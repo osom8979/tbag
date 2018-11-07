@@ -19,7 +19,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace container {
 
-Egg::Egg() TBAG_NOEXCEPT : _type(EggTypeTable::BT_NONE), _bag(nullptr), _user(nullptr)
+Egg::Egg() TBAG_NOEXCEPT : _type(EggTypeTable::ETT_NONE), _bag(nullptr), _user(nullptr)
 {
     // EMPTY.
 }
@@ -31,7 +31,7 @@ Egg::Egg(std::string const & content) : Egg()
     }
 }
 
-Egg::Egg(char const * content) : Egg(std::string(content == nullptr ? "" : content))
+Egg::Egg(char const * content) : Egg(std::string(content == nullptr ? std::string() : content))
 {
     // EMPTY.
 }
@@ -71,7 +71,7 @@ Egg & Egg::operator =(std::string const & content)
 
 Egg & Egg::operator =(char const * content)
 {
-    fromString(content);
+    fromString(content == nullptr ? std::string() : content);
     return *this;
 }
 
@@ -95,7 +95,7 @@ void Egg::swap(Egg & obj) TBAG_NOEXCEPT
 
 void Egg::clear()
 {
-    _type = EggTypeTable::BT_NONE;
+    _type = EggTypeTable::ETT_NONE;
     _bag.reset();
     _user.reset();
 }
@@ -109,28 +109,28 @@ Err Egg::create(EggTypeTable type)
     try {
         switch (type) {
         // @formatter:off
-        case EggTypeTable::BT_INT8   : _bag.reset((FakeBag*)(new BagInt8   ), [](FakeBag * b){ delete reinterpret_cast<BagInt8   *>(b); }); break;
-        case EggTypeTable::BT_UINT8  : _bag.reset((FakeBag*)(new BagUint8  ), [](FakeBag * b){ delete reinterpret_cast<BagUint8  *>(b); }); break;
-        case EggTypeTable::BT_INT16  : _bag.reset((FakeBag*)(new BagInt16  ), [](FakeBag * b){ delete reinterpret_cast<BagInt16  *>(b); }); break;
-        case EggTypeTable::BT_UINT16 : _bag.reset((FakeBag*)(new BagUint16 ), [](FakeBag * b){ delete reinterpret_cast<BagUint16 *>(b); }); break;
-        case EggTypeTable::BT_INT32  : _bag.reset((FakeBag*)(new BagInt32  ), [](FakeBag * b){ delete reinterpret_cast<BagInt32  *>(b); }); break;
-        case EggTypeTable::BT_UINT32 : _bag.reset((FakeBag*)(new BagUint32 ), [](FakeBag * b){ delete reinterpret_cast<BagUint32 *>(b); }); break;
-        case EggTypeTable::BT_INT64  : _bag.reset((FakeBag*)(new BagInt64  ), [](FakeBag * b){ delete reinterpret_cast<BagInt64  *>(b); }); break;
-        case EggTypeTable::BT_UINT64 : _bag.reset((FakeBag*)(new BagUint64 ), [](FakeBag * b){ delete reinterpret_cast<BagUint64 *>(b); }); break;
-        case EggTypeTable::BT_FLOAT32: _bag.reset((FakeBag*)(new BagFloat32), [](FakeBag * b){ delete reinterpret_cast<BagFloat32*>(b); }); break;
-        case EggTypeTable::BT_FLOAT64: _bag.reset((FakeBag*)(new BagFloat64), [](FakeBag * b){ delete reinterpret_cast<BagFloat64*>(b); }); break;
+        case EggTypeTable::ETT_INT8   : _bag.reset((FakeBag*)(new BagInt8   ), [](FakeBag * b){ delete reinterpret_cast<BagInt8   *>(b); }); break;
+        case EggTypeTable::ETT_UINT8  : _bag.reset((FakeBag*)(new BagUint8  ), [](FakeBag * b){ delete reinterpret_cast<BagUint8  *>(b); }); break;
+        case EggTypeTable::ETT_INT16  : _bag.reset((FakeBag*)(new BagInt16  ), [](FakeBag * b){ delete reinterpret_cast<BagInt16  *>(b); }); break;
+        case EggTypeTable::ETT_UINT16 : _bag.reset((FakeBag*)(new BagUint16 ), [](FakeBag * b){ delete reinterpret_cast<BagUint16 *>(b); }); break;
+        case EggTypeTable::ETT_INT32  : _bag.reset((FakeBag*)(new BagInt32  ), [](FakeBag * b){ delete reinterpret_cast<BagInt32  *>(b); }); break;
+        case EggTypeTable::ETT_UINT32 : _bag.reset((FakeBag*)(new BagUint32 ), [](FakeBag * b){ delete reinterpret_cast<BagUint32 *>(b); }); break;
+        case EggTypeTable::ETT_INT64  : _bag.reset((FakeBag*)(new BagInt64  ), [](FakeBag * b){ delete reinterpret_cast<BagInt64  *>(b); }); break;
+        case EggTypeTable::ETT_UINT64 : _bag.reset((FakeBag*)(new BagUint64 ), [](FakeBag * b){ delete reinterpret_cast<BagUint64 *>(b); }); break;
+        case EggTypeTable::ETT_FLOAT32: _bag.reset((FakeBag*)(new BagFloat32), [](FakeBag * b){ delete reinterpret_cast<BagFloat32*>(b); }); break;
+        case EggTypeTable::ETT_FLOAT64: _bag.reset((FakeBag*)(new BagFloat64), [](FakeBag * b){ delete reinterpret_cast<BagFloat64*>(b); }); break;
         // @formatter:on
         default:
             assert(false && "Unknown type assertion.");
             _bag.reset();
-            _type = EggTypeTable::BT_NONE;
+            _type = EggTypeTable::ETT_NONE;
             return Err::E_ILLARGS;
         }
     } catch (std::exception & e) {
-        _type = EggTypeTable::BT_NONE;
+        _type = EggTypeTable::ETT_NONE;
         return Err::E_BADALLOC;
     } catch (...) {
-        _type = EggTypeTable::BT_NONE;
+        _type = EggTypeTable::ETT_NONE;
         return Err::E_UNKEXCP;
     }
 
@@ -149,16 +149,16 @@ Err Egg::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
     try {
         switch (_type) {
         // @formatter:off
-        case EggTypeTable::BT_INT8   : reinterpret_cast<BagInt8   *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_UINT8  : reinterpret_cast<BagUint8  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_INT16  : reinterpret_cast<BagInt16  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_UINT16 : reinterpret_cast<BagUint16 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_INT32  : reinterpret_cast<BagInt32  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_UINT32 : reinterpret_cast<BagUint32 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_INT64  : reinterpret_cast<BagInt64  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_UINT64 : reinterpret_cast<BagUint64 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_FLOAT32: reinterpret_cast<BagFloat32*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        case EggTypeTable::BT_FLOAT64: reinterpret_cast<BagFloat64*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_INT8   : reinterpret_cast<BagInt8   *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_UINT8  : reinterpret_cast<BagUint8  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_INT16  : reinterpret_cast<BagInt16  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_UINT16 : reinterpret_cast<BagUint16 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_INT32  : reinterpret_cast<BagInt32  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_UINT32 : reinterpret_cast<BagUint32 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_INT64  : reinterpret_cast<BagInt64  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_UINT64 : reinterpret_cast<BagUint64 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_FLOAT32: reinterpret_cast<BagFloat32*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case EggTypeTable::ETT_FLOAT64: reinterpret_cast<BagFloat64*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
         // @formatter:on
         default:
             assert(false && "Unknown type assertion.");
@@ -178,16 +178,16 @@ void * Egg::data()
 
     switch (_type) {
     // @formatter:off
-    case EggTypeTable::BT_INT8   : return reinterpret_cast<BagInt8   *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT8  : return reinterpret_cast<BagUint8  *>(_bag.get())->data();
-    case EggTypeTable::BT_INT16  : return reinterpret_cast<BagInt16  *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT16 : return reinterpret_cast<BagUint16 *>(_bag.get())->data();
-    case EggTypeTable::BT_INT32  : return reinterpret_cast<BagInt32  *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT32 : return reinterpret_cast<BagUint32 *>(_bag.get())->data();
-    case EggTypeTable::BT_INT64  : return reinterpret_cast<BagInt64  *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT64 : return reinterpret_cast<BagUint64 *>(_bag.get())->data();
-    case EggTypeTable::BT_FLOAT32: return reinterpret_cast<BagFloat32*>(_bag.get())->data();
-    case EggTypeTable::BT_FLOAT64: return reinterpret_cast<BagFloat64*>(_bag.get())->data();
+    case EggTypeTable::ETT_INT8   : return reinterpret_cast<BagInt8   *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT8  : return reinterpret_cast<BagUint8  *>(_bag.get())->data();
+    case EggTypeTable::ETT_INT16  : return reinterpret_cast<BagInt16  *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT16 : return reinterpret_cast<BagUint16 *>(_bag.get())->data();
+    case EggTypeTable::ETT_INT32  : return reinterpret_cast<BagInt32  *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT32 : return reinterpret_cast<BagUint32 *>(_bag.get())->data();
+    case EggTypeTable::ETT_INT64  : return reinterpret_cast<BagInt64  *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT64 : return reinterpret_cast<BagUint64 *>(_bag.get())->data();
+    case EggTypeTable::ETT_FLOAT32: return reinterpret_cast<BagFloat32*>(_bag.get())->data();
+    case EggTypeTable::ETT_FLOAT64: return reinterpret_cast<BagFloat64*>(_bag.get())->data();
     // @formatter:on
     default:
         assert(false && "Unknown type assertion.");
@@ -203,16 +203,16 @@ void const * Egg::data() const
 
     switch (_type) {
     // @formatter:off
-    case EggTypeTable::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->data();
-    case EggTypeTable::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->data();
-    case EggTypeTable::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->data();
-    case EggTypeTable::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->data();
-    case EggTypeTable::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->data();
-    case EggTypeTable::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->data();
-    case EggTypeTable::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->data();
+    case EggTypeTable::ETT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->data();
+    case EggTypeTable::ETT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->data();
+    case EggTypeTable::ETT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->data();
+    case EggTypeTable::ETT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->data();
+    case EggTypeTable::ETT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->data();
+    case EggTypeTable::ETT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->data();
+    case EggTypeTable::ETT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->data();
     // @formatter:on
     default:
         assert(false && "Unknown type assertion.");
@@ -228,16 +228,16 @@ std::size_t Egg::size() const
 
     switch (_type) {
     // @formatter:off
-    case EggTypeTable::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size();
-    case EggTypeTable::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size();
-    case EggTypeTable::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size();
-    case EggTypeTable::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->size();
-    case EggTypeTable::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->size();
-    case EggTypeTable::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->size();
-    case EggTypeTable::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->size();
-    case EggTypeTable::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size();
-    case EggTypeTable::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size();
-    case EggTypeTable::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size();
+    case EggTypeTable::ETT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size();
+    case EggTypeTable::ETT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size();
+    case EggTypeTable::ETT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size();
+    case EggTypeTable::ETT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->size();
+    case EggTypeTable::ETT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->size();
+    case EggTypeTable::ETT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->size();
+    case EggTypeTable::ETT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->size();
+    case EggTypeTable::ETT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size();
+    case EggTypeTable::ETT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size();
+    case EggTypeTable::ETT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size();
     // @formatter:on
     default:
         assert(false && "Unknown type assertion.");
@@ -253,16 +253,16 @@ std::size_t Egg::size(std::size_t index) const
 
     switch (_type) {
     // @formatter:off
-    case EggTypeTable::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size(index);
-    case EggTypeTable::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size(index);
+    case EggTypeTable::ETT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size(index);
     // @formatter:on
     default:
         assert(false && "Unknown type assertion.");
@@ -278,16 +278,16 @@ std::size_t Egg::dims() const
 
     switch (_type) {
     // @formatter:off
-    case EggTypeTable::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->dims();
-    case EggTypeTable::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->dims();
-    case EggTypeTable::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->dims();
-    case EggTypeTable::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->dims();
-    case EggTypeTable::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->dims();
-    case EggTypeTable::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->dims();
-    case EggTypeTable::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->dims();
-    case EggTypeTable::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->dims();
-    case EggTypeTable::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->dims();
-    case EggTypeTable::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->dims();
+    case EggTypeTable::ETT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->dims();
     // @formatter:on
     default:
         assert(false && "Unknown type assertion.");
@@ -303,16 +303,16 @@ bool Egg::empty() const
 
     switch (_type) {
     // @formatter:off
-    case EggTypeTable::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->empty();
-    case EggTypeTable::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->empty();
-    case EggTypeTable::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->empty();
-    case EggTypeTable::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->empty();
-    case EggTypeTable::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->empty();
-    case EggTypeTable::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->empty();
-    case EggTypeTable::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->empty();
-    case EggTypeTable::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->empty();
-    case EggTypeTable::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->empty();
-    case EggTypeTable::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->empty();
+    case EggTypeTable::ETT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->empty();
     // @formatter:on
     default:
         assert(false && "Unknown type assertion.");
@@ -364,7 +364,7 @@ std::string Egg::toInfoString() const
 
 std::string Egg::toAutoString() const
 {
-    if (exists() && dims() == 1 && (_type == EggTypeTable::BT_INT8 || _type == EggTypeTable::BT_UINT8)) {
+    if (exists() && dims() == 1 && (_type == EggTypeTable::ETT_INT8 || _type == EggTypeTable::ETT_UINT8)) {
         return toString();
     }
     return toInfoString();
@@ -376,7 +376,7 @@ Err Egg::fromString(std::string const & content)
     if (isFailure(CODE)) {
         return CODE;
     }
-    assert(_type == EggTypeTable::BT_INT8 || _type == EggTypeTable::BT_UINT8);
+    assert(_type == EggTypeTable::ETT_INT8 || _type == EggTypeTable::ETT_UINT8);
     std::copy(content.begin(), content.end(), cast<char>());
     return Err::E_SUCCESS;
 }

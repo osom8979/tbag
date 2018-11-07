@@ -69,17 +69,17 @@ static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::EggTypeTa
 
     switch (type) {
     // @formatter:off
-    case EggTypeTable::BT_INT8   : return AnyArr_ByteArr  ;
-    case EggTypeTable::BT_UINT8  : return AnyArr_UbyteArr ;
-    case EggTypeTable::BT_INT16  : return AnyArr_ShortArr ;
-    case EggTypeTable::BT_UINT16 : return AnyArr_UshortArr;
-    case EggTypeTable::BT_INT32  : return AnyArr_IntArr   ;
-    case EggTypeTable::BT_UINT32 : return AnyArr_UintArr  ;
-    case EggTypeTable::BT_INT64  : return AnyArr_LongArr  ;
-    case EggTypeTable::BT_UINT64 : return AnyArr_UlongArr ;
-    case EggTypeTable::BT_FLOAT32: return AnyArr_FloatArr ;
-    case EggTypeTable::BT_FLOAT64: return AnyArr_DoubleArr;
-    case EggTypeTable::BT_NONE   : return AnyArr_NONE;
+    case EggTypeTable::ETT_NONE   : return AnyArr_NONE     ;
+    case EggTypeTable::ETT_INT8   : return AnyArr_ByteArr  ;
+    case EggTypeTable::ETT_UINT8  : return AnyArr_UbyteArr ;
+    case EggTypeTable::ETT_INT16  : return AnyArr_ShortArr ;
+    case EggTypeTable::ETT_UINT16 : return AnyArr_UshortArr;
+    case EggTypeTable::ETT_INT32  : return AnyArr_IntArr   ;
+    case EggTypeTable::ETT_UINT32 : return AnyArr_UintArr  ;
+    case EggTypeTable::ETT_INT64  : return AnyArr_LongArr  ;
+    case EggTypeTable::ETT_UINT64 : return AnyArr_UlongArr ;
+    case EggTypeTable::ETT_FLOAT32: return AnyArr_FloatArr ;
+    case EggTypeTable::ETT_FLOAT64: return AnyArr_DoubleArr;
     // @formatter:on
     default:
         return AnyArr_NONE;

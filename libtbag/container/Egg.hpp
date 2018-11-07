@@ -49,62 +49,73 @@ namespace container {
 enum class EggTypeTable : int
 {
     // @formatter:off
-    BT_NONE = 0, ///< Not initialized.
-    BT_INT8    ,
-    BT_UINT8   ,
-    BT_INT16   ,
-    BT_UINT16  ,
-    BT_INT32   ,
-    BT_UINT32  ,
-    BT_INT64   ,
-    BT_UINT64  ,
-    BT_FLOAT32 ,
-    BT_FLOAT64 ,
+    ETT_NONE = 0, ///< Not initialized.
+    ETT_INT8    ,
+    ETT_UINT8   ,
+    ETT_INT16   ,
+    ETT_UINT16  ,
+    ETT_INT32   ,
+    ETT_UINT32  ,
+    ETT_INT64   ,
+    ETT_UINT64  ,
+    ETT_FLOAT32 ,
+    ETT_FLOAT64 ,
     // @formatter:on
 };
 
 template <typename T, EggTypeTable egg_type>
-struct EggInfo : public std::true_type
+struct EggInfo
 {
     using type = T;
     TBAG_CONSTEXPR static EggTypeTable const value = egg_type;
     TBAG_CONSTEXPR static std::size_t const size = sizeof(T);
+    TBAG_CONSTEXPR static bool const is_egg_type = true;
+};
+
+template <typename T>
+struct EggInfo<T, EggTypeTable::ETT_NONE>
+{
+    using type = T;
+    TBAG_CONSTEXPR static EggTypeTable const value = EggTypeTable::ETT_NONE;
+    TBAG_CONSTEXPR static std::size_t const size = sizeof(T);
+    TBAG_CONSTEXPR static bool const is_egg_type = false;
 };
 
 template <>
-struct EggInfo<void, EggTypeTable::BT_NONE> : public std::false_type
+struct EggInfo<void, EggTypeTable::ETT_NONE>
 {
     using type = void;
-    TBAG_CONSTEXPR static EggTypeTable const value = EggTypeTable::BT_NONE;
+    TBAG_CONSTEXPR static EggTypeTable const value = EggTypeTable::ETT_NONE;
     TBAG_CONSTEXPR static std::size_t const size = 0;
+    TBAG_CONSTEXPR static bool const is_egg_type = false;
 };
 
 // @formatter:off
-template <typename T> struct EggTypeInfo : public EggInfo<    void, EggTypeTable::BT_NONE   > { /* EMPTY. */ };
-template <> struct EggTypeInfo<  int8_t> : public EggInfo<  int8_t, EggTypeTable::BT_INT8   > { /* EMPTY. */ };
-template <> struct EggTypeInfo< uint8_t> : public EggInfo< uint8_t, EggTypeTable::BT_UINT8  > { /* EMPTY. */ };
-template <> struct EggTypeInfo< int16_t> : public EggInfo< int16_t, EggTypeTable::BT_INT16  > { /* EMPTY. */ };
-template <> struct EggTypeInfo<uint16_t> : public EggInfo<uint16_t, EggTypeTable::BT_UINT16 > { /* EMPTY. */ };
-template <> struct EggTypeInfo< int32_t> : public EggInfo< int32_t, EggTypeTable::BT_INT32  > { /* EMPTY. */ };
-template <> struct EggTypeInfo<uint32_t> : public EggInfo<uint32_t, EggTypeTable::BT_UINT32 > { /* EMPTY. */ };
-template <> struct EggTypeInfo< int64_t> : public EggInfo< int64_t, EggTypeTable::BT_INT64  > { /* EMPTY. */ };
-template <> struct EggTypeInfo<uint64_t> : public EggInfo<uint64_t, EggTypeTable::BT_UINT64 > { /* EMPTY. */ };
-template <> struct EggTypeInfo<   float> : public EggInfo<   float, EggTypeTable::BT_FLOAT32> { /* EMPTY. */ };
-template <> struct EggTypeInfo<  double> : public EggInfo<  double, EggTypeTable::BT_FLOAT64> { /* EMPTY. */ };
+template <typename T> struct EggTypeInfo : public EggInfo<       T, EggTypeTable::ETT_NONE   > { /* EMPTY. */ };
+template <> struct EggTypeInfo<  int8_t> : public EggInfo<  int8_t, EggTypeTable::ETT_INT8   > { /* EMPTY. */ };
+template <> struct EggTypeInfo< uint8_t> : public EggInfo< uint8_t, EggTypeTable::ETT_UINT8  > { /* EMPTY. */ };
+template <> struct EggTypeInfo< int16_t> : public EggInfo< int16_t, EggTypeTable::ETT_INT16  > { /* EMPTY. */ };
+template <> struct EggTypeInfo<uint16_t> : public EggInfo<uint16_t, EggTypeTable::ETT_UINT16 > { /* EMPTY. */ };
+template <> struct EggTypeInfo< int32_t> : public EggInfo< int32_t, EggTypeTable::ETT_INT32  > { /* EMPTY. */ };
+template <> struct EggTypeInfo<uint32_t> : public EggInfo<uint32_t, EggTypeTable::ETT_UINT32 > { /* EMPTY. */ };
+template <> struct EggTypeInfo< int64_t> : public EggInfo< int64_t, EggTypeTable::ETT_INT64  > { /* EMPTY. */ };
+template <> struct EggTypeInfo<uint64_t> : public EggInfo<uint64_t, EggTypeTable::ETT_UINT64 > { /* EMPTY. */ };
+template <> struct EggTypeInfo<   float> : public EggInfo<   float, EggTypeTable::ETT_FLOAT32> { /* EMPTY. */ };
+template <> struct EggTypeInfo<  double> : public EggInfo<  double, EggTypeTable::ETT_FLOAT64> { /* EMPTY. */ };
 // @formatter:on
 
 // @formatter:off
-template <EggTypeTable egg_type> struct EggEnumInfo      : public EggInfo<    void, EggTypeTable::BT_NONE   > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_INT8   > : public EggInfo<  int8_t, EggTypeTable::BT_INT8   > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_UINT8  > : public EggInfo< uint8_t, EggTypeTable::BT_UINT8  > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_INT16  > : public EggInfo< int16_t, EggTypeTable::BT_INT16  > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_UINT16 > : public EggInfo<uint16_t, EggTypeTable::BT_UINT16 > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_INT32  > : public EggInfo< int32_t, EggTypeTable::BT_INT32  > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_UINT32 > : public EggInfo<uint32_t, EggTypeTable::BT_UINT32 > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_INT64  > : public EggInfo< int64_t, EggTypeTable::BT_INT64  > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_UINT64 > : public EggInfo<uint64_t, EggTypeTable::BT_UINT64 > { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_FLOAT32> : public EggInfo<   float, EggTypeTable::BT_FLOAT32> { /* EMPTY. */ };
-template <> struct EggEnumInfo<EggTypeTable::BT_FLOAT64> : public EggInfo<  double, EggTypeTable::BT_FLOAT64> { /* EMPTY. */ };
+template <EggTypeTable egg_type> struct EggEnumInfo      : public EggInfo<    void, EggTypeTable::ETT_NONE   > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_INT8   > : public EggInfo<  int8_t, EggTypeTable::ETT_INT8   > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_UINT8  > : public EggInfo< uint8_t, EggTypeTable::ETT_UINT8  > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_INT16  > : public EggInfo< int16_t, EggTypeTable::ETT_INT16  > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_UINT16 > : public EggInfo<uint16_t, EggTypeTable::ETT_UINT16 > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_INT32  > : public EggInfo< int32_t, EggTypeTable::ETT_INT32  > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_UINT32 > : public EggInfo<uint32_t, EggTypeTable::ETT_UINT32 > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_INT64  > : public EggInfo< int64_t, EggTypeTable::ETT_INT64  > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_UINT64 > : public EggInfo<uint64_t, EggTypeTable::ETT_UINT64 > { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_FLOAT32> : public EggInfo<   float, EggTypeTable::ETT_FLOAT32> { /* EMPTY. */ };
+template <> struct EggEnumInfo<EggTypeTable::ETT_FLOAT64> : public EggInfo<  double, EggTypeTable::ETT_FLOAT64> { /* EMPTY. */ };
 // @formatter:on
 
 // @formatter:off
@@ -119,6 +130,36 @@ static_assert(EggTypeInfo<uint64_t>::size == 8,  "uint64_t size is not correct."
 static_assert(EggTypeInfo<   float>::size == 4, "float32_t size is not correct.");
 static_assert(EggTypeInfo<  double>::size == 8, "float64_t size is not correct.");
 // @formatter:on
+
+template <typename T>
+struct is_supported_egg : public EggTypeInfo<T>
+{ /* EMPTY. */ };
+
+template <typename T, bool is_unsigned, std::size_t size, bool is_floating>
+struct __make_egg_type : public EggTypeInfo<void>
+{ /* EMPTY. */ };
+
+// @formatter:off
+template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 4, true> : public EggTypeInfo<float>  { /* EMPTY. */ };
+template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 8, true> : public EggTypeInfo<double> { /* EMPTY. */ };
+// @formatter:on
+
+// @formatter:off
+template <typename T> struct __make_egg_type<T, false, 1, false> : public EggTypeInfo<  int8_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 1, false> : public EggTypeInfo< uint8_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 2, false> : public EggTypeInfo< int16_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 2, false> : public EggTypeInfo<uint16_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 4, false> : public EggTypeInfo< int32_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 4, false> : public EggTypeInfo<uint32_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 8, false> : public EggTypeInfo< int64_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 8, false> : public EggTypeInfo<uint64_t> { /* EMPTY. */ };
+// @formatter:on
+
+template <typename T>
+struct make_egg_type : public __make_egg_type<T, std::is_unsigned<T>::value, sizeof(T), std::is_floating_point<T>::value>
+{
+    using original_type = T;
+};
 
 template <typename T>
 TBAG_CONSTEXPR inline EggTypeTable getEggType() TBAG_NOEXCEPT
@@ -136,19 +177,39 @@ inline char const * getEggTypeName(EggTypeTable type) TBAG_NOEXCEPT
 {
     switch (type) {
     // @formatter:off
-    case EggTypeTable::BT_NONE   : return    "NONE";
-    case EggTypeTable::BT_INT8   : return    "INT8";
-    case EggTypeTable::BT_UINT8  : return   "UINT8";
-    case EggTypeTable::BT_INT16  : return   "INT16";
-    case EggTypeTable::BT_UINT16 : return  "UINT16";
-    case EggTypeTable::BT_INT32  : return   "INT32";
-    case EggTypeTable::BT_UINT32 : return  "UINT32";
-    case EggTypeTable::BT_INT64  : return   "INT64";
-    case EggTypeTable::BT_UINT64 : return  "UINT64";
-    case EggTypeTable::BT_FLOAT32: return "FLOAT32";
-    case EggTypeTable::BT_FLOAT64: return "FLOAT64";
-    default:                  return "UNKNOWN";
+    case EggTypeTable::ETT_NONE   : return    "NONE";
+    case EggTypeTable::ETT_INT8   : return    "INT8";
+    case EggTypeTable::ETT_UINT8  : return   "UINT8";
+    case EggTypeTable::ETT_INT16  : return   "INT16";
+    case EggTypeTable::ETT_UINT16 : return  "UINT16";
+    case EggTypeTable::ETT_INT32  : return   "INT32";
+    case EggTypeTable::ETT_UINT32 : return  "UINT32";
+    case EggTypeTable::ETT_INT64  : return   "INT64";
+    case EggTypeTable::ETT_UINT64 : return  "UINT64";
+    case EggTypeTable::ETT_FLOAT32: return "FLOAT32";
+    case EggTypeTable::ETT_FLOAT64: return "FLOAT64";
+    default:                       return "UNKNOWN";
     // @formatter:on
+    }
+}
+
+inline std::size_t getEggTypeSize(EggTypeTable type) TBAG_NOEXCEPT
+{
+    switch (type) {
+    // @formatter:off
+    case EggTypeTable::ETT_INT8   : return  8;
+    case EggTypeTable::ETT_UINT8  : return  8;
+    case EggTypeTable::ETT_INT16  : return 16;
+    case EggTypeTable::ETT_UINT16 : return 16;
+    case EggTypeTable::ETT_INT32  : return 32;
+    case EggTypeTable::ETT_UINT32 : return 32;
+    case EggTypeTable::ETT_INT64  : return 64;
+    case EggTypeTable::ETT_UINT64 : return 64;
+    case EggTypeTable::ETT_FLOAT32: return 32;
+    case EggTypeTable::ETT_FLOAT64: return 64;
+    // @formatter:on
+    default:
+        return 0;
     }
 }
 
@@ -181,8 +242,12 @@ public:
     using BaseBagType = libtbag::container::Bag<T, Allocator<T>, MAX_ELEMENTS_BUFFER_SIZE>;
 
 public:
-    using BagInt8    = BaseBagType<  int8_t>; ///< == char (Default string type)
-    using BagUint8   = BaseBagType< uint8_t>; ///< == unsigned char (Default buffer type)
+    using CharType = typename make_egg_type<char>::type;
+    using IntType  = typename make_egg_type<int>::type;
+
+public:
+    using BagInt8    = BaseBagType<  int8_t>;
+    using BagUint8   = BaseBagType< uint8_t>;
     using BagInt16   = BaseBagType< int16_t>;
     using BagUint16  = BaseBagType<uint16_t>;
     using BagInt32   = BaseBagType< int32_t>;
@@ -213,21 +278,24 @@ public:
     ~Egg();
 
 public:
-    template <typename Type>
-    Egg(std::vector<Type> const & content) : Egg()
+    template <typename T>
+    Egg(std::vector<T> const & content) : Egg()
     {
-        if (isFailure(fromVector<Type>(content))) {
+        if (isFailure(fromVector<T>(content))) {
             throw std::bad_alloc();
         }
     }
 
-    template <typename Type>
-    Egg(std::initializer_list<Type> list) : Egg()
+    template <typename T>
+    Egg(std::initializer_list<T> list) : Egg()
     {
-        if (isFailure(resize<Type>(list.size()))) {
+        using RealT = typename make_egg_type<T>::type;
+        static_assert(EggTypeInfo<RealT>::is_egg_type, "Unsupported Egg type.");
+
+        if (isFailure(resize<RealT>(list.size()))) {
             throw std::bad_alloc();
         }
-        std::copy(list.begin(), list.end(), cast<Type>());
+        std::copy(list.begin(), list.end(), cast<RealT>());
     }
 
 public:
@@ -239,10 +307,10 @@ public:
     Egg & operator =(char const * content);
 
 public:
-    template <typename Type>
-    Egg & operator =(std::vector<Type> const & content)
+    template <typename T>
+    Egg & operator =(std::vector<T> const & content)
     {
-        if (isFailure(fromVector<Type>(content))) {
+        if (isFailure(fromVector<T>(content))) {
             throw std::bad_alloc();
         }
         return *this;
@@ -297,11 +365,13 @@ public:
 
 public:
     template <typename T,
-              typename BaseBagT   = BaseBagType<T>,
+              typename RealT      = typename make_egg_type<T>::type,
+              typename BaseBagT   = BaseBagType<RealT>,
               typename SharedBagT = std::shared_ptr<BaseBagT> >
     SharedBagT bag() const TBAG_NOEXCEPT
     {
-        assert(isTypeEquals<T>(_type));
+        static_assert(EggTypeInfo<RealT>::is_egg_type, "Unsupported Egg type.");
+        assert(isTypeEquals<RealT>(_type));
         return SharedBagT(_bag, (BaseBagT*)(_bag.get()));
     }
 
@@ -326,6 +396,9 @@ public:
     inline char const * getTypeName() const TBAG_NOEXCEPT
     { return getEggTypeName(_type); }
 
+    inline std::size_t getTypeSize() const TBAG_NOEXCEPT
+    { return getEggTypeSize(_type); }
+
 public:
     void clear();
 
@@ -335,17 +408,24 @@ public:
 public:
     template <typename T>
     Err create()
-    { return create(getEggType<T>()); }
+    {
+        using RealT = typename make_egg_type<T>::type;
+        static_assert(EggTypeInfo<RealT>::is_egg_type, "Unsupported Egg type.");
+        return create(getEggType<RealT>());
+    }
 
 public:
     Err resize(unsigned i0/**/, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
                unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0);
 
 public:
-    template <typename Type, typename ... Args>
+    template <typename T, typename ... Args>
     Err resize(Args && ... args)
     {
-        Err const CODE = create<Type>();
+        using RealT = typename make_egg_type<T>::type;
+        static_assert(EggTypeInfo<RealT>::is_egg_type, "Unsupported Egg type.");
+
+        Err const CODE = create<RealT>();
         if (CODE != Err::E_ALREADY && CODE != Err::E_SUCCESS) {
             return CODE;
         }
@@ -360,13 +440,13 @@ public:
     template <typename CastT>
     CastT * cast()
     {
-        return (CastT*)data();
+        return reinterpret_cast<CastT*>(data());
     }
 
     template <typename CastT>
     CastT const * cast() const
     {
-        return (CastT const *)data();
+        return reinterpret_cast<CastT const *>(data());
     }
 
     template <typename CastT, typename ... Args>
@@ -401,24 +481,35 @@ public:
 
 public:
     template <typename InputT>
-    void copyFrom(InputT const * data, std::size_t size, std::size_t offset = 0)
+    Err copyFrom(InputT const * data, std::size_t size, std::size_t offset = 0)
     {
-        assert(static_cast<bool>(_bag));
+        if (!_bag) {
+            assert(_type == EggTypeTable::ETT_NONE);
+            return Err::E_NREADY;
+        }
+        if (size > this->size() - offset) {
+            return Err::E_SMALLBUF;
+        }
+
         switch (_type) {
         // @formatter:off
-        case EggTypeTable::BT_INT8   : std::copy(data, data + size, cast<  int8_t>() + offset); break;
-        case EggTypeTable::BT_UINT8  : std::copy(data, data + size, cast< uint8_t>() + offset); break;
-        case EggTypeTable::BT_INT16  : std::copy(data, data + size, cast< int16_t>() + offset); break;
-        case EggTypeTable::BT_UINT16 : std::copy(data, data + size, cast<uint16_t>() + offset); break;
-        case EggTypeTable::BT_INT32  : std::copy(data, data + size, cast< int32_t>() + offset); break;
-        case EggTypeTable::BT_UINT32 : std::copy(data, data + size, cast<uint32_t>() + offset); break;
-        case EggTypeTable::BT_INT64  : std::copy(data, data + size, cast< int64_t>() + offset); break;
-        case EggTypeTable::BT_UINT64 : std::copy(data, data + size, cast<uint64_t>() + offset); break;
-        case EggTypeTable::BT_FLOAT32: std::copy(data, data + size, cast<   float>() + offset); break;
-        case EggTypeTable::BT_FLOAT64: std::copy(data, data + size, cast<  double>() + offset); break;
-        default: assert(false && "Unknown type assertion.");
+        case EggTypeTable::ETT_INT8   : std::copy(data, data + size, cast<  int8_t>() + offset); break;
+        case EggTypeTable::ETT_UINT8  : std::copy(data, data + size, cast< uint8_t>() + offset); break;
+        case EggTypeTable::ETT_INT16  : std::copy(data, data + size, cast< int16_t>() + offset); break;
+        case EggTypeTable::ETT_UINT16 : std::copy(data, data + size, cast<uint16_t>() + offset); break;
+        case EggTypeTable::ETT_INT32  : std::copy(data, data + size, cast< int32_t>() + offset); break;
+        case EggTypeTable::ETT_UINT32 : std::copy(data, data + size, cast<uint32_t>() + offset); break;
+        case EggTypeTable::ETT_INT64  : std::copy(data, data + size, cast< int64_t>() + offset); break;
+        case EggTypeTable::ETT_UINT64 : std::copy(data, data + size, cast<uint64_t>() + offset); break;
+        case EggTypeTable::ETT_FLOAT32: std::copy(data, data + size, cast<   float>() + offset); break;
+        case EggTypeTable::ETT_FLOAT64: std::copy(data, data + size, cast<  double>() + offset); break;
         // @formatter:on
+        default:
+            assert(false && "Unknown type assertion.");
+            return Err::E_UNKNOWN;
         }
+
+        return Err::E_SUCCESS;
     }
 
 public:
@@ -432,19 +523,19 @@ public:
     template <typename T, typename VectorT = std::vector<T> >
     VectorT toVector() const
     {
-        assert(static_cast<bool>(_bag));
         switch (_type) {
         // @formatter:off
-        case EggTypeTable::BT_INT8   : return VectorT(cast<  int8_t>(), cast<  int8_t>() + size());
-        case EggTypeTable::BT_UINT8  : return VectorT(cast< uint8_t>(), cast< uint8_t>() + size());
-        case EggTypeTable::BT_INT16  : return VectorT(cast< int16_t>(), cast< int16_t>() + size());
-        case EggTypeTable::BT_UINT16 : return VectorT(cast<uint16_t>(), cast<uint16_t>() + size());
-        case EggTypeTable::BT_INT32  : return VectorT(cast< int32_t>(), cast< int32_t>() + size());
-        case EggTypeTable::BT_UINT32 : return VectorT(cast<uint32_t>(), cast<uint32_t>() + size());
-        case EggTypeTable::BT_INT64  : return VectorT(cast< int64_t>(), cast< int64_t>() + size());
-        case EggTypeTable::BT_UINT64 : return VectorT(cast<uint64_t>(), cast<uint64_t>() + size());
-        case EggTypeTable::BT_FLOAT32: return VectorT(cast<   float>(), cast<   float>() + size());
-        case EggTypeTable::BT_FLOAT64: return VectorT(cast<  double>(), cast<  double>() + size());
+        case EggTypeTable::ETT_NONE   : return VectorT();
+        case EggTypeTable::ETT_INT8   : return VectorT(cast<  int8_t>(), cast<  int8_t>() + size());
+        case EggTypeTable::ETT_UINT8  : return VectorT(cast< uint8_t>(), cast< uint8_t>() + size());
+        case EggTypeTable::ETT_INT16  : return VectorT(cast< int16_t>(), cast< int16_t>() + size());
+        case EggTypeTable::ETT_UINT16 : return VectorT(cast<uint16_t>(), cast<uint16_t>() + size());
+        case EggTypeTable::ETT_INT32  : return VectorT(cast< int32_t>(), cast< int32_t>() + size());
+        case EggTypeTable::ETT_UINT32 : return VectorT(cast<uint32_t>(), cast<uint32_t>() + size());
+        case EggTypeTable::ETT_INT64  : return VectorT(cast< int64_t>(), cast< int64_t>() + size());
+        case EggTypeTable::ETT_UINT64 : return VectorT(cast<uint64_t>(), cast<uint64_t>() + size());
+        case EggTypeTable::ETT_FLOAT32: return VectorT(cast<   float>(), cast<   float>() + size());
+        case EggTypeTable::ETT_FLOAT64: return VectorT(cast<  double>(), cast<  double>() + size());
         default: assert(false && "Unknown type assertion.");
         // @formatter:on
         }
@@ -455,15 +546,15 @@ public:
     Err fromString(std::string const & content);
 
 public:
-    template <typename T>
+    template <typename T, typename RealT = typename make_egg_type<T>::type>
     Err fromVector(std::vector<T> const & content)
     {
-        Err const CODE = resize<T>(content.size());
+        static_assert(EggTypeInfo<RealT>::is_egg_type, "Unsupported Egg type.");
+        Err const CODE = resize<RealT>(content.size());
         if (isFailure(CODE)) {
             return CODE;
         }
-        assert(isTypeEquals<T>(_type));
-        std::copy(content.begin(), content.end(), cast<T>());
+        std::copy(content.begin(), content.end(), cast<RealT>());
         return Err::E_SUCCESS;
     }
 
@@ -471,19 +562,19 @@ public:
     template <typename ... Args>
     std::size_t offset(Args && ... args) const
     {
-        assert(static_cast<bool>(_bag));
         switch (_type) {
         // @formatter:off
-        case EggTypeTable::BT_INT8   : return ((BagInt8   *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_UINT8  : return ((BagUint8  *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_INT16  : return ((BagInt16  *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_UINT16 : return ((BagUint16 *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_INT32  : return ((BagInt32  *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_UINT32 : return ((BagUint32 *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_INT64  : return ((BagInt64  *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_UINT64 : return ((BagUint64 *)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_FLOAT32: return ((BagFloat32*)_bag.get())->offset(std::forward<Args>(args) ...);
-        case EggTypeTable::BT_FLOAT64: return ((BagFloat64*)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_NONE   : return 0;
+        case EggTypeTable::ETT_INT8   : return ((BagInt8   *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_UINT8  : return ((BagUint8  *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_INT16  : return ((BagInt16  *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_UINT16 : return ((BagUint16 *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_INT32  : return ((BagInt32  *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_UINT32 : return ((BagUint32 *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_INT64  : return ((BagInt64  *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_UINT64 : return ((BagUint64 *)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_FLOAT32: return ((BagFloat32*)_bag.get())->offset(std::forward<Args>(args) ...);
+        case EggTypeTable::ETT_FLOAT64: return ((BagFloat64*)_bag.get())->offset(std::forward<Args>(args) ...);
         default: assert(false && "Unknown type assertion.");
         // @formatter:on
         }

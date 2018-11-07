@@ -243,6 +243,11 @@ public:
         // EMPTY.
     }
 
+    Bag(allocator_type const & allocator) : _dimenstions(), _container(allocator)
+    {
+        // EMPTY.
+    }
+
     template <typename Tp>
     Bag(std::initializer_list<Tp> list) : Bag()
     {
@@ -259,7 +264,7 @@ public:
         *this = obj;
     }
 
-    Bag(Bag && obj) : Bag()
+    Bag(Bag && obj) TBAG_NOEXCEPT : Bag()
     {
         *this = std::move(obj);
     }
@@ -276,7 +281,7 @@ public:
         return *this;
     }
 
-    Bag & operator =(Bag && obj)
+    Bag & operator =(Bag && obj) TBAG_NOEXCEPT
     {
         swap(obj);
         return *this;
@@ -291,7 +296,7 @@ public:
         }
     }
 
-    void swap(Bag & obj)
+    void swap(Bag & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
             _dimenstions.swap(obj._dimenstions);

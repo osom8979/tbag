@@ -26,7 +26,7 @@ TEST(EggTest, Default)
     ASSERT_EQ(Err::E_NREADY, obj1.resize(10));
     ASSERT_EQ(Err::E_NREADY, obj2.resize(10, 20));
 
-    ASSERT_EQ(Err::E_SUCCESS, obj1.create(EggTypeTable::BT_INT32));
+    ASSERT_EQ(Err::E_SUCCESS, obj1.create(EggTypeTable::ETT_INT32));
     ASSERT_EQ(Err::E_SUCCESS, obj2.create<int32_t>());
     ASSERT_EQ(obj1.getType(), obj2.getType());
 
@@ -82,7 +82,7 @@ TEST(EggTest, Default)
 TEST(EggTest, InitializerList)
 {
     Egg obj = { 0, 1, 2, 3, 4 };
-    ASSERT_EQ(EggTypeTable::BT_INT32, obj.getType());
+    ASSERT_EQ(EggTypeTable::ETT_INT32, obj.getType());
     ASSERT_EQ(5, obj.size());
     ASSERT_EQ(0, obj.at<int32_t>(0));
     ASSERT_EQ(1, obj.at<int32_t>(1));
@@ -95,7 +95,7 @@ TEST(EggTest, Offset)
 {
     Egg bag;
     bag.resize<int32_t>(2, 3, 4);
-    ASSERT_EQ(EggTypeTable::BT_INT32, bag.getType());
+    ASSERT_EQ(EggTypeTable::ETT_INT32, bag.getType());
     ASSERT_EQ(2*3*4, bag.size());
     ASSERT_EQ(2, bag.size(0));
     ASSERT_EQ(3, bag.size(1));
