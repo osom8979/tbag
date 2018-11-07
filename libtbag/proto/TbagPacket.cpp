@@ -62,24 +62,24 @@ using PairOffset             = flatbuffers::Offset<tbag::Pair>;
 using PairOffsetVector       = flatbuffers::Vector<PairOffset>;
 using PairOffsetVectorOffset = flatbuffers::Offset<PairOffsetVector>;
 
-static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::BexType type) TBAG_NOEXCEPT
+static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::EggTypeTable type) TBAG_NOEXCEPT
 {
     using namespace libtbag::proto::fbs::tbag;
     using namespace libtbag::container;
 
     switch (type) {
     // @formatter:off
-    case BexType::BT_INT8   : return AnyArr_ByteArr  ;
-    case BexType::BT_UINT8  : return AnyArr_UbyteArr ;
-    case BexType::BT_INT16  : return AnyArr_ShortArr ;
-    case BexType::BT_UINT16 : return AnyArr_UshortArr;
-    case BexType::BT_INT32  : return AnyArr_IntArr   ;
-    case BexType::BT_UINT32 : return AnyArr_UintArr  ;
-    case BexType::BT_INT64  : return AnyArr_LongArr  ;
-    case BexType::BT_UINT64 : return AnyArr_UlongArr ;
-    case BexType::BT_FLOAT32: return AnyArr_FloatArr ;
-    case BexType::BT_FLOAT64: return AnyArr_DoubleArr;
-    case BexType::BT_NONE   : return AnyArr_NONE;
+    case EggTypeTable::BT_INT8   : return AnyArr_ByteArr  ;
+    case EggTypeTable::BT_UINT8  : return AnyArr_UbyteArr ;
+    case EggTypeTable::BT_INT16  : return AnyArr_ShortArr ;
+    case EggTypeTable::BT_UINT16 : return AnyArr_UshortArr;
+    case EggTypeTable::BT_INT32  : return AnyArr_IntArr   ;
+    case EggTypeTable::BT_UINT32 : return AnyArr_UintArr  ;
+    case EggTypeTable::BT_INT64  : return AnyArr_LongArr  ;
+    case EggTypeTable::BT_UINT64 : return AnyArr_UlongArr ;
+    case EggTypeTable::BT_FLOAT32: return AnyArr_FloatArr ;
+    case EggTypeTable::BT_FLOAT64: return AnyArr_DoubleArr;
+    case EggTypeTable::BT_NONE   : return AnyArr_NONE;
     // @formatter:on
     default:
         return AnyArr_NONE;
@@ -195,18 +195,18 @@ public:
     PairOffsetVectorOffset createPairs(std::string const & content)
     {
         std::vector<PairOffset> offsets;
-        offsets.push_back(createPair(content, Bex()));
+        offsets.push_back(createPair(content, Egg()));
         return builder.CreateVector(offsets);
     }
 
     PairOffsetVectorOffset createPairs(std::string const & key, std::string const & val)
     {
         std::vector<PairOffset> offsets;
-        offsets.push_back(createPair(key, Bex(val)));
+        offsets.push_back(createPair(key, Egg(val)));
         return builder.CreateVector(offsets);
     }
 
-    PairOffset createPair(std::string const & key, Bex const & bag)
+    PairOffset createPair(std::string const & key, Egg const & bag)
     {
         using namespace libtbag::proto::fbs::tbag;
         AnyArr const VALUE_TYPE = getAnyArr(bag.getType());
@@ -226,7 +226,7 @@ public:
                           VALUE_TYPE, createAnyArr(VALUE_TYPE, bag));
     }
 
-    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, Bex const & bag)
+    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, Egg const & bag)
     {
         using namespace libtbag::proto::fbs::tbag;
         switch (value_type) {
@@ -403,7 +403,7 @@ public:
     }
 
     template <typename PairItr>
-    Bex createBagEx(PairItr itr, tbag::AnyArr arr_type) const
+    Egg createBagEx(PairItr itr, tbag::AnyArr arr_type) const
     {
         using namespace libtbag::proto::fbs::tbag;
         switch (arr_type) {
@@ -418,26 +418,26 @@ public:
         case AnyArr_UlongArr:   return createBagEx<PairItr,  UlongArr, uint64_t>(itr);
         case AnyArr_FloatArr:   return createBagEx<PairItr,  FloatArr,    float>(itr);
         case AnyArr_DoubleArr:  return createBagEx<PairItr, DoubleArr,   double>(itr);
-        case AnyArr_NONE:       return Bex();
+        case AnyArr_NONE:       return Egg();
         default: TBAG_INACCESSIBLE_BLOCK_ASSERT();
         // @formatter:on
         }
-        return Bex();
+        return Egg();
     }
 
     template <typename PairItr, typename TbagArrType, typename ValueType>
-    Bex createBagEx(PairItr itr) const
+    Egg createBagEx(PairItr itr) const
     {
-        Bex bag;
+        Egg bag;
 
         Err code = bag.create<ValueType>();
         if (isFailure(code)) {
-            return Bex();
+            return Egg();
         }
 
         code = bag.resize(itr->i0(), itr->i1(), itr->i2(), itr->i3(), itr->i4(), itr->i5(), itr->i6(), itr->i7());
         if (isFailure(code)) {
-            return Bex();
+            return Egg();
         }
 
         auto val = (TbagArrType const *)itr->val();
@@ -523,14 +523,14 @@ void TbagPacket::onHeader(uint64_t id, int32_t type, int32_t code, void * arg)
     assert(user_arg != nullptr);
 
     if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
-        Bex * bag = (Bex*)user_arg->user;
+        Egg * bag = (Egg*)user_arg->user;
         assert(bag != nullptr);
     } else {
         // Unknown types.
     }
 }
 
-void TbagPacket::onPair(std::string && key, Bex && val, void * arg)
+void TbagPacket::onPair(std::string && key, Egg && val, void * arg)
 {
     if (arg == nullptr) {
         return;
@@ -545,7 +545,7 @@ void TbagPacket::onPair(std::string && key, Bex && val, void * arg)
     assert(user_arg != nullptr);
 
     if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
-        Bex * bag = (Bex*)user_arg->user;
+        Egg * bag = (Egg*)user_arg->user;
         assert(bag != nullptr);
         *bag = std::move(val);
     } else {
@@ -576,9 +576,9 @@ Err TbagPacket::update()
     return update((char const *)point(), size());
 }
 
-TbagPacket::Bex TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
+TbagPacket::Egg TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
 {
-    Bex result;
+    Egg result;
     UserArg arg;
     arg.type = static_cast<int>(UserArgType::UAT_BAG_EX);
     arg.user = &result;
@@ -590,12 +590,12 @@ TbagPacket::Bex TbagPacket::findKey(char const * buffer, std::size_t size, std::
     return result;
 }
 
-TbagPacket::Bex TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
+TbagPacket::Egg TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
 {
     return findKey(buffer.data(), buffer.size(), key, code);
 }
 
-TbagPacket::Bex TbagPacket::findKey(std::string const & key, Err * code)
+TbagPacket::Egg TbagPacket::findKey(std::string const & key, Err * code)
 {
     return findKey((char const *)point(), size(), key, code);
 }

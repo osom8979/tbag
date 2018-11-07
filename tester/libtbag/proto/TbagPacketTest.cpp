@@ -34,9 +34,9 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
 {
     using namespace libtbag::container;
     std::string const BAG_KEY = "bag";
-    Bex bag;
+    Egg bag;
     bag.resize<int32_t>(2, 3);
-    ASSERT_EQ(BexType::BT_INT32, bag.getType());
+    ASSERT_EQ(EggTypeTable::BT_INT32, bag.getType());
     ASSERT_EQ(2*3, bag.size());
     ASSERT_EQ(2, bag.size(0));
     ASSERT_EQ(3, bag.size(1));
@@ -59,7 +59,7 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
     ASSERT_EQ(1, packet2.bags().size());
 
     auto bag_result = packet2.bags()[BAG_KEY];
-    ASSERT_EQ(BexType::BT_INT32, bag_result.getType());
+    ASSERT_EQ(EggTypeTable::BT_INT32, bag_result.getType());
     ASSERT_EQ(2*3, bag_result.size());
     ASSERT_EQ(2, bag_result.size(0));
     ASSERT_EQ(3, bag_result.size(1));
@@ -167,10 +167,10 @@ TEST(TbagPacketTest, FileSaveLoad)
     std::string const BAG2_KEY = "bag2";
     std::vector<int32_t> const BAG2_VAL = {1, 2, 3, 4};
 
-    Bex bag1 = BAG1_VAL;
-    Bex bag2 = BAG2_VAL;
-    ASSERT_EQ(BexType::BT_INT8, bag1.getType());
-    ASSERT_EQ(BexType::BT_INT32, bag2.getType());
+    Egg bag1 = BAG1_VAL;
+    Egg bag2 = BAG2_VAL;
+    ASSERT_EQ(EggTypeTable::BT_INT8, bag1.getType());
+    ASSERT_EQ(EggTypeTable::BT_INT32, bag2.getType());
 
     uint64_t const TEST_ID   = 1;
     int32_t  const TEST_TYPE = 2;
@@ -199,12 +199,12 @@ TEST(TbagPacketTest, FileSaveLoad)
     auto bag1_result = packet2.bags()[BAG1_KEY];
     auto bag2_result = packet2.bags()[BAG2_KEY];
 
-    ASSERT_EQ(BexType::BT_INT8, bag1_result.getType());
+    ASSERT_EQ(EggTypeTable::BT_INT8, bag1_result.getType());
     ASSERT_EQ(BAG1_VAL.size(), bag1_result.size());
     ASSERT_EQ(1, bag1_result.dims());
     ASSERT_EQ(BAG1_VAL, bag1_result.toString());
 
-    ASSERT_EQ(BexType::BT_INT32, bag2_result.getType());
+    ASSERT_EQ(EggTypeTable::BT_INT32, bag2_result.getType());
     ASSERT_EQ(BAG2_VAL.size(), bag2_result.size());
     ASSERT_EQ(1, bag2_result.dims());
     auto * bag2_begin = bag2_result.cast<int32_t>();

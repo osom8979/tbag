@@ -19,7 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 #include <libtbag/Type.hpp>
-#include <libtbag/container/Bex.hpp>
+#include <libtbag/container/Egg.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
@@ -39,13 +39,13 @@ struct TbagPacketTypes : private Noncopyable
 {
     using TypeTable = libtbag::type::TypeTable;
     using Buffer    = libtbag::util::Buffer;
-    using Bex     = libtbag::container::Bex;
+    using Egg     = libtbag::container::Egg;
 #if !defined(NDEBUG) && defined(TBAG_PLATFORM_MACOS)
-    using BagExMap  = std::map<std::string, Bex>;
+    using BagExMap  = std::map<std::string, Egg>;
 #else
-    using BagExMap  = std::unordered_map<std::string, Bex>;
+    using BagExMap  = std::unordered_map<std::string, Egg>;
 #endif
-    static_assert(Bex::getMaxDims() == 8, "FlatBuffers compatibility check. (table Pair)");
+    static_assert(Egg::getMaxDims() == 8, "FlatBuffers compatibility check. (table Pair)");
 };
 
 /**
@@ -130,7 +130,7 @@ public:
 protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) { /* EMPTY. */ }
     virtual void onPairSize(std::size_t size, void * arg) { /* EMPTY. */ }
-    virtual void onPair(std::string && key, Bex && val, void * arg) { /* EMPTY. */ }
+    virtual void onPair(std::string && key, Egg && val, void * arg) { /* EMPTY. */ }
 };
 
 /**
@@ -167,7 +167,7 @@ public:
 
 protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) override;
-    virtual void onPair(std::string && key, Bex && val, void * arg) override;
+    virtual void onPair(std::string && key, Egg && val, void * arg) override;
 
 public:
     inline uint64_t   id() const TBAG_NOEXCEPT { return   _id; }
@@ -192,9 +192,9 @@ public:
     Err update();
 
 public:
-    Bex findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
-    Bex findKey(Buffer const & buffer, std::string const & key, Err * code = nullptr);
-    Bex findKey(std::string const & key, Err * code = nullptr);
+    Egg findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
+    Egg findKey(Buffer const & buffer, std::string const & key, Err * code = nullptr);
+    Egg findKey(std::string const & key, Err * code = nullptr);
 
 public:
     Err buildFromSelf();

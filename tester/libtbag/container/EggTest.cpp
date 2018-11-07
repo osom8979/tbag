@@ -1,20 +1,20 @@
 /**
- * @file   BexTest.cpp
- * @brief  Bex class tester.
+ * @file   EggTest.cpp
+ * @brief  Egg class tester.
  * @author zer0
  * @date   2018-10-22
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/container/Bex.hpp>
+#include <libtbag/container/Egg.hpp>
 
 using namespace libtbag;
 using namespace libtbag::container;
 
-TEST(BexTest, Default)
+TEST(EggTest, Default)
 {
-    Bex obj1;
-    Bex obj2;
+    Egg obj1;
+    Egg obj2;
 
     ASSERT_FALSE(static_cast<bool>(obj1));
     ASSERT_FALSE(static_cast<bool>(obj2));
@@ -26,7 +26,7 @@ TEST(BexTest, Default)
     ASSERT_EQ(Err::E_NREADY, obj1.resize(10));
     ASSERT_EQ(Err::E_NREADY, obj2.resize(10, 20));
 
-    ASSERT_EQ(Err::E_SUCCESS, obj1.create(BexType::BT_INT32));
+    ASSERT_EQ(Err::E_SUCCESS, obj1.create(EggTypeTable::BT_INT32));
     ASSERT_EQ(Err::E_SUCCESS, obj2.create<int32_t>());
     ASSERT_EQ(obj1.getType(), obj2.getType());
 
@@ -56,7 +56,7 @@ TEST(BexTest, Default)
     ASSERT_EQ(10   , obj2_bag->size(0));
     ASSERT_EQ(20   , obj2_bag->size(1));
 
-    Bex obj3 = std::move(obj2);
+    Egg obj3 = std::move(obj2);
     ASSERT_TRUE(static_cast<bool>(obj1));
     ASSERT_FALSE(static_cast<bool>(obj2));
     ASSERT_TRUE(static_cast<bool>(obj3));
@@ -65,8 +65,8 @@ TEST(BexTest, Default)
     std::cout << "Obj2: " << obj2 << std::endl;
     std::cout << "Obj3: " << obj3 << std::endl;
 
-    Bex obj4("BexTest.Default");
-    Bex obj5(std::vector<int32_t>{0, 1, 2, 3, 4});
+    Egg obj4("EggTest.Default");
+    Egg obj5(std::vector<int32_t>{0, 1, 2, 3, 4});
     std::cout << "Obj4: " << obj4 << std::endl;
     std::cout << "Obj5: " << obj5 << std::endl;
 
@@ -75,14 +75,14 @@ TEST(BexTest, Default)
     std::cout << "Update Obj4: " << obj4 << std::endl;
     std::cout << "Update Obj5: " << obj5 << std::endl;
 
-    Bex obj6 = obj5;
+    Egg obj6 = obj5;
     ASSERT_EQ(obj6, obj5);
 }
 
-TEST(BexTest, InitializerList)
+TEST(EggTest, InitializerList)
 {
-    Bex obj = { 0, 1, 2, 3, 4 };
-    ASSERT_EQ(BexType::BT_INT32, obj.getType());
+    Egg obj = { 0, 1, 2, 3, 4 };
+    ASSERT_EQ(EggTypeTable::BT_INT32, obj.getType());
     ASSERT_EQ(5, obj.size());
     ASSERT_EQ(0, obj.at<int32_t>(0));
     ASSERT_EQ(1, obj.at<int32_t>(1));
@@ -91,11 +91,11 @@ TEST(BexTest, InitializerList)
     ASSERT_EQ(4, obj.at<int32_t>(4));
 }
 
-TEST(BexTest, Offset)
+TEST(EggTest, Offset)
 {
-    Bex bag;
+    Egg bag;
     bag.resize<int32_t>(2, 3, 4);
-    ASSERT_EQ(BexType::BT_INT32, bag.getType());
+    ASSERT_EQ(EggTypeTable::BT_INT32, bag.getType());
     ASSERT_EQ(2*3*4, bag.size());
     ASSERT_EQ(2, bag.size(0));
     ASSERT_EQ(3, bag.size(1));
@@ -136,7 +136,7 @@ TEST(BexTest, Offset)
     ASSERT_EQ(23, bag.at<int32_t>(1, 2, 3));
 }
 
-struct TestBagExUser : public Bex::User
+struct TestBagExUser : public Egg::User
 {
     bool & call_destructor;
     int value;
@@ -150,12 +150,12 @@ struct TestBagExUser : public Bex::User
     }
 };
 
-TEST(BexTest, User)
+TEST(EggTest, User)
 {
     int const TEST_VALUE = 10;
     bool call_destructor = false;
 
-    Bex test;
+    Egg test;
     test.createUser<TestBagExUser>(TEST_VALUE, call_destructor);
     auto shared_user = test.user<TestBagExUser>();
     ASSERT_EQ(TEST_VALUE, shared_user->value);
@@ -164,10 +164,10 @@ TEST(BexTest, User)
     ASSERT_TRUE(call_destructor);
 }
 
-TEST(BexTest, StringConvert)
+TEST(EggTest, StringConvert)
 {
-    std::string const TEST_STRING = "BexTest.StringConvert";
-    Bex const TEST_BAG(TEST_STRING);
+    std::string const TEST_STRING = "EggTest.StringConvert";
+    Egg const TEST_BAG(TEST_STRING);
     ASSERT_TRUE(TEST_BAG.exists());
     ASSERT_FALSE(TEST_BAG.empty());
     ASSERT_EQ(TEST_STRING.size(), TEST_BAG.size());
@@ -176,10 +176,10 @@ TEST(BexTest, StringConvert)
     ASSERT_EQ(TEST_STRING, TEST_BAG.toString());
 }
 
-TEST(BexTest, VectorConvert)
+TEST(EggTest, VectorConvert)
 {
     std::vector<int> const TEST_VECTOR = {10, 20, 30};
-    Bex const TEST_BAG(TEST_VECTOR);
+    Egg const TEST_BAG(TEST_VECTOR);
     ASSERT_TRUE(TEST_BAG.exists());
     ASSERT_FALSE(TEST_BAG.empty());
     ASSERT_EQ(TEST_VECTOR.size(), TEST_BAG.size());
@@ -192,10 +192,10 @@ TEST(BexTest, VectorConvert)
     ASSERT_EQ(TEST_VECTOR[2], RESULT_VECTOR[2]);
 }
 
-TEST(BexTest, HexConvert)
+TEST(EggTest, HexConvert)
 {
     std::string const TEST_STRING = "0123456789";
-    Bex const TEST_BAG(TEST_STRING);
+    Egg const TEST_BAG(TEST_STRING);
     ASSERT_TRUE(TEST_BAG.exists());
 
     auto const HEX = TEST_BAG.toHexString();
