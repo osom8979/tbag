@@ -9,8 +9,6 @@
 #include <libtbag/container/Egg.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
-
-#include <utility>
 #include <sstream>
 
 // -------------------
@@ -22,6 +20,13 @@ namespace container {
 Egg::Egg() TBAG_NOEXCEPT : _type(EggTypeTable::ETT_NONE), _bag(nullptr), _user(nullptr)
 {
     // EMPTY.
+}
+
+Egg::Egg(EggTypeTable type) : Egg()
+{
+    if (isFailure(create(type))) {
+        throw std::bad_alloc();
+    }
 }
 
 Egg::Egg(std::string const & content) : Egg()
@@ -127,9 +132,11 @@ Err Egg::create(EggTypeTable type)
             return Err::E_ILLARGS;
         }
     } catch (std::exception & e) {
+        _bag.reset();
         _type = EggTypeTable::ETT_NONE;
         return Err::E_BADALLOC;
     } catch (...) {
+        _bag.reset();
         _type = EggTypeTable::ETT_NONE;
         return Err::E_UNKEXCP;
     }
@@ -168,6 +175,40 @@ Err Egg::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
         return Err::E_UNKEXCP;
     }
     return Err::E_SUCCESS;
+}
+
+Egg Egg::clone(bool copy_user) const
+{
+    Egg result;
+    if (isFailure(result.create(_type))) {
+        return Egg();
+    }
+
+    assert(result.getType() == _type);
+    assert(_type == EggTypeTable::ETT_NONE);
+
+    switch (_type) {
+    // @formatter:off
+    case EggTypeTable::ETT_INT8   : reinterpret_cast<BagInt8   *>(result.get())->copy(*reinterpret_cast<BagInt8   *>(_bag.get())); break;
+    case EggTypeTable::ETT_UINT8  : reinterpret_cast<BagUint8  *>(result.get())->copy(*reinterpret_cast<BagUint8  *>(_bag.get())); break;
+    case EggTypeTable::ETT_INT16  : reinterpret_cast<BagInt16  *>(result.get())->copy(*reinterpret_cast<BagInt16  *>(_bag.get())); break;
+    case EggTypeTable::ETT_UINT16 : reinterpret_cast<BagUint16 *>(result.get())->copy(*reinterpret_cast<BagUint16 *>(_bag.get())); break;
+    case EggTypeTable::ETT_INT32  : reinterpret_cast<BagInt32  *>(result.get())->copy(*reinterpret_cast<BagInt32  *>(_bag.get())); break;
+    case EggTypeTable::ETT_UINT32 : reinterpret_cast<BagUint32 *>(result.get())->copy(*reinterpret_cast<BagUint32 *>(_bag.get())); break;
+    case EggTypeTable::ETT_INT64  : reinterpret_cast<BagInt64  *>(result.get())->copy(*reinterpret_cast<BagInt64  *>(_bag.get())); break;
+    case EggTypeTable::ETT_UINT64 : reinterpret_cast<BagUint64 *>(result.get())->copy(*reinterpret_cast<BagUint64 *>(_bag.get())); break;
+    case EggTypeTable::ETT_FLOAT32: reinterpret_cast<BagFloat32*>(result.get())->copy(*reinterpret_cast<BagFloat32*>(_bag.get())); break;
+    case EggTypeTable::ETT_FLOAT64: reinterpret_cast<BagFloat64*>(result.get())->copy(*reinterpret_cast<BagFloat64*>(_bag.get())); break;
+    // @formatter:on
+    default:
+        assert(false && "Unknown type assertion.");
+        return Egg();
+    }
+
+    if (copy_user) {
+        result.atUser() = _user;
+    }
+    return result;
 }
 
 void * Egg::data()

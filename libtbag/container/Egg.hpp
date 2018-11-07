@@ -31,8 +31,8 @@
 #include <algorithm>
 #include <iterator>
 #include <initializer_list>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -265,12 +265,13 @@ public:
     using SharedUser = std::shared_ptr<User>;
 
 private:
-    EggTypeTable    _type;
-    SharedBag  _bag;
-    SharedUser _user;
+    EggTypeTable _type;
+    SharedBag    _bag;
+    SharedUser   _user;
 
 public:
     Egg() TBAG_NOEXCEPT;
+    Egg(EggTypeTable type);
     Egg(std::string const & content);
     Egg(char const * content);
     Egg(Egg const & obj) TBAG_NOEXCEPT;
@@ -431,6 +432,9 @@ public:
         }
         return resize(std::forward<Args>(args) ...);
     }
+
+public:
+    Egg clone(bool copy_user = true) const;
 
 public:
     void * data();
