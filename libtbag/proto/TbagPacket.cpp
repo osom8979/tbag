@@ -62,24 +62,24 @@ using PairOffset             = flatbuffers::Offset<tbag::Pair>;
 using PairOffsetVector       = flatbuffers::Vector<PairOffset>;
 using PairOffsetVectorOffset = flatbuffers::Offset<PairOffsetVector>;
 
-static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::EggTypeTable type) TBAG_NOEXCEPT
+static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::BoxTypeTable type) TBAG_NOEXCEPT
 {
     using namespace libtbag::proto::fbs::tbag;
     using namespace libtbag::container;
 
     switch (type) {
     // @formatter:off
-    case EggTypeTable::ETT_NONE   : return AnyArr_NONE     ;
-    case EggTypeTable::ETT_INT8   : return AnyArr_ByteArr  ;
-    case EggTypeTable::ETT_UINT8  : return AnyArr_UbyteArr ;
-    case EggTypeTable::ETT_INT16  : return AnyArr_ShortArr ;
-    case EggTypeTable::ETT_UINT16 : return AnyArr_UshortArr;
-    case EggTypeTable::ETT_INT32  : return AnyArr_IntArr   ;
-    case EggTypeTable::ETT_UINT32 : return AnyArr_UintArr  ;
-    case EggTypeTable::ETT_INT64  : return AnyArr_LongArr  ;
-    case EggTypeTable::ETT_UINT64 : return AnyArr_UlongArr ;
-    case EggTypeTable::ETT_FLOAT32: return AnyArr_FloatArr ;
-    case EggTypeTable::ETT_FLOAT64: return AnyArr_DoubleArr;
+    case BoxTypeTable::BTT_NONE   : return AnyArr_NONE     ;
+    case BoxTypeTable::BTT_INT8   : return AnyArr_ByteArr  ;
+    case BoxTypeTable::BTT_UINT8  : return AnyArr_UbyteArr ;
+    case BoxTypeTable::BTT_INT16  : return AnyArr_ShortArr ;
+    case BoxTypeTable::BTT_UINT16 : return AnyArr_UshortArr;
+    case BoxTypeTable::BTT_INT32  : return AnyArr_IntArr   ;
+    case BoxTypeTable::BTT_UINT32 : return AnyArr_UintArr  ;
+    case BoxTypeTable::BTT_INT64  : return AnyArr_LongArr  ;
+    case BoxTypeTable::BTT_UINT64 : return AnyArr_UlongArr ;
+    case BoxTypeTable::BTT_FLOAT32: return AnyArr_FloatArr ;
+    case BoxTypeTable::BTT_FLOAT64: return AnyArr_DoubleArr;
     // @formatter:on
     default:
         return AnyArr_NONE;
@@ -159,11 +159,11 @@ public:
         return Err::E_SUCCESS;
     }
 
-    Err build(uint64_t id, int32_t type, int32_t code, BagExMap const & bags)
+    Err build(uint64_t id, int32_t type, int32_t code, BoxMap const & boxes)
     {
         using namespace libtbag::proto::fbs::tbag;
         clear();
-        finish(CreateTbagPacket(builder, id, type, code, createPairs(bags)));
+        finish(CreateTbagPacket(builder, id, type, code, createPairs(boxes)));
         return Err::E_SUCCESS;
     }
 
@@ -183,10 +183,10 @@ public:
         return Err::E_SUCCESS;
     }
 
-    PairOffsetVectorOffset createPairs(BagExMap const bags)
+    PairOffsetVectorOffset createPairs(BoxMap const boxes)
     {
         std::vector<PairOffset> offsets;
-        for (auto & bag : bags) {
+        for (auto & bag : boxes) {
             offsets.push_back(createPair(bag.first, bag.second));
         }
         return builder.CreateVector(offsets);
@@ -195,18 +195,18 @@ public:
     PairOffsetVectorOffset createPairs(std::string const & content)
     {
         std::vector<PairOffset> offsets;
-        offsets.push_back(createPair(content, Egg()));
+        offsets.push_back(createPair(content, Box()));
         return builder.CreateVector(offsets);
     }
 
     PairOffsetVectorOffset createPairs(std::string const & key, std::string const & val)
     {
         std::vector<PairOffset> offsets;
-        offsets.push_back(createPair(key, Egg(val)));
+        offsets.push_back(createPair(key, Box(val)));
         return builder.CreateVector(offsets);
     }
 
-    PairOffset createPair(std::string const & key, Egg const & bag)
+    PairOffset createPair(std::string const & key, Box const & bag)
     {
         using namespace libtbag::proto::fbs::tbag;
         AnyArr const VALUE_TYPE = getAnyArr(bag.getType());
@@ -226,7 +226,7 @@ public:
                           VALUE_TYPE, createAnyArr(VALUE_TYPE, bag));
     }
 
-    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, Egg const & bag)
+    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, Box const & bag)
     {
         using namespace libtbag::proto::fbs::tbag;
         switch (value_type) {
@@ -298,10 +298,10 @@ Err TbagPacketBuilder::build(uint64_t id, int32_t type, int32_t code)
     return _impl->build(id, type, code);
 }
 
-Err TbagPacketBuilder::build(BagExMap const & bags, uint64_t id, int32_t type, int32_t code)
+Err TbagPacketBuilder::build(BoxMap const & boxes, uint64_t id, int32_t type, int32_t code)
 {
     assert(static_cast<bool>(_impl));
-    return _impl->build(id, type, code, bags);
+    return _impl->build(id, type, code, boxes);
 }
 
 Err TbagPacketBuilder::build(std::string const & content, uint64_t id, int32_t type, int32_t code)
@@ -403,7 +403,7 @@ public:
     }
 
     template <typename PairItr>
-    Egg createBagEx(PairItr itr, tbag::AnyArr arr_type) const
+    Box createBagEx(PairItr itr, tbag::AnyArr arr_type) const
     {
         using namespace libtbag::proto::fbs::tbag;
         switch (arr_type) {
@@ -418,26 +418,26 @@ public:
         case AnyArr_UlongArr:   return createBagEx<PairItr,  UlongArr, uint64_t>(itr);
         case AnyArr_FloatArr:   return createBagEx<PairItr,  FloatArr,    float>(itr);
         case AnyArr_DoubleArr:  return createBagEx<PairItr, DoubleArr,   double>(itr);
-        case AnyArr_NONE:       return Egg();
+        case AnyArr_NONE:       return Box();
         default: TBAG_INACCESSIBLE_BLOCK_ASSERT();
         // @formatter:on
         }
-        return Egg();
+        return Box();
     }
 
     template <typename PairItr, typename TbagArrType, typename ValueType>
-    Egg createBagEx(PairItr itr) const
+    Box createBagEx(PairItr itr) const
     {
-        Egg bag;
+        Box bag;
 
         Err code = bag.create<ValueType>();
         if (isFailure(code)) {
-            return Egg();
+            return Box();
         }
 
         code = bag.resize(itr->i0(), itr->i1(), itr->i2(), itr->i3(), itr->i4(), itr->i5(), itr->i6(), itr->i7());
         if (isFailure(code)) {
-            return Egg();
+            return Box();
         }
 
         auto val = (TbagArrType const *)itr->val();
@@ -523,14 +523,14 @@ void TbagPacket::onHeader(uint64_t id, int32_t type, int32_t code, void * arg)
     assert(user_arg != nullptr);
 
     if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
-        Egg * bag = (Egg*)user_arg->user;
+        Box * bag = (Box*)user_arg->user;
         assert(bag != nullptr);
     } else {
         // Unknown types.
     }
 }
 
-void TbagPacket::onPair(std::string && key, Egg && val, void * arg)
+void TbagPacket::onPair(std::string && key, Box && val, void * arg)
 {
     if (arg == nullptr) {
         return;
@@ -545,7 +545,7 @@ void TbagPacket::onPair(std::string && key, Egg && val, void * arg)
     assert(user_arg != nullptr);
 
     if (user_arg->type == static_cast<int>(UserArgType::UAT_BAG_EX)) {
-        Egg * bag = (Egg*)user_arg->user;
+        Box * bag = (Box*)user_arg->user;
         assert(bag != nullptr);
         *bag = std::move(val);
     } else {
@@ -576,9 +576,9 @@ Err TbagPacket::update()
     return update((char const *)point(), size());
 }
 
-TbagPacket::Egg TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
+TbagPacket::Box TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
 {
-    Egg result;
+    Box result;
     UserArg arg;
     arg.type = static_cast<int>(UserArgType::UAT_BAG_EX);
     arg.user = &result;
@@ -590,12 +590,12 @@ TbagPacket::Egg TbagPacket::findKey(char const * buffer, std::size_t size, std::
     return result;
 }
 
-TbagPacket::Egg TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
+TbagPacket::Box TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
 {
     return findKey(buffer.data(), buffer.size(), key, code);
 }
 
-TbagPacket::Egg TbagPacket::findKey(std::string const & key, Err * code)
+TbagPacket::Box TbagPacket::findKey(std::string const & key, Err * code)
 {
     return findKey((char const *)point(), size(), key, code);
 }

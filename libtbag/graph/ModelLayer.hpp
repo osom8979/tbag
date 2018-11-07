@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/container/Egg.hpp>
+#include <libtbag/container/Box.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <memory>
@@ -45,8 +45,8 @@ public:
 
 public:
     using Buffer = libtbag::util::Buffer;
-    using Egg  = libtbag::container::Egg;
-    using BagExs = std::vector<Egg>;
+    using Box  = libtbag::container::Box;
+    using BagExs = std::vector<Box>;
     using Layers = std::vector<ModelLayer>;
 
 public:
@@ -63,7 +63,7 @@ public:
     {
     public:
         using Buffer = ModelLayer::Buffer;
-        using Egg    = ModelLayer::Egg;
+        using Box    = ModelLayer::Box;
         using BagExs = ModelLayer::BagExs;
         using Layers = ModelLayer::Layers;
 

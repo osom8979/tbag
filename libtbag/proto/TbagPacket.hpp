@@ -19,7 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 #include <libtbag/Type.hpp>
-#include <libtbag/container/Egg.hpp>
+#include <libtbag/container/Box.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
@@ -39,13 +39,13 @@ struct TbagPacketTypes : private Noncopyable
 {
     using TypeTable = libtbag::type::TypeTable;
     using Buffer    = libtbag::util::Buffer;
-    using Egg     = libtbag::container::Egg;
+    using Box       = libtbag::container::Box;
 #if !defined(NDEBUG) && defined(TBAG_PLATFORM_MACOS)
-    using BagExMap  = std::map<std::string, Egg>;
+    using BoxMap  = std::map<std::string, Box>;
 #else
-    using BagExMap  = std::unordered_map<std::string, Egg>;
+    using BoxMap  = std::unordered_map<std::string, Box>;
 #endif
-    static_assert(Egg::getMaxDims() == 8, "FlatBuffers compatibility check. (table Pair)");
+    static_assert(Box::getMaxDims() == 8, "FlatBuffers compatibility check. (table Pair)");
 };
 
 /**
@@ -88,7 +88,7 @@ public:
 
 public:
     Err build(uint64_t id, int32_t type = 0, int32_t code = 0);
-    Err build(BagExMap const & bags, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
+    Err build(BoxMap const & boxes, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(std::string const & content, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
     Err build(std::string const & key, std::string const & val, uint64_t id = 0, int32_t type = 0, int32_t code = 0);
 
@@ -130,7 +130,7 @@ public:
 protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) { /* EMPTY. */ }
     virtual void onPairSize(std::size_t size, void * arg) { /* EMPTY. */ }
-    virtual void onPair(std::string && key, Egg && val, void * arg) { /* EMPTY. */ }
+    virtual void onPair(std::string && key, Box && val, void * arg) { /* EMPTY. */ }
 };
 
 /**
@@ -145,7 +145,7 @@ private:
     uint64_t _id;
     int32_t  _type;
     int32_t  _code;
-    BagExMap _bags;
+    BoxMap _bags;
 
 public:
     enum class UserArgType : int
@@ -167,7 +167,7 @@ public:
 
 protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) override;
-    virtual void onPair(std::string && key, Egg && val, void * arg) override;
+    virtual void onPair(std::string && key, Box && val, void * arg) override;
 
 public:
     inline uint64_t   id() const TBAG_NOEXCEPT { return   _id; }
@@ -180,8 +180,8 @@ public:
     inline void setCode(uint32_t value) TBAG_NOEXCEPT { _code = value; }
 
 public:
-    inline BagExMap       & bags()       TBAG_NOEXCEPT { return _bags; }
-    inline BagExMap const & bags() const TBAG_NOEXCEPT { return _bags; }
+    inline BoxMap       & boxes()       TBAG_NOEXCEPT { return _bags; }
+    inline BoxMap const & boxes() const TBAG_NOEXCEPT { return _bags; }
 
 public:
     void clear();
@@ -192,9 +192,9 @@ public:
     Err update();
 
 public:
-    Egg findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
-    Egg findKey(Buffer const & buffer, std::string const & key, Err * code = nullptr);
-    Egg findKey(std::string const & key, Err * code = nullptr);
+    Box findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
+    Box findKey(Buffer const & buffer, std::string const & key, Err * code = nullptr);
+    Box findKey(std::string const & key, Err * code = nullptr);
 
 public:
     Err buildFromSelf();

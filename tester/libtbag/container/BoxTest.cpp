@@ -1,20 +1,20 @@
 /**
- * @file   EggTest.cpp
- * @brief  Egg class tester.
+ * @file   BoxTest.cpp
+ * @brief  Box class tester.
  * @author zer0
  * @date   2018-10-22
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/container/Egg.hpp>
+#include <libtbag/container/Box.hpp>
 
 using namespace libtbag;
 using namespace libtbag::container;
 
-TEST(EggTest, Default)
+TEST(BoxTest, Default)
 {
-    Egg obj1;
-    Egg obj2;
+    Box obj1;
+    Box obj2;
 
     ASSERT_FALSE(static_cast<bool>(obj1));
     ASSERT_FALSE(static_cast<bool>(obj2));
@@ -26,7 +26,7 @@ TEST(EggTest, Default)
     ASSERT_EQ(Err::E_NREADY, obj1.resize(10));
     ASSERT_EQ(Err::E_NREADY, obj2.resize(10, 20));
 
-    ASSERT_EQ(Err::E_SUCCESS, obj1.create(EggTypeTable::ETT_INT32));
+    ASSERT_EQ(Err::E_SUCCESS, obj1.create(BoxTypeTable::BTT_INT32));
     ASSERT_EQ(Err::E_SUCCESS, obj2.create<int32_t>());
     ASSERT_EQ(obj1.getType(), obj2.getType());
 
@@ -56,7 +56,7 @@ TEST(EggTest, Default)
     ASSERT_EQ(10   , obj2_bag->size(0));
     ASSERT_EQ(20   , obj2_bag->size(1));
 
-    Egg obj3 = std::move(obj2);
+    Box obj3 = std::move(obj2);
     ASSERT_TRUE(static_cast<bool>(obj1));
     ASSERT_FALSE(static_cast<bool>(obj2));
     ASSERT_TRUE(static_cast<bool>(obj3));
@@ -65,8 +65,8 @@ TEST(EggTest, Default)
     std::cout << "Obj2: " << obj2 << std::endl;
     std::cout << "Obj3: " << obj3 << std::endl;
 
-    Egg obj4("EggTest.Default");
-    Egg obj5(std::vector<int32_t>{0, 1, 2, 3, 4});
+    Box obj4("BoxTest.Default");
+    Box obj5(std::vector<int32_t>{0, 1, 2, 3, 4});
     std::cout << "Obj4: " << obj4 << std::endl;
     std::cout << "Obj5: " << obj5 << std::endl;
 
@@ -75,14 +75,14 @@ TEST(EggTest, Default)
     std::cout << "Update Obj4: " << obj4 << std::endl;
     std::cout << "Update Obj5: " << obj5 << std::endl;
 
-    Egg obj6 = obj5;
+    Box obj6 = obj5;
     ASSERT_EQ(obj6, obj5);
 }
 
-TEST(EggTest, InitializerList)
+TEST(BoxTest, InitializerList)
 {
-    Egg obj = { 0, 1, 2, 3, 4 };
-    ASSERT_EQ(EggTypeTable::ETT_INT32, obj.getType());
+    Box obj = { 0, 1, 2, 3, 4 };
+    ASSERT_EQ(BoxTypeTable::BTT_INT32, obj.getType());
     ASSERT_EQ(5, obj.size());
     ASSERT_EQ(0, obj.at<int32_t>(0));
     ASSERT_EQ(1, obj.at<int32_t>(1));
@@ -91,11 +91,11 @@ TEST(EggTest, InitializerList)
     ASSERT_EQ(4, obj.at<int32_t>(4));
 }
 
-TEST(EggTest, Offset)
+TEST(BoxTest, Offset)
 {
-    Egg bag;
+    Box bag;
     bag.resize<int32_t>(2, 3, 4);
-    ASSERT_EQ(EggTypeTable::ETT_INT32, bag.getType());
+    ASSERT_EQ(BoxTypeTable::BTT_INT32, bag.getType());
     ASSERT_EQ(2*3*4, bag.size());
     ASSERT_EQ(2, bag.size(0));
     ASSERT_EQ(3, bag.size(1));
@@ -136,7 +136,7 @@ TEST(EggTest, Offset)
     ASSERT_EQ(23, bag.at<int32_t>(1, 2, 3));
 }
 
-struct TestBagExUser : public Egg::User
+struct TestBagExUser : public Box::User
 {
     bool & call_destructor;
     int value;
@@ -150,12 +150,12 @@ struct TestBagExUser : public Egg::User
     }
 };
 
-TEST(EggTest, User)
+TEST(BoxTest, User)
 {
     int const TEST_VALUE = 10;
     bool call_destructor = false;
 
-    Egg test;
+    Box test;
     test.createUser<TestBagExUser>(TEST_VALUE, call_destructor);
     auto shared_user = test.user<TestBagExUser>();
     ASSERT_EQ(TEST_VALUE, shared_user->value);
@@ -164,10 +164,10 @@ TEST(EggTest, User)
     ASSERT_TRUE(call_destructor);
 }
 
-TEST(EggTest, StringConvert)
+TEST(BoxTest, StringConvert)
 {
-    std::string const TEST_STRING = "EggTest.StringConvert";
-    Egg const TEST_BAG(TEST_STRING);
+    std::string const TEST_STRING = "BoxTest.StringConvert";
+    Box const TEST_BAG(TEST_STRING);
     ASSERT_TRUE(TEST_BAG.exists());
     ASSERT_FALSE(TEST_BAG.empty());
     ASSERT_EQ(TEST_STRING.size(), TEST_BAG.size());
@@ -176,10 +176,10 @@ TEST(EggTest, StringConvert)
     ASSERT_EQ(TEST_STRING, TEST_BAG.toString());
 }
 
-TEST(EggTest, VectorConvert)
+TEST(BoxTest, VectorConvert)
 {
     std::vector<int> const TEST_VECTOR = {10, 20, 30};
-    Egg const TEST_BAG(TEST_VECTOR);
+    Box const TEST_BAG(TEST_VECTOR);
     ASSERT_TRUE(TEST_BAG.exists());
     ASSERT_FALSE(TEST_BAG.empty());
     ASSERT_EQ(TEST_VECTOR.size(), TEST_BAG.size());
@@ -192,10 +192,10 @@ TEST(EggTest, VectorConvert)
     ASSERT_EQ(TEST_VECTOR[2], RESULT_VECTOR[2]);
 }
 
-TEST(EggTest, HexConvert)
+TEST(BoxTest, HexConvert)
 {
     std::string const TEST_STRING = "0123456789";
-    Egg const TEST_BAG(TEST_STRING);
+    Box const TEST_BAG(TEST_STRING);
     ASSERT_TRUE(TEST_BAG.exists());
 
     auto const HEX = TEST_BAG.toHexString();

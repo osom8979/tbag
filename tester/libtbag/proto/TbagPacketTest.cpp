@@ -27,16 +27,16 @@ TEST(TbagPacketTest, UpdateSelf)
     ASSERT_EQ(TEST_ID, packet.id());
     ASSERT_EQ(TEST_TYPE, packet.type());
     ASSERT_EQ(TEST_CODE, packet.code());
-    ASSERT_TRUE(packet.bags().empty());
+    ASSERT_TRUE(packet.boxes().empty());
 }
 
 TEST(TbagPacketTest, UpdateSelf_BagEx)
 {
     using namespace libtbag::container;
     std::string const BAG_KEY = "bag";
-    Egg bag;
+    Box bag;
     bag.resize<int32_t>(2, 3);
-    ASSERT_EQ(EggTypeTable::ETT_INT32, bag.getType());
+    ASSERT_EQ(BoxTypeTable::BTT_INT32, bag.getType());
     ASSERT_EQ(2*3, bag.size());
     ASSERT_EQ(2, bag.size(0));
     ASSERT_EQ(3, bag.size(1));
@@ -44,7 +44,7 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
         *(bag.cast<int32_t>() + i) = i;
     }
 
-    TbagPacket::BagExMap map;
+    TbagPacket::BoxMap map;
     map.insert(std::make_pair(BAG_KEY, bag));
     ASSERT_EQ(1, map.size());
 
@@ -55,11 +55,11 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
 
     TbagPacket packet2;
     ASSERT_EQ(Err::E_SUCCESS, packet2.update(BUILD_BUFFER));
-    ASSERT_FALSE(packet2.bags().empty());
-    ASSERT_EQ(1, packet2.bags().size());
+    ASSERT_FALSE(packet2.boxes().empty());
+    ASSERT_EQ(1, packet2.boxes().size());
 
-    auto bag_result = packet2.bags()[BAG_KEY];
-    ASSERT_EQ(EggTypeTable::ETT_INT32, bag_result.getType());
+    auto bag_result = packet2.boxes()[BAG_KEY];
+    ASSERT_EQ(BoxTypeTable::BTT_INT32, bag_result.getType());
     ASSERT_EQ(2*3, bag_result.size());
     ASSERT_EQ(2, bag_result.size(0));
     ASSERT_EQ(3, bag_result.size(1));
@@ -87,10 +87,10 @@ TEST(TbagPacketTest, UpdateSelf_String)
     ASSERT_EQ(TEST_ID, packet.id());
     ASSERT_EQ(TEST_TYPE, packet.type());
     ASSERT_EQ(TEST_CODE, packet.code());
-    ASSERT_FALSE(packet.bags().empty());
-    ASSERT_EQ(1, packet.bags().size());
-    ASSERT_EQ(TEST_TEXT, packet.bags().begin()->first);
-    ASSERT_FALSE(packet.bags().begin()->second.exists());
+    ASSERT_FALSE(packet.boxes().empty());
+    ASSERT_EQ(1, packet.boxes().size());
+    ASSERT_EQ(TEST_TEXT, packet.boxes().begin()->first);
+    ASSERT_FALSE(packet.boxes().begin()->second.exists());
 }
 
 TEST(TbagPacketTest, UpdateSelf_KeyValue)
@@ -110,11 +110,11 @@ TEST(TbagPacketTest, UpdateSelf_KeyValue)
     ASSERT_EQ(TEST_ID, packet.id());
     ASSERT_EQ(TEST_TYPE, packet.type());
     ASSERT_EQ(TEST_CODE, packet.code());
-    ASSERT_FALSE(packet.bags().empty());
-    ASSERT_EQ(1, packet.bags().size());
-    ASSERT_EQ(TEST_KEY, packet.bags().begin()->first);
-    ASSERT_TRUE(packet.bags().begin()->second.exists());
-    ASSERT_EQ(TEST_VAL, packet.bags().begin()->second.toString());
+    ASSERT_FALSE(packet.boxes().empty());
+    ASSERT_EQ(1, packet.boxes().size());
+    ASSERT_EQ(TEST_KEY, packet.boxes().begin()->first);
+    ASSERT_TRUE(packet.boxes().begin()->second.exists());
+    ASSERT_EQ(TEST_VAL, packet.boxes().begin()->second.toString());
 }
 
 TEST(TbagPacketTest, FindKey)
@@ -167,16 +167,16 @@ TEST(TbagPacketTest, FileSaveLoad)
     std::string const BAG2_KEY = "bag2";
     std::vector<int32_t> const BAG2_VAL = {1, 2, 3, 4};
 
-    Egg bag1 = BAG1_VAL;
-    Egg bag2 = BAG2_VAL;
-    ASSERT_EQ(EggTypeTable::ETT_INT8, bag1.getType());
-    ASSERT_EQ(EggTypeTable::ETT_INT32, bag2.getType());
+    Box bag1 = BAG1_VAL;
+    Box bag2 = BAG2_VAL;
+    ASSERT_EQ(BoxTypeTable::BTT_INT8, bag1.getType());
+    ASSERT_EQ(BoxTypeTable::BTT_INT32, bag2.getType());
 
     uint64_t const TEST_ID   = 1;
     int32_t  const TEST_TYPE = 2;
     int32_t  const TEST_CODE = 3;
 
-    TbagPacket::BagExMap map;
+    TbagPacket::BoxMap map;
     map.insert(std::make_pair(BAG1_KEY, bag1));
     map.insert(std::make_pair(BAG2_KEY, bag2));
     ASSERT_EQ(2, map.size());
@@ -193,18 +193,18 @@ TEST(TbagPacketTest, FileSaveLoad)
     ASSERT_EQ(TEST_ID, packet2.id());
     ASSERT_EQ(TEST_TYPE, packet2.type());
     ASSERT_EQ(TEST_CODE, packet2.code());
-    ASSERT_FALSE(packet2.bags().empty());
-    ASSERT_EQ(2, packet2.bags().size());
+    ASSERT_FALSE(packet2.boxes().empty());
+    ASSERT_EQ(2, packet2.boxes().size());
 
-    auto bag1_result = packet2.bags()[BAG1_KEY];
-    auto bag2_result = packet2.bags()[BAG2_KEY];
+    auto bag1_result = packet2.boxes()[BAG1_KEY];
+    auto bag2_result = packet2.boxes()[BAG2_KEY];
 
-    ASSERT_EQ(EggTypeTable::ETT_INT8, bag1_result.getType());
+    ASSERT_EQ(BoxTypeTable::BTT_INT8, bag1_result.getType());
     ASSERT_EQ(BAG1_VAL.size(), bag1_result.size());
     ASSERT_EQ(1, bag1_result.dims());
     ASSERT_EQ(BAG1_VAL, bag1_result.toString());
 
-    ASSERT_EQ(EggTypeTable::ETT_INT32, bag2_result.getType());
+    ASSERT_EQ(BoxTypeTable::BTT_INT32, bag2_result.getType());
     ASSERT_EQ(BAG2_VAL.size(), bag2_result.size());
     ASSERT_EQ(1, bag2_result.dims());
     auto * bag2_begin = bag2_result.cast<int32_t>();
