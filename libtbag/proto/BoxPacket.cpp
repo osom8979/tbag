@@ -1,8 +1,9 @@
 /**
- * @file   TbagPacket.cpp
- * @brief  TbagPacket class implementation.
+ * @file   BoxPacket.cpp
+ * @brief  BoxPacket class implementation.
  * @author zer0
  * @date   2018-10-24
+ * @date   2018-11-07 (Rename: BoxPacket -> BoxPacket)
  */
 
 #if defined(TBAG_COMP_MSVC)
@@ -21,8 +22,8 @@ TBAG_PUSH_MACRO(max);
 // FlatBuffers generated files.
 #include <flatbuffers/flatbuffers.h>
 #include <flatbuffers/idl.h>
-#include <libtbag/proto/fbs/tbag_generated.h>
-#include <libtbag/proto/fbs/tbag_t2s.h>
+#include <libtbag/proto/fbs/box_generated.h>
+#include <libtbag/proto/fbs/box_t2s.h>
 
 #if defined(TBAG_COMP_MSVC)
 # if defined(__RESTORE_MIN__)
@@ -35,7 +36,7 @@ TBAG_POP_MACRO(max);
 # endif // defined(__RESTORE_MAX__)
 #endif // defined(TBAG_COMP_MSVC)
 
-#include <libtbag/proto/TbagPacket.hpp>
+#include <libtbag/proto/BoxPacket.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/filesystem/File.hpp>
@@ -58,13 +59,13 @@ using FlatBufferParser  = flatbuffers::Parser;
 using StringOffset       = flatbuffers::Offset<flatbuffers::String>;
 using StringOffsetVector = flatbuffers::Vector<StringOffset>;
 
-using PairOffset             = flatbuffers::Offset<tbag::Pair>;
+using PairOffset             = flatbuffers::Offset<box::Pair>;
 using PairOffsetVector       = flatbuffers::Vector<PairOffset>;
 using PairOffsetVectorOffset = flatbuffers::Offset<PairOffsetVector>;
 
-static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::BoxTypeTable type) TBAG_NOEXCEPT
+static libtbag::proto::fbs::box::AnyArr getAnyArr(libtbag::container::BoxTypeTable type) TBAG_NOEXCEPT
 {
-    using namespace libtbag::proto::fbs::tbag;
+    using namespace libtbag::proto::fbs::box;
     using namespace libtbag::container;
 
     switch (type) {
@@ -92,7 +93,7 @@ static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::BoxTypeTa
  * @author zer0
  * @date   2018-10-24
  */
-struct TbagPacketBuilder::Impl
+struct BoxPacketBuilder::Impl
 {
 public:
     FlatBufferBuilder builder;
@@ -101,8 +102,8 @@ public:
 public:
     Impl(std::size_t capacity) : builder(capacity, nullptr)
     {
-        if (parser.Parse(__get_text_to_cpp11_string__tbag__()) == false) {
-            tDLogA("TbagPacketBuilder::Impl() Parse fail.");
+        if (parser.Parse(__get_text_to_cpp11_string__box__()) == false) {
+            tDLogA("BoxPacketBuilder::Impl() Parse fail.");
             throw std::bad_alloc();
         }
     }
@@ -130,7 +131,7 @@ public:
 
     Err assign(uint8_t const * buffer, std::size_t size)
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         clear();
         builder.PushFlatBuffer(buffer, size);
         return Err::E_SUCCESS;
@@ -153,33 +154,33 @@ public:
 
     Err build(uint64_t id, int32_t type, int32_t code)
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         clear();
-        finish(CreateTbagPacket(builder, id, type, code));
+        finish(CreateBoxPacket(builder, id, type, code));
         return Err::E_SUCCESS;
     }
 
     Err build(uint64_t id, int32_t type, int32_t code, BoxMap const & boxes)
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         clear();
-        finish(CreateTbagPacket(builder, id, type, code, createPairs(boxes)));
+        finish(CreateBoxPacket(builder, id, type, code, createPairs(boxes)));
         return Err::E_SUCCESS;
     }
 
     Err build(uint64_t id, int32_t type, int32_t code, std::string const & content)
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         clear();
-        finish(CreateTbagPacket(builder, id, type, code, createPairs(content)));
+        finish(CreateBoxPacket(builder, id, type, code, createPairs(content)));
         return Err::E_SUCCESS;
     }
 
     Err build(uint64_t id, int32_t type, int32_t code, std::string const & key, std::string const & val)
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         clear();
-        finish(CreateTbagPacket(builder, id, type, code, createPairs(key, val)));
+        finish(CreateBoxPacket(builder, id, type, code, createPairs(key, val)));
         return Err::E_SUCCESS;
     }
 
@@ -208,7 +209,7 @@ public:
 
     PairOffset createPair(std::string const & key, Box const & bag)
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         AnyArr const VALUE_TYPE = getAnyArr(bag.getType());
         assert(AnyArr_MIN <= COMPARE_AND(VALUE_TYPE) <= AnyArr_MAX);
         if (VALUE_TYPE == AnyArr_NONE) {
@@ -226,9 +227,9 @@ public:
                           VALUE_TYPE, createAnyArr(VALUE_TYPE, bag));
     }
 
-    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::tbag::AnyArr value_type, Box const & bag)
+    flatbuffers::Offset<void> createAnyArr(libtbag::proto::fbs::box::AnyArr value_type, Box const & bag)
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         switch (value_type) {
         // @formatter:off
         case AnyArr_ByteArr:    return   CreateByteArr(builder, builder.CreateVector(bag.cast<  int8_t>(), bag.size())).Union();
@@ -250,73 +251,73 @@ public:
 };
 
 // ---------------------------------
-// TbagPacketBuilder implementation.
+// BoxPacketBuilder implementation.
 // ---------------------------------
 
-TbagPacketBuilder::TbagPacketBuilder(std::size_t capacity) : _impl(std::make_unique<Impl>(capacity))
+BoxPacketBuilder::BoxPacketBuilder(std::size_t capacity) : _impl(std::make_unique<Impl>(capacity))
 {
     assert(static_cast<bool>(_impl));
 }
 
-TbagPacketBuilder::~TbagPacketBuilder()
+BoxPacketBuilder::~BoxPacketBuilder()
 {
     // EMPTY.
 }
 
-uint8_t * TbagPacketBuilder::point() const
+uint8_t * BoxPacketBuilder::point() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->point();
 }
 
-std::size_t TbagPacketBuilder::size() const
+std::size_t BoxPacketBuilder::size() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->size();
 }
 
-Err TbagPacketBuilder::assign(uint8_t const * buffer, std::size_t size)
+Err BoxPacketBuilder::assign(uint8_t const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_impl));
     return _impl->assign(buffer, size);
 }
 
-Err TbagPacketBuilder::assign(Buffer const & buffer)
+Err BoxPacketBuilder::assign(Buffer const & buffer)
 {
     return assign((uint8_t const *)buffer.data(), buffer.size());
 }
 
-std::string TbagPacketBuilder::toJsonString() const
+std::string BoxPacketBuilder::toJsonString() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->toJsonString();
 }
 
-Err TbagPacketBuilder::build(uint64_t id, int32_t type, int32_t code)
+Err BoxPacketBuilder::build(uint64_t id, int32_t type, int32_t code)
 {
     assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code);
 }
 
-Err TbagPacketBuilder::build(BoxMap const & boxes, uint64_t id, int32_t type, int32_t code)
+Err BoxPacketBuilder::build(BoxMap const & boxes, uint64_t id, int32_t type, int32_t code)
 {
     assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code, boxes);
 }
 
-Err TbagPacketBuilder::build(std::string const & content, uint64_t id, int32_t type, int32_t code)
+Err BoxPacketBuilder::build(std::string const & content, uint64_t id, int32_t type, int32_t code)
 {
     assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code, content);
 }
 
-Err TbagPacketBuilder::build(std::string const & key, std::string const & val, uint64_t id, int32_t type, int32_t code)
+Err BoxPacketBuilder::build(std::string const & key, std::string const & val, uint64_t id, int32_t type, int32_t code)
 {
     assert(static_cast<bool>(_impl));
     return _impl->build(id, type, code, key, val);
 }
 
-TbagPacketBuilder::Buffer TbagPacketBuilder::toBuffer() const
+BoxPacketBuilder::Buffer BoxPacketBuilder::toBuffer() const
 {
     return Buffer(point(), point() + size());
 }
@@ -327,13 +328,13 @@ TbagPacketBuilder::Buffer TbagPacketBuilder::toBuffer() const
  * @author zer0
  * @date   2018-10-24
  */
-struct TbagPacketParser::Impl
+struct BoxPacketParser::Impl
 {
 private:
-    TbagPacketParser * _parent = nullptr;
+    BoxPacketParser * _parent = nullptr;
 
 public:
-    Impl(TbagPacketParser * parent) : _parent(parent)
+    Impl(BoxPacketParser * parent) : _parent(parent)
     {
         assert(_parent != nullptr);
     }
@@ -348,16 +349,16 @@ public:
               void * arg = nullptr, bool only_header = false, char const * key = nullptr)
     {
         using namespace flatbuffers;
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
 
         assert(_parent != nullptr);
 
         Verifier verifier((uint8_t const *)buffer, size);
-        if (!VerifyTbagPacketBuffer(verifier)) {
+        if (!VerifyBoxPacketBuffer(verifier)) {
             return Err::E_PARSING;
         }
 
-        auto const * PACKET = GetTbagPacket(buffer);
+        auto const * PACKET = GetBoxPacket(buffer);
         _parent->onHeader(PACKET->id(), PACKET->type(), PACKET->code(), arg);
         if (only_header) {
             return Err::E_SUCCESS;
@@ -403,9 +404,9 @@ public:
     }
 
     template <typename PairItr>
-    Box createBagEx(PairItr itr, tbag::AnyArr arr_type) const
+    Box createBagEx(PairItr itr, box::AnyArr arr_type) const
     {
-        using namespace libtbag::proto::fbs::tbag;
+        using namespace libtbag::proto::fbs::box;
         switch (arr_type) {
         // @formatter:off
         case AnyArr_ByteArr:    return createBagEx<PairItr,   ByteArr,     char>(itr);
@@ -447,20 +448,20 @@ public:
 };
 
 // --------------------------------
-// TbagPacketParser implementation.
+// BoxPacketParser implementation.
 // --------------------------------
 
-TbagPacketParser::TbagPacketParser() : _impl(std::make_unique<Impl>(this)), _parsing(false)
+BoxPacketParser::BoxPacketParser() : _impl(std::make_unique<Impl>(this)), _parsing(false)
 {
     assert(static_cast<bool>(_impl));
 }
 
-TbagPacketParser::~TbagPacketParser()
+BoxPacketParser::~BoxPacketParser()
 {
     // EMPTY.
 }
 
-Err TbagPacketParser::parse(char const * buffer, std::size_t size, void * arg)
+Err BoxPacketParser::parse(char const * buffer, std::size_t size, void * arg)
 {
     assert(static_cast<bool>(_impl));
     _parsing = true;
@@ -469,12 +470,12 @@ Err TbagPacketParser::parse(char const * buffer, std::size_t size, void * arg)
     return CODE;
 }
 
-Err TbagPacketParser::parse(Buffer const & buffer, void * arg)
+Err BoxPacketParser::parse(Buffer const & buffer, void * arg)
 {
     return parse(buffer.data(), buffer.size(), arg);
 }
 
-Err TbagPacketParser::parseOnlyHeader(char const * buffer, std::size_t size, void * arg)
+Err BoxPacketParser::parseOnlyHeader(char const * buffer, std::size_t size, void * arg)
 {
     assert(static_cast<bool>(_impl));
     _parsing = true;
@@ -483,7 +484,7 @@ Err TbagPacketParser::parseOnlyHeader(char const * buffer, std::size_t size, voi
     return CODE;
 }
 
-Err TbagPacketParser::parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg)
+Err BoxPacketParser::parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg)
 {
     assert(static_cast<bool>(_impl));
     _parsing = true;
@@ -492,21 +493,21 @@ Err TbagPacketParser::parseFindKey(char const * buffer, std::size_t size, std::s
     return CODE;
 }
 
-// --------------------------
-// TbagPacket implementation.
-// --------------------------
+// -------------------------
+// BoxPacket implementation.
+// -------------------------
 
-TbagPacket::TbagPacket(std::size_t capacity) : TbagPacketBuilder(capacity), TbagPacketParser()
+BoxPacket::BoxPacket(std::size_t capacity) : BoxPacketBuilder(capacity), BoxPacketParser()
 {
     // EMPTY.
 }
 
-TbagPacket::~TbagPacket()
+BoxPacket::~BoxPacket()
 {
     // EMPTY.
 }
 
-void TbagPacket::onHeader(uint64_t id, int32_t type, int32_t code, void * arg)
+void BoxPacket::onHeader(uint64_t id, int32_t type, int32_t code, void * arg)
 {
     if (arg == nullptr) {
         return;
@@ -530,7 +531,7 @@ void TbagPacket::onHeader(uint64_t id, int32_t type, int32_t code, void * arg)
     }
 }
 
-void TbagPacket::onPair(std::string && key, Box && val, void * arg)
+void BoxPacket::onPair(std::string && key, Box && val, void * arg)
 {
     if (arg == nullptr) {
         return;
@@ -553,7 +554,7 @@ void TbagPacket::onPair(std::string && key, Box && val, void * arg)
     }
 }
 
-void TbagPacket::clear()
+void BoxPacket::clear()
 {
     _id = 0;
     _type = 0;
@@ -561,22 +562,22 @@ void TbagPacket::clear()
     _bags.clear();
 }
 
-Err TbagPacket::update(char const * buffer, std::size_t size)
+Err BoxPacket::update(char const * buffer, std::size_t size)
 {
     return parse(buffer, size, this);
 }
 
-Err TbagPacket::update(Buffer const & buffer)
+Err BoxPacket::update(Buffer const & buffer)
 {
     return update(buffer.data(), buffer.size());
 }
 
-Err TbagPacket::update()
+Err BoxPacket::update()
 {
     return update((char const *)point(), size());
 }
 
-TbagPacket::Box TbagPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
+BoxPacket::Box BoxPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
 {
     Box result;
     UserArg arg;
@@ -590,28 +591,28 @@ TbagPacket::Box TbagPacket::findKey(char const * buffer, std::size_t size, std::
     return result;
 }
 
-TbagPacket::Box TbagPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
+BoxPacket::Box BoxPacket::findKey(Buffer const & buffer, std::string const & key, Err * code)
 {
     return findKey(buffer.data(), buffer.size(), key, code);
 }
 
-TbagPacket::Box TbagPacket::findKey(std::string const & key, Err * code)
+BoxPacket::Box BoxPacket::findKey(std::string const & key, Err * code)
 {
     return findKey((char const *)point(), size(), key, code);
 }
 
-Err TbagPacket::buildFromSelf()
+Err BoxPacket::buildFromSelf()
 {
     return build(_bags, _id, _type, _code);
 }
 
-Err TbagPacket::saveFile(std::string const & path)
+Err BoxPacket::saveFile(std::string const & path)
 {
     using namespace libtbag::filesystem;
     return writeFile(path, (char const *)point(), size());
 }
 
-Err TbagPacket::loadFile(std::string const & path)
+Err BoxPacket::loadFile(std::string const & path)
 {
     using namespace libtbag::filesystem;
     Buffer buffer;

@@ -1,6 +1,6 @@
 // tbag packet protocols.
 
-namespace libtbag.proto.fbs.tbag;
+namespace libtbag.proto.fbs.box;
 
 table   ByteArr { data : [byte]  ; } //  8 BIT ARRAY
 table  UbyteArr { data : [ubyte] ; } //  8 BIT ARRAY
@@ -49,7 +49,7 @@ table Pair
     val : AnyArr;
 }
 
-table TbagPacket
+table BoxPacket
 {
     id    : ulong;
     type  : int;
@@ -57,5 +57,5 @@ table TbagPacket
     pairs : [Pair];
 }
 
-root_type TbagPacket;
+root_type BoxPacket;
 

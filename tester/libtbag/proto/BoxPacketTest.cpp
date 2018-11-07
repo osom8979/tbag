@@ -1,24 +1,25 @@
 /**
- * @file   TbagPacketTest.cpp
- * @brief  TbagPacket class tester.
+ * @file   BoxPacketTest.cpp
+ * @brief  BoxPacket class tester.
  * @author zer0
  * @date   2018-10-24
+ * @date   2018-11-07 (Rename: TbagPacketTest -> BoxPacketTest)
  */
 
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
-#include <libtbag/proto/TbagPacket.hpp>
+#include <libtbag/proto/BoxPacket.hpp>
 
 using namespace libtbag;
 using namespace libtbag::proto;
 
-TEST(TbagPacketTest, UpdateSelf)
+TEST(BoxPacketTest, UpdateSelf)
 {
     uint64_t const TEST_ID   = 10;
     int32_t  const TEST_TYPE = 20;
     int32_t  const TEST_CODE = 30;
 
-    TbagPacket packet;
+    BoxPacket packet;
     ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
@@ -30,7 +31,7 @@ TEST(TbagPacketTest, UpdateSelf)
     ASSERT_TRUE(packet.boxes().empty());
 }
 
-TEST(TbagPacketTest, UpdateSelf_BagEx)
+TEST(BoxPacketTest, UpdateSelf_BagEx)
 {
     using namespace libtbag::container;
     std::string const BAG_KEY = "bag";
@@ -44,16 +45,16 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
         *(bag.cast<int32_t>() + i) = i;
     }
 
-    TbagPacket::BoxMap map;
+    BoxPacket::BoxMap map;
     map.insert(std::make_pair(BAG_KEY, bag));
     ASSERT_EQ(1, map.size());
 
-    TbagPacket packet1;
+    BoxPacket packet1;
     ASSERT_EQ(Err::E_SUCCESS, packet1.build(map));
     auto const BUILD_BUFFER = packet1.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
-    TbagPacket packet2;
+    BoxPacket packet2;
     ASSERT_EQ(Err::E_SUCCESS, packet2.update(BUILD_BUFFER));
     ASSERT_FALSE(packet2.boxes().empty());
     ASSERT_EQ(1, packet2.boxes().size());
@@ -71,14 +72,14 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
     ASSERT_EQ(5, bag_result.at<int32_t>(1, 2));
 }
 
-TEST(TbagPacketTest, UpdateSelf_String)
+TEST(BoxPacketTest, UpdateSelf_String)
 {
-    std::string const TEST_TEXT = "TbagPacketTest.UpdateSelf_BagEx";
+    std::string const TEST_TEXT = "BoxPacketTest.UpdateSelf_BagEx";
     uint64_t const TEST_ID   = 10;
     int32_t  const TEST_TYPE = 20;
     int32_t  const TEST_CODE = 30;
 
-    TbagPacket packet;
+    BoxPacket packet;
     ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_TEXT, TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
@@ -93,15 +94,15 @@ TEST(TbagPacketTest, UpdateSelf_String)
     ASSERT_FALSE(packet.boxes().begin()->second.exists());
 }
 
-TEST(TbagPacketTest, UpdateSelf_KeyValue)
+TEST(BoxPacketTest, UpdateSelf_KeyValue)
 {
-    std::string const TEST_KEY = "TbagPacketTest";
+    std::string const TEST_KEY = "BoxPacketTest";
     std::string const TEST_VAL = "UpdateSelf_BagEx";
     uint64_t const TEST_ID   = 10;
     int32_t  const TEST_TYPE = 20;
     int32_t  const TEST_CODE = 30;
 
-    TbagPacket packet;
+    BoxPacket packet;
     ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_KEY, TEST_VAL, TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
@@ -117,12 +118,12 @@ TEST(TbagPacketTest, UpdateSelf_KeyValue)
     ASSERT_EQ(TEST_VAL, packet.boxes().begin()->second.toString());
 }
 
-TEST(TbagPacketTest, FindKey)
+TEST(BoxPacketTest, FindKey)
 {
-    std::string const TEST_KEY = "TbagPacketTest";
+    std::string const TEST_KEY = "BoxPacketTest";
     std::string const TEST_VAL = "FindKey";
 
-    TbagPacket packet;
+    BoxPacket packet;
     ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_KEY, TEST_VAL));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
@@ -139,13 +140,13 @@ TEST(TbagPacketTest, FindKey)
     ASSERT_FALSE(bag2.exists());
 }
 
-TEST(TbagPacketTest, Assign)
+TEST(BoxPacketTest, Assign)
 {
     uint64_t const TEST_ID   = 1;
     int32_t  const TEST_TYPE = 2;
     int32_t  const TEST_CODE = 3;
 
-    TbagPacket packet;
+    BoxPacket packet;
     ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER1 = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER1.empty());
@@ -156,7 +157,7 @@ TEST(TbagPacketTest, Assign)
     ASSERT_TRUE(std::equal(BUILD_BUFFER1.begin(), BUILD_BUFFER1.end(), BUILD_BUFFER2.begin(), BUILD_BUFFER2.end()));
 }
 
-TEST(TbagPacketTest, FileSaveLoad)
+TEST(BoxPacketTest, FileSaveLoad)
 {
     tttDir(true, true);
     auto const FILE_PATH = tttDir_Get() / "mats";
@@ -176,18 +177,18 @@ TEST(TbagPacketTest, FileSaveLoad)
     int32_t  const TEST_TYPE = 2;
     int32_t  const TEST_CODE = 3;
 
-    TbagPacket::BoxMap map;
+    BoxPacket::BoxMap map;
     map.insert(std::make_pair(BAG1_KEY, bag1));
     map.insert(std::make_pair(BAG2_KEY, bag2));
     ASSERT_EQ(2, map.size());
 
-    TbagPacket packet1;
+    BoxPacket packet1;
     ASSERT_EQ(Err::E_SUCCESS, packet1.build(map, TEST_ID, TEST_TYPE, TEST_CODE));
     ASSERT_FALSE(FILE_PATH.exists());
     ASSERT_EQ(Err::E_SUCCESS, packet1.saveFile(FILE_PATH));
     ASSERT_TRUE(FILE_PATH.exists());
 
-    TbagPacket packet2;
+    BoxPacket packet2;
     ASSERT_EQ(Err::E_SUCCESS, packet2.loadFile(FILE_PATH));
 
     ASSERT_EQ(TEST_ID, packet2.id());

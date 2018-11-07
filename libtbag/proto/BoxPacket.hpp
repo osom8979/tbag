@@ -1,12 +1,13 @@
 /**
- * @file   TbagPacket.hpp
- * @brief  TbagPacket class prototype.
+ * @file   BoxPacket.hpp
+ * @brief  BoxPacket class prototype.
  * @author zer0
  * @date   2018-10-24
+ * @date   2018-11-07 (Rename: BoxPacket -> BoxPacket)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PROTO_TBAGPACKET_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_PROTO_TBAGPACKET_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PROTO_BOXPACKET_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_PROTO_BOXPACKET_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -35,7 +36,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace proto {
 
-struct TbagPacketTypes : private Noncopyable
+struct BoxPacketTypes : private Noncopyable
 {
     using TypeTable = libtbag::type::TypeTable;
     using Buffer    = libtbag::util::Buffer;
@@ -49,12 +50,13 @@ struct TbagPacketTypes : private Noncopyable
 };
 
 /**
- * TbagPacketBuilder class prototype.
+ * BoxPacketBuilder class prototype.
  *
  * @author zer0
  * @date   2018-10-24
+ * @date   2018-11-07 (Rename: BoxPacketBuilder -> BoxPacketBuilder)
  */
-class TBAG_API TbagPacketBuilder : public TbagPacketTypes
+class TBAG_API BoxPacketBuilder : public BoxPacketTypes
 {
 public:
     struct Impl;
@@ -72,8 +74,8 @@ private:
     UniqueImpl _impl;
 
 public:
-    TbagPacketBuilder(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
-    virtual ~TbagPacketBuilder();
+    BoxPacketBuilder(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    virtual ~BoxPacketBuilder();
 
 public:
     uint8_t * point() const;
@@ -97,12 +99,13 @@ public:
 };
 
 /**
- * TbagPacketParser class prototype.
+ * BoxPacketParser class prototype.
  *
  * @author zer0
  * @date   2018-10-24
+ * @date   2018-11-07 (Rename: BoxPacketParser -> BoxPacketParser)
  */
-class TBAG_API TbagPacketParser : public TbagPacketTypes
+class TBAG_API BoxPacketParser : public BoxPacketTypes
 {
 public:
     class Impl;
@@ -114,8 +117,8 @@ private:
     std::atomic_bool _parsing;
 
 public:
-    TbagPacketParser();
-    virtual ~TbagPacketParser();
+    BoxPacketParser();
+    virtual ~BoxPacketParser();
 
 public:
     inline bool isParsing() const TBAG_NOEXCEPT
@@ -134,12 +137,13 @@ protected:
 };
 
 /**
- * TbagPacket class prototype.
+ * BoxPacket class prototype.
  *
  * @author zer0
  * @date   2018-10-24
+ * @date   2018-11-07 (Rename: BoxPacket -> BoxPacket)
  */
-class TBAG_API TbagPacket : public TbagPacketBuilder, public TbagPacketParser
+class TBAG_API BoxPacket : public BoxPacketBuilder, public BoxPacketParser
 {
 private:
     uint64_t _id;
@@ -162,8 +166,8 @@ public:
     };
 
 public:
-    TbagPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
-    virtual ~TbagPacket();
+    BoxPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    virtual ~BoxPacket();
 
 protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) override;
@@ -210,5 +214,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_PROTO_TBAGPACKET_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_PROTO_BOXPACKET_HPP__
 
