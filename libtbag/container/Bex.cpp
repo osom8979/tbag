@@ -19,7 +19,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace container {
 
-Bex::Bex() TBAG_NOEXCEPT : _type(TypeTable::TT_UNKNOWN), _bag(nullptr), _user(nullptr)
+Bex::Bex() TBAG_NOEXCEPT : _type(BexType::BT_NONE), _bag(nullptr), _user(nullptr)
 {
     // EMPTY.
 }
@@ -95,44 +95,52 @@ void Bex::swap(Bex & obj) TBAG_NOEXCEPT
 
 void Bex::clear()
 {
-    _type = TypeTable::TT_UNKNOWN;
+    _type = BexType::BT_NONE;
     _bag.reset();
     _user.reset();
 }
 
-Err Bex::create(TypeTable type)
+Err Bex::create(BexType type)
 {
     if (_type == type) {
         return Err::E_ALREADY;
     }
 
-    switch (type) {
-#define _TBAG_XX(name, symbol, type) \
-    case TypeTable::TT_##name:       \
-        _bag.reset((FakeBag*)(new (std::nothrow) BAG_##name##_TYPE()), [](FakeBag * b){ \
-            delete ((BAG_##name##_TYPE*)b); \
-        }); \
-        break;
-    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    case TypeTable::TT_UNKNOWN:
-    default:
-        _bag.reset();
-        _type = TypeTable::TT_UNKNOWN;
-        return Err::E_ILLARGS;
+    try {
+        switch (type) {
+        // @formatter:off
+        case BexType::BT_INT8   : _bag.reset((FakeBag*)(new BagInt8   ), [](FakeBag * b){ delete reinterpret_cast<BagInt8   *>(b); }); break;
+        case BexType::BT_UINT8  : _bag.reset((FakeBag*)(new BagUint8  ), [](FakeBag * b){ delete reinterpret_cast<BagUint8  *>(b); }); break;
+        case BexType::BT_INT16  : _bag.reset((FakeBag*)(new BagInt16  ), [](FakeBag * b){ delete reinterpret_cast<BagInt16  *>(b); }); break;
+        case BexType::BT_UINT16 : _bag.reset((FakeBag*)(new BagUint16 ), [](FakeBag * b){ delete reinterpret_cast<BagUint16 *>(b); }); break;
+        case BexType::BT_INT32  : _bag.reset((FakeBag*)(new BagInt32  ), [](FakeBag * b){ delete reinterpret_cast<BagInt32  *>(b); }); break;
+        case BexType::BT_UINT32 : _bag.reset((FakeBag*)(new BagUint32 ), [](FakeBag * b){ delete reinterpret_cast<BagUint32 *>(b); }); break;
+        case BexType::BT_INT64  : _bag.reset((FakeBag*)(new BagInt64  ), [](FakeBag * b){ delete reinterpret_cast<BagInt64  *>(b); }); break;
+        case BexType::BT_UINT64 : _bag.reset((FakeBag*)(new BagUint64 ), [](FakeBag * b){ delete reinterpret_cast<BagUint64 *>(b); }); break;
+        case BexType::BT_FLOAT32: _bag.reset((FakeBag*)(new BagFloat32), [](FakeBag * b){ delete reinterpret_cast<BagFloat32*>(b); }); break;
+        case BexType::BT_FLOAT64: _bag.reset((FakeBag*)(new BagFloat64), [](FakeBag * b){ delete reinterpret_cast<BagFloat64*>(b); }); break;
+        // @formatter:on
+        default:
+            assert(false && "Unknown type assertion.");
+            _bag.reset();
+            _type = BexType::BT_NONE;
+            return Err::E_ILLARGS;
+        }
+    } catch (std::exception & e) {
+        _type = BexType::BT_NONE;
+        return Err::E_BADALLOC;
+    } catch (...) {
+        _type = BexType::BT_NONE;
+        return Err::E_UNKEXCP;
     }
 
-    if (_bag) {
-        _type = type;
-        return Err::E_SUCCESS;
-    }
-
-    _type = TypeTable::TT_UNKNOWN;
-    return Err::E_BADALLOC;
+    assert(static_cast<bool>(_bag));
+    _type = type;
+    return Err::E_SUCCESS;
 }
 
 Err Bex::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
-                  unsigned i4, unsigned i5, unsigned i6, unsigned i7)
+                unsigned i4, unsigned i5, unsigned i6, unsigned i7)
 {
     if (!_bag) {
         return Err::E_NREADY;
@@ -140,20 +148,26 @@ Err Bex::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
 
     try {
         switch (_type) {
-#define _TBAG_XX(name, symbol, type) \
-        case TypeTable::TT_##name:   \
-            ((BAG_##name##_TYPE*)_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); \
-            break;
-        TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-        case TypeTable::TT_UNKNOWN:
+        // @formatter:off
+        case BexType::BT_INT8   : reinterpret_cast<BagInt8   *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_UINT8  : reinterpret_cast<BagUint8  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_INT16  : reinterpret_cast<BagInt16  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_UINT16 : reinterpret_cast<BagUint16 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_INT32  : reinterpret_cast<BagInt32  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_UINT32 : reinterpret_cast<BagUint32 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_INT64  : reinterpret_cast<BagInt64  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_UINT64 : reinterpret_cast<BagUint64 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_FLOAT32: reinterpret_cast<BagFloat32*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        case BexType::BT_FLOAT64: reinterpret_cast<BagFloat64*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
+        // @formatter:on
         default:
+            assert(false && "Unknown type assertion.");
             return Err::E_ILLSTATE;
         }
-        return Err::E_SUCCESS;
     } catch (...) {
         return Err::E_UNKEXCP;
     }
+    return Err::E_SUCCESS;
 }
 
 void * Bex::data()
@@ -163,12 +177,20 @@ void * Bex::data()
     }
 
     switch (_type) {
-#define _TBAG_XX(name, symbol, type) \
-    case TypeTable::TT_##name: return ((BAG_##name##_TYPE*)_bag.get())->data();
-    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    case TypeTable::TT_UNKNOWN:
+    // @formatter:off
+    case BexType::BT_INT8   : return reinterpret_cast<BagInt8   *>(_bag.get())->data();
+    case BexType::BT_UINT8  : return reinterpret_cast<BagUint8  *>(_bag.get())->data();
+    case BexType::BT_INT16  : return reinterpret_cast<BagInt16  *>(_bag.get())->data();
+    case BexType::BT_UINT16 : return reinterpret_cast<BagUint16 *>(_bag.get())->data();
+    case BexType::BT_INT32  : return reinterpret_cast<BagInt32  *>(_bag.get())->data();
+    case BexType::BT_UINT32 : return reinterpret_cast<BagUint32 *>(_bag.get())->data();
+    case BexType::BT_INT64  : return reinterpret_cast<BagInt64  *>(_bag.get())->data();
+    case BexType::BT_UINT64 : return reinterpret_cast<BagUint64 *>(_bag.get())->data();
+    case BexType::BT_FLOAT32: return reinterpret_cast<BagFloat32*>(_bag.get())->data();
+    case BexType::BT_FLOAT64: return reinterpret_cast<BagFloat64*>(_bag.get())->data();
+    // @formatter:on
     default:
+        assert(false && "Unknown type assertion.");
         return nullptr;
     }
 }
@@ -180,12 +202,20 @@ void const * Bex::data() const
     }
 
     switch (_type) {
-#define _TBAG_XX(name, symbol, type) \
-    case TypeTable::TT_##name: return ((BAG_##name##_TYPE const *)_bag.get())->data();
-    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    case TypeTable::TT_UNKNOWN:
+    // @formatter:off
+    case BexType::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->data();
+    case BexType::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->data();
+    case BexType::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->data();
+    case BexType::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->data();
+    case BexType::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->data();
+    case BexType::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->data();
+    case BexType::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->data();
+    case BexType::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->data();
+    case BexType::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->data();
+    case BexType::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->data();
+    // @formatter:on
     default:
+        assert(false && "Unknown type assertion.");
         return nullptr;
     }
 }
@@ -197,12 +227,20 @@ std::size_t Bex::size() const
     }
 
     switch (_type) {
-#define _TBAG_XX(name, symbol, type) \
-    case TypeTable::TT_##name: return ((BAG_##name##_TYPE const *)_bag.get())->size();
-    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    case TypeTable::TT_UNKNOWN:
+    // @formatter:off
+    case BexType::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size();
+    case BexType::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size();
+    case BexType::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size();
+    case BexType::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->size();
+    case BexType::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->size();
+    case BexType::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->size();
+    case BexType::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->size();
+    case BexType::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size();
+    case BexType::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size();
+    case BexType::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size();
+    // @formatter:on
     default:
+        assert(false && "Unknown type assertion.");
         return 0;
     }
 }
@@ -214,12 +252,20 @@ std::size_t Bex::size(std::size_t index) const
     }
 
     switch (_type) {
-#define _TBAG_XX(name, symbol, type) \
-    case TypeTable::TT_##name: return ((BAG_##name##_TYPE const *)_bag.get())->size(index);
-    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    case TypeTable::TT_UNKNOWN:
+    // @formatter:off
+    case BexType::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size(index);
+    case BexType::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size(index);
+    case BexType::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size(index);
+    case BexType::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->size(index);
+    case BexType::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->size(index);
+    case BexType::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->size(index);
+    case BexType::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->size(index);
+    case BexType::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size(index);
+    case BexType::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size(index);
+    case BexType::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size(index);
+    // @formatter:on
     default:
+        assert(false && "Unknown type assertion.");
         return 0;
     }
 }
@@ -231,12 +277,20 @@ std::size_t Bex::dims() const
     }
 
     switch (_type) {
-#define _TBAG_XX(name, symbol, type) \
-    case TypeTable::TT_##name: return ((BAG_##name##_TYPE const *)_bag.get())->dims();
-    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    case TypeTable::TT_UNKNOWN:
+    // @formatter:off
+    case BexType::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->dims();
+    case BexType::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->dims();
+    case BexType::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->dims();
+    case BexType::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->dims();
+    case BexType::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->dims();
+    case BexType::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->dims();
+    case BexType::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->dims();
+    case BexType::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->dims();
+    case BexType::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->dims();
+    case BexType::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->dims();
+    // @formatter:on
     default:
+        assert(false && "Unknown type assertion.");
         return 0;
     }
 }
@@ -248,32 +302,40 @@ bool Bex::empty() const
     }
 
     switch (_type) {
-#define _TBAG_XX(name, symbol, type) \
-    case TypeTable::TT_##name: return ((BAG_##name##_TYPE const *)_bag.get())->empty();
-    TBAG_TYPE_TABLE_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    case TypeTable::TT_UNKNOWN:
+    // @formatter:off
+    case BexType::BT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->empty();
+    case BexType::BT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->empty();
+    case BexType::BT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->empty();
+    case BexType::BT_UINT16 : return reinterpret_cast<BagUint16  const *>(_bag.get())->empty();
+    case BexType::BT_INT32  : return reinterpret_cast<BagInt32   const *>(_bag.get())->empty();
+    case BexType::BT_UINT32 : return reinterpret_cast<BagUint32  const *>(_bag.get())->empty();
+    case BexType::BT_INT64  : return reinterpret_cast<BagInt64   const *>(_bag.get())->empty();
+    case BexType::BT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->empty();
+    case BexType::BT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->empty();
+    case BexType::BT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->empty();
+    // @formatter:on
     default:
+        assert(false && "Unknown type assertion.");
         return true;
     }
 }
 
 std::string Bex::toString() const
 {
-    auto const * BUFFER = castData<char>();
+    auto const * BUFFER = cast<char>();
     return std::string(BUFFER, BUFFER + size());
 }
 
 std::string Bex::toHexString() const
 {
     using namespace libtbag::string;
-    return convertByteArrayToHexString(castData<uint8_t>(), size(), STRING_EMPTY);
+    return convertByteArrayToHexString(cast<uint8_t>(), size(), STRING_EMPTY);
 }
 
 std::string Bex::toHexBoxString(int line_width) const
 {
     using namespace libtbag::string;
-    return convertByteArrayToHexStringBox(castData<uint8_t>(), size(), line_width);
+    return convertByteArrayToHexStringBox(cast<uint8_t>(), size(), line_width);
 }
 
 std::string Bex::toInfoString() const
@@ -302,7 +364,7 @@ std::string Bex::toInfoString() const
 
 std::string Bex::toAutoString() const
 {
-    if (exists() && dims() == 1 && _type == TypeTable::TT_CHAR) {
+    if (exists() && dims() == 1 && (_type == BexType::BT_INT8 || _type == BexType::BT_UINT8)) {
         return toString();
     }
     return toInfoString();
@@ -314,8 +376,8 @@ Err Bex::fromString(std::string const & content)
     if (isFailure(CODE)) {
         return CODE;
     }
-    assert(_type == TypeTable::TT_CHAR);
-    std::copy(content.begin(), content.end(), castData<char>());
+    assert(_type == BexType::BT_INT8 || _type == BexType::BT_UINT8);
+    std::copy(content.begin(), content.end(), cast<char>());
     return Err::E_SUCCESS;
 }
 

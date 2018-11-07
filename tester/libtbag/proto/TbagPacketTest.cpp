@@ -35,13 +35,13 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
     using namespace libtbag::container;
     std::string const BAG_KEY = "bag";
     Bex bag;
-    bag.resize<int>(2, 3);
-    ASSERT_EQ(Bex::TypeTable::TT_INT, bag.getType());
+    bag.resize<int32_t>(2, 3);
+    ASSERT_EQ(BexType::BT_INT32, bag.getType());
     ASSERT_EQ(2*3, bag.size());
     ASSERT_EQ(2, bag.size(0));
     ASSERT_EQ(3, bag.size(1));
     for (int i = 0; i < bag.size(); ++i) {
-        *(bag.castData<int>() + i) = i;
+        *(bag.cast<int32_t>() + i) = i;
     }
 
     TbagPacket::BagExMap map;
@@ -59,16 +59,16 @@ TEST(TbagPacketTest, UpdateSelf_BagEx)
     ASSERT_EQ(1, packet2.bags().size());
 
     auto bag_result = packet2.bags()[BAG_KEY];
-    ASSERT_EQ(Bex::TypeTable::TT_INT, bag_result.getType());
+    ASSERT_EQ(BexType::BT_INT32, bag_result.getType());
     ASSERT_EQ(2*3, bag_result.size());
     ASSERT_EQ(2, bag_result.size(0));
     ASSERT_EQ(3, bag_result.size(1));
-    ASSERT_EQ(0, bag_result.at<int>(0, 0));
-    ASSERT_EQ(1, bag_result.at<int>(0, 1));
-    ASSERT_EQ(2, bag_result.at<int>(0, 2));
-    ASSERT_EQ(3, bag_result.at<int>(1, 0));
-    ASSERT_EQ(4, bag_result.at<int>(1, 1));
-    ASSERT_EQ(5, bag_result.at<int>(1, 2));
+    ASSERT_EQ(0, bag_result.at<int32_t>(0, 0));
+    ASSERT_EQ(1, bag_result.at<int32_t>(0, 1));
+    ASSERT_EQ(2, bag_result.at<int32_t>(0, 2));
+    ASSERT_EQ(3, bag_result.at<int32_t>(1, 0));
+    ASSERT_EQ(4, bag_result.at<int32_t>(1, 1));
+    ASSERT_EQ(5, bag_result.at<int32_t>(1, 2));
 }
 
 TEST(TbagPacketTest, UpdateSelf_String)
@@ -165,12 +165,12 @@ TEST(TbagPacketTest, FileSaveLoad)
     std::string const BAG1_KEY = "bag1";
     std::string const BAG1_VAL = "Test";
     std::string const BAG2_KEY = "bag2";
-    std::vector<int> const BAG2_VAL = {1, 2, 3, 4};
+    std::vector<int32_t> const BAG2_VAL = {1, 2, 3, 4};
 
     Bex bag1 = BAG1_VAL;
     Bex bag2 = BAG2_VAL;
-    ASSERT_EQ(Bex::TypeTable::TT_CHAR, bag1.getType());
-    ASSERT_EQ(Bex::TypeTable::TT_INT, bag2.getType());
+    ASSERT_EQ(BexType::BT_INT8, bag1.getType());
+    ASSERT_EQ(BexType::BT_INT32, bag2.getType());
 
     uint64_t const TEST_ID   = 1;
     int32_t  const TEST_TYPE = 2;
@@ -199,16 +199,16 @@ TEST(TbagPacketTest, FileSaveLoad)
     auto bag1_result = packet2.bags()[BAG1_KEY];
     auto bag2_result = packet2.bags()[BAG2_KEY];
 
-    ASSERT_EQ(Bex::TypeTable::TT_CHAR, bag1_result.getType());
+    ASSERT_EQ(BexType::BT_INT8, bag1_result.getType());
     ASSERT_EQ(BAG1_VAL.size(), bag1_result.size());
     ASSERT_EQ(1, bag1_result.dims());
     ASSERT_EQ(BAG1_VAL, bag1_result.toString());
 
-    ASSERT_EQ(Bex::TypeTable::TT_INT, bag2_result.getType());
+    ASSERT_EQ(BexType::BT_INT32, bag2_result.getType());
     ASSERT_EQ(BAG2_VAL.size(), bag2_result.size());
     ASSERT_EQ(1, bag2_result.dims());
-    auto * bag2_begin = bag2_result.castData<int>();
-    auto * bag2_end = bag2_result.castData<int>() + bag2_result.size();
+    auto * bag2_begin = bag2_result.cast<int32_t>();
+    auto * bag2_end = bag2_result.cast<int32_t>() + bag2_result.size();
     ASSERT_TRUE(std::equal(BAG2_VAL.begin(), BAG2_VAL.end(), bag2_begin, bag2_end));
 }
 

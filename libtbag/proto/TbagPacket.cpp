@@ -62,116 +62,28 @@ using PairOffset             = flatbuffers::Offset<tbag::Pair>;
 using PairOffsetVector       = flatbuffers::Vector<PairOffset>;
 using PairOffsetVectorOffset = flatbuffers::Offset<PairOffsetVector>;
 
-static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::type::TypeTable type) TBAG_NOEXCEPT
+static libtbag::proto::fbs::tbag::AnyArr getAnyArr(libtbag::container::BexType type) TBAG_NOEXCEPT
 {
     using namespace libtbag::proto::fbs::tbag;
-    using namespace libtbag::type;
+    using namespace libtbag::container;
 
     switch (type) {
     // @formatter:off
-    case type::TT_INT8:         return AnyArr_ByteArr;
-    case type::TT_UINT8:        return AnyArr_UbyteArr;
-    case type::TT_INT16:        return AnyArr_ShortArr;
-    case type::TT_UINT16:       return AnyArr_UshortArr;
-    case type::TT_INT32:        return AnyArr_IntArr;
-    case type::TT_UINT32:       return AnyArr_UintArr;
-    case type::TT_INT64:        return AnyArr_LongArr;
-    case type::TT_UINT64:       return AnyArr_UlongArr;
-    case TypeTable::TT_FLOAT:   return AnyArr_FloatArr;
-    case TypeTable::TT_DOUBLE:  return AnyArr_DoubleArr;
-    case TypeTable::TT_UNKNOWN: return AnyArr_NONE;
-    case TypeTable::TT_BOOL:    return AnyArr_NONE;
-    case TypeTable::TT_LDOUBLE: return AnyArr_NONE;
-    default:                    break;
+    case BexType::BT_INT8   : return AnyArr_ByteArr  ;
+    case BexType::BT_UINT8  : return AnyArr_UbyteArr ;
+    case BexType::BT_INT16  : return AnyArr_ShortArr ;
+    case BexType::BT_UINT16 : return AnyArr_UshortArr;
+    case BexType::BT_INT32  : return AnyArr_IntArr   ;
+    case BexType::BT_UINT32 : return AnyArr_UintArr  ;
+    case BexType::BT_INT64  : return AnyArr_LongArr  ;
+    case BexType::BT_UINT64 : return AnyArr_UlongArr ;
+    case BexType::BT_FLOAT32: return AnyArr_FloatArr ;
+    case BexType::BT_FLOAT64: return AnyArr_DoubleArr;
+    case BexType::BT_NONE   : return AnyArr_NONE;
     // @formatter:on
+    default:
+        return AnyArr_NONE;
     }
-
-    auto const TYPE_BYTE = getTypeSize(type);
-
-    switch (type) {
-    // @formatter:off
-    case TypeTable::TT_CHAR:
-        assert(TYPE_BYTE == 1);
-        return AnyArr_ByteArr;
-
-    case TypeTable::TT_SCHAR:
-        assert(TYPE_BYTE == 1);
-        return AnyArr_ByteArr;
-    case TypeTable::TT_UCHAR:
-        assert(TYPE_BYTE == 1);
-        return AnyArr_UbyteArr;
-
-    case TypeTable::TT_WCHAR:
-        if (TYPE_BYTE == 1) {
-            return AnyArr_ByteArr;
-        } else if (TYPE_BYTE == 2) {
-            return AnyArr_ShortArr;
-        } else if (TYPE_BYTE == 4) {
-            return AnyArr_IntArr;
-        } else if (TYPE_BYTE == 8) {
-            return AnyArr_LongArr;
-        }
-        break;
-
-    case TypeTable::TT_CHAR16:
-        assert(TYPE_BYTE == 2);
-        return AnyArr_ShortArr;
-    case TypeTable::TT_CHAR32:
-        assert(TYPE_BYTE == 4);
-        return AnyArr_IntArr;
-
-    case TypeTable::TT_SHORT:
-        assert(TYPE_BYTE == 2);
-        return AnyArr_ShortArr;
-    case TypeTable::TT_USHORT:
-        assert(TYPE_BYTE == 2);
-        return AnyArr_UshortArr;
-
-    case TypeTable::TT_INT:
-    case TypeTable::TT_LONG:
-        if (TYPE_BYTE == 2) {
-            return AnyArr_ShortArr;
-        } else if (TYPE_BYTE == 4) {
-            return AnyArr_IntArr;
-        }
-        break;
-
-    case TypeTable::TT_UINT:
-    case TypeTable::TT_ULONG:
-        if (TYPE_BYTE == 2) {
-            return AnyArr_UshortArr;
-        } else if (TYPE_BYTE == 4) {
-            return AnyArr_UintArr;
-        }
-        break;
-
-    case TypeTable::TT_LLONG:
-        if (TYPE_BYTE == 4) {
-            return AnyArr_IntArr;
-        } else if (TYPE_BYTE == 8) {
-            return AnyArr_LongArr;
-        }
-        break;
-
-    case TypeTable::TT_ULLONG:
-        if (TYPE_BYTE == 4) {
-            return AnyArr_UintArr;
-        } else if (TYPE_BYTE == 8) {
-            return AnyArr_UlongArr;
-        }
-        break;
-
-    case TypeTable::TT_UNKNOWN:
-    case TypeTable::TT_BOOL:
-    case TypeTable::TT_FLOAT:
-    case TypeTable::TT_DOUBLE:
-    case TypeTable::TT_LDOUBLE:
-    default: break;
-    // @formatter:on
-    }
-
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return AnyArr_NONE;
 }
 
 /**
@@ -319,16 +231,16 @@ public:
         using namespace libtbag::proto::fbs::tbag;
         switch (value_type) {
         // @formatter:off
-        case AnyArr_ByteArr:    return   CreateByteArr(builder, builder.CreateVector(bag.castData<  int8_t>(), bag.size())).Union();
-        case AnyArr_UbyteArr:   return  CreateUbyteArr(builder, builder.CreateVector(bag.castData< uint8_t>(), bag.size())).Union();
-        case AnyArr_ShortArr:   return  CreateShortArr(builder, builder.CreateVector(bag.castData< int16_t>(), bag.size())).Union();
-        case AnyArr_UshortArr:  return CreateUshortArr(builder, builder.CreateVector(bag.castData<uint16_t>(), bag.size())).Union();
-        case AnyArr_IntArr:     return    CreateIntArr(builder, builder.CreateVector(bag.castData< int32_t>(), bag.size())).Union();
-        case AnyArr_UintArr:    return   CreateUintArr(builder, builder.CreateVector(bag.castData<uint32_t>(), bag.size())).Union();
-        case AnyArr_LongArr:    return   CreateLongArr(builder, builder.CreateVector(bag.castData< int64_t>(), bag.size())).Union();
-        case AnyArr_UlongArr:   return  CreateUlongArr(builder, builder.CreateVector(bag.castData<uint64_t>(), bag.size())).Union();
-        case AnyArr_FloatArr:   return  CreateFloatArr(builder, builder.CreateVector(bag.castData<   float>(), bag.size())).Union();
-        case AnyArr_DoubleArr:  return CreateDoubleArr(builder, builder.CreateVector(bag.castData<  double>(), bag.size())).Union();
+        case AnyArr_ByteArr:    return   CreateByteArr(builder, builder.CreateVector(bag.cast<  int8_t>(), bag.size())).Union();
+        case AnyArr_UbyteArr:   return  CreateUbyteArr(builder, builder.CreateVector(bag.cast< uint8_t>(), bag.size())).Union();
+        case AnyArr_ShortArr:   return  CreateShortArr(builder, builder.CreateVector(bag.cast< int16_t>(), bag.size())).Union();
+        case AnyArr_UshortArr:  return CreateUshortArr(builder, builder.CreateVector(bag.cast<uint16_t>(), bag.size())).Union();
+        case AnyArr_IntArr:     return    CreateIntArr(builder, builder.CreateVector(bag.cast< int32_t>(), bag.size())).Union();
+        case AnyArr_UintArr:    return   CreateUintArr(builder, builder.CreateVector(bag.cast<uint32_t>(), bag.size())).Union();
+        case AnyArr_LongArr:    return   CreateLongArr(builder, builder.CreateVector(bag.cast< int64_t>(), bag.size())).Union();
+        case AnyArr_UlongArr:   return  CreateUlongArr(builder, builder.CreateVector(bag.cast<uint64_t>(), bag.size())).Union();
+        case AnyArr_FloatArr:   return  CreateFloatArr(builder, builder.CreateVector(bag.cast<   float>(), bag.size())).Union();
+        case AnyArr_DoubleArr:  return CreateDoubleArr(builder, builder.CreateVector(bag.cast<  double>(), bag.size())).Union();
         default:                break;
         // @formatter:on
         }
