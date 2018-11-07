@@ -515,6 +515,12 @@ macro (tbag_modules__apply_dep_nng)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_dep_cds)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES cds)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/cds)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:cds>)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
