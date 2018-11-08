@@ -67,7 +67,7 @@ BaseLoop::BaseLoop() : Native(utype::LOOP), _running(false)
     // Initializes the given uv_loop_t structure.
     int const CODE = ::uv_loop_init(Parent::cast<uv_loop_t>());
     if (CODE != 0) {
-        tDLogD("BaseLoop::BaseLoop() error [{}] {}", CODE, getUvErrorName(CODE));
+        tDLogE("BaseLoop::BaseLoop() error [{}] {}", CODE, getUvErrorName(CODE));
         throw std::bad_alloc();
     }
 
@@ -302,7 +302,7 @@ bool Loop::eraseChildHandle(void * native_handle)
         return false; // Not found handle.
     }
 
-    void const * HANDLE_ADDRESS   = shared.get();
+    void const * HANDLE_ADDRESS = shared.get();
     bool const IS_INTERNAL = shared->isInternal();
     std::string const HANDLE_NAME = shared->getName();
 

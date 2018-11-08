@@ -68,7 +68,7 @@ Err Async::send()
 
 void Async::onAsync()
 {
-    tDLogD("Async::onAsync() called.");
+    // EMPTY.
 }
 
 } // namespace uvpp

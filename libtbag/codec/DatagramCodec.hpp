@@ -48,10 +48,10 @@ struct DatagramTypes
     using binf = uvpp::binf;
     using Size = uint32_t;
 
-    using Buffer         = util::Buffer;
+    using Buffer         = libtbag::util::Buffer;
     using SharedBuffer   = std::shared_ptr<Buffer>;
-    using SharedBuffers  = container::ReuseQueue<SharedBuffer>;
-    using CircularBuffer = container::CircularBuffer<char>;
+    using SharedBuffers  = libtbag::container::ReuseQueue<SharedBuffer>;
+    using CircularBuffer = libtbag::container::CircularBuffer<char>;
 
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;
