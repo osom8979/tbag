@@ -46,8 +46,8 @@ void detachThread()
 
 void initHazardPointerSingleton()
 {
-    ::cds::gc::HP volatile __hazard_pointer__;  // Hazard Pointer SMR (Safe Memory Reclamation)
-    ((void*)(&__hazard_pointer__));             // Do not anything.
+    // Hazard Pointer SMR (Safe Memory Reclamation)
+    ::cds::gc::HP volatile __hazard_pointer__;
 }
 
 } // namespace cds
