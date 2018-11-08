@@ -30,6 +30,9 @@ struct UxLoop::Impl : private Noncopyable
 private:
     UxLoop * _parent;
 
+private:
+    Loop _loop;
+
 public:
     Impl(UxLoop * parent) : _parent(parent)
     {
@@ -40,11 +43,27 @@ public:
     {
         // EMPTY.
     }
+
+public:
+    inline Loop       * loop()       TBAG_NOEXCEPT { return &_loop; }
+    inline Loop const * loop() const TBAG_NOEXCEPT { return &_loop; }
+
+public:
+    bool isRunning() const
+    {
+        return _loop.isRunning();
+    }
+
+public:
+    Err run(Loop::RunMode mode)
+    {
+        return _loop.run(mode);
+    }
 };
 
-// ----------------------------
+// ----------------------
 // UxLoop implementation.
-// ----------------------------
+// ----------------------
 
 UxLoop::UxLoop() : _impl(std::make_shared<Impl>(this))
 {
@@ -100,6 +119,42 @@ void UxLoop::swap(UxLoop & obj) TBAG_NOEXCEPT
 void UxLoop::reset()
 {
     _impl.reset();
+}
+
+UxLoop::Loop * UxLoop::getLoop()
+{
+    assert(exists());
+    return _impl->loop();
+}
+
+UxLoop::Loop const * UxLoop::getLoop() const
+{
+    assert(exists());
+    return _impl->loop();
+}
+
+bool UxLoop::isRunning() const
+{
+    assert(exists());
+    return _impl->isRunning();
+}
+
+Err UxLoop::runDefault()
+{
+    assert(exists());
+    return _impl->run(Loop::RunMode::RUN_DEFAULT);
+}
+
+Err UxLoop::RunOnce()
+{
+    assert(exists());
+    return _impl->run(Loop::RunMode::RUN_ONCE);
+}
+
+Err UxLoop::RunNowait()
+{
+    assert(exists());
+    return _impl->run(Loop::RunMode::RUN_NOWAIT);
 }
 
 } // namespace uvxx

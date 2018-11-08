@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <memory>
 
@@ -38,6 +40,7 @@ public:
 
 public:
     using SharedImpl = std::shared_ptr<Impl>;
+    using Loop       = libtbag::uvpp::Loop;
 
 private:
     SharedImpl _impl;
@@ -96,6 +99,18 @@ public:
 
 public:
     void reset();
+
+public:
+    Loop * getLoop();
+    Loop const * getLoop() const;
+
+public:
+    bool isRunning() const;
+
+public:
+    Err runDefault();
+    Err RunOnce();
+    Err RunNowait();
 };
 
 } // namespace uvxx
