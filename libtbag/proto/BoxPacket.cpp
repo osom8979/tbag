@@ -19,6 +19,13 @@ TBAG_PUSH_MACRO(max);
 # endif // defined(max)
 #endif // defined(TBAG_COMP_MSVC)
 
+/**
+ * A FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE macro is required to use the Verifier::GetComputedSize() method.
+ *
+ * @see <https://github.com/google/flatbuffers/issues/4604>
+ */
+#define FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE
+
 // FlatBuffers generated files.
 #include <flatbuffers/flatbuffers.h>
 #include <flatbuffers/idl.h>
@@ -357,6 +364,8 @@ public:
         if (!VerifyBoxPacketBuffer(verifier)) {
             return Err::E_PARSING;
         }
+
+        //auto const COMPUTED_SIZE = verifier.GetComputedSize();
 
         auto const * PACKET = GetBoxPacket(buffer);
         _parent->onHeader(PACKET->id(), PACKET->type(), PACKET->code(), arg);
