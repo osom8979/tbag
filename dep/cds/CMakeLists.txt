@@ -30,7 +30,7 @@ if (APPLE)
 endif ()
 
 if (WITH_ASAN)
-    if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set (CMAKE_CXX_FLAGS_DEBUG "-D_DEBUG")
         set (CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -fPIC -fsanitize=address,undefined -g -DCDS_ADDRESS_SANITIZER_ENABLED -fno-omit-frame-pointer -fno-optimize-sibling-calls")
@@ -42,7 +42,7 @@ if (WITH_ASAN)
 endif ()
 
 if (WITH_TSAN)
-    if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         set (CMAKE_CXX_FLAGS_DEBUG   "-D_DEBUG")
         set (CMAKE_CXX_FLAGS_RELEASE "-DNDEBUG")
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O1 -fPIC -fsanitize=thread -g -DCDS_THREAD_SANITIZER_ENABLED -fno-omit-frame-pointer")
@@ -54,20 +54,10 @@ if (WITH_TSAN)
 endif ()
 
 set (CDS_STATIC_LIBRARY ${PROJECT_NAME})
-
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set (CMAKE_INCLUDE_CURRENT_DIR ON)
 
-#if (CDS_BIN_DIR)
-#    set (EXECUTABLE_OUTPUT_PATH ${CDS_BIN_DIR})
-#    set (LIBRARY_OUTPUT_PATH ${CDS_BIN_DIR})
-#else ()
-#    set (EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-#    set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-#endif ()
-#message (STATUS "Binary output path: ${EXECUTABLE_OUTPUT_PATH}")
-
-if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+if (CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
     string (REGEX MATCHALL "-std=[^ ]+" cxx_std_found ${CMAKE_CXX_FLAGS} " dummy@rg")
     if (cxx_std_found)
         message ("C++ std: ${cxx_std_found}")
@@ -91,40 +81,41 @@ if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_
     endif ()
 endif ()
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4512")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4127")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:inline")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
+endif ()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "AIX")
-    set (CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> -q -c ${CMAKE_STATIC_LINKER_FLAGS} -o <TARGET> <OBJECTS>")
+    set  (CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> -q -c ${CMAKE_STATIC_LINKER_FLAGS} -o <TARGET> <OBJECTS>")
     list (APPEND LIBCDS_PRIVATE_CXX_FLAGS "-Wl,-G")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-brtl")
+    set  (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-brtl")
 endif ()
 
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
 check_include_file_cxx (linux/membarrier.h CDS_HAVE_LINUX_MEMBARRIER_H CMAKE_CXX_FLAGS)
 
-#message("Build type -- ${CMAKE_BUILD_TYPE}")
-#message("Compiler version: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-#message("System: ${CMAKE_SYSTEM_NAME} version: ${CMAKE_SYSTEM_VERSION}")
-#message("Target architecture: ${CMAKE_TARGET_ARCHITECTURE}")
-#if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-#    message("Compiler flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_DEBUG} ${LIBCDS_PUBLIC_CXX_FLAGS} ${LIBCDS_PRIVATE_CXX_FLAGS}")
-#else()
-#    message("Compiler flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_RELEASE} ${LIBCDS_PUBLIC_CXX_FLAGS} ${LIBCDS_PRIVATE_CXX_FLAGS}")
-#endif()
-#message("Exe flags: ${CMAKE_EXE_LINKER_FLAGS}")
-
 set (SOURCES src/init.cpp
-             src/hp.cpp
-             src/dhp.cpp
-             src/urcu_gp.cpp
-             src/urcu_sh.cpp
-             src/thread_data.cpp
-             src/topology_hpux.cpp
-             src/topology_linux.cpp
-             src/topology_osx.cpp
-             src/dllmain.cpp)
+        src/hp.cpp
+        src/dhp.cpp
+        src/urcu_gp.cpp
+        src/urcu_sh.cpp
+        src/thread_data.cpp
+        src/topology_hpux.cpp
+        src/topology_linux.cpp
+        src/topology_osx.cpp
+        src/dllmain.cpp)
 
 add_library (${CDS_STATIC_LIBRARY} STATIC ${SOURCES})
-target_compile_definitions (${CDS_STATIC_LIBRARY} PRIVATE CDS_BUILD_STATIC_LIB)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    target_compile_definitions (${CDS_STATIC_LIBRARY} PRIVATE CDS_BUILD_STATIC_LIB _ENABLE_ATOMIC_ALIGNMENT_FIX CDS_BUILD_LIB)
+else ()
+    target_compile_definitions (${CDS_STATIC_LIBRARY} PRIVATE CDS_BUILD_STATIC_LIB)
+endif ()
 
 target_link_libraries      (${CDS_STATIC_LIBRARY} PRIVATE   "${CMAKE_THREAD_LIBS_INIT}")
 target_include_directories (${CDS_STATIC_LIBRARY} INTERFACE "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>" $<INSTALL_INTERFACE:include>)
