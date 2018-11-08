@@ -10,6 +10,7 @@
 #include <libtbag/locale/Locale.hpp>
 #include <libtbag/crypto/SslUtils.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/lockfree/cds/CdsUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <mutex>
@@ -52,6 +53,8 @@ public:
         libtbag::uvpp::initialize();
         libtbag::crypto::initializeSsl();
         libtbag::util::createSingletonObjects();
+        libtbag::lockfree::cds::initialize();
+        libtbag::lockfree::cds::initHazardPointerSingleton();
 
         _init = true;
         return true;
@@ -65,6 +68,7 @@ public:
             return false;
         }
 
+        libtbag::lockfree::cds::release();
         libtbag::util::releaseSingletonObjects();
         libtbag::crypto::releaseSsl();
         libtbag::uvpp::release();
