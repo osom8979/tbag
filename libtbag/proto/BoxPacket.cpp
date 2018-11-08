@@ -51,6 +51,7 @@ TBAG_POP_MACRO(max);
 
 #include <cassert>
 #include <algorithm>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -352,8 +353,8 @@ public:
     }
 
 public:
-    Err parse(char const * buffer, std::size_t size,
-              void * arg = nullptr, bool only_header = false, char const * key = nullptr)
+    std::pair<Err, std::size_t> parse(char const * buffer, std::size_t size, void * arg = nullptr,
+                                      bool only_header = false, char const * key = nullptr)
     {
         using namespace flatbuffers;
         using namespace libtbag::proto::fbs::box;
@@ -362,21 +363,25 @@ public:
 
         Verifier verifier((uint8_t const *)buffer, size);
         if (!VerifyBoxPacketBuffer(verifier)) {
-            return Err::E_PARSING;
+            return std::make_pair(Err::E_PARSING, 0U);
         }
 
-        //auto const COMPUTED_SIZE = verifier.GetComputedSize();
+#if defined(FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE)
+        std::size_t const COMPUTED_SIZE = verifier.GetComputedSize();
+#else
+        std::size_t const COMPUTED_SIZE = 0;
+#endif
 
         auto const * PACKET = GetBoxPacket(buffer);
         _parent->onHeader(PACKET->id(), PACKET->type(), PACKET->code(), arg);
         if (only_header) {
-            return Err::E_SUCCESS;
+            return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
         }
 
         auto const * PAIRS = PACKET->pairs();
         if (PAIRS == nullptr) {
             // Not exists 'pairs'.
-            return Err::E_SUCCESS;
+            return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
         }
 
         _parent->onPairSize(PACKET->pairs()->size(), arg);
@@ -390,26 +395,26 @@ public:
 
             auto const VAL_TYPE = itr->val_type();
             if (!(AnyArr_MIN <= COMPARE_AND(VAL_TYPE) <= AnyArr_MAX)) {
-                return Err::E_ENOMSG;
+                return std::make_pair(Err::E_ENOMSG, COMPUTED_SIZE);
             }
 
             if (!VerifyAnyArr(verifier, itr->val(), VAL_TYPE)) {
                 // Use 'Verifier error' to distinguish it from 'Parsing error' at the top.
-                return Err::E_VERIFIER;
+                return std::make_pair(Err::E_VERIFIER, COMPUTED_SIZE);
             }
 
             _parent->onPair(std::string(itr->key()->str()), createBagEx(itr, VAL_TYPE), arg);
             if (!FIND_KEY.empty() && FIND_KEY == itr->key()->str()) {
                 // Found the key !! Exit the loop.
-                return Err::E_SUCCESS;
+                return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
             }
         }
 
         if (!FIND_KEY.empty()) {
             // Not found the key.
-            return Err::E_ENFOUND;
+            return std::make_pair(Err::E_ENFOUND, COMPUTED_SIZE);
         }
-        return Err::E_SUCCESS;
+        return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
     }
 
     template <typename PairItr>
@@ -460,7 +465,7 @@ public:
 // BoxPacketParser implementation.
 // --------------------------------
 
-BoxPacketParser::BoxPacketParser() : _impl(std::make_unique<Impl>(this)), _parsing(false)
+BoxPacketParser::BoxPacketParser() : _impl(std::make_unique<Impl>(this))
 {
     assert(static_cast<bool>(_impl));
 }
@@ -470,36 +475,31 @@ BoxPacketParser::~BoxPacketParser()
     // EMPTY.
 }
 
-Err BoxPacketParser::parse(char const * buffer, std::size_t size, void * arg)
+Err BoxPacketParser::parse(char const * buffer, std::size_t size, void * arg, std::size_t * computed_size)
 {
     assert(static_cast<bool>(_impl));
-    _parsing = true;
-    auto const CODE = _impl->parse(buffer, size, arg, false, nullptr);
-    _parsing = false;
-    return CODE;
+    auto const RESULT = _impl->parse(buffer, size, arg, false, nullptr);
+    if (computed_size != nullptr) {
+        *computed_size = RESULT.second;
+    }
+    return RESULT.first;
 }
 
-Err BoxPacketParser::parse(Buffer const & buffer, void * arg)
+Err BoxPacketParser::parse(Buffer const & buffer, void * arg, std::size_t * computed_size)
 {
-    return parse(buffer.data(), buffer.size(), arg);
+    return parse(buffer.data(), buffer.size(), arg, computed_size);
 }
 
 Err BoxPacketParser::parseOnlyHeader(char const * buffer, std::size_t size, void * arg)
 {
     assert(static_cast<bool>(_impl));
-    _parsing = true;
-    auto const CODE = _impl->parse(buffer, size, arg, true, nullptr);
-    _parsing = false;
-    return CODE;
+    return _impl->parse(buffer, size, arg, true, nullptr).first;
 }
 
 Err BoxPacketParser::parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg)
 {
     assert(static_cast<bool>(_impl));
-    _parsing = true;
-    auto const CODE = _impl->parse(buffer, size, arg, false, key.c_str());
-    _parsing = false;
-    return CODE;
+    return _impl->parse(buffer, size, arg, false, key.c_str()).first;
 }
 
 // -------------------------
@@ -571,19 +571,19 @@ void BoxPacket::clear()
     _bags.clear();
 }
 
-Err BoxPacket::update(char const * buffer, std::size_t size)
+Err BoxPacket::parse(char const * buffer, std::size_t size, std::size_t * computed_size)
 {
-    return parse(buffer, size, this);
+    return BoxPacketParser::parse(buffer, size, this, computed_size);
 }
 
-Err BoxPacket::update(Buffer const & buffer)
+Err BoxPacket::parse(Buffer const & buffer, std::size_t * computed_size)
 {
-    return update(buffer.data(), buffer.size());
+    return parse(buffer.data(), buffer.size(), computed_size);
 }
 
-Err BoxPacket::update()
+Err BoxPacket::parseSelf(std::size_t * computed_size)
 {
-    return update((char const *)point(), size());
+    return parse((char const *)point(), size(), computed_size);
 }
 
 BoxPacket::Box BoxPacket::findKey(char const * buffer, std::size_t size, std::string const & key, Err * code)
@@ -610,7 +610,7 @@ BoxPacket::Box BoxPacket::findKey(std::string const & key, Err * code)
     return findKey((char const *)point(), size(), key, code);
 }
 
-Err BoxPacket::buildFromSelf()
+Err BoxPacket::buildSelf()
 {
     return build(_bags, _id, _type, _code);
 }
@@ -627,7 +627,7 @@ Err BoxPacket::loadFile(std::string const & path)
     Buffer buffer;
     auto const CODE = readFile(path, buffer);
     if (isSuccess(CODE)) {
-        return update(buffer);
+        return parse(buffer);
     }
     return CODE;
 }

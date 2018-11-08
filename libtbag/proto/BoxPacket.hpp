@@ -114,21 +114,18 @@ public:
 
 private:
     UniqueImpl _impl;
-    std::atomic_bool _parsing;
 
 public:
     BoxPacketParser();
     virtual ~BoxPacketParser();
 
 public:
-    inline bool isParsing() const TBAG_NOEXCEPT
-    { return _parsing; }
+    Err parse(char const * buffer, std::size_t size, void * arg, std::size_t * computed_size);
+    Err parse(Buffer const & buffer, void * arg, std::size_t * computed_size);
 
 public:
-    Err parse(char const * buffer, std::size_t size, void * arg = nullptr);
-    Err parse(Buffer const & buffer, void * arg = nullptr);
-    Err parseOnlyHeader(char const * buffer, std::size_t size, void * arg = nullptr);
-    Err parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg = nullptr);
+    Err parseOnlyHeader(char const * buffer, std::size_t size, void * arg);
+    Err parseFindKey(char const * buffer, std::size_t size, std::string const & key, void * arg);
 
 protected:
     virtual void onHeader(uint64_t id, int32_t type, int32_t code, void * arg) { /* EMPTY. */ }
@@ -191,9 +188,9 @@ public:
     void clear();
 
 public:
-    Err update(char const * buffer, std::size_t size);
-    Err update(Buffer const & buffer);
-    Err update();
+    Err parse(char const * buffer, std::size_t size, std::size_t * computed_size = nullptr);
+    Err parse(Buffer const & buffer, std::size_t * computed_size = nullptr);
+    Err parseSelf(std::size_t * computed_size = nullptr);
 
 public:
     Box findKey(char const * buffer, std::size_t size, std::string const & key, Err * code = nullptr);
@@ -201,7 +198,7 @@ public:
     Box findKey(std::string const & key, Err * code = nullptr);
 
 public:
-    Err buildFromSelf();
+    Err buildSelf();
 
 public:
     Err saveFile(std::string const & path);
