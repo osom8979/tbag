@@ -1,6 +1,6 @@
 ## VERSION
 
-- FlatBuffers 1.7.1
+- FlatBuffers 1.10.0
 
 ## LICENSE
 
@@ -8,7 +8,7 @@
 
 ## CHANGE LOG
 
-### Change include header
+### Change include header (1.7.1)
 
 <code>src/idl_gen_cpp.cpp</code> Replace from:
 ```c++

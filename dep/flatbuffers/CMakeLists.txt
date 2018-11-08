@@ -52,10 +52,16 @@ set (FLATC_SRCS
         "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_python.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_fbs.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_grpc.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_dart.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_json_schema.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_lobster.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_lua.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_rust.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/flatc.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/flatc_main.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/grpc/src/compiler/cpp_generator.cc"
-        "${CMAKE_CURRENT_SOURCE_DIR}/grpc/src/compiler/go_generator.cc")
+        "${CMAKE_CURRENT_SOURCE_DIR}/grpc/src/compiler/go_generator.cc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/grpc/src/compiler/java_generator.cc")
 add_executable (flatc ${FLATC_SRCS})
 target_link_libraries (flatc PRIVATE flatbuffers)
 
