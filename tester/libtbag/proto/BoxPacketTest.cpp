@@ -31,6 +31,32 @@ TEST(BoxPacketTest, UpdateSelf)
     ASSERT_TRUE(packet.boxes().empty());
 }
 
+TEST(BoxPacketTest, UpdateSelf_DataSlice)
+{
+    uint64_t const TEST_ID   = 10;
+    int32_t  const TEST_TYPE = 20;
+    int32_t  const TEST_CODE = 30;
+
+    BoxPacket packet;
+    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
+    auto const BUILD_BUFFER = packet.toBuffer();
+    ASSERT_FALSE(BUILD_BUFFER.empty());
+
+    auto const BUFFER_SIZE = BUILD_BUFFER.size();
+    BoxPacket::Buffer extend_buffer(BUFFER_SIZE + 1);
+    std::copy(BUILD_BUFFER.begin(), BUILD_BUFFER.end(), extend_buffer.begin());
+
+    ASSERT_EQ(Err::E_PARSING, packet.update(extend_buffer.data(), BUFFER_SIZE - 1));
+    ASSERT_EQ(Err::E_SUCCESS, packet.update(extend_buffer.data(), BUFFER_SIZE + 0));
+    ASSERT_EQ(Err::E_SUCCESS, packet.update(extend_buffer.data(), BUFFER_SIZE + 1));
+
+    ASSERT_EQ(TEST_ID, packet.id());
+    ASSERT_EQ(TEST_TYPE, packet.type());
+    ASSERT_EQ(TEST_CODE, packet.code());
+    ASSERT_TRUE(packet.boxes().empty());
+}
+
+
 TEST(BoxPacketTest, UpdateSelf_BagEx)
 {
     using namespace libtbag::container;
