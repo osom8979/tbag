@@ -3,6 +3,8 @@
  * @brief  NumberOfDigits class prototype.
  * @author zer0
  * @date   2018-05-30
+ *
+ * @translate{ko, 자리수를 획득한다.}
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_TMP_NUMBEROFDIGITS_HPP__

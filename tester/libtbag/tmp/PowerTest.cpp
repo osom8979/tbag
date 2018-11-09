@@ -28,3 +28,24 @@ TEST(PowerTest, Default)
     ASSERT_EQ(343, test_value);
 }
 
+TEST(PowerTest, IsPowerOf2)
+{
+    ASSERT_TRUE(is_power_of_2<1>::value);
+    ASSERT_TRUE(is_power_of_2<2>::value);
+    ASSERT_TRUE(is_power_of_2<4>::value);
+    ASSERT_TRUE(is_power_of_2<8>::value);
+    ASSERT_TRUE(is_power_of_2<16>::value);
+    ASSERT_TRUE(is_power_of_2<32>::value);
+    ASSERT_TRUE(is_power_of_2<64>::value);
+    ASSERT_TRUE(is_power_of_2<128>::value);
+
+    ASSERT_FALSE(is_power_of_2<3>::value);
+    ASSERT_FALSE(is_power_of_2<5>::value);
+    ASSERT_FALSE(is_power_of_2<7>::value);
+    ASSERT_FALSE(is_power_of_2<10>::value);
+    ASSERT_FALSE(is_power_of_2<17>::value);
+    ASSERT_FALSE(is_power_of_2<30>::value);
+    ASSERT_FALSE(is_power_of_2<80>::value);
+    ASSERT_FALSE(is_power_of_2<140>::value);
+}
+

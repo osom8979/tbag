@@ -30,7 +30,7 @@ namespace tmp {
 template <uint64_t _Base, uint64_t _Power>
 struct Power
 {
-    static TBAG_CONSTEXPR uint64_t const value = _Base * Power<_Base, _Power -1>::value;
+    TBAG_CONSTEXPR static uint64_t const value = _Base * Power<_Base, _Power -1>::value;
 };
 
 /**
@@ -39,7 +39,7 @@ struct Power
 template <uint64_t _Base>
 struct Power<_Base, 1>
 {
-    static TBAG_CONSTEXPR uint64_t const value = _Base;
+    TBAG_CONSTEXPR static uint64_t const value = _Base;
 };
 
 /**
@@ -49,7 +49,16 @@ template <uint64_t _Base>
 struct Power<_Base, 0>
 {
     static_assert(_Base != 0, "0 Power 0 is NaN.");
-    static TBAG_CONSTEXPR uint64_t const value = 1;
+    TBAG_CONSTEXPR static uint64_t const value = 1;
+};
+
+/**
+ * Positive integer power of 2.
+ */
+template <uint64_t _Value>
+struct is_power_of_2
+{
+    TBAG_CONSTEXPR static bool const value = ((_Value & (_Value - 1)) == 0 && _Value/*(Ignore 0 number)*/);
 };
 
 } // namespace tmp
