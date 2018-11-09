@@ -1,11 +1,11 @@
 /**
- * @file   BoundMpMcQueue.cpp
- * @brief  BoundMpMcQueue class implementation.
+ * @file   BoundedMpMcQueue.cpp
+ * @brief  BoundedMpMcQueue class implementation.
  * @author zer0
  * @date   2018-11-09
  */
 
-#include <libtbag/lockfree/BoundMpMcQueue.hpp>
+#include <libtbag/lockfree/BoundedMpMcQueue.hpp>
 #include <libtbag/bitwise/BitHacks.hpp>
 #include <libtbag/memory/AlignedMemory.hpp>
 #include <libtbag/debug/Assert.hpp>
@@ -30,7 +30,7 @@ namespace lockfree {
  * @author zer0
  * @date   2018-11-09
  */
-struct BoundMpMcQueue::Impl : private Noncopyable
+struct BoundedMpMcQueue::Impl : private Noncopyable
 {
 public:
     using State    = lfds711_queue_bmm_state;
@@ -38,7 +38,7 @@ public:
     using Elements = std::vector<Element>;
 
 private:
-    BoundMpMcQueue * _parent;
+    BoundedMpMcQueue * _parent;
 
 private:
     /**
@@ -56,11 +56,11 @@ private:
     Elements _elements;
 
 public:
-    Impl(BoundMpMcQueue * parent, std::size_t size) : _parent(parent), _state(nullptr), _elements(size)
+    Impl(BoundedMpMcQueue * parent, std::size_t size) : _parent(parent), _state(nullptr), _elements(size)
     {
         assert(_parent != nullptr);
         if (!libtbag::bitwise::isPowerOf2(size)) {
-            tDLogE("BoundMpMcQueue::Impl::Impl() Must be a positive integer power of 2");
+            tDLogE("BoundedMpMcQueue::Impl::Impl() Must be a positive integer power of 2");
             throw std::bad_alloc();
         }
 
@@ -173,70 +173,70 @@ private:
 };
 
 // ------------------------------
-// BoundMpMcQueue implementation.
+// BoundedMpMcQueue implementation.
 // ------------------------------
 
-BoundMpMcQueue::BoundMpMcQueue(std::size_t power_of_2_size)
+BoundedMpMcQueue::BoundedMpMcQueue(std::size_t power_of_2_size)
         : _impl(std::make_unique<Impl>(this, power_of_2_size))
 {
     assert(static_cast<bool>(_impl));
 }
 
-BoundMpMcQueue::~BoundMpMcQueue()
+BoundedMpMcQueue::~BoundedMpMcQueue()
 {
     // EMPTY.
 }
 
-std::size_t BoundMpMcQueue::potentially_inaccurate_count() const
+std::size_t BoundedMpMcQueue::potentially_inaccurate_count() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->potentially_inaccurate_count();
 }
 
-BoundMpMcQueue::MiscValidity BoundMpMcQueue::singlethreaded_validate(
+BoundedMpMcQueue::MiscValidity BoundedMpMcQueue::singlethreaded_validate(
         std::size_t min_elements, std::size_t max_elements) const
 {
     assert(static_cast<bool>(_impl));
     return _impl->singlethreaded_validate(min_elements, max_elements);
 }
 
-bool BoundMpMcQueue::enqueue(void * key, void * value)
+bool BoundedMpMcQueue::enqueue(void * key, void * value)
 {
     assert(static_cast<bool>(_impl));
     return _impl->enqueue(key, value);
 }
 
-bool BoundMpMcQueue::enqueue(void * value)
+bool BoundedMpMcQueue::enqueue(void * value)
 {
     assert(static_cast<bool>(_impl));
     return _impl->enqueue(value);
 }
 
-bool BoundMpMcQueue::enqueueKey(void * key)
+bool BoundedMpMcQueue::enqueueKey(void * key)
 {
     assert(static_cast<bool>(_impl));
     return _impl->enqueue(key);
 }
 
-bool BoundMpMcQueue::dequeue(void ** key, void ** value)
+bool BoundedMpMcQueue::dequeue(void ** key, void ** value)
 {
     assert(static_cast<bool>(_impl));
     return _impl->dequeue(key, value);
 }
 
-bool BoundMpMcQueue::dequeue(void ** value)
+bool BoundedMpMcQueue::dequeue(void ** value)
 {
     assert(static_cast<bool>(_impl));
     return _impl->dequeue(value);
 }
 
-bool BoundMpMcQueue::dequeueKey(void ** key)
+bool BoundedMpMcQueue::dequeueKey(void ** key)
 {
     assert(static_cast<bool>(_impl));
     return _impl->dequeue(key);
 }
 
-void BoundMpMcQueue::onCleanup(void * key, void * value)
+void BoundedMpMcQueue::onCleanup(void * key, void * value)
 {
     assert(static_cast<bool>(_impl));
 }

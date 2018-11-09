@@ -1,12 +1,12 @@
 /**
- * @file   BoundMpMcQueue.hpp
- * @brief  BoundMpMcQueue class prototype.
+ * @file   BoundedMpMcQueue.hpp
+ * @brief  BoundedMpMcQueue class prototype.
  * @author zer0
  * @date   2018-11-09
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOCKFREE_BOUNDMPMCQUEUE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOCKFREE_BOUNDMPMCQUEUE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOCKFREE_BOUNDEDMPMCQUEUE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOCKFREE_BOUNDEDMPMCQUEUE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -27,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace lockfree {
 
 /**
- * BoundMpMcQueue class prototype.
+ * BoundedMpMcQueue class prototype.
  *
  * @author zer0
  * @date   2018-11-09
@@ -35,7 +35,7 @@ namespace lockfree {
  * @remarks
  *  Bounded, Many-Producer, Many-consumer Queue.
  */
-class TBAG_API BoundMpMcQueue : private Noncopyable
+class TBAG_API BoundedMpMcQueue : private Noncopyable
 {
 public:
     struct Impl;
@@ -70,8 +70,8 @@ private:
     UniqueImpl _impl;
 
 public:
-    BoundMpMcQueue(std::size_t power_of_2_size = DEFAULT_QUEUE_SIZE);
-    virtual ~BoundMpMcQueue();
+    BoundedMpMcQueue(std::size_t power_of_2_size = DEFAULT_QUEUE_SIZE);
+    virtual ~BoundedMpMcQueue();
 
 public:
     std::size_t potentially_inaccurate_count() const;
@@ -97,5 +97,5 @@ protected:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOCKFREE_BOUNDMPMCQUEUE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOCKFREE_BOUNDEDMPMCQUEUE_HPP__
 
