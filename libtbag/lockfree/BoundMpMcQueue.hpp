@@ -42,6 +42,21 @@ public:
     friend struct Impl;
 
 public:
+    enum class MiscValidity
+    {
+        MV_ERROR,
+        MV_UNKNOWN,
+        MV_VALID,
+        MV_INVALID_LOOP,
+        MV_INVALID_MISSING_ELEMENTS,
+        MV_INVALID_ADDITIONAL_ELEMENTS,
+        MV_INVALID_TEST_DATA,
+        MV_INVALID_ORDER,
+        MV_INVALID_ATOMIC_FAILED,
+        MV_INDETERMINATE_NONATOMIC_PASSED,
+    };
+
+public:
     using UniqueImpl = std::unique_ptr<Impl>;
 
 public:
@@ -59,8 +74,21 @@ public:
     virtual ~BoundMpMcQueue();
 
 public:
+    std::size_t potentially_inaccurate_count() const;
+    MiscValidity singlethreaded_validate(std::size_t min_elements = 0, std::size_t max_elements = 0) const;
+
+public:
+    bool enqueue(void * key, void * value);
     bool enqueue(void * value);
+    bool enqueueKey(void * key);
+
+public:
+    bool dequeue(void ** key, void ** value);
     bool dequeue(void ** value);
+    bool dequeueKey(void ** key);
+
+protected:
+    virtual void onCleanup(void * key, void * value);
 };
 
 } // namespace lockfree
