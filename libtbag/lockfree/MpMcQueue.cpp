@@ -8,6 +8,8 @@
 #include <libtbag/lockfree/MpMcQueue.hpp>
 #include <libtbag/memory/AlignedMemory.hpp>
 
+#include <cassert>
+
 extern "C" {
 #include <liblfds711.h>
 }
@@ -51,6 +53,8 @@ public:
         using namespace libtbag::memory;
         _state = (State   *) alignedMemoryAlloc(sizeof(State)  , LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
         _dummy = (Element *) alignedMemoryAlloc(sizeof(Element), LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
+        assert(_state != nullptr);
+        assert(_dummy != nullptr);
         lfds711_queue_umm_init_valid_on_current_logical_core(_state, _dummy, this);
     }
 
@@ -58,6 +62,8 @@ public:
     {
         lfds711_queue_umm_cleanup(_state, &__element_cleanup_cb__);
         using namespace libtbag::memory;
+        assert(_dummy != nullptr);
+        assert(_state != nullptr);
         alignedMemoryFree(_dummy);
         alignedMemoryFree(_state);
     }
