@@ -92,7 +92,6 @@ endforeach ()
 tbag_modules__luajit_embedding ()
 
 ## Library subproject.
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/cds)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/flatbuffers)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/http-parser)
