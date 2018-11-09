@@ -31,6 +31,7 @@ Tea-bag is Third party extension utility project.
 - sqlite_orm master-fecdc19 (BSD 3-clause license)
 - lemon 1.3.1 (Boost Software License, Version 1.0)
 - nanosvg master-2b08dee (zlib license)
+- lfds 7.1.1 (Public domain)
 
 ## Dependencies (TBUI)
 
