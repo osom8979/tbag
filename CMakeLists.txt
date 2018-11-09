@@ -98,6 +98,7 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/http-parser)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/minizip)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lemon)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lfds)
 
 ## CI Preset.
 if (RUN_TRAVIS)

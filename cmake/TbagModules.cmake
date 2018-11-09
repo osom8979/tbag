@@ -521,6 +521,12 @@ macro (tbag_modules__apply_dep_cds)
     tbag_modules__add_whole_archive ($<TARGET_FILE:cds>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_lfds)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lfds)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/lfds/inc)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:lfds>)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
