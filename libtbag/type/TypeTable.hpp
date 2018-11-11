@@ -124,12 +124,39 @@ struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
 
     using Limits = std::numeric_limits<Number>;
 
-    /** returns the largest finite value of the given type */
+
+
+    /**
+     * returns the largest finite value of the given type
+     *
+     * @remarks
+     *  Equivalent to CHAR_MAX, SCHAR_MAX, UCHAR_MAX, SHRT_MAX,
+     *  USHRT_MAX, INT_MAX, UINT_MAX, LONG_MAX, ULONG_MAX, LLONG_MAX,
+     *  ULLONG_MAX, UINT_LEAST16_MAX, UINT_LEAST32_MAX, FLT_MAX,
+     *  DBL_MAX or LDBL_MAX, depending on type.
+     */
     TBAG_CONSTEXPR static Number maximum() TBAG_NOEXCEPT { return Limits::max(); }
-    /** returns the smallest finite value of the given type */
+
+    /**
+     * returns the smallest finite value of the given type
+     *
+     * @remarks
+     *  - For floating types with denormalization (variable number of exponent bits): @n
+     *    minimum positive normalized value.
+     *  - Equivalent to CHAR_MIN, SCHAR_MIN, SHRT_MIN, INT_MIN, LONG_MIN, @n
+     *    LLONG_MIN, FLT_MIN, DBL_MIN, LDBL_MIN or 0, depending on type.
+     */
     TBAG_CONSTEXPR static Number minimum() TBAG_NOEXCEPT { return Limits::min(); }
-    /** returns the lowest finite value of the given type */
+
+    /**
+     * returns the lowest finite value of the given type
+     *
+     * @remarks
+     *  - For integral types: the same as min().
+     *  - For floating-point types: implementation-dependent; generally, the negative of max().
+     */
     TBAG_CONSTEXPR static Number lowest() TBAG_NOEXCEPT { return Limits::lowest(); }
+
     /** returns the difference between 1.0 and the next representable value of the given floating-point type */
     TBAG_CONSTEXPR static Number epsilon() TBAG_NOEXCEPT { return Limits::epsilon(); }
     /** returns the maximum rounding error of the given floating-point type */
