@@ -34,6 +34,8 @@
 #include <type_traits>
 #include <utility>
 
+//#define ENABLE_TBAG_BOX_INITIALIZER_LIST
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -272,6 +274,9 @@ private:
 public:
     Box() TBAG_NOEXCEPT;
     Box(BoxTypeTable type);
+    Box(BoxTypeTable type,
+        unsigned i0/**/, unsigned i1 = 0, unsigned i2 = 0, unsigned i3 = 0,
+        unsigned i4 = 0, unsigned i5 = 0, unsigned i6 = 0, unsigned i7 = 0);
     Box(std::string const & content);
     Box(char const * content);
     Box(Box const & obj) TBAG_NOEXCEPT;
@@ -287,17 +292,18 @@ public:
         }
     }
 
+#if defined(ENABLE_TBAG_BOX_INITIALIZER_LIST)
     template <typename T>
     Box(std::initializer_list<T> list) : Box()
     {
         using RealT = typename make_egg_type<T>::type;
         static_assert(BoxTypeInfo<RealT>::is_egg_type, "Unsupported Box type.");
-
         if (isFailure(resize<RealT>(list.size()))) {
             throw std::bad_alloc();
         }
         std::copy(list.begin(), list.end(), cast<RealT>());
     }
+#endif
 
 public:
     Box & operator =(Box const & obj) TBAG_NOEXCEPT;

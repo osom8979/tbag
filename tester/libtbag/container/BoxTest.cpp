@@ -79,18 +79,6 @@ TEST(BoxTest, Default)
     ASSERT_EQ(obj6, obj5);
 }
 
-TEST(BoxTest, InitializerList)
-{
-    Box obj = { 0, 1, 2, 3, 4 };
-    ASSERT_EQ(BoxTypeTable::BTT_INT32, obj.getType());
-    ASSERT_EQ(5, obj.size());
-    ASSERT_EQ(0, obj.at<int32_t>(0));
-    ASSERT_EQ(1, obj.at<int32_t>(1));
-    ASSERT_EQ(2, obj.at<int32_t>(2));
-    ASSERT_EQ(3, obj.at<int32_t>(3));
-    ASSERT_EQ(4, obj.at<int32_t>(4));
-}
-
 TEST(BoxTest, Offset)
 {
     Box bag;

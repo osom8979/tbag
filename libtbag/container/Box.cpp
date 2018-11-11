@@ -29,6 +29,15 @@ Box::Box(BoxTypeTable type) : Box()
     }
 }
 
+Box::Box(BoxTypeTable type,
+         unsigned i0, unsigned i1, unsigned i2, unsigned i3,
+         unsigned i4, unsigned i5, unsigned i6, unsigned i7) : Box(type)
+{
+    if (isFailure(resize(i0, i1, i2, i3, i4, i5, i6, i7))) {
+        throw std::bad_alloc();
+    }
+}
+
 Box::Box(std::string const & content) : Box()
 {
     if (isFailure(fromString(content))) {
