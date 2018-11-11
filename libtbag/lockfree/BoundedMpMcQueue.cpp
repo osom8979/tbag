@@ -184,7 +184,7 @@ BoundedMpMcQueue::BoundedMpMcQueue(std::size_t power_of_2_size)
 
 BoundedMpMcQueue::~BoundedMpMcQueue()
 {
-    // EMPTY.
+    _impl.reset();
 }
 
 std::size_t BoundedMpMcQueue::potentially_inaccurate_count() const
@@ -238,7 +238,7 @@ bool BoundedMpMcQueue::dequeueKey(void ** key)
 
 void BoundedMpMcQueue::onCleanup(void * key, void * value)
 {
-    assert(static_cast<bool>(_impl));
+    // EMPTY.
 }
 
 } // namespace lockfree
