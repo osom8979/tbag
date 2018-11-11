@@ -31,6 +31,22 @@ inline bool isPowerOf2(T const & value) TBAG_NOEXCEPT
     return ((value & (value - 1)) == 0 && value/*(Ignore 0 number)*/);
 }
 
+/**
+ * The most significant bit (MSB, also called the high-order bit)
+ * is the bit position in a binary number having the greatest value.
+ */
+template <typename T>
+inline int findMostSignificantBit(T value) TBAG_NOEXCEPT
+{
+    static_assert(std::is_integral<T>::value, "Only integer type is supported.");
+    int pos = 0;
+    while (value) {
+        value >>= 1;
+        ++pos;
+    }
+    return pos;
+}
+
 } // namespace bitwise
 
 // --------------------

@@ -32,3 +32,24 @@ TEST(BitHacksTest, isPowerOf2)
     ASSERT_FALSE(isPowerOf2(140));
 }
 
+TEST(BitHacksTest, findMostSignificantBit)
+{
+    ASSERT_EQ(1, findMostSignificantBit(1));
+    ASSERT_EQ(2, findMostSignificantBit(2));
+    ASSERT_EQ(3, findMostSignificantBit(4));
+    ASSERT_EQ(4, findMostSignificantBit(8));
+    ASSERT_EQ(5, findMostSignificantBit(16));
+    ASSERT_EQ(6, findMostSignificantBit(32));
+    ASSERT_EQ(7, findMostSignificantBit(64));
+    ASSERT_EQ(8, findMostSignificantBit(128));
+
+    ASSERT_EQ(2, findMostSignificantBit(3));
+    ASSERT_EQ(3, findMostSignificantBit(5));
+    ASSERT_EQ(3, findMostSignificantBit(7));
+    ASSERT_EQ(4, findMostSignificantBit(10));
+    ASSERT_EQ(5, findMostSignificantBit(17));
+    ASSERT_EQ(5, findMostSignificantBit(30));
+    ASSERT_EQ(7, findMostSignificantBit(80));
+    ASSERT_EQ(8, findMostSignificantBit(140));
+}
+
