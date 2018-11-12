@@ -74,6 +74,9 @@ public:
     virtual ~BoundedMpMcQueue();
 
 public:
+    static std::size_t calcMinimumQueueSize(std::size_t request_size);
+
+public:
     std::size_t potentially_inaccurate_count() const;
     MiscValidity singlethreaded_validate(std::size_t min_elements = 0, std::size_t max_elements = 0) const;
 

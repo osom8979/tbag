@@ -12,6 +12,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
+#include <cmath>
 #include <vector>
 
 extern "C" {
@@ -185,6 +186,18 @@ BoundedMpMcQueue::BoundedMpMcQueue(std::size_t power_of_2_size)
 BoundedMpMcQueue::~BoundedMpMcQueue()
 {
     _impl.reset();
+}
+
+std::size_t BoundedMpMcQueue::calcMinimumQueueSize(std::size_t request_size)
+{
+    using namespace libtbag::bitwise;
+    if (isPowerOf2(request_size)) {
+        return request_size;
+    }
+    auto const RESULT_SIZE = static_cast<std::size_t>(pow(2, findMostSignificantBit(request_size) + 1));
+    assert(isPowerOf2(RESULT_SIZE));
+    assert(RESULT_SIZE >= request_size);
+    return RESULT_SIZE;
 }
 
 std::size_t BoundedMpMcQueue::potentially_inaccurate_count() const
