@@ -83,9 +83,6 @@ private:
     void removeMsg(MqMsg * value);
 
 public:
-    static std::size_t calcMinimumQueueSize(std::size_t request_size);
-
-public:
     std::size_t getInaccurateSizeOfActive() const;
     std::size_t getInaccurateSizeOfReady() const;
 

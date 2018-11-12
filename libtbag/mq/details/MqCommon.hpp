@@ -50,6 +50,63 @@ struct MqMsg
     { /* EMPTY. */ }
 };
 
+struct MqMsgCopyFrom
+{
+    char const * data;
+    std::size_t  size;
+
+    MqMsgCopyFrom(char const * d, std::size_t s) : data(d), size(s)
+    { /* EMPTY. */ }
+
+    ~MqMsgCopyFrom()
+    { /* EMPTY. */ }
+
+    bool operator()(MqMsg * msg)
+    {
+        Err code;
+        msg->type = MqType::MT_BOX_ADDRESS;
+        assert(size <= libtbag::type::TypeInfo<unsigned>::maximum());
+        code = msg->box.resize(static_cast<unsigned>(size));
+        assert(isSuccess(code));
+        code = msg->box.copyFrom(data, size);
+        assert(isSuccess(code));
+        return true;
+    }
+};
+
+struct MqMsgCopyTo
+{
+    MqType      * type;
+    char        * data;
+    std::size_t    max;
+    std::size_t * size;
+
+    MqMsgCopyTo(MqType * t, char * d, std::size_t m, std::size_t * s)
+            : type(t), data(d), max(m), size(s)
+    { /* EMPTY. */ }
+
+    ~MqMsgCopyTo()
+    { /* EMPTY. */ }
+
+    bool operator()(MqMsg * msg)
+    {
+        if (type != nullptr) {
+            *type = msg->type;
+        }
+        auto const BOX_SIZE = msg->box.size();
+        if (size != nullptr) {
+            *size = BOX_SIZE;
+        }
+        if (data != nullptr) {
+            auto const * BEGIN = msg->box.cast<int8_t>();
+            auto const * END   = BEGIN + (BOX_SIZE <= max ? BOX_SIZE : max);
+            std::copy(BEGIN, END, data);
+        }
+        return true;
+    }
+};
+
+
 struct MqInterface
 {
     virtual bool send() = 0;
