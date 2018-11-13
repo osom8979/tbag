@@ -62,7 +62,7 @@ public:
     {
         RS_WAITING,
         RS_ASYNC,
-        RS_RUNNING,
+        RS_REQUESTING,
     };
 
 private:
@@ -86,7 +86,7 @@ public:
     { return _queue.size(); }
 
     inline bool isWaiting() const TBAG_NOEXCEPT_SP_OP(_queue.empty())
-    { return _queue.empty() && _state == RequestState::SS_WAITING; }
+    { return _state == RequestState::RS_WAITING; }
 
 public:
     void enqueue(Value const & value)
@@ -103,15 +103,15 @@ public:
     {
         assert(!_queue.empty());
         assert(_state == RequestState::RS_ASYNC);
-        _state = RequestState::SS_SENDING;
+        _state = RequestState::RS_REQUESTING;
 
-        doRequest(_queue.front());
+        doRequest(_request, _queue.front());
     }
 
     void doneRequest()
     {
         assert(!_queue.empty());
-        assert(_state == RequestState::SS_SENDING);
+        assert(_state == RequestState::RS_REQUESTING);
 
         auto value = _queue.front();
         _queue.pop();
@@ -119,7 +119,7 @@ public:
         onDequeue(value);
 
         if (_queue.empty()) {
-            _state = RequestState::SS_WAITING;
+            _state = RequestState::RS_WAITING;
         } else {
             auto const CODE = send();
             assert(isSuccess(CODE));
@@ -128,7 +128,7 @@ public:
     }
 
 protected:
-    virtual void doRequest(Value const & value) = 0;
+    virtual void doRequest(Request & request, Value const & value) = 0;
     virtual void onDequeue(Value const & value) = 0;
 };
 

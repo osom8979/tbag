@@ -25,7 +25,6 @@
 
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Async.hpp>
-#include <libtbag/uvpp/ex/AsyncRequestQueue.hpp>
 
 #include <cassert>
 #include <queue>
