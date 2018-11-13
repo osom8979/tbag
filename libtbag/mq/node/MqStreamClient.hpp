@@ -2,7 +2,7 @@
  * @file   MqStreamClient.hpp
  * @brief  MqStreamClient class prototype.
  * @author zer0
- * @date   2018-11-12
+ * @date   2018-11-13
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_MQ_NODE_MQSTREAMCLIENT_HPP__
@@ -15,15 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
-#include <libtbag/Noncopyable.hpp>
-
-#include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/uvpp/Pipe.hpp>
-#include <libtbag/uvpp/Request.hpp>
-
-#include <cassert>
+#include <libtbag/mq/details/MqCommon.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -36,91 +28,73 @@ namespace node {
  * MqStreamClient class prototype.
  *
  * @author zer0
- * @date   2018-11-12
+ * @date   2018-11-13
  */
-class TBAG_API MqStreamClient : private Noncopyable
+class TBAG_API MqStreamClient : public libtbag::mq::details::MqInterface
 {
 public:
-    using Loop   = libtbag::uvpp::Loop;
-    using Stream = libtbag::uvpp::Stream;
-    using Tcp    = libtbag::uvpp::Tcp;
-    using Pipe   = libtbag::uvpp::Pipe;
-
-    using ConnectRequest  = libtbag::uvpp::ConnectRequest;
-    using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
-    using WriteRequest    = libtbag::uvpp::WriteRequest;
-
-    using binf   = libtbag::util::binf;
-    using cbinf  = libtbag::util::cbinf;
+    using MqType = libtbag::mq::details::MqType;
 
 public:
-    struct tcp_t  { /* EMPTY. */ };
-    struct pipe_t { /* EMPTY. */ };
-
-public:
-    struct TcpClient;
-    struct PipeClient;
-
-    friend struct TcpClient;
-    friend struct PipeClient;
-
-public:
-    struct TcpClient : public Tcp
+    template <typename _BaseT>
+    struct Client : public _BaseT
     {
         MqStreamClient * parent = nullptr;
 
-        TcpClient(Loop & loop, MqStreamClient * p) : Tcp(loop), parent(p)
+        Client(Loop & loop, MqStreamClient * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
-        virtual ~TcpClient()
+        virtual ~Client()
         { /* EMPTY. */ }
 
         virtual void onConnect(ConnectRequest & request, Err code) override
-        { parent->onConnect(this, request, code); }
+        { parent->onConnect(request, code); }
         virtual void onShutdown(ShutdownRequest & request, Err code) override
-        { parent->onShutdown(this, request, code); }
+        { parent->onShutdown(request, code); }
         virtual void onWrite(WriteRequest & request, Err code) override
-        { parent->onWrite(this, request, code); }
+        { parent->onWrite(request, code); }
         virtual binf onAlloc(std::size_t suggested_size) override
-        { return parent->onAlloc(this, suggested_size); }
+        { return parent->onAlloc(suggested_size); }
         virtual void onRead(Err code, char const * buffer, std::size_t size) override
-        { parent->onRead(this, code, buffer, size); }
+        { parent->onRead(code, buffer, size); }
         virtual void onClose() override
-        { parent->onClose(this); }
-    };
-
-    struct PipeClient : public Pipe
-    {
-        MqStreamClient * parent = nullptr;
-
-        PipeClient(Loop & loop, MqStreamClient * p) : Pipe(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~PipeClient()
-        { /* EMPTY. */ }
-
-        virtual void onShutdown(ShutdownRequest & request, Err code) override
-        { parent->onShutdown(this, request, code); }
-        virtual void onWrite(WriteRequest & request, Err code) override
-        { parent->onWrite(this, request, code); }
-        virtual binf onAlloc(std::size_t suggested_size) override
-        { return parent->onAlloc(this, suggested_size); }
-        virtual void onRead(Err code, char const * buffer, std::size_t size) override
-        { parent->onRead(this, code, buffer, size); }
-        virtual void onClose() override
-        { parent->onClose(this); }
+        { parent->onClose(); }
     };
 
 public:
-    MqStreamClient(Loop & loop, tcp_t const &);
-    MqStreamClient(Loop & loop, pipe_t const &);
+    using TcpClient  = Client<Tcp>;
+    using PipeClient = Client<Pipe>;
+
+public:
+    using SharedTcpClient  = std::shared_ptr<TcpClient>;
+    using SharedPipeClient = std::shared_ptr<PipeClient>;
+
+public:
+    using pipe_t = libtbag::mq::details::pipe_t;
+    using tcp_t  = libtbag::mq::details::tcp_t;
+
+public:
+    MqType const TYPE;
+
+public:
+    MqStreamClient(Loop & loop, pipe_t const & UNUSED_PARAM(x));
+    MqStreamClient(Loop & loop, tcp_t const & UNUSED_PARAM(x));
     virtual ~MqStreamClient();
 
 protected:
-    void onConnect (Stream * stream, ConnectRequest & request, Err code);
-    void onShutdown(Stream * stream, ShutdownRequest & request, Err code);
-    void onWrite   (Stream * stream, WriteRequest & request, Err code);
-    binf onAlloc   (Stream * stream, std::size_t suggested_size);
-    void onRead    (Stream * stream, Err code, char const * buffer, std::size_t size);
-    void onClose   (Stream * stream);
+    void onConnect(ConnectRequest & request, Err code);
+    void onShutdown(ShutdownRequest & request, Err code);
+    void onWrite(WriteRequest & request, Err code);
+    binf onAlloc(std::size_t suggested_size);
+    void onRead(Err code, char const * buffer, std::size_t size);
+    void onClose();
+
+public:
+    virtual Err open(std::string const & uri) override;
+    virtual Err close() override;
+
+public:
+    virtual Err send(char const * buffer, std::size_t size) override;
+    virtual Err recv(std::vector<char> & buffer) override;
 };
 
 } // namespace node

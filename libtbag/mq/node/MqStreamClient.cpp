@@ -2,7 +2,7 @@
  * @file   MqStreamClient.cpp
  * @brief  MqStreamClient class implementation.
  * @author zer0
- * @date   2018-11-12
+ * @date   2018-11-13
  */
 
 #include <libtbag/mq/node/MqStreamClient.hpp>
@@ -17,12 +17,12 @@ namespace node {
 
 using binf = MqStreamClient::binf;
 
-MqStreamClient::MqStreamClient(Loop & loop, tcp_t const &)
+MqStreamClient::MqStreamClient(Loop & loop, pipe_t const & UNUSED_PARAM(x)) : TYPE(MqType::MT_PIPE)
 {
     // EMPTY.
 }
 
-MqStreamClient::MqStreamClient(Loop & loop, pipe_t const &)
+MqStreamClient::MqStreamClient(Loop & loop, tcp_t const & UNUSED_PARAM(x)) : TYPE(MqType::MT_TCP)
 {
     // EMPTY.
 }
@@ -32,29 +32,49 @@ MqStreamClient::~MqStreamClient()
     // EMPTY.
 }
 
-void MqStreamClient::onConnect(Stream * stream, ConnectRequest & request, Err code)
+void MqStreamClient::onConnect(ConnectRequest & request, Err code)
 {
 }
 
-void MqStreamClient::onShutdown(Stream * stream, ShutdownRequest & request, Err code)
+void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
 {
 }
 
-void MqStreamClient::onWrite(Stream * stream, WriteRequest & request, Err code)
+void MqStreamClient::onWrite(WriteRequest & request, Err code)
 {
 }
 
-binf MqStreamClient::onAlloc(Stream * stream, std::size_t suggested_size)
+binf MqStreamClient::onAlloc(std::size_t suggested_size)
 {
     return binf();
 }
 
-void MqStreamClient::onRead(Stream * stream, Err code, char const * buffer, std::size_t size)
+void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
 {
 }
 
-void MqStreamClient::onClose(Stream * stream)
+void MqStreamClient::onClose()
 {
+}
+
+Err MqStreamClient::open(std::string const & uri)
+{
+    return Err::E_UNSUPOP;
+}
+
+Err MqStreamClient::close()
+{
+    return Err::E_UNSUPOP;
+}
+
+Err MqStreamClient::send(char const * buffer, std::size_t size)
+{
+    return Err::E_UNSUPOP;
+}
+
+Err MqStreamClient::recv(std::vector<char> & buffer)
+{
+    return Err::E_UNSUPOP;
 }
 
 } // namespace node

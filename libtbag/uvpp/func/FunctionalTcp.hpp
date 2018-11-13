@@ -40,7 +40,8 @@ template <typename TcpType, typename MutexType = lock::FakeLock>
 class FunctionalTcp : public FunctionalStream<TcpType, MutexType>
 {
 public:
-    using Parent = FunctionalStream<TcpType, MutexType>;
+    using Base  = FunctionalStream<TcpType, MutexType>;
+    using Guard = typename Base::Guard;
     using OnConnect = std::function<void(ConnectRequest&, Err)>;
 
 private:
@@ -48,7 +49,7 @@ private:
 
 public:
     template <typename ... Args>
-    FunctionalTcp(Args && ... args) : Parent(std::forward<Args>(args) ...)
+    FunctionalTcp(Args && ... args) : Base(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
     virtual ~FunctionalTcp()
     { /* EMPTY. */ }
@@ -56,16 +57,16 @@ public:
 public:
     void setOnConnect(OnConnect const & cb)
     {
-        Guard guard(_mutex);
+        Guard guard(Base::_mutex);
         _connect_cb = cb;
     }
 
 public:
     virtual void onConnect(ConnectRequest & request, Err code) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_write_cb)) {
-            _write_cb(request, code);
+        Guard guard(Base::_mutex);
+        if (static_cast<bool>(Base::_write_cb)) {
+            Base::_write_cb(request, code);
         }
     }
 };

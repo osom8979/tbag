@@ -15,10 +15,24 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Box.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Pipe.hpp>
+#include <libtbag/uvpp/Udp.hpp>
+#include <libtbag/uvpp/Request.hpp>
+
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
+
+#include <string>
+#include <vector>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,6 +54,23 @@ inline bool isMqMessageType(MqEvent type) TBAG_NOEXCEPT
     return type == MqEvent::ME_MSG /*|| type == MqEvent::ME_BOX_MSG*/;
 }
 
+enum class MqType : int
+{
+    MT_PIPE,
+    MT_UDP,
+    MT_TCP,
+};
+
+struct pipe_t { /* EMPTY. */ };
+struct udp_t  { /* EMPTY. */ };
+struct tcp_t  { /* EMPTY. */ };
+
+/**
+ * MessageQueue data packet.
+ *
+ * @author zer0
+ * @date   2018-11-13
+ */
 struct MqMsg
 {
     using Box          = libtbag::container::Box;
@@ -56,72 +87,70 @@ struct MqMsg
     { /* EMPTY. */ }
 };
 
-struct MqMsgCopyFrom
+/**
+ * Message copy from.
+ *
+ * @author zer0
+ * @date   2018-11-13
+ */
+struct TBAG_API MqMsgCopyFrom
 {
     MqEvent      event;
     char const * data;
     std::size_t  size;
 
-    MqMsgCopyFrom(MqEvent e) : MqMsgCopyFrom(e, nullptr, 0)
-    { /* EMPTY. */ }
-    MqMsgCopyFrom(char const * d, std::size_t s) : MqMsgCopyFrom(MqEvent::ME_MSG, d, s)
-    { /* EMPTY. */ }
-    MqMsgCopyFrom(MqEvent e, char const * d, std::size_t s) : event(e), data(d), size(s)
-    { /* EMPTY. */ }
-    ~MqMsgCopyFrom()
-    { /* EMPTY. */ }
+    MqMsgCopyFrom(MqEvent e);
+    MqMsgCopyFrom(char const * d, std::size_t s);
+    MqMsgCopyFrom(MqEvent e, char const * d, std::size_t s);
+    ~MqMsgCopyFrom();
 
-    bool operator()(MqMsg * msg)
-    {
-        msg->event = event;
-        if (data == nullptr || size == 0) {
-            return true;
-        }
-
-        assert(size <= libtbag::type::TypeInfo<unsigned>::maximum());
-        Err const RESIZE_CODE = msg->box.resize(static_cast<unsigned>(size));
-        assert(isSuccess(RESIZE_CODE));
-        Err const COPY_CODE = msg->box.copyFrom(data, size);
-        assert(isSuccess(COPY_CODE));
-        return true;
-    }
+    bool operator()(MqMsg * msg);
 };
 
-struct MqMsgCopyTo
+/**
+ * Message copy to.
+ *
+ * @author zer0
+ * @date   2018-11-13
+ */
+struct TBAG_API MqMsgCopyTo
 {
     MqEvent     * event;
     char        * data;
     std::size_t    max;
     std::size_t * size;
 
-    MqMsgCopyTo(MqEvent * e, char * d, std::size_t m, std::size_t * s)
-            : event(e), data(d), max(m), size(s)
-    { /* EMPTY. */ }
-    ~MqMsgCopyTo()
-    { /* EMPTY. */ }
+    MqMsgCopyTo(MqEvent * e, char * d, std::size_t m, std::size_t * s);
+    ~MqMsgCopyTo();
 
-    bool operator()(MqMsg * msg)
-    {
-        if (event != nullptr) {
-            *event = msg->event;
-        }
-        auto const BOX_SIZE = msg->box.size();
-        if (size != nullptr) {
-            *size = BOX_SIZE;
-        }
-        if (data != nullptr) {
-            auto const * BEGIN = msg->box.cast<int8_t>();
-            auto const * END   = BEGIN + (BOX_SIZE <= max ? BOX_SIZE : max);
-            std::copy(BEGIN, END, data);
-        }
-        return true;
-    }
+    bool operator()(MqMsg * msg);
 };
 
 struct MqInterface
 {
-    virtual bool send() = 0;
-    virtual bool recv() = 0;
+    using Loop   = libtbag::uvpp::Loop;
+    using Stream = libtbag::uvpp::Stream;
+    using Tcp    = libtbag::uvpp::Tcp;
+    using Udp    = libtbag::uvpp::Udp;
+    using Pipe   = libtbag::uvpp::Pipe;
+
+    using ConnectRequest  = libtbag::uvpp::ConnectRequest;
+    using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
+    using WriteRequest    = libtbag::uvpp::WriteRequest;
+    using UdpSendRequest  = libtbag::uvpp::UdpSendRequest;
+
+    using NativeHandle = Loop::NativeHandle;
+    using SharedHandle = Loop::SharedHandle;
+    using WeakHandle   = Loop::WeakHandle;
+
+    using  binf = libtbag::util::binf;
+    using cbinf = libtbag::util::cbinf;
+
+    virtual Err open(std::string const & uri) = 0;
+    virtual Err close() = 0;
+
+    virtual Err send(char const * buffer, std::size_t size) = 0;
+    virtual Err recv(std::vector<char> & buffer) = 0;
 };
 
 } // namespace details
