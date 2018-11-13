@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/mq/details/MqEventQueue.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cstring>
 #include <string>
@@ -58,6 +59,7 @@ struct MqSendQueueTest : public MqEventQueue
 
 TEST(MqEventQueueTest, Default)
 {
+    log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
     std::size_t const MAX_QUEUE = 4;
 
     libtbag::uvpp::Loop loop;
