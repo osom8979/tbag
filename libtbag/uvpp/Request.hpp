@@ -18,6 +18,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/uvpp/Native.hpp>
 
+#include <type_traits>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -81,6 +83,21 @@ _TBAG_UV_REQUEST_EX(FS      , Fs      );
 _TBAG_UV_REQUEST_EX(WORK    , Work    );
 
 #undef _TBAG_UV_REQUEST_EX
+
+template <typename T, bool is_base>
+struct __is_request_type;
+
+template <typename T>
+struct __is_request_type<T, true> : public std::true_type
+{ /* EMPTY. */ };
+
+template <typename T>
+struct __is_request_type<T, false> : public std::false_type
+{ /* EMPTY. */ };
+
+template <typename T>
+struct is_request_type : public __is_request_type<T, std::is_base_of<Request, T>::value>
+{ /* EMPTY. */ };
 
 } // namespace uvpp
 
