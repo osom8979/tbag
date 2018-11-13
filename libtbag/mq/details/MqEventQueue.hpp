@@ -25,6 +25,7 @@
 
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Async.hpp>
+#include <libtbag/uvpp/ex/AsyncRequestQueue.hpp>
 
 #include <cassert>
 #include <queue>
@@ -48,41 +49,41 @@ namespace details {
  *
  * @remarks
  *  @code
- *   +--------------------------------------------------------------------------------------------------+
- *   |            :                                                                                     |
- *   |  [WORKING] : [EVENT THREAD]                                                                      |
- *   |  [THREAD ] :                                                                                     |
- *   |            :                                                                                     |
- *   |            : Lockfree                                                                            |
- *   |            :  Ready                                                                              |
- *   |    User    :  Queue                                                                              |
- *   |     |      :    |                                                                                |
- *   |     *<~~~~~~~~~~*           MqMsg                                                                |
- *   |  dequeue   :    |           Async                                                                |
- *   |     |      :    |             |                                                                  |
- *   |     *~~~~~~~~~~~~~~~~~~~~~~~~>* (onAsync)                                                        |
- *   |  message   :    |             |             MqMsgQueue                                           |
- *   |   send     :    |             |                 |                                                |
- *   |            :    |             *~~~~{if-msg}~~~~>*                                                |
- *   |            :    |             |              enqueue          SendAsync {Sending-state}          |
- *   |            :    |             |                 |                 |     {Waiting-state}          |
- *   |            :    *<~{if-event}~*                 *~~{if-waiting}~~>*                              |
- *   |            : enqueue                            |              message                           |
- *   |            :    |                               |               send                             |
- *   |            :    |                               |                 |                              |
- *   |            :    |                               |                 * (onAsync)      Stream        |
- *   |            :    |                               |                 |                  |           |
- *   |            :    |                               |                 *~{send-message}~~>*           |
- *   |            :    |                               |                 |                  |           |
- *   |            :    |                               |                 *<~{write-message}~*(onWrite)  |
- *   |            :    |                               |{Loop}           |                              |
- *   |            :    |                               *<~~~~~~~~~~~~~~~~*                              |
- *   |            :    |                          {If there are messages left in the queue ...}         |
- *   |            :    |                                                 |                              |
- *   |            :    *<~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*                              |
- *   |            : enqueue                                                                             |
- *   |            :                                                                                     |
- *   +--------------------------------------------------------------------------------------------------+
+ *   +-----------------------------------------------------------------------------------------------------+
+ *   |            :                                                                                        |
+ *   |  [WORKING] : [EVENT THREAD]                                                                         |
+ *   |  [THREAD ] :                                                                                        |
+ *   |            :                                                                                        |
+ *   |            : Lockfree                                                                               |
+ *   |            :  Ready                                                                                 |
+ *   |    User    :  Queue                                                                                 |
+ *   |     |      :    |                                                                                   |
+ *   |     *<~~~~~~~~~~*           MqMsg           . .[USER CUSTOM]. . . . . . . . . . . . . . . . . . . . |
+ *   |  dequeue   :    |           Async           .                                                       |
+ *   |     |      :    |             |             .                                                       |
+ *   |     *~~~~~~~~~~~~~~~~~~~~~~~~>* (onAsync)   .                                                       |
+ *   |  message   :    |             |             .  MqMsgQueue                                           |
+ *   |   send     :    |             |             .      |                                                |
+ *   |            :    |             *~~~~{if-msg}~~~~~~~>*                                                |
+ *   |            :    |             |             .   enqueue          SendAsync {Sending-state}          |
+ *   |            :    |             |             .      |                 |     {Waiting-state}          |
+ *   |            :    *<~{if-event}~*             .      *~~{if-waiting}~~>*                              |
+ *   |            : enqueue                        .      |              message                           |
+ *   |            :    |                           .      |               send                             |
+ *   |            :    |                           .      |                 |                              |
+ *   |            :    |                           .      |                 * (onAsync)      Stream        |
+ *   |            :    |                           .      |                 |                  |           |
+ *   |            :    |                           .      |                 *~{send-message}~~>*           |
+ *   |            :    |                           .      |                 |                  |           |
+ *   |            :    |                           .      |                 *<~{write-message}~*(onWrite)  |
+ *   |            :    |                           .      |{Loop}           |                              |
+ *   |            :    |                           .      *<~~~~~~~~~~~~~~~~*                              |
+ *   |            :    |                           .          {If there are messages left in the queue ...}|
+ *   |            :    |                           .                        |                              |
+ *   |            :    *<~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*                              |
+ *   |            : enqueue                        .                                                       |
+ *   |            :                                .                                                       |
+ *   +-----------------------------------------------------------------------------------------------------+
  *  @endcode
  */
 class TBAG_API MqEventQueue : private Noncopyable
@@ -96,16 +97,15 @@ public:
     using MiscValidity     = BoundedMpMcQueue::MiscValidity;
 
 public:
-    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE  = BoundedMpMcQueue::DEFAULT_QUEUE_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE = 1024;
+    enum class AfterAction : int
+    {
+        AA_DELAY,
+        AA_READY,
+    };
 
 public:
-    enum class SendState
-    {
-        SS_WAITING,
-        SS_ASYNC,
-        SS_SENDING,
-    };
+    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE  = BoundedMpMcQueue::DEFAULT_QUEUE_SIZE;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE = 1024;
 
 public:
     struct AsyncMsg : public Async, public MqMsg
@@ -125,28 +125,9 @@ public:
         { parent->onClose(this); }
     };
 
-    struct SendAsync : public Async
-    {
-        MqEventQueue * parent = nullptr;
-
-        SendAsync(Loop & loop, MqEventQueue * p) : Async(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~SendAsync()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onAsync(this); }
-
-        virtual void onClose() override
-        { parent->onClose(this); }
-    };
-
 public:
     using UniqueQueue     = std::unique_ptr<BoundedMpMcQueue>;
-    using SharedSendAsync = std::shared_ptr<SendAsync>;
     using SharedAsyncMsg  = std::shared_ptr<AsyncMsg>;
-    using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
-    using MsgPointerQueue = std::queue<AsyncMsgPointer>;
     using SharedAsyncMsgs = std::vector<SharedAsyncMsg>;
     using ThreadId        = std::thread::id;
 
@@ -154,43 +135,27 @@ private:
     ThreadId const THREAD_ID;
 
 private:
-    UniqueQueue _ready;
-
-private:
     /**
      * @warning
      *  It must be accessed only from the loop thread.
      */
-    struct {
-        SendState        state = SendState::SS_WAITING;
-        SharedSendAsync  sender;
-        SharedAsyncMsgs  messages;
-        MsgPointerQueue  queue;
-    } __local__;
+    SharedAsyncMsgs __messages__;
+
+private:
+    UniqueQueue _ready;
 
 public:
     MqEventQueue(Loop & loop,
-                std::size_t size = DEFAULT_QUEUE_SIZE,
-                std::size_t msg_size = DEFAULT_PACKET_SIZE);
+                     std::size_t size = DEFAULT_QUEUE_SIZE,
+                     std::size_t msg_size = DEFAULT_PACKET_SIZE);
     virtual ~MqEventQueue();
 
 private:
     void onAsync(AsyncMsg * async);
-    void onAsync(SendAsync * async);
-
     void onClose(AsyncMsg * async);
-    void onClose(SendAsync * async);
 
 protected:
     void closeAsyncMsgs();
-    void closeSendAsync();
-    void closeAll();
-
-protected:
-    bool isWatingSender() const;
-
-public:
-    void doneWrite(Err code);
 
 public:
     std::size_t getInaccurateSizeOfReady() const;
@@ -230,8 +195,11 @@ public:
     Err enqueue(char const * data, std::size_t size);
 
 protected:
-    virtual void onEvent(MqEvent event, char const * data, std::size_t size);
-    virtual void onSend(char const * data, std::size_t size);
+    TBAG_CONSTEXPR static AfterAction const DELAY_ACTION = AfterAction::AA_DELAY;
+    TBAG_CONSTEXPR static AfterAction const READY_ACTION = AfterAction::AA_READY;
+
+protected:
+    virtual AfterAction onMsg(MqMsg * msg);
 };
 
 } // namespace details
