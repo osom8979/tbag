@@ -1,12 +1,12 @@
 /**
- * @file   AsyncRequestQueue.hpp
- * @brief  AsyncRequestQueue class prototype.
+ * @file   AsyncSingleRequestQueue.hpp
+ * @brief  AsyncSingleRequestQueue class prototype.
  * @author zer0
  * @date   2018-11-13
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_ASYNCREQUESTQUEUE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_ASYNCREQUESTQUEUE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_ASYNCSINGLEREQUESTQUEUE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_ASYNCSINGLEREQUESTQUEUE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -32,7 +32,7 @@ namespace uvpp {
 namespace ex   {
 
 /**
- * AsyncRequestQueue class prototype.
+ * AsyncSingleRequestQueue class prototype.
  *
  * @author zer0
  * @date   2018-11-13
@@ -41,7 +41,7 @@ namespace ex   {
  *  This class is not thread safe.
  */
 template <typename T, typename RequestType>
-class AsyncRequestQueue : public Async
+class AsyncSingleRequestQueue : public Async
 {
 public:
     friend class libtbag::uvpp::Loop;
@@ -71,11 +71,11 @@ private:
     Request      _request;
 
 protected:
-    AsyncRequestQueue(Loop & loop) : Async(loop), _state(RequestState::RS_WAITING)
+    AsyncSingleRequestQueue(Loop & loop) : Async(loop), _state(RequestState::RS_WAITING)
     { /* EMPTY. */ }
 
 public:
-    virtual ~AsyncRequestQueue()
+    virtual ~AsyncSingleRequestQueue()
     { /* EMPTY. */ }
 
 public:
@@ -139,5 +139,5 @@ protected:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_ASYNCREQUESTQUEUE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_UVPP_EX_ASYNCSINGLEREQUESTQUEUE_HPP__
 
