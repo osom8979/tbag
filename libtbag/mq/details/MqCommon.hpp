@@ -27,22 +27,28 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq      {
 namespace details {
 
-enum class MqType : int
+enum class MqEvent : int
 {
-    MT_NONE,
-    MT_BOX_ADDRESS,
-    MT_CREATE,
+    ME_NONE,
+    ME_MSG,
+    ME_SHUTDOWN,
+    ME_CLOSE,
 };
+
+inline bool isMqMessageType(MqEvent type) TBAG_NOEXCEPT
+{
+    return type == MqEvent::ME_MSG /*|| type == MqEvent::ME_BOX_MSG*/;
+}
 
 struct MqMsg
 {
     using Box          = libtbag::container::Box;
     using BoxTypeTable = libtbag::container::BoxTypeTable;
 
-    MqType type;
-    Box    box;
+    MqEvent event;
+    Box     box;
 
-    MqMsg(std::size_t size) : type(MqType::MT_NONE),
+    MqMsg(std::size_t size) : event(MqEvent::ME_NONE),
                               box(BoxTypeTable::BTT_INT8, static_cast<unsigned>(size))
     { /* EMPTY. */ }
 
@@ -52,46 +58,52 @@ struct MqMsg
 
 struct MqMsgCopyFrom
 {
+    MqEvent      event;
     char const * data;
     std::size_t  size;
 
-    MqMsgCopyFrom(char const * d, std::size_t s) : data(d), size(s)
+    MqMsgCopyFrom(MqEvent e) : MqMsgCopyFrom(e, nullptr, 0)
     { /* EMPTY. */ }
-
+    MqMsgCopyFrom(char const * d, std::size_t s) : MqMsgCopyFrom(MqEvent::ME_MSG, d, s)
+    { /* EMPTY. */ }
+    MqMsgCopyFrom(MqEvent e, char const * d, std::size_t s) : event(e), data(d), size(s)
+    { /* EMPTY. */ }
     ~MqMsgCopyFrom()
     { /* EMPTY. */ }
 
     bool operator()(MqMsg * msg)
     {
-        Err code;
-        msg->type = MqType::MT_BOX_ADDRESS;
+        msg->event = event;
+        if (data == nullptr || size == 0) {
+            return true;
+        }
+
         assert(size <= libtbag::type::TypeInfo<unsigned>::maximum());
-        code = msg->box.resize(static_cast<unsigned>(size));
-        assert(isSuccess(code));
-        code = msg->box.copyFrom(data, size);
-        assert(isSuccess(code));
+        Err const RESIZE_CODE = msg->box.resize(static_cast<unsigned>(size));
+        assert(isSuccess(RESIZE_CODE));
+        Err const COPY_CODE = msg->box.copyFrom(data, size);
+        assert(isSuccess(COPY_CODE));
         return true;
     }
 };
 
 struct MqMsgCopyTo
 {
-    MqType      * type;
+    MqEvent     * event;
     char        * data;
     std::size_t    max;
     std::size_t * size;
 
-    MqMsgCopyTo(MqType * t, char * d, std::size_t m, std::size_t * s)
-            : type(t), data(d), max(m), size(s)
+    MqMsgCopyTo(MqEvent * e, char * d, std::size_t m, std::size_t * s)
+            : event(e), data(d), max(m), size(s)
     { /* EMPTY. */ }
-
     ~MqMsgCopyTo()
     { /* EMPTY. */ }
 
     bool operator()(MqMsg * msg)
     {
-        if (type != nullptr) {
-            *type = msg->type;
+        if (event != nullptr) {
+            *event = msg->event;
         }
         auto const BOX_SIZE = msg->box.size();
         if (size != nullptr) {
@@ -105,7 +117,6 @@ struct MqMsgCopyTo
         return true;
     }
 };
-
 
 struct MqInterface
 {

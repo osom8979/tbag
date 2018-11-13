@@ -77,9 +77,9 @@ Err MqQueue::enqueue(char const * data, std::size_t size)
     return enqueue(MqMsgCopyFrom(data, size));
 }
 
-Err MqQueue::dequeue(char * data, std::size_t max_buffer, MqType * type, std::size_t * size)
+Err MqQueue::dequeue(char * data, std::size_t max_buffer, MqEvent * event, std::size_t * size)
 {
-    return dequeue(MqMsgCopyTo(type, data, max_buffer, size));
+    return dequeue(MqMsgCopyTo(event, data, max_buffer, size));
 }
 
 } // namespace details

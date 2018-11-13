@@ -136,7 +136,7 @@ public:
 
 public:
     Err enqueue(char const * data, std::size_t size);
-    Err dequeue(char * data, std::size_t max_buffer, MqType * type, std::size_t * size);
+    Err dequeue(char * data, std::size_t max_buffer, MqEvent * event, std::size_t * size);
 };
 
 } // namespace details

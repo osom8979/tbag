@@ -9,6 +9,11 @@
 #include <libtbag/mq/details/MqSendQueue.hpp>
 
 #include <cstring>
+#include <string>
+#include <thread>
+#include <chrono>
+
+#define USE_DELAY_ENQUEUE_TEST
 
 using namespace libtbag;
 using namespace libtbag::mq;
@@ -18,31 +23,35 @@ struct MqSendQueueTest : public MqSendQueue
 {
     TBAG_CONSTEXPR static char const * TEST_VALUE = "TEST";
 
-    int async_success = 0;
-    int async_failure = 0;
-    int close_count   = 0;
+    int send_success = 0;
+    int send_failure = 0;
+    int delay_close_error = 0;
 
     MqSendQueueTest(Loop & loop, std::size_t size) : MqSendQueue(loop, size)
     { /* EMPTY. */ }
-
     virtual ~MqSendQueueTest()
     { /* EMPTY. */ }
 
-    virtual void onAsync(AsyncMsg * msg) override
+    virtual void onEvent(MqEvent event, char const * data, std::size_t size) override
     {
-        if (MqType::MT_BOX_ADDRESS == msg->type &&
-                msg->box.size() == strlen(TEST_VALUE) &&
-                msg->box.toString() == TEST_VALUE) {
-            ++async_success;
+        if (event == MqEvent::ME_CLOSE && isWatingSender()) {
+            this->closeAll();
         } else {
-            ++async_failure;
+            if (isFailure(enqueueClose())) {
+                ++delay_close_error;
+            }
         }
-        msg->close();
     }
 
-    virtual void onClose(AsyncMsg * msg) override
+    virtual void onSend(char const * data, std::size_t size) override
     {
-        ++close_count;
+        std::string const RESULT(data, data + size);
+        if (RESULT == TEST_VALUE) {
+            ++send_success;
+        } else {
+            ++send_failure;
+        }
+        doneWrite(Err::E_SUCCESS);
     }
 };
 
@@ -53,24 +62,30 @@ TEST(MqSendQueueTest, Default)
     libtbag::uvpp::Loop loop;
     MqSendQueueTest queue(loop, MAX_QUEUE);
     ASSERT_EQ(MAX_QUEUE, queue.getInaccurateSizeOfReady());
-    ASSERT_EQ(Err::E_SUCCESS, queue.enqueue(MqSendQueueTest::TEST_VALUE, strlen(MqSendQueueTest::TEST_VALUE)));
-    ASSERT_EQ(Err::E_SUCCESS, queue.enqueue(MqSendQueueTest::TEST_VALUE, strlen(MqSendQueueTest::TEST_VALUE)));
-    ASSERT_EQ(Err::E_SUCCESS, queue.enqueue(MqSendQueueTest::TEST_VALUE, strlen(MqSendQueueTest::TEST_VALUE)));
-    ASSERT_EQ(Err::E_SUCCESS, queue.enqueue(MqSendQueueTest::TEST_VALUE, strlen(MqSendQueueTest::TEST_VALUE)));
-    ASSERT_EQ(0, queue.getInaccurateSizeOfReady());
 
-    Err loop_result = Err::E_UNKNOWN;
+    std::size_t success_count = 0;
     std::thread thread([&](){
-        loop_result = loop.run();
+#if defined(USE_DELAY_ENQUEUE_TEST)
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+#endif
+        auto const * VAL = MqSendQueueTest::TEST_VALUE;
+        std::size_t const SIZE = strlen(VAL);
+        // @formatter:off
+        if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
+        if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
+        if (isSuccess(queue.enqueueClose())) { ++success_count; }
+        // @formatter:on
     });
+
+    Err const CODE = loop.run();
+    ASSERT_EQ(Err::E_SUCCESS, CODE);
 
     ASSERT_TRUE(thread.joinable());
     thread.join();
 
-    ASSERT_EQ(Err::E_SUCCESS, loop_result);
-
-    ASSERT_EQ(MAX_QUEUE, queue.async_success);
-    ASSERT_EQ(0, queue.async_failure);
-    ASSERT_EQ(MAX_QUEUE, queue.close_count);
+    ASSERT_EQ(3, success_count);
+    ASSERT_EQ(2, queue.send_success);
+    ASSERT_EQ(0, queue.send_failure);
+    ASSERT_EQ(0, queue.delay_close_error);
 }
 

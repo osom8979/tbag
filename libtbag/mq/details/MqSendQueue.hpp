@@ -18,13 +18,17 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#include <libtbag/container/Pointer.hpp>
 #include <libtbag/lockfree/BoundedMpMcQueue.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
 
-#include <libtbag/uvpp/Async.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Async.hpp>
 
 #include <cassert>
+#include <queue>
+#include <vector>
+#include <thread>
 #include <memory>
 
 // -------------------
@@ -39,6 +43,45 @@ namespace details {
  *
  * @author zer0
  * @date   2018-11-12
+ *
+ * @remarks
+ *  @code
+ *   +--------------------------------------------------------------------------------------------------+
+ *   |            :                                                                                     |
+ *   |  [WORKING] : [EVENT THREAD]                                                                      |
+ *   |  [THREAD ] :                                                                                     |
+ *   |            :                                                                                     |
+ *   |            : Lockfree                                                                            |
+ *   |            :  Ready                                                                              |
+ *   |    User    :  Queue                                                                              |
+ *   |     |      :    |                                                                                |
+ *   |     *<~~~~~~~~~~*           MqMsg                                                                |
+ *   |  dequeue   :    |           Async                                                                |
+ *   |     |      :    |             |                                                                  |
+ *   |     *~~~~~~~~~~~~~~~~~~~~~~~~>* (onAsync)                                                        |
+ *   |  message   :    |             |             MqMsgQueue                                           |
+ *   |   send     :    |             |                 |                                                |
+ *   |            :    |             *~~~~{if-msg}~~~~>*                                                |
+ *   |            :    |             |              enqueue          SendAsync {Sending-state}          |
+ *   |            :    |             |                 |                 |     {Waiting-state}          |
+ *   |            :    *<~{if-event}~*                 *~~{if-waiting}~~>*                              |
+ *   |            : enqueue                            |              message                           |
+ *   |            :    |                               |               send                             |
+ *   |            :    |                               |                 |                              |
+ *   |            :    |                               |                 * (onAsync)      Stream        |
+ *   |            :    |                               |                 |                  |           |
+ *   |            :    |                               |                 *~{send-message}~~>*           |
+ *   |            :    |                               |                 |                  |           |
+ *   |            :    |                               |                 *<~{write-message}~*(onWrite)  |
+ *   |            :    |                               |{Loop}           |                              |
+ *   |            :    |                               *<~~~~~~~~~~~~~~~~*                              |
+ *   |            :    |                          {If there are messages left in the queue ...}         |
+ *   |            :    |                                                 |                              |
+ *   |            :    *<~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*                              |
+ *   |            : enqueue                                                                             |
+ *   |            :                                                                                     |
+ *   +--------------------------------------------------------------------------------------------------+
+ *  @endcode
  */
 class TBAG_API MqSendQueue : private Noncopyable
 {
@@ -55,47 +98,97 @@ public:
     TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE = 1024;
 
 public:
+    enum class SendState
+    {
+        SS_WAITING,
+        SS_ASYNC,
+        SS_SENDING,
+    };
+
+public:
     struct AsyncMsg : public Async, public MqMsg
     {
         MqSendQueue * parent = nullptr;
 
         AsyncMsg(Loop & loop, std::size_t size, MqSendQueue * p)
                 : Async(loop), MqMsg(size), parent(p)
-        { /* EMPTY. */ }
-
+        { assert(parent != nullptr); }
         virtual ~AsyncMsg()
         { /* EMPTY. */ }
 
         virtual void onAsync() override
-        {
-            assert(parent != nullptr);
-            parent->onAsync(this);
-            auto const RESULT = parent->_ready->enqueue(this);
-            assert(RESULT);
-        }
+        { parent->onAsync(this); }
 
         virtual void onClose() override
-        {
-            assert(parent != nullptr);
-            parent->onClose(this);
-        }
+        { parent->onClose(this); }
     };
 
-    friend struct AsyncMsg;
+    struct SendAsync : public Async
+    {
+        MqSendQueue * parent = nullptr;
+
+        SendAsync(Loop & loop, MqSendQueue * p) : Async(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~SendAsync()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onAsync(this); }
+
+        virtual void onClose() override
+        { parent->onClose(this); }
+    };
 
 public:
-    using UniqueQueue = std::unique_ptr<BoundedMpMcQueue>;
+    using UniqueQueue     = std::unique_ptr<BoundedMpMcQueue>;
+    using SharedSendAsync = std::shared_ptr<SendAsync>;
+    using SharedAsyncMsg  = std::shared_ptr<AsyncMsg>;
+    using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
+    using MsgPointerQueue = std::queue<AsyncMsgPointer>;
+    using SharedAsyncMsgs = std::vector<SharedAsyncMsg>;
+    using ThreadId        = std::thread::id;
+
+private:
+    ThreadId const THREAD_ID;
 
 private:
     UniqueQueue _ready;
 
+private:
+    /**
+     * @warning
+     *  It must be accessed only from the loop thread.
+     */
+    struct {
+        SendState        state = SendState::SS_WAITING;
+        SharedSendAsync  sender;
+        SharedAsyncMsgs  messages;
+        MsgPointerQueue  queue;
+    } __local__;
+
 public:
-    MqSendQueue(Loop & loop, std::size_t size = DEFAULT_QUEUE_SIZE, std::size_t msg_size = DEFAULT_PACKET_SIZE);
+    MqSendQueue(Loop & loop,
+                std::size_t size = DEFAULT_QUEUE_SIZE,
+                std::size_t msg_size = DEFAULT_PACKET_SIZE);
     virtual ~MqSendQueue();
 
+private:
+    void onAsync(AsyncMsg * async);
+    void onAsync(SendAsync * async);
+
+    void onClose(AsyncMsg * async);
+    void onClose(SendAsync * async);
+
 protected:
-    virtual void onAsync(AsyncMsg * async);
-    virtual void onClose(AsyncMsg * async);
+    void closeAsyncMsgs();
+    void closeSendAsync();
+    void closeAll();
+
+protected:
+    bool isWatingSender() const;
+
+public:
+    void doneWrite(Err code);
 
 public:
     std::size_t getInaccurateSizeOfReady() const;
@@ -128,7 +221,15 @@ public:
     }
 
 public:
+    Err enqueueShutdown();
+    Err enqueueClose();
+
+public:
     Err enqueue(char const * data, std::size_t size);
+
+protected:
+    virtual void onEvent(MqEvent event, char const * data, std::size_t size);
+    virtual void onSend(char const * data, std::size_t size);
 };
 
 } // namespace details
