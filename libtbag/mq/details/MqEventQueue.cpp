@@ -1,11 +1,12 @@
 /**
- * @file   MqSendQueue.cpp
- * @brief  MqSendQueue class implementation.
+ * @file   MqEventQueue.cpp
+ * @brief  MqEventQueue class implementation.
  * @author zer0
  * @date   2018-11-12
+ * @date   2018-11-13 (Rename: MqSendQueue -> MqEventQueue)
  */
 
-#include <libtbag/mq/details/MqSendQueue.hpp>
+#include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -15,7 +16,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq      {
 namespace details {
 
-MqSendQueue::MqSendQueue(Loop & loop, std::size_t size, std::size_t msg_size)
+MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
         : THREAD_ID(std::this_thread::get_id())
 {
     std::size_t const POWER_OF_2 = BoundedMpMcQueue::calcMinimumQueueSize(size);
@@ -40,12 +41,12 @@ MqSendQueue::MqSendQueue(Loop & loop, std::size_t size, std::size_t msg_size)
     assert(static_cast<bool>(__local__.sender));
 }
 
-MqSendQueue::~MqSendQueue()
+MqEventQueue::~MqEventQueue()
 {
     assert(THREAD_ID == std::this_thread::get_id());
 }
 
-void MqSendQueue::onAsync(AsyncMsg * async)
+void MqEventQueue::onAsync(AsyncMsg * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
@@ -65,7 +66,7 @@ void MqSendQueue::onAsync(AsyncMsg * async)
     }
 }
 
-void MqSendQueue::onAsync(SendAsync * async)
+void MqEventQueue::onAsync(SendAsync * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
@@ -82,26 +83,26 @@ void MqSendQueue::onAsync(SendAsync * async)
     onSend(msg->box.cast<char>(), msg->box.size());
 }
 
-void MqSendQueue::onClose(AsyncMsg * async)
+void MqEventQueue::onClose(AsyncMsg * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
 }
 
-void MqSendQueue::onClose(SendAsync * async)
+void MqEventQueue::onClose(SendAsync * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
 }
 
-void MqSendQueue::closeAsyncMsgs()
+void MqEventQueue::closeAsyncMsgs()
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(__local__.sender));
     __local__.sender->close();
 }
 
-void MqSendQueue::closeSendAsync()
+void MqEventQueue::closeSendAsync()
 {
     assert(THREAD_ID == std::this_thread::get_id());
     for (auto & msg : __local__.messages) {
@@ -110,18 +111,18 @@ void MqSendQueue::closeSendAsync()
     }
 }
 
-void MqSendQueue::closeAll()
+void MqEventQueue::closeAll()
 {
     closeAsyncMsgs();
     closeSendAsync();
 }
 
-bool MqSendQueue::isWatingSender() const
+bool MqEventQueue::isWatingSender() const
 {
     return __local__.queue.empty() && __local__.state == SendState::SS_WAITING;
 }
 
-void MqSendQueue::doneWrite(Err code)
+void MqEventQueue::doneWrite(Err code)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(!__local__.queue.empty());
@@ -149,37 +150,37 @@ void MqSendQueue::doneWrite(Err code)
     }
 }
 
-std::size_t MqSendQueue::getInaccurateSizeOfReady() const
+std::size_t MqEventQueue::getInaccurateSizeOfReady() const
 {
     return _ready->potentially_inaccurate_count();
 }
 
-MqSendQueue::MiscValidity MqSendQueue::validateOfReady(std::size_t min, std::size_t max) const
+MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::size_t max) const
 {
     return _ready->singlethreaded_validate(min, max);
 }
 
-Err MqSendQueue::enqueueShutdown()
+Err MqEventQueue::enqueueShutdown()
 {
     return enqueue(MqMsgCopyFrom(MqEvent::ME_SHUTDOWN));
 }
 
-Err MqSendQueue::enqueueClose()
+Err MqEventQueue::enqueueClose()
 {
     return enqueue(MqMsgCopyFrom(MqEvent::ME_CLOSE));
 }
 
-Err MqSendQueue::enqueue(char const * data, std::size_t size)
+Err MqEventQueue::enqueue(char const * data, std::size_t size)
 {
     return enqueue(MqMsgCopyFrom(MqEvent::ME_MSG, data, size));
 }
 
-void MqSendQueue::onEvent(MqEvent event, char const * data, std::size_t size)
+void MqEventQueue::onEvent(MqEvent event, char const * data, std::size_t size)
 {
     assert(THREAD_ID == std::this_thread::get_id());
 }
 
-void MqSendQueue::onSend(char const * data, std::size_t size)
+void MqEventQueue::onSend(char const * data, std::size_t size)
 {
     assert(THREAD_ID == std::this_thread::get_id());
 }

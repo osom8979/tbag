@@ -1,12 +1,13 @@
 /**
- * @file   MqSendQueueTest.cpp
- * @brief  MqSendQueue class tester.
+ * @file   MqEventQueueTest.cpp
+ * @brief  MqEventQueue class tester.
  * @author zer0
  * @date   2018-11-12
+ * @date   2018-11-13 (Rename: MqSendQueue -> MqEventQueue)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/mq/details/MqSendQueue.hpp>
+#include <libtbag/mq/details/MqEventQueue.hpp>
 
 #include <cstring>
 #include <string>
@@ -19,7 +20,7 @@ using namespace libtbag;
 using namespace libtbag::mq;
 using namespace libtbag::mq::details;
 
-struct MqSendQueueTest : public MqSendQueue
+struct MqSendQueueTest : public MqEventQueue
 {
     TBAG_CONSTEXPR static char const * TEST_VALUE = "TEST";
 
@@ -27,7 +28,7 @@ struct MqSendQueueTest : public MqSendQueue
     int send_failure = 0;
     int delay_close_error = 0;
 
-    MqSendQueueTest(Loop & loop, std::size_t size) : MqSendQueue(loop, size)
+    MqSendQueueTest(Loop & loop, std::size_t size) : MqEventQueue(loop, size)
     { /* EMPTY. */ }
     virtual ~MqSendQueueTest()
     { /* EMPTY. */ }
@@ -55,7 +56,7 @@ struct MqSendQueueTest : public MqSendQueue
     }
 };
 
-TEST(MqSendQueueTest, Default)
+TEST(MqEventQueueTest, Default)
 {
     std::size_t const MAX_QUEUE = 4;
 

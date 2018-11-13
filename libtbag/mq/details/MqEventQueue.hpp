@@ -1,12 +1,13 @@
 /**
- * @file   MqSendQueue.hpp
- * @brief  MqSendQueue class prototype.
+ * @file   MqEventQueue.hpp
+ * @brief  MqEventQueue class prototype.
  * @author zer0
  * @date   2018-11-12
+ * @date   2018-11-13 (Rename: MqSendQueue -> MqEventQueue)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MQ_DETAILS_MQSENDQUEUE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MQ_DETAILS_MQSENDQUEUE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MQ_DETAILS_MQEVENTQUEUE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MQ_DETAILS_MQEVENTQUEUE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -39,10 +40,11 @@ namespace mq      {
 namespace details {
 
 /**
- * MqSendQueue class prototype.
+ * MqEventQueue class prototype.
  *
  * @author zer0
  * @date   2018-11-12
+ * @date   2018-11-13 (Rename: MqSendQueue -> MqEventQueue)
  *
  * @remarks
  *  @code
@@ -83,7 +85,7 @@ namespace details {
  *   +--------------------------------------------------------------------------------------------------+
  *  @endcode
  */
-class TBAG_API MqSendQueue : private Noncopyable
+class TBAG_API MqEventQueue : private Noncopyable
 {
 public:
     using Loop  = libtbag::uvpp::Loop;
@@ -108,9 +110,9 @@ public:
 public:
     struct AsyncMsg : public Async, public MqMsg
     {
-        MqSendQueue * parent = nullptr;
+        MqEventQueue * parent = nullptr;
 
-        AsyncMsg(Loop & loop, std::size_t size, MqSendQueue * p)
+        AsyncMsg(Loop & loop, std::size_t size, MqEventQueue * p)
                 : Async(loop), MqMsg(size), parent(p)
         { assert(parent != nullptr); }
         virtual ~AsyncMsg()
@@ -125,9 +127,9 @@ public:
 
     struct SendAsync : public Async
     {
-        MqSendQueue * parent = nullptr;
+        MqEventQueue * parent = nullptr;
 
-        SendAsync(Loop & loop, MqSendQueue * p) : Async(loop), parent(p)
+        SendAsync(Loop & loop, MqEventQueue * p) : Async(loop), parent(p)
         { assert(parent != nullptr); }
         virtual ~SendAsync()
         { /* EMPTY. */ }
@@ -167,10 +169,10 @@ private:
     } __local__;
 
 public:
-    MqSendQueue(Loop & loop,
+    MqEventQueue(Loop & loop,
                 std::size_t size = DEFAULT_QUEUE_SIZE,
                 std::size_t msg_size = DEFAULT_PACKET_SIZE);
-    virtual ~MqSendQueue();
+    virtual ~MqEventQueue();
 
 private:
     void onAsync(AsyncMsg * async);
@@ -239,5 +241,5 @@ protected:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MQ_DETAILS_MQSENDQUEUE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MQ_DETAILS_MQEVENTQUEUE_HPP__
 
