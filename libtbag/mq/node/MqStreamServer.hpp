@@ -21,10 +21,12 @@
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
 
+#include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Async.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
 #include <libtbag/uvpp/Pipe.hpp>
+#include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/proto/MsgPacket.hpp>
 
@@ -56,6 +58,7 @@ public:
     using Async  = libtbag::uvpp::Async;
     using Tcp    = libtbag::uvpp::Tcp;
     using Pipe   = libtbag::uvpp::Pipe;
+    using Timer  = libtbag::uvpp::Timer;
 
     using ConnectRequest  = libtbag::uvpp::ConnectRequest;
     using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
@@ -106,8 +109,11 @@ private:
         AsyncMsgQueue queue;
 
         Writer(Loop & loop, MqStreamServer * p)
-                : Async(loop), parent(p), state(RequestState::RS_WAITING), write_count(0), queue()
+                : Async(loop), parent(p),
+                  state(RequestState::RS_WAITING),
+                  write_count(0), queue()
         { assert(parent != nullptr); }
+
         virtual ~Writer()
         { /* EMPTY. */ }
 
@@ -120,6 +126,24 @@ private:
         { parent->onWriterClose(this); }
     };
 
+    struct CloseTimer : public Timer
+    {
+        Stream * stream;
+
+        CloseTimer(Loop & loop, Stream * s) : Timer(loop), stream(s)
+        { assert(stream != nullptr); }
+        virtual ~CloseTimer()
+        { /* EMPTY. */ }
+
+        virtual void onTimer() override
+        {
+            if (!stream->isClosing()) {
+                stream->close();
+            }
+            close();
+        }
+    };
+
     template <typename _BaseT>
     struct Node : public _BaseT
     {
@@ -129,6 +153,7 @@ private:
         WriteRequest    write_req;
 
         Buffer read_buffer;
+        Buffer remaining_read;
 
         Node(Loop & loop, MqStreamServer * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
@@ -289,6 +314,10 @@ protected:
     binf onNodeAlloc   (Stream * node, std::size_t suggested_size);
     void onNodeRead    (Stream * node, Err code, char const * buffer, std::size_t size);
     void onNodeClose   (Stream * node);
+
+private:
+    Err closeNode(Stream * node, std::size_t wait_closing_millisec = 0);
+    void closeAllNode(std::size_t wait_closing_millisec = 0);
 
 protected:
     void onServerConnection(Stream * server, Err code);

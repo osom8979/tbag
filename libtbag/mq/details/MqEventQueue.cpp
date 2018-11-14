@@ -81,14 +81,24 @@ MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::s
     return _ready->singlethreaded_validate(min, max);
 }
 
-Err MqEventQueue::enqueue(char const * data, std::size_t size)
-{
-    return enqueue(MqMsgCopyFrom(data, size));
-}
-
 Err MqEventQueue::enqueueClose()
 {
-    return enqueue(MqMsgCopyFrom(MqEvent::ME_CLOSE));
+    return enqueue(MqEvent::ME_CLOSE, nullptr, 0);
+}
+
+Err MqEventQueue::enqueue(MqMsg const & msg)
+{
+    return enqueue(msg.event, msg.data(), msg.size());
+}
+
+Err MqEventQueue::enqueue(char const * data, std::size_t size)
+{
+    return enqueue(MqEvent::ME_MSG, data, size);
+}
+
+Err MqEventQueue::enqueue(MqEvent event, char const * data, std::size_t size)
+{
+    return enqueue(MqMsgCopyFrom(event, data, size));
 }
 
 MqEventQueue::AfterAction MqEventQueue::onMsg(AsyncMsg * msg)

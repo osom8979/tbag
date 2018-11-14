@@ -187,8 +187,10 @@ public:
     }
 
 public:
-    Err enqueue(char const * data, std::size_t size);
     Err enqueueClose();
+    Err enqueue(MqMsg const & msg);
+    Err enqueue(char const * data, std::size_t size);
+    Err enqueue(MqEvent event, char const * data, std::size_t size);
 
 protected:
     virtual AfterAction onMsg(AsyncMsg * msg);
