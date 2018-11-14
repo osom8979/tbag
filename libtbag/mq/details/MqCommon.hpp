@@ -38,14 +38,8 @@ enum class MqEvent : int32_t
 {
     ME_NONE,
     ME_MSG,
-    ME_SHUTDOWN,
     ME_CLOSE,
 };
-
-inline bool isMqMessageType(MqEvent type) TBAG_NOEXCEPT
-{
-    return type == MqEvent::ME_MSG /*|| type == MqEvent::ME_BOX_MSG*/;
-}
 
 enum class MqType : int
 {

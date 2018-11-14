@@ -130,7 +130,7 @@ public:
     using SharedAsyncMsgs = std::vector<SharedAsyncMsg>;
     using ThreadId        = std::thread::id;
 
-private:
+public:
     ThreadId const THREAD_ID;
 
 private:
@@ -187,11 +187,8 @@ public:
     }
 
 public:
-    Err enqueueShutdown();
-    Err enqueueClose();
-
-public:
     Err enqueue(char const * data, std::size_t size);
+    Err enqueueClose();
 
 protected:
     virtual AfterAction onMsg(AsyncMsg * msg);

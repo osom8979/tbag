@@ -52,6 +52,7 @@ class TBAG_API MqStreamServer : public libtbag::mq::details::MqEventQueue,
 public:
     using Loop   = libtbag::uvpp::Loop;
     using Stream = libtbag::uvpp::Stream;
+    using Async  = libtbag::uvpp::Async;
     using Tcp    = libtbag::uvpp::Tcp;
     using Pipe   = libtbag::uvpp::Pipe;
 
@@ -66,6 +67,7 @@ public:
     using binf   = libtbag::util::binf;
     using cbinf  = libtbag::util::cbinf;
 
+    using MqEvent      = libtbag::mq::details::MqEvent;
     using MqType       = libtbag::mq::details::MqType;
     using MqMsg        = libtbag::mq::details::MqMsg;
     using MqEventQueue = libtbag::mq::details::MqEventQueue;
@@ -73,25 +75,43 @@ public:
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
+    using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
 public:
     TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE    = MqEventQueue::DEFAULT_QUEUE_SIZE;
     TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE   = MqEventQueue::DEFAULT_PACKET_SIZE;
     TBAG_CONSTEXPR static std::size_t DEFAULT_MAX_NODE_SIZE = 100000; // C10K
 
+public:
+    enum class RequestState
+    {
+        RS_WAITING,
+        RS_ASYNC,
+        RS_REQUESTING,
+    };
+
 private:
-    struct EventQueue : public MqEventQueue
+    struct Writer : public Async
     {
         MqStreamServer * parent = nullptr;
 
-        EventQueue(Loop & loop, std::size_t size, std::size_t msg_size, MqStreamServer * p)
-                : MqEventQueue(loop, size, msg_size), parent(p)
+        RequestState  state;
+        std::size_t   write_count;
+        AsyncMsgQueue queue;
+
+        Writer(Loop & loop, MqStreamServer * p)
+                : Async(loop), parent(p), state(RequestState::RS_WAITING), write_count(0), queue()
         { assert(parent != nullptr); }
-        virtual ~EventQueue()
+        virtual ~Writer()
         { /* EMPTY. */ }
 
-        virtual AfterAction onMsg(AsyncMsg * msg) override
-        { return parent->onMsg(msg); }
+        inline bool isWaiting() const TBAG_NOEXCEPT
+        { return state == RequestState::RS_WAITING; }
+
+        virtual void onAsync() override
+        { parent->onWriterAsync(this); }
+        virtual void onClose() override
+        { parent->onWriterClose(this); }
     };
 
     template <typename _BaseT>
@@ -145,6 +165,8 @@ public:
     using PipeServer = Server<Pipe>;
 
 public:
+    using SharedWriter = std::shared_ptr<Writer>;
+
     using SharedTcpNode  = std::shared_ptr<TcpNode>;
     using SharedPipeNode = std::shared_ptr<PipeNode>;
 
@@ -160,7 +182,7 @@ public:
 public:
     struct Params
     {
-        std::string  uri;
+        std::string  dest;
         int          port       = 0;
         MqType       type       = MqType::MT_TCP;
         std::size_t  queue_size = DEFAULT_QUEUE_SIZE;
@@ -179,6 +201,7 @@ private:
 
 private:
     SharedStream _server;
+    SharedWriter _writer;
     NodeSet      _nodes;
 
 public:
@@ -187,6 +210,10 @@ public:
 
 protected:
     virtual AfterAction onMsg(AsyncMsg * msg) override;
+
+protected:
+    void onWriterAsync(Writer * writer);
+    void onWriterClose(Writer * writer);
 
 protected:
     void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
