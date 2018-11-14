@@ -63,12 +63,8 @@ MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     return AfterAction::AA_OK;
 }
 
-// ---------------
-namespace __impl {
-// ---------------
-
 template <typename NodeT>
-std::size_t writeAll(MqStreamServer::NodeSet & nodes, char const * data, std::size_t size)
+static std::size_t __write_all_nodes(MqStreamServer::NodeSet & nodes, char const * data, std::size_t size)
 {
     std::size_t success_counter = 0;
     for (auto & cursor : nodes) {
@@ -81,10 +77,6 @@ std::size_t writeAll(MqStreamServer::NodeSet & nodes, char const * data, std::si
     }
     return success_counter;
 }
-
-// ------------------
-} // namespace __impl
-// ------------------
 
 void MqStreamServer::onWriterAsync(Writer * writer)
 {
@@ -101,9 +93,9 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto const   size = msg_pointer->data.size();
 
     if (TYPE == MqType::MT_PIPE) {
-        writer->write_count = __impl::writeAll<PipeNode>(_nodes, data, size);
+        writer->write_count = __write_all_nodes<PipeNode>(_nodes, data, size);
     } else {
-        writer->write_count = __impl::writeAll<TcpNode>(_nodes, data, size);
+        writer->write_count = __write_all_nodes<TcpNode>(_nodes, data, size);
     }
 }
 
