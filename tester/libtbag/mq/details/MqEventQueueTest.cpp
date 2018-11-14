@@ -38,7 +38,7 @@ struct MqSendQueueTest : public MqEventQueue
     virtual AfterAction onMsg(AsyncMsg * msg) override
     {
         if (msg->event == MqEvent::ME_MSG) {
-            if (std::string(msg->data.begin(), msg->data.end()) == TEST_VALUE) {
+            if (std::string(msg->begin(), msg->end()) == TEST_VALUE) {
                 ++send_success;
             } else {
                 ++send_failure;

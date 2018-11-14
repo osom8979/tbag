@@ -26,6 +26,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -65,18 +67,63 @@ struct MqMsg
     static_assert(sizeof(Buffer::value_type) == 1,
                   "The minimum unit of the buffer element must be 1 Byte.");
 
-    MqEvent event;
-    Buffer  data;
+    MqEvent  event;
+    Buffer   buffer;
 
-    MqMsg() : event(MqEvent::ME_NONE), data()
+    MqMsg() : event(MqEvent::ME_NONE), buffer()
     { /* EMPTY. */ }
-    MqMsg(std::size_t s) : event(MqEvent::ME_NONE), data(s)
+    MqMsg(std::size_t s) : event(MqEvent::ME_NONE), buffer(s)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e, std::size_t s) : event(e), data(s)
+    MqMsg(MqEvent e, std::size_t s) : event(e), buffer(s)
+    { /* EMPTY. */ }
+
+    MqMsg(MqMsg const & obj) : event(obj.event), buffer(obj.buffer)
+    { /* EMPTY. */ }
+    MqMsg(MqMsg && obj) TBAG_NOEXCEPT : event(std::move(obj.event)), buffer(std::move(obj.buffer))
     { /* EMPTY. */ }
 
     ~MqMsg()
     { /* EMPTY. */ }
+
+    MqMsg & operator =(MqMsg const & obj)
+    {
+        if (this != &obj) {
+            event  = obj.event;
+            buffer = obj.buffer;
+        }
+        return *this;
+    }
+
+    MqMsg & operator =(MqMsg && obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            std::swap(event, obj.event);
+            buffer.swap(obj.buffer);
+        }
+        return *this;
+    }
+
+    inline char * data() TBAG_NOEXCEPT_SP_OP(buffer.data())
+    { return buffer.data(); }
+
+    inline char const * data() const TBAG_NOEXCEPT_SP_OP(buffer.data())
+    { return buffer.data(); }
+
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(buffer.empty())
+    { return buffer.empty(); }
+
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(buffer.size())
+    { return buffer.size(); }
+
+    inline Buffer::iterator begin() TBAG_NOEXCEPT
+    { return buffer.begin(); }
+    inline Buffer::const_iterator begin() const TBAG_NOEXCEPT
+    { return buffer.begin(); }
+
+    inline Buffer::iterator end() TBAG_NOEXCEPT
+    { return buffer.end(); }
+    inline Buffer::const_iterator end() const TBAG_NOEXCEPT
+    { return buffer.end(); }
 };
 
 /**

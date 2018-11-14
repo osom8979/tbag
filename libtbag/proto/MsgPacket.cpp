@@ -129,7 +129,7 @@ public:
 
     Err build(MqMsg const & msg)
     {
-        return build((int32_t)msg.event, (int8_t const *)msg.data.data(), msg.data.size());
+        return build((int32_t)msg.event, (int8_t const *)msg.data(), msg.size());
     }
 
     Err build(int32_t event, int8_t const * data, std::size_t size)
@@ -234,7 +234,7 @@ Err MsgPacketParser::parse(char const * buffer, std::size_t size, MqMsg * msg, s
     if (msg != nullptr) {
         auto const * PACKET = GetMsgPacket(buffer);
         msg->event = (MqEvent)PACKET->event();
-        msg->data.assign(PACKET->data()->begin(), PACKET->data()->end());
+        msg->buffer.assign(PACKET->data()->begin(), PACKET->data()->end());
     }
     return Err::E_SUCCESS;
 }

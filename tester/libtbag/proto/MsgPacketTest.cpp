@@ -18,7 +18,7 @@ TEST(MsgPacketTest, Default)
 
     MsgPacket::MqMsg msg1;
     msg1.event = TEST_EVENT;
-    msg1.data.assign(TEST_VALUE.begin(), TEST_VALUE.end());
+    msg1.buffer.assign(TEST_VALUE.begin(), TEST_VALUE.end());
 
     MsgPacket packet;
     ASSERT_EQ(Err::E_SUCCESS, packet.build(msg1));
@@ -30,6 +30,6 @@ TEST(MsgPacketTest, Default)
     ASSERT_EQ(Err::E_SUCCESS, packet.parse(BUILD_BUFFER, &msg2, &computed_size));
     ASSERT_EQ(BUILD_BUFFER.size(), computed_size);
     ASSERT_EQ(TEST_EVENT, msg2.event);
-    ASSERT_EQ(TEST_VALUE, std::string(msg2.data.begin(), msg2.data.end()));
+    ASSERT_EQ(TEST_VALUE, std::string(msg2.begin(), msg2.end()));
 }
 

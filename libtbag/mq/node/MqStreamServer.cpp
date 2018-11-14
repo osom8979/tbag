@@ -22,8 +22,8 @@ namespace node {
 using binf = MqStreamServer::binf;
 
 MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
-        : MqEventQueue(loop, params.queue_size, params.msg_size),
-          TYPE(params.type), _params(params), _server(), _nodes()
+        : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
+          TYPE(params.type), _params(params), _server(), _nodes(), _packer(params.packer_size)
 {
     if (TYPE == MqType::MT_PIPE) {
         _server = loop.newHandle<PipeServer>(loop, this);
@@ -40,7 +40,7 @@ MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
 
 MqStreamServer::~MqStreamServer()
 {
-    // EMPTY.
+    assert(THREAD_ID == std::this_thread::get_id());
 }
 
 MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
@@ -89,8 +89,8 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto const msg_pointer = writer->queue.front();
     assert(static_cast<bool>(msg_pointer));
 
-    auto const * data = msg_pointer->data.data();
-    auto const   size = msg_pointer->data.size();
+    auto const * data = msg_pointer->data();
+    auto const   size = msg_pointer->size();
 
     if (TYPE == MqType::MT_PIPE) {
         writer->write_count = __write_all_nodes<PipeNode>(_nodes, data, size);

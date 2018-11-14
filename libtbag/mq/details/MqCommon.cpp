@@ -47,7 +47,7 @@ bool MqMsgCopyFrom::operator()(MqMsg * msg)
     if (data == nullptr || size == 0) {
         return true;
     }
-    msg->data.assign(data, data + size);
+    msg->buffer.assign(data, data + size);
     return true;
 }
 
@@ -71,12 +71,12 @@ bool MqMsgCopyTo::operator()(MqMsg * msg)
     if (event != nullptr) {
         *event = msg->event;
     }
-    auto const SIZE = msg->data.size();
+    auto const SIZE = msg->size();
     if (size != nullptr) {
         *size = SIZE;
     }
     if (data != nullptr) {
-        auto const BEGIN = msg->data.begin();
+        auto const BEGIN = msg->begin();
         auto const END   = BEGIN + (SIZE <= max ? SIZE : max);
         std::copy(BEGIN, END, data);
     }

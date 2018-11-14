@@ -26,6 +26,7 @@
 #include <libtbag/uvpp/Tcp.hpp>
 #include <libtbag/uvpp/Pipe.hpp>
 #include <libtbag/uvpp/Request.hpp>
+#include <libtbag/proto/MsgPacket.hpp>
 
 #include <vector>
 #include <unordered_set>
@@ -71,16 +72,21 @@ public:
     using MqType       = libtbag::mq::details::MqType;
     using MqMsg        = libtbag::mq::details::MqMsg;
     using MqEventQueue = libtbag::mq::details::MqEventQueue;
+    using MqQueue      = libtbag::mq::details::MqQueue;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
+    using MsgPacket = libtbag::proto::MsgPacket;
+
 public:
-    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE    = MqEventQueue::DEFAULT_QUEUE_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE   = MqEventQueue::DEFAULT_PACKET_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_MAX_NODE_SIZE = 100000; // C10K
+    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE     = MqEventQueue::DEFAULT_QUEUE_SIZE;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE    = MqEventQueue::DEFAULT_PACKET_SIZE;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_MAX_NODE_SIZE  = 100000; // C10K
+    TBAG_CONSTEXPR static std::size_t DEFAULT_BUILDER_SIZE   = MsgPacket::DEFAULT_BUILDER_CAPACITY;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_CLOSE_MILLISEC = 1 * 1000;
 
 public:
     enum class RequestState
@@ -182,12 +188,72 @@ public:
 public:
     struct Params
     {
-        std::string  dest;
-        int          port       = 0;
-        MqType       type       = MqType::MT_TCP;
-        std::size_t  queue_size = DEFAULT_QUEUE_SIZE;
-        std::size_t  msg_size   = DEFAULT_PACKET_SIZE;
-        std::size_t  max_nodes  = DEFAULT_MAX_NODE_SIZE;
+        /**
+         * Type of stream. must be TCP or PIPE.
+         */
+        MqType type = MqType::MT_TCP;
+
+        /**
+         * Bind address.
+         *
+         * @remarks
+         *  - tcp: bind socket address.
+         *  - pipe: pipe file path.
+         */
+        std::string bind;
+
+        /**
+         * Bind port number.
+         *
+         * @remarks
+         *  - tcp: port number.
+         *  - pipe: unused.
+         */
+        int port = 0;
+
+        /**
+         * The maximum size of the queue for transmission.
+         */
+        std::size_t send_queue_size = DEFAULT_QUEUE_SIZE;
+
+        /**
+         * The default size of the transmission message packet.
+         *
+         * @remarks
+         *  If memory is insufficient, it will be more expanded.
+         */
+        std::size_t send_msg_size = DEFAULT_PACKET_SIZE;
+
+        /**
+         * The maximum size of the queue for receive
+         */
+        std::size_t recv_queue_size = DEFAULT_QUEUE_SIZE;
+
+        /**
+         * The default size of the receive message packet.
+         *
+         * @remarks
+         *  If memory is insufficient, it will be more expanded.
+         */
+        std::size_t recv_msg_size = DEFAULT_PACKET_SIZE;
+
+        /**
+         * The number of clients that can be accepted.
+         */
+        std::size_t max_nodes = DEFAULT_MAX_NODE_SIZE;
+
+        /**
+         * Temporary buffer size for serialization.
+         */
+        std::size_t packer_size = DEFAULT_BUILDER_SIZE;
+
+        /**
+         * Wait time to closing. If this value is 0, close immediately.
+         *
+         * @remarks
+         *  If you request a shutdown directly, You need time to wait for an idle recv request.
+         */
+        std::size_t wait_closing_millisec = DEFAULT_CLOSE_MILLISEC;
 
         Params() { /* EMPTY. */ }
         ~Params() { /* EMPTY. */ }
@@ -203,6 +269,8 @@ private:
     SharedStream _server;
     SharedWriter _writer;
     NodeSet      _nodes;
+    MsgPacket    _packer;
+    MqQueue      _recv_queue;
 
 public:
     MqStreamServer(Loop & loop, Params const & params);
