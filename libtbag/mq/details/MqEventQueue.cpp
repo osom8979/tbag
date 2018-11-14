@@ -48,11 +48,11 @@ void MqEventQueue::onAsync(AsyncMsg * async)
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
     auto const AFTER_ACTION = onMsg(async);
-    if (AFTER_ACTION == READY_ACTION) {
+    if (AFTER_ACTION == AfterAction::AA_OK) {
         auto const RESULT = _ready->enqueue(async);
         assert(RESULT);
     } else {
-        assert(AFTER_ACTION == DELAY_ACTION);
+        assert(AFTER_ACTION == AfterAction::AA_DELAY);
     }
 }
 
@@ -100,7 +100,7 @@ MqEventQueue::AfterAction MqEventQueue::onMsg(MqMsg * msg)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
-    return READY_ACTION;
+    return AfterAction::AA_OK;
 }
 
 } // namespace details

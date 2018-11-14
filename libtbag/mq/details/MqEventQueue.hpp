@@ -98,8 +98,8 @@ public:
 public:
     enum class AfterAction : int
     {
+        AA_OK,
         AA_DELAY,
-        AA_READY,
     };
 
 public:
@@ -192,10 +192,6 @@ public:
 
 public:
     Err enqueue(char const * data, std::size_t size);
-
-protected:
-    TBAG_CONSTEXPR static AfterAction const DELAY_ACTION = AfterAction::AA_DELAY;
-    TBAG_CONSTEXPR static AfterAction const READY_ACTION = AfterAction::AA_READY;
 
 protected:
     virtual AfterAction onMsg(MqMsg * msg);
