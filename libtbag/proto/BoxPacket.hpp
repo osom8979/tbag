@@ -146,7 +146,7 @@ private:
     uint64_t _id;
     int32_t  _type;
     int32_t  _code;
-    BoxMap _bags;
+    BoxMap   _bags;
 
 public:
     enum class UserArgType : int

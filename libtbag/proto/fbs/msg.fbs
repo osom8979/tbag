@@ -1,0 +1,12 @@
+// tbag packet protocols.
+
+namespace libtbag.proto.fbs.msg;
+
+table MsgPacket
+{
+    event : int;
+    data  : [byte];
+}
+
+root_type MsgPacket;
+

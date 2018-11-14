@@ -48,6 +48,11 @@ set (BOX_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/box_t2s.h")
 tbag_modules__build_dep_flatc_cpp (box_fbs "${BOX_FBS_SRC}")
 tbag_modules__text_to_cpp11string (box_t2s "${BOX_T2S_PATH}" box __box__ "${BOX_FBS_SRC}")
 
+set (MSG_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/msg.fbs")
+set (MSG_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/msg_t2s.h")
+tbag_modules__build_dep_flatc_cpp (msg_fbs "${MSG_FBS_SRC}")
+tbag_modules__text_to_cpp11string (msg_t2s "${MSG_T2S_PATH}" msg __msg__ "${MSG_FBS_SRC}")
+
 if (CUDA_FOUND)
     tbag_modules__check_cuda ()
     tbag_modules__apply_cuda ()
