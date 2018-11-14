@@ -47,13 +47,7 @@ bool MqMsgCopyFrom::operator()(MqMsg * msg)
     if (data == nullptr || size == 0) {
         return true;
     }
-
-    assert(size <= libtbag::type::TypeInfo<unsigned>::maximum());
-    Err const RESIZE_CODE = msg->box.resize(static_cast<unsigned>(size));
-    assert(isSuccess(RESIZE_CODE));
-    Err const COPY_CODE = msg->box.copyFrom(data, size);
-    assert(isSuccess(COPY_CODE));
-
+    msg->data.assign(data, data + size);
     return true;
 }
 
@@ -77,13 +71,13 @@ bool MqMsgCopyTo::operator()(MqMsg * msg)
     if (event != nullptr) {
         *event = msg->event;
     }
-    auto const BOX_SIZE = msg->box.size();
+    auto const SIZE = msg->data.size();
     if (size != nullptr) {
-        *size = BOX_SIZE;
+        *size = SIZE;
     }
     if (data != nullptr) {
-        auto const * BEGIN = msg->box.cast<int8_t>();
-        auto const * END   = BEGIN + (BOX_SIZE <= max ? BOX_SIZE : max);
+        auto const BEGIN = msg->data.begin();
+        auto const END   = BEGIN + (SIZE <= max ? SIZE : max);
         std::copy(BEGIN, END, data);
     }
     return true;

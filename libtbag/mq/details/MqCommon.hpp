@@ -17,10 +17,10 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/container/Box.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Async.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
 #include <libtbag/uvpp/Pipe.hpp>
 #include <libtbag/uvpp/Udp.hpp>
@@ -41,7 +41,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq      {
 namespace details {
 
-enum class MqEvent : int
+enum class MqEvent : int32_t
 {
     ME_NONE,
     ME_MSG,
@@ -73,15 +73,19 @@ struct tcp_t  { /* EMPTY. */ };
  */
 struct MqMsg
 {
-    using Box          = libtbag::container::Box;
-    using BoxTypeTable = libtbag::container::BoxTypeTable;
+    using Buffer = libtbag::util::Buffer;
+
+    static_assert(sizeof(Buffer::value_type) == 1,
+                  "The minimum unit of the buffer element must be 1 Byte.");
 
     MqEvent event;
-    int     channel;
-    Box     box;
+    Buffer  data;
 
-    MqMsg(std::size_t size) : event(MqEvent::ME_NONE), channel(0),
-                              box(BoxTypeTable::BTT_INT8, static_cast<unsigned>(size))
+    MqMsg() : event(MqEvent::ME_NONE), data()
+    { /* EMPTY. */ }
+    MqMsg(std::size_t s) : event(MqEvent::ME_NONE), data(s)
+    { /* EMPTY. */ }
+    MqMsg(MqEvent e, std::size_t s) : event(e), data(s)
     { /* EMPTY. */ }
 
     ~MqMsg()
