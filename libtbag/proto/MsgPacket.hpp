@@ -101,6 +101,8 @@ public:
  *
  * @author zer0
  * @date   2018-11-14
+ *
+ * @translate{ko, 한국인을 울린 그 맛!}
  */
 class TBAG_API MsgPacket : public MsgPacketBuilder, public MsgPacketParser
 {
