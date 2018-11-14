@@ -116,6 +116,9 @@ protected:
 public:
     virtual Err send(char const * buffer, std::size_t size) override;
     virtual Err recv(std::vector<char> & buffer) override;
+
+public:
+    virtual Err recvWait(std::vector<char> & buffer) override;
 };
 
 } // namespace node

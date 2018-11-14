@@ -233,6 +233,11 @@ Err MqStreamServer::recv(std::vector<char> & buffer)
     return Err::E_UNSUPOP;
 }
 
+Err MqStreamServer::recvWait(std::vector<char> & buffer)
+{
+    return Err::E_UNSUPOP;
+}
+
 } // namespace node
 } // namespace mq
 

@@ -122,6 +122,8 @@ struct MqInterface
 {
     virtual Err send(char const * buffer, std::size_t size) = 0;
     virtual Err recv(std::vector<char> & buffer) = 0;
+
+    virtual Err recvWait(std::vector<char> & buffer) = 0;
 };
 
 } // namespace details
