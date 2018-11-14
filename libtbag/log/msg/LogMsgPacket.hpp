@@ -1,17 +1,16 @@
 /**
- * @file   MsgPacket.hpp
- * @brief  MsgPacket class prototype.
+ * @file   LogMsgPacket.hpp
+ * @brief  LogMsgPacket class prototype.
  * @author zer0
  * @date   2016-07-09
+ * @date   2016-11-14 (MsgPacket -> LogMsgPacket)
  *
  * @remarks
  *  Log message packet.
- *
- * @translate{ko, 한국인을 울린 그 맛!}
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_MSG_MSGPACKET_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_MSG_MSGPACKET_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_MSG_LOGMSGPACKET_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_LOG_MSG_LOGMSGPACKET_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -33,12 +32,13 @@ namespace log {
 namespace msg {
 
 /**
- * MsgPacket class prototype.
+ * LogMsgPacket class prototype.
  *
  * @author zer0
  * @date   2016-07-09
+ * @date   2016-11-14 (MsgPacket -> LogMsgPacket)
  */
-class MsgPacket
+class LogMsgPacket
 {
 public:
     using Severity = level::Severity;
@@ -50,24 +50,24 @@ private:
 
 public:
     // @formatter:off
-    MsgPacket() : _severity(level::INFORMATIONAL_SEVERITY), _message()
+    LogMsgPacket() : _severity(level::INFORMATIONAL_SEVERITY), _message()
     { /* EMPTY. */ }
-    MsgPacket(Severity const & severity) : _severity(severity), _message()
+    LogMsgPacket(Severity const & severity) : _severity(severity), _message()
     { /* EMPTY. */ }
-    MsgPacket(String const & msg) : _severity(level::INFORMATIONAL_SEVERITY), _message(msg)
+    LogMsgPacket(String const & msg) : _severity(level::INFORMATIONAL_SEVERITY), _message(msg)
     { /* EMPTY. */ }
-    MsgPacket(Severity const & severity, String const & msg) : _severity(severity), _message(msg)
+    LogMsgPacket(Severity const & severity, String const & msg) : _severity(severity), _message(msg)
     { /* EMPTY. */ }
-    MsgPacket(MsgPacket const & obj) : MsgPacket()
+    LogMsgPacket(LogMsgPacket const & obj) : LogMsgPacket()
     { (*this) = obj; }
-    MsgPacket(MsgPacket && obj) : MsgPacket()
+    LogMsgPacket(LogMsgPacket && obj) : LogMsgPacket()
     { (*this) = std::move(obj); }
-    virtual ~MsgPacket()
+    virtual ~LogMsgPacket()
     { /* EMPTY. */ }
     // @formatter:on
 
 public:
-    inline MsgPacket & operator =(MsgPacket const & obj)
+    inline LogMsgPacket & operator =(LogMsgPacket const & obj)
     {
         if (this != &obj) {
             _severity = obj._severity;
@@ -76,7 +76,7 @@ public:
         return *this;
     }
 
-    inline MsgPacket & operator =(MsgPacket && obj)
+    inline LogMsgPacket & operator =(LogMsgPacket && obj)
     {
         if (this != &obj) {
             _severity = std::move(obj._severity);
@@ -85,19 +85,19 @@ public:
         return *this;
     }
 
-    inline MsgPacket & operator =(char const * message)
+    inline LogMsgPacket & operator =(char const * message)
     {
         _message = message;
         return *this;
     }
 
-    inline MsgPacket & operator =(String const & message)
+    inline LogMsgPacket & operator =(String const & message)
     {
         _message = message;
         return *this;
     }
 
-    inline friend void swap(MsgPacket & lh, MsgPacket & rh)
+    inline friend void swap(LogMsgPacket & lh, LogMsgPacket & rh)
     {
         if (&lh != &rh) {
             std::swap(lh._severity, rh._severity);
@@ -139,7 +139,7 @@ public:
     // @formatter:on
 
 public:
-    friend MsgPacket & operator <<(MsgPacket & msg, char value)
+    friend LogMsgPacket & operator <<(LogMsgPacket & msg, char value)
     {
         msg._message.append(1, value);
         return msg;
@@ -147,7 +147,7 @@ public:
 
 #ifndef MSGPACKET_LEFT_SHIFT_OPERATOR
 #define MSGPACKET_LEFT_SHIFT_OPERATOR(type, value, append)      \
-    friend MsgPacket & operator <<(MsgPacket & msg, type value) \
+    friend LogMsgPacket & operator <<(LogMsgPacket & msg, type value) \
     { msg._message += append; return msg; }
 #endif
 
@@ -184,5 +184,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_MSG_MSGPACKET_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_MSG_LOGMSGPACKET_HPP__
 

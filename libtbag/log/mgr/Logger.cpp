@@ -33,7 +33,7 @@ Logger::~Logger()
 void Logger::write(Severity const & severity, String const & message)
 {
     if (static_cast<bool>(_sink) && _severity.isContain(severity)) {
-        _sink->safeWrite(_generator.make(MsgPacket(severity, message)));
+        _sink->safeWrite(_generator.make(LogMsgPacket(severity, message)));
     }
 }
 

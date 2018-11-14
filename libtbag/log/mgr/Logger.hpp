@@ -19,7 +19,7 @@
 #include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/sink/Sink.hpp>
 #include <libtbag/log/msg/PacketGenerator.hpp>
-#include <libtbag/log/msg/MsgPacket.hpp>
+#include <libtbag/log/msg/LogMsgPacket.hpp>
 
 #include <libtbag/3rd/fmt/format.h>
 #include <libtbag/3rd/fmt/ostream.h>
@@ -44,15 +44,15 @@ namespace mgr {
 class TBAG_API Logger : private Noncopyable
 {
 public:
-    using MsgPacket = msg::MsgPacket;
-    using Generator = msg::PacketGenerator;
-    using MakeType  = Generator::MakeType;
+    using LogMsgPacket = msg::LogMsgPacket;
+    using Generator    = msg::PacketGenerator;
+    using MakeType     = Generator::MakeType;
 
-    using SinkType  = sink::SinkInterface;
-    using SinkPtr   = std::unique_ptr<SinkType>;
+    using SinkType     = sink::SinkInterface;
+    using SinkPtr      = std::unique_ptr<SinkType>;
 
-    using Severity  = level::Severity;
-    using String    = std::string;
+    using Severity     = level::Severity;
+    using String       = std::string;
 
 private:
     SinkPtr   _sink;

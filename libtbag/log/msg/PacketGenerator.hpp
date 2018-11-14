@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/log/level/Severity.hpp>
-#include <libtbag/log/msg/MsgPacket.hpp>
+#include <libtbag/log/msg/LogMsgPacket.hpp>
 
 #include <string>
 
@@ -71,12 +71,12 @@ public:
     // @formatter:on
 
 public:
-    String make(MsgPacket const & packet);
+    String make(LogMsgPacket const & packet);
 
 public:
-    String makeDefault(MsgPacket const & packet);
-    String makeDefaultColor(MsgPacket const & packet);
-    String makeRaw(MsgPacket const & packet);
+    String makeDefault(LogMsgPacket const & packet);
+    String makeDefaultColor(LogMsgPacket const & packet);
+    String makeRaw(LogMsgPacket const & packet);
 
 public:
     static String getNowTimeString();

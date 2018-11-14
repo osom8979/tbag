@@ -35,7 +35,7 @@ PacketGenerator::~PacketGenerator()
     // EMPTY.
 }
 
-PacketGenerator::String PacketGenerator::make(MsgPacket const & packet)
+PacketGenerator::String PacketGenerator::make(LogMsgPacket const & packet)
 {
     switch (_type) {
     case MakeType::DEFAULT:
@@ -49,7 +49,7 @@ PacketGenerator::String PacketGenerator::make(MsgPacket const & packet)
     }
 }
 
-PacketGenerator::String PacketGenerator::makeDefault(MsgPacket const & packet)
+PacketGenerator::String PacketGenerator::makeDefault(LogMsgPacket const & packet)
 {
     std::stringstream ss;
     ss << getNowTimeString() << DATE_MSG_SEPARATOR
@@ -59,7 +59,7 @@ PacketGenerator::String PacketGenerator::makeDefault(MsgPacket const & packet)
     return ss.str();
 }
 
-PacketGenerator::String PacketGenerator::makeDefaultColor(MsgPacket const & packet)
+PacketGenerator::String PacketGenerator::makeDefaultColor(LogMsgPacket const & packet)
 {
     using namespace libtbag::log::level;
 
@@ -91,7 +91,7 @@ PacketGenerator::String PacketGenerator::makeDefaultColor(MsgPacket const & pack
     return ss.str();
 }
 
-PacketGenerator::String PacketGenerator::makeRaw(MsgPacket const & packet)
+PacketGenerator::String PacketGenerator::makeRaw(LogMsgPacket const & packet)
 {
     return packet.getMessage();
 }

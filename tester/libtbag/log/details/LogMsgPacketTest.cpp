@@ -1,12 +1,13 @@
 /**
- * @file   MsgPacketTest.cpp
- * @brief  MsgPacket class tester.
+ * @file   LogMsgPacketTest.cpp
+ * @brief  LogMsgPacket class tester.
  * @author zer0
  * @date   2016-07-16
+ * @date   2016-11-14 (MsgPacket -> LogMsgPacket)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/log/msg/MsgPacket.hpp>
+#include <libtbag/log/msg/LogMsgPacket.hpp>
 
 #include <iostream>
 
@@ -14,9 +15,9 @@ using namespace libtbag;
 using namespace libtbag::log;
 using namespace libtbag::log::msg;
 
-TEST(MsgPacketTest, Operator)
+TEST(LogMsgPacketTest, Operator)
 {
-    MsgPacket packet;
+    LogMsgPacket packet;
 
     packet << 100 << 'c';
     ASSERT_STREQ("100c", packet.c_str());
