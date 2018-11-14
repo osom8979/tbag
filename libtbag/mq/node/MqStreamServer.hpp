@@ -22,7 +22,10 @@
 #include <libtbag/mq/details/MqQueue.hpp>
 
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/ex/AsyncSingleRequestQueue.hpp>
+#include <libtbag/uvpp/Async.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Pipe.hpp>
+#include <libtbag/uvpp/Request.hpp>
 
 #include <vector>
 #include <unordered_set>
@@ -43,12 +46,30 @@ namespace node {
  * @author zer0
  * @date   2018-11-13
  */
-class TBAG_API MqStreamServer : public libtbag::mq::details::MqInterface
+class TBAG_API MqStreamServer : public libtbag::mq::details::MqEventQueue,
+                                public libtbag::mq::details::MqInterface
 {
 public:
-    using MqType          = libtbag::mq::details::MqType;
-    using MqMsg           = libtbag::mq::details::MqMsg;
-    using MqEventQueue    = libtbag::mq::details::MqEventQueue;
+    using Loop   = libtbag::uvpp::Loop;
+    using Stream = libtbag::uvpp::Stream;
+    using Tcp    = libtbag::uvpp::Tcp;
+    using Pipe   = libtbag::uvpp::Pipe;
+
+    using ConnectRequest  = libtbag::uvpp::ConnectRequest;
+    using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
+    using WriteRequest    = libtbag::uvpp::WriteRequest;
+
+    using SharedHandle = Loop::SharedHandle;
+    using WeakHandle   = Loop::WeakHandle;
+
+    using Buffer = libtbag::util::Buffer;
+    using binf   = libtbag::util::binf;
+    using cbinf  = libtbag::util::cbinf;
+
+    using MqType       = libtbag::mq::details::MqType;
+    using MqMsg        = libtbag::mq::details::MqMsg;
+    using MqEventQueue = libtbag::mq::details::MqEventQueue;
+
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
@@ -57,16 +78,6 @@ public:
     TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE    = MqEventQueue::DEFAULT_QUEUE_SIZE;
     TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE   = MqEventQueue::DEFAULT_PACKET_SIZE;
     TBAG_CONSTEXPR static std::size_t DEFAULT_MAX_NODE_SIZE = 100000; // C10K
-
-public:
-    template <typename T, typename R>
-    using AsyncSingleRequestQueue = libtbag::uvpp::ex::AsyncSingleRequestQueue<T, R>;
-
-public:
-    using WriteMsgQueue = AsyncSingleRequestQueue<AsyncMsgPointer, WriteRequest>;
-
-    static_assert(std::is_same<AsyncMsgPointer, typename WriteMsgQueue::Value>::value, "");
-    static_assert(std::is_same<WriteRequest, typename WriteMsgQueue::Request>::value, "");
 
 private:
     struct EventQueue : public MqEventQueue
@@ -86,41 +97,17 @@ private:
     template <typename _BaseT>
     struct Node : public _BaseT
     {
-        struct Write : public WriteMsgQueue
-        {
-            using Value   = WriteMsgQueue::Value;
-            using Request = WriteMsgQueue::Request;
-
-            Node * node = nullptr;
-
-            Write(Loop & loop, Node * p) : WriteMsgQueue(loop), node(p)
-            { assert(node != nullptr); }
-            virtual ~Write()
-            { /* EMPTY. */ }
-
-            virtual void doRequest(Request & request, Value const & value) override
-            { node->doWriteRequest(request, value); }
-            virtual void onDequeue(Value const & value) override
-            { node->onWriteDequeue(value); }
-            virtual void onClose() override
-            { node->onWriteClose(); }
-        };
-
         MqStreamServer * parent = nullptr;
-        Write writer;
-        std::vector<char> read_buffer;
 
-        Node(Loop & loop, MqStreamServer * p) : _BaseT(loop), parent(p), writer(loop, this)
+        ShutdownRequest shutdown_req;
+        WriteRequest    write_req;
+
+        Buffer read_buffer;
+
+        Node(Loop & loop, MqStreamServer * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
         virtual ~Node()
         { /* EMPTY. */ }
-
-        void doWriteRequest(typename Write::Request & request, typename Write::Value const & value)
-        { parent->doWriteRequest(this, request, value); }
-        void onWriteDequeue(typename Write::Value const & value)
-        { parent->onWriteDequeue(this, value); }
-        void onWriteClose()
-        { parent->onWriteClose(this); }
 
         virtual void onShutdown(ShutdownRequest & request, Err code) override
         { parent->onNodeShutdown(this, request, code); }
@@ -185,14 +172,12 @@ public:
     };
 
 public:
-    MqType   const TYPE;
-    ThreadId const THREAD_ID;
+    MqType const TYPE;
 
 private:
     Params _params;
 
 private:
-    EventQueue   _events;
     SharedStream _server;
     NodeSet      _nodes;
 
@@ -201,12 +186,7 @@ public:
     virtual ~MqStreamServer();
 
 protected:
-    AfterAction onMsg(AsyncMsg * msg);
-
-protected:
-    void doWriteRequest(Stream * node, WriteRequest & request, AsyncMsgPointer const & value);
-    void onWriteDequeue(Stream * node, AsyncMsgPointer const & value);
-    void onWriteClose  (Stream * node);
+    virtual AfterAction onMsg(AsyncMsg * msg) override;
 
 protected:
     void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);

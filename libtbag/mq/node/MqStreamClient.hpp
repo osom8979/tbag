@@ -16,6 +16,13 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
+#include <libtbag/mq/details/MqEventQueue.hpp>
+
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Async.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Pipe.hpp>
+#include <libtbag/uvpp/Request.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,7 +40,25 @@ namespace node {
 class TBAG_API MqStreamClient : public libtbag::mq::details::MqInterface
 {
 public:
-    using MqType = libtbag::mq::details::MqType;
+    using Loop   = libtbag::uvpp::Loop;
+    using Stream = libtbag::uvpp::Stream;
+    using Tcp    = libtbag::uvpp::Tcp;
+    using Pipe   = libtbag::uvpp::Pipe;
+
+    using ConnectRequest  = libtbag::uvpp::ConnectRequest;
+    using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
+    using WriteRequest    = libtbag::uvpp::WriteRequest;
+
+    using SharedHandle = Loop::SharedHandle;
+    using WeakHandle   = Loop::WeakHandle;
+
+    using Buffer = libtbag::util::Buffer;
+    using binf   = libtbag::util::binf;
+    using cbinf  = libtbag::util::cbinf;
+
+    using MqType       = libtbag::mq::details::MqType;
+    using MqMsg        = libtbag::mq::details::MqMsg;
+    using MqEventQueue = libtbag::mq::details::MqEventQueue;
 
 public:
     template <typename _BaseT>

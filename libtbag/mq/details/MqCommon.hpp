@@ -19,13 +19,6 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
-#include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/uvpp/Async.hpp>
-#include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/uvpp/Pipe.hpp>
-#include <libtbag/uvpp/Udp.hpp>
-#include <libtbag/uvpp/Request.hpp>
-
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -131,32 +124,7 @@ struct TBAG_API MqMsgCopyTo
     bool operator()(MqMsg * msg);
 };
 
-struct MqCommonTypes
-{
-    using Loop   = libtbag::uvpp::Loop;
-    using Stream = libtbag::uvpp::Stream;
-    using Tcp    = libtbag::uvpp::Tcp;
-    using Udp    = libtbag::uvpp::Udp;
-    using Pipe   = libtbag::uvpp::Pipe;
-
-    using ConnectRequest  = libtbag::uvpp::ConnectRequest;
-    using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
-    using WriteRequest    = libtbag::uvpp::WriteRequest;
-    using UdpSendRequest  = libtbag::uvpp::UdpSendRequest;
-
-    using NativeHandle = Loop::NativeHandle;
-    using SharedHandle = Loop::SharedHandle;
-    using WeakHandle   = Loop::WeakHandle;
-
-    using  binf = libtbag::util::binf;
-    using cbinf = libtbag::util::cbinf;
-
-    using pipe_t = libtbag::mq::details::pipe_t;
-    using udp_t  = libtbag::mq::details::udp_t;
-    using tcp_t  = libtbag::mq::details::tcp_t;
-};
-
-struct MqInterface : public MqCommonTypes
+struct MqInterface
 {
     virtual Err send(char const * buffer, std::size_t size) = 0;
     virtual Err recv(std::vector<char> & buffer) = 0;

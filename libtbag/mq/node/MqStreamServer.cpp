@@ -19,9 +19,8 @@ namespace node {
 using binf = MqStreamServer::binf;
 
 MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
-        : TYPE(params.type), THREAD_ID(std::this_thread::get_id()),
-          _params(params), _events(loop, params.queue_size, params.msg_size, this),
-          _server(), _nodes()
+        : MqEventQueue(loop, params.queue_size, params.msg_size),
+          TYPE(params.type), _params(params)
 {
     if (TYPE == MqType::MT_PIPE) {
         _server = loop.newHandle<PipeServer>(loop, this);
@@ -42,18 +41,6 @@ MqStreamServer::~MqStreamServer()
 MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
 {
     return AfterAction::AA_DELAY;
-}
-
-void MqStreamServer::doWriteRequest(Stream * node, WriteRequest & request, AsyncMsgPointer const & value)
-{
-}
-
-void MqStreamServer::onWriteDequeue(Stream * node, AsyncMsgPointer const & value)
-{
-}
-
-void MqStreamServer::onWriteClose(Stream * node)
-{
 }
 
 void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Err code)
