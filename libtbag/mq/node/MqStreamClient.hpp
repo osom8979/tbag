@@ -89,10 +89,6 @@ protected:
     void onClose();
 
 public:
-    virtual Err open(std::string const & uri) override;
-    virtual Err close() override;
-
-public:
     virtual Err send(char const * buffer, std::size_t size) override;
     virtual Err recv(std::vector<char> & buffer) override;
 };

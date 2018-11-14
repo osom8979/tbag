@@ -145,8 +145,8 @@ private:
 
 public:
     MqEventQueue(Loop & loop,
-                     std::size_t size = DEFAULT_QUEUE_SIZE,
-                     std::size_t msg_size = DEFAULT_PACKET_SIZE);
+                 std::size_t size = DEFAULT_QUEUE_SIZE,
+                 std::size_t msg_size = DEFAULT_PACKET_SIZE);
     virtual ~MqEventQueue();
 
 private:
@@ -194,7 +194,14 @@ public:
     Err enqueue(char const * data, std::size_t size);
 
 protected:
-    virtual AfterAction onMsg(MqMsg * msg);
+    virtual AfterAction onMsg(AsyncMsg * msg);
+
+protected:
+    /**
+     * @warning
+     *  Only messages extracted via onMsg() can be enqueue.
+     */
+    Err restoreMessage(AsyncMsg * msg, bool validate = false);
 };
 
 } // namespace details

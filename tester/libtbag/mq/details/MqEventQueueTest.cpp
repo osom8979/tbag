@@ -35,7 +35,7 @@ struct MqSendQueueTest : public MqEventQueue
     virtual ~MqSendQueueTest()
     { /* EMPTY. */ }
 
-    virtual AfterAction onMsg(MqMsg * msg) override
+    virtual AfterAction onMsg(AsyncMsg * msg) override
     {
         if (msg->event == MqEvent::ME_MSG) {
             if (msg->box.toString() == TEST_VALUE) {

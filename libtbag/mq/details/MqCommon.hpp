@@ -77,9 +77,10 @@ struct MqMsg
     using BoxTypeTable = libtbag::container::BoxTypeTable;
 
     MqEvent event;
+    int     channel;
     Box     box;
 
-    MqMsg(std::size_t size) : event(MqEvent::ME_NONE),
+    MqMsg(std::size_t size) : event(MqEvent::ME_NONE), channel(0),
                               box(BoxTypeTable::BTT_INT8, static_cast<unsigned>(size))
     { /* EMPTY. */ }
 
@@ -126,7 +127,7 @@ struct TBAG_API MqMsgCopyTo
     bool operator()(MqMsg * msg);
 };
 
-struct MqInterface
+struct MqCommonTypes
 {
     using Loop   = libtbag::uvpp::Loop;
     using Stream = libtbag::uvpp::Stream;
@@ -146,9 +147,13 @@ struct MqInterface
     using  binf = libtbag::util::binf;
     using cbinf = libtbag::util::cbinf;
 
-    virtual Err open(std::string const & uri) = 0;
-    virtual Err close() = 0;
+    using pipe_t = libtbag::mq::details::pipe_t;
+    using udp_t  = libtbag::mq::details::udp_t;
+    using tcp_t  = libtbag::mq::details::tcp_t;
+};
 
+struct MqInterface : public MqCommonTypes
+{
     virtual Err send(char const * buffer, std::size_t size) = 0;
     virtual Err recv(std::vector<char> & buffer) = 0;
 };

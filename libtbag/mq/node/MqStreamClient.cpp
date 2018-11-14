@@ -57,16 +57,6 @@ void MqStreamClient::onClose()
 {
 }
 
-Err MqStreamClient::open(std::string const & uri)
-{
-    return Err::E_UNSUPOP;
-}
-
-Err MqStreamClient::close()
-{
-    return Err::E_UNSUPOP;
-}
-
 Err MqStreamClient::send(char const * buffer, std::size_t size)
 {
     return Err::E_UNSUPOP;

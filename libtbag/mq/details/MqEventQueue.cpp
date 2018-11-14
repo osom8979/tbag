@@ -96,11 +96,35 @@ Err MqEventQueue::enqueue(char const * data, std::size_t size)
     return enqueue(MqMsgCopyFrom(data, size));
 }
 
-MqEventQueue::AfterAction MqEventQueue::onMsg(MqMsg * msg)
+MqEventQueue::AfterAction MqEventQueue::onMsg(AsyncMsg * msg)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
     return AfterAction::AA_OK;
+}
+
+Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool validate)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(msg != nullptr);
+
+    if (validate) {
+        bool ok = false;
+        for (auto & cursor : __messages__) {
+            assert(static_cast<bool>(cursor));
+            if (msg == cursor.get()) {
+                ok = true;
+                break;
+            }
+        }
+        if (!ok) {
+            return Err::E_ILLARGS;
+        }
+    }
+
+    auto const RESULT = _ready->enqueue(msg);
+    assert(RESULT);
+    return RESULT ? Err::E_SUCCESS : Err::E_EPUSH;
 }
 
 } // namespace details
