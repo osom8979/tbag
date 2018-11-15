@@ -28,7 +28,7 @@ using binf     = MqStreamServer::binf;
 
 MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          TYPE(params.type), _params(params), _server(), _nodes(), _packer(params.packer_size),
+          TYPE(params.type), PARAMS(params), _server(), _nodes(), _packer(params.packer_size),
           _recv_queue(params.recv_queue_size, params.recv_msg_size)
 {
     if (TYPE == MqType::MT_PIPE) {
@@ -177,7 +177,7 @@ void MqStreamServer::onCloseTimerClose(CloseTimer * timer)
 
 void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Err code)
 {
-    if (_params.wait_closing_millisec == 0) {
+    if (PARAMS.wait_closing_millisec == 0) {
         node->close();
         return;
     }
@@ -191,8 +191,8 @@ void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Er
         return;
     }
 
-    assert(_params.wait_closing_millisec > 0);
-    auto const START_CODE = timer->start(_params.wait_closing_millisec);
+    assert(PARAMS.wait_closing_millisec > 0);
+    auto const START_CODE = timer->start(PARAMS.wait_closing_millisec);
     if (isFailure(START_CODE)) {
         node->close();
         timer->close();
@@ -214,7 +214,7 @@ void MqStreamServer::onNodeWrite(Stream * node, WriteRequest & request, Err code
     auto value = _writer->queue.front();
     _writer->queue.pop();
 
-    auto const CODE = restoreMessage(value.get(), _params.verify_restore_message);
+    auto const CODE = restoreMessage(value.get(), PARAMS.verify_restore_message);
     assert(isSuccess(CODE));
 
     if (_writer->queue.empty()) {
@@ -293,8 +293,8 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
     if (code != Err::E_SUCCESS) {
         ++error_count;
         tDLogE("MqStreamServer::onNodeRead() Read error: {} ({}/{})",
-               code, error_count, _params.continuous_read_error_count);
-        if (error_count >= _params.continuous_read_error_count) {
+               code, error_count, PARAMS.continuous_read_error_count);
+        if (error_count >= PARAMS.continuous_read_error_count) {
             node->close();
         }
         return;
@@ -393,8 +393,8 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
         return;
     }
 
-    if (_nodes.size() + 1 >= _params.max_nodes) {
-        tDLogE("MqStreamServer::onServerConnection() The connection is full ({})", _params.max_nodes);
+    if (_nodes.size() + 1 >= PARAMS.max_nodes) {
+        tDLogE("MqStreamServer::onServerConnection() The connection is full ({})", PARAMS.max_nodes);
         return;
     }
 
@@ -417,10 +417,10 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
     auto const ACCEPT_CODE = server->accept(*stream);
     assert(ACCEPT_CODE == Err::E_SUCCESS);
 
-    if (TYPE == MqType::MT_TCP && !_params.accept_ip_regex.empty()) {
+    if (TYPE == MqType::MT_TCP && !PARAMS.accept_ip_regex.empty()) {
         auto * tcp = (TcpNode*)stream.get();
         auto const PEER_IP = tcp->getPeerIp();
-        if (!std::regex_match(PEER_IP, std::regex(_params.accept_ip_regex))) {
+        if (!std::regex_match(PEER_IP, std::regex(PARAMS.accept_ip_regex))) {
             tDLogI("MqStreamServer::onServerConnection() Filtered ip: {}", PEER_IP);
             stream->close();
             return;

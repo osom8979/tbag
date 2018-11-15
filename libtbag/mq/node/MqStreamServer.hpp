@@ -326,9 +326,7 @@ public:
 
 public:
     MqType const TYPE;
-
-private:
-    Params _params;
+    Params const PARAMS;
 
 private:
     SharedStream _server;
