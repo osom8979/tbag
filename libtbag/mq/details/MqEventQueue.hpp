@@ -161,32 +161,6 @@ public:
     MiscValidity validateOfReady(std::size_t min = 0, std::size_t max = 0) const;
 
 public:
-    template <typename Predicated>
-    Err enqueue(Predicated predicated)
-    {
-        void * value = nullptr;
-        if (!_ready->dequeueVal(&value)) {
-            return Err::E_NREADY;
-        }
-
-        auto * msg = (AsyncMsg*)value;
-        assert(msg != nullptr);
-
-        if (!predicated(msg)) {
-            auto const RESULT = _ready->enqueueVal(value);
-            assert(RESULT);
-            return Err::E_ECANCELED;
-        }
-
-        auto const CODE = msg->send();
-        if (isFailure(CODE)) {
-            auto const RESULT = _ready->enqueueVal(value);
-            assert(RESULT);
-        }
-        return CODE;
-    }
-
-public:
     Err enqueueClose();
     Err enqueue(MqMsg const & msg);
     Err enqueue(MqEvent e, char const * data, std::size_t size);

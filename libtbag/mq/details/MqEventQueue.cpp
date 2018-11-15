@@ -81,6 +81,34 @@ MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::s
     return _ready->singlethreaded_validate(min, max);
 }
 
+using AsyncMsg = MqEventQueue::AsyncMsg;
+using UniqueQueue = MqEventQueue::UniqueQueue;
+
+template <typename Predicated>
+static Err __enqueue(UniqueQueue & ready, Predicated predicated)
+{
+    void * value = nullptr;
+    if (!ready->dequeueVal(&value)) {
+        return Err::E_NREADY;
+    }
+
+    auto * msg = (AsyncMsg*)value;
+    assert(msg != nullptr);
+
+    if (!predicated(msg)) {
+        auto const RESULT = ready->enqueueVal(value);
+        assert(RESULT);
+        return Err::E_ECANCELED;
+    }
+
+    auto const CODE = msg->send();
+    if (isFailure(CODE)) {
+        auto const RESULT = ready->enqueueVal(value);
+        assert(RESULT);
+    }
+    return CODE;
+}
+
 Err MqEventQueue::enqueueClose()
 {
     return enqueue(MqMsg(MqEvent::ME_CLOSE));
@@ -88,7 +116,7 @@ Err MqEventQueue::enqueueClose()
 
 Err MqEventQueue::enqueue(MqMsg const & msg)
 {
-    return enqueue(MqMsgCopyFrom(msg));
+    return __enqueue(_ready, MqMsgCopyFrom(msg));
 }
 
 Err MqEventQueue::enqueue(MqEvent e, char const * data, std::size_t size)
