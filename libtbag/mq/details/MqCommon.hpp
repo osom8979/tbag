@@ -45,14 +45,28 @@ enum class MqEvent : int32_t
 
 enum class MqType : int
 {
+    MT_NONE,
     MT_PIPE,
     MT_UDP,
     MT_TCP,
 };
 
+TBAG_CONSTEXPR char const * const PIPE_LOWER_NAME = "pipe";
+TBAG_CONSTEXPR char const * const  UDP_LOWER_NAME = "udp";
+TBAG_CONSTEXPR char const * const  TCP_LOWER_NAME = "tcp";
+
+enum class MqMode : int
+{
+    MM_BIND,
+    MM_CONNECT,
+};
+
 struct pipe_t { /* EMPTY. */ };
 struct udp_t  { /* EMPTY. */ };
 struct tcp_t  { /* EMPTY. */ };
+
+struct bind_t    { /* EMPTY. */ };
+struct connect_t { /* EMPTY. */ };
 
 /**
  * MessageQueue data packet.

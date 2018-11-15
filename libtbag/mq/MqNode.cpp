@@ -6,10 +6,17 @@
  */
 
 #include <libtbag/mq/MqNode.hpp>
-#include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/log/Log.hpp>
+
+#include <libtbag/mq/details/MqCommon.hpp>
+#include <libtbag/mq/node/MqStreamClient.hpp>
+#include <libtbag/mq/node/MqStreamServer.hpp>
 #include <libtbag/thread/ThreadPool.hpp>
+
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/network/Uri.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -30,12 +37,19 @@ namespace mq {
 struct MqNode::Impl : private Noncopyable
 {
 public:
+    using Uri  = libtbag::network::Uri;
     using Pool = libtbag::thread::ThreadPool;
     using Loop = libtbag::uvpp::Loop;
 
 public:
-    struct bind_t    { /* EMPTY. */ };
-    struct connect_t { /* EMPTY. */ };
+    using MqType         = libtbag::mq::details::MqType;
+    using MqMode         = libtbag::mq::details::MqMode;
+    using MqStreamClient = libtbag::mq::node::MqStreamClient;
+    using MqStreamServer = libtbag::mq::node::MqStreamServer;
+
+public:
+    using MqInterface = libtbag::mq::details::MqInterface;
+    using SharedMq    = std::shared_ptr<MqInterface>;
 
 public:
     /**
@@ -43,6 +57,10 @@ public:
      *  Don't change this variable.
      */
     TBAG_CONSTEXPR static std::size_t const THREAD_SIZE = 1U;
+
+public:
+    MqType const TYPE;
+    MqMode const MODE;
 
 private:
     MqNode * _parent;
@@ -52,20 +70,29 @@ private:
     Loop _loop;
     Err  _last;
 
-public:
-    Impl(MqNode * parent) : _pool(THREAD_SIZE), _parent(parent), _last(Err::E_EBUSY)
-    {
-        assert(_parent != nullptr);
-    }
+private:
+    SharedMq _mq;
 
-    Impl(MqNode * parent, std::string const & uri, bind_t) : Impl(parent)
+private:
+    static MqType getMqType(std::string const & uri)
     {
-        if (!startTask()) {
-            throw std::bad_alloc();
+        Uri const URI(uri);
+        auto const HOST = libtbag::string::lower(URI.getHost());
+        using namespace libtbag::mq::details;
+        if (HOST == PIPE_LOWER_NAME) {
+            return MqType::MT_PIPE;
+        } else if (HOST == TCP_LOWER_NAME) {
+            return MqType::MT_TCP;
+        } else if (HOST == UDP_LOWER_NAME) {
+            return MqType::MT_UDP;
         }
+        return MqType::MT_NONE;
     }
 
-    Impl(MqNode * parent, std::string const & uri, connect_t) : Impl(parent)
+public:
+    Impl(MqNode * parent, std::string const & uri, MqMode mode)
+            : TYPE(getMqType(uri)), MODE(mode), _parent(parent),
+              _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         if (!startTask()) {
             throw std::bad_alloc();
@@ -93,6 +120,21 @@ public:
             tDLogE("MqNode::Impl::runner() Loop error: {}", _last);
         }
         _pool.exit();
+    }
+
+public:
+    Err send(char const * buffer, std::size_t size)
+    {
+        return Err::E_UNSUPOP;
+    }
+
+    Err recv(std::vector<char> & buffer)
+    {
+        return Err::E_UNSUPOP;
+    }
+
+    void recvWait(std::vector<char> & buffer)
+    {
     }
 };
 
@@ -149,7 +191,7 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
 Err MqNode::bind(std::string const & uri)
 {
     try {
-        _impl = std::make_shared<Impl>(this, uri, Impl::bind_t{});
+        _impl = std::make_shared<Impl>(this, uri, Impl::MqMode::MM_BIND);
     } catch (...) {
         return Err::E_UNKEXCP;
     }
@@ -159,7 +201,7 @@ Err MqNode::bind(std::string const & uri)
 Err MqNode::connect(std::string const & uri)
 {
     try {
-        _impl = std::make_shared<Impl>(this, uri, Impl::connect_t{});
+        _impl = std::make_shared<Impl>(this, uri, Impl::MqMode::MM_CONNECT);
     } catch (...) {
         return Err::E_UNKEXCP;
     }
@@ -174,12 +216,33 @@ Err MqNode::close()
 
 Err MqNode::send(char const * buffer, std::size_t size)
 {
-    return Err::E_UNSUPOP;
+    if (!_impl) {
+        return Err::E_NREADY;
+    }
+    return _impl->send(buffer, size);
 }
 
-Err MqNode::recv(char * buffer, std::size_t buffer_size, std::size_t * read_size)
+Err MqNode::send(std::vector<char> const & buffer)
 {
-    return Err::E_UNSUPOP;
+    if (!_impl) {
+        return Err::E_NREADY;
+    }
+    return send(buffer.data(), buffer.size());
+}
+
+Err MqNode::recv(std::vector<char> & buffer)
+{
+    if (!_impl) {
+        return Err::E_NREADY;
+    }
+    return _impl->recv(buffer);
+}
+
+void MqNode::recvWait(std::vector<char> & buffer)
+{
+    if (_impl) {
+        _impl->recvWait(buffer);
+    }
 }
 
 } // namespace mq

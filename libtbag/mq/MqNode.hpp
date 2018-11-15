@@ -103,7 +103,13 @@ public:
 
 public:
     Err send(char const * buffer, std::size_t size);
-    Err recv(char * buffer, std::size_t buffer_size, std::size_t * read_size = nullptr);
+    Err send(std::vector<char> const & buffer);
+
+public:
+    Err recv(std::vector<char> & buffer);
+
+public:
+    void recvWait(std::vector<char> & buffer);
 };
 
 } // namespace mq
