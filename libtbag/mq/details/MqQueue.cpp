@@ -27,7 +27,7 @@ MqQueue::MqQueue(std::size_t size, std::size_t msg_size) : _active(), _ready()
     assert(static_cast<bool>(_active));
     assert(static_cast<bool>(_ready));
     for (std::size_t i = 0; i < POWER_OF_2; ++i) {
-        bool const ENQUEUE_RESULT = _ready->enqueue(createMsg(msg_size));
+        bool const ENQUEUE_RESULT = _ready->enqueueVal(createMsg(msg_size));
         assert(ENQUEUE_RESULT);
     }
     std::size_t const READY_QUEUE_SIZE = _ready->potentially_inaccurate_count();
@@ -85,6 +85,10 @@ Err MqQueue::enqueue(char const * data, std::size_t size)
 Err MqQueue::dequeue(MqMsg & msg)
 {
     return dequeue(MqMsgCopyTo(msg));
+}
+
+void MqQueue::dequeue_wait(MqMsg & msg)
+{
 }
 
 } // namespace details

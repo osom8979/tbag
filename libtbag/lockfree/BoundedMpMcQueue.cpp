@@ -132,16 +132,6 @@ public:
         return lfds711_queue_bmm_enqueue(_state, key, value) == 1;
     }
 
-    bool enqueue(void * value)
-    {
-        return enqueue(nullptr, value);
-    }
-
-    bool enqueueKey(void * key)
-    {
-        return enqueue(key, nullptr);
-    }
-
 public:
     bool dequeue(void ** key, void ** value)
     {
@@ -149,16 +139,6 @@ public:
         // Returns 0 if dequeing failed.
         // Dequeuing only fails if the queue is empty.
         return lfds711_queue_bmm_dequeue(_state, key, value) == 1;
-    }
-
-    bool dequeue(void ** value)
-    {
-        return dequeue(nullptr, value);
-    }
-
-    bool dequeueKey(void ** key)
-    {
-        return dequeue(key, nullptr);
     }
 
 private:
@@ -219,16 +199,16 @@ bool BoundedMpMcQueue::enqueue(void * key, void * value)
     return _impl->enqueue(key, value);
 }
 
-bool BoundedMpMcQueue::enqueue(void * value)
+bool BoundedMpMcQueue::enqueueVal(void * value)
 {
     assert(static_cast<bool>(_impl));
-    return _impl->enqueue(value);
+    return _impl->enqueue(nullptr, value);
 }
 
 bool BoundedMpMcQueue::enqueueKey(void * key)
 {
     assert(static_cast<bool>(_impl));
-    return _impl->enqueue(key);
+    return _impl->enqueue(key, nullptr);
 }
 
 bool BoundedMpMcQueue::dequeue(void ** key, void ** value)
@@ -237,16 +217,16 @@ bool BoundedMpMcQueue::dequeue(void ** key, void ** value)
     return _impl->dequeue(key, value);
 }
 
-bool BoundedMpMcQueue::dequeue(void ** value)
+bool BoundedMpMcQueue::dequeueVal(void ** value)
 {
     assert(static_cast<bool>(_impl));
-    return _impl->dequeue(value);
+    return _impl->dequeue(nullptr, value);
 }
 
 bool BoundedMpMcQueue::dequeueKey(void ** key)
 {
     assert(static_cast<bool>(_impl));
-    return _impl->dequeue(key);
+    return _impl->dequeue(key, nullptr);
 }
 
 void BoundedMpMcQueue::onCleanup(void * key, void * value)

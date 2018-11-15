@@ -28,7 +28,7 @@ MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
         auto async = loop.newHandle<AsyncMsg>(loop, msg_size, this);
         assert(static_cast<bool>(async));
 
-        bool const ENQUEUE_RESULT = _ready->enqueue(async.get());
+        bool const ENQUEUE_RESULT = _ready->enqueueVal(async.get());
         assert(ENQUEUE_RESULT);
 
         __messages__.at(i) = async;
@@ -49,7 +49,7 @@ void MqEventQueue::onAsync(AsyncMsg * async)
     assert(async != nullptr);
     auto const AFTER_ACTION = onMsg(async);
     if (AFTER_ACTION == AfterAction::AA_OK) {
-        auto const RESULT = _ready->enqueue(async);
+        auto const RESULT = _ready->enqueueVal(async);
         assert(RESULT);
     } else {
         assert(AFTER_ACTION == AfterAction::AA_DELAY);
@@ -127,7 +127,7 @@ Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool verify)
         }
     }
 
-    auto const RESULT = _ready->enqueue(msg);
+    auto const RESULT = _ready->enqueueVal(msg);
     assert(RESULT);
     return RESULT ? Err::E_SUCCESS : Err::E_EPUSH;
 }

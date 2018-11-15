@@ -95,19 +95,19 @@ public:
     Err enqueue(Predicated predicated)
     {
         void * value = nullptr;
-        if (!_ready->dequeue(&value)) {
+        if (!_ready->dequeueVal(&value)) {
             return Err::E_NREADY;
         }
 
         auto * msg = (MqMsg*)value;
         assert(msg != nullptr);
         if (!predicated(msg)) {
-            auto const RESULT = _ready->enqueue(value);
+            auto const RESULT = _ready->enqueueVal(value);
             assert(RESULT);
             return Err::E_ECANCELED;
         }
 
-        auto const RESULT = _active->enqueue(value);
+        auto const RESULT = _active->enqueueVal(value);
         assert(RESULT);
         return Err::E_SUCCESS;
     }
@@ -117,19 +117,19 @@ public:
     Err dequeue(Predicated predicated)
     {
         void * value = nullptr;
-        if (!_active->dequeue(&value)) {
+        if (!_active->dequeueVal(&value)) {
             return Err::E_NREADY;
         }
 
         auto * msg = (MqMsg*)value;
         assert(msg != nullptr);
         if (!predicated(msg)) {
-            auto const RESULT = _active->enqueue(value);
+            auto const RESULT = _active->enqueueVal(value);
             assert(RESULT);
             return Err::E_ECANCELED;
         }
 
-        auto const RESULT = _ready->enqueue(value);
+        auto const RESULT = _ready->enqueueVal(value);
         assert(RESULT);
         return Err::E_SUCCESS;
     }
@@ -140,6 +140,9 @@ public:
 
 public:
     Err dequeue(MqMsg & msg);
+
+public:
+    void dequeue_wait(MqMsg & msg);
 };
 
 } // namespace details

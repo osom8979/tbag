@@ -165,7 +165,7 @@ public:
     Err enqueue(Predicated predicated)
     {
         void * value = nullptr;
-        if (!_ready->dequeue(&value)) {
+        if (!_ready->dequeueVal(&value)) {
             return Err::E_NREADY;
         }
 
@@ -173,14 +173,14 @@ public:
         assert(msg != nullptr);
 
         if (!predicated(msg)) {
-            auto const RESULT = _ready->enqueue(value);
+            auto const RESULT = _ready->enqueueVal(value);
             assert(RESULT);
             return Err::E_ECANCELED;
         }
 
         auto const CODE = msg->send();
         if (isFailure(CODE)) {
-            auto const RESULT = _ready->enqueue(value);
+            auto const RESULT = _ready->enqueueVal(value);
             assert(RESULT);
         }
         return CODE;

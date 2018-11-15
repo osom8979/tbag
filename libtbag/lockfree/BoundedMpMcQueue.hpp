@@ -82,12 +82,12 @@ public:
 
 public:
     bool enqueue(void * key, void * value);
-    bool enqueue(void * value);
+    bool enqueueVal(void * value);
     bool enqueueKey(void * key);
 
 public:
     bool dequeue(void ** key, void ** value);
-    bool dequeue(void ** value);
+    bool dequeueVal(void ** value);
     bool dequeueKey(void ** key);
 
 protected:
