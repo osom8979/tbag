@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/tmp/Power.hpp>
 
+#include <cstdint>
 #include <memory>
 
 // -------------------
@@ -61,6 +62,7 @@ public:
 
 public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_QUEUE_SIZE = 1024;
+    TBAG_CONSTEXPR static uint64_t    const DEFAULT_WAIT_TIMEOUT_NANO = 1/*nano*/ * 1000/*micro*/ * 1000/*milli*/;
 
 public:
     static_assert(libtbag::tmp::is_power_of_2<DEFAULT_QUEUE_SIZE>::value,
@@ -82,13 +84,27 @@ public:
 
 public:
     bool enqueue(void * key, void * value);
-    bool enqueueVal(void * value);
-    bool enqueueKey(void * key);
+    bool enqueueAndSignaling(void * key, void * value);
+    bool enqueueAndWaitSignaling(void * key, void * value);
+
+public:
+    bool enqueue(void * value);
+    bool enqueueAndSignaling(void * value);
+    bool enqueueAndWaitSignaling(void * value);
 
 public:
     bool dequeue(void ** key, void ** value);
-    bool dequeueVal(void ** value);
-    bool dequeueKey(void ** key);
+    bool dequeueAndSignaling(void ** key, void ** value);
+    bool dequeueAndWaitSignaling(void ** key, void ** value);
+
+public:
+    bool dequeue(void ** value);
+    bool dequeueAndSignaling(void ** value);
+    bool dequeueAndWaitSignaling(void ** value);
+
+public:
+    void dequeueWait(void ** key, void ** value);
+    void dequeueWait(void ** key, void ** value, uint64_t wait_timeout_nano);
 
 protected:
     virtual void onCleanup(void * key, void * value);

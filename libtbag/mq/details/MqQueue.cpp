@@ -27,7 +27,7 @@ MqQueue::MqQueue(std::size_t size, std::size_t msg_size) : _active(), _ready()
     assert(static_cast<bool>(_active));
     assert(static_cast<bool>(_ready));
     for (std::size_t i = 0; i < POWER_OF_2; ++i) {
-        bool const ENQUEUE_RESULT = _ready->enqueueVal(createMsg(msg_size));
+        bool const ENQUEUE_RESULT = _ready->enqueue(createMsg(msg_size));
         assert(ENQUEUE_RESULT);
     }
     std::size_t const READY_QUEUE_SIZE = _ready->potentially_inaccurate_count();
@@ -78,19 +78,19 @@ template <typename Predicated>
 static Err __enqueue(UniqueQueue & ready, UniqueQueue & active, Predicated predicated)
 {
     void * value = nullptr;
-    if (!ready->dequeueVal(&value)) {
+    if (!ready->dequeue(&value)) {
         return Err::E_NREADY;
     }
 
     auto * msg = (MqMsg*)value;
     assert(msg != nullptr);
     if (!predicated(msg)) {
-        auto const RESULT = ready->enqueueVal(value);
+        auto const RESULT = ready->enqueue(value);
         assert(RESULT);
         return Err::E_ECANCELED;
     }
 
-    auto const RESULT = active->enqueueVal(value);
+    auto const RESULT = active->enqueue(value);
     assert(RESULT);
     return Err::E_SUCCESS;
 }
@@ -99,19 +99,19 @@ template <typename Predicated>
 static Err __dequeue(UniqueQueue & ready, UniqueQueue & active, Predicated predicated)
 {
     void * value = nullptr;
-    if (!active->dequeueVal(&value)) {
+    if (!active->dequeue(&value)) {
         return Err::E_NREADY;
     }
 
     auto * msg = (MqMsg*)value;
     assert(msg != nullptr);
     if (!predicated(msg)) {
-        auto const RESULT = active->enqueueVal(value);
+        auto const RESULT = active->enqueue(value);
         assert(RESULT);
         return Err::E_ECANCELED;
     }
 
-    auto const RESULT = ready->enqueueVal(value);
+    auto const RESULT = ready->enqueue(value);
     assert(RESULT);
     return Err::E_SUCCESS;
 }

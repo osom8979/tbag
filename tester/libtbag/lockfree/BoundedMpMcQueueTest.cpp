@@ -37,11 +37,11 @@ TEST(BoundedMpMcQueueTest, Default)
     ASSERT_NE(nullptr, strcpy(data_error.name, TEST_ERROR));
 
     BoundedMpMcQueue queue(4);
-    ASSERT_TRUE(queue.enqueueVal(&data1));
-    ASSERT_TRUE(queue.enqueueVal(&data2));
-    ASSERT_TRUE(queue.enqueueVal(&data3));
-    ASSERT_TRUE(queue.enqueueVal(&data4));
-    ASSERT_FALSE(queue.enqueueVal(&data_error));
+    ASSERT_TRUE(queue.enqueue(&data1));
+    ASSERT_TRUE(queue.enqueue(&data2));
+    ASSERT_TRUE(queue.enqueue(&data3));
+    ASSERT_TRUE(queue.enqueue(&data4));
+    ASSERT_FALSE(queue.enqueue(&data_error));
 
     BoundedMpMcQueueTestData * temp_data1;
     BoundedMpMcQueueTestData * temp_data2;
@@ -49,11 +49,11 @@ TEST(BoundedMpMcQueueTest, Default)
     BoundedMpMcQueueTestData * temp_data4;
     BoundedMpMcQueueTestData * temp_data_error;
 
-    ASSERT_TRUE(queue.dequeueVal((void**)&temp_data1));
-    ASSERT_TRUE(queue.dequeueVal((void**)&temp_data2));
-    ASSERT_TRUE(queue.dequeueVal((void**)&temp_data3));
-    ASSERT_TRUE(queue.dequeueVal((void**)&temp_data4));
-    ASSERT_FALSE(queue.dequeueVal((void**)&temp_data_error));
+    ASSERT_TRUE(queue.dequeue((void**)&temp_data1));
+    ASSERT_TRUE(queue.dequeue((void**)&temp_data2));
+    ASSERT_TRUE(queue.dequeue((void**)&temp_data3));
+    ASSERT_TRUE(queue.dequeue((void**)&temp_data4));
+    ASSERT_FALSE(queue.dequeue((void**)&temp_data_error));
 
     ASSERT_STREQ(TEST1_DATA, temp_data1->name);
     ASSERT_STREQ(TEST2_DATA, temp_data2->name);

@@ -28,7 +28,7 @@ MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
         auto async = loop.newHandle<AsyncMsg>(loop, msg_size, this);
         assert(static_cast<bool>(async));
 
-        bool const ENQUEUE_RESULT = _ready->enqueueVal(async.get());
+        bool const ENQUEUE_RESULT = _ready->enqueue(async.get());
         assert(ENQUEUE_RESULT);
 
         __messages__.at(i) = async;
@@ -49,7 +49,7 @@ void MqEventQueue::onAsync(AsyncMsg * async)
     assert(async != nullptr);
     auto const AFTER_ACTION = onMsg(async);
     if (AFTER_ACTION == AfterAction::AA_OK) {
-        auto const RESULT = _ready->enqueueVal(async);
+        auto const RESULT = _ready->enqueue(async);
         assert(RESULT);
     } else {
         assert(AFTER_ACTION == AfterAction::AA_DELAY);
@@ -88,7 +88,7 @@ template <typename Predicated>
 static Err __enqueue(UniqueQueue & ready, Predicated predicated)
 {
     void * value = nullptr;
-    if (!ready->dequeueVal(&value)) {
+    if (!ready->dequeue(&value)) {
         return Err::E_NREADY;
     }
 
@@ -96,14 +96,14 @@ static Err __enqueue(UniqueQueue & ready, Predicated predicated)
     assert(msg != nullptr);
 
     if (!predicated(msg)) {
-        auto const RESULT = ready->enqueueVal(value);
+        auto const RESULT = ready->enqueue(value);
         assert(RESULT);
         return Err::E_ECANCELED;
     }
 
     auto const CODE = msg->send();
     if (isFailure(CODE)) {
-        auto const RESULT = ready->enqueueVal(value);
+        auto const RESULT = ready->enqueue(value);
         assert(RESULT);
     }
     return CODE;
@@ -155,7 +155,7 @@ Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool verify)
         }
     }
 
-    auto const RESULT = _ready->enqueueVal(msg);
+    auto const RESULT = _ready->enqueue(msg);
     assert(RESULT);
     return RESULT ? Err::E_SUCCESS : Err::E_EPUSH;
 }
