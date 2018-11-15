@@ -137,10 +137,9 @@ public:
 public:
     Err enqueue(MqMsg const & msg);
     Err enqueue(char const * data, std::size_t size);
-    Err enqueue(MqEvent event, char const * data, std::size_t size);
 
 public:
-    Err dequeue(char * data, std::size_t max_buffer, MqEvent * event, std::size_t * size);
+    Err dequeue(MqMsg & msg);
 };
 
 } // namespace details

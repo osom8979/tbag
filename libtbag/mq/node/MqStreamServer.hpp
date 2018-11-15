@@ -28,6 +28,8 @@
 #include <libtbag/uvpp/Pipe.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
+#include <libtbag/network/Uri.hpp>
+#include <libtbag/network/SocketAddress.hpp>
 #include <libtbag/proto/MsgPacket.hpp>
 
 #include <vector>
@@ -82,7 +84,9 @@ public:
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
-    using MsgPacket = libtbag::proto::MsgPacket;
+    using SocketAddress = libtbag::network::SocketAddress;
+    using Uri           = libtbag::network::Uri;
+    using MsgPacket     = libtbag::proto::MsgPacket;
 
 public:
     TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE     = MqEventQueue::DEFAULT_QUEUE_SIZE;
@@ -128,20 +132,23 @@ private:
 
     struct CloseTimer : public Timer
     {
-        Stream * stream;
+        MqStreamServer * parent = nullptr;
+        Stream * stream = nullptr;
 
-        CloseTimer(Loop & loop, Stream * s) : Timer(loop), stream(s)
-        { assert(stream != nullptr); }
+        CloseTimer(Loop & loop, MqStreamServer * p, Stream * s) : Timer(loop), parent(p), stream(s)
+        {
+            assert(parent != nullptr);
+            assert(stream != nullptr);
+        }
+
         virtual ~CloseTimer()
         { /* EMPTY. */ }
 
         virtual void onTimer() override
-        {
-            if (!stream->isClosing()) {
-                stream->close();
-            }
-            close();
-        }
+        { parent->onCloseTimer(this); }
+
+        virtual void onClose() override
+        { parent->onCloseTimerClose(this); }
     };
 
     template <typename _BaseT>
@@ -154,6 +161,8 @@ private:
 
         Buffer read_buffer;
         Buffer remaining_read;
+
+        bool is_shutdown = false;
 
         Node(Loop & loop, MqStreamServer * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
@@ -236,6 +245,15 @@ public:
          */
         int port = 0;
 
+        /*
+         * Used with uv_tcp_bind, when an IPv6 address is used.
+         *
+         * @remarks
+         *  - tcp: use this flag.
+         *  - pipe: unused.
+         */
+        bool tcp_ipv6_only = false;
+
         /**
          * The maximum size of the queue for transmission.
          */
@@ -280,6 +298,11 @@ public:
          */
         std::size_t wait_closing_millisec = DEFAULT_CLOSE_MILLISEC;
 
+        /**
+         * Verify the restore message.
+         */
+        bool verify_restore_message = false;
+
         Params() { /* EMPTY. */ }
         ~Params() { /* EMPTY. */ }
     };
@@ -309,6 +332,10 @@ protected:
     void onWriterClose(Writer * writer);
 
 protected:
+    void onCloseTimer(CloseTimer * timer);
+    void onCloseTimerClose(CloseTimer * timer);
+
+protected:
     void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
     void onNodeWrite   (Stream * node, WriteRequest & request, Err code);
     binf onNodeAlloc   (Stream * node, std::size_t suggested_size);
@@ -316,19 +343,19 @@ protected:
     void onNodeClose   (Stream * node);
 
 private:
-    Err closeNode(Stream * node, std::size_t wait_closing_millisec = 0);
-    void closeAllNode(std::size_t wait_closing_millisec = 0);
+    Err closeNode(Stream * node);
+    std::size_t closeAllNode();
 
 protected:
     void onServerConnection(Stream * server, Err code);
     void onServerClose(Stream * server);
 
 public:
-    virtual Err send(char const * buffer, std::size_t size) override;
-    virtual Err recv(std::vector<char> & buffer) override;
+    virtual Err send(MqMsg const & msg) override;
+    virtual Err recv(MqMsg & msg) override;
 
 public:
-    virtual Err recvWait(std::vector<char> & buffer) override;
+    virtual Err recvWait(MqMsg & msg) override;
 };
 
 } // namespace node

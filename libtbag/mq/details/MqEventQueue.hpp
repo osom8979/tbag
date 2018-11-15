@@ -189,8 +189,8 @@ public:
 public:
     Err enqueueClose();
     Err enqueue(MqMsg const & msg);
+    Err enqueue(MqEvent e, char const * data, std::size_t size);
     Err enqueue(char const * data, std::size_t size);
-    Err enqueue(MqEvent event, char const * data, std::size_t size);
 
 protected:
     virtual AfterAction onMsg(AsyncMsg * msg);
@@ -200,7 +200,7 @@ protected:
      * @warning
      *  Only messages extracted via onMsg() can be enqueue.
      */
-    Err restoreMessage(AsyncMsg * msg, bool validate = false);
+    Err restoreMessage(AsyncMsg * msg, bool verify = false);
 };
 
 } // namespace details

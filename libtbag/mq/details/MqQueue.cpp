@@ -74,22 +74,17 @@ MqQueue::MiscValidity MqQueue::validateOfReady(std::size_t min, std::size_t max)
 
 Err MqQueue::enqueue(MqMsg const & msg)
 {
-    return enqueue(msg.event, msg.data(), msg.size());
+    return enqueue(MqMsgCopyFrom(msg));
 }
 
 Err MqQueue::enqueue(char const * data, std::size_t size)
 {
-    return enqueue(MqEvent::ME_MSG, data, size);
+    return enqueue(MqMsg(data, size));
 }
 
-Err MqQueue::enqueue(MqEvent event, char const * data, std::size_t size)
+Err MqQueue::dequeue(MqMsg & msg)
 {
-    return enqueue(MqMsgCopyFrom(event, data, size));
-}
-
-Err MqQueue::dequeue(char * data, std::size_t max_buffer, MqEvent * event, std::size_t * size)
-{
-    return dequeue(MqMsgCopyTo(event, data, max_buffer, size));
+    return dequeue(MqMsgCopyTo(msg));
 }
 
 } // namespace details

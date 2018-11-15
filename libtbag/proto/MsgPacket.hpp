@@ -92,8 +92,8 @@ public:
     ~MsgPacketParser();
 
 public:
-    Err parse(char const * buffer, std::size_t size, MqMsg * msg = nullptr, std::size_t * computed_size = nullptr);
-    Err parse(Buffer const & buffer, MqMsg * msg = nullptr, std::size_t * computed_size = nullptr);
+    Err parse(char const * buffer, std::size_t size, MqMsg * msg, std::size_t * computed_size);
+    Err parse(Buffer const & buffer, MqMsg * msg, std::size_t * computed_size);
 };
 
 /**
@@ -106,9 +106,20 @@ public:
  */
 class TBAG_API MsgPacket : public MsgPacketBuilder, public MsgPacketParser
 {
+private:
+    MqMsg _msg;
+
 public:
     MsgPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
     ~MsgPacket();
+
+public:
+    inline MqMsg       & msg()       TBAG_NOEXCEPT { return _msg; }
+    inline MqMsg const & msg() const TBAG_NOEXCEPT { return _msg; }
+
+public:
+    Err parseAndUpdate(char const * buffer, std::size_t size, std::size_t * computed_size);
+    Err parseAndUpdate(Buffer const & buffer, std::size_t * computed_size);
 };
 
 } // namespace proto

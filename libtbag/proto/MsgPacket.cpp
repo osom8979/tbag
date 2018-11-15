@@ -258,6 +258,16 @@ MsgPacket::~MsgPacket()
     // EMPTY.
 }
 
+Err MsgPacket::parseAndUpdate(char const * buffer, std::size_t size, std::size_t * computed_size)
+{
+    return MsgPacketParser::parse(buffer, size, &_msg, computed_size);
+}
+
+Err MsgPacket::parseAndUpdate(Buffer const & buffer, std::size_t * computed_size)
+{
+    return parseAndUpdate(buffer.data(), buffer.size(), computed_size);
+}
+
 } // namespace proto
 
 // --------------------

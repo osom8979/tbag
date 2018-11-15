@@ -115,6 +115,22 @@ Err Tcp::bind(sockaddr const * address, unsigned int flags)
     return convertUvErrorToErrWithLogging("Tcp::bind()", CODE);
 }
 
+Err Tcp::bind(sockaddr const * address, BindFlag flags)
+{
+    unsigned int uv_flags = 0;
+    switch (flags) {
+    case BindFlag::BF_IPV6_ONLY:
+        uv_flags = UV_TCP_IPV6ONLY;
+        break;
+    case BindFlag::BF_NONE:
+    default:
+        uv_flags = 0;
+        break;
+    }
+
+    return bind(address, uv_flags);
+}
+
 Err Tcp::getSockName(struct sockaddr * name, int * namelen)
 {
     // addr must point to a valid and big enough chunk of memory,

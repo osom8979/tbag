@@ -39,9 +39,51 @@ MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
         throw ErrException(Err::E_ILLARGS);
     }
     assert(static_cast<bool>(_server));
+    assert(_server->isInit());
 
     _writer = loop.newHandle<Writer>(loop, this);
     assert(static_cast<bool>(_writer));
+    assert(_writer->isInit());
+
+    if (TYPE == MqType::MT_PIPE) {
+        auto * pipe = (PipeServer*)(_server.get());
+        assert(pipe != nullptr);
+        auto const BIND_CODE = pipe->bind(params.bind.c_str());
+        if (isFailure(BIND_CODE)) {
+            throw ErrException(BIND_CODE);
+        }
+
+        Err const LISTEN_CODE = pipe->listen();
+        if (isFailure(LISTEN_CODE)) {
+            throw ErrException(LISTEN_CODE);
+        }
+    } else {
+        assert(TYPE == MqType::MT_TCP);
+        auto * tcp = (TcpServer*)(_server.get());
+
+        SocketAddress addr;
+        auto const INIT_CODE = addr.init(params.bind, params.port);
+        if (isFailure(INIT_CODE)) {
+            throw ErrException(INIT_CODE);
+        }
+
+        Tcp::BindFlag flags;
+        if (params.tcp_ipv6_only) {
+            flags = Tcp::BindFlag::BF_IPV6_ONLY;
+        } else {
+            flags = Tcp::BindFlag::BF_NONE;
+        }
+
+        auto const BIND_CODE = tcp->bind(addr.getCommon(), flags);
+        if (isFailure(BIND_CODE)) {
+            throw ErrException(BIND_CODE);
+        }
+
+        Err const LISTEN_CODE = tcp->listen();
+        if (isFailure(LISTEN_CODE)) {
+            throw ErrException(LISTEN_CODE);
+        }
+    }
 }
 
 MqStreamServer::~MqStreamServer()
@@ -54,6 +96,7 @@ MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     assert(THREAD_ID == std::this_thread::get_id());
     if (msg->event == MqEvent::ME_MSG) {
         _writer->queue.push(AsyncMsgPointer(msg));
+
         if (_writer->state == RequestState::RS_WAITING) {
             auto const CODE = _writer->send();
             assert(isSuccess(CODE));
@@ -63,7 +106,7 @@ MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     }
 
     if (msg->event == MqEvent::ME_CLOSE) {
-        closeAllNode(_params.wait_closing_millisec);
+        closeAllNode();
     } else {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }
@@ -71,22 +114,21 @@ MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
 }
 
 template <typename NodeT>
-static std::size_t __write_all_nodes(NodeSet & nodes, char const * data, std::size_t size)
+static std::size_t __write_all_nodes(NodeSet & nodes, uint8_t const * data, std::size_t size)
 {
-    std::size_t success_counter = 0;
+    std::size_t success_count = 0;
     for (auto & cursor : nodes) {
         assert(static_cast<bool>(cursor));
         auto * node = (NodeT*)(cursor.get());
-        auto const CODE = node->write(node->write_req, data, size);
+        auto const CODE = node->write(node->write_req, (char const *)data, size);
         if (isSuccess(CODE)) {
-            ++success_counter;
+            ++success_count;
         }
     }
-    return success_counter;
+    return success_count;
 }
 
-template <typename NodeT>
-static std::size_t __write_all_nodes(NodeSet & nodes, char const * data, std::size_t size, MqType type)
+static std::size_t __write_all_nodes(NodeSet & nodes, uint8_t const * data, std::size_t size, MqType type)
 {
     if (type == MqType::MT_PIPE) {
         return __write_all_nodes<PipeNode>(nodes, data, size);
@@ -106,20 +148,55 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto const msg_pointer = writer->queue.front();
     assert(static_cast<bool>(msg_pointer));
 
-    auto const * data = msg_pointer->data();
-    auto const   size = msg_pointer->size();
-
-    writer->write_count = __write_all_nodes<PipeNode>(_nodes, data, size, TYPE);
+    auto const CODE = _packer.build(*(msg_pointer.get()));
+    assert(isSuccess(CODE));
+    writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), TYPE);
 }
 
 void MqStreamServer::onWriterClose(Writer * writer)
 {
+    // EMPTY.
+}
+
+void MqStreamServer::onCloseTimer(CloseTimer * timer)
+{
     assert(THREAD_ID == std::this_thread::get_id());
+    assert(timer != nullptr);
+    assert(timer->stream != nullptr);
+
+    if (!timer->stream->isClosing()) {
+        timer->stream->close();
+    }
+    timer->close();
+}
+
+void MqStreamServer::onCloseTimerClose(CloseTimer * timer)
+{
+    // EMPTY.
 }
 
 void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Err code)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
+    if (_params.wait_closing_millisec == 0) {
+        node->close();
+        return;
+    }
+
+    auto * loop = node->getLoop();
+    assert(loop != nullptr);
+
+    auto timer = loop->newHandle<CloseTimer>(*loop, this, node);
+    if (!timer) {
+        node->close();
+        return;
+    }
+
+    assert(_params.wait_closing_millisec > 0);
+    auto const START_CODE = timer->start(_params.wait_closing_millisec);
+    if (isFailure(START_CODE)) {
+        node->close();
+        timer->close();
+    }
 }
 
 void MqStreamServer::onNodeWrite(Stream * node, WriteRequest & request, Err code)
@@ -137,7 +214,7 @@ void MqStreamServer::onNodeWrite(Stream * node, WriteRequest & request, Err code
     auto value = _writer->queue.front();
     _writer->queue.pop();
 
-    auto const CODE = restoreMessage(value.get());
+    auto const CODE = restoreMessage(value.get(), _params.verify_restore_message);
     assert(isSuccess(CODE));
 
     if (_writer->queue.empty()) {
@@ -197,28 +274,30 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
         return;
     }
     if (code != Err::E_SUCCESS) {
-        // Error.
+        tDLogE("MqStreamServer::onNodeRead() Read error: {}", code);
         return;
     }
 
     assert(code == Err::E_SUCCESS);
     auto & remaining_read = __read_buffer(node, buffer, size, TYPE);
 
-    MqMsg msg;
     std::size_t computed_size = 0;
-    auto const PARSE_CODE = _packer.parse(remaining_read.data(), remaining_read.size(), &msg, &computed_size);
+    auto const PARSE_CODE = _packer.parseAndUpdate(remaining_read, &computed_size);
     if (isFailure(PARSE_CODE)) {
-        // Skip...
+        // Skip... (maybe no error)
         return;
     }
 
-    auto const ENQUEUE_CODE = _recv_queue.enqueue(msg);
+    assert(computed_size <= remaining_read.size());
+    remaining_read.erase(remaining_read.begin(), remaining_read.begin() + computed_size);
+
+    auto const ENQUEUE_CODE = _recv_queue.enqueue(_packer.msg());
     if (isFailure(ENQUEUE_CODE)) {
-        // Skip...
+        tDLogE("MqStreamServer::onNodeRead() Enqueue error: {}", ENQUEUE_CODE);
         return;
     }
 
-    // All processes succeeded.
+    // [DONE] All processes succeeded.
 }
 
 void MqStreamServer::onNodeClose(Stream * node)
@@ -238,7 +317,15 @@ template <typename NodeT>
 static Err __shutdown(MqStreamServer::Stream * stream)
 {
     auto * node = (NodeT*)(stream);
-    return node->shutdown(node->shutdown_req);
+    if (node->is_shutdown) {
+        return Err::E_ILLSTATE;
+    }
+
+    auto const CODE = node->shutdown(node->shutdown_req);
+    if (isSuccess(CODE)) {
+        node->is_shutdown = true;
+    }
+    return CODE;
 }
 
 static Err __shutdown(Stream * stream, MqType type)
@@ -250,42 +337,29 @@ static Err __shutdown(Stream * stream, MqType type)
     return __shutdown<TcpNode>(stream);
 }
 
-Err MqStreamServer::closeNode(Stream * node, std::size_t wait_closing_millisec)
+Err MqStreamServer::closeNode(Stream * node)
 {
-    if (wait_closing_millisec == 0) {
-        node->close();
-        return Err::E_SUCCESS;
+    auto const CODE = __shutdown(node, TYPE);
+    if (CODE == Err::E_ILLSTATE) {
+        // Skip...
+        return Err::E_ILLSTATE;
     }
-
-    auto * loop = node->getLoop();
-    assert(loop != nullptr);
-
-    auto timer = loop->newHandle<CloseTimer>(*loop, node);
-    if (!timer) {
+    if (isFailure(CODE)) {
         node->close();
-        return Err::E_EXPIRED;
     }
-
-    auto const SHUTDOWN_CODE = __shutdown(node, TYPE);
-    if (isFailure(SHUTDOWN_CODE)) {
-        node->close();
-        timer->close();
-        return SHUTDOWN_CODE;
-    }
-
-    auto const START_CODE = timer->start(wait_closing_millisec);
-    if (isFailure(START_CODE)) {
-        node->close();
-        timer->close();
-    }
-    return START_CODE;
+    return CODE;
 }
 
-void MqStreamServer::closeAllNode(std::size_t wait_closing_millisec)
+std::size_t MqStreamServer::closeAllNode()
 {
+    std::size_t skip_or_success_count = 0;
     for (auto /*&*/ node : _nodes) {
-        closeNode(node.get(), wait_closing_millisec);
+        auto const CODE = closeNode(node.get());
+        if (CODE == Err::E_SUCCESS || CODE == Err::E_ILLSTATE) {
+            ++skip_or_success_count;
+        }
     }
+    return skip_or_success_count;
 }
 
 void MqStreamServer::onServerConnection(Stream * server, Err code)
@@ -330,17 +404,17 @@ void MqStreamServer::onServerClose(Stream * server)
     assert(THREAD_ID == std::this_thread::get_id());
 }
 
-Err MqStreamServer::send(char const * buffer, std::size_t size)
+Err MqStreamServer::send(MqMsg const & msg)
 {
-    return Err::E_UNSUPOP;
+    return enqueue(msg);
 }
 
-Err MqStreamServer::recv(std::vector<char> & buffer)
+Err MqStreamServer::recv(MqMsg & msg)
 {
-    return Err::E_UNSUPOP;
+    return _recv_queue.dequeue(msg);
 }
 
-Err MqStreamServer::recvWait(std::vector<char> & buffer)
+Err MqStreamServer::recvWait(MqMsg & msg)
 {
     return Err::E_UNSUPOP;
 }

@@ -46,6 +46,13 @@ public:
 public:
     using Parent = Stream;
 
+public:
+    enum class BindFlag : unsigned int
+    {
+        BF_NONE,
+        BF_IPV6_ONLY,
+    };
+
 protected:
     Tcp(Loop & loop);
 
@@ -71,6 +78,7 @@ public:
 
     /** Bind the handle to an address and port. */
     Err bind(sockaddr const * address, unsigned int flags = 0);
+    Err bind(sockaddr const * address, BindFlag flags);
 
     /** Get the current address to which the handle is bound. */
     Err getSockName(struct sockaddr * name, int * namelen);

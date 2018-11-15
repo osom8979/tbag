@@ -63,6 +63,7 @@ struct tcp_t  { /* EMPTY. */ };
 struct MqMsg
 {
     using Buffer = libtbag::util::Buffer;
+    using Value  = Buffer::value_type;
 
     static_assert(sizeof(Buffer::value_type) == 1,
                   "The minimum unit of the buffer element must be 1 Byte.");
@@ -74,7 +75,13 @@ struct MqMsg
     { /* EMPTY. */ }
     MqMsg(std::size_t s) : event(MqEvent::ME_NONE), buffer(s)
     { /* EMPTY. */ }
+    MqMsg(MqEvent e) : event(e), buffer()
+    { /* EMPTY. */ }
     MqMsg(MqEvent e, std::size_t s) : event(e), buffer(s)
+    { /* EMPTY. */ }
+    MqMsg(MqEvent e, Value const * d, std::size_t s) : event(e), buffer(d, d + s)
+    { /* EMPTY. */ }
+    MqMsg(Value const * d, std::size_t s) : event(MqEvent::ME_MSG), buffer(d, d + s)
     { /* EMPTY. */ }
 
     MqMsg(MqMsg const & obj) : event(obj.event), buffer(obj.buffer)
@@ -134,13 +141,9 @@ struct MqMsg
  */
 struct TBAG_API MqMsgCopyFrom
 {
-    MqEvent      event;
-    char const * data;
-    std::size_t  size;
+    MqMsg const & source_msg;
 
-    MqMsgCopyFrom(MqEvent e);
-    MqMsgCopyFrom(char const * d, std::size_t s);
-    MqMsgCopyFrom(MqEvent e, char const * d, std::size_t s);
+    MqMsgCopyFrom(MqMsg const & msg);
     ~MqMsgCopyFrom();
 
     bool operator()(MqMsg * msg);
@@ -154,12 +157,9 @@ struct TBAG_API MqMsgCopyFrom
  */
 struct TBAG_API MqMsgCopyTo
 {
-    MqEvent     * event;
-    char        * data;
-    std::size_t    max;
-    std::size_t * size;
+    MqMsg & destination_msg;
 
-    MqMsgCopyTo(MqEvent * e, char * d, std::size_t m, std::size_t * s);
+    MqMsgCopyTo(MqMsg & msg);
     ~MqMsgCopyTo();
 
     bool operator()(MqMsg * msg);
@@ -167,10 +167,10 @@ struct TBAG_API MqMsgCopyTo
 
 struct MqInterface
 {
-    virtual Err send(char const * buffer, std::size_t size) = 0;
-    virtual Err recv(std::vector<char> & buffer) = 0;
+    virtual Err send(MqMsg const & msg) = 0;
+    virtual Err recv(MqMsg & msg) = 0;
 
-    virtual Err recvWait(std::vector<char> & buffer) = 0;
+    virtual Err recvWait(MqMsg & msg) = 0;
 };
 
 } // namespace details

@@ -57,17 +57,17 @@ void MqStreamClient::onClose()
 {
 }
 
-Err MqStreamClient::send(char const * buffer, std::size_t size)
+Err MqStreamClient::send(MqMsg const & msg)
 {
     return Err::E_UNSUPOP;
 }
 
-Err MqStreamClient::recv(std::vector<char> & buffer)
+Err MqStreamClient::recv(MqMsg & msg)
 {
     return Err::E_UNSUPOP;
 }
 
-Err MqStreamClient::recvWait(std::vector<char> & buffer)
+Err MqStreamClient::recvWait(MqMsg & msg)
 {
     return Err::E_UNSUPOP;
 }

@@ -114,11 +114,11 @@ protected:
     void onClose();
 
 public:
-    virtual Err send(char const * buffer, std::size_t size) override;
-    virtual Err recv(std::vector<char> & buffer) override;
+    virtual Err send(MqMsg const & msg) override;
+    virtual Err recv(MqMsg & msg) override;
 
 public:
-    virtual Err recvWait(std::vector<char> & buffer) override;
+    virtual Err recvWait(MqMsg & msg) override;
 };
 
 } // namespace node

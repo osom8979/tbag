@@ -83,22 +83,22 @@ MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::s
 
 Err MqEventQueue::enqueueClose()
 {
-    return enqueue(MqEvent::ME_CLOSE, nullptr, 0);
+    return enqueue(MqMsg(MqEvent::ME_CLOSE));
 }
 
 Err MqEventQueue::enqueue(MqMsg const & msg)
 {
-    return enqueue(msg.event, msg.data(), msg.size());
+    return enqueue(MqMsgCopyFrom(msg));
+}
+
+Err MqEventQueue::enqueue(MqEvent e, char const * data, std::size_t size)
+{
+    return enqueue(MqMsg(e, data, size));
 }
 
 Err MqEventQueue::enqueue(char const * data, std::size_t size)
 {
-    return enqueue(MqEvent::ME_MSG, data, size);
-}
-
-Err MqEventQueue::enqueue(MqEvent event, char const * data, std::size_t size)
-{
-    return enqueue(MqMsgCopyFrom(event, data, size));
+    return enqueue(MqMsg(data, size));
 }
 
 MqEventQueue::AfterAction MqEventQueue::onMsg(AsyncMsg * msg)
@@ -108,12 +108,12 @@ MqEventQueue::AfterAction MqEventQueue::onMsg(AsyncMsg * msg)
     return AfterAction::AA_OK;
 }
 
-Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool validate)
+Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool verify)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
-    if (validate) {
+    if (verify) {
         bool ok = false;
         for (auto & cursor : __messages__) {
             assert(static_cast<bool>(cursor));

@@ -7,6 +7,7 @@
 
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/log/Log.hpp>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -19,19 +20,7 @@ namespace details {
 // MqMsgCopyFrom implementation.
 // -----------------------------
 
-MqMsgCopyFrom::MqMsgCopyFrom(MqEvent e) : MqMsgCopyFrom(e, nullptr, 0)
-{
-    // EMPTY.
-}
-
-MqMsgCopyFrom::MqMsgCopyFrom(char const * d, std::size_t s)
-        : MqMsgCopyFrom(MqEvent::ME_MSG, d, s)
-{
-    // EMPTY.
-}
-
-MqMsgCopyFrom::MqMsgCopyFrom(MqEvent e, char const * d, std::size_t s)
-        : event(e), data(d), size(s)
+MqMsgCopyFrom::MqMsgCopyFrom(MqMsg const & msg) : source_msg(msg)
 {
     // EMPTY.
 }
@@ -43,11 +32,8 @@ MqMsgCopyFrom::~MqMsgCopyFrom()
 
 bool MqMsgCopyFrom::operator()(MqMsg * msg)
 {
-    msg->event = event;
-    if (data == nullptr || size == 0) {
-        return true;
-    }
-    msg->buffer.assign(data, data + size);
+    assert(msg != nullptr);
+    *msg = source_msg;
     return true;
 }
 
@@ -55,8 +41,7 @@ bool MqMsgCopyFrom::operator()(MqMsg * msg)
 // MqMsgCopyTo implementation.
 // ---------------------------
 
-MqMsgCopyTo::MqMsgCopyTo(MqEvent * e, char * d, std::size_t m, std::size_t * s)
-        : event(e), data(d), max(m), size(s)
+MqMsgCopyTo::MqMsgCopyTo(MqMsg & msg) : destination_msg(msg)
 {
     // EMPTY.
 }
@@ -68,18 +53,7 @@ MqMsgCopyTo::~MqMsgCopyTo()
 
 bool MqMsgCopyTo::operator()(MqMsg * msg)
 {
-    if (event != nullptr) {
-        *event = msg->event;
-    }
-    auto const SIZE = msg->size();
-    if (size != nullptr) {
-        *size = SIZE;
-    }
-    if (data != nullptr) {
-        auto const BEGIN = msg->begin();
-        auto const END   = BEGIN + (SIZE <= max ? SIZE : max);
-        std::copy(BEGIN, END, data);
-    }
+    destination_msg = *msg;
     return true;
 }
 
