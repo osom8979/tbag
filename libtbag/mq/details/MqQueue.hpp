@@ -44,8 +44,9 @@ public:
     using MiscValidity     = BoundedMpMcQueue::MiscValidity;
 
 public:
-    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE  = BoundedMpMcQueue::DEFAULT_QUEUE_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE = 1024;
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_QUEUE_SIZE        = BoundedMpMcQueue::DEFAULT_QUEUE_SIZE;
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_PACKET_SIZE       = 1024;
+    TBAG_CONSTEXPR static uint64_t    const DEFAULT_WAIT_TIMEOUT_NANO = 1/*nano*/ * 1000/*micro*/ * 1000/*milli*/;
 
 public:
     struct Queue : public BoundedMpMcQueue
@@ -70,12 +71,17 @@ public:
     friend struct Queue;
     using UniqueQueue = std::unique_ptr<Queue>;
 
+public:
+    uint64_t const WAIT_TIMEOUT_NANO;
+
 private:
     UniqueQueue _active;
     UniqueQueue _ready;
 
 public:
-    MqQueue(std::size_t size = DEFAULT_QUEUE_SIZE, std::size_t msg_size = DEFAULT_PACKET_SIZE);
+    MqQueue(std::size_t size = DEFAULT_QUEUE_SIZE,
+            std::size_t msg_size = DEFAULT_PACKET_SIZE,
+            uint64_t wait_timeout_nano = DEFAULT_WAIT_TIMEOUT_NANO);
     ~MqQueue();
 
 private:
@@ -98,7 +104,7 @@ public:
     Err dequeue(MqMsg & msg);
 
 public:
-    void dequeue_wait(MqMsg & msg);
+    void dequeueWait(MqMsg & msg);
 };
 
 } // namespace details

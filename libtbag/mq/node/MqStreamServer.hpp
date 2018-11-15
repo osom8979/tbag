@@ -370,7 +370,7 @@ public:
     virtual Err recv(MqMsg & msg) override;
 
 public:
-    virtual Err recvWait(MqMsg & msg) override;
+    virtual void recvWait(MqMsg & msg) override;
 };
 
 } // namespace node

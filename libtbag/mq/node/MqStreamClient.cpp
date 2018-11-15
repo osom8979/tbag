@@ -381,9 +381,9 @@ Err MqStreamClient::recv(MqMsg & msg)
     return _recv_queue.dequeue(msg);
 }
 
-Err MqStreamClient::recvWait(MqMsg & msg)
+void MqStreamClient::recvWait(MqMsg & msg)
 {
-    return Err::E_UNSUPOP;
+    _recv_queue.dequeueWait(msg);
 }
 
 } // namespace node

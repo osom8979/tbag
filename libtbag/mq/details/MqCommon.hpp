@@ -170,7 +170,7 @@ struct MqInterface
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;
 
-    virtual Err recvWait(MqMsg & msg) = 0;
+    virtual void recvWait(MqMsg & msg) = 0;
 };
 
 } // namespace details

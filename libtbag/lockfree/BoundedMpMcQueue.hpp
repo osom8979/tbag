@@ -18,7 +18,6 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/tmp/Power.hpp>
 
-#include <cstdint>
 #include <memory>
 
 // -------------------
@@ -62,7 +61,6 @@ public:
 
 public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_QUEUE_SIZE = 1024;
-    TBAG_CONSTEXPR static uint64_t    const DEFAULT_WAIT_TIMEOUT_NANO = 1/*nano*/ * 1000/*micro*/ * 1000/*milli*/;
 
 public:
     static_assert(libtbag::tmp::is_power_of_2<DEFAULT_QUEUE_SIZE>::value,
@@ -104,7 +102,11 @@ public:
 
 public:
     void dequeueWait(void ** key, void ** value);
-    void dequeueWait(void ** key, void ** value, uint64_t wait_timeout_nano);
+    void dequeueWait(void ** value);
+
+public:
+    void dequeueWaitTimeout(void ** key, void ** value, uint64_t wait_timeout_nano);
+    void dequeueWaitTimeout(void ** value, uint64_t wait_timeout_nano);
 
 protected:
     virtual void onCleanup(void * key, void * value);

@@ -338,10 +338,22 @@ void BoundedMpMcQueue::dequeueWait(void ** key, void ** value)
     _impl->wait_dequeue(key, value);
 }
 
-void BoundedMpMcQueue::dequeueWait(void ** key, void ** value, uint64_t wait_timeout_nano)
+void BoundedMpMcQueue::dequeueWait(void ** value)
+{
+    assert(static_cast<bool>(_impl));
+    _impl->wait_dequeue(nullptr, value);
+}
+
+void BoundedMpMcQueue::dequeueWaitTimeout(void ** key, void ** value, uint64_t wait_timeout_nano)
 {
     assert(static_cast<bool>(_impl));
     _impl->wait_dequeue(key, value, wait_timeout_nano);
+}
+
+void BoundedMpMcQueue::dequeueWaitTimeout(void ** value, uint64_t wait_timeout_nano)
+{
+    assert(static_cast<bool>(_impl));
+    _impl->wait_dequeue(nullptr, value, wait_timeout_nano);
 }
 
 void BoundedMpMcQueue::onCleanup(void * key, void * value)

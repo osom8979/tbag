@@ -19,7 +19,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq      {
 namespace details {
 
-MqQueue::MqQueue(std::size_t size, std::size_t msg_size) : _active(), _ready()
+MqQueue::MqQueue(std::size_t size, std::size_t msg_size, uint64_t wait_timeout_nano)
+        : WAIT_TIMEOUT_NANO(wait_timeout_nano), _active(), _ready()
 {
     std::size_t const POWER_OF_2 = BoundedMpMcQueue::calcMinimumQueueSize(size);
     _active = std::make_unique<Queue>(this, POWER_OF_2);
@@ -90,7 +91,7 @@ static Err __enqueue(UniqueQueue & ready, UniqueQueue & active, Predicated predi
         return Err::E_ECANCELED;
     }
 
-    auto const RESULT = active->enqueue(value);
+    auto const RESULT = active->enqueueAndSignaling(value);
     assert(RESULT);
     return Err::E_SUCCESS;
 }
@@ -99,14 +100,14 @@ template <typename Predicated>
 static Err __dequeue(UniqueQueue & ready, UniqueQueue & active, Predicated predicated)
 {
     void * value = nullptr;
-    if (!active->dequeue(&value)) {
+    if (!active->dequeueAndSignaling(&value)) {
         return Err::E_NREADY;
     }
 
     auto * msg = (MqMsg*)value;
     assert(msg != nullptr);
     if (!predicated(msg)) {
-        auto const RESULT = active->enqueue(value);
+        auto const RESULT = active->enqueueAndSignaling(value);
         assert(RESULT);
         return Err::E_ECANCELED;
     }
@@ -131,8 +132,16 @@ Err MqQueue::dequeue(MqMsg & msg)
     return __dequeue(_ready, _active, MqMsgCopyTo(msg));
 }
 
-void MqQueue::dequeue_wait(MqMsg & msg)
+void MqQueue::dequeueWait(MqMsg & msg)
 {
+    void * value = nullptr;
+    _active->dequeueWaitTimeout(&value, WAIT_TIMEOUT_NANO);
+
+    assert(value != nullptr);
+    msg = *((MqMsg*)value);
+
+    auto const RESULT = _ready->enqueue(value);
+    assert(RESULT);
 }
 
 } // namespace details
