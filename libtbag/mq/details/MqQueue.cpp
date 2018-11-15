@@ -72,9 +72,53 @@ MqQueue::MiscValidity MqQueue::validateOfReady(std::size_t min, std::size_t max)
     return _ready->singlethreaded_validate(min, max);
 }
 
+using UniqueQueue = MqQueue::UniqueQueue;
+
+template <typename Predicated>
+static Err __enqueue(UniqueQueue & ready, UniqueQueue & active, Predicated predicated)
+{
+    void * value = nullptr;
+    if (!ready->dequeueVal(&value)) {
+        return Err::E_NREADY;
+    }
+
+    auto * msg = (MqMsg*)value;
+    assert(msg != nullptr);
+    if (!predicated(msg)) {
+        auto const RESULT = ready->enqueueVal(value);
+        assert(RESULT);
+        return Err::E_ECANCELED;
+    }
+
+    auto const RESULT = active->enqueueVal(value);
+    assert(RESULT);
+    return Err::E_SUCCESS;
+}
+
+template <typename Predicated>
+static Err __dequeue(UniqueQueue & ready, UniqueQueue & active, Predicated predicated)
+{
+    void * value = nullptr;
+    if (!active->dequeueVal(&value)) {
+        return Err::E_NREADY;
+    }
+
+    auto * msg = (MqMsg*)value;
+    assert(msg != nullptr);
+    if (!predicated(msg)) {
+        auto const RESULT = active->enqueueVal(value);
+        assert(RESULT);
+        return Err::E_ECANCELED;
+    }
+
+    auto const RESULT = ready->enqueueVal(value);
+    assert(RESULT);
+    return Err::E_SUCCESS;
+}
+
 Err MqQueue::enqueue(MqMsg const & msg)
 {
-    return enqueue(MqMsgCopyFrom(msg));
+    return __enqueue(_ready, _active, MqMsgCopyFrom(msg));
 }
 
 Err MqQueue::enqueue(char const * data, std::size_t size)
@@ -84,7 +128,7 @@ Err MqQueue::enqueue(char const * data, std::size_t size)
 
 Err MqQueue::dequeue(MqMsg & msg)
 {
-    return dequeue(MqMsgCopyTo(msg));
+    return __dequeue(_ready, _active, MqMsgCopyTo(msg));
 }
 
 void MqQueue::dequeue_wait(MqMsg & msg)
