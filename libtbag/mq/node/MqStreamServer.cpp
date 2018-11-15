@@ -28,8 +28,8 @@ using binf     = MqStreamServer::binf;
 
 MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          TYPE(params.type), _params(params), _server(), _nodes(),
-          _packer(params.packer_size)
+          TYPE(params.type), _params(params), _server(), _nodes(), _packer(params.packer_size),
+          _recv_queue(params.recv_queue_size, params.recv_msg_size)
 {
     if (TYPE == MqType::MT_PIPE) {
         _server = loop.newHandle<PipeServer>(loop, this);
@@ -248,6 +248,21 @@ binf MqStreamServer::onNodeAlloc(Stream * node, std::size_t suggested_size)
 }
 
 template <typename NodeT>
+static std::size_t & __get_read_error_count(Stream * stream)
+{
+    return ((NodeT*)(stream))->read_error_count;
+}
+
+static std::size_t & __get_read_error_count(Stream * stream, MqType type)
+{
+    if (type == MqType::MT_PIPE) {
+        return __get_read_error_count<PipeNode>(stream);
+    }
+    assert(type == MqType::MT_TCP);
+    return __get_read_error_count<TcpNode>(stream);
+}
+
+template <typename NodeT>
 static Buffer & __read_buffer(Stream * stream, char const * buffer, std::size_t size)
 {
     auto * node = (NodeT*)(stream);
@@ -273,12 +288,20 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
         node->close();
         return;
     }
+
+    auto & error_count = __get_read_error_count(node, TYPE);
     if (code != Err::E_SUCCESS) {
-        tDLogE("MqStreamServer::onNodeRead() Read error: {}", code);
+        ++error_count;
+        tDLogE("MqStreamServer::onNodeRead() Read error: {} ({}/{})",
+               code, error_count, _params.continuous_read_error_count);
+        if (error_count >= _params.continuous_read_error_count) {
+            node->close();
+        }
         return;
     }
 
     assert(code == Err::E_SUCCESS);
+    error_count = 0;
     auto & remaining_read = __read_buffer(node, buffer, size, TYPE);
 
     std::size_t computed_size = 0;
@@ -388,9 +411,21 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
         assert(TYPE == MqType::MT_TCP);
         stream = loop->newHandle<TcpNode>(*loop, this);
     }
+    assert(static_cast<bool>(stream));
+    assert(stream->isInit());
 
     auto const ACCEPT_CODE = server->accept(*stream);
     assert(ACCEPT_CODE == Err::E_SUCCESS);
+
+    if (TYPE == MqType::MT_TCP && !_params.accept_ip_regex.empty()) {
+        auto * tcp = (TcpNode*)stream.get();
+        auto const PEER_IP = tcp->getPeerIp();
+        if (!std::regex_match(PEER_IP, std::regex(_params.accept_ip_regex))) {
+            tDLogI("MqStreamServer::onServerConnection() Filtered ip: {}", PEER_IP);
+            stream->close();
+            return;
+        }
+    }
 
     auto const START_CODE = stream->startRead();
     assert(START_CODE == Err::E_SUCCESS);

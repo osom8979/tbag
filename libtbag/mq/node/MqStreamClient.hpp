@@ -98,6 +98,15 @@ public:
     using tcp_t  = libtbag::mq::details::tcp_t;
 
 public:
+    struct Params
+    {
+        /**
+         * Number of attempts to reconnect
+         */
+        std::size_t reconnect_count = 0;
+    };
+
+public:
     MqType const TYPE;
 
 public:

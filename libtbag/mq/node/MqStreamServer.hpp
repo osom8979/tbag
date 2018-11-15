@@ -34,7 +34,7 @@
 
 #include <vector>
 #include <unordered_set>
-#include <unordered_map>
+#include <regex>
 #include <thread>
 #include <type_traits>
 
@@ -89,11 +89,12 @@ public:
     using MsgPacket     = libtbag::proto::MsgPacket;
 
 public:
-    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE     = MqEventQueue::DEFAULT_QUEUE_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE    = MqEventQueue::DEFAULT_PACKET_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_MAX_NODE_SIZE  = 100000; // C10K
-    TBAG_CONSTEXPR static std::size_t DEFAULT_BUILDER_SIZE   = MsgPacket::DEFAULT_BUILDER_CAPACITY;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_CLOSE_MILLISEC = 1 * 1000;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE       = MqEventQueue::DEFAULT_QUEUE_SIZE;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE      = MqEventQueue::DEFAULT_PACKET_SIZE;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_MAX_NODE_SIZE    = 100000; // C10K
+    TBAG_CONSTEXPR static std::size_t DEFAULT_BUILDER_SIZE     = MsgPacket::DEFAULT_BUILDER_CAPACITY;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_CLOSE_MILLISEC   = 1 * 1000;
+    TBAG_CONSTEXPR static std::size_t DEFAULT_READ_ERROR_COUNT = 4;
 
 public:
     enum class RequestState
@@ -163,6 +164,7 @@ private:
         Buffer remaining_read;
 
         bool is_shutdown = false;
+        std::size_t read_error_count = 0;
 
         Node(Loop & loop, MqStreamServer * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
@@ -302,6 +304,21 @@ public:
          * Verify the restore message.
          */
         bool verify_restore_message = false;
+
+        /**
+         * If the consecutive read error is maximum,
+         * the connection is forced to close.
+         */
+        std::size_t continuous_read_error_count = DEFAULT_READ_ERROR_COUNT;
+
+        /**
+         * You are given the opportunity to filter IP addresses for acceptance.
+         *
+         * @remarks
+         *  - tcp: use this value.
+         *  - pipe: unused.
+         */
+        std::string accept_ip_regex;
 
         Params() { /* EMPTY. */ }
         ~Params() { /* EMPTY. */ }
