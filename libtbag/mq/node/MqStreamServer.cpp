@@ -145,12 +145,29 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     assert(writer->state == RequestState::RS_ASYNC);
     writer->state = RequestState::RS_REQUESTING;
 
-    auto const msg_pointer = writer->queue.front();
+    auto msg_pointer = writer->queue.front();
     assert(static_cast<bool>(msg_pointer));
 
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
+
     writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), TYPE);
+    if (writer->write_count == 0) {
+        tDLogE("MqStreamServer::onWriterAsync() Write error: {} nodes", _nodes.size());
+
+        writer->queue.pop();
+
+        auto const CODE = restoreMessage(msg_pointer.get(), PARAMS.verify_restore_message);
+        assert(isSuccess(CODE));
+
+        if (writer->queue.empty()) {
+            writer->state = RequestState::RS_WAITING;
+        } else {
+            auto const CODE = writer->send();
+            assert(isSuccess(CODE));
+            writer->state = RequestState::RS_ASYNC;
+        }
+    }
 }
 
 void MqStreamServer::onWriterClose(Writer * writer)
@@ -177,6 +194,9 @@ void MqStreamServer::onCloseTimerClose(CloseTimer * timer)
 
 void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Err code)
 {
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(node != nullptr);
+
     if (PARAMS.wait_closing_millisec == 0) {
         node->close();
         return;
@@ -337,7 +357,7 @@ void MqStreamServer::onNodeClose(Stream * node)
 }
 
 template <typename NodeT>
-static Err __shutdown(MqStreamServer::Stream * stream)
+static Err __shutdown(Stream * stream)
 {
     auto * node = (NodeT*)(stream);
     if (node->is_shutdown) {
