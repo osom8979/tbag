@@ -119,9 +119,90 @@ void MqStreamServer::onCloseEvent()
     assert(THREAD_ID == std::this_thread::get_id());
     tDLogI("MqStreamServer::onCloseEvent() Start closing ...");
 
-    closeAllNode();
+    closeNodes();
     closeServer();
 }
+
+Err MqStreamServer::closeServer()
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(static_cast<bool>(_server));
+
+    _closing_server = true;
+
+    if (PARAMS.wait_closing_millisec == 0) {
+        _server->close();
+        return Err::E_SUCCESS;
+    }
+
+    auto * loop = _server->getLoop();
+    assert(loop != nullptr);
+
+    auto timer = loop->newHandle<CloseTimer>(*loop, this, _server.get());
+    if (!timer) {
+        _server->close();
+        return Err::E_EXPIRED;
+    }
+
+    assert(PARAMS.wait_closing_millisec > 0);
+    auto const START_CODE = timer->start(PARAMS.wait_closing_millisec);
+    if (isFailure(START_CODE)) {
+        _server->close();
+        timer->close();
+    }
+    return START_CODE;
+}
+
+template <typename NodeT>
+static Err __shutdown(Stream * stream)
+{
+    auto * node = (NodeT*)(stream);
+    if (node->is_shutdown) {
+        return Err::E_ILLSTATE;
+    }
+
+    auto const CODE = node->shutdown(node->shutdown_req);
+    if (isSuccess(CODE)) {
+        node->is_shutdown = true;
+    }
+    return CODE;
+}
+
+static Err __shutdown(Stream * stream, MqType type)
+{
+    if (type == MqType::MT_PIPE) {
+        return __shutdown<PipeNode>(stream);
+    }
+    assert(type == MqType::MT_TCP);
+    return __shutdown<TcpNode>(stream);
+}
+
+Err MqStreamServer::closeNode(Stream * node)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    auto const CODE = __shutdown(node, TYPE);
+    if (CODE == Err::E_ILLSTATE) {
+        return Err::E_ILLSTATE; // Skip...
+    }
+    if (isFailure(CODE)) {
+        node->close();
+    }
+    return CODE;
+}
+
+std::size_t MqStreamServer::closeNodes()
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    std::size_t skip_or_success_count = 0;
+    for (auto /*&*/ node : _nodes) {
+        auto const CODE = closeNode(node.get());
+        if (CODE == Err::E_SUCCESS || CODE == Err::E_ILLSTATE) {
+            ++skip_or_success_count;
+        }
+    }
+    return skip_or_success_count;
+}
+
 
 template <typename NodeT>
 static std::size_t __write_all_nodes(NodeSet & nodes, uint8_t const * data, std::size_t size)
@@ -371,86 +452,6 @@ void MqStreamServer::onNodeClose(Stream * node)
     tDLogI("MqStreamServer::onNodeClose() Close node: @{}", (void*)node);
 }
 
-template <typename NodeT>
-static Err __shutdown(Stream * stream)
-{
-    auto * node = (NodeT*)(stream);
-    if (node->is_shutdown) {
-        return Err::E_ILLSTATE;
-    }
-
-    auto const CODE = node->shutdown(node->shutdown_req);
-    if (isSuccess(CODE)) {
-        node->is_shutdown = true;
-    }
-    return CODE;
-}
-
-static Err __shutdown(Stream * stream, MqType type)
-{
-    if (type == MqType::MT_PIPE) {
-        return __shutdown<PipeNode>(stream);
-    }
-    assert(type == MqType::MT_TCP);
-    return __shutdown<TcpNode>(stream);
-}
-
-void MqStreamServer::closeServer()
-{
-    assert(THREAD_ID == std::this_thread::get_id());
-    assert(static_cast<bool>(_server));
-
-    _closing_server = true;
-
-    if (PARAMS.wait_closing_millisec == 0) {
-        _server->close();
-        return;
-    }
-
-    auto * loop = _server->getLoop();
-    assert(loop != nullptr);
-
-    auto timer = loop->newHandle<CloseTimer>(*loop, this, _server.get());
-    if (!timer) {
-        _server->close();
-        return;
-    }
-
-    assert(PARAMS.wait_closing_millisec > 0);
-    auto const START_CODE = timer->start(PARAMS.wait_closing_millisec);
-    if (isFailure(START_CODE)) {
-        _server->close();
-        timer->close();
-    }
-}
-
-Err MqStreamServer::closeNode(Stream * node)
-{
-    assert(THREAD_ID == std::this_thread::get_id());
-    auto const CODE = __shutdown(node, TYPE);
-    if (CODE == Err::E_ILLSTATE) {
-        // Skip...
-        return Err::E_ILLSTATE;
-    }
-    if (isFailure(CODE)) {
-        node->close();
-    }
-    return CODE;
-}
-
-std::size_t MqStreamServer::closeAllNode()
-{
-    assert(THREAD_ID == std::this_thread::get_id());
-    std::size_t skip_or_success_count = 0;
-    for (auto /*&*/ node : _nodes) {
-        auto const CODE = closeNode(node.get());
-        if (CODE == Err::E_SUCCESS || CODE == Err::E_ILLSTATE) {
-            ++skip_or_success_count;
-        }
-    }
-    return skip_or_success_count;
-}
-
 void MqStreamServer::onServerConnection(Stream * server, Err code)
 {
     assert(THREAD_ID == std::this_thread::get_id());
@@ -519,6 +520,8 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
 void MqStreamServer::onServerClose(Stream * server)
 {
     assert(THREAD_ID == std::this_thread::get_id());
+    tDLogI("MqStreamServer::onServerClose() CLOSE SERVER!");
+
     if (!_writer->isClosing()) {
         _writer->close();
     }

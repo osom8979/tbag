@@ -18,12 +18,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq   {
 namespace node {
 
-using binf       = MqStreamClient::binf;
-using Stream     = MqStreamClient::Stream;
-using MqType     = MqStreamClient::MqType;
-using PipeClient = MqStreamClient::PipeClient;
-using TcpClient  = MqStreamClient::TcpClient;
-using Buffer     = MqStreamClient::Buffer;
+using binf        = MqStreamClient::binf;
+using Stream      = MqStreamClient::Stream;
+using MqType      = MqStreamClient::MqType;
+using PipeClient  = MqStreamClient::PipeClient;
+using TcpClient   = MqStreamClient::TcpClient;
+using Buffer      = MqStreamClient::Buffer;
+using AfterAction = MqStreamClient::AfterAction;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
@@ -74,7 +75,7 @@ MqStreamClient::~MqStreamClient()
     assert(THREAD_ID == std::this_thread::get_id());
 }
 
-MqStreamClient::AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
+AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     if (msg->event == MqEvent::ME_MSG) {
@@ -89,11 +90,46 @@ MqStreamClient::AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
     }
 
     if (msg->event == MqEvent::ME_CLOSE) {
-        closeNode();
+        onCloseEvent();
     } else {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }
     return AfterAction::AA_OK;
+}
+
+template <typename NodeT>
+static Err __shutdown(Stream * stream)
+{
+    auto * node = (NodeT*)(stream);
+    if (node->is_shutdown) {
+        return Err::E_ILLSTATE;
+    }
+
+    auto const CODE = node->shutdown(node->shutdown_req);
+    if (isSuccess(CODE)) {
+        node->is_shutdown = true;
+    }
+    return CODE;
+}
+
+static Err __shutdown(Stream * stream, MqType type)
+{
+    if (type == MqType::MT_PIPE) {
+        return __shutdown<PipeClient>(stream);
+    }
+    assert(type == MqType::MT_TCP);
+    return __shutdown<TcpClient>(stream);
+}
+
+void MqStreamClient::onCloseEvent()
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    tDLogI("MqStreamClient::onCloseEvent() Start closing ...");
+
+    auto const CODE = __shutdown(_client.get(), TYPE);
+    if (CODE != Err::E_SUCCESS && CODE != Err::E_ILLSTATE) {
+        _client->close();
+    }
 }
 
 template <typename NodeT>
@@ -187,6 +223,8 @@ void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_client));
+
+    tDLogI("MqStreamClient::onNodeShutdown() Shutdown node");
 
     if (PARAMS.wait_closing_millisec == 0) {
         _client->close();
@@ -331,44 +369,13 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
 
 void MqStreamClient::onClose()
 {
-    // EMPTY.
-}
+    assert(THREAD_ID == std::this_thread::get_id());
+    tDLogI("MqStreamClient::onServerClose() CLOSE CLIENT!");
 
-template <typename NodeT>
-static Err __shutdown(Stream * stream)
-{
-    auto * node = (NodeT*)(stream);
-    if (node->is_shutdown) {
-        return Err::E_ILLSTATE;
+    if (!_writer->isClosing()) {
+        _writer->close();
     }
-
-    auto const CODE = node->shutdown(node->shutdown_req);
-    if (isSuccess(CODE)) {
-        node->is_shutdown = true;
-    }
-    return CODE;
-}
-
-static Err __shutdown(Stream * stream, MqType type)
-{
-    if (type == MqType::MT_PIPE) {
-        return __shutdown<PipeClient>(stream);
-    }
-    assert(type == MqType::MT_TCP);
-    return __shutdown<TcpClient>(stream);
-}
-
-Err MqStreamClient::closeNode()
-{
-    auto const CODE = __shutdown(_client.get(), TYPE);
-    if (CODE == Err::E_ILLSTATE) {
-        // Skip...
-        return Err::E_ILLSTATE;
-    }
-    if (isFailure(CODE)) {
-        _client->close();
-    }
-    return CODE;
+    closeAsyncMsgs();
 }
 
 Err MqStreamClient::send(MqMsg const & msg)

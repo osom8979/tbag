@@ -208,27 +208,23 @@ public:
     MqStreamClient(Loop & loop, MqParams const & params);
     virtual ~MqStreamClient();
 
-protected:
+private:
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
-protected:
+    void onCloseEvent();
+
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
 
-protected:
-    void onCloseTimer(CloseTimer * timer);
+    void onCloseTimer     (CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
 
-protected:
-    void onConnect(ConnectRequest & request, Err code);
+    void onConnect (ConnectRequest & request, Err code);
     void onShutdown(ShutdownRequest & request, Err code);
-    void onWrite(WriteRequest & request, Err code);
-    binf onAlloc(std::size_t suggested_size);
-    void onRead(Err code, char const * buffer, std::size_t size);
-    void onClose();
-
-private:
-    Err closeNode();
+    void onWrite   (WriteRequest & request, Err code);
+    binf onAlloc   (std::size_t suggested_size);
+    void onRead    (Err code, char const * buffer, std::size_t size);
+    void onClose   ();
 
 public:
     virtual Err send(MqMsg const & msg) override;

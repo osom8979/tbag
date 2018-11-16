@@ -238,10 +238,14 @@ private:
 
     void onCloseEvent();
 
+    Err closeServer();
+    Err closeNode(Stream * node);
+    std::size_t closeNodes();
+
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
 
-    void onCloseTimer(CloseTimer * timer);
+    void onCloseTimer     (CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
 
     void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
@@ -250,12 +254,8 @@ private:
     void onNodeRead    (Stream * node, Err code, char const * buffer, std::size_t size);
     void onNodeClose   (Stream * node);
 
-    void closeServer();
-    Err closeNode(Stream * node);
-    std::size_t closeAllNode();
-
     void onServerConnection(Stream * server, Err code);
-    void onServerClose(Stream * server);
+    void onServerClose     (Stream * server);
 
 public:
     virtual Err send(MqMsg const & msg) override;

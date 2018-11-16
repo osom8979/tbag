@@ -106,9 +106,12 @@ public:
 
     void runner()
     {
+        tDLogI("MqNode::Impl::runner() Loop start");
         _last = _loop.run();
-        if (isFailure(_last)) {
-            tDLogE("MqNode::Impl::runner() Loop error: {}", _last);
+        if (isSuccess(_last)) {
+            tDLogI("MqNode::Impl::runner() Loop end success.");
+        } else {
+            tDLogE("MqNode::Impl::runner() Loop end error: {}", _last);
         }
     }
 
