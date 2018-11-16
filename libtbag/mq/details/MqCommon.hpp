@@ -61,13 +61,6 @@ enum class MqMode : int
     MM_CONNECT,
 };
 
-struct pipe_t { /* EMPTY. */ };
-struct udp_t  { /* EMPTY. */ };
-struct tcp_t  { /* EMPTY. */ };
-
-struct bind_t    { /* EMPTY. */ };
-struct connect_t { /* EMPTY. */ };
-
 /**
  * MessageQueue data packet.
  *
