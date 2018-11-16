@@ -308,6 +308,17 @@ std::string removeRegex(std::string const & source, std::string const & regex)
     return replaceRegex(source, regex, std::string());
 }
 
+std::string replace(std::string const & source, std::string const & find, std::string const & replace)
+{
+    auto const pos = source.find(find);
+    if (pos != std::string::npos) {
+        std::string result = source;
+        result.replace(pos, find.size(), replace);
+        return result;
+    }
+    return source;
+}
+
 bool isMatch(std::string const & source, std::regex const & regex)
 {
     return std::regex_match(source, regex);

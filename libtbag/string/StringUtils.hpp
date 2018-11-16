@@ -165,6 +165,11 @@ TBAG_API std::vector<std::string> splitMatch(std::string const & source, std::st
 TBAG_API std::string replaceRegex(std::string const & source, std::string const & regex, std::string const & replace);
 TBAG_API std::string removeRegex(std::string const & source, std::string const & regex);
 
+/**
+ * Simple replace.
+ */
+TBAG_API std::string replace(std::string const & source, std::string const & find, std::string const & replace);
+
 TBAG_API bool isMatch(std::string const & source, std::regex const & regex);
 TBAG_API bool isMatch(std::string const & source, std::string const & regex);
 TBAG_API bool isUtf8Match(std::string const & utf8_source, std::string const & regex);

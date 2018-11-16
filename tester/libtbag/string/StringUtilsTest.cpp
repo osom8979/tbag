@@ -170,6 +170,21 @@ TEST(StringUtilsTest, SplitMatch)
     ASSERT_STREQ("TEST", list[2].c_str());
 }
 
+TEST(StringUtilsTest, ReplaceRegex)
+{
+    ASSERT_STREQ("test", replaceRegex("t2st", "[0-9]s", "es").c_str());
+}
+
+TEST(StringUtilsTest, RemoveRegex)
+{
+    ASSERT_STREQ("test", removeRegex("te7st", "[0-9]").c_str());
+}
+
+TEST(StringUtilsTest, Replace)
+{
+    ASSERT_STREQ("/t/TEMP/", replace("/TEMP/TEMP/", "TEMP", "t").c_str());
+}
+
 TEST(StringUtilsTest, IsMatch)
 {
     std::string content = "https://www.blackhole-project.com:8080/test";
@@ -248,7 +263,7 @@ TEST(StringUtilsTest, Trim)
     ASSERT_STREQ(     "", trim(t6).c_str());
 }
 
-TEST(StringUtilsTest, createRandomString)
+TEST(StringUtilsTest, CreateRandomString)
 {
     const std::size_t BUFFER_SIZE = 5;
     const std::size_t TEST_COUNT  = 100;
