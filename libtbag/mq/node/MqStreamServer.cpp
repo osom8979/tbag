@@ -29,7 +29,8 @@ using binf     = MqStreamServer::binf;
 MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
           TYPE(params.type), PARAMS(params), _server(), _nodes(), _packer(params.packer_size),
-          _recv_queue(params.recv_queue_size, params.recv_msg_size)
+          _recv_queue(params.recv_queue_size, params.recv_msg_size),
+          _closing_server(false)
 {
     if (TYPE == MqType::MT_PIPE) {
         _server = loop.newHandle<PipeServer>(loop, this);
@@ -106,11 +107,20 @@ MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     }
 
     if (msg->event == MqEvent::ME_CLOSE) {
-        closeAllNode();
+        onCloseEvent();
     } else {
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }
     return AfterAction::AA_OK;
+}
+
+void MqStreamServer::onCloseEvent()
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    tDLogI("MqStreamServer::onCloseEvent() Start closing ...");
+
+    closeAllNode();
+    closeServer();
 }
 
 template <typename NodeT>
@@ -196,6 +206,8 @@ void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Er
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(node != nullptr);
+
+    tDLogI("MqStreamServer::onNodeShutdown() Shutdown node: @{}", (void*)node);
 
     if (PARAMS.wait_closing_millisec == 0) {
         node->close();
@@ -346,6 +358,7 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
 void MqStreamServer::onNodeClose(Stream * node)
 {
     assert(THREAD_ID == std::this_thread::get_id());
+
     Loop * loop = node->getLoop();
     assert(loop != nullptr);
 
@@ -354,6 +367,8 @@ void MqStreamServer::onNodeClose(Stream * node)
 
     auto const ERASE_RESULT = _nodes.erase(StreamPointer(node));
     assert(ERASE_RESULT == 1);
+
+    tDLogI("MqStreamServer::onNodeClose() Close node: @{}", (void*)node);
 }
 
 template <typename NodeT>
@@ -380,8 +395,38 @@ static Err __shutdown(Stream * stream, MqType type)
     return __shutdown<TcpNode>(stream);
 }
 
+void MqStreamServer::closeServer()
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(static_cast<bool>(_server));
+
+    _closing_server = true;
+
+    if (PARAMS.wait_closing_millisec == 0) {
+        _server->close();
+        return;
+    }
+
+    auto * loop = _server->getLoop();
+    assert(loop != nullptr);
+
+    auto timer = loop->newHandle<CloseTimer>(*loop, this, _server.get());
+    if (!timer) {
+        _server->close();
+        return;
+    }
+
+    assert(PARAMS.wait_closing_millisec > 0);
+    auto const START_CODE = timer->start(PARAMS.wait_closing_millisec);
+    if (isFailure(START_CODE)) {
+        _server->close();
+        timer->close();
+    }
+}
+
 Err MqStreamServer::closeNode(Stream * node)
 {
+    assert(THREAD_ID == std::this_thread::get_id());
     auto const CODE = __shutdown(node, TYPE);
     if (CODE == Err::E_ILLSTATE) {
         // Skip...
@@ -395,6 +440,7 @@ Err MqStreamServer::closeNode(Stream * node)
 
 std::size_t MqStreamServer::closeAllNode()
 {
+    assert(THREAD_ID == std::this_thread::get_id());
     std::size_t skip_or_success_count = 0;
     for (auto /*&*/ node : _nodes) {
         auto const CODE = closeNode(node.get());
@@ -410,6 +456,11 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
     assert(THREAD_ID == std::this_thread::get_id());
     if (code != Err::E_SUCCESS) {
         tDLogE("MqStreamServer::onServerConnection() Connection {} error.", code);
+        return;
+    }
+
+    if (_closing_server) {
+        tDLogE("MqStreamServer::onServerConnection() Closing this server.");
         return;
     }
 
@@ -441,7 +492,7 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
         auto * tcp = (TcpNode*)stream.get();
         auto const PEER_IP = tcp->getPeerIp();
         if (!std::regex_match(PEER_IP, std::regex(PARAMS.accept_ip_regex))) {
-            tDLogI("MqStreamServer::onServerConnection() Filtered ip: {}", PEER_IP);
+            tDLogD("MqStreamServer::onServerConnection() Filtered ip: {}", PEER_IP);
             stream->close();
             return;
         }
@@ -452,25 +503,49 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
 
     auto const INSERT_RESULT = _nodes.insert(StreamPointer(stream.get())).second;
     assert(INSERT_RESULT);
+
+    std::string peer_info;
+    if (TYPE == MqType::MT_PIPE) {
+        //peer_info = ((PipeNode*)stream.get())->getPeerName();
+        peer_info = ((PipeNode*)stream.get())->getSockName();
+    } else if (TYPE == MqType::MT_TCP) {
+        peer_info = ((TcpNode*)stream.get())->getPeerIp();
+        peer_info += ':';
+        peer_info += libtbag::string::toString(((TcpNode*)stream.get())->getPeerPort());
+    }
+    tDLogI("MqStreamServer::onServerConnection() Connecton success: {}", peer_info);
 }
 
 void MqStreamServer::onServerClose(Stream * server)
 {
     assert(THREAD_ID == std::this_thread::get_id());
+    if (!_writer->isClosing()) {
+        _writer->close();
+    }
+    closeAsyncMsgs();
 }
 
 Err MqStreamServer::send(MqMsg const & msg)
 {
+    if (_closing_server) {
+        return Err::E_CLOSING;
+    }
     return enqueue(msg);
 }
 
 Err MqStreamServer::recv(MqMsg & msg)
 {
+    if (_closing_server) {
+        return Err::E_CLOSING;
+    }
     return _recv_queue.dequeue(msg);
 }
 
 void MqStreamServer::recvWait(MqMsg & msg)
 {
+    if (_closing_server) {
+        return;
+    }
     _recv_queue.dequeueWait(msg);
 }
 

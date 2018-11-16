@@ -294,6 +294,11 @@ struct MqParams
      */
     std::size_t try_reconnect_count = 0;
 
+    /**
+     * Verbose log message.
+     */
+    bool verbose = false;
+
     MqParams()
     { /* EMPTY. */ }
 
@@ -312,6 +317,7 @@ TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME    = "wait_closing";
 TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
 TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
 TBAG_CONSTEXPR static char const * const TRY_RECONNECT_NAME   = "try_reconnect";
+TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
 
 // -----------------------
 // Miscellaneous utilities

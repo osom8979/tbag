@@ -35,6 +35,7 @@
 #include <vector>
 #include <unordered_set>
 #include <regex>
+#include <atomic>
 #include <thread>
 #include <type_traits>
 
@@ -225,33 +226,34 @@ private:
     MsgPacket    _packer;
     MqQueue      _recv_queue;
 
+private:
+    std::atomic_bool _closing_server;
+
 public:
     MqStreamServer(Loop & loop, MqParams const & params);
     virtual ~MqStreamServer();
 
-protected:
+private:
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
-protected:
+    void onCloseEvent();
+
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
 
-protected:
     void onCloseTimer(CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
 
-protected:
     void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
     void onNodeWrite   (Stream * node, WriteRequest & request, Err code);
     binf onNodeAlloc   (Stream * node, std::size_t suggested_size);
     void onNodeRead    (Stream * node, Err code, char const * buffer, std::size_t size);
     void onNodeClose   (Stream * node);
 
-private:
+    void closeServer();
     Err closeNode(Stream * node);
     std::size_t closeAllNode();
 
-protected:
     void onServerConnection(Stream * server, Err code);
     void onServerClose(Stream * server);
 
@@ -259,7 +261,6 @@ public:
     virtual Err send(MqMsg const & msg) override;
     virtual Err recv(MqMsg & msg) override;
 
-public:
     virtual void recvWait(MqMsg & msg) override;
 };
 

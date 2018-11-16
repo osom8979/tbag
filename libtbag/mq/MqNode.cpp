@@ -86,8 +86,10 @@ public:
 
     ~Impl()
     {
+        _mq->send(MqMsg(MqEvent::ME_CLOSE));
         _pool.waitPush([&](){
             _pool.exit();
+            _mq.reset();
         });
     }
 

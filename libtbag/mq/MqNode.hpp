@@ -43,6 +43,7 @@ public:
 
 public:
     using MqType   = libtbag::mq::details::MqType;
+    using MqEvent  = libtbag::mq::details::MqEvent;
     using MqMode   = libtbag::mq::details::MqMode;
     using MqMsg    = libtbag::mq::details::MqMsg;
     using MqParams = libtbag::mq::details::MqParams;

@@ -167,6 +167,11 @@ MqParams convertUriToParams(std::string const & uri_string, bool convert_windows
         params.try_reconnect_count = toValue<unsigned>(itr->second);
     }
 
+    itr = QUERIES.find(VERBOSE_NAME);
+    if (itr != QUERIES.end()) {
+        params.verbose = toValue<bool>(itr->second);
+    }
+
     return params;
 }
 
