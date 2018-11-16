@@ -25,7 +25,7 @@ using PipeClient = MqStreamClient::PipeClient;
 using TcpClient  = MqStreamClient::TcpClient;
 using Buffer     = MqStreamClient::Buffer;
 
-MqStreamClient::MqStreamClient(Loop & loop, Params const & params)
+MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
           TYPE(params.type), PARAMS(params), _client(), _packer(params.packer_size),
           _recv_queue(params.recv_queue_size, params.recv_msg_size)
@@ -45,19 +45,19 @@ MqStreamClient::MqStreamClient(Loop & loop, Params const & params)
     assert(_writer->isInit());
 
     if (TYPE == MqType::MT_PIPE) {
-        if (!libtbag::filesystem::Path(params.connect).exists()) {
+        if (!libtbag::filesystem::Path(params.address).exists()) {
             throw ErrException(Err::E_EEXIST);
         }
 
         auto * pipe = (PipeClient*)(_client.get());
         assert(pipe != nullptr);
-        pipe->connect(pipe->connect_req, params.connect.c_str());
+        pipe->connect(pipe->connect_req, params.address.c_str());
     } else {
         assert(TYPE == MqType::MT_TCP);
         auto * tcp = (TcpClient*)(_client.get());
 
         SocketAddress addr;
-        auto const INIT_CODE = addr.init(params.connect, params.port);
+        auto const INIT_CODE = addr.init(params.address, params.port);
         if (isFailure(INIT_CODE)) {
             throw ErrException(INIT_CODE);
         }

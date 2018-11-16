@@ -57,6 +57,7 @@ TBAG_CONSTEXPR char const * const  TCP_LOWER_NAME = "tcp";
 
 enum class MqMode : int
 {
+    MM_NONE,
     MM_BIND,
     MM_CONNECT,
 };
@@ -179,6 +180,132 @@ struct MqInterface
 
     virtual void recvWait(MqMsg & msg) = 0;
 };
+
+TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_QUEUE_SIZE       = 1024;            // power of 2.
+TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_PACKET_SIZE      = 256;             // data buffer size.
+TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_MAX_NODE_SIZE    = 100000;          // Number of C10K.
+TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_BUILDER_SIZE     = 1 * 1024 * 1024; // FlatBuffers builder capacity.
+TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_CLOSE_MILLISEC   = 1 * 1000;        // Shutdown -> Close wait-timeout.
+TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_READ_ERROR_COUNT = 4;               // Max continuous read error count.
+
+struct MqParams
+{
+    /**
+     * Type of stream. must be TCP or PIPE.
+     */
+    MqType type = MqType::MT_TCP;
+
+    /**
+     * Bind or Connect address.
+     *
+     * @remarks
+     *  - tcp: bind socket address.
+     *  - pipe: pipe file path.
+     */
+    std::string address;
+
+    /**
+     * Bind port number.
+     *
+     * @remarks
+     *  - tcp: port number.
+     *  - pipe: unused.
+     */
+    int port = 0;
+
+    /*
+     * Used with uv_tcp_bind, when an IPv6 address is used.
+     *
+     * @remarks
+     *  - tcp: use this flag.
+     *  - pipe: unused.
+     */
+    bool tcp_ipv6_only = false;
+
+    /**
+     * The maximum size of the queue for transmission.
+     */
+    std::size_t send_queue_size = TBAG_MQ_DEFAULT_QUEUE_SIZE;
+
+    /**
+     * The default size of the transmission message packet.
+     *
+     * @remarks
+     *  If memory is insufficient, it will be more expanded.
+     */
+    std::size_t send_msg_size = TBAG_MQ_DEFAULT_PACKET_SIZE;
+
+    /**
+     * The maximum size of the queue for receive
+     */
+    std::size_t recv_queue_size = TBAG_MQ_DEFAULT_QUEUE_SIZE;
+
+    /**
+     * The default size of the receive message packet.
+     *
+     * @remarks
+     *  If memory is insufficient, it will be more expanded.
+     */
+    std::size_t recv_msg_size = TBAG_MQ_DEFAULT_PACKET_SIZE;
+
+    /**
+     * The number of clients that can be accepted.
+     */
+    std::size_t max_nodes = TBAG_MQ_DEFAULT_MAX_NODE_SIZE;
+
+    /**
+     * Temporary buffer size for serialization.
+     */
+    std::size_t packer_size = TBAG_MQ_DEFAULT_BUILDER_SIZE;
+
+    /**
+     * Wait time to closing. If this value is 0, close immediately.
+     *
+     * @remarks
+     *  If you request a shutdown directly, You need time to wait for an idle recv request.
+     */
+    std::size_t wait_closing_millisec = TBAG_MQ_DEFAULT_CLOSE_MILLISEC;
+
+    /**
+     * Verify the restore message.
+     */
+    bool verify_restore_message = false;
+
+    /**
+     * If the consecutive read error is maximum,
+     * the connection is forced to close.
+     */
+    std::size_t continuous_read_error_count = TBAG_MQ_DEFAULT_READ_ERROR_COUNT;
+
+    /**
+     * You are given the opportunity to filter IP addresses for acceptance.
+     *
+     * @remarks
+     *  - tcp: use this value.
+     *  - pipe: unused.
+     */
+    std::string accept_ip_regex;
+
+    /**
+     * Number of attempts to reconnect
+     *
+     * @remarks
+     *  - Used in client only.
+     */
+    std::size_t reconnect_count = 0;
+
+    MqParams()
+    { /* EMPTY. */ }
+
+    ~MqParams()
+    { /* EMPTY. */ }
+};
+
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
+
+TBAG_API MqParams convertUriToParams(std::string const & uri);
 
 } // namespace details
 } // namespace mq

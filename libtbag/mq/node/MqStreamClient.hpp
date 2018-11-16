@@ -79,6 +79,7 @@ public:
     using MqMsg        = libtbag::mq::details::MqMsg;
     using MqEventQueue = libtbag::mq::details::MqEventQueue;
     using MqQueue      = libtbag::mq::details::MqQueue;
+    using MqParams     = libtbag::mq::details::MqParams;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
@@ -194,93 +195,8 @@ public:
     using ThreadId      = std::thread::id;
 
 public:
-    struct Params
-    {
-        /**
-         * Type of stream. must be TCP or PIPE.
-         */
-        MqType type = MqType::MT_TCP;
-
-        /**
-         * Connect address.
-         *
-         * @remarks
-         *  - tcp: connect socket address.
-         *  - pipe: pipe file path.
-         */
-        std::string connect;
-
-        /**
-         * Bind port number.
-         *
-         * @remarks
-         *  - tcp: port number.
-         *  - pipe: unused.
-         */
-        int port = 0;
-
-        /**
-         * The maximum size of the queue for transmission.
-         */
-        std::size_t send_queue_size = DEFAULT_QUEUE_SIZE;
-
-        /**
-         * The default size of the transmission message packet.
-         *
-         * @remarks
-         *  If memory is insufficient, it will be more expanded.
-         */
-        std::size_t send_msg_size = DEFAULT_PACKET_SIZE;
-
-        /**
-         * The maximum size of the queue for receive
-         */
-        std::size_t recv_queue_size = DEFAULT_QUEUE_SIZE;
-
-        /**
-         * The default size of the receive message packet.
-         *
-         * @remarks
-         *  If memory is insufficient, it will be more expanded.
-         */
-        std::size_t recv_msg_size = DEFAULT_PACKET_SIZE;
-
-        /**
-         * Temporary buffer size for serialization.
-         */
-        std::size_t packer_size = DEFAULT_BUILDER_SIZE;
-
-        /**
-         * Wait time to closing. If this value is 0, close immediately.
-         *
-         * @remarks
-         *  If you request a shutdown directly, You need time to wait for an idle recv request.
-         */
-        std::size_t wait_closing_millisec = DEFAULT_CLOSE_MILLISEC;
-
-        /**
-         * Verify the restore message.
-         */
-        bool verify_restore_message = false;
-
-        /**
-         * If the consecutive read error is maximum,
-         * the connection is forced to close.
-         */
-        std::size_t continuous_read_error_count = DEFAULT_READ_ERROR_COUNT;
-
-        /**
-         * Number of attempts to reconnect
-         */
-        std::size_t reconnect_count = 0;
-
-        Params() { /* EMPTY. */ }
-        ~Params() { /* EMPTY. */ }
-    };
-
-public:
     MqType const TYPE;
-    Params const PARAMS;
+    MqParams const PARAMS;
 
 private:
     SharedStream _client;
@@ -289,7 +205,7 @@ private:
     MqQueue      _recv_queue;
 
 public:
-    MqStreamClient(Loop & loop, Params const & params);
+    MqStreamClient(Loop & loop, MqParams const & params);
     virtual ~MqStreamClient();
 
 protected:

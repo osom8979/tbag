@@ -57,6 +57,16 @@ bool MqMsgCopyTo::operator()(MqMsg * msg)
     return true;
 }
 
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
+
+MqParams convertUriToParams(std::string const & uri)
+{
+    MqParams params;
+    return params;
+}
+
 } // namespace details
 } // namespace mq
 

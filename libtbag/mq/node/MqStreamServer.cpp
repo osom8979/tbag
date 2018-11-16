@@ -26,7 +26,7 @@ using NodeSet  = MqStreamServer::NodeSet;
 using Buffer   = MqStreamServer::Buffer;
 using binf     = MqStreamServer::binf;
 
-MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
+MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
           TYPE(params.type), PARAMS(params), _server(), _nodes(), _packer(params.packer_size),
           _recv_queue(params.recv_queue_size, params.recv_msg_size)
@@ -48,7 +48,7 @@ MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
     if (TYPE == MqType::MT_PIPE) {
         auto * pipe = (PipeServer*)(_server.get());
         assert(pipe != nullptr);
-        auto const BIND_CODE = pipe->bind(params.bind.c_str());
+        auto const BIND_CODE = pipe->bind(params.address.c_str());
         if (isFailure(BIND_CODE)) {
             throw ErrException(BIND_CODE);
         }
@@ -62,7 +62,7 @@ MqStreamServer::MqStreamServer(Loop & loop, Params const & params)
         auto * tcp = (TcpServer*)(_server.get());
 
         SocketAddress addr;
-        auto const INIT_CODE = addr.init(params.bind, params.port);
+        auto const INIT_CODE = addr.init(params.address, params.port);
         if (isFailure(INIT_CODE)) {
             throw ErrException(INIT_CODE);
         }

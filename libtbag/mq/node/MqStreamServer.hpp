@@ -78,6 +78,7 @@ public:
     using MqMsg        = libtbag::mq::details::MqMsg;
     using MqEventQueue = libtbag::mq::details::MqEventQueue;
     using MqQueue      = libtbag::mq::details::MqQueue;
+    using MqParams     = libtbag::mq::details::MqParams;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
@@ -87,14 +88,6 @@ public:
     using SocketAddress = libtbag::network::SocketAddress;
     using Uri           = libtbag::network::Uri;
     using MsgPacket     = libtbag::proto::MsgPacket;
-
-public:
-    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE       = MqEventQueue::DEFAULT_QUEUE_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE      = MqEventQueue::DEFAULT_PACKET_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_MAX_NODE_SIZE    = 100000; // C10K
-    TBAG_CONSTEXPR static std::size_t DEFAULT_BUILDER_SIZE     = MsgPacket::DEFAULT_BUILDER_CAPACITY;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_CLOSE_MILLISEC   = 1 * 1000;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_READ_ERROR_COUNT = 4;
 
 public:
     enum class RequestState
@@ -222,111 +215,8 @@ public:
     using ThreadId      = std::thread::id;
 
 public:
-    struct Params
-    {
-        /**
-         * Type of stream. must be TCP or PIPE.
-         */
-        MqType type = MqType::MT_TCP;
-
-        /**
-         * Bind address.
-         *
-         * @remarks
-         *  - tcp: bind socket address.
-         *  - pipe: pipe file path.
-         */
-        std::string bind;
-
-        /**
-         * Bind port number.
-         *
-         * @remarks
-         *  - tcp: port number.
-         *  - pipe: unused.
-         */
-        int port = 0;
-
-        /*
-         * Used with uv_tcp_bind, when an IPv6 address is used.
-         *
-         * @remarks
-         *  - tcp: use this flag.
-         *  - pipe: unused.
-         */
-        bool tcp_ipv6_only = false;
-
-        /**
-         * The maximum size of the queue for transmission.
-         */
-        std::size_t send_queue_size = DEFAULT_QUEUE_SIZE;
-
-        /**
-         * The default size of the transmission message packet.
-         *
-         * @remarks
-         *  If memory is insufficient, it will be more expanded.
-         */
-        std::size_t send_msg_size = DEFAULT_PACKET_SIZE;
-
-        /**
-         * The maximum size of the queue for receive
-         */
-        std::size_t recv_queue_size = DEFAULT_QUEUE_SIZE;
-
-        /**
-         * The default size of the receive message packet.
-         *
-         * @remarks
-         *  If memory is insufficient, it will be more expanded.
-         */
-        std::size_t recv_msg_size = DEFAULT_PACKET_SIZE;
-
-        /**
-         * The number of clients that can be accepted.
-         */
-        std::size_t max_nodes = DEFAULT_MAX_NODE_SIZE;
-
-        /**
-         * Temporary buffer size for serialization.
-         */
-        std::size_t packer_size = DEFAULT_BUILDER_SIZE;
-
-        /**
-         * Wait time to closing. If this value is 0, close immediately.
-         *
-         * @remarks
-         *  If you request a shutdown directly, You need time to wait for an idle recv request.
-         */
-        std::size_t wait_closing_millisec = DEFAULT_CLOSE_MILLISEC;
-
-        /**
-         * Verify the restore message.
-         */
-        bool verify_restore_message = false;
-
-        /**
-         * If the consecutive read error is maximum,
-         * the connection is forced to close.
-         */
-        std::size_t continuous_read_error_count = DEFAULT_READ_ERROR_COUNT;
-
-        /**
-         * You are given the opportunity to filter IP addresses for acceptance.
-         *
-         * @remarks
-         *  - tcp: use this value.
-         *  - pipe: unused.
-         */
-        std::string accept_ip_regex;
-
-        Params() { /* EMPTY. */ }
-        ~Params() { /* EMPTY. */ }
-    };
-
-public:
     MqType const TYPE;
-    Params const PARAMS;
+    MqParams const PARAMS;
 
 private:
     SharedStream _server;
@@ -336,7 +226,7 @@ private:
     MqQueue      _recv_queue;
 
 public:
-    MqStreamServer(Loop & loop, Params const & params);
+    MqStreamServer(Loop & loop, MqParams const & params);
     virtual ~MqStreamServer();
 
 protected:

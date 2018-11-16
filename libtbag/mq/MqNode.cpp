@@ -42,8 +42,6 @@ public:
     using Loop = libtbag::uvpp::Loop;
 
 public:
-    using MqType         = libtbag::mq::details::MqType;
-    using MqMode         = libtbag::mq::details::MqMode;
     using MqStreamClient = libtbag::mq::node::MqStreamClient;
     using MqStreamServer = libtbag::mq::node::MqStreamServer;
 
@@ -59,7 +57,6 @@ public:
     TBAG_CONSTEXPR static std::size_t const THREAD_SIZE = 1U;
 
 public:
-    MqType const TYPE;
     MqMode const MODE;
 
 private:
@@ -90,51 +87,59 @@ private:
     }
 
 public:
-    Impl(MqNode * parent, std::string const & uri, MqMode mode)
-            : TYPE(getMqType(uri)), MODE(mode), _parent(parent),
+    Impl(MqNode * parent, MqParams const & params, MqMode mode)
+            : MODE(mode), _parent(parent),
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
-        if (!startTask()) {
+        assert(MODE != MqMode::MM_NONE);
+        if (!_pool.waitPush([this, params, mode](){ init(params, mode); })) {
+            throw std::bad_alloc();
+        }
+        if (!_pool.push([&](){ runner(); })) {
             throw std::bad_alloc();
         }
     }
 
     ~Impl()
     {
-        // EMPTY.
-    }
-
-private:
-    bool startTask()
-    {
-        return _pool.push([&](){
-            this->runner();
+        _pool.waitPush([&](){
+            _pool.exit();
         });
     }
 
 public:
+    void init(MqParams const & params, MqMode mode)
+    {
+        if (MODE == MqMode::MM_BIND) {
+            _mq = std::make_shared<MqStreamServer>(_loop, params);
+        } else {
+            assert(MODE == MqMode::MM_CONNECT);
+            _mq = std::make_shared<MqStreamClient>(_loop, params);
+        }
+    }
+
     void runner()
     {
         _last = _loop.run();
         if (isFailure(_last)) {
             tDLogE("MqNode::Impl::runner() Loop error: {}", _last);
         }
-        _pool.exit();
     }
 
 public:
-    Err send(char const * buffer, std::size_t size)
+    Err send(MqMsg const & msg)
     {
-        return Err::E_UNSUPOP;
+        return _mq->send(msg);
     }
 
-    Err recv(std::vector<char> & buffer)
+    Err recv(MqMsg & msg)
     {
-        return Err::E_UNSUPOP;
+        return _mq->recv(msg);
     }
 
-    void recvWait(std::vector<char> & buffer)
+    void recvWait(MqMsg & msg)
     {
+        return _mq->recvWait(msg);
     }
 };
 
@@ -188,20 +193,20 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
     }
 }
 
-Err MqNode::bind(std::string const & uri)
+Err MqNode::bind(MqParams const & params)
 {
     try {
-        _impl = std::make_shared<Impl>(this, uri, Impl::MqMode::MM_BIND);
+        _impl = std::make_shared<Impl>(this, params, MqMode::MM_BIND);
     } catch (...) {
         return Err::E_UNKEXCP;
     }
     return Err::E_SUCCESS;
 }
 
-Err MqNode::connect(std::string const & uri)
+Err MqNode::connect(MqParams const & params)
 {
     try {
-        _impl = std::make_shared<Impl>(this, uri, Impl::MqMode::MM_CONNECT);
+        _impl = std::make_shared<Impl>(this, params, MqMode::MM_CONNECT);
     } catch (...) {
         return Err::E_UNKEXCP;
     }
@@ -214,35 +219,26 @@ Err MqNode::close()
     return Err::E_SUCCESS;
 }
 
-Err MqNode::send(char const * buffer, std::size_t size)
+Err MqNode::send(MqMsg const & msg)
 {
     if (!_impl) {
         return Err::E_NREADY;
     }
-    return _impl->send(buffer, size);
+    return _impl->send(msg);
 }
 
-Err MqNode::send(std::vector<char> const & buffer)
+Err MqNode::recv(MqMsg & msg)
 {
     if (!_impl) {
         return Err::E_NREADY;
     }
-    return send(buffer.data(), buffer.size());
+    return _impl->recv(msg);
 }
 
-Err MqNode::recv(std::vector<char> & buffer)
+void MqNode::recvWait(MqMsg & msg)
 {
-    if (!_impl) {
-        return Err::E_NREADY;
-    }
-    return _impl->recv(buffer);
-}
-
-void MqNode::recvWait(std::vector<char> & buffer)
-{
-    if (_impl) {
-        _impl->recvWait(buffer);
-    }
+    assert(static_cast<bool>(_impl));
+    _impl->recvWait(msg);
 }
 
 } // namespace mq

@@ -46,7 +46,7 @@ public:
 public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_QUEUE_SIZE        = BoundedMpMcQueue::DEFAULT_QUEUE_SIZE;
     TBAG_CONSTEXPR static std::size_t const DEFAULT_PACKET_SIZE       = 1024;
-    TBAG_CONSTEXPR static uint64_t    const DEFAULT_WAIT_TIMEOUT_NANO = 1/*nano*/ * 1000/*micro*/ * 1000/*milli*/;
+    TBAG_CONSTEXPR static uint64_t    const DEFAULT_WAIT_TIMEOUT_NANO = 1000000; /* 1 millisec */
 
 public:
     struct Queue : public BoundedMpMcQueue

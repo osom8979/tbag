@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/mq/details/MqCommon.hpp>
 
 #include <memory>
 
@@ -39,6 +40,12 @@ public:
 
 public:
     using SharedImpl = std::shared_ptr<Impl>;
+
+public:
+    using MqType   = libtbag::mq::details::MqType;
+    using MqMode   = libtbag::mq::details::MqMode;
+    using MqMsg    = libtbag::mq::details::MqMsg;
+    using MqParams = libtbag::mq::details::MqParams;
 
 private:
     SharedImpl _impl;
@@ -95,21 +102,18 @@ public:
     }
 
 public:
-    Err bind(std::string const & uri);
-    Err connect(std::string const & uri);
+    Err bind(MqParams const & params);
+    Err connect(MqParams const & params);
 
 public:
     Err close();
 
 public:
-    Err send(char const * buffer, std::size_t size);
-    Err send(std::vector<char> const & buffer);
+    Err send(MqMsg const & msg);
+    Err recv(MqMsg & msg);
 
 public:
-    Err recv(std::vector<char> & buffer);
-
-public:
-    void recvWait(std::vector<char> & buffer);
+    void recvWait(MqMsg & msg);
 };
 
 } // namespace mq
