@@ -124,8 +124,6 @@ struct TypeInfo : public BaseTypeInfo<typename std::remove_cv<T>::type>
 
     using Limits = std::numeric_limits<Number>;
 
-
-
     /**
      * returns the largest finite value of the given type
      *
