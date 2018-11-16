@@ -10,6 +10,7 @@
 #include <libtbag/uvpp/Pipe.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Request.hpp>
+#include <libtbag/uvpp/func/FunctionalPipe.hpp>
 
 #include <cstring>
 #include <cassert>
@@ -22,6 +23,7 @@
 
 using namespace libtbag;
 using namespace libtbag::uvpp;
+using namespace libtbag::uvpp::func;
 
 TBAG_CONSTEXPR char const * const PIPE_WRITE_TEST_MSG = "TEST";
 
@@ -242,5 +244,90 @@ TEST(PipeTest, Default)
     ASSERT_EQ(1, server_pipe->step3);
     ASSERT_EQ(1, server_pipe->step4);
     ASSERT_EQ(1, server_pipe->step5);
+}
+
+TEST(PipeTest, ClientShutdown)
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+    auto const TEST_FILE_PATH = std::string(R"(\\.\pipe\)") + test_info_->test_case_name() + "_" + test_info_->name();
+    char const * PATH = TEST_FILE_PATH.c_str();
+#else
+    tttDir(true, true);
+    auto const TEST_FILE_PATH = tttDir_Get() / "pipe_shutdown.sock";
+    char const * PATH = TEST_FILE_PATH.c_str();
+#endif
+
+    Loop loop;
+    ConnectRequest  connect_req;
+    ShutdownRequest shutdown_req;
+
+    int   connection_count = 0;
+    int      connect_count = 0;
+    int     shutdown_count = 0;
+    int client_close_count = 0;
+    int    node_read_count = 0;
+    int   node_close_count = 0;
+    int server_close_count = 0;
+
+    auto server_pipe = loop.newHandle<FuncPipe>(loop);
+    auto client_pipe = loop.newHandle<FuncPipe>(loop);
+    auto node_pipe   = loop.newHandle<FuncPipe>(loop);
+
+    server_pipe->connection_cb = [&](Err code){
+        ++connection_count;
+        auto const CODE = server_pipe->accept(*(node_pipe.get()));
+        assert(CODE == Err::E_SUCCESS);
+        auto const START_CODE = node_pipe->startRead();
+        assert(START_CODE == Err::E_SUCCESS);
+        std::cout << "01. Connection" << std::endl;
+    };
+    client_pipe->connect_cb = [&](ConnectRequest & req, Err code){
+        ++connect_count;
+        auto const CODE = client_pipe->shutdown(shutdown_req);
+        assert(CODE == Err::E_SUCCESS);
+        std::cout << "02. Connect" << std::endl;
+    };
+    client_pipe->shutdown_cb = [&](ShutdownRequest & req, Err code){
+        ++shutdown_count;
+        client_pipe->close();
+        std::cout << "03. Shutdown" << std::endl;
+    };
+    client_pipe->close_cb = [&](){
+        ++client_close_count;
+        std::cout << "04. Close (Client)" << std::endl;
+    };
+    std::vector<char> node_buffer;
+    node_pipe->alloc_cb = [&](std::size_t suggested_size) -> binf{
+        std::cout << "05. Alloc (Node)" << std::endl;
+        return libtbag::uvpp::defaultOnAlloc(node_buffer, suggested_size);
+    };
+    node_pipe->read_cb = [&](Err code, char const * data, std::size_t size){
+        ++node_read_count;
+        assert(code == Err::E_EOF);
+        node_pipe->close();
+        std::cout << "06. Read EOF (Node)" << std::endl;
+    };
+    node_pipe->close_cb = [&](){
+        ++node_close_count;
+        server_pipe->close();
+        std::cout << "07. Close (Node)" << std::endl;
+    };
+    server_pipe->close_cb = [&](){
+        ++server_close_count;
+        std::cout << "08. Close (Server)" << std::endl;
+    };
+
+    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH));
+    ASSERT_EQ(Err::E_SUCCESS, server_pipe->listen());
+    client_pipe->connect(connect_req, PATH);
+    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+
+    ASSERT_EQ(1,   connection_count);
+    ASSERT_EQ(1,      connect_count);
+    ASSERT_EQ(1,     shutdown_count);
+    ASSERT_EQ(1, client_close_count);
+    ASSERT_EQ(1,    node_read_count);
+    ASSERT_EQ(1,   node_close_count);
+    ASSERT_EQ(1, server_close_count);
 }
 
