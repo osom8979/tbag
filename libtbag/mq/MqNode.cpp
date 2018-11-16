@@ -70,22 +70,6 @@ private:
 private:
     SharedMq _mq;
 
-private:
-    static MqType getMqType(std::string const & uri)
-    {
-        Uri const URI(uri);
-        auto const HOST = libtbag::string::lower(URI.getHost());
-        using namespace libtbag::mq::details;
-        if (HOST == PIPE_LOWER_NAME) {
-            return MqType::MT_PIPE;
-        } else if (HOST == TCP_LOWER_NAME) {
-            return MqType::MT_TCP;
-        } else if (HOST == UDP_LOWER_NAME) {
-            return MqType::MT_UDP;
-        }
-        return MqType::MT_NONE;
-    }
-
 public:
     Impl(MqNode * parent, MqParams const & params, MqMode mode)
             : MODE(mode), _parent(parent),
@@ -203,6 +187,11 @@ Err MqNode::bind(MqParams const & params)
     return Err::E_SUCCESS;
 }
 
+Err MqNode::bind(std::string const & uri)
+{
+    return bind(libtbag::mq::details::convertUriToParams(uri));
+}
+
 Err MqNode::connect(MqParams const & params)
 {
     try {
@@ -211,6 +200,11 @@ Err MqNode::connect(MqParams const & params)
         return Err::E_UNKEXCP;
     }
     return Err::E_SUCCESS;
+}
+
+Err MqNode::connect(std::string const & uri)
+{
+    return connect(libtbag::mq::details::convertUriToParams(uri));
 }
 
 Err MqNode::close()

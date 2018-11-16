@@ -292,7 +292,7 @@ struct MqParams
      * @remarks
      *  - Used in client only.
      */
-    std::size_t reconnect_count = 0;
+    std::size_t try_reconnect_count = 0;
 
     MqParams()
     { /* EMPTY. */ }
@@ -301,11 +301,23 @@ struct MqParams
     { /* EMPTY. */ }
 };
 
+TBAG_CONSTEXPR static char const * const TCP_IPV6_ONLY_NAME   = "tcp_ipv6";
+TBAG_CONSTEXPR static char const * const SEND_QUEUE_SIZE_NAME = "send_queue";
+TBAG_CONSTEXPR static char const * const SEND_MSG_SIZE_NAME   = "send_msg";
+TBAG_CONSTEXPR static char const * const RECV_QUEUE_SIZE_NAME = "recv_queue";
+TBAG_CONSTEXPR static char const * const RECV_MSG_SIZE_NAME   = "recv_msg";
+TBAG_CONSTEXPR static char const * const MAX_NODES_NAME       = "max_nodes";
+TBAG_CONSTEXPR static char const * const PACKER_SIZE_NAME     = "packer_size";
+TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME    = "wait_closing";
+TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
+TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
+TBAG_CONSTEXPR static char const * const TRY_RECONNECT_NAME   = "try_reconnect";
+
 // -----------------------
 // Miscellaneous utilities
 // -----------------------
 
-TBAG_API MqParams convertUriToParams(std::string const & uri);
+TBAG_API MqParams convertUriToParams(std::string const & uri_string, bool convert_windows_path = false);
 
 } // namespace details
 } // namespace mq

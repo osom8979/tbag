@@ -103,7 +103,11 @@ public:
 
 public:
     Err bind(MqParams const & params);
+    Err bind(std::string const & uri);
+
+public:
     Err connect(MqParams const & params);
+    Err connect(std::string const & uri);
 
 public:
     Err close();

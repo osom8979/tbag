@@ -180,7 +180,7 @@ Err DnsAddrInfo::requestAddrInfo(Loop & loop,
 
     int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
                                       __global_uv_getaddrinfo_cb__, real_hostname, real_service, hints);
-    return convertUvErrorToErrWithLogging("DnsAddrInfo::requestAddrInfo()", CODE);
+    return convertUvErrorToErr(CODE);
 }
 
 Err DnsAddrInfo::requestAddrInfoWithSync(Loop & loop,
@@ -193,7 +193,7 @@ Err DnsAddrInfo::requestAddrInfoWithSync(Loop & loop,
 
     int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
                                       nullptr, real_hostname, real_service, hints);
-    return convertUvErrorToErrWithLogging("DnsAddrInfo::requestAddrInfoWithSync()", CODE);
+    return convertUvErrorToErr(CODE);
 }
 
 void DnsAddrInfo::freeAddrInfo()
@@ -276,14 +276,14 @@ Err DnsNameInfo::requestNameInfo(Loop & loop, struct sockaddr const * addr, int 
 
     int const CODE = ::uv_getnameinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getnameinfo_t>(),
                                       __global_uv_getnameinfo_cb__, addr, flags);
-    return convertUvErrorToErrWithLogging("DnsNameInfo::requestNameInfo()", CODE);
+    return convertUvErrorToErr(CODE);
 }
 
 Err DnsNameInfo::requestNameInfoWithSync(Loop & loop, struct sockaddr const * addr, int flags)
 {
     int const CODE = ::uv_getnameinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getnameinfo_t>(),
                                       nullptr, addr, flags);
-    return convertUvErrorToErrWithLogging("DnsNameInfo::requestNameInfoWithSync()", CODE);
+    return convertUvErrorToErr(CODE);
 }
 
 void DnsNameInfo::onGetNameInfo(Err code, std::string const & hostname, std::string const & service)
