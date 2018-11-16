@@ -236,8 +236,8 @@ std::size_t BaseLoop::getNativeSize() TBAG_NOEXCEPT
 // Loop implementation.
 // --------------------
 
-Loop::Loop(bool auto_erase, bool print_internal)
-        : _auto_erase_handle(auto_erase), _print_internal_handle(print_internal)
+Loop::Loop(bool auto_erase, bool print_internal, bool verbose)
+        : _auto_erase_handle(auto_erase), _print_internal_handle(print_internal), _verbose(verbose)
 {
     // EMPTY.
 }
@@ -307,14 +307,14 @@ bool Loop::eraseChildHandle(void * native_handle)
     std::string const HANDLE_NAME = shared->getName();
 
     if (_handles.erase(NativeHandle(native_handle)) != 1U) {
-        tDLogE("Loop::eraseChildHandle(@{}[{}]) Failure (Handles: {})",
-               HANDLE_ADDRESS, HANDLE_NAME, _handles.size());
+        tDLogIfE(_verbose, "Loop::eraseChildHandle(@{}[{}]) Failure (Handles: {})",
+                 HANDLE_ADDRESS, HANDLE_NAME, _handles.size());
         return false;
     }
 
     if (_print_internal_handle || IS_INTERNAL == false) {
-        tDLogD("Loop::eraseChildHandle(@{}[{}]) Success (Handles: {})",
-               HANDLE_ADDRESS, HANDLE_NAME, _handles.size());
+        tDLogIfD(_verbose, "Loop::eraseChildHandle(@{}[{}]) Success (Handles: {})",
+                 HANDLE_ADDRESS, HANDLE_NAME, _handles.size());
     }
     return true;
 }
@@ -322,21 +322,21 @@ bool Loop::eraseChildHandle(void * native_handle)
 Loop::WeakHandle Loop::insertChildHandle(SharedHandle h)
 {
     if (static_cast<bool>(h) == false) {
-        tDLogE("Loop::insertChildHandle() Expired handle.");
+        tDLogIfE(_verbose, "Loop::insertChildHandle() Expired handle.");
         return WeakHandle();
     }
 
     auto itr = _handles.insert(value_type(NativeHandle(h->get()), h));
     if (static_cast<bool>(itr.second)) {
         if (_print_internal_handle || h->isInternal() == false) {
-            tDLogD("Loop::insertChildHandle(@{}[{}]) Success (Handles: {})",
-                   static_cast<void*>(h.get()), h->getName(), _handles.size());
+            tDLogIfD(_verbose, "Loop::insertChildHandle(@{}[{}]) Success (Handles: {})",
+                     static_cast<void*>(h.get()), h->getName(), _handles.size());
         }
         return WeakHandle(itr.first->second);
     }
 
-    tDLogE("Loop::insertChildHandle(@{}[{}]) Failure (Handles: {})",
-           static_cast<void*>(h.get()), h->getName(), _handles.size());
+    tDLogIfE(_verbose, "Loop::insertChildHandle(@{}[{}]) Failure (Handles: {})",
+             static_cast<void*>(h.get()), h->getName(), _handles.size());
     return WeakHandle();
 }
 

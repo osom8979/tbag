@@ -165,9 +165,10 @@ private:
 private:
     bool _auto_erase_handle;
     bool _print_internal_handle;
+    bool _verbose;
 
 public:
-    Loop(bool auto_erase = true, bool print_internal = false);
+    Loop(bool auto_erase = true, bool print_internal = false, bool verbose = false);
     virtual ~Loop();
 
 public:
