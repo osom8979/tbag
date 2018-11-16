@@ -82,18 +82,18 @@ TEST(AsyncTest, Thread)
     is_idle = false;
     is_end = false;
 
-    async->setOnAsync([&](){
+    async->async_cb = [&](){
         ++async_counter;
         async->close();
-    });
-    async->setOnClose([&](){
+    };
+    async->close_cb = [&](){
         ++close_counter;
-    });
-    idle->setOnIdle([&](){
+    };
+    idle->idle_cb = [&](){
         is_idle.store(true);
         async->send();
         idle->close();
-    });
+    };
     ASSERT_EQ(Err::E_SUCCESS, idle->start());
 
     Err loop_result = Err::E_UNKNOWN;

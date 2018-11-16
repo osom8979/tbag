@@ -19,11 +19,8 @@
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Process.hpp>
-#include <libtbag/lock/FakeLock.hpp>
 
 #include <cstdint>
-#include <functional>
-#include <mutex>
 #include <atomic>
 
 // -------------------
@@ -43,59 +40,39 @@ namespace func {
  * @author zer0
  * @date   2017-05-31
  */
-template <typename ProcessType, typename MutexType = lock::FakeLock>
-class FunctionalProcess : public ProcessType
+template <typename ProcessType>
+struct FunctionalProcess : public FunctionalHandle<ProcessType>
 {
-public:
-    using Parent = ProcessType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Process, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent  = FunctionalHandle<ProcessType>;
     using Options = typename Parent::Options;
     using OnExit  = std::function<void(int64_t, int)>;
 
-private:
-    Mutex _mutex;
-    OnExit _exit_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Process, Parent);
 
-private:
-    std::atomic<bool>    _exit;
-    std::atomic<int64_t> _exit_status;
-    std::atomic<int>     _term_signal;
+    OnExit exit_cb;
 
-public:
+    std::atomic<bool>    exit;
+    std::atomic<int64_t> exit_status;
+    std::atomic<int>     term_signal;
+
     template <typename ... Args>
-    FunctionalProcess(Args && ... args) : Parent(std::forward<Args>(args) ...), _exit(false), _exit_status(0), _term_signal(0)
+    FunctionalProcess(Args && ... args) : Parent(std::forward<Args>(args) ...),
+                                          exit(false), exit_status(0), term_signal(0)
     { /* EMPTY. */ }
+
     virtual ~FunctionalProcess()
     { /* EMPTY. */ }
 
-public:
-    inline bool    isExit() const { return _exit; }
-    inline int64_t getExitStatus() const { return _exit_status; }
-    inline int     getTermSignal() const { return _term_signal; }
-
-public:
-    void setOnExit(OnExit const & cb)
-    {
-        Guard guard(_mutex);
-        _exit_cb = cb;
-    }
-
-public:
     virtual void onExit(int64_t exit_status, int term_signal) override
     {
-        _exit = true;
-        _exit_status = exit_status;
-        _term_signal = term_signal;
+        exit = true;
+        exit_status = exit_status;
+        term_signal = term_signal;
 
-        Guard guard(_mutex);
-        if (static_cast<bool>(_exit_cb)) {
-            _exit_cb(exit_status, term_signal);
+        if (exit_cb) {
+            exit_cb(exit_status, term_signal);
+        } else {
+            Parent::onExit(exit_status, term_signal);
         }
     }
 };

@@ -409,11 +409,11 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     bool server_timeout = false;
 
     auto timer = server_loop.newHandle<uvpp::func::FuncTimer>(server_loop);
-    timer->setOnTimer([&](){
+    timer->timer_cb = [&](){
         server_timeout = true;
         server.close();
         timer->close();
-    });
+    };
     timer->start(TEST_SERVER_TIMEOUT);
 
     server.set_onClientWrite([&](WeakClient node, Err code){

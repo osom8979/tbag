@@ -19,11 +19,6 @@
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Stream.hpp>
-#include <libtbag/lock/FakeLock.hpp>
-
-#include <functional>
-#include <utility>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,89 +37,73 @@ namespace func {
  * @author zer0
  * @date   2017-09-05
  */
-template <typename StreamType, typename MutexType = lock::FakeLock>
-class FunctionalStream : public StreamType
+template <typename StreamType>
+struct FunctionalStream : public FunctionalHandle<StreamType>
 {
-public:
-    using Parent = StreamType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Stream, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent       = FunctionalHandle<StreamType>;
     using OnShutdown   = std::function<void(ShutdownRequest&, Err)>;
     using OnConnection = std::function<void(Err)>;
     using OnAlloc      = std::function<binf(std::size_t)>;
     using OnRead       = std::function<void(Err, char const *, std::size_t)>;
     using OnWrite      = std::function<void(WriteRequest&, Err)>;
 
-protected:
-    Mutex _mutex;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Stream, Parent);
 
-private:
-    OnShutdown   _shutdown_cb;
-    OnConnection _connection_cb;
-    OnAlloc      _alloc_cb;
-    OnRead       _read_cb;
-    OnWrite      _write_cb;
+    OnShutdown   shutdown_cb;
+    OnConnection connection_cb;
+    OnAlloc      alloc_cb;
+    OnRead       read_cb;
+    OnWrite      write_cb;
 
-public:
     template <typename ... Args>
     FunctionalStream(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalStream()
     { /* EMPTY. */ }
 
-public:
-    // @formatter:off
-    void setOnShutdown  (OnShutdown   const & cb) { Guard guard(_mutex);   _shutdown_cb = cb; }
-    void setOnConnection(OnConnection const & cb) { Guard guard(_mutex); _connection_cb = cb; }
-    void setOnAlloc     (OnAlloc      const & cb) { Guard guard(_mutex);      _alloc_cb = cb; }
-    void setOnRead      (OnRead       const & cb) { Guard guard(_mutex);       _read_cb = cb; }
-    void setOnWrite     (OnWrite      const & cb) { Guard guard(_mutex);      _write_cb = cb; }
-    // @formatter:on
-
-public:
     virtual void onShutdown(ShutdownRequest & request, Err code) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_shutdown_cb)) {
-            _shutdown_cb(request, code);
+        if (shutdown_cb) {
+            shutdown_cb(request, code);
+        } else {
+            Parent::onShutdown(request, code);
         }
     }
 
     virtual void onConnection(Err code) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_connection_cb)) {
-            _connection_cb(code);
+        if (connection_cb) {
+            connection_cb(code);
+        } else {
+            Parent::onConnection(code);
         }
     }
 
     virtual binf onAlloc(std::size_t suggested_size) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_alloc_cb)) {
-            return _alloc_cb(suggested_size);
+        if (alloc_cb) {
+            return alloc_cb(suggested_size);
+        } else {
+            return Parent::onAlloc(suggested_size);
         }
-        return binf();
     }
 
     virtual void onRead(Err code, char const * buffer, std::size_t size) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_read_cb)) {
-            _read_cb(code, buffer, size);
+        if (read_cb) {
+            read_cb(code, buffer, size);
+        } else {
+            Parent::onRead(code, buffer, size);
         }
     }
 
     virtual void onWrite(WriteRequest & request, Err code) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_write_cb)) {
-            _write_cb(request, code);
+        if (write_cb) {
+            write_cb(request, code);
+        } else {
+            Parent::onWrite(request, code);
         }
     }
 };

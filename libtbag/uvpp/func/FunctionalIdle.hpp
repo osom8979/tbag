@@ -19,10 +19,6 @@
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Idle.hpp>
-#include <libtbag/lock/FakeLock.hpp>
-
-#include <functional>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,44 +37,29 @@ namespace func {
  * @author zer0
  * @date   2017-05-31
  */
-template <typename IdleType, typename MutexType = lock::FakeLock>
-class FunctionalIdle : public IdleType
+template <typename IdleType>
+struct FunctionalIdle : public FunctionalHandle<IdleType>
 {
-public:
-    using Parent = IdleType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Idle, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent = FunctionalHandle<IdleType>;
     using OnIdle = std::function<void(void)>;
 
-private:
-    Mutex _mutex;
-    OnIdle _idle_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Idle, Parent);
 
-public:
+    OnIdle idle_cb;
+
     template <typename ... Args>
     FunctionalIdle(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalIdle()
     { /* EMPTY. */ }
 
-public:
-    inline void setOnIdle(OnIdle const & cb)
-    {
-        Guard guard(_mutex);
-        _idle_cb = cb;
-    }
-
-public:
     virtual void onIdle() override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_idle_cb)) {
-            _idle_cb();
+        if (idle_cb) {
+            idle_cb();
+        } else {
+            Parent::onIdle();
         }
     }
 };

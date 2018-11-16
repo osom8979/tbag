@@ -94,10 +94,10 @@ public:
         }
 
         BRACE("Close callbacks") {
-            _signal->setOnSignal([&](int signum){
+            _signal->signal_cb = [&](int signum){
                 tDLogW("TpotServer::Internal::init()::OnSignal() Signal: {}", libtbag::signal::getSignalName(signum));
                 close();
-            });
+            };
             _server->set_onServerClose([&](){
                 tDLogN("TpotServer::Internal::init()::OnServerClose()");
                 if (static_cast<bool>(_signal) && _signal->isClosing() == false) {

@@ -19,10 +19,6 @@
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Timer.hpp>
-#include <libtbag/lock/FakeLock.hpp>
-
-#include <functional>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,44 +37,29 @@ namespace func {
  * @author zer0
  * @date   2017-05-31
  */
-template <typename TimerType, typename MutexType = lock::FakeLock>
-class FunctionalTimer : public TimerType
+template <typename TimerType>
+struct FunctionalTimer : public FunctionalHandle<TimerType>
 {
-public:
-    using Parent = TimerType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Timer, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent  = FunctionalHandle<TimerType>;
     using OnTimer = std::function<void(void)>;
 
-private:
-    Mutex _mutex;
-    OnTimer _timer_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Timer, Parent);
 
-public:
+    OnTimer timer_cb;
+
     template <typename ... Args>
     FunctionalTimer(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalTimer()
     { /* EMPTY. */ }
 
-public:
-    void setOnTimer(OnTimer const & cb)
-    {
-        Guard guard(_mutex);
-        _timer_cb = cb;
-    }
-
-public:
     virtual void onTimer() override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_timer_cb)) {
-            _timer_cb();
+        if (timer_cb) {
+            timer_cb();
+        } else {
+            Parent::onTimer();
         }
     }
 };

@@ -19,10 +19,6 @@
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Udp.hpp>
-#include <libtbag/lock/FakeLock.hpp>
-
-#include <functional>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,77 +37,51 @@ namespace func {
  * @author zer0
  * @date   2017-06-15
  */
-template <typename UdpType, typename MutexType = lock::FakeLock>
-class FunctionalUdp : public UdpType
+template <typename UdpType>
+struct FunctionalUdp : public FunctionalHandle<UdpType>
 {
-public:
-    using Parent = UdpType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Udp, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent  = FunctionalHandle<UdpType>;
     using OnSend  = std::function<void(UdpSendRequest&, Err)>;
     using OnAlloc = std::function<binf(std::size_t)>;
     using OnRecv  = std::function<void(Err, char const *, std::size_t, sockaddr const *, unsigned int)>;
 
-private:
-    Mutex _mutex;
-    OnSend  _send_cb;
-    OnAlloc _alloc_cb;
-    OnRecv  _recv_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Udp, Parent);
 
-public:
+    OnSend  send_cb;
+    OnAlloc alloc_cb;
+    OnRecv  recv_cb;
+
     template <typename ... Args>
     FunctionalUdp(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalUdp()
     { /* EMPTY. */ }
 
-public:
-    void setOnSend(OnSend const & cb)
-    {
-        Guard guard(_mutex);
-        _send_cb = cb;
-    }
-
-    void setOnAlloc(OnAlloc const & cb)
-    {
-        Guard guard(_mutex);
-        _alloc_cb = cb;
-    }
-
-    void setOnRecv(OnRecv const & cb)
-    {
-        Guard guard(_mutex);
-        _recv_cb = cb;
-    }
-
-public:
     virtual void onSend(UdpSendRequest & request, Err code) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_send_cb)) {
-            _send_cb(request, code);
+        if (send_cb) {
+            send_cb(request, code);
+        } else {
+            Parent::onSend(request, code);
         }
     }
 
     virtual binf onAlloc(std::size_t suggested_size) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_alloc_cb)) {
-            return _alloc_cb(suggested_size);
+        if (alloc_cb) {
+            return alloc_cb(suggested_size);
+        } else {
+            return Parent::onAlloc(suggested_size);
         }
-        return binf();
     }
 
     virtual void onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_recv_cb)) {
-            _recv_cb(code, buffer, size, addr, flags);
+        if (recv_cb) {
+            recv_cb(code, buffer, size, addr, flags);
+        } else {
+            Parent::onRecv(code, buffer, size, addr, flags);
         }
     }
 };

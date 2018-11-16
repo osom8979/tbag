@@ -15,40 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
+
+#include <libtbag/uvpp/Handle.hpp>
 
 #include <functional>
-#include <mutex>
-
-#ifndef TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT
-#define TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(guard_type, mutex) \
-    public:                                         \
-        using OnClose = std::function<void(void)>;  \
-        using OnWalk  = std::function<void(void*)>; \
-    private:                                        \
-        OnClose  _close_cb;                         \
-        OnWalk    _walk_cb;                         \
-    public:                                         \
-        inline void setOnClose(OnClose const & cb)  \
-        { guard_type g(mutex); _close_cb = cb; }    \
-        inline void setOnWalk(OnWalk const & cb)    \
-        { guard_type g(mutex); _walk_cb = cb; }     \
-    public:                                         \
-        virtual void onClose() override             \
-        {                                           \
-            guard_type g(mutex);                    \
-            if (static_cast<bool>(_close_cb)) {     \
-                _close_cb();                        \
-            }                                       \
-        }                                           \
-        virtual void onWalk(void * arg) override    \
-        {                                           \
-            guard_type g(mutex);                    \
-            if (static_cast<bool>(_walk_cb)) {      \
-                _walk_cb(arg);                      \
-            }                                       \
-        }                                           \
-    /* END */
-#endif
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -57,7 +29,42 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 namespace func {
 
-// EMPTY.
+template <typename UvType>
+struct FunctionalHandle : public UvType
+{
+    using OnClose = std::function<void(void)>;
+    using OnWalk  = std::function<void(void*)>;
+
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Handle, UvType);
+
+    OnClose close_cb;
+    OnWalk  walk_cb;
+
+    template <typename ... Args>
+    FunctionalHandle(Args && ... args) : UvType(std::forward<Args>(args) ...)
+    { /* EMPTY. */ }
+
+    virtual ~FunctionalHandle()
+    { /* EMPTY. */ }
+
+    virtual void onClose() override
+    {
+        if (close_cb) {
+            close_cb();
+        } else {
+            UvType::onClose();
+        }
+    }
+
+    virtual void onWalk(void * arg) override
+    {
+        if (walk_cb) {
+            walk_cb(arg);
+        } else {
+            UvType::onWalk(arg);
+        }
+    }
+};
 
 } // namespace func
 } // namespace uvpp

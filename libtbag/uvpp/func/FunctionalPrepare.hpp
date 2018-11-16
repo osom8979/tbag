@@ -19,10 +19,6 @@
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Prepare.hpp>
-#include <libtbag/lock/FakeLock.hpp>
-
-#include <functional>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,44 +37,29 @@ namespace func {
  * @author zer0
  * @date   2017-05-31
  */
-template <typename PrepareType, typename MutexType = lock::FakeLock>
-class FunctionalPrepare : public PrepareType
+template <typename PrepareType>
+struct FunctionalPrepare : public FunctionalHandle<PrepareType>
 {
-public:
-    using Parent = PrepareType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Prepare, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent    = FunctionalHandle<PrepareType>;
     using OnPrepare = std::function<void(void)>;
 
-private:
-    Mutex _mutex;
-    OnPrepare _prepare_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Prepare, Parent);
 
-public:
+    OnPrepare prepare_cb;
+
     template <typename ... Args>
     FunctionalPrepare(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalPrepare()
     { /* EMPTY. */ }
 
-public:
-    void setOnPrepare(OnPrepare const & cb)
-    {
-        Guard guard(_mutex);
-        _prepare_cb = cb;
-    }
-
-public:
     virtual void onPrepare() override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_prepare_cb)) {
-            _prepare_cb();
+        if (prepare_cb) {
+            prepare_cb();
+        } else {
+            Parent::onPrepare();
         }
     }
 };

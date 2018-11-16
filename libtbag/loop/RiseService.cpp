@@ -226,7 +226,7 @@ Err RiseService::run(SharedComSet const & init_coms)
     onCreate(coms);
 
     std::size_t const COMS_SIZE = coms.size();
-    timer->setOnTimer([&](){
+    timer->timer_cb = [&](){
         std::size_t end_count = 0;
         for (auto & com : coms) {
             assert(static_cast<bool>(com));
@@ -250,13 +250,14 @@ Err RiseService::run(SharedComSet const & init_coms)
             timer->close();
             signal->close();
         }
-    });
-    signal->setOnSignal([&](int signum) {
+    };
+
+    signal->signal_cb = [&](int signum) {
         if (onInterrupt(coms) == TERMINATE_LOOP_FLAG) {
             timer->close();
             signal->close();
         }
-    });
+    };
 
     tDLogD("RiseService::run() Timer repeat: {}ms", REPEAT);
     Err const LOOP_EXIT_CODE = loop.run();

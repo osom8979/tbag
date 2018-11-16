@@ -31,29 +31,29 @@ TEST(TimerTest, Default)
     auto timer   = loop.newHandle<FuncTimer>(loop);
     auto check   = loop.newHandle<FuncCheck>(loop);
 
-    prepare->setOnPrepare([&](){
+    prepare->prepare_cb = [&](){
         ++prepare_counter;
         prepare->close();
-    });
-    prepare->setOnClose([&](){
+    };
+    prepare->close_cb = [&](){
         ++prepare_close_counter;
-    });
+    };
 
-    timer->setOnTimer([&](){
+    timer->timer_cb = [&](){
         ++timer_counter;
         timer->close();
-    });
-    timer->setOnClose([&](){
+    };
+    timer->close_cb = [&](){
         ++timer_close_counter;
-    });
+    };
 
-    check->setOnCheck([&](){
+    check->check_cb = [&](){
         ++check_counter;
         check->close();
-    });
-    check->setOnClose([&](){
+    };
+    check->close_cb = [&](){
         ++check_close_counter;
-    });
+    };
 
     ASSERT_EQ(Err::E_SUCCESS, timer->start(0));
     ASSERT_EQ(Err::E_SUCCESS, check->start());

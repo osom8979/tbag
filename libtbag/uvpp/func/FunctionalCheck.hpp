@@ -19,11 +19,6 @@
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Check.hpp>
-#include <libtbag/lock/FakeLock.hpp>
-
-
-#include <functional>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,44 +37,29 @@ namespace func {
  * @author zer0
  * @date   2017-05-31
  */
-template <typename CheckType, typename MutexType = lock::FakeLock>
-struct FunctionalCheck : public CheckType
+template <typename CheckType>
+struct FunctionalCheck : public FunctionalHandle<CheckType>
 {
-public:
-    using Parent = CheckType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Check, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent  = FunctionalHandle<CheckType>;
     using OnCheck = std::function<void(void)>;
 
-private:
-    Mutex _mutex;
-    OnCheck _check_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Check, Parent);
 
-public:
+    OnCheck check_cb;
+
     template <typename ... Args>
     FunctionalCheck(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalCheck()
     { /* EMPTY. */ }
 
-public:
-    void setOnCheck(OnCheck const & cb)
-    {
-        Guard guard(_mutex);
-        _check_cb = cb;
-    }
-
-public:
     virtual void onCheck() override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_check_cb)) {
-            _check_cb();
+        if (check_cb) {
+            check_cb();
+        } else {
+            Parent::onCheck();
         }
     }
 };

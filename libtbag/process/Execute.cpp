@@ -73,11 +73,11 @@ int execute(std::string const & file,
     int signal = 0;
 
     auto proc = loop.newHandle<FuncProcess>(loop, options);
-    proc->setOnExit([&](int64_t exit_status, int term_signal){
+    proc->exit_cb = [&](int64_t exit_status, int term_signal){
         exit_code = exit_status;
         signal = term_signal;
         proc->close();
-    });
+    };
 
     Err const LOOP_RESULT = loop.run();
     if (isFailure(LOOP_RESULT)) {

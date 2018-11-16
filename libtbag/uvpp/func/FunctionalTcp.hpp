@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
 
 #include <libtbag/uvpp/func/FunctionalStream.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
@@ -36,37 +37,29 @@ namespace func {
  * @author zer0
  * @date   2017-09-05
  */
-template <typename TcpType, typename MutexType = lock::FakeLock>
-class FunctionalTcp : public FunctionalStream<TcpType, MutexType>
+template <typename TcpType>
+struct FunctionalTcp : public FunctionalStream<PipeType>
 {
-public:
-    using Base  = FunctionalStream<TcpType, MutexType>;
-    using Guard = typename Base::Guard;
+    using Parent    = FunctionalStream<TcpType>;
     using OnConnect = std::function<void(ConnectRequest&, Err)>;
 
-private:
-    OnConnect _connect_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Tcp, Parent);
 
-public:
+    OnConnect connect_cb;
+
     template <typename ... Args>
-    FunctionalTcp(Args && ... args) : Base(std::forward<Args>(args) ...)
+    FunctionalTcp(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalTcp()
     { /* EMPTY. */ }
 
-public:
-    void setOnConnect(OnConnect const & cb)
-    {
-        Guard guard(Base::_mutex);
-        _connect_cb = cb;
-    }
-
-public:
     virtual void onConnect(ConnectRequest & request, Err code) override
     {
-        Guard guard(Base::_mutex);
-        if (static_cast<bool>(Base::_write_cb)) {
-            Base::_write_cb(request, code);
+        if (connect_cb) {
+            connect_cb(request, code);
+        } else {
+            Parent::onConnect(request, code);
         }
     }
 };

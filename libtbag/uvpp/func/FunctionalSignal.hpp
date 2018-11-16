@@ -15,14 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
+#include <libtbag/Type.hpp>
 
 #include <libtbag/uvpp/func/FunctionalHandle.hpp>
 #include <libtbag/uvpp/Signal.hpp>
-#include <libtbag/lock/FakeLock.hpp>
-
-#include <functional>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -41,44 +37,29 @@ namespace func {
  * @author zer0
  * @date   2017-07-14
  */
-template <typename SignalType, typename MutexType = lock::FakeLock>
-class FunctionalSignal : public SignalType
+template <typename SignalType>
+struct FunctionalSignal : public FunctionalHandle<SignalType>
 {
-public:
-    using Parent = SignalType;
-    using Mutex  = MutexType;
-    using Guard  = std::lock_guard<Mutex>;
-
-    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Signal, Parent);
-    TBAG_UVPP_FUNCTIONAL_HANDLE_DEFAULT(Guard, _mutex);
-
-public:
+    using Parent   = FunctionalHandle<SignalType>;
     using OnSignal = std::function<void(int)>;
 
-private:
-    Mutex _mutex;
-    OnSignal _signal_cb;
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Signal, Parent);
 
-public:
+    OnSignal signal_cb;
+
     template <typename ... Args>
     FunctionalSignal(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalSignal()
     { /* EMPTY. */ }
 
-public:
-    void setOnSignal(OnSignal const & cb)
-    {
-        Guard guard(_mutex);
-        _signal_cb = cb;
-    }
-
-public:
     virtual void onSignal(int signum) override
     {
-        Guard guard(_mutex);
-        if (static_cast<bool>(_signal_cb)) {
-            _signal_cb(signum);
+        if (signal_cb) {
+            signal_cb(signum);
+        } else {
+            Parent::onSignal(signum);
         }
     }
 };

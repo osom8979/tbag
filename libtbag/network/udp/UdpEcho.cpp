@@ -69,9 +69,9 @@ Err UdpEcho::initDefault(std::string const & bind_ip, int port, uint64_t timeout
     }
 
     if (timeout > 0) {
-        _timer->setOnTimer([&](){
+        _timer->timer_cb = [&](){
             close();
-        });
+        };
         Err const START_TIMER_CODE = _timer->start(timeout);
         if (isFailure(START_TIMER_CODE)) {
             return START_TIMER_CODE;

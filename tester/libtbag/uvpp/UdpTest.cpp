@@ -36,20 +36,20 @@ TEST(UdpTest, Default)
 
     Buffer recv_buffer;
     std::string recv_string;
-    recv_udp->setOnAlloc([&](std::size_t suggested_size) -> binf {
+    recv_udp->alloc_cb = [&](std::size_t suggested_size) -> binf {
         return defaultOnAlloc(recv_buffer, suggested_size);
-    });
-    recv_udp->setOnRecv([&](Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags){
+    };
+    recv_udp->recv_cb = [&](Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags){
         recv_string = std::string(buffer, buffer + size);
         recv_udp->close();
-    });
-    send_udp->setOnSend([&](UdpSendRequest & request, Err code){
+    };
+    send_udp->send_cb = [&](UdpSendRequest & request, Err code){
         send_udp->close();
-    });
-    idle->setOnIdle([&](){
+    };
+    idle->idle_cb = [&](){
         send_udp->send(req, TEST_MESSAGE, sizeof(TEST_MESSAGE), &send_ipv4);
         idle->close();
-    });
+    };
 
     ASSERT_EQ(Err::E_SUCCESS, initAddress(ANY_IPV4, 0, &recv_ipv4));
     ASSERT_EQ(Err::E_SUCCESS, recv_udp->bind(&recv_ipv4));

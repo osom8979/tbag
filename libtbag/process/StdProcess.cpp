@@ -74,12 +74,12 @@ Err StdProcess::spawn(Loop & loop,
         options.appendIgnoreStdio();
     } else {
         _in = loop.newHandle<FuncPipe>(loop, false);
-        _in->setOnWrite([&](WriteRequest & request, Err code){
+        _in->write_cb = [&](WriteRequest & request, Err code){
             if (code != Err::E_SUCCESS) {
                 tDLogE("StdProcess::spawn() stdin write {} error", getErrName(code));
             }
             _in->close();
-        });
+        };
         Process::StdioContainer in_container(_in.get());
         in_container.setCreatePipe();
         in_container.setReadablePipe();
@@ -87,10 +87,10 @@ Err StdProcess::spawn(Loop & loop,
     }
 
     _out = loop.newHandle<FuncPipe>(loop, false);
-    _out->setOnAlloc([&](std::size_t suggested_size) -> binf {
+    _out->alloc_cb = [&](std::size_t suggested_size) -> binf {
         return uvpp::defaultOnAlloc(_out_buffer, suggested_size);
-    });
-    _out->setOnRead([&](Err code, char const * buffer, std::size_t size){
+    };
+    _out->read_cb = [&](Err code, char const * buffer, std::size_t size){
         if (code == Err::E_SUCCESS) {
             onOutRead(buffer, size);
         } else if (code == Err::E_EOF) {
@@ -99,17 +99,17 @@ Err StdProcess::spawn(Loop & loop,
             tDLogE("StdProcess::spawn() stdout read {} error", getErrName(code));
             _out->close();
         }
-    });
+    };
     Process::StdioContainer out_container(_out.get());
     out_container.setCreatePipe();
     out_container.setWritablePipe();
     options.appendStdio(out_container);
 
     _err = loop.newHandle<FuncPipe>(loop, false);
-    _err->setOnAlloc([&](std::size_t suggested_size) -> binf {
+    _err->alloc_cb = [&](std::size_t suggested_size) -> binf {
         return uvpp::defaultOnAlloc(_err_buffer, suggested_size);
-    });
-    _err->setOnRead([&](Err code, char const * buffer, std::size_t size){
+    };
+    _err->read_cb = [&](Err code, char const * buffer, std::size_t size){
         if (code == Err::E_SUCCESS) {
             onErrRead(buffer, size);
         } else if (code == Err::E_EOF) {
@@ -118,7 +118,7 @@ Err StdProcess::spawn(Loop & loop,
             tDLogE("StdProcess::spawn() stderr read {} error", getErrName(code));
             _err->close();
         }
-    });
+    };
     Process::StdioContainer err_container(_err.get());
     err_container.setCreatePipe();
     err_container.setWritablePipe();
@@ -132,14 +132,14 @@ Err StdProcess::spawn(Loop & loop,
         return Err::E_UNKEXCP;
     }
 
-    _process->setOnExit([&](int64_t exit_status, int term_signal){
+    _process->exit_cb = [&](int64_t exit_status, int term_signal){
         onExit(exit_status, term_signal);
         _process->close();
-    });
-    _process->setOnClose([&](){
+    };
+    _process->close_cb = [&](){
         _is_running = false;
         onClose();
-    });
+    };
 
     if (input.empty() == false) {
         Err const WRITE_CODE = _in->write(_write_req, input.c_str(), input.size());

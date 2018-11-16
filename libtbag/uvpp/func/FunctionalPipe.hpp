@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
 
 #include <libtbag/uvpp/func/FunctionalStream.hpp>
 #include <libtbag/uvpp/Pipe.hpp>
@@ -36,18 +37,31 @@ namespace func {
  * @author zer0
  * @date   2017-09-05
  */
-template <typename PipeType, typename MutexType = lock::FakeLock>
-class FunctionalPipe : public FunctionalStream<PipeType, MutexType>
+template <typename PipeType>
+struct FunctionalPipe : public FunctionalStream<PipeType>
 {
-public:
-    using Parent = FunctionalStream<PipeType, MutexType>;
+    using Parent    = FunctionalStream<PipeType>;
+    using OnConnect = std::function<void(ConnectRequest&, Err)>;
 
-public:
+    STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Pipe, Parent);
+
+    OnConnect connect_cb;
+
     template <typename ... Args>
     FunctionalPipe(Args && ... args) : Parent(std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
     virtual ~FunctionalPipe()
     { /* EMPTY. */ }
+
+    virtual void onConnect(ConnectRequest & request, Err code) override
+    {
+        if (connect_cb) {
+            connect_cb(request, code);
+        } else {
+            Parent::onConnect(request, code);
+        }
+    }
 };
 
 /**

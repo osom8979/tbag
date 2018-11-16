@@ -39,11 +39,11 @@ TEST(ProcessTest, Default)
     options.appendArgument("file");
     options.appendArgument(WRITE_BODY);
     auto proc = loop.newHandle<FuncProcess>(loop, options);
-    proc->setOnExit([&](int64_t exit_status, int term_signal){
+    proc->exit_cb = [&](int64_t exit_status, int term_signal){
         result_exit_status = exit_status;
         result_term_signal = term_signal;
         proc->close();
-    });
+    };
 
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
     ASSERT_EQ(0, result_exit_status);
