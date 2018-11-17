@@ -15,33 +15,30 @@ using namespace libtbag::mq;
 
 TEST(MqNodeTest, Bind_Release)
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
-    auto const TEST_FILE_PATH = std::string(R"(\\.\pipe\)") + test_info_->test_case_name() + "_" + test_info_->name();
-    char const * PATH = TEST_FILE_PATH.c_str();
-#else
-    tttDir(true, true);
-    auto const TEST_FILE_PATH = tttDir_Get() / "mq_node.sock";
-    char const * PATH = TEST_FILE_PATH.c_str();
-#endif
+    tttDir_Automatic_Pipe();
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get();
 
     MqNode node;
-    ASSERT_EQ(Err::E_SUCCESS, node.bind(std::string("pipe://") + PATH));
+    ASSERT_EQ(Err::E_SUCCESS, node.bind(PIPE_PATH));
 }
+
+//TEST(MqNodeTest, Connect_Release)
+//{
+//    tttDir_Automatic_Pipe();
+//    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get();
+//
+//    MqNode node;
+//    ASSERT_EQ(Err::E_SUCCESS, node.connect(PIPE_PATH));
+//}
 
 TEST(MqNodeTest, BindAndConnection_Release)
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
-    auto const TEST_FILE_PATH = std::string(R"(\\.\pipe\)") + test_info_->test_case_name() + "_" + test_info_->name();
-    char const * PATH = TEST_FILE_PATH.c_str();
-#else
-    tttDir(true, true);
-    auto const TEST_FILE_PATH = tttDir_Get() / "mq_node.sock";
-    char const * PATH = TEST_FILE_PATH.c_str();
-#endif
+    tttDir_Automatic_Pipe();
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get();
 
     MqNode node1;
     MqNode node2;
-    ASSERT_EQ(Err::E_SUCCESS, node1.bind(std::string("pipe://") + PATH));
-    ASSERT_EQ(Err::E_SUCCESS, node2.connect(std::string("pipe://") + PATH));
+    ASSERT_EQ(Err::E_SUCCESS, node1.bind(PIPE_PATH));
+    ASSERT_EQ(Err::E_SUCCESS, node2.connect(PIPE_PATH));
 }
 

@@ -116,6 +116,10 @@ NAMESPACE_LIBTBAG_CLOSE
 #define TBAG_TEST_TEMP_DIR_NAME __tbag_tester_temp_dir__
 #endif
 
+#ifndef TBAG_TEST_TEMP_NAMED_PIPE_NAME
+#define TBAG_TEST_TEMP_NAMED_PIPE_NAME __tbag_tester_temp_named_pipe__
+#endif
+
 /**
  * @def TBAG_TEST_TEMP_DIR
  * @brief Tbag Test Temp Directory.
@@ -164,6 +168,26 @@ NAMESPACE_LIBTBAG_CLOSE
 
 #ifndef tttDir_Get
 #define tttDir_Get() TBAG_TEST_TEMP_DIR_GET()
+#endif
+
+#ifndef tttDir_Automatic_Pipe
+# if defined(TBAG_PLATFORM_WINDOWS)
+#  define tttDir_Automatic_Pipe()               \
+    auto const TBAG_TEST_TEMP_NAMED_PIPE_NAME = \
+            std::string(R"(\\.\pipe\)")  +      \
+            test_info_->test_case_name() +      \
+            std::string("_")             +      \
+            test_info_->name();
+# else
+#  define tttDir_Automatic_Pipe()               \
+    tttDir_Automatic();                         \
+    auto const TBAG_TEST_TEMP_NAMED_PIPE_NAME = \
+            (tttDir_Get() / "pipe").toString();
+# endif
+#endif
+
+#ifndef tttDir_Pipe_Get
+#define tttDir_Pipe_Get() TBAG_TEST_TEMP_NAMED_PIPE_NAME.c_str()
 #endif
 
 #ifndef TEST_DEFAULT_CONSTRUCTOR
