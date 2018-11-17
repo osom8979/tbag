@@ -76,6 +76,11 @@ std::size_t MqEventQueue::getInaccurateSizeOfReady() const
     return _ready->potentially_inaccurate_count();
 }
 
+std::size_t MqEventQueue::getInaccurateSizeOfActive() const
+{
+    return __messages__.size() - getInaccurateSizeOfReady();
+}
+
 MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::size_t max) const
 {
     return _ready->singlethreaded_validate(min, max);

@@ -43,6 +43,16 @@ enum class MqEvent : int32_t
     ME_CLOSE,
 };
 
+inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
+{
+    switch (event) {
+    case MqEvent::ME_NONE:  return "NONE";
+    case MqEvent::ME_MSG:   return "MSG";
+    case MqEvent::ME_CLOSE: return "CLOSE";
+    default:                return "UNKNOWN";
+    }
+}
+
 enum class MqType : int
 {
     MT_NONE,
@@ -51,9 +61,20 @@ enum class MqType : int
     MT_TCP,
 };
 
-TBAG_CONSTEXPR char const * const PIPE_LOWER_NAME = "pipe";
-TBAG_CONSTEXPR char const * const  UDP_LOWER_NAME = "udp";
-TBAG_CONSTEXPR char const * const  TCP_LOWER_NAME = "tcp";
+TBAG_CONSTEXPR char const * const PIPE_UPPER_NAME = "PIPE";
+TBAG_CONSTEXPR char const * const  UDP_UPPER_NAME = "UDP";
+TBAG_CONSTEXPR char const * const  TCP_UPPER_NAME = "TCP";
+
+inline char const * const getTypeName(MqType type) TBAG_NOEXCEPT
+{
+    switch (type) {
+    case MqType::MT_NONE: return "NONE";
+    case MqType::MT_PIPE: return PIPE_UPPER_NAME;
+    case MqType::MT_UDP:  return UDP_UPPER_NAME;
+    case MqType::MT_TCP:  return TCP_UPPER_NAME;
+    default:              return "UNKNOWN";
+    }
+}
 
 enum class MqMode : int
 {
@@ -61,6 +82,58 @@ enum class MqMode : int
     MM_BIND,
     MM_CONNECT,
 };
+
+inline char const * const getModeName(MqMode mode) TBAG_NOEXCEPT
+{
+    switch (mode) {
+    case MqMode::MM_NONE:    return "NONE";
+    case MqMode::MM_BIND:    return "BIND";
+    case MqMode::MM_CONNECT: return "CONNECT";
+    default:                 return "UNKNOWN";
+    }
+}
+
+enum class MqRequestState
+{
+    MRS_WAITING,
+    MRS_ASYNC,
+    MRS_REQUESTING,
+};
+
+inline char const * const getRequestStateName(MqRequestState state) TBAG_NOEXCEPT
+{
+    switch (state) {
+    case MqRequestState::MRS_WAITING:    return "WAITING";
+    case MqRequestState::MRS_ASYNC:      return "ASYNC";
+    case MqRequestState::MRS_REQUESTING: return "REQUESTING";
+    default:                             return "UNKNOWN";
+    }
+}
+
+enum class MqMachineState
+{
+    MMS_OPENING,          ///< Construct begin.
+    MMS_INITIALIZED,      ///< Construct done.
+    MMS_CONNECTED,        ///< Socket connect.
+    MMS_SHUTTING,         ///< Shutdown request.
+    MMS_DELAY_SHUTTING,   ///< Delay the shutdown request.
+    MMS_SHUTDOWN,         ///< onShutdown() done.
+    MMS_CLOSED,           ///< onClose() done.
+};
+
+inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEPT
+{
+    switch (state) {
+    case MqMachineState::MMS_OPENING:         return "OPENING";
+    case MqMachineState::MMS_INITIALIZED:     return "INITIALIZED";
+    case MqMachineState::MMS_CONNECTED:       return "CONNECTED";
+    case MqMachineState::MMS_SHUTTING:        return "SHUTTING";
+    case MqMachineState::MMS_DELAY_SHUTTING:  return "DELAY_SHUTTING";
+    case MqMachineState::MMS_SHUTDOWN:        return "SHUTDOWN";
+    case MqMachineState::MMS_CLOSED:          return "CLOSED";
+    default:                                  return "UNKNOWN";
+    }
+}
 
 /**
  * MessageQueue data packet.
@@ -175,6 +248,8 @@ struct TBAG_API MqMsgCopyTo
 
 struct MqInterface
 {
+    virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
+
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;
 
@@ -295,9 +370,25 @@ struct MqParams
     std::size_t try_reconnect_count = 0;
 
     /**
+     * Wait until connection is completed.
+     *
+     * @remarks
+     *  The server is not used.
+     */
+    std::size_t wait_on_connection_timeout_millisec = 1000;
+
+    /**
      * Verbose log message.
      */
     bool verbose = false;
+
+    /**
+     * The wait time to not miss the send() requested by another thread.
+     *
+     * @remarks
+     *  At least 10 nanoseconds is recommended.
+     */
+    std::size_t shutdown_wait_nanosec = 1000;
 
     MqParams()
     { /* EMPTY. */ }
@@ -317,6 +408,7 @@ TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME    = "wait_closing";
 TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
 TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
 TBAG_CONSTEXPR static char const * const TRY_RECONNECT_NAME   = "try_reconnect";
+TBAG_CONSTEXPR static char const * const WAIT_CONNECTION_NAME = "wait_connection";
 TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
 
 // -----------------------

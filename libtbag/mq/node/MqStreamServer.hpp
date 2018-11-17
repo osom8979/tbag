@@ -74,12 +74,14 @@ public:
     using binf   = libtbag::util::binf;
     using cbinf  = libtbag::util::cbinf;
 
-    using MqEvent      = libtbag::mq::details::MqEvent;
-    using MqType       = libtbag::mq::details::MqType;
-    using MqMsg        = libtbag::mq::details::MqMsg;
-    using MqEventQueue = libtbag::mq::details::MqEventQueue;
-    using MqQueue      = libtbag::mq::details::MqQueue;
-    using MqParams     = libtbag::mq::details::MqParams;
+    using MqEvent        = libtbag::mq::details::MqEvent;
+    using MqType         = libtbag::mq::details::MqType;
+    using MqRequestState = libtbag::mq::details::MqRequestState;
+    using MqMachineState = libtbag::mq::details::MqMachineState;
+    using MqMsg          = libtbag::mq::details::MqMsg;
+    using MqEventQueue   = libtbag::mq::details::MqEventQueue;
+    using MqQueue        = libtbag::mq::details::MqQueue;
+    using MqParams       = libtbag::mq::details::MqParams;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
@@ -256,6 +258,10 @@ private:
 
     void onServerConnection(Stream * server, Err code);
     void onServerClose     (Stream * server);
+
+public:
+    virtual MqMachineState state() const TBAG_NOEXCEPT override
+    { return MqMachineState::MMS_CLOSED; }
 
 public:
     virtual Err send(MqMsg const & msg) override;

@@ -74,12 +74,12 @@ MqParams convertUriToParams(std::string const & uri_string, bool convert_windows
         return params;
     }
 
-    auto const SCHEMA = libtbag::string::lower(uri.getSchema());
-    if (SCHEMA == PIPE_LOWER_NAME) {
+    auto const SCHEMA = libtbag::string::upper(uri.getSchema());
+    if (SCHEMA == PIPE_UPPER_NAME) {
         params.type = MqType::MT_PIPE;
-    } else if (SCHEMA == TCP_LOWER_NAME) {
+    } else if (SCHEMA == TCP_UPPER_NAME) {
         params.type = MqType::MT_TCP;
-    } else if (SCHEMA == UDP_LOWER_NAME) {
+    } else if (SCHEMA == UDP_UPPER_NAME) {
         params.type = MqType::MT_UDP;
     } else {
         tDLogW("convertUriToParams() {} applies as a TCP type.", SCHEMA);
@@ -165,6 +165,11 @@ MqParams convertUriToParams(std::string const & uri_string, bool convert_windows
     itr = QUERIES.find(TRY_RECONNECT_NAME);
     if (itr != QUERIES.end()) {
         params.try_reconnect_count = toValue<unsigned>(itr->second);
+    }
+
+    itr = QUERIES.find(WAIT_CONNECTION_NAME);
+    if (itr != QUERIES.end()) {
+        params.wait_on_connection_timeout_millisec = toValue<unsigned>(itr->second);
     }
 
     itr = QUERIES.find(VERBOSE_NAME);

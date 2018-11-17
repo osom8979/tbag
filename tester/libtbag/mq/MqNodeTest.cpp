@@ -13,7 +13,7 @@
 using namespace libtbag;
 using namespace libtbag::mq;
 
-TEST(MqNodeTest, BindAndRelease)
+TEST(MqNodeTest, Bind_Release)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
     auto const TEST_FILE_PATH = std::string(R"(\\.\pipe\)") + test_info_->test_case_name() + "_" + test_info_->name();
@@ -28,7 +28,7 @@ TEST(MqNodeTest, BindAndRelease)
     ASSERT_EQ(Err::E_SUCCESS, node.bind(std::string("pipe://") + PATH));
 }
 
-TEST(MqNodeTest, BindAndConnection)
+TEST(MqNodeTest, BindAndConnection_Release)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
     auto const TEST_FILE_PATH = std::string(R"(\\.\pipe\)") + test_info_->test_case_name() + "_" + test_info_->name();
@@ -40,9 +40,8 @@ TEST(MqNodeTest, BindAndConnection)
 #endif
 
     MqNode node1;
-    ASSERT_EQ(Err::E_SUCCESS, node1.bind(std::string("pipe://") + PATH));
-
     MqNode node2;
+    ASSERT_EQ(Err::E_SUCCESS, node1.bind(std::string("pipe://") + PATH));
     ASSERT_EQ(Err::E_SUCCESS, node2.connect(std::string("pipe://") + PATH));
 }
 

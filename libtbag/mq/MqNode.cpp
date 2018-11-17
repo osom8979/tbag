@@ -14,11 +14,16 @@
 #include <libtbag/mq/node/MqStreamServer.hpp>
 #include <libtbag/thread/ThreadPool.hpp>
 
+#include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
+
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
+#include <thread>
+#include <chrono>
 #include <algorithm>
 #include <utility>
 
@@ -50,6 +55,10 @@ public:
     using SharedMq    = std::shared_ptr<MqInterface>;
 
 public:
+    using UvLock      = libtbag::lock::UvLock;
+    using UvCondition = libtbag::lock::UvCondition;
+
+public:
     /**
      * @warning
      *  Don't change this variable.
@@ -76,11 +85,25 @@ public:
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         assert(MODE != MqMode::MM_NONE);
-        if (!_pool.waitPush([this, params, mode](){ init(params, mode); })) {
+        if (!_pool.waitPush([&](){ init(params, mode); })) {
             throw std::bad_alloc();
         }
+        assert(static_cast<bool>(_mq));
         if (!_pool.push([&](){ runner(); })) {
             throw std::bad_alloc();
+        }
+
+        // [CLIENT ONLY]
+        // Wait until connection is completed.
+        if (MODE == MqMode::MM_CONNECT && params.wait_on_connection_timeout_millisec > 0) {
+            auto const BEGIN_TIME = std::chrono::system_clock::now();
+            auto const TIMEOUT = std::chrono::milliseconds(params.wait_on_connection_timeout_millisec);
+            while (_mq->state() == MqMachineState::MMS_INITIALIZED) {
+                if (std::chrono::system_clock::now() - BEGIN_TIME >= TIMEOUT) {
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
         }
     }
 

@@ -158,6 +158,7 @@ protected:
 
 public:
     std::size_t getInaccurateSizeOfReady() const;
+    std::size_t getInaccurateSizeOfActive() const;
     MiscValidity validateOfReady(std::size_t min = 0, std::size_t max = 0) const;
 
 public:

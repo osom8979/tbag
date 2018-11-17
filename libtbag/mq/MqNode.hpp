@@ -42,11 +42,13 @@ public:
     using SharedImpl = std::shared_ptr<Impl>;
 
 public:
-    using MqType   = libtbag::mq::details::MqType;
-    using MqEvent  = libtbag::mq::details::MqEvent;
-    using MqMode   = libtbag::mq::details::MqMode;
-    using MqMsg    = libtbag::mq::details::MqMsg;
-    using MqParams = libtbag::mq::details::MqParams;
+    using MqEvent        = libtbag::mq::details::MqEvent;
+    using MqType         = libtbag::mq::details::MqType;
+    using MqRequestState = libtbag::mq::details::MqRequestState;
+    using MqMachineState = libtbag::mq::details::MqMachineState;
+    using MqMsg          = libtbag::mq::details::MqMsg;
+    using MqMode         = libtbag::mq::details::MqMode;
+    using MqParams       = libtbag::mq::details::MqParams;
 
 private:
     SharedImpl _impl;

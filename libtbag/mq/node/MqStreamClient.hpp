@@ -36,6 +36,7 @@
 #include <vector>
 #include <unordered_set>
 #include <regex>
+#include <atomic>
 #include <thread>
 #include <type_traits>
 
@@ -52,8 +53,8 @@ namespace node {
  * @author zer0
  * @date   2018-11-13
  */
-class TBAG_API MqStreamClient : public libtbag::mq::details::MqEventQueue,
-                                public libtbag::mq::details::MqInterface
+class TBAG_API MqStreamClient : protected libtbag::mq::details::MqEventQueue,
+                                public    libtbag::mq::details::MqInterface
 {
 public:
     using Loop   = libtbag::uvpp::Loop;
@@ -74,12 +75,14 @@ public:
     using binf   = libtbag::util::binf;
     using cbinf  = libtbag::util::cbinf;
 
-    using MqEvent      = libtbag::mq::details::MqEvent;
-    using MqType       = libtbag::mq::details::MqType;
-    using MqMsg        = libtbag::mq::details::MqMsg;
-    using MqEventQueue = libtbag::mq::details::MqEventQueue;
-    using MqQueue      = libtbag::mq::details::MqQueue;
-    using MqParams     = libtbag::mq::details::MqParams;
+    using MqEvent        = libtbag::mq::details::MqEvent;
+    using MqType         = libtbag::mq::details::MqType;
+    using MqRequestState = libtbag::mq::details::MqRequestState;
+    using MqMachineState = libtbag::mq::details::MqMachineState;
+    using MqMsg          = libtbag::mq::details::MqMsg;
+    using MqEventQueue   = libtbag::mq::details::MqEventQueue;
+    using MqQueue        = libtbag::mq::details::MqQueue;
+    using MqParams       = libtbag::mq::details::MqParams;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
@@ -97,31 +100,23 @@ public:
     TBAG_CONSTEXPR static std::size_t DEFAULT_CLOSE_MILLISEC   = 1 * 1000;
     TBAG_CONSTEXPR static std::size_t DEFAULT_READ_ERROR_COUNT = 4;
 
-public:
-    enum class RequestState
-    {
-        RS_WAITING,
-        RS_ASYNC,
-        RS_REQUESTING,
-    };
-
 private:
     struct Writer : public Async
     {
         MqStreamClient * parent = nullptr;
 
-        RequestState  state;
-        AsyncMsgQueue queue;
+        MqRequestState state;
+        AsyncMsgQueue  queue;
 
         Writer(Loop & loop, MqStreamClient * p)
-                : Async(loop), parent(p), state(RequestState::RS_WAITING), queue()
+                : Async(loop), parent(p), state(MqRequestState::MRS_WAITING), queue()
         { assert(parent != nullptr); }
 
         virtual ~Writer()
         { /* EMPTY. */ }
 
         inline bool isWaiting() const TBAG_NOEXCEPT
-        { return state == RequestState::RS_WAITING; }
+        { return state == MqRequestState::MRS_WAITING; }
 
         virtual void onAsync() override
         { parent->onWriterAsync(this); }
@@ -154,12 +149,6 @@ private:
         ConnectRequest  connect_req;
         ShutdownRequest shutdown_req;
         WriteRequest    write_req;
-
-        Buffer read_buffer;
-        Buffer remaining_read;
-
-        bool is_shutdown = false;
-        std::size_t read_error_count = 0;
 
         Client(Loop & loop, MqStreamClient * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
@@ -195,7 +184,6 @@ public:
     using ThreadId      = std::thread::id;
 
 public:
-    MqType const TYPE;
     MqParams const PARAMS;
 
 private:
@@ -204,6 +192,19 @@ private:
     MsgPacket    _packer;
     MqQueue      _recv_queue;
 
+private:
+    std::size_t _read_error_count;
+    Buffer      _read_buffer;
+    Buffer      _remaining_read;
+
+public:
+    using AtomicState = std::atomic<MqMachineState>;
+    using AtomicInt   = std::atomic_int;
+
+private:
+    AtomicState _state;
+    AtomicInt   _now_sending;
+
 public:
     MqStreamClient(Loop & loop, MqParams const & params);
     virtual ~MqStreamClient();
@@ -211,20 +212,28 @@ public:
 private:
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
+private:
     void onCloseEvent();
 
+private:
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
 
+private:
     void onCloseTimer     (CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
 
+private:
     void onConnect (ConnectRequest & request, Err code);
     void onShutdown(ShutdownRequest & request, Err code);
     void onWrite   (WriteRequest & request, Err code);
     binf onAlloc   (std::size_t suggested_size);
     void onRead    (Err code, char const * buffer, std::size_t size);
     void onClose   ();
+
+public:
+    virtual MqMachineState state() const TBAG_NOEXCEPT override
+    { return _state; }
 
 public:
     virtual Err send(MqMsg const & msg) override;
