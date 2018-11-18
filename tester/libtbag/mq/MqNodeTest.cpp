@@ -8,15 +8,19 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/mq/MqNode.hpp>
+#include <libtbag/log/Log.hpp>
+
 #include <string>
 
 using namespace libtbag;
 using namespace libtbag::mq;
 
-TEST(MqNodeTest, Bind_Release)
+TEST(MqNodeTest, Bind)
 {
+    libtbag::log::SeverityGuard guard;
+
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get();
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
     MqNode node;
     ASSERT_EQ(Err::E_SUCCESS, node.bind(PIPE_PATH));
@@ -31,14 +35,39 @@ TEST(MqNodeTest, Bind_Release)
 //    ASSERT_EQ(Err::E_SUCCESS, node.connect(PIPE_PATH));
 //}
 
-TEST(MqNodeTest, BindAndConnection_Release)
+TEST(MqNodeTest, BindAndConnection)
 {
-    tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get();
+    // Client release -> Server release!
 
-    MqNode node1;
-    MqNode node2;
-    ASSERT_EQ(Err::E_SUCCESS, node1.bind(PIPE_PATH));
-    ASSERT_EQ(Err::E_SUCCESS, node2.connect(PIPE_PATH));
+    tttDir_Automatic_Pipe();
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+
+    auto server = std::make_unique<MqNode>();
+    auto client = std::make_unique<MqNode>();
+
+    libtbag::log::SeverityGuard guard;
+    ASSERT_EQ(Err::E_SUCCESS, server->bind(PIPE_PATH));
+    ASSERT_EQ(Err::E_SUCCESS, client->connect(PIPE_PATH));
+
+    client.reset();
+    server.reset();
+}
+
+TEST(MqNodeTest, BindAndConnection2)
+{
+    // Server release -> Client release!
+
+    tttDir_Automatic_Pipe();
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+
+    auto server = std::make_unique<MqNode>();
+    auto client = std::make_unique<MqNode>();
+
+    //libtbag::log::SeverityGuard guard;
+    ASSERT_EQ(Err::E_SUCCESS, server->bind(PIPE_PATH));
+    ASSERT_EQ(Err::E_SUCCESS, client->connect(PIPE_PATH));
+
+    server.reset();
+    client.reset();
 }
 
