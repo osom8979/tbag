@@ -32,7 +32,8 @@ MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
           PARAMS(params), _client(), _packer(params.packer_size),
           _recv_queue(params.recv_queue_size, params.recv_msg_size),
           _read_error_count(0),
-          _state(MqMachineState::MMS_OPENING), _now_sending(0)
+          _state(MqMachineState::MMS_OPENING), _now_sending(0),
+          _closed_async_messages_count(0)
 {
     if (PARAMS.type == MqType::MT_PIPE) {
         _client = loop.newHandle<PipeClient>(loop, this);
@@ -84,39 +85,6 @@ MqStreamClient::~MqStreamClient()
     assert(THREAD_ID == std::this_thread::get_id());
 }
 
-AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
-{
-    assert(THREAD_ID == std::this_thread::get_id());
-    assert(msg != nullptr);
-
-    if (_state != MqMachineState::MMS_CONNECTED) {
-        using namespace libtbag::mq::details;
-        tDLogW("MqStreamClient::onMsg() Illegal client state, skip current message ({})", getEventName(msg->event));
-        return AfterAction::AA_OK;
-    }
-
-    if (msg->event == MqEvent::ME_MSG) {
-        _writer->queue.push(AsyncMsgPointer(msg));
-        if (_writer->state == MqRequestState::MRS_WAITING) {
-            auto const CODE = _writer->send();
-            if (isSuccess(CODE)) {
-                _writer->state = MqRequestState::MRS_ASYNC;
-            } else {
-                tDLogE("MqStreamClient::onMsg() Async send error ({})", CODE);
-                return AfterAction::AA_OK;
-            }
-        }
-        return AfterAction::AA_DELAY;
-    }
-
-    if (msg->event == MqEvent::ME_CLOSE) {
-        onCloseEvent();
-    } else {
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    }
-    return AfterAction::AA_OK;
-}
-
 template <typename ClientT>
 static Err __shutdown(Stream * stream)
 {
@@ -124,46 +92,205 @@ static Err __shutdown(Stream * stream)
     return client->shutdown(client->shutdown_req);
 }
 
-static Err __shutdown(Stream * stream, MqType type)
+Err MqStreamClient::shutdown()
 {
-    if (type == MqType::MT_PIPE) {
-        return __shutdown<PipeClient>(stream);
+    Err code;
+    if (PARAMS.type == MqType::MT_PIPE) {
+        code = __shutdown<PipeClient>(_client.get());
+    } else {
+        assert(PARAMS.type == MqType::MT_TCP);
+        code = __shutdown<TcpClient>(_client.get());
     }
-    assert(type == MqType::MT_TCP);
-    return __shutdown<TcpClient>(stream);
+    if (isSuccess(code)) {
+        _state = MqMachineState::MMS_SHUTTING;
+    }
+    return code;
 }
 
-void MqStreamClient::onCloseEvent()
+void MqStreamClient::close()
+{
+    if (_client->isClosing()) {
+        // EOF can be called via onRead() after the Client has already closed.
+        assert(_state == MqMachineState::MMS_CLOSING || _state == MqMachineState::MMS_CLOSED);
+        return;
+    }
+
+    if (_state == MqMachineState::MMS_CONNECTED) {
+        _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
+        std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.shutdown_wait_nanosec));
+        while (_now_sending > 0) {
+            // Busy waiting...
+        }
+
+        // [IMPORTANT]
+        // From this moment on, there is no send-queue producer.
+        assert(_now_sending == 0);
+        assert(static_cast<bool>(_writer));
+
+        // Cancel all pending messages in send-queue and returns resources.
+        while (!_writer->queue.empty()) {
+            auto msg = _writer->queue.front();
+            _writer->queue.pop();
+            restoreMessage(msg.get(), PARAMS.verify_restore_message);
+        }
+    } else {
+        _state = MqMachineState::MMS_CLOSING;
+    }
+
+    _client->close();
+}
+
+void MqStreamClient::onAsyncMsg(AsyncMsg * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
+    assert(async != nullptr);
 
-    _state = MqMachineState::MMS_SHUTTING;
+    MqEventQueue::onAsyncMsg(async);
+}
+
+void MqStreamClient::onCloseMsg(AsyncMsg * async)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(async != nullptr);
+    assert(_state == MqMachineState::MMS_CLOSING);
+
+    MqEventQueue::onCloseMsg(async);
+
+    ++_closed_async_messages_count;
+    assert(_closed_async_messages_count <= QUEUE_SIZE);
+    if (_closed_async_messages_count == QUEUE_SIZE) {
+        assert(!_writer->isClosing());
+        _writer->close();
+        tDLogIfD(PARAMS.verbose,
+                 "MqStreamClient::onCloseMsg() Close request of writer, Next, onWriterClose() event method.");
+    }
+}
+
+AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(msg != nullptr);
+
+    if (_state != MqMachineState::MMS_CONNECTED) {
+        using namespace libtbag::mq::details;
+        tDLogIfW(PARAMS.verbose,
+                 "MqStreamClient::onMsg() Illegal client state, skip current message ({})",
+                 getEventName(msg->event));
+        return AfterAction::AA_OK;
+    }
+
+    assert(_state == MqMachineState::MMS_CONNECTED);
+    switch (msg->event) {
+    case MqEvent::ME_MSG:
+        return onMsgEvent(msg);
+
+    case MqEvent::ME_CLOSE:
+        onCloseEvent(msg);
+        break;
+
+    case MqEvent::ME_NONE:
+        break;
+
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+    }
+    return AfterAction::AA_OK;
+}
+
+AfterAction MqStreamClient::onMsgEvent(AsyncMsg * msg)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(msg != nullptr);
+    assert(_state == MqMachineState::MMS_CONNECTED);
+
+    _writer->queue.push(AsyncMsgPointer(msg));
+
+    if (_writer->state != MqRequestState::MRS_WAITING) {
+        tDLogIfD(PARAMS.verbose, "MqStreamClient::onMsg() Writer is already working");
+        return AfterAction::AA_DELAY;
+    }
+
+    auto const CODE = _writer->send();
+    if (isFailure(CODE)) {
+        tDLogE("MqStreamClient::onMsg() Async send error ({})", CODE);
+        return AfterAction::AA_OK;
+    }
+
+    _writer->state = MqRequestState::MRS_ASYNC;
+    return AfterAction::AA_DELAY;
+}
+
+void MqStreamClient::onCloseEvent(AsyncMsg * msg)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(msg != nullptr);
+
+    if (_state != MqMachineState::MMS_CONNECTED) {
+        tDLogIfW(PARAMS.verbose, "MqStreamClient::onCloseEvent() Illegal state, This close message is skipped.");
+        return;
+    }
+
+    assert(_state == MqMachineState::MMS_CONNECTED);
+    _state = MqMachineState::MMS_ON_CLOSE_MSG; // This prevents the send() method from receiving further input.
     std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.shutdown_wait_nanosec));
     while (_now_sending > 0) {
         // Busy waiting...
     }
 
     // [IMPORTANT]
-    // From this moment on,
-    // there is no send-queue producers.
+    // From this moment on, there is no send-queue producer.
     assert(_now_sending == 0);
     assert(static_cast<bool>(_writer));
     auto const ACTIVE_SEND_SIZE = getInaccurateSizeOfActive() - 1/*Subtract the current message*/;
-    if (ACTIVE_SEND_SIZE == 0 && _writer->state == MqRequestState::MRS_WAITING) {
-        assert(_writer->queue.size() == 0);
 
-        auto const CODE = __shutdown(_client.get(), PARAMS.type);
+    if (ACTIVE_SEND_SIZE > 0 || _writer->state != MqRequestState::MRS_WAITING) {
+        // Clear any remaining transmission queues and continue with system shutdown.
+        tDLogIfI(PARAMS.verbose, "MqStreamClient::onCloseEvent() Delay the shutdown request ...");
+        _state = MqMachineState::MMS_DELAY_SHUTTING;
+        return;
+    }
+
+    assert(_writer->queue.empty());
+    auto const CODE = shutdown();
+    if (isSuccess(CODE)) {
+        tDLogIfD(PARAMS.verbose,
+                 "MqStreamClient::onCloseEvent() Shutdown request ... Next, onShutdown() event method.");
+    } else {
+        tDLogE("MqStreamClient::onCloseEvent() Shutdown error: {}", CODE);
+        close();
+    }
+}
+
+void MqStreamClient::afterProcessMessage(AsyncMsg * msg)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(msg != nullptr);
+
+    _writer->queue.pop();
+    auto const CODE = restoreMessage(msg, PARAMS.verify_restore_message);
+    assert(isSuccess(CODE));
+
+    if (!_writer->queue.empty()) {
+        auto const CODE = _writer->send();
+        assert(isSuccess(CODE));
+        _writer->state = MqRequestState::MRS_ASYNC;
+        return;
+    }
+
+    _writer->state = MqRequestState::MRS_WAITING;
+
+    // If the shutdown is delayed, proceed with it.
+    if (_state == MqMachineState::MMS_DELAY_SHUTTING) {
+        auto const CODE = shutdown();
         if (isSuccess(CODE)) {
-            tDLogI("MqStreamClient::onCloseEvent() Shutdown request ...");
+            tDLogIfD(PARAMS.verbose,
+                     "MqStreamClient::afterProcessMessage() Shutdown request ... Next, onShutdown() event method.");
         } else {
-            tDLogE("MqStreamClient::onCloseEvent() Shutdown error: {}", CODE);
-            _client->close();
+            tDLogE("MqStreamClient::afterProcessMessage() Shutdown error: {}", CODE);
+            close();
             return;
         }
-    } else {
-        // Clear all remaining send-queue and proceed with shutdown.
-        tDLogI("MqStreamClient::onCloseEvent() Delay the shutdown request ...");
-        _state = MqMachineState::MMS_DELAY_SHUTTING;
     }
 }
 
@@ -188,9 +315,17 @@ void MqStreamClient::onWriterAsync(Writer * writer)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(writer != nullptr);
+    assert(writer == _writer.get());
     assert(writer->queue.empty());
     assert(writer->state == MqRequestState::MRS_ASYNC);
     writer->state = MqRequestState::MRS_REQUESTING;
+
+    if (writer->queue.empty()) {
+        assert(_state == MqMachineState::MMS_CLOSING);
+        writer->state = MqRequestState::MRS_WAITING;
+        tDLogIfW(PARAMS.verbose, "MqStreamClient::onWriterAsync() All messages are canceled.");
+        return;
+    }
 
     auto msg_pointer = writer->queue.front();
     assert(static_cast<bool>(msg_pointer));
@@ -199,31 +334,12 @@ void MqStreamClient::onWriterAsync(Writer * writer)
     assert(isSuccess(CODE));
 
     auto const WRITE_CODE = __write_client(_client.get(), _packer.point(), _packer.size(), PARAMS.type);
-    if (isFailure(WRITE_CODE)) {
-        tDLogE("MqStreamClient::onWriterAsync() Write error: {}", WRITE_CODE);
-
-        writer->queue.pop();
-
-        auto const CODE = restoreMessage(msg_pointer.get(), PARAMS.verify_restore_message);
-        assert(isSuccess(CODE));
-
-        if (writer->queue.empty()) {
-            writer->state = MqRequestState::MRS_WAITING;
-            if (_state == MqMachineState::MMS_DELAY_SHUTTING) {
-                auto const CODE = __shutdown(_client.get(), PARAMS.type);
-                if (isSuccess(CODE)) {
-                    tDLogI("MqStreamClient::onWriterAsync() Shutdown request ...");
-                } else {
-                    tDLogE("MqStreamClient::onWriterAsync() Shutdown error: {}", CODE);
-                    _client->close();
-                    return;
-                }
-            }
-        } else {
-            auto const CODE = writer->send();
-            assert(isSuccess(CODE));
-            writer->state = MqRequestState::MRS_ASYNC;
-        }
+    if (isSuccess(WRITE_CODE)) {
+        tDLogIfD(PARAMS.verbose,
+                 "MqStreamClient::onWriterAsync() Write process ... Next, onWrite() event method.");
+    } else {
+        tDLogW("MqStreamClient::onWriterAsync() Write error({}), skip this message.", WRITE_CODE);
+        afterProcessMessage(msg_pointer.get());
     }
 }
 
@@ -231,6 +347,10 @@ void MqStreamClient::onWriterClose(Writer * writer)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(writer != nullptr);
+    assert(_state == MqMachineState::MMS_CLOSING);
+
+    // Last closing point.
+    _state = MqMachineState::MMS_CLOSED;
 }
 
 void MqStreamClient::onCloseTimer(CloseTimer * timer)
@@ -239,9 +359,7 @@ void MqStreamClient::onCloseTimer(CloseTimer * timer)
     assert(timer != nullptr);
     assert(static_cast<bool>(_client));
 
-    if (!_client->isClosing()) {
-        _client->close();
-    }
+    close();
     timer->close();
 }
 
@@ -255,23 +373,18 @@ void MqStreamClient::onConnect(ConnectRequest & request, Err code)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_client));
-
-    if (_state != MqMachineState::MMS_INITIALIZED) {
-        tDLogE("MqStreamClient::onConnect() Illegal state error: not initialized.");
-        _client->close();
-        return;
-    }
+    assert(_state == MqMachineState::MMS_INITIALIZED);
 
     if (isFailure(code)) {
         tDLogE("MqStreamClient::onConnect() Connect error: {}", code);
-        _client->close();
+        close();
         return;
     }
 
-    Err const START_CODE = _client->startRead();
+    auto const START_CODE = _client->startRead();
     if (isFailure(START_CODE)) {
         tDLogE("MqStreamClient::onConnect() Start read error: {}", code);
-        _client->close();
+        close();
         return;
     }
 
@@ -287,13 +400,13 @@ void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
 
     if (isFailure(code)) {
         tDLogE("MqStreamClient::onShutdown() Shutdown error: {}", code);
-        _client->close();
+        close();
         return;
     }
 
     if (PARAMS.wait_closing_millisec == 0) {
         tDLogIfD(PARAMS.verbose, "MqStreamClient::onShutdown() Direct closing");
-        _client->close();
+        close();
         return;
     }
 
@@ -303,7 +416,7 @@ void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
     auto timer = loop->newHandle<CloseTimer>(*loop, this);
     if (!timer) {
         tDLogE("MqStreamClient::onShutdown() Create timer error");
-        _client->close();
+        close();
         return;
     }
 
@@ -311,12 +424,14 @@ void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
     auto const START_CODE = timer->start(PARAMS.wait_closing_millisec);
     if (isFailure(START_CODE)) {
         tDLogE("MqStreamClient::onShutdown() Close timer start error: {}", START_CODE);
-        _client->close();
+        close();
         timer->close();
         return;
     }
 
     tDLogI("MqStreamClient::onNodeShutdown() Shutdown event done");
+    assert(_state == MqMachineState::MMS_SHUTTING || _state == MqMachineState::MMS_DELAY_SHUTTING);
+    assert(_state != MqMachineState::MMS_SHUTDOWN);
     _state = MqMachineState::MMS_SHUTDOWN;
 }
 
@@ -326,30 +441,10 @@ void MqStreamClient::onWrite(WriteRequest & request, Err code)
     assert(static_cast<bool>(_writer));
     assert(!_writer->queue.empty());
     assert(_writer->state == MqRequestState::MRS_REQUESTING);
+    assert(_state == MqMachineState::MMS_CONNECTED || _state == MqMachineState::MMS_DELAY_SHUTTING);
 
     auto value = _writer->queue.front();
-    _writer->queue.pop();
-
-    auto const CODE = restoreMessage(value.get(), PARAMS.verify_restore_message);
-    assert(isSuccess(CODE));
-
-    if (_writer->queue.empty()) {
-        _writer->state = MqRequestState::MRS_WAITING;
-        if (_state == MqMachineState::MMS_DELAY_SHUTTING) {
-            auto const CODE = __shutdown(_client.get(), PARAMS.type);
-            if (isSuccess(CODE)) {
-                tDLogI("MqStreamClient::onWrite() Shutdown request ...");
-            } else {
-                tDLogE("MqStreamClient::onWrite() Shutdown error: {}", CODE);
-                _client->close();
-                return;
-            }
-        }
-    } else {
-        auto const CODE = _writer->send();
-        assert(isSuccess(CODE));
-        _writer->state = MqRequestState::MRS_ASYNC;
-    }
+    afterProcessMessage(value.get());
 }
 
 binf MqStreamClient::onAlloc(std::size_t suggested_size)
@@ -364,7 +459,7 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
     assert(_client != nullptr);
 
     if (code == Err::E_EOF) {
-        _client->close();
+        close();
         return;
     }
 
@@ -373,7 +468,7 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
         tDLogE("MqStreamClient::onNodeRead() Read error: {} ({}/{})",
                code, _read_error_count, PARAMS.continuous_read_error_count);
         if (_read_error_count >= PARAMS.continuous_read_error_count) {
-            _client->close();
+            close();
         }
         return;
     }
@@ -405,13 +500,14 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
 void MqStreamClient::onClose()
 {
     assert(THREAD_ID == std::this_thread::get_id());
+    assert(_state == MqMachineState::MMS_CLOSING);
 
-    tDLogI("MqStreamClient::onServerClose() Close this client!");
-    _state = MqMachineState::MMS_CLOSED;
-
-    if (!_writer->isClosing()) {
-        _writer->close();
+    if (PARAMS.verbose) {
+        tDLogI("MqStreamClient::onClose() Close this client!");
+    } else {
+        tDLogI("MqStreamClient::onClose() Close this client! Next, close all async messages in send-queue.");
     }
+
     closeAsyncMsgs();
 }
 

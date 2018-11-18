@@ -263,6 +263,9 @@ public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override
     { return MqMachineState::MMS_CLOSED; }
 
+    virtual MqParams params() const override
+    { return PARAMS; }
+
 public:
     virtual Err send(MqMsg const & msg) override;
     virtual Err recv(MqMsg & msg) override;

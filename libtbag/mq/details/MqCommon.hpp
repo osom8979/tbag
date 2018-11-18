@@ -115,9 +115,11 @@ enum class MqMachineState
     MMS_OPENING,          ///< Construct begin.
     MMS_INITIALIZED,      ///< Construct done.
     MMS_CONNECTED,        ///< Socket connect.
+    MMS_ON_CLOSE_MSG,     ///< Obtain the close request message.
     MMS_SHUTTING,         ///< Shutdown request.
     MMS_DELAY_SHUTTING,   ///< Delay the shutdown request.
     MMS_SHUTDOWN,         ///< onShutdown() done.
+    MMS_CLOSING,          ///< Close request.
     MMS_CLOSED,           ///< onClose() done.
 };
 
@@ -244,16 +246,6 @@ struct TBAG_API MqMsgCopyTo
     ~MqMsgCopyTo();
 
     bool operator()(MqMsg * msg);
-};
-
-struct MqInterface
-{
-    virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
-
-    virtual Err send(MqMsg const & msg) = 0;
-    virtual Err recv(MqMsg & msg) = 0;
-
-    virtual void recvWait(MqMsg & msg) = 0;
 };
 
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_QUEUE_SIZE       = 1024;            // power of 2.
@@ -410,6 +402,18 @@ TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
 TBAG_CONSTEXPR static char const * const TRY_RECONNECT_NAME   = "try_reconnect";
 TBAG_CONSTEXPR static char const * const WAIT_CONNECTION_NAME = "wait_connection";
 TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
+
+struct MqInterface
+{
+    virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
+
+    virtual MqParams params() const = 0;
+
+    virtual Err send(MqMsg const & msg) = 0;
+    virtual Err recv(MqMsg & msg) = 0;
+
+    virtual void recvWait(MqMsg & msg) = 0;
+};
 
 // -----------------------
 // Miscellaneous utilities

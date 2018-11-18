@@ -17,14 +17,13 @@ namespace mq      {
 namespace details {
 
 MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
-        : THREAD_ID(std::this_thread::get_id())
+        : THREAD_ID(std::this_thread::get_id()), QUEUE_SIZE(BoundedMpMcQueue::calcMinimumQueueSize(size))
 {
-    std::size_t const POWER_OF_2 = BoundedMpMcQueue::calcMinimumQueueSize(size);
-    _ready = std::make_unique<BoundedMpMcQueue>(POWER_OF_2);
+    _ready = std::make_unique<BoundedMpMcQueue>(QUEUE_SIZE);
     assert(static_cast<bool>(_ready));
 
-    __messages__.resize(POWER_OF_2);
-    for (std::size_t i = 0; i < POWER_OF_2; ++i) {
+    __messages__.resize(QUEUE_SIZE);
+    for (std::size_t i = 0; i < QUEUE_SIZE; ++i) {
         auto async = loop.newHandle<AsyncMsg>(loop, msg_size, this);
         assert(static_cast<bool>(async));
 
@@ -35,7 +34,7 @@ MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
     }
 
     std::size_t const READY_QUEUE_SIZE = _ready->potentially_inaccurate_count();
-    assert(POWER_OF_2 == READY_QUEUE_SIZE);
+    assert(QUEUE_SIZE == READY_QUEUE_SIZE);
 }
 
 MqEventQueue::~MqEventQueue()
@@ -43,7 +42,7 @@ MqEventQueue::~MqEventQueue()
     assert(THREAD_ID == std::this_thread::get_id());
 }
 
-void MqEventQueue::onAsync(AsyncMsg * async)
+void MqEventQueue::onAsyncMsg(AsyncMsg * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
@@ -56,7 +55,7 @@ void MqEventQueue::onAsync(AsyncMsg * async)
     }
 }
 
-void MqEventQueue::onClose(AsyncMsg * async)
+void MqEventQueue::onCloseMsg(AsyncMsg * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
@@ -78,7 +77,7 @@ std::size_t MqEventQueue::getInaccurateSizeOfReady() const
 
 std::size_t MqEventQueue::getInaccurateSizeOfActive() const
 {
-    return __messages__.size() - getInaccurateSizeOfReady();
+    return QUEUE_SIZE - getInaccurateSizeOfReady();
 }
 
 MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::size_t max) const

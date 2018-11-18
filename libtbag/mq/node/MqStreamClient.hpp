@@ -205,15 +205,28 @@ private:
     AtomicState _state;
     AtomicInt   _now_sending;
 
+private:
+    std::size_t _closed_async_messages_count;
+
 public:
     MqStreamClient(Loop & loop, MqParams const & params);
     virtual ~MqStreamClient();
 
 private:
+    Err shutdown();
+    void close();
+
+private:
+    virtual void onAsyncMsg(AsyncMsg * async) override;
+    virtual void onCloseMsg(AsyncMsg * async) override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
 private:
-    void onCloseEvent();
+    AfterAction onMsgEvent(AsyncMsg * msg);
+    void onCloseEvent(AsyncMsg * msg);
+
+private:
+    void afterProcessMessage(AsyncMsg * msg);
 
 private:
     void onWriterAsync(Writer * writer);
@@ -234,6 +247,9 @@ private:
 public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override
     { return _state; }
+
+    virtual MqParams params() const override
+    { return PARAMS; }
 
 public:
     virtual Err send(MqMsg const & msg) override;

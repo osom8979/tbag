@@ -118,10 +118,10 @@ public:
         { /* EMPTY. */ }
 
         virtual void onAsync() override
-        { parent->onAsync(this); }
+        { parent->onAsyncMsg(this); }
 
         virtual void onClose() override
-        { parent->onClose(this); }
+        { parent->onCloseMsg(this); }
     };
 
 public:
@@ -132,6 +132,7 @@ public:
 
 public:
     ThreadId const THREAD_ID;
+    std::size_t const QUEUE_SIZE;
 
 private:
     /**
@@ -149,9 +150,9 @@ public:
                  std::size_t msg_size = DEFAULT_PACKET_SIZE);
     virtual ~MqEventQueue();
 
-private:
-    void onAsync(AsyncMsg * async);
-    void onClose(AsyncMsg * async);
+protected:
+    virtual void onAsyncMsg(AsyncMsg * async);
+    virtual void onCloseMsg(AsyncMsg * async);
 
 protected:
     void closeAsyncMsgs();
