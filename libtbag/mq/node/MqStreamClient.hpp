@@ -111,12 +111,8 @@ private:
         Writer(Loop & loop, MqStreamClient * p)
                 : Async(loop), parent(p), state(MqRequestState::MRS_WAITING), queue()
         { assert(parent != nullptr); }
-
         virtual ~Writer()
         { /* EMPTY. */ }
-
-        inline bool isWaiting() const TBAG_NOEXCEPT
-        { return state == MqRequestState::MRS_WAITING; }
 
         virtual void onAsync() override
         { parent->onWriterAsync(this); }
@@ -130,13 +126,11 @@ private:
 
         CloseTimer(Loop & loop, MqStreamClient * p) : Timer(loop), parent(p)
         { assert(parent != nullptr); }
-
         virtual ~CloseTimer()
         { /* EMPTY. */ }
 
         virtual void onTimer() override
         { parent->onCloseTimer(this); }
-
         virtual void onClose() override
         { parent->onCloseTimerClose(this); }
     };
@@ -182,6 +176,8 @@ public:
 public:
     using SharedStream  = std::shared_ptr<Stream>;
     using ThreadId      = std::thread::id;
+    using AtomicState   = std::atomic<MqMachineState>;
+    using AtomicInt     = std::atomic_int;
 
 public:
     MqParams const PARAMS;
@@ -196,10 +192,6 @@ private:
     std::size_t _read_error_count;
     Buffer      _read_buffer;
     Buffer      _remaining_read;
-
-public:
-    using AtomicState = std::atomic<MqMachineState>;
-    using AtomicInt   = std::atomic_int;
 
 private:
     AtomicState _state;

@@ -87,6 +87,8 @@ public:
     using AfterAction     = MqEventQueue::AfterAction;
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
+    using AtomicState     = std::atomic<MqMachineState>;
+    using AtomicInt       = std::atomic_int;
 
     using SocketAddress = libtbag::network::SocketAddress;
     using Uri           = libtbag::network::Uri;
@@ -98,20 +100,16 @@ private:
         MqStreamServer * parent = nullptr;
 
         MqRequestState state;
-        std::size_t    write_count;
         AsyncMsgQueue  queue;
+        std::size_t    write_count;
 
         Writer(Loop & loop, MqStreamServer * p)
                 : Async(loop), parent(p),
                   state(MqRequestState::MRS_WAITING),
-                  write_count(0), queue()
+                  queue(), write_count(0)
         { assert(parent != nullptr); }
-
         virtual ~Writer()
         { /* EMPTY. */ }
-
-        inline bool isWaiting() const TBAG_NOEXCEPT
-        { return state == MqRequestState::MRS_WAITING; }
 
         virtual void onAsync() override
         { parent->onWriterAsync(this); }
@@ -124,7 +122,8 @@ private:
         MqStreamServer * parent = nullptr;
         Stream * stream = nullptr;
 
-        CloseTimer(Loop & loop, MqStreamServer * p, Stream * s) : Timer(loop), parent(p), stream(s)
+        CloseTimer(Loop & loop, MqStreamServer * p, Stream * s)
+                : Timer(loop), parent(p), stream(s)
         {
             assert(parent != nullptr);
             assert(stream != nullptr);
@@ -135,7 +134,6 @@ private:
 
         virtual void onTimer() override
         { parent->onCloseTimer(this); }
-
         virtual void onClose() override
         { parent->onCloseTimerClose(this); }
     };
@@ -210,7 +208,6 @@ public:
     using ThreadId      = std::thread::id;
 
 public:
-    MqType const TYPE;
     MqParams const PARAMS;
 
 private:

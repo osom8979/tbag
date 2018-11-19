@@ -28,13 +28,13 @@ using binf     = MqStreamServer::binf;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          TYPE(params.type), PARAMS(params), _server(), _nodes(), _packer(params.packer_size),
+          PARAMS(params), _server(), _nodes(), _packer(params.packer_size),
           _recv_queue(params.recv_queue_size, params.recv_msg_size),
           _closing_server(false)
 {
-    if (TYPE == MqType::MT_PIPE) {
+    if (PARAMS.type == MqType::MT_PIPE) {
         _server = loop.newHandle<PipeServer>(loop, this);
-    } else if (TYPE == MqType::MT_TCP) {
+    } else if (PARAMS.type == MqType::MT_TCP) {
         _server = loop.newHandle<TcpServer>(loop, this);
     } else {
         throw ErrException(Err::E_ILLARGS);
@@ -46,7 +46,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
     assert(static_cast<bool>(_writer));
     assert(_writer->isInit());
 
-    if (TYPE == MqType::MT_PIPE) {
+    if (PARAMS.type == MqType::MT_PIPE) {
         auto * pipe = (PipeServer*)(_server.get());
         assert(pipe != nullptr);
         auto const BIND_CODE = pipe->bind(params.address.c_str());
@@ -59,7 +59,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
             throw ErrException(LISTEN_CODE);
         }
     } else {
-        assert(TYPE == MqType::MT_TCP);
+        assert(PARAMS.type == MqType::MT_TCP);
         auto * tcp = (TcpServer*)(_server.get());
 
         SocketAddress addr;
@@ -180,7 +180,7 @@ static Err __shutdown(Stream * stream, MqType type)
 Err MqStreamServer::closeNode(Stream * node)
 {
     assert(THREAD_ID == std::this_thread::get_id());
-    auto const CODE = __shutdown(node, TYPE);
+    auto const CODE = __shutdown(node, PARAMS.type);
     if (CODE == Err::E_ILLSTATE) {
         return Err::E_ILLSTATE; // Skip...
     }
@@ -242,7 +242,7 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
 
-    writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), TYPE);
+    writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), PARAMS.type);
     if (writer->write_count == 0) {
         tDLogE("MqStreamServer::onWriterAsync() Write error: {} nodes", _nodes.size());
 
@@ -357,7 +357,7 @@ static Buffer & __get_read_buffer(Stream * stream, MqType type)
 binf MqStreamServer::onNodeAlloc(Stream * node, std::size_t suggested_size)
 {
     assert(THREAD_ID == std::this_thread::get_id());
-    return libtbag::uvpp::defaultOnAlloc(__get_read_buffer(node, TYPE), suggested_size);
+    return libtbag::uvpp::defaultOnAlloc(__get_read_buffer(node, PARAMS.type), suggested_size);
 }
 
 template <typename NodeT>
@@ -402,7 +402,7 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
         return;
     }
 
-    auto & error_count = __get_read_error_count(node, TYPE);
+    auto & error_count = __get_read_error_count(node, PARAMS.type);
     if (code != Err::E_SUCCESS) {
         ++error_count;
         tDLogE("MqStreamServer::onNodeRead() Read error: {} ({}/{})",
@@ -415,7 +415,7 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
 
     assert(code == Err::E_SUCCESS);
     error_count = 0;
-    auto & remaining_read = __read_buffer(node, buffer, size, TYPE);
+    auto & remaining_read = __read_buffer(node, buffer, size, PARAMS.type);
 
     std::size_t computed_size = 0;
     auto const PARSE_CODE = _packer.parseAndUpdate(remaining_read, &computed_size);
@@ -477,10 +477,10 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
     assert(loop != nullptr);
 
     SharedStream stream;
-    if (TYPE == MqType::MT_PIPE) {
+    if (PARAMS.type == MqType::MT_PIPE) {
         stream = loop->newHandle<PipeNode>(*loop, this);
     } else {
-        assert(TYPE == MqType::MT_TCP);
+        assert(PARAMS.type == MqType::MT_TCP);
         stream = loop->newHandle<TcpNode>(*loop, this);
     }
     assert(static_cast<bool>(stream));
@@ -489,7 +489,7 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
     auto const ACCEPT_CODE = server->accept(*stream);
     assert(ACCEPT_CODE == Err::E_SUCCESS);
 
-    if (TYPE == MqType::MT_TCP && !PARAMS.accept_ip_regex.empty()) {
+    if (PARAMS.type == MqType::MT_TCP && !PARAMS.accept_ip_regex.empty()) {
         auto * tcp = (TcpNode*)stream.get();
         auto const PEER_IP = tcp->getPeerIp();
         if (!std::regex_match(PEER_IP, std::regex(PARAMS.accept_ip_regex))) {
@@ -506,10 +506,10 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
     assert(INSERT_RESULT);
 
     std::string peer_info;
-    if (TYPE == MqType::MT_PIPE) {
+    if (PARAMS.type == MqType::MT_PIPE) {
         //peer_info = ((PipeNode*)stream.get())->getPeerName();
         peer_info = ((PipeNode*)stream.get())->getSockName();
-    } else if (TYPE == MqType::MT_TCP) {
+    } else if (PARAMS.type == MqType::MT_TCP) {
         peer_info = ((TcpNode*)stream.get())->getPeerIp();
         peer_info += ':';
         peer_info += libtbag::string::toString(((TcpNode*)stream.get())->getPeerPort());
