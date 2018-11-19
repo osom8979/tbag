@@ -92,26 +92,18 @@ public:
     using Uri           = libtbag::network::Uri;
     using MsgPacket     = libtbag::proto::MsgPacket;
 
-public:
-    enum class RequestState
-    {
-        RS_WAITING,
-        RS_ASYNC,
-        RS_REQUESTING,
-    };
-
 private:
     struct Writer : public Async
     {
         MqStreamServer * parent = nullptr;
 
-        RequestState  state;
-        std::size_t   write_count;
-        AsyncMsgQueue queue;
+        MqRequestState state;
+        std::size_t    write_count;
+        AsyncMsgQueue  queue;
 
         Writer(Loop & loop, MqStreamServer * p)
                 : Async(loop), parent(p),
-                  state(RequestState::RS_WAITING),
+                  state(MqRequestState::MRS_WAITING),
                   write_count(0), queue()
         { assert(parent != nullptr); }
 
@@ -119,7 +111,7 @@ private:
         { /* EMPTY. */ }
 
         inline bool isWaiting() const TBAG_NOEXCEPT
-        { return state == RequestState::RS_WAITING; }
+        { return state == MqRequestState::MRS_WAITING; }
 
         virtual void onAsync() override
         { parent->onWriterAsync(this); }

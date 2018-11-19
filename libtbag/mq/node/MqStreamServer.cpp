@@ -98,10 +98,10 @@ MqStreamServer::AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     if (msg->event == MqEvent::ME_MSG) {
         _writer->queue.push(AsyncMsgPointer(msg));
 
-        if (_writer->state == RequestState::RS_WAITING) {
+        if (_writer->state == MqRequestState::MRS_WAITING) {
             auto const CODE = _writer->send();
             assert(isSuccess(CODE));
-            _writer->state = RequestState::RS_ASYNC;
+            _writer->state = MqRequestState::MRS_ASYNC;
         }
         return AfterAction::AA_DELAY;
     }
@@ -233,8 +233,8 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     assert(THREAD_ID == std::this_thread::get_id());
     assert(writer != nullptr);
     assert(writer->queue.empty());
-    assert(writer->state == RequestState::RS_ASYNC);
-    writer->state = RequestState::RS_REQUESTING;
+    assert(writer->state == MqRequestState::MRS_ASYNC);
+    writer->state = MqRequestState::MRS_REQUESTING;
 
     auto msg_pointer = writer->queue.front();
     assert(static_cast<bool>(msg_pointer));
@@ -252,11 +252,11 @@ void MqStreamServer::onWriterAsync(Writer * writer)
         assert(isSuccess(CODE));
 
         if (writer->queue.empty()) {
-            writer->state = RequestState::RS_WAITING;
+            writer->state = MqRequestState::MRS_WAITING;
         } else {
             auto const CODE = writer->send();
             assert(isSuccess(CODE));
-            writer->state = RequestState::RS_ASYNC;
+            writer->state = MqRequestState::MRS_ASYNC;
         }
     }
 }
@@ -317,7 +317,7 @@ void MqStreamServer::onNodeWrite(Stream * node, WriteRequest & request, Err code
     assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_writer));
     assert(!_writer->queue.empty());
-    assert(_writer->state == RequestState::RS_REQUESTING);
+    assert(_writer->state == MqRequestState::MRS_REQUESTING);
 
     if (_writer->write_count > 0) {
         (_writer->write_count)--;
@@ -331,11 +331,11 @@ void MqStreamServer::onNodeWrite(Stream * node, WriteRequest & request, Err code
     assert(isSuccess(CODE));
 
     if (_writer->queue.empty()) {
-        _writer->state = RequestState::RS_WAITING;
+        _writer->state = MqRequestState::MRS_WAITING;
     } else {
         auto const CODE = _writer->send();
         assert(isSuccess(CODE));
-        _writer->state = RequestState::RS_ASYNC;
+        _writer->state = MqRequestState::MRS_ASYNC;
     }
 }
 
