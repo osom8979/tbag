@@ -69,11 +69,11 @@ PacketGenerator::String PacketGenerator::makeDefaultColor(LogMsgPacket const & p
     if (level <= EMERGENCY_SEVERITY) {
         ss << tces::DISPLAY_ATTRIBUTE_BG_RED << tces::DISPLAY_ATTRIBUTE_FG_CYAN;
     } else if (level <= ALERT_SEVERITY) {
-        ss << tces::DISPLAY_ATTRIBUTE_FG_RED;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_MAGENTA;
     } else if (level <= CRITICAL_SEVERITY) {
         ss << tces::DISPLAY_ATTRIBUTE_FG_RED;
     } else if (level <= ERROR_SEVERITY) {
-        ss << tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
+        ss << tces::DISPLAY_ATTRIBUTE_FG_RED;
     } else if (level <= WARNING_SEVERITY) {
         ss << tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
     } else if (level <= NOTICE_SEVERITY) {
