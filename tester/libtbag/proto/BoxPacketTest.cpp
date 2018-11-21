@@ -47,7 +47,7 @@ TEST(BoxPacketTest, UpdateSelf_DataSlice)
     std::copy(BUILD_BUFFER.begin(), BUILD_BUFFER.end(), extend_buffer.begin());
 
     std::size_t computed_size = 0;
-    ASSERT_EQ(Err::E_PARSING, packet.parse(extend_buffer.data(), BUFFER_SIZE - 1, &computed_size));
+    ASSERT_EQ(Err::E_VERIFIER, packet.parse(extend_buffer.data(), BUFFER_SIZE - 1, &computed_size));
     ASSERT_EQ(Err::E_SUCCESS, packet.parse(extend_buffer.data(), BUFFER_SIZE + 0, &computed_size));
     ASSERT_EQ(BUFFER_SIZE, computed_size);
 
