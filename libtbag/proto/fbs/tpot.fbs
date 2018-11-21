@@ -15,8 +15,8 @@ enum ResultCode : int
 /// Tpot(libtbag) protocol version.
 struct Version
 {
-    major : uint = 0;
-    minor : uint = 1;
+    major_ver : uint = 0;
+    minor_ver : uint = 1;
 }
 
 // ------

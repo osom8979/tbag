@@ -507,7 +507,7 @@ protected:
     void onVersionResponse(tpot::Header const * header, tpot::VersionResponse const * packet, void * arg)
     {
         assert(_parent != nullptr);
-        util::Version const VERSION(packet->version()->major(), packet->version()->minor());
+        util::Version const VERSION(packet->version()->major_ver(), packet->version()->minor_ver());
         _parent->onVersionResponse(createHeader(header), VERSION, createPairs(packet->features()), arg);
     }
 
