@@ -26,19 +26,9 @@ TEST(MqNodeTest, Bind)
     ASSERT_EQ(Err::E_SUCCESS, node.bind(PIPE_PATH));
 }
 
-//TEST(MqNodeTest, Connect_Release)
-//{
-//    tttDir_Automatic_Pipe();
-//    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get();
-//
-//    MqNode node;
-//    ASSERT_EQ(Err::E_SUCCESS, node.connect(PIPE_PATH));
-//}
-
-TEST(MqNodeTest, BindAndConnection)
+TEST(MqNodeTest, ClientRel_ServerRel)
 {
     // Client release -> Server release!
-
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
@@ -53,17 +43,16 @@ TEST(MqNodeTest, BindAndConnection)
     server.reset();
 }
 
-TEST(MqNodeTest, BindAndConnection2)
+TEST(MqNodeTest, ServerRel_ClientRel)
 {
     // Server release -> Client release!
-
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
     auto server = std::make_unique<MqNode>();
     auto client = std::make_unique<MqNode>();
 
-    //libtbag::log::SeverityGuard guard;
+    libtbag::log::SeverityGuard guard;
     ASSERT_EQ(Err::E_SUCCESS, server->bind(PIPE_PATH));
     ASSERT_EQ(Err::E_SUCCESS, client->connect(PIPE_PATH));
 

@@ -126,6 +126,8 @@ private:
 
         virtual void onTimer() override
         { parent->onCloseTimer(this); }
+        virtual void onClose() override
+        { parent->onCloseTimerClose(this); }
     };
 
     template <typename _BaseT>
@@ -147,6 +149,8 @@ private:
         virtual ~Node()
         { /* EMPTY. */ }
 
+        virtual void onShutdown(ShutdownRequest & request, Err code) override
+        { parent->onNodeShutdown(this, request, code); }
         virtual void onWrite(WriteRequest & request, Err code) override
         { parent->onNodeWrite(this, request, code); }
         virtual binf onAlloc(std::size_t suggested_size) override
@@ -214,14 +218,15 @@ public:
 
 private:
     Err shutdown(Stream * stream);
-    std::size_t shutdown();
-
     void close(Stream * stream);
-    void close();
+
+private:
+    std::size_t shutdownNodes();
+    std::size_t closeNodes();
 
 private:
     void shutdownAndClose();
-    void tearDown();
+    void tearDown(bool on_message);
 
 private:
     virtual void onCloseMsgDone() override;
@@ -245,12 +250,14 @@ private:
 
 private:
     void onCloseTimer(CloseTimer * timer);
+    void onCloseTimerClose(CloseTimer * timer);
 
 private:
-    void onNodeWrite(Stream * node, WriteRequest & request, Err code);
-    binf onNodeAlloc(Stream * node, std::size_t suggested_size);
-    void onNodeRead (Stream * node, Err code, char const * buffer, std::size_t size);
-    void onNodeClose(Stream * node);
+    void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
+    void onNodeWrite   (Stream * node, WriteRequest & request, Err code);
+    binf onNodeAlloc   (Stream * node, std::size_t suggested_size);
+    void onNodeRead    (Stream * node, Err code, char const * buffer, std::size_t size);
+    void onNodeClose   (Stream * node);
 
 private:
     void onServerConnection(Stream * server, Err code);

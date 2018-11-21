@@ -67,6 +67,8 @@ public:
 
 public:
     MqMode const MODE;
+    MqType const TYPE;
+    bool const VERBOSE;
 
 private:
     MqNode * _parent;
@@ -81,8 +83,8 @@ private:
 
 public:
     Impl(MqNode * parent, MqParams const & params, MqMode mode)
-            : MODE(mode), _parent(parent),
-              _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
+            : MODE(mode), TYPE(params.type), VERBOSE(params.verbose),
+              _parent(parent), _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         assert(MODE != MqMode::MM_NONE);
         if (!_pool.waitPush([&](){ init(params, mode); })) {
@@ -98,8 +100,11 @@ public:
         if (MODE == MqMode::MM_CONNECT && params.wait_on_connection_timeout_millisec > 0) {
             auto const BEGIN_TIME = std::chrono::system_clock::now();
             auto const TIMEOUT = std::chrono::milliseconds(params.wait_on_connection_timeout_millisec);
+
+            tDLogIfI(VERBOSE, "MqNode::Impl::Impl() Waiting connection ...");
             while (_mq->state() == MqMachineState::MMS_INITIALIZED) {
                 if (std::chrono::system_clock::now() - BEGIN_TIME >= TIMEOUT) {
+                    tDLogIfW(params.verbose, "MqNode::Impl::Impl() Connection timeout.");
                     break;
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -109,9 +114,33 @@ public:
 
     ~Impl()
     {
-        _mq->send(MqMsg(MqEvent::ME_CLOSE));
-        _pool.exit();
+        using namespace libtbag::mq::details;
+
+        char const * const TYPE_NAME = getTypeName(TYPE);
+        char const * const MODE_NAME = getModeName(MODE);
+
+        auto const CODE = _mq->send(MqMsg(MqEvent::ME_CLOSE));
+        if (isSuccess(CODE)) {
+            tDLogIfD(VERBOSE, "MqNode::Impl::~Impl({}/{}) Send a close message.",
+                     TYPE_NAME, MODE_NAME);
+        } else {
+            tDLogIfW(VERBOSE, "MqNode::Impl::~Impl({}/{}) Failed to send close-message: {}",
+                     TYPE_NAME, MODE_NAME, CODE);
+        }
+
+        bool const PUSH_RESULT = _pool.push([&](){
+            _mq.reset();
+            _pool.exit();
+        });
+        if (!PUSH_RESULT) {
+            tDLogE("MqNode::Impl::~Impl({}/{}) Task push failed.", TYPE_NAME, MODE_NAME);
+            _mq.reset();
+            _pool.exit();
+        }
+
+        tDLogIfI(VERBOSE, "MqNode::Impl::~Impl({}/{}) Wait for Pool to exit.", TYPE_NAME, MODE_NAME);
         _pool.join();
+        tDLogIfI(VERBOSE, "MqNode::Impl::~Impl({}/{}) Done.", TYPE_NAME, MODE_NAME);
     }
 
 public:
@@ -127,14 +156,20 @@ public:
 
     void runner()
     {
-        tDLogI("MqNode::Impl::runner() Loop start");
+        using namespace libtbag::mq::details;
+        auto const PARAMS = _mq->params();
+        tDLogIfI(PARAMS.verbose, "MqNode::Impl::runner({}/{}) Loop start",
+                 getTypeName(PARAMS.type), getModeName(MODE));
+
         _last = _loop.run();
+
         if (isSuccess(_last)) {
-            tDLogI("MqNode::Impl::runner() Loop end success.");
+            tDLogIfI(PARAMS.verbose, "MqNode::Impl::runner({}/{}) Loop end success.",
+                     getTypeName(PARAMS.type), getModeName(MODE));
         } else {
-            tDLogE("MqNode::Impl::runner() Loop end error: {}", _last);
+            tDLogE("MqNode::Impl::runner({}/{}) Loop end error: {}",
+                   _last, getTypeName(PARAMS.type), getModeName(MODE));
         }
-        _mq.reset();
     }
 
 public:

@@ -49,7 +49,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
     assert(_writer->isInit());
 
     if (PARAMS.type == MqType::MT_PIPE) {
-        if (!libtbag::filesystem::Path(params.address).exists()) {
+        if (libtbag::filesystem::Path(params.address).exists()) {
             tDLogE("MqStreamServer::MqStreamServer() Exists named pipe: {}", params.address);
             throw ErrException(Err::E_EEXIST);
         }
@@ -103,7 +103,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
 
 MqStreamServer::~MqStreamServer()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
+    // EMPTY.
 }
 
 template <typename NodeT>
@@ -125,7 +125,16 @@ Err MqStreamServer::shutdown(Stream * stream)
     }
 }
 
-std::size_t MqStreamServer::shutdown()
+void MqStreamServer::close(Stream * stream)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(stream != nullptr);
+    if (!stream->isClosing()) {
+        stream->close();
+    }
+}
+
+std::size_t MqStreamServer::shutdownNodes()
 {
     assert(THREAD_ID == std::this_thread::get_id());
     std::size_t success_count = 0;
@@ -137,28 +146,22 @@ std::size_t MqStreamServer::shutdown()
     return success_count;
 }
 
-void MqStreamServer::close(Stream * stream)
+std::size_t MqStreamServer::closeNodes()
 {
     assert(THREAD_ID == std::this_thread::get_id());
-    assert(stream != nullptr);
-    if (!stream->isClosing()) {
-        stream->close();
-    }
-}
-
-void MqStreamServer::close()
-{
-    assert(THREAD_ID == std::this_thread::get_id());
+    std::size_t count = 0;
     for (auto node : _nodes) {
         close(node.get());
+        ++count;
     }
+    return count;
 }
 
 void MqStreamServer::shutdownAndClose()
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(_writer->queue.empty());
-    std::size_t const SHUTDOWN_COUNT = shutdown();
+    std::size_t const SHUTDOWN_COUNT = shutdownNodes();
 
     if (SHUTDOWN_COUNT == _nodes.size()) {
         tDLogIfD(PARAMS.verbose,
@@ -181,7 +184,7 @@ void MqStreamServer::shutdownAndClose()
     assert(isSuccess(START_CODE));
 }
 
-void MqStreamServer::tearDown()
+void MqStreamServer::tearDown(bool on_message)
 {
     assert(THREAD_ID == std::this_thread::get_id());
 
@@ -203,9 +206,15 @@ void MqStreamServer::tearDown()
     // From this moment on, there is no send-queue producer.
     assert(_sending == 0);
     assert(static_cast<bool>(_writer));
-    auto const ACTIVE_SEND_SIZE = getInaccurateSizeOfActive() - 1/*Subtract the current message*/;
 
-    if (ACTIVE_SEND_SIZE > 0 || _writer->state != MqRequestState::MRS_WAITING) {
+    std::size_t active_send_size = getInaccurateSizeOfActive();
+    if (on_message) {
+        assert(active_send_size >= 1);
+        // Subtract the current message.
+        --active_send_size;
+    }
+
+    if (active_send_size > 0 || _writer->state != MqRequestState::MRS_WAITING) {
         // Clear any remaining transmission queues and continue with system shutdown.
         tDLogI("MqStreamServer::tearDown() Delay the shutdown request ...");
         _state = MqMachineState::MMS_DELAY_CLOSING;
@@ -287,7 +296,8 @@ AfterAction MqStreamServer::onMsgEvent(AsyncMsg * msg)
 void MqStreamServer::onCloseEvent()
 {
     assert(THREAD_ID == std::this_thread::get_id());
-    tearDown();
+    tDLogI("MqStreamServer::onCloseEvent() Close message confirmed.");
+    tearDown(true);
 }
 
 void MqStreamServer::afterProcessMessage(AsyncMsg * msg)
@@ -395,8 +405,27 @@ void MqStreamServer::onCloseTimer(CloseTimer * timer)
     using namespace libtbag::mq::details;
     assert(isClosingState(_state));
 
-    closeAsyncMsgs();
     timer->close();
+    closeNodes();
+    closeAsyncMsgs();
+}
+
+void MqStreamServer::onCloseTimerClose(CloseTimer * timer)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(timer != nullptr);
+    tDLogIfD(PARAMS.verbose, "MqStreamServer::onCloseTimerClose() Close timer.");
+}
+
+void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Err code)
+{
+    assert(THREAD_ID == std::this_thread::get_id());
+    assert(node != nullptr);
+    if (isSuccess(code)) {
+        tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeShutdown() Shutdown success.");
+    } else {
+        tDLogE("MqStreamServer::onNodeShutdown() Shutdown error: {}", code);
+    }
 }
 
 void MqStreamServer::onNodeWrite(Stream * node, WriteRequest & request, Err code)
@@ -605,7 +634,7 @@ void MqStreamServer::onServerClose(Stream * server)
     using namespace libtbag::mq::details;
     assert(isClosingState(_state));
 
-    tDLogI("MqStreamServer::onServerClose() Close this client!");
+    tDLogI("MqStreamServer::onServerClose() Close this server!");
 
     // Last closing point.
     _state = MqMachineState::MMS_CLOSED;

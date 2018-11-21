@@ -131,6 +131,8 @@ private:
 
         virtual void onTimer() override
         { parent->onCloseTimer(this); }
+        virtual void onClose() override
+        { parent->onCloseTimerClose(this); }
     };
 
     template <typename _BaseT>
@@ -149,6 +151,8 @@ private:
 
         virtual void onConnect(ConnectRequest & request, Err code) override
         { parent->onConnect(request, code); }
+        virtual void onShutdown(ShutdownRequest & request, Err code) override
+        { parent->onShutdown(request, code); }
         virtual void onWrite(WriteRequest & request, Err code) override
         { parent->onWrite(request, code); }
         virtual binf onAlloc(std::size_t suggested_size) override
@@ -202,7 +206,7 @@ private:
 
 private:
     void shutdownAndClose();
-    void tearDown();
+    void tearDown(bool on_message);
 
 private:
     virtual void onCloseMsgDone() override;
@@ -221,13 +225,15 @@ private:
 
 private:
     void onCloseTimer(CloseTimer * timer);
+    void onCloseTimerClose(CloseTimer * timer);
 
 private:
-    void onConnect(ConnectRequest & request, Err code);
-    void onWrite  (WriteRequest & request, Err code);
-    binf onAlloc  (std::size_t suggested_size);
-    void onRead   (Err code, char const * buffer, std::size_t size);
-    void onClose  ();
+    void onConnect (ConnectRequest & request, Err code);
+    void onShutdown(ShutdownRequest & request, Err code);
+    void onWrite   (WriteRequest & request, Err code);
+    binf onAlloc   (std::size_t suggested_size);
+    void onRead    (Err code, char const * buffer, std::size_t size);
+    void onClose   ();
 
 public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override
