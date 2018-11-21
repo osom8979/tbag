@@ -221,15 +221,17 @@ Err MsgPacketParser::parse(char const * buffer, std::size_t size, MqMsg * msg, s
     using namespace libtbag::proto::fbs::msg;
 
     Verifier verifier((uint8_t const *)buffer, size);
-    if (!VerifyMsgPacketBuffer(verifier)) {
-        return Err::E_PARSING;
-    }
+    auto const VERIFY_RESULT = VerifyMsgPacketBuffer(verifier);
 
 #if defined(FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE)
     if (computed_size != nullptr) {
         *computed_size = verifier.GetComputedSize();
     }
 #endif
+
+    if (!VERIFY_RESULT) {
+        return Err::E_VERIFIER;
+    }
 
     if (msg != nullptr) {
         auto const * PACKET = GetMsgPacket(buffer);

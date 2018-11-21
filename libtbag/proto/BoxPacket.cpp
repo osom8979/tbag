@@ -362,15 +362,17 @@ public:
         assert(_parent != nullptr);
 
         Verifier verifier((uint8_t const *)buffer, size);
-        if (!VerifyBoxPacketBuffer(verifier)) {
-            return std::make_pair(Err::E_PARSING, 0U);
-        }
+        auto const VERIFY_RESULT = VerifyBoxPacketBuffer(verifier);
 
 #if defined(FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE)
         std::size_t const COMPUTED_SIZE = verifier.GetComputedSize();
 #else
-        std::size_t const COMPUTED_SIZE = 0;
+        std::size_t const COMPUTED_SIZE = 0U;
 #endif
+
+        if (!VERIFY_RESULT) {
+            return std::make_pair(Err::E_VERIFIER, COMPUTED_SIZE);
+        }
 
         auto const * PACKET = GetBoxPacket(buffer);
         _parent->onHeader(PACKET->id(), PACKET->type(), PACKET->code(), arg);
@@ -399,8 +401,8 @@ public:
             }
 
             if (!VerifyAnyArr(verifier, itr->val(), VAL_TYPE)) {
-                // Use 'Verifier error' to distinguish it from 'Parsing error' at the top.
-                return std::make_pair(Err::E_VERIFIER, COMPUTED_SIZE);
+                // Use 'Parsing error' to distinguish it from 'Verifier error' at the top.
+                return std::make_pair(Err::E_PARSING, COMPUTED_SIZE);
             }
 
             _parent->onPair(std::string(itr->key()->str()), createBagEx(itr, VAL_TYPE), arg);
