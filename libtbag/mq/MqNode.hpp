@@ -105,6 +105,9 @@ public:
     }
 
 public:
+    static MqParams getParams(std::string const & uri);
+
+public:
     Err bind(MqParams const & params);
     Err bind(std::string const & uri);
 
@@ -117,6 +120,9 @@ public:
 
 public:
     Err send(MqMsg const & msg);
+    Err send(char const * buffer, std::size_t size);
+
+public:
     Err recv(MqMsg & msg);
 
 public:

@@ -267,6 +267,7 @@ void MqStreamClient::afterProcessMessage(AsyncMsg * msg)
         auto const CODE = _writer->send();
         assert(isSuccess(CODE));
         _writer->state = MqRequestState::MRS_ASYNC;
+        tDLogIfD(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Async next message ...");
         return;
     }
 
@@ -274,7 +275,10 @@ void MqStreamClient::afterProcessMessage(AsyncMsg * msg)
 
     // If the shutdown is delayed, proceed with it.
     if (_state == MqMachineState::MMS_DELAY_CLOSING) {
+        tDLogIfI(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Async next message ...");
         shutdownAndClose();
+    } else {
+        tDLogIfD(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Waiting for messages ...");
     }
 }
 
@@ -401,6 +405,12 @@ void MqStreamClient::onWrite(WriteRequest & request, Err code)
     using namespace libtbag::mq::details;
     assert(isActiveState(_state) || isClosingState(_state));
 
+    if (isSuccess(code)) {
+        tDLogIfD(PARAMS.verbose, "MqStreamClient::onWrite() Write success.");
+    } else {
+        tDLogE("MqStreamClient::onWrite() Write error: {}", code);
+    }
+
     afterProcessMessage(_writer->queue.front().get());
 }
 
@@ -443,24 +453,52 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
     _read_error_count = 0;
     _remaining_read.insert(_remaining_read.end(), buffer, buffer + size);
 
-    std::size_t computed_size = 0;
-    auto const PARSE_CODE = _packer.parseAndUpdate(_remaining_read, &computed_size);
-    if (isFailure(PARSE_CODE)) {
-        // Skip... (maybe no error)
-        return;
-    }
+    std::size_t const REMAINING_SIZE = _remaining_read.size();
+    std::size_t computed_total = 0;
+    std::size_t computed_size  = 0;
 
-    assert(computed_size <= _remaining_read.size());
-    _remaining_read.erase(_remaining_read.begin(), _remaining_read.begin() + computed_size);
+    Err parse_code;
+    Err enqueue_code;
 
-    auto const ENQUEUE_CODE = _receives.enqueue(_packer.msg());
-    if (isFailure(ENQUEUE_CODE)) {
-        tDLogE("MqStreamClient::onRead() Enqueue error: {}", ENQUEUE_CODE);
-        return;
+    while (true) {
+        parse_code = _packer.parseAndUpdate(_remaining_read.data() + computed_total,
+                                            REMAINING_SIZE - computed_total,
+                                            &computed_size);
+        if (isSuccess(parse_code)) {
+            assert(0 < COMPARE_AND(computed_size) <= _remaining_read.size());
+            computed_total += computed_size;
+            tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Remaining size: {}",
+                     REMAINING_SIZE - computed_total);
+        } else {
+            assert(parse_code == Err::E_VERIFIER);
+            if (computed_size) {
+                tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Verify error "
+                         "(remaining size: {}, Required size: {})",
+                         REMAINING_SIZE - computed_total, computed_size);
+            } else {
+                tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Verify error "
+                         "(remaining size: {})", REMAINING_SIZE - computed_total);
+            }
+            break;
+        }
+
+        enqueue_code = _receives.enqueue(_packer.msg());
+        if (isSuccess(enqueue_code)) {
+            tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Enqueue success.");
+        } else {
+            tDLogE("MqStreamClient::onRead() Enqueue error: {}", enqueue_code);
+            break;
+        }
     }
 
     // [DONE] All processes succeeded.
-    assert(isSuccess(ENQUEUE_CODE));
+    if (computed_total >= 1) {
+        _remaining_read.erase(_remaining_read.begin(),
+                              _remaining_read.begin() + computed_total);
+    }
+
+    tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Remaining size: {}",
+             _remaining_read.size());
 }
 
 void MqStreamClient::onClose()

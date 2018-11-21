@@ -95,7 +95,7 @@ public:
             throw std::bad_alloc();
         }
 
-        // [CLIENT ONLY]
+        // [CONNECT(CLIENT) ONLY]
         // Wait until connection is completed.
         if (MODE == MqMode::MM_CONNECT && params.wait_on_connection_timeout_millisec > 0) {
             auto const BEGIN_TIME = std::chrono::system_clock::now();
@@ -239,6 +239,11 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
     }
 }
 
+MqNode::MqParams MqNode::getParams(std::string const & uri)
+{
+    return libtbag::mq::details::convertUriToParams(uri);
+}
+
 Err MqNode::bind(MqParams const & params)
 {
     try {
@@ -251,7 +256,7 @@ Err MqNode::bind(MqParams const & params)
 
 Err MqNode::bind(std::string const & uri)
 {
-    return bind(libtbag::mq::details::convertUriToParams(uri));
+    return bind(getParams(uri));
 }
 
 Err MqNode::connect(MqParams const & params)
@@ -266,7 +271,7 @@ Err MqNode::connect(MqParams const & params)
 
 Err MqNode::connect(std::string const & uri)
 {
-    return connect(libtbag::mq::details::convertUriToParams(uri));
+    return connect(getParams(uri));
 }
 
 Err MqNode::close()
@@ -281,6 +286,11 @@ Err MqNode::send(MqMsg const & msg)
         return Err::E_NREADY;
     }
     return _impl->send(msg);
+}
+
+Err MqNode::send(char const * buffer, std::size_t size)
+{
+    return send(MqMsg(buffer, size));
 }
 
 Err MqNode::recv(MqMsg & msg)

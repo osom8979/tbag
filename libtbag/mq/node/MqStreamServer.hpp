@@ -236,11 +236,6 @@ private:
     AfterAction onMsgEvent(AsyncMsg * msg);
     void onCloseEvent();
 
-//private:
-//    Err closeServer();
-//    Err closeNode(Stream * node);
-//    std::size_t closeNodes();
-
 private:
     void afterProcessMessage(AsyncMsg * msg);
 

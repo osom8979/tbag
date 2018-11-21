@@ -199,6 +199,8 @@ struct MqMsg
     { /* EMPTY. */ }
     MqMsg(Value const * d, std::size_t s) : event(MqEvent::ME_MSG), buffer(d, d + s)
     { /* EMPTY. */ }
+    MqMsg(std::string const & str) : event(MqEvent::ME_MSG), buffer(str.begin(), str.end())
+    { /* EMPTY. */ }
 
     MqMsg(MqMsg const & obj) : event(obj.event), buffer(obj.buffer)
     { /* EMPTY. */ }
