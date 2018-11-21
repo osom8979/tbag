@@ -119,14 +119,13 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hinstDLL,
                     _In_ DWORD     fdwReason,
                     _In_ LPVOID    lpvReserved)
 {
-    bool result = false;
     switch (fdwReason) {
-    case DLL_PROCESS_ATTACH: result = ::libtbag::setUp();    break;
-    case DLL_PROCESS_DETACH: result = ::libtbag::tearDown(); break;
-    case DLL_THREAD_ATTACH:  result = ::libtbag::setUp();    break;
-    case DLL_THREAD_DETACH:  result = ::libtbag::tearDown(); break;
+    case DLL_PROCESS_ATTACH: break;
+    case DLL_PROCESS_DETACH: break;
+    case DLL_THREAD_ATTACH:  break;
+    case DLL_THREAD_DETACH:  break;
     }
-    return (result == true ? TRUE : FALSE);
+    return TRUE;
 }
 #endif // defined(TBAG_PLATFORM_WINDOWS)
 
