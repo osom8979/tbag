@@ -110,10 +110,8 @@ public:
     ~Impl()
     {
         _mq->send(MqMsg(MqEvent::ME_CLOSE));
-        _pool.waitPush([&](){
-            _pool.exit();
-            _mq.reset();
-        });
+        _pool.exit();
+        _pool.join();
     }
 
 public:
@@ -136,6 +134,7 @@ public:
         } else {
             tDLogE("MqNode::Impl::runner() Loop end error: {}", _last);
         }
+        _mq.reset();
     }
 
 public:

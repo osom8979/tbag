@@ -140,6 +140,7 @@ private:
      *  It must be accessed only from the loop thread.
      */
     SharedAsyncMsgs __messages__;
+    std::size_t     __closed_messages__;
 
 private:
     UniqueQueue _ready;
@@ -170,6 +171,12 @@ public:
 
 protected:
     virtual AfterAction onMsg(AsyncMsg * msg);
+
+protected:
+    /**
+     * All messages have been closed.
+     */
+    virtual void onCloseMsgDone();
 
 protected:
     /**

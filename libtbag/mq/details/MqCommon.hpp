@@ -112,29 +112,62 @@ inline char const * const getRequestStateName(MqRequestState state) TBAG_NOEXCEP
 
 enum class MqMachineState
 {
-    MMS_OPENING,          ///< Construct begin.
-    MMS_INITIALIZED,      ///< Construct done.
-    MMS_CONNECTED,        ///< Socket connect.
-    MMS_ON_CLOSE_MSG,     ///< Obtain the close request message.
-    MMS_SHUTTING,         ///< Shutdown request.
-    MMS_DELAY_SHUTTING,   ///< Delay the shutdown request.
-    MMS_SHUTDOWN,         ///< onShutdown() done.
-    MMS_CLOSING,          ///< Close request.
-    MMS_CLOSED,           ///< onClose() done.
+    MMS_NONE,
+
+    /**
+     * Construct done.
+     *
+     * @remarks
+     *  The server skips this state and immediately goes to the ACTIVE state.
+     */
+    MMS_INITIALIZED,
+
+    /**
+     * Active machine state.
+     *
+     * @remarks
+     *  - client: The socket is connect state.
+     *  - server: The socket is bind state.
+     */
+    MMS_ACTIVE,
+
+    MMS_CLOSING,        ///< Obtain the close request message.
+    MMS_DELAY_CLOSING,  ///< Delay the close request.
+    MMS_CLOSED,         ///< Close is done.
 };
 
 inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEPT
 {
     switch (state) {
-    case MqMachineState::MMS_OPENING:         return "OPENING";
-    case MqMachineState::MMS_INITIALIZED:     return "INITIALIZED";
-    case MqMachineState::MMS_CONNECTED:       return "CONNECTED";
-    case MqMachineState::MMS_SHUTTING:        return "SHUTTING";
-    case MqMachineState::MMS_DELAY_SHUTTING:  return "DELAY_SHUTTING";
-    case MqMachineState::MMS_SHUTDOWN:        return "SHUTDOWN";
-    case MqMachineState::MMS_CLOSED:          return "CLOSED";
-    default:                                  return "UNKNOWN";
+    case MqMachineState::MMS_NONE:          return "NONE";
+    case MqMachineState::MMS_INITIALIZED:   return "INITIALIZED";
+    case MqMachineState::MMS_ACTIVE:        return "ACTIVE";
+    case MqMachineState::MMS_CLOSING:       return "CLOSING";
+    case MqMachineState::MMS_DELAY_CLOSING: return "DELAY_CLOSING";
+    case MqMachineState::MMS_CLOSED:        return "CLOSED";
+    default:                                return "UNKNOWN";
     }
+}
+
+inline bool isActiveState(MqMachineState state) TBAG_NOEXCEPT
+{
+    return (state == MqMachineState::MMS_ACTIVE);
+}
+
+inline bool isInactiveState(MqMachineState state) TBAG_NOEXCEPT
+{
+    return !isActiveState(state);
+}
+
+inline bool isClosingState(MqMachineState state) TBAG_NOEXCEPT
+{
+    return (state == MqMachineState::MMS_CLOSING ||
+            state == MqMachineState::MMS_DELAY_CLOSING);
+}
+
+inline bool isCloseState(MqMachineState state) TBAG_NOEXCEPT
+{
+    return (isClosingState(state) || state == MqMachineState::MMS_CLOSED);
 }
 
 /**

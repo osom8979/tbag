@@ -131,8 +131,6 @@ private:
 
         virtual void onTimer() override
         { parent->onCloseTimer(this); }
-        virtual void onClose() override
-        { parent->onCloseTimerClose(this); }
     };
 
     template <typename _BaseT>
@@ -151,8 +149,6 @@ private:
 
         virtual void onConnect(ConnectRequest & request, Err code) override
         { parent->onConnect(request, code); }
-        virtual void onShutdown(ShutdownRequest & request, Err code) override
-        { parent->onShutdown(request, code); }
         virtual void onWrite(WriteRequest & request, Err code) override
         { parent->onWrite(request, code); }
         virtual binf onAlloc(std::size_t suggested_size) override
@@ -168,16 +164,15 @@ public:
     using PipeClient = Client<Pipe>;
 
 public:
-    using SharedWriter = std::shared_ptr<Writer>;
-
+    using SharedStream     = std::shared_ptr<Stream>;
+    using SharedWriter     = std::shared_ptr<Writer>;
     using SharedTcpClient  = std::shared_ptr<TcpClient>;
     using SharedPipeClient = std::shared_ptr<PipeClient>;
 
 public:
-    using SharedStream  = std::shared_ptr<Stream>;
-    using ThreadId      = std::thread::id;
-    using AtomicState   = std::atomic<MqMachineState>;
-    using AtomicInt     = std::atomic_int;
+    using ThreadId    = std::thread::id;
+    using AtomicState = std::atomic<MqMachineState>;
+    using AtomicInt   = std::atomic_int;
 
 public:
     MqParams const PARAMS;
@@ -186,7 +181,7 @@ private:
     SharedStream _client;
     SharedWriter _writer;
     MsgPacket    _packer;
-    MqQueue      _recv_queue;
+    MqQueue      _receives;
 
 private:
     std::size_t _read_error_count;
@@ -195,10 +190,7 @@ private:
 
 private:
     AtomicState _state;
-    AtomicInt   _now_sending;
-
-private:
-    std::size_t _closed_async_messages_count;
+    AtomicInt   _sending;
 
 public:
     MqStreamClient(Loop & loop, MqParams const & params);
@@ -209,13 +201,16 @@ private:
     void close();
 
 private:
-    virtual void onAsyncMsg(AsyncMsg * async) override;
-    virtual void onCloseMsg(AsyncMsg * async) override;
+    void shutdownAndClose();
+    void tearDown();
+
+private:
+    virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
 private:
     AfterAction onMsgEvent(AsyncMsg * msg);
-    void onCloseEvent(AsyncMsg * msg);
+    void onCloseEvent();
 
 private:
     void afterProcessMessage(AsyncMsg * msg);
@@ -225,16 +220,14 @@ private:
     void onWriterClose(Writer * writer);
 
 private:
-    void onCloseTimer     (CloseTimer * timer);
-    void onCloseTimerClose(CloseTimer * timer);
+    void onCloseTimer(CloseTimer * timer);
 
 private:
-    void onConnect (ConnectRequest & request, Err code);
-    void onShutdown(ShutdownRequest & request, Err code);
-    void onWrite   (WriteRequest & request, Err code);
-    binf onAlloc   (std::size_t suggested_size);
-    void onRead    (Err code, char const * buffer, std::size_t size);
-    void onClose   ();
+    void onConnect(ConnectRequest & request, Err code);
+    void onWrite  (WriteRequest & request, Err code);
+    binf onAlloc  (std::size_t suggested_size);
+    void onRead   (Err code, char const * buffer, std::size_t size);
+    void onClose  ();
 
 public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override

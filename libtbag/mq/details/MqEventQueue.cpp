@@ -17,7 +17,9 @@ namespace mq      {
 namespace details {
 
 MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
-        : THREAD_ID(std::this_thread::get_id()), QUEUE_SIZE(BoundedMpMcQueue::calcMinimumQueueSize(size))
+        : THREAD_ID(std::this_thread::get_id()),
+          QUEUE_SIZE(BoundedMpMcQueue::calcMinimumQueueSize(size)),
+          __messages__(), __closed_messages__(0)
 {
     _ready = std::make_unique<BoundedMpMcQueue>(QUEUE_SIZE);
     assert(static_cast<bool>(_ready));
@@ -59,6 +61,12 @@ void MqEventQueue::onCloseMsg(AsyncMsg * async)
 {
     assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
+
+    ++__closed_messages__;
+    assert(__closed_messages__ <= QUEUE_SIZE);
+    if (__closed_messages__ == QUEUE_SIZE) {
+        onCloseMsgDone();
+    }
 }
 
 void MqEventQueue::closeAsyncMsgs()
@@ -138,6 +146,11 @@ MqEventQueue::AfterAction MqEventQueue::onMsg(AsyncMsg * msg)
     assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
     return AfterAction::AA_OK;
+}
+
+void MqEventQueue::onCloseMsgDone()
+{
+    assert(THREAD_ID == std::this_thread::get_id());
 }
 
 Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool verify)

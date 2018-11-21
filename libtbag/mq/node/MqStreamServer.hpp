@@ -87,8 +87,6 @@ public:
     using AfterAction     = MqEventQueue::AfterAction;
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
-    using AtomicState     = std::atomic<MqMachineState>;
-    using AtomicInt       = std::atomic_int;
 
     using SocketAddress = libtbag::network::SocketAddress;
     using Uri           = libtbag::network::Uri;
@@ -120,22 +118,14 @@ private:
     struct CloseTimer : public Timer
     {
         MqStreamServer * parent = nullptr;
-        Stream * stream = nullptr;
 
-        CloseTimer(Loop & loop, MqStreamServer * p, Stream * s)
-                : Timer(loop), parent(p), stream(s)
-        {
-            assert(parent != nullptr);
-            assert(stream != nullptr);
-        }
-
+        CloseTimer(Loop & loop, MqStreamServer * p) : Timer(loop), parent(p)
+        { assert(parent != nullptr); }
         virtual ~CloseTimer()
         { /* EMPTY. */ }
 
         virtual void onTimer() override
         { parent->onCloseTimer(this); }
-        virtual void onClose() override
-        { parent->onCloseTimerClose(this); }
     };
 
     template <typename _BaseT>
@@ -157,8 +147,6 @@ private:
         virtual ~Node()
         { /* EMPTY. */ }
 
-        virtual void onShutdown(ShutdownRequest & request, Err code) override
-        { parent->onNodeShutdown(this, request, code); }
         virtual void onWrite(WriteRequest & request, Err code) override
         { parent->onNodeWrite(this, request, code); }
         virtual binf onAlloc(std::size_t suggested_size) override
@@ -186,26 +174,25 @@ private:
     };
 
 public:
-    using TcpNode  = Node<Tcp>;
-    using PipeNode = Node<Pipe>;
-
+    using TcpNode    = Node<Tcp>;
+    using PipeNode   = Node<Pipe>;
     using TcpServer  = Server<Tcp>;
     using PipeServer = Server<Pipe>;
 
 public:
-    using SharedWriter = std::shared_ptr<Writer>;
-
-    using SharedTcpNode  = std::shared_ptr<TcpNode>;
-    using SharedPipeNode = std::shared_ptr<PipeNode>;
-
+    using SharedStream     = std::shared_ptr<Stream>;
+    using SharedWriter     = std::shared_ptr<Writer>;
+    using SharedTcpNode    = std::shared_ptr<TcpNode>;
+    using SharedPipeNode   = std::shared_ptr<PipeNode>;
     using SharedTcpServer  = std::shared_ptr<TcpServer>;
     using SharedPipeServer = std::shared_ptr<PipeServer>;
 
 public:
     using StreamPointer = libtbag::container::Pointer<Stream>;
     using NodeSet       = std::unordered_set<StreamPointer, StreamPointer::Hash, StreamPointer::EqualTo>;
-    using SharedStream  = std::shared_ptr<Stream>;
     using ThreadId      = std::thread::id;
+    using AtomicState   = std::atomic<MqMachineState>;
+    using AtomicInt     = std::atomic_int;
 
 public:
     MqParams const PARAMS;
@@ -215,42 +202,63 @@ private:
     SharedWriter _writer;
     NodeSet      _nodes;
     MsgPacket    _packer;
-    MqQueue      _recv_queue;
+    MqQueue      _receives;
 
 private:
-    std::atomic_bool _closing_server;
+    AtomicState _state;
+    AtomicInt   _sending;
 
 public:
     MqStreamServer(Loop & loop, MqParams const & params);
     virtual ~MqStreamServer();
 
 private:
+    Err shutdown(Stream * stream);
+    std::size_t shutdown();
+
+    void close(Stream * stream);
+    void close();
+
+private:
+    void shutdownAndClose();
+    void tearDown();
+
+private:
+    virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
+private:
+    AfterAction onMsgEvent(AsyncMsg * msg);
     void onCloseEvent();
 
-    Err closeServer();
-    Err closeNode(Stream * node);
-    std::size_t closeNodes();
+//private:
+//    Err closeServer();
+//    Err closeNode(Stream * node);
+//    std::size_t closeNodes();
 
+private:
+    void afterProcessMessage(AsyncMsg * msg);
+
+private:
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
 
-    void onCloseTimer     (CloseTimer * timer);
-    void onCloseTimerClose(CloseTimer * timer);
+private:
+    void onCloseTimer(CloseTimer * timer);
 
-    void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
-    void onNodeWrite   (Stream * node, WriteRequest & request, Err code);
-    binf onNodeAlloc   (Stream * node, std::size_t suggested_size);
-    void onNodeRead    (Stream * node, Err code, char const * buffer, std::size_t size);
-    void onNodeClose   (Stream * node);
+private:
+    void onNodeWrite(Stream * node, WriteRequest & request, Err code);
+    binf onNodeAlloc(Stream * node, std::size_t suggested_size);
+    void onNodeRead (Stream * node, Err code, char const * buffer, std::size_t size);
+    void onNodeClose(Stream * node);
 
+private:
     void onServerConnection(Stream * server, Err code);
     void onServerClose     (Stream * server);
 
 public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override
-    { return MqMachineState::MMS_CLOSED; }
+    { return _state; }
 
     virtual MqParams params() const override
     { return PARAMS; }
@@ -259,6 +267,7 @@ public:
     virtual Err send(MqMsg const & msg) override;
     virtual Err recv(MqMsg & msg) override;
 
+public:
     virtual void recvWait(MqMsg & msg) override;
 };
 
