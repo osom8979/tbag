@@ -29,6 +29,11 @@ TEST(MqNodeTest, Bind)
 
 TEST(MqNodeTest, ClientRel_ServerRel)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test.\n";
+    return;
+#endif
+
     // Client release -> Server release!
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
@@ -46,6 +51,11 @@ TEST(MqNodeTest, ClientRel_ServerRel)
 
 TEST(MqNodeTest, ServerRel_ClientRel)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test.\n";
+    return;
+#endif
+
     // Server release -> Client release!
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
@@ -63,6 +73,11 @@ TEST(MqNodeTest, ServerRel_ClientRel)
 
 TEST(MqNodeTest, ClientToServerMessage)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test.\n";
+    return;
+#endif
+
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
@@ -100,6 +115,11 @@ TEST(MqNodeTest, ClientToServerMessage)
 
 TEST(MqNodeTest, ServerToClientMessage)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test.\n";
+    return;
+#endif
+
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
@@ -137,6 +157,11 @@ TEST(MqNodeTest, ServerToClientMessage)
 
 TEST(MqNodeTest, SendAndClose1)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test.\n";
+    return;
+#endif
+
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
@@ -155,6 +180,11 @@ TEST(MqNodeTest, SendAndClose1)
 
 TEST(MqNodeTest, SendAndClose2)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test.\n";
+    return;
+#endif
+
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
@@ -173,6 +203,11 @@ TEST(MqNodeTest, SendAndClose2)
 
 TEST(MqNodeTest, MultiClient)
 {
+#if defined(TBAG_PLATFORM_WINDOWS)
+    std::cout << "Skip this test.\n";
+    return;
+#endif
+
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
