@@ -636,7 +636,7 @@ macro (tbag_modules__apply_ext_sfml_ignore_gl_al)
                     -Wl,-framework,IOKit
                     -Wl,-framework,Carbon)
         else ()
-            # TODO: Linux
+            list (APPEND TBAG_PROJECT_LDFLAGS -lX11 -lXrandr -ludev)
         endif ()
     endif ()
 
