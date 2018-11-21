@@ -148,6 +148,10 @@ public:
     std::_Exit(code)
 #endif
 
+#ifndef _TBAG_DEFAULT_SKIP_STACK_SIZE
+#define _TBAG_DEFAULT_SKIP_STACK_SIZE 7
+#endif
+
 #ifndef _TBAG_DEFAULT_SIGNAL_HANDLER
 #define _TBAG_DEFAULT_SIGNAL_HANDLER(cls, msg)                              \
     struct cls : public ::libtbag::signal::SignalHandler {                  \
@@ -156,7 +160,7 @@ public:
         virtual ~cls() { }                                                  \
         virtual void run(int signal) override {                             \
             auto sname  = ::libtbag::signal::getSignalName(signal);         \
-            auto strace = ::libtbag::debug::getStackTraceString();          \
+            auto strace = ::libtbag::debug::getStackTraceString(_TBAG_DEFAULT_SKIP_STACK_SIZE); \
             if (_logger.empty()) {                                          \
                 using namespace libtbag::signal;                            \
                 if (signal == TBAG_SIGNAL_ABORT) {                          \
