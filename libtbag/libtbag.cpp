@@ -105,12 +105,12 @@ NAMESPACE_LIBTBAG_CLOSE
 
 static void TBAG_CONSTRUCTOR __tbag_constructor(void)
 {
-    ::libtbag::setUp();
+    // ::libtbag::setUp();
 }
 
 static void TBAG_DESTRUCTOR __tbag_destructor(void)
 {
-    ::libtbag::tearDown();
+    // ::libtbag::tearDown();
 }
 
 #if defined(TBAG_PLATFORM_WINDOWS)
