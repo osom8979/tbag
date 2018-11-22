@@ -43,6 +43,7 @@ class TBAG_API ThreadPool : private Noncopyable
 {
 public:
     struct ThreadPimpl;
+    friend struct ThreadPimpl;
 
 public:
     TBAG_CONSTEXPR static unsigned long const WAIT_INFINITE_TIMEOUT = 0;
@@ -56,15 +57,15 @@ public:
     using SharedTask = std::shared_ptr<Task>;
     using TaskQueue = std::queue<SharedTask>;
 
-    using Mutex  = libtbag::lock::UvLock;
-    using Signal = libtbag::lock::UvCondition;
+    using Mutex     = libtbag::lock::UvLock;
+    using Condition = libtbag::lock::UvCondition;
 
 private:
     mutable Mutex _mutex;
 
     bool        _exit;
     std::size_t _active;
-    Signal      _signal;
+    Condition   _condition;
 
     ThreadGroup _threads;
     TaskQueue   _task;
@@ -73,11 +74,11 @@ private:
     std::exception_ptr _exception;
 
 public:
-    ThreadPool(std::size_t size = 1U, bool wait_active = true);
+    ThreadPool(std::size_t size = 1U, bool wait_active = true, bool signal_handing = true);
     ~ThreadPool();
 
 private:
-    bool createThreads(std::size_t size, bool wait_active = true);
+    bool createThreads(std::size_t size, bool wait_active, bool signal_handing);
     void runner(std::size_t index);
 
 public:
@@ -88,6 +89,7 @@ public:
 
 public:
     void join(bool rethrow = true);
+    void rethrowIfExists();
 
 public:
     bool isEmptyOfThreads() const;
@@ -99,9 +101,12 @@ public:
 
     std::thread::id getThreadId(int i) const;
 
-public:
+protected:
     virtual void setUp   () { /* EMPTY. */ }
     virtual void tearDown() { /* EMPTY. */ }
+
+protected:
+    virtual void signal(int signum);
 
 public:
     bool waitPush(Task const & task)

@@ -194,3 +194,15 @@ TEST(ThreadPoolTest, ThreadId)
     ASSERT_NE(ID1, ID2);
 }
 
+#if 0
+TEST(ThreadPoolTest, SIGSEGV_AND_EXIT)
+{
+    ThreadPool pool;
+    pool.push([&](){
+        int * test = (int*)(0x9999999999);
+        *test = 100000;
+    });
+    ASSERT_NO_THROW(pool.join(false));
+}
+#endif
+

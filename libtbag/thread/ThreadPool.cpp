@@ -6,8 +6,11 @@
  */
 
 #include <libtbag/thread/ThreadPool.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/thread/ThreadLocalStorage.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/debug/StackTrace.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 #include <atomic>
@@ -33,14 +36,25 @@ namespace thread {
 struct ThreadPool::ThreadPimpl
 {
 public:
+    using Tls = libtbag::thread::ThreadLocalStorage;
+
+public:
+    static Tls pimpl_pointer;
+
+public:
     std::size_t const INDEX;
+    bool const SIGNAL_HANDING;
+
+public:
     ThreadPool * parent;
     uv_thread_t  thread;
 
     std::atomic_bool  active;
     std::thread::id   id;
 
-    ThreadPimpl(ThreadPool * p, std::size_t i) : parent(p), INDEX(i), active(false)
+public:
+    ThreadPimpl(ThreadPool * p, std::size_t i, bool s)
+            : INDEX(i), SIGNAL_HANDING(s), parent(p), active(false)
     {
         assert(parent != nullptr);
         int const ERROR_CODE = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
@@ -63,11 +77,21 @@ public:
 private:
     static void globalCallback(void * arg)
     {
-        ThreadPool::ThreadPimpl * thread = static_cast<ThreadPool::ThreadPimpl*>(arg);
+        ThreadPimpl * thread = static_cast<ThreadPimpl*>(arg);
         assert(thread != nullptr);
         assert(thread->parent != nullptr);
 
+        if (thread->SIGNAL_HANDING) {
+            using namespace libtbag::signal;
+            std::signal(TBAG_SIGNAL_ILLEGAL_INSTRUCTION, signalDispatcher);
+            std::signal(TBAG_SIGNAL_FLOATING_POINT_EXCEPTION, signalDispatcher);
+            std::signal(TBAG_SIGNAL_SEGMENTATION_VIOLATION, signalDispatcher);
+            std::signal(TBAG_SIGNAL_TERMINATION, signalDispatcher);
+            std::signal(TBAG_SIGNAL_ABORT, signalDispatcher);
+        }
+
         // Initialize.
+        thread->pimpl_pointer.set(thread);
         thread->id = std::this_thread::get_id();
         thread->active = true;
 
@@ -79,15 +103,26 @@ private:
         // Cleanup.
         thread->active = false;
     }
+
+    static void signalDispatcher(int signum)
+    {
+        ThreadPimpl * thread = pimpl_pointer.cast<ThreadPimpl>();
+        assert(thread != nullptr);
+        assert(thread->parent != nullptr);
+        thread->parent->signal(signum);
+    }
 };
+
+ThreadPool::ThreadPimpl::Tls ThreadPool::ThreadPimpl::pimpl_pointer;
 
 // --------------------------
 // ThreadPool implementation.
 // --------------------------
 
-ThreadPool::ThreadPool(std::size_t size, bool wait_active) : _exit(false), _active(0)
+ThreadPool::ThreadPool(std::size_t size, bool wait_active, bool signal_handing)
+        : _exit(false), _active(0)
 {
-    if (createThreads(size, wait_active) == false) {
+    if (!createThreads(size, wait_active, signal_handing)) {
         throw std::bad_alloc();
     }
 }
@@ -98,7 +133,7 @@ ThreadPool::~ThreadPool()
     _threads.clear();
 }
 
-bool ThreadPool::createThreads(std::size_t size, bool wait_active)
+bool ThreadPool::createThreads(std::size_t size, bool wait_active, bool signal_handing)
 {
     bool result = true;
 
@@ -107,19 +142,19 @@ bool ThreadPool::createThreads(std::size_t size, bool wait_active)
         _threads.resize(size);
 
         for (std::size_t i = 0; i < size; ++i) {
-            _threads[i] = SharedThread(new (std::nothrow) ThreadPimpl(this, i));
-            if (static_cast<bool>(_threads[i]) == false) {
+            _threads[i] = SharedThread(new (std::nothrow) ThreadPimpl(this, i, signal_handing));
+            if (!_threads[i]) {
                 result = false;
                 break;
             }
         }
 
-        if (result == false) {
+        if (!result) {
             tDLogE("ThreadPool::createThreads({}) ThreadPimpl constructor error.", size);
             _threads.clear();
             _exit = true;
         }
-        _signal.broadcast();
+        _condition.broadcast();
     } else {
         tDLogE("ThreadPool::createThreads({}) IllegalArgumentException: pool size is 0.", size);
     }
@@ -160,11 +195,11 @@ void ThreadPool::runner(std::size_t index)
     SharedTask current_task;
     std::exception_ptr exception;
 
-    while (is_exit == false) {
+    while (!is_exit) {
         // WAIT SIGNAL LOOP.
         _mutex.lock();
-        while (_exit == false && _task.empty()) {
-            _signal.wait(_mutex);
+        while (!_exit && _task.empty()) {
+            _condition.wait(_mutex);
         }
         _mutex.unlock();
 
@@ -219,7 +254,7 @@ void ThreadPool::runner(std::size_t index)
 void ThreadPool::clear()
 {
     _mutex.lock();
-    if (_task.empty() == false) {
+    if (!_task.empty()) {
         _task.pop();
     }
     _mutex.unlock();
@@ -229,7 +264,7 @@ void ThreadPool::exit()
 {
     _mutex.lock();
     _exit = true;
-    _signal.broadcast();
+    _condition.broadcast();
     _mutex.unlock();
 }
 
@@ -246,11 +281,11 @@ bool ThreadPool::push(Task const & task)
 {
     bool result = false;
     _mutex.lock();
-    if (_exit == false) {
+    if (!_exit) {
         _task.push(SharedTask(new Task(task)));
         result = true;
     }
-    _signal.signal();
+    _condition.signal();
     _mutex.unlock();
     return result;
 }
@@ -263,18 +298,23 @@ void ThreadPool::join(bool rethrow)
     }
 
     if (rethrow) {
-        std::exception_ptr exception;
+        rethrowIfExists();
+    }
+}
 
-        _mutex.lock();
-        if (_exception) {
-            exception = _exception;
-            _exception = std::exception_ptr();
-        }
-        _mutex.unlock();
+void ThreadPool::rethrowIfExists()
+{
+    std::exception_ptr exception;
 
-        if (exception) {
-            std::rethrow_exception(exception);
-        }
+    _mutex.lock();
+    if (_exception) {
+        exception = _exception;
+        _exception = std::exception_ptr();
+    }
+    _mutex.unlock();
+
+    if (exception) {
+        std::rethrow_exception(exception);
     }
 }
 
@@ -328,10 +368,22 @@ std::thread::id ThreadPool::getThreadId(int i) const
     return id;
 }
 
+void ThreadPool::signal(int signum)
+{
+    using namespace libtbag::signal;
+    using namespace libtbag::debug;
+    if (existSignalNumber(signum)) {
+        tDLogA("ThreadPool::signal({}) Signal catch!\n{}", getSignalName(signum), getStackTraceString());
+    } else {
+        tDLogA("ThreadPool::signal({}) Signal catch!\n{}", signum, getStackTraceString());
+    }
+    exitForce(signum);
+}
+
 bool ThreadPool::waitTask(ThreadPool & pool, Task const & task)
 {
-    Mutex  mutex;
-    Signal signal;
+    Mutex mutex;
+    Condition signal;
 
     bool result   = false;
     bool task_end = false;
