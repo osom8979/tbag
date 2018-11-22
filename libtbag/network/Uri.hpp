@@ -202,6 +202,10 @@ public:
 // Static methods.
 public:
     static std::string getFieldString(std::string const & original, FieldInfo const & info);
+
+public:
+    static std::string encodePercent(std::string const & text);
+    static std::string decodePercent(std::string const & text);
 };
 
 /**

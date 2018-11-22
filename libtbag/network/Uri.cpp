@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/network/Uri.hpp>
+#include <libtbag/codec/PercentEncoding.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/bitwise/BitFlags.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
@@ -402,6 +403,16 @@ std::map<std::string, std::string> Uri::getQueryMap() const
 std::string Uri::getFieldString(std::string const & original, FieldInfo const & info)
 {
     return original.substr(info.offset, info.length);
+}
+
+std::string Uri::encodePercent(std::string const & text)
+{
+    return libtbag::codec::encodePercent(text);
+}
+
+std::string Uri::decodePercent(std::string const & text)
+{
+    return libtbag::codec::decodePercent(text);
 }
 
 // *****************************************
