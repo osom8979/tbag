@@ -321,6 +321,11 @@ bool Uri::parse(std::string const & uri, bool is_connect)
     return true;
 }
 
+bool Uri::encodeParse(std::string const & uri, bool is_connect)
+{
+    return parse(encodePercent(uri), is_connect);
+}
+
 Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
 {
     if (isHost() == false) {
@@ -392,6 +397,16 @@ std::map<std::string, std::string> Uri::getQueryMap() const
             // Unknown case.
             break;
         }
+    }
+    return result;
+}
+
+std::map<std::string, std::string> Uri::decodeQueryMap() const
+{
+    std::map<std::string, std::string> result;
+    for (auto & cursor : getQueryMap()) {
+        result.insert(std::make_pair(decodePercent(cursor.first),
+                                     decodePercent(cursor.second)));
     }
     return result;
 }

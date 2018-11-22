@@ -169,6 +169,12 @@ public:
     std::string getUserinfo() const { return getFieldString(_uri, _userinfo); }
 
 public:
+    std::string decodePath    () const { return decodePercent(getPath    ()); }
+    std::string decodeQuery   () const { return decodePercent(getQuery   ()); }
+    std::string decodeFragment() const { return decodePercent(getFragment()); }
+    std::string decodeUserinfo() const { return decodePercent(getUserinfo()); }
+
+public:
     int getPortNumber() const;
     std::string getUrl() const;
     std::string getRequestPath() const;
@@ -176,11 +182,7 @@ public:
 public:
     void clear();
     bool parse(std::string const & uri, bool is_connect = false);
-
-// Alias methods.
-public:
-    inline bool set(std::string const & uri, bool is_connect = false)
-    { return parse(uri, is_connect); }
+    bool encodeParse(std::string const & uri, bool is_connect = false);
 
 public:
     inline std::string getString() const { return _uri; }
@@ -198,6 +200,7 @@ public:
 // Extension methods.
 public:
     std::map<std::string, std::string> getQueryMap() const;
+    std::map<std::string, std::string> decodeQueryMap() const;
 
 // Static methods.
 public:
