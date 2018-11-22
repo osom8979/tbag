@@ -222,16 +222,6 @@ static void __std_terminate_dispatcher__()
 // Main methods.
 // -------------
 
-std::string getSignalName(int signal_number)
-{
-    switch (signal_number) {
-#define _TBAG_XX(name, signal, message) case TBAG_##name: return #signal;
-    TBAG_SIGNAL_MAP(_TBAG_XX)
-#undef _TBAG_XX
-    default: return std::to_string(signal_number);
-    }
-}
-
 void registerStdTerminateHandler(SignalHandler * handler, int order)
 {
     using Observable = __impl::SignalObservable;

@@ -59,6 +59,26 @@ TBAG_CONSTEXPR int const SIGNAL_STD_TERMINATE = INT_MAX; // C++ terminate signal
 TBAG_CONSTEXPR int const FIRST_ORDER = INT_MAX;
 TBAG_CONSTEXPR int const LAST_ORDER  = INT_MIN;
 
+inline bool existSignalNumber(int signal_number) TBAG_NOEXCEPT
+{
+    switch (signal_number) {
+#define _TBAG_XX(name, signal, message) case TBAG_##name: return true;
+    TBAG_SIGNAL_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return false;
+    }
+}
+
+inline char const * const getSignalName(int signal_number) TBAG_NOEXCEPT
+{
+    switch (signal_number) {
+#define _TBAG_XX(name, signal, message) case TBAG_##name: return #signal;
+    TBAG_SIGNAL_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return "UNKNOWN";
+    }
+}
+
 /**
  * Signal handler interface.
  *
@@ -113,8 +133,6 @@ public:
  * @date   2017-07-14
  */
 using FuncSignalHandler = FunctionalSignalHandler;
-
-TBAG_API std::string getSignalName(int signal_number);
 
 TBAG_API void registerStdTerminateHandler(SignalHandler * handler, int order = 0);
 TBAG_API void registerStdTerminateFunctionalHandler(SignalCallback const & cb, int order = 0);
