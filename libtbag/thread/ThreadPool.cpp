@@ -13,7 +13,6 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
-#include <atomic>
 #include <exception>
 #include <chrono>
 #include <uv.h>
@@ -120,7 +119,7 @@ ThreadPool::ThreadPimpl::Tls ThreadPool::ThreadPimpl::pimpl_pointer;
 // --------------------------
 
 ThreadPool::ThreadPool(std::size_t size, bool wait_active, bool signal_handing)
-        : _exit(false), _active(0)
+        : _exit(false), _active(0), handling_exceptions_in_destructors(true)
 {
     if (!createThreads(size, wait_active, signal_handing)) {
         throw std::bad_alloc();
@@ -131,6 +130,10 @@ ThreadPool::~ThreadPool()
 {
     exit();
     _threads.clear();
+
+    if (handling_exceptions_in_destructors) {
+        rethrowIfExists();
+    }
 }
 
 bool ThreadPool::createThreads(std::size_t size, bool wait_active, bool signal_handing)

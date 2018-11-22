@@ -23,6 +23,7 @@
 #include <memory>
 #include <vector>
 #include <queue>
+#include <atomic>
 #include <exception>
 #include <stdexcept>
 #include <thread>
@@ -74,7 +75,12 @@ private:
     std::exception_ptr _exception;
 
 public:
-    ThreadPool(std::size_t size = 1U, bool wait_active = true, bool signal_handing = true);
+    std::atomic_bool handling_exceptions_in_destructors;
+
+public:
+    ThreadPool(std::size_t size = 1U,
+               bool wait_active = true,
+               bool signal_handing = true);
     ~ThreadPool();
 
 private:
