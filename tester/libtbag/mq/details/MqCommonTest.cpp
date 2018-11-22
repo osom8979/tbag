@@ -13,6 +13,18 @@ using namespace libtbag;
 using namespace libtbag::mq;
 using namespace libtbag::mq::details;
 
+TEST(MqCommonTest, AppendLocalhost)
+{
+    std::string const TEST1   = "pIpE://\\\\.\\pipe\\temp";
+    std::string const RESULT1 = "pIpE://localhost/\\\\.\\pipe\\temp";
+
+    std::string const TEST2   = "pIpE://";
+    std::string const RESULT2 = "pIpE://localhost/";
+
+    ASSERT_EQ(RESULT1, __append_localhost_if_pipe_schema(TEST1));
+    ASSERT_EQ(RESULT2, __append_localhost_if_pipe_schema(TEST2));
+}
+
 TEST(MqCommonTest, ConvertUriToParams)
 {
     auto const PARAMS1 = convertUriToParams("tcp://192.168.0.1:9999?read_error=10&verify_msg=true");
@@ -22,7 +34,7 @@ TEST(MqCommonTest, ConvertUriToParams)
     ASSERT_EQ(10, PARAMS1.continuous_read_error_count);
     ASSERT_TRUE(PARAMS1.verify_restore_message);
 
-    auto const PARAMS2 = convertUriToParams("pipe:////./pipe/test?tcp_ipv6=true&send_msg=5", true);
+    auto const PARAMS2 = convertUriToParams("pipe://\\\\.\\pipe\\test?tcp_ipv6=true&send_msg=5");
     ASSERT_STREQ("\\\\.\\pipe\\test", PARAMS2.address.c_str());
     ASSERT_EQ(MqType::MT_PIPE, PARAMS2.type);
     ASSERT_TRUE(PARAMS2.tcp_ipv6_only);
