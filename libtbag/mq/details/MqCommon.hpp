@@ -454,7 +454,14 @@ struct MqInterface
 // Miscellaneous utilities
 // -----------------------
 
-TBAG_API MqParams convertUriToParams(std::string const & uri_string, bool convert_windows_path = false);
+/**
+ * @warning
+ *  If it is a PIPE schema, @n
+ *  you should clear the slash('/') after parsing.
+ */
+TBAG_API std::string __append_localhost_if_pipe_schema(std::string const & uri_string);
+
+TBAG_API MqParams convertUriToParams(std::string const & uri_string, bool auto_encode = true);
 
 } // namespace details
 } // namespace mq
