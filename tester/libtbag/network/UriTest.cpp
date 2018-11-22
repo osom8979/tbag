@@ -145,6 +145,28 @@ TEST(UriTest, QueryMap)
     ASSERT_STREQ("UTF-8", itr->second.c_str());
 }
 
+TEST(UriTest, EncodeDecode)
+{
+    std::string const ENCODED = "https://temp:pa%5Css@translate.google.co.kr:8080/a%5Ca/?h%20l=ko&temp=A%5CB#en/ko/Test%5CMessage";
+    std::string const DECODED = "https://temp:pa\\ss@translate.google.co.kr:8080/a\\a/?h l=ko&temp=A\\B#en/ko/Test\\Message";
+    ASSERT_EQ(ENCODED, Uri::encodePercent(DECODED));
+    ASSERT_EQ(DECODED, Uri::decodePercent(ENCODED));
+
+    Uri uri;
+    ASSERT_TRUE(uri.encodeParse(DECODED));
+    ASSERT_STREQ("https", uri.getSchema().c_str());
+    ASSERT_STREQ("temp:pa\\ss", uri.decodeUserinfo().c_str());
+    ASSERT_STREQ("translate.google.co.kr", uri.getHost().c_str());
+    ASSERT_STREQ("8080", uri.getPort().c_str());
+    ASSERT_STREQ("h l=ko&temp=A\\B", uri.decodeQuery().c_str());
+    ASSERT_STREQ("/a\\a/", uri.decodePath().c_str());
+    ASSERT_STREQ("en/ko/Test\\Message", uri.decodeFragment().c_str());
+
+    auto const QUERIES = uri.decodeQueryMap();
+    ASSERT_STREQ("ko", QUERIES.at("h l").c_str());
+    ASSERT_STREQ("A\\B", QUERIES.at("temp").c_str());
+}
+
 TEST(UriTest, DISABLE_HTTP_PARSER_URL_FIELDS)
 {
     __check_error__http_parser_url_fields();
