@@ -82,31 +82,11 @@ public:
 
 public:
     bool enqueue(void * key, void * value);
-    bool enqueueAndSignaling(void * key, void * value);
-    bool enqueueAndWaitSignaling(void * key, void * value);
-
-public:
     bool enqueue(void * value);
-    bool enqueueAndSignaling(void * value);
-    bool enqueueAndWaitSignaling(void * value);
 
 public:
     bool dequeue(void ** key, void ** value);
-    bool dequeueAndSignaling(void ** key, void ** value);
-    bool dequeueAndWaitSignaling(void ** key, void ** value);
-
-public:
     bool dequeue(void ** value);
-    bool dequeueAndSignaling(void ** value);
-    bool dequeueAndWaitSignaling(void ** value);
-
-public:
-    void dequeueWait(void ** key, void ** value);
-    void dequeueWait(void ** value);
-
-public:
-    void dequeueWaitTimeout(void ** key, void ** value, uint64_t wait_timeout_nano);
-    void dequeueWaitTimeout(void ** value, uint64_t wait_timeout_nano);
 
 protected:
     virtual void onCleanup(void * key, void * value);

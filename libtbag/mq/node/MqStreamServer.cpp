@@ -725,7 +725,7 @@ Err MqStreamServer::recv(MqMsg & msg)
 
 void MqStreamServer::recvWait(MqMsg & msg)
 {
-    _receives.dequeueWait(msg);
+    //_receives.dequeueWait(msg);
 }
 
 } // namespace node

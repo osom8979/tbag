@@ -20,10 +20,6 @@ extern "C" {
 #include <liblfds711.h>
 }
 
-#include <atomic>
-#include <libtbag/lock/UvLock.hpp>
-#include <libtbag/lock/UvCondition.hpp>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -147,67 +143,6 @@ public:
     }
 
 private:
-    struct {
-        libtbag::lock::UvLock       mutex;
-        libtbag::lock::UvCondition  signal;
-    } __wait_feature__;
-
-public:
-    bool enqueue_and_signaling(void * key, void * value)
-    {
-        bool const result = enqueue(key, value);
-        __wait_feature__.signal.signal();
-        return result;
-    }
-
-    bool enqueue_and_wait_signaling(void * key, void * value)
-    {
-        while (!__wait_feature__.mutex.tryLock()) {
-            // No-wait retry...
-        }
-        bool const result = enqueue(key, value);
-        __wait_feature__.signal.signal();
-        __wait_feature__.mutex.unlock();
-        return result;
-    }
-
-    bool dequeue_and_signaling(void ** key, void ** value)
-    {
-        bool const result = dequeue(key, value);
-        __wait_feature__.signal.broadcast();
-        return result;
-    }
-
-    bool dequeue_and_wait_signaling(void ** key, void ** value)
-    {
-        while (!__wait_feature__.mutex.tryLock()) {
-            // No-wait retry...
-        }
-        bool const result = dequeue(key, value);
-        __wait_feature__.signal.broadcast();
-        __wait_feature__.mutex.unlock();
-        return result;
-    }
-
-    void wait_dequeue(void ** key, void ** value)
-    {
-        __wait_feature__.mutex.lock();
-        while (!dequeue(key, value)) {
-            __wait_feature__.signal.wait(__wait_feature__.mutex);
-        }
-        __wait_feature__.mutex.unlock();
-    }
-
-    void wait_dequeue(void ** key, void ** value, uint64_t wait_timeout_nano)
-    {
-        __wait_feature__.mutex.lock();
-        while (!dequeue(key, value)) {
-            __wait_feature__.signal.wait(__wait_feature__.mutex, wait_timeout_nano);
-        }
-        __wait_feature__.mutex.unlock();
-    }
-
-private:
     static void __element_cleanup_cb__(State * state, void * key, void * value)
     {
         assert(state != nullptr);
@@ -266,34 +201,10 @@ bool BoundedMpMcQueue::enqueue(void * key, void * value)
     return _impl->enqueue(key, value);
 }
 
-bool BoundedMpMcQueue::enqueueAndSignaling(void * key, void * value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->enqueue_and_signaling(key, value);
-}
-
-bool BoundedMpMcQueue::enqueueAndWaitSignaling(void * key, void * value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->enqueue_and_wait_signaling(key, value);
-}
-
 bool BoundedMpMcQueue::enqueue(void * value)
 {
     assert(static_cast<bool>(_impl));
     return _impl->enqueue(nullptr, value);
-}
-
-bool BoundedMpMcQueue::enqueueAndSignaling(void * value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->enqueue_and_signaling(nullptr, value);
-}
-
-bool BoundedMpMcQueue::enqueueAndWaitSignaling(void * value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->enqueue_and_wait_signaling(nullptr, value);
 }
 
 bool BoundedMpMcQueue::dequeue(void ** key, void ** value)
@@ -302,58 +213,10 @@ bool BoundedMpMcQueue::dequeue(void ** key, void ** value)
     return _impl->dequeue(key, value);
 }
 
-bool BoundedMpMcQueue::dequeueAndSignaling(void ** key, void ** value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->dequeue_and_signaling(key, value);
-}
-
-bool BoundedMpMcQueue::dequeueAndWaitSignaling(void ** key, void ** value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->dequeue_and_wait_signaling(key, value);
-}
-
 bool BoundedMpMcQueue::dequeue(void ** value)
 {
     assert(static_cast<bool>(_impl));
     return _impl->dequeue(nullptr, value);
-}
-
-bool BoundedMpMcQueue::dequeueAndSignaling(void ** value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->dequeue_and_signaling(nullptr, value);
-}
-
-bool BoundedMpMcQueue::dequeueAndWaitSignaling(void ** value)
-{
-    assert(static_cast<bool>(_impl));
-    return _impl->dequeue_and_wait_signaling(nullptr, value);
-}
-
-void BoundedMpMcQueue::dequeueWait(void ** key, void ** value)
-{
-    assert(static_cast<bool>(_impl));
-    _impl->wait_dequeue(key, value);
-}
-
-void BoundedMpMcQueue::dequeueWait(void ** value)
-{
-    assert(static_cast<bool>(_impl));
-    _impl->wait_dequeue(nullptr, value);
-}
-
-void BoundedMpMcQueue::dequeueWaitTimeout(void ** key, void ** value, uint64_t wait_timeout_nano)
-{
-    assert(static_cast<bool>(_impl));
-    _impl->wait_dequeue(key, value, wait_timeout_nano);
-}
-
-void BoundedMpMcQueue::dequeueWaitTimeout(void ** value, uint64_t wait_timeout_nano)
-{
-    assert(static_cast<bool>(_impl));
-    _impl->wait_dequeue(nullptr, value, wait_timeout_nano);
 }
 
 void BoundedMpMcQueue::onCleanup(void * key, void * value)
