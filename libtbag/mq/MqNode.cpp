@@ -190,9 +190,9 @@ public:
         return _mq->recv(msg);
     }
 
-    void recvWait(MqMsg & msg)
+    Err recvWait(MqMsg & msg, uint64_t timeout_nano)
     {
-        return _mq->recvWait(msg);
+        return _mq->recvWait(msg, timeout_nano);
     }
 };
 
@@ -308,10 +308,10 @@ Err MqNode::recv(MqMsg & msg)
     return _impl->recv(msg);
 }
 
-void MqNode::recvWait(MqMsg & msg)
+Err MqNode::recvWait(MqMsg & msg, uint64_t timeout_nano)
 {
     assert(static_cast<bool>(_impl));
-    _impl->recvWait(msg);
+    return _impl->recvWait(msg, timeout_nano);
 }
 
 } // namespace mq

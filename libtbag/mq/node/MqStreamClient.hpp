@@ -22,6 +22,9 @@
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
 
+#include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
+
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Async.hpp>
@@ -57,6 +60,9 @@ class TBAG_API MqStreamClient : protected libtbag::mq::details::MqEventQueue,
                                 public    libtbag::mq::details::MqInterface
 {
 public:
+    using UvLock      = libtbag::lock::UvLock;
+    using UvCondition = libtbag::lock::UvCondition;
+
     using Loop   = libtbag::uvpp::Loop;
     using Stream = libtbag::uvpp::Stream;
     using Async  = libtbag::uvpp::Async;
@@ -187,7 +193,7 @@ private:
     SharedStream _client;
     SharedWriter _writer;
     MsgPacket    _packer;
-    MqQueue      _receives;
+    MqQueue      _receives; ///< Single-Producer, Many-consumer.
 
 private:
     std::size_t _read_error_count;
@@ -197,6 +203,10 @@ private:
 private:
     AtomicState _state;
     AtomicInt   _sending;
+
+private:
+    UvLock      _wait_lock;
+    UvCondition _wait_cond;
 
 public:
     MqStreamClient(Loop & loop, MqParams const & params, MqRecvCallback * cb);
@@ -249,7 +259,7 @@ public:
     virtual Err recv(MqMsg & msg) override;
 
 public:
-    virtual void recvWait(MqMsg & msg) override;
+    virtual Err recvWait(MqMsg & msg, uint64_t timeout_nano) override;
 };
 
 } // namespace node

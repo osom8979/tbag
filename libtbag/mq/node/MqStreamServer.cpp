@@ -10,6 +10,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
+#include <chrono>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -103,7 +104,10 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params, MqRecvCallb
 
 MqStreamServer::~MqStreamServer()
 {
-    // EMPTY.
+    _wait_lock.lock();
+    _state = MqMachineState::MMS_DESTROYING;
+    _wait_cond.broadcast();
+    _wait_lock.unlock();
 }
 
 template <typename NodeT>
@@ -584,7 +588,15 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
             assert(CALLBACK != nullptr);
             CALLBACK->onRecv(_packer.msg());
         } else {
-            enqueue_code = _receives.enqueue(_packer.msg());
+            COMMENT("Single-Producer recv-queue") {
+                while (!_wait_lock.tryLock()) {
+                    // Busy waiting...
+                }
+                enqueue_code = _receives.enqueue(_packer.msg());
+                _wait_cond.signal();
+                _wait_lock.unlock();
+            }
+
             if (isSuccess(enqueue_code)) {
                 tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Enqueue success.");
             } else {
@@ -723,9 +735,40 @@ Err MqStreamServer::recv(MqMsg & msg)
     return _receives.dequeue(msg);
 }
 
-void MqStreamServer::recvWait(MqMsg & msg)
+Err MqStreamServer::recvWait(MqMsg & msg, uint64_t timeout_nano)
 {
-    //_receives.dequeueWait(msg);
+    auto const BEGIN = std::chrono::system_clock::now();
+    auto const TIMEOUT = std::chrono::nanoseconds(timeout_nano);
+
+    Err code;
+
+    _wait_lock.lock();
+    while (true) {
+        code = _receives.dequeue(msg);
+        if (isSuccess(code)) {
+            assert(code == Err::E_SUCCESS);
+            break;
+        }
+
+        if (_state == MqMachineState::MMS_DESTROYING) {
+            code = Err::E_ECANCELED;
+            break;
+        }
+
+        if (timeout_nano == 0) {
+            _wait_cond.wait(_wait_lock);
+        } else {
+            using namespace std::chrono;
+            auto remaining_timeout_nano = TIMEOUT - (system_clock::now() - BEGIN);
+            _wait_cond.wait(_wait_lock, remaining_timeout_nano.count());
+            if ((system_clock::now() - BEGIN) >= TIMEOUT) {
+                code = Err::E_TIMEOUT;
+                break;
+            }
+        }
+    }
+    _wait_lock.unlock();
+    return code;
 }
 
 } // namespace node

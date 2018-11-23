@@ -127,7 +127,7 @@ public:
     Err recv(MqMsg & msg);
 
 public:
-    void recvWait(MqMsg & msg);
+    Err recvWait(MqMsg & msg, uint64_t timeout_nano = 0);
 };
 
 } // namespace mq
