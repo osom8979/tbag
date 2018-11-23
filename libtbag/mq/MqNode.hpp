@@ -39,9 +39,6 @@ public:
     friend struct Impl;
 
 public:
-    using SharedImpl = std::shared_ptr<Impl>;
-
-public:
     using MqEvent        = libtbag::mq::details::MqEvent;
     using MqType         = libtbag::mq::details::MqType;
     using MqRequestState = libtbag::mq::details::MqRequestState;
@@ -49,6 +46,9 @@ public:
     using MqMsg          = libtbag::mq::details::MqMsg;
     using MqMode         = libtbag::mq::details::MqMode;
     using MqParams       = libtbag::mq::details::MqParams;
+
+public:
+    using SharedImpl = std::shared_ptr<Impl>;
 
 private:
     SharedImpl _impl;
@@ -68,7 +68,8 @@ public:
     void swap(MqNode & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(MqNode & lh, MqNode & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(MqNode & lh, MqNode & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT

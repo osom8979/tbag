@@ -290,6 +290,14 @@ TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_BUILDER_SIZE     = 1 * 1024 * 1
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_CLOSE_MILLISEC   = 1 * 1000;        // Shutdown -> Close wait-timeout.
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_READ_ERROR_COUNT = 4;               // Max continuous read error count.
 
+/**
+ * Callback prototype for intercepting Receive events.
+ */
+using MqOnRecv = void(*)(MqMsg const & msg, void * user);
+
+/**
+ * User customizable option packs.
+ */
 struct MqParams
 {
     /**
@@ -315,7 +323,7 @@ struct MqParams
      */
     int port = 0;
 
-    /*
+    /**
      * Used with uv_tcp_bind, when an IPv6 address is used.
      *
      * @remarks
@@ -323,6 +331,14 @@ struct MqParams
      *  - pipe: unused.
      */
     bool tcp_ipv6_only = false;
+
+    /**
+     * Use the receive callback.
+     *
+     * @remarks
+     *  When this option is set, it no longer enqueues to the recv-queue.
+     */
+    MqOnRecv recv_cb = nullptr;
 
     /**
      * The maximum size of the queue for transmission.
@@ -417,6 +433,11 @@ struct MqParams
      */
     std::size_t shutdown_wait_nanosec = 1000;
 
+    /**
+     * Space for user-defined arbitrary data.
+     */
+    void * user = nullptr;
+
     MqParams()
     { /* EMPTY. */ }
 
@@ -441,13 +462,17 @@ TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
 struct MqInterface
 {
     virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
-
     virtual MqParams params() const = 0;
 
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;
 
     virtual void recvWait(MqMsg & msg) = 0;
+};
+
+struct MqRecvCallback
+{
+    virtual void onRecv(MqMsg const & msg) = 0;
 };
 
 // -----------------------

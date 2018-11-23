@@ -83,6 +83,7 @@ public:
     using MqEventQueue   = libtbag::mq::details::MqEventQueue;
     using MqQueue        = libtbag::mq::details::MqQueue;
     using MqParams       = libtbag::mq::details::MqParams;
+    using MqRecvCallback = libtbag::mq::details::MqRecvCallback;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
@@ -180,6 +181,7 @@ public:
 
 public:
     MqParams const PARAMS;
+    MqRecvCallback * const CALLBACK;
 
 private:
     SharedStream _client;
@@ -197,7 +199,7 @@ private:
     AtomicInt   _sending;
 
 public:
-    MqStreamClient(Loop & loop, MqParams const & params);
+    MqStreamClient(Loop & loop, MqParams const & params, MqRecvCallback * cb);
     virtual ~MqStreamClient();
 
 private:

@@ -27,9 +27,9 @@ using Buffer      = MqStreamServer::Buffer;
 using binf        = MqStreamServer::binf;
 using AfterAction = MqStreamServer::AfterAction;
 
-MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
+MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params, MqRecvCallback * cb)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          PARAMS(params), _server(), _nodes(), _packer(params.packer_size),
+          PARAMS(params), CALLBACK(cb), _server(), _nodes(), _packer(params.packer_size),
           _receives(params.recv_queue_size, params.recv_msg_size),
           _state(MqMachineState::MMS_NONE), _sending(0)
 {
@@ -580,12 +580,17 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
             break;
         }
 
-        enqueue_code = _receives.enqueue(_packer.msg());
-        if (isSuccess(enqueue_code)) {
-            tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Enqueue success.");
+        if (PARAMS.recv_cb != nullptr) {
+            assert(CALLBACK != nullptr);
+            CALLBACK->onRecv(_packer.msg());
         } else {
-            tDLogE("MqStreamServer::onNodeRead() Enqueue error: {}", enqueue_code);
-            break;
+            enqueue_code = _receives.enqueue(_packer.msg());
+            if (isSuccess(enqueue_code)) {
+                tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Enqueue success.");
+            } else {
+                tDLogE("MqStreamServer::onNodeRead() Enqueue error: {}", enqueue_code);
+                break;
+            }
         }
     }
 

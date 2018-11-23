@@ -39,7 +39,7 @@ namespace mq {
  * @author zer0
  * @date   2018-11-11
  */
-struct MqNode::Impl : private Noncopyable
+struct MqNode::Impl : public libtbag::mq::details::MqRecvCallback
 {
 public:
     using Uri  = libtbag::network::Uri;
@@ -51,6 +51,7 @@ public:
     using MqStreamServer = libtbag::mq::node::MqStreamServer;
 
 public:
+    using MqOnRecv    = libtbag::mq::details::MqOnRecv;
     using MqInterface = libtbag::mq::details::MqInterface;
     using SharedMq    = std::shared_ptr<MqInterface>;
 
@@ -66,9 +67,8 @@ public:
     TBAG_CONSTEXPR static std::size_t const THREAD_SIZE = 1U;
 
 public:
-    MqMode const MODE;
-    MqType const TYPE;
-    bool const VERBOSE;
+    MqMode   const MODE;
+    MqParams const PARAMS;
 
 private:
     MqNode * _parent;
@@ -83,8 +83,8 @@ private:
 
 public:
     Impl(MqNode * parent, MqParams const & params, MqMode mode)
-            : MODE(mode), TYPE(params.type), VERBOSE(params.verbose),
-              _parent(parent), _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
+            : MODE(mode), PARAMS(params), _parent(parent),
+              _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         assert(MODE != MqMode::MM_NONE);
         if (!_pool.waitPush([&](){ init(params, mode); })) {
@@ -101,7 +101,7 @@ public:
             auto const BEGIN_TIME = std::chrono::system_clock::now();
             auto const TIMEOUT = std::chrono::milliseconds(params.wait_on_connection_timeout_millisec);
 
-            tDLogIfI(VERBOSE, "MqNode::Impl::Impl() Waiting connection ...");
+            tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting connection ...");
             while (_mq->state() == MqMachineState::MMS_INITIALIZED) {
                 if (std::chrono::system_clock::now() - BEGIN_TIME >= TIMEOUT) {
                     tDLogIfW(params.verbose, "MqNode::Impl::Impl() Connection timeout.");
@@ -116,15 +116,15 @@ public:
     {
         using namespace libtbag::mq::details;
 
-        char const * const TYPE_NAME = getTypeName(TYPE);
+        char const * const TYPE_NAME = getTypeName(PARAMS.type);
         char const * const MODE_NAME = getModeName(MODE);
 
         auto const CODE = _mq->send(MqMsg(MqEvent::ME_CLOSE));
         if (isSuccess(CODE)) {
-            tDLogIfD(VERBOSE, "MqNode::Impl::~Impl({}/{}) Send a close message.",
+            tDLogIfD(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Send a close message.",
                      TYPE_NAME, MODE_NAME);
         } else {
-            tDLogIfW(VERBOSE, "MqNode::Impl::~Impl({}/{}) Failed to send close-message: {}",
+            tDLogIfW(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Failed to send close-message: {}",
                      TYPE_NAME, MODE_NAME, CODE);
         }
 
@@ -138,19 +138,19 @@ public:
             _pool.exit();
         }
 
-        tDLogIfI(VERBOSE, "MqNode::Impl::~Impl({}/{}) Wait for Pool to exit.", TYPE_NAME, MODE_NAME);
+        tDLogIfI(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Wait for Pool to exit.", TYPE_NAME, MODE_NAME);
         _pool.join();
-        tDLogIfI(VERBOSE, "MqNode::Impl::~Impl({}/{}) Done.", TYPE_NAME, MODE_NAME);
+        tDLogIfI(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Done.", TYPE_NAME, MODE_NAME);
     }
 
 public:
     void init(MqParams const & params, MqMode mode)
     {
         if (MODE == MqMode::MM_BIND) {
-            _mq = std::make_shared<MqStreamServer>(_loop, params);
+            _mq = std::make_shared<MqStreamServer>(_loop, params, this);
         } else {
             assert(MODE == MqMode::MM_CONNECT);
-            _mq = std::make_shared<MqStreamClient>(_loop, params);
+            _mq = std::make_shared<MqStreamClient>(_loop, params, this);
         }
     }
 
@@ -170,6 +170,13 @@ public:
             tDLogE("MqNode::Impl::runner({}/{}) Loop end error: {}",
                    _last, getTypeName(PARAMS.type), getModeName(MODE));
         }
+    }
+
+protected:
+    virtual void onRecv(MqMsg const & msg) override
+    {
+        assert(PARAMS.recv_cb != nullptr);
+        PARAMS.recv_cb(msg, PARAMS.user);
     }
 
 public:
