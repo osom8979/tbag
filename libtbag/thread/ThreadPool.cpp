@@ -58,7 +58,8 @@ public:
         assert(parent != nullptr);
         int const ERROR_CODE = ::uv_thread_create(&thread, &ThreadPimpl::globalCallback, this);
         if (ERROR_CODE != 0) {
-            tDLogE("ThreadPimpl::ThreadPimpl({}) error[{}] {}", INDEX, ERROR_CODE, getUvErrorName(ERROR_CODE));
+            tDLogE("ThreadPimpl::ThreadPimpl({}) error[{}] {}",
+                   INDEX, ERROR_CODE, ERROR_CODE);
             throw std::bad_alloc();
         }
     }
@@ -153,13 +154,15 @@ bool ThreadPool::createThreads(std::size_t size, bool wait_active, bool signal_h
         }
 
         if (!result) {
-            tDLogE("ThreadPool::createThreads({}) ThreadPimpl constructor error.", size);
+            tDLogE("ThreadPool::createThreads({}) "
+                   "ThreadPimpl constructor error.", size);
             _threads.clear();
             _exit = true;
         }
         _condition.broadcast();
     } else {
-        tDLogE("ThreadPool::createThreads({}) IllegalArgumentException: pool size is 0.", size);
+        tDLogE("ThreadPool::createThreads({}) "
+               "IllegalArgumentException: pool size is 0.", size);
     }
     _mutex.unlock();
 
@@ -167,7 +170,7 @@ bool ThreadPool::createThreads(std::size_t size, bool wait_active, bool signal_h
         std::size_t active_count = 0;
 
         auto const BEGIN   = std::chrono::system_clock::now();
-        auto const TIMEOUT = std::chrono::milliseconds(static_cast<unsigned long>(WAIT_TIMEOUT_MILLISEC));
+        auto const TIMEOUT = std::chrono::milliseconds(WAIT_TIMEOUT_MILLISEC);
 
         // Wait for all threads to become active.
         while (active_count != size) {
@@ -181,7 +184,8 @@ bool ThreadPool::createThreads(std::size_t size, bool wait_active, bool signal_h
             }
             _mutex.unlock();
 
-            if ((WAIT_TIMEOUT_MILLISEC > WAIT_INFINITE_TIMEOUT) && (std::chrono::system_clock::now() - BEGIN) >= TIMEOUT) {
+            using namespace std::chrono;
+            if ((WAIT_TIMEOUT_MILLISEC > WAIT_INFINITE_TIMEOUT) && (system_clock::now() - BEGIN) >= TIMEOUT) {
                 tDLogE("ThreadPool::createThreads({}) Active wait timeout.");
                 return false;
             }
@@ -223,7 +227,7 @@ void ThreadPool::runner(std::size_t index)
 
             if (find_task) {
                 try {
-                    if (static_cast<bool>(current_task) && static_cast<bool>(*current_task.get())) {
+                    if (current_task && *current_task.get()) {
                         (*current_task.get())();
                     }
                 } catch (...) {
@@ -376,9 +380,11 @@ void ThreadPool::signal(int signum)
     using namespace libtbag::signal;
     using namespace libtbag::debug;
     if (existSignalNumber(signum)) {
-        tDLogA("ThreadPool::signal({}) Signal catch!\n{}", getSignalName(signum), getStackTraceString());
+        tDLogA("ThreadPool::signal({}) Signal catch!\n{}",
+               getSignalName(signum), getStackTraceString());
     } else {
-        tDLogA("ThreadPool::signal({}) Signal catch!\n{}", signum, getStackTraceString());
+        tDLogA("ThreadPool::signal({}) Signal catch!\n{}",
+               signum, getStackTraceString());
     }
     exitForce(signum);
 }
