@@ -169,8 +169,10 @@ bool ThreadPool::createThreads(std::size_t size, bool wait_active, bool signal_h
     if (result && wait_active) {
         std::size_t active_count = 0;
 
-        auto const BEGIN   = std::chrono::system_clock::now();
-        auto const TIMEOUT = std::chrono::milliseconds(WAIT_TIMEOUT_MILLISEC);
+        using namespace std::chrono;
+        auto const BEGIN = system_clock::now();
+        // Casting to resolve 'undefined symbol errors' in constexpr.
+        auto const TIMEOUT = milliseconds(static_cast<milliseconds::rep>(WAIT_TIMEOUT_MILLISEC));
 
         // Wait for all threads to become active.
         while (active_count != size) {
@@ -184,8 +186,7 @@ bool ThreadPool::createThreads(std::size_t size, bool wait_active, bool signal_h
             }
             _mutex.unlock();
 
-            using namespace std::chrono;
-            if ((WAIT_TIMEOUT_MILLISEC > WAIT_INFINITE_TIMEOUT) && (system_clock::now() - BEGIN) >= TIMEOUT) {
+            if (system_clock::now() - BEGIN >= TIMEOUT) {
                 tDLogE("ThreadPool::createThreads({}) Active wait timeout.");
                 return false;
             }
