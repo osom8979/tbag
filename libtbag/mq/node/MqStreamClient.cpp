@@ -29,7 +29,7 @@ using AfterAction = MqStreamClient::AfterAction;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params, MqRecvCallback * cb)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          PARAMS(params), CALLBACK(cb), _client(), _packer(params.packer_size),
+          PARAMS(params), _callback(cb), _client(), _packer(params.packer_size),
           _receives(params.recv_queue_size, params.recv_msg_size),
           _read_error_count(0),
           _state(MqMachineState::MMS_NONE), _sending(0)
@@ -486,8 +486,8 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
         }
 
         if (PARAMS.recv_cb != nullptr) {
-            assert(CALLBACK != nullptr);
-            CALLBACK->onRecv(_packer.msg());
+            assert(_callback != nullptr);
+            _callback->onRecv(_packer.msg());
         } else {
             COMMENT("Single-Producer recv-queue") {
                 while (!_wait_lock.tryLock()) {

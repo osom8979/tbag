@@ -187,7 +187,11 @@ public:
 
 public:
     MqParams const PARAMS;
-    MqRecvCallback * const CALLBACK;
+
+private:
+    // 'CALLBACK' is defined as a macro in Windows.
+    // So use another variable name: '_callback'
+    MqRecvCallback * const _callback;
 
 private:
     SharedStream _client;
