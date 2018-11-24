@@ -746,7 +746,6 @@ Err MqStreamServer::recvWait(MqMsg & msg, uint64_t timeout_nano)
     while (true) {
         code = _receives.dequeue(msg);
         if (isSuccess(code)) {
-            assert(code == Err::E_SUCCESS);
             break;
         }
 
