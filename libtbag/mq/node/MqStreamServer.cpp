@@ -737,8 +737,10 @@ Err MqStreamServer::recv(MqMsg & msg)
 
 Err MqStreamServer::recvWait(MqMsg & msg, uint64_t timeout_nano)
 {
-    auto const BEGIN = std::chrono::system_clock::now();
-    auto const TIMEOUT = std::chrono::nanoseconds(timeout_nano);
+    using namespace std::chrono;
+    auto const BEGIN = system_clock::now();
+    nanoseconds const TIMEOUT(timeout_nano);
+    nanoseconds remaining_timeout_nano;
 
     Err code;
 
@@ -748,7 +750,6 @@ Err MqStreamServer::recvWait(MqMsg & msg, uint64_t timeout_nano)
         if (isSuccess(code)) {
             break;
         }
-
         if (_state == MqMachineState::MMS_DESTROYING) {
             code = Err::E_ECANCELED;
             break;
@@ -757,9 +758,7 @@ Err MqStreamServer::recvWait(MqMsg & msg, uint64_t timeout_nano)
         if (timeout_nano == 0) {
             _wait_cond.wait(_wait_lock);
         } else {
-            using namespace std::chrono;
-            auto remaining_timeout_nano = TIMEOUT - (system_clock::now() - BEGIN);
-            _wait_cond.wait(_wait_lock, remaining_timeout_nano.count());
+            _wait_cond.wait(_wait_lock, (TIMEOUT - (system_clock::now() - BEGIN)).count());
             if ((system_clock::now() - BEGIN) >= TIMEOUT) {
                 code = Err::E_TIMEOUT;
                 break;
