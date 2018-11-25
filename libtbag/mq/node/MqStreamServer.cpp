@@ -328,13 +328,29 @@ void MqStreamServer::afterProcessMessage(AsyncMsg * msg)
 }
 
 template <typename NodeT>
+static Err __write_node(Stream * stream, uint8_t const * data, std::size_t size)
+{
+    assert(stream != nullptr);
+    auto * node = (NodeT*)stream;
+    return node->write(node->write_req, (char const *)data, size);
+}
+
+static Err __write_node(Stream * stream, uint8_t const * data, std::size_t size, MqType type)
+{
+    if (type == MqType::MT_PIPE) {
+        return __write_node<PipeNode>(stream, data, size);
+    } else {
+        assert(type == MqType::MT_TCP);
+        return __write_node<TcpNode>(stream, data, size);
+    }
+}
+
+template <typename NodeT>
 static std::size_t __write_all_nodes(NodeSet & nodes, uint8_t const * data, std::size_t size)
 {
     std::size_t success_count = 0;
-    for (auto & cursor : nodes) {
-        assert(static_cast<bool>(cursor));
-        auto * node = (NodeT*)(cursor.get());
-        auto const CODE = node->write(node->write_req, (char const *)data, size);
+    for (auto cursor : nodes) {
+        auto const CODE = __write_node<NodeT>(cursor.get(), data, size);
         if (isSuccess(CODE)) {
             ++success_count;
         }
@@ -373,7 +389,36 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
 
-    writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), PARAMS.type);
+    if (PARAMS.write_filter_cb != nullptr) {
+        // Give the user a chance to filter the message.
+        if (!PARAMS.write_filter_cb(*(msg_pointer.get()), this)) {
+            tDLogIfI(PARAMS.verbose, "MqStreamServer::onWriterAsync() Filtered this message.");
+            afterProcessMessage(msg_pointer.get());
+            return;
+        }
+    }
+
+    if (msg_pointer.get()->stream_id) {
+        auto itr = _nodes.find(StreamPointer(reinterpret_cast<Stream*>(msg_pointer.get()->stream_id)));
+        if (itr == _nodes.end()) {
+            tDLogIfE(PARAMS.verbose, "MqStreamServer::onWriterAsync() Not found node: {}",
+                     msg_pointer.get()->stream_id);
+            afterProcessMessage(msg_pointer.get());
+            return;
+        }
+
+        auto node = *itr;
+        auto const CODE = __write_node(node.get(), _packer.point(), _packer.size(), PARAMS.type);
+        if (isSuccess(CODE)) {
+            writer->write_count = 1;
+        } else {
+            writer->write_count = 0;
+        }
+    } else {
+        assert(msg_pointer.get()->stream_id == 0);
+        writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), PARAMS.type);
+    }
+
     if (writer->write_count == _nodes.size()) {
         tDLogIfD(PARAMS.verbose, "MqStreamServer::onWriterAsync() Write process ({}) ... "
                  "Next, onNodeWrite() event method.", writer->write_count);
@@ -578,6 +623,9 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
             }
             break;
         }
+
+        // Update current node key(id);
+        _packer.msg().stream_id = reinterpret_cast<std::intptr_t>(node);
 
         if (PARAMS.recv_cb != nullptr) {
             PARAMS.recv_cb(_packer.msg(), this);

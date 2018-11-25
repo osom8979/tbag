@@ -193,6 +193,8 @@ struct MqMsg
     static_assert(sizeof(Buffer::value_type) == 1,
                   "The minimum unit of the buffer element must be 1 Byte.");
 
+    std::intptr_t stream_id = 0;
+
     MqEvent  event;
     Buffer   buffer;
 
@@ -299,10 +301,18 @@ TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_BUILDER_SIZE     = 1 * 1024 * 1
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_CLOSE_MILLISEC   = 1 * 1000;        // Shutdown -> Close wait-timeout.
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_READ_ERROR_COUNT = 4;               // Max continuous read error count.
 
+// Forward declaration.
+struct MqInterface;
+
+/**
+ * Message filter.
+ */
+using MqOnWriteFilter = bool(*)(MqMsg & msg, MqInterface * mq_node);
+
 /**
  * Callback prototype for intercepting Receive events.
  */
-using MqOnRecv = void(*)(MqMsg const & msg, void * user);
+using MqOnRecv = void(*)(MqMsg const & msg, MqInterface * mq_node);
 
 /**
  * User customizable option packs.
@@ -340,6 +350,11 @@ struct MqParams
      *  - pipe: unused.
      */
     bool tcp_ipv6_only = false;
+
+    /**
+     * Give the user a chance to filter the message.
+     */
+    MqOnWriteFilter write_filter_cb = nullptr;
 
     /**
      * Use the receive callback.

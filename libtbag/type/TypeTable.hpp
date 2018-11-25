@@ -193,6 +193,13 @@ TBAG_CONSTEXPR inline TypeTable getTypeTable() TBAG_NOEXCEPT
     static_assert(BaseTypeInfo<type_name>::value, "The " #type_name " type is not a primary type.")
 #endif
 
+#if 0
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(std::size_t   );
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(std::ptrdiff_t);
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(std::intptr_t );
+_STATIC_ASSERT_CHECK_PRIMARY_TYPE(std::uintptr_t);
+#endif
+
 _STATIC_ASSERT_CHECK_PRIMARY_TYPE(  int8_t);
 _STATIC_ASSERT_CHECK_PRIMARY_TYPE( uint8_t);
 _STATIC_ASSERT_CHECK_PRIMARY_TYPE( int16_t);
