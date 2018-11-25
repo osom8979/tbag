@@ -479,11 +479,6 @@ struct MqInterface
     virtual Err recvWait(MqMsg & msg, uint64_t timeout_nano) = 0;
 };
 
-struct MqRecvCallback
-{
-    virtual void onRecv(MqMsg const & msg) = 0;
-};
-
 // -----------------------
 // Miscellaneous utilities
 // -----------------------

@@ -18,10 +18,9 @@ namespace node {
 
 using AfterAction = MqLocalQueue::AfterAction;
 
-MqLocalQueue::MqLocalQueue(Loop & loop, MqParams const & params, MqRecvCallback * cb)
+MqLocalQueue::MqLocalQueue(Loop & loop, MqParams const & params)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          PARAMS(params), _callback(cb),
-          _receives(params.recv_queue_size, params.recv_msg_size),
+          PARAMS(params), _receives(params.recv_queue_size, params.recv_msg_size),
           _state(MqMachineState::MMS_ACTIVE), _sending(0)
 {
     // EMPTY.
@@ -89,8 +88,7 @@ AfterAction MqLocalQueue::onMsgEvent(AsyncMsg * msg)
     assert(isActiveState(_state) || isClosingState(_state));
 
     if (PARAMS.recv_cb != nullptr) {
-        assert(_callback != nullptr);
-        _callback->onRecv(*msg);
+        PARAMS.recv_cb(*msg, this);
     } else {
         Err enqueue_code;
 

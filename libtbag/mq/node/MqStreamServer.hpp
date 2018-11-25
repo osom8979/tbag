@@ -87,7 +87,6 @@ public:
     using MqEventQueue   = libtbag::mq::details::MqEventQueue;
     using MqQueue        = libtbag::mq::details::MqQueue;
     using MqParams       = libtbag::mq::details::MqParams;
-    using MqRecvCallback = libtbag::mq::details::MqRecvCallback;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;
@@ -207,11 +206,6 @@ public:
     MqParams const PARAMS;
 
 private:
-    // 'CALLBACK' is defined as a macro in Windows.
-    // So use another variable name: '_callback'
-    MqRecvCallback * const _callback;
-
-private:
     SharedStream _server;
     SharedWriter _writer;
     NodeSet      _nodes;
@@ -227,7 +221,7 @@ private:
     UvCondition _wait_cond;
 
 public:
-    MqStreamServer(Loop & loop, MqParams const & params, MqRecvCallback * cb);
+    MqStreamServer(Loop & loop, MqParams const & params);
     virtual ~MqStreamServer();
 
 private:

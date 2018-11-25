@@ -58,7 +58,6 @@ public:
     using MqEventQueue   = libtbag::mq::details::MqEventQueue;
     using MqQueue        = libtbag::mq::details::MqQueue;
     using MqParams       = libtbag::mq::details::MqParams;
-    using MqRecvCallback = libtbag::mq::details::MqRecvCallback;
 
     using Buffer = libtbag::util::Buffer;
     using binf   = libtbag::util::binf;
@@ -79,11 +78,6 @@ public:
     MqParams const PARAMS;
 
 private:
-    // 'CALLBACK' is defined as a macro in Windows.
-    // So use another variable name: '_callback'
-    MqRecvCallback * const _callback;
-
-private:
     MqQueue _receives; ///< Single-Producer, Many-consumer.
 
 private:
@@ -95,7 +89,7 @@ private:
     UvCondition _wait_cond;
 
 public:
-    MqLocalQueue(Loop & loop, MqParams const & params, MqRecvCallback * cb);
+    MqLocalQueue(Loop & loop, MqParams const & params);
     virtual ~MqLocalQueue();
 
 private:

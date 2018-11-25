@@ -39,7 +39,7 @@ namespace mq {
  * @author zer0
  * @date   2018-11-11
  */
-struct MqNode::Impl : public libtbag::mq::details::MqRecvCallback
+struct MqNode::Impl : private Noncopyable
 {
 public:
     using Uri  = libtbag::network::Uri;
@@ -147,10 +147,10 @@ public:
     void init(MqParams const & params, MqMode mode)
     {
         if (MODE == MqMode::MM_BIND) {
-            _mq = std::make_shared<MqStreamServer>(_loop, params, this);
+            _mq = std::make_shared<MqStreamServer>(_loop, params);
         } else {
             assert(MODE == MqMode::MM_CONNECT);
-            _mq = std::make_shared<MqStreamClient>(_loop, params, this);
+            _mq = std::make_shared<MqStreamClient>(_loop, params);
         }
     }
 
@@ -170,13 +170,6 @@ public:
             tDLogE("MqNode::Impl::runner({}/{}) Loop end error: {}",
                    _last, getTypeName(PARAMS.type), getModeName(MODE));
         }
-    }
-
-protected:
-    virtual void onRecv(MqMsg const & msg) override
-    {
-        assert(PARAMS.recv_cb != nullptr);
-        PARAMS.recv_cb(msg, PARAMS.user);
     }
 
 public:
