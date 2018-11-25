@@ -17,9 +17,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/details/MqEventQueue.hpp>
-
-#include <libtbag/mq/details/MqCommon.hpp>
-#include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
 
 #include <libtbag/lock/UvLock.hpp>
@@ -32,7 +29,6 @@
 #include <libtbag/uvpp/Pipe.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
-#include <libtbag/network/Uri.hpp>
 #include <libtbag/network/SocketAddress.hpp>
 #include <libtbag/proto/MsgPacket.hpp>
 
@@ -97,15 +93,7 @@ public:
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
     using SocketAddress = libtbag::network::SocketAddress;
-    using Uri           = libtbag::network::Uri;
     using MsgPacket     = libtbag::proto::MsgPacket;
-
-public:
-    TBAG_CONSTEXPR static std::size_t DEFAULT_QUEUE_SIZE       = MqEventQueue::DEFAULT_QUEUE_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_PACKET_SIZE      = MqEventQueue::DEFAULT_PACKET_SIZE;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_BUILDER_SIZE     = MsgPacket::DEFAULT_BUILDER_CAPACITY;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_CLOSE_MILLISEC   = 1 * 1000;
-    TBAG_CONSTEXPR static std::size_t DEFAULT_READ_ERROR_COUNT = 4;
 
 private:
     struct Writer : public Async
