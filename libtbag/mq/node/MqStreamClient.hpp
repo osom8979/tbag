@@ -18,6 +18,7 @@
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
+#include <libtbag/mq/node/MqBase.hpp>
 
 #include <libtbag/lock/UvLock.hpp>
 #include <libtbag/lock/UvCondition.hpp>
@@ -31,6 +32,7 @@
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/network/SocketAddress.hpp>
 #include <libtbag/proto/MsgPacket.hpp>
+#include <libtbag/container/Pointer.hpp>
 
 #include <vector>
 #include <unordered_set>
@@ -52,8 +54,7 @@ namespace node {
  * @author zer0
  * @date   2018-11-13
  */
-class TBAG_API MqStreamClient : protected libtbag::mq::details::MqEventQueue,
-                                public    libtbag::mq::details::MqInterface
+class TBAG_API MqStreamClient : public libtbag::mq::node::MqBase
 {
 public:
     using UvLock      = libtbag::lock::UvLock;
@@ -167,32 +168,15 @@ public:
     using SharedTcpClient  = std::shared_ptr<TcpClient>;
     using SharedPipeClient = std::shared_ptr<PipeClient>;
 
-public:
-    using ThreadId    = std::thread::id;
-    using AtomicState = std::atomic<MqMachineState>;
-    using AtomicInt   = std::atomic_int;
-
-public:
-    MqParams const PARAMS;
-
 private:
     SharedStream _client;
     SharedWriter _writer;
     MsgPacket    _packer;
-    MqQueue      _receives; ///< Single-Producer, Many-consumer.
 
 private:
     std::size_t _read_error_count;
     Buffer      _read_buffer;
     Buffer      _remaining_read;
-
-private:
-    AtomicState _state;
-    AtomicInt   _sending;
-
-private:
-    UvLock      _wait_lock;
-    UvCondition _wait_cond;
 
 public:
     MqStreamClient(Loop & loop, MqParams const & params);
@@ -232,20 +216,6 @@ private:
     binf onAlloc   (std::size_t suggested_size);
     void onRead    (Err code, char const * buffer, std::size_t size);
     void onClose   ();
-
-public:
-    virtual MqMachineState state() const TBAG_NOEXCEPT override
-    { return _state; }
-
-    virtual MqParams params() const override
-    { return PARAMS; }
-
-public:
-    virtual Err send(MqMsg const & msg) override;
-    virtual Err recv(MqMsg & msg) override;
-
-public:
-    virtual Err recvWait(MqMsg & msg, uint64_t timeout_nano) override;
 };
 
 } // namespace node

@@ -15,14 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/container/Pointer.hpp>
-
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
-
-#include <libtbag/lock/UvLock.hpp>
-#include <libtbag/lock/UvCondition.hpp>
+#include <libtbag/mq/node/MqBase.hpp>
 
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -33,6 +29,7 @@
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/network/SocketAddress.hpp>
 #include <libtbag/proto/MsgPacket.hpp>
+#include <libtbag/container/Pointer.hpp>
 
 #include <vector>
 #include <unordered_set>
@@ -54,13 +51,9 @@ namespace node {
  * @author zer0
  * @date   2018-11-13
  */
-class TBAG_API MqStreamServer : public libtbag::mq::details::MqEventQueue,
-                                public libtbag::mq::details::MqInterface
+class TBAG_API MqStreamServer : public libtbag::mq::node::MqBase
 {
 public:
-    using UvLock      = libtbag::lock::UvLock;
-    using UvCondition = libtbag::lock::UvCondition;
-
     using Loop   = libtbag::uvpp::Loop;
     using Stream = libtbag::uvpp::Stream;
     using Async  = libtbag::uvpp::Async;
@@ -198,27 +191,12 @@ public:
 public:
     using StreamPointer = libtbag::container::Pointer<Stream>;
     using NodeSet       = std::unordered_set<StreamPointer, StreamPointer::Hash, StreamPointer::EqualTo>;
-    using ThreadId      = std::thread::id;
-    using AtomicState   = std::atomic<MqMachineState>;
-    using AtomicInt     = std::atomic_int;
-
-public:
-    MqParams const PARAMS;
 
 private:
     SharedStream _server;
     SharedWriter _writer;
     NodeSet      _nodes;
     MsgPacket    _packer;
-    MqQueue      _receives; ///< Single-Producer, Many-consumer.
-
-private:
-    AtomicState _state;
-    AtomicInt   _sending;
-
-private:
-    UvLock      _wait_lock;
-    UvCondition _wait_cond;
 
 public:
     MqStreamServer(Loop & loop, MqParams const & params);
@@ -265,20 +243,6 @@ private:
 private:
     void onServerConnection(Stream * server, Err code);
     void onServerClose     (Stream * server);
-
-public:
-    virtual MqMachineState state() const TBAG_NOEXCEPT override
-    { return _state; }
-
-    virtual MqParams params() const override
-    { return PARAMS; }
-
-public:
-    virtual Err send(MqMsg const & msg) override;
-    virtual Err recv(MqMsg & msg) override;
-
-public:
-    virtual Err recvWait(MqMsg & msg, uint64_t timeout_nano) override;
 };
 
 } // namespace node

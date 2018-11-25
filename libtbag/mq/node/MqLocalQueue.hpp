@@ -18,13 +18,13 @@
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
+#include <libtbag/mq/node/MqBase.hpp>
 
 #include <libtbag/lock/UvLock.hpp>
 #include <libtbag/lock/UvCondition.hpp>
 
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/proto/MsgPacket.hpp>
 
 #include <atomic>
 
@@ -41,8 +41,7 @@ namespace node {
  * @author zer0
  * @date   2018-11-24
  */
-class TBAG_API MqLocalQueue : protected libtbag::mq::details::MqEventQueue,
-                              public    libtbag::mq::details::MqInterface
+class TBAG_API MqLocalQueue : public libtbag::mq::node::MqBase
 {
 public:
     using UvLock      = libtbag::lock::UvLock;
@@ -57,7 +56,6 @@ public:
     using MqMsg          = libtbag::mq::details::MqMsg;
     using MqEventQueue   = libtbag::mq::details::MqEventQueue;
     using MqQueue        = libtbag::mq::details::MqQueue;
-    using MqParams       = libtbag::mq::details::MqParams;
 
     using Buffer = libtbag::util::Buffer;
     using binf   = libtbag::util::binf;
@@ -67,26 +65,6 @@ public:
     using AfterAction     = MqEventQueue::AfterAction;
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
-
-    using MsgPacket = libtbag::proto::MsgPacket;
-
-    using ThreadId    = std::thread::id;
-    using AtomicState = std::atomic<MqMachineState>;
-    using AtomicInt   = std::atomic_int;
-
-public:
-    MqParams const PARAMS;
-
-private:
-    MqQueue _receives; ///< Single-Producer, Many-consumer.
-
-private:
-    AtomicState _state;
-    AtomicInt   _sending;
-
-private:
-    UvLock      _wait_lock;
-    UvCondition _wait_cond;
 
 public:
     MqLocalQueue(Loop & loop, MqParams const & params);
@@ -99,20 +77,6 @@ private:
 private:
     AfterAction onMsgEvent(AsyncMsg * msg);
     void onCloseEvent();
-
-public:
-    virtual MqMachineState state() const TBAG_NOEXCEPT override
-    { return _state; }
-
-    virtual MqParams params() const override
-    { return PARAMS; }
-
-public:
-    virtual Err send(MqMsg const & msg) override;
-    virtual Err recv(MqMsg & msg) override;
-
-public:
-    virtual Err recvWait(MqMsg & msg, uint64_t timeout_nano) override;
 };
 
 } // namespace node

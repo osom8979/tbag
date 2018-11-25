@@ -29,10 +29,8 @@ using binf        = MqStreamServer::binf;
 using AfterAction = MqStreamServer::AfterAction;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
-        : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          PARAMS(params), _server(), _nodes(), _packer(params.packer_size),
-          _receives(params.recv_queue_size, params.recv_msg_size),
-          _state(MqMachineState::MMS_NONE), _sending(0)
+        : MqBase(loop, params, MqMachineState::MMS_NONE),
+          _server(), _nodes(), _packer(params.packer_size)
 {
     if (PARAMS.type == MqType::MT_PIPE) {
         _server = loop.newHandle<PipeServer>(loop, this);
@@ -104,10 +102,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
 
 MqStreamServer::~MqStreamServer()
 {
-    _wait_lock.lock();
-    _state = MqMachineState::MMS_DESTROYING;
-    _wait_cond.broadcast();
-    _wait_lock.unlock();
+    // EMPTY.
 }
 
 template <typename NodeT>
@@ -706,66 +701,6 @@ void MqStreamServer::onServerClose(Stream * server)
 
     // Last closing point.
     _state = MqMachineState::MMS_CLOSED;
-}
-
-Err MqStreamServer::send(MqMsg const & msg)
-{
-    if (!details::isActiveState(_state)) {
-        return Err::E_ILLSTATE;
-    }
-
-    // [WARNING]
-    // This point is a dangerous point
-    // where the number of times to send(<code>_sending</code>) out can be missed.
-    // To avoid this, use sleep() on that thread.
-    //
-    // Note:
-    // the moment when the <code>_state</code> information becomes
-    // <code>MqMachineState::MMS_CLOSING</code>.
-
-    ++_sending;
-    auto const CODE = enqueue(msg);
-    --_sending;
-    return CODE;
-}
-
-Err MqStreamServer::recv(MqMsg & msg)
-{
-    return _receives.dequeue(msg);
-}
-
-Err MqStreamServer::recvWait(MqMsg & msg, uint64_t timeout_nano)
-{
-    using namespace std::chrono;
-    auto const BEGIN = system_clock::now();
-    nanoseconds const TIMEOUT(timeout_nano);
-    nanoseconds remaining_timeout_nano;
-
-    Err code;
-
-    _wait_lock.lock();
-    while (true) {
-        code = _receives.dequeue(msg);
-        if (isSuccess(code)) {
-            break;
-        }
-        if (_state == MqMachineState::MMS_DESTROYING) {
-            code = Err::E_ECANCELED;
-            break;
-        }
-
-        if (timeout_nano == 0) {
-            _wait_cond.wait(_wait_lock);
-        } else {
-            _wait_cond.wait(_wait_lock, (TIMEOUT - (system_clock::now() - BEGIN)).count());
-            if ((system_clock::now() - BEGIN) >= TIMEOUT) {
-                code = Err::E_TIMEOUT;
-                break;
-            }
-        }
-    }
-    _wait_lock.unlock();
-    return code;
 }
 
 } // namespace node
