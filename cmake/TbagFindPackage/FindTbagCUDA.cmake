@@ -40,10 +40,63 @@
 #///  - ${CUDA_npps_LIBRARY}       NVIDIA Performance Primitives library (signal processing). Only available for CUDA version 5.5+.
 #///  - ${CUDA_nvcuvenc_LIBRARY}   CUDA Video Encoder library. Only available for CUDA version 3.2+. Windows only.
 #///  - ${CUDA_nvcuvid_LIBRARY}    CUDA Video Decoder library. Only available for CUDA version 3.2+. Windows only.
+#///
+#/// Deprecated Fermi(2.x) version.
+
+set (TBAG_CUDA_ARCH2_NAME   Fermi)
+set (TBAG_CUDA_ARCH3_NAME  Kepler)
+set (TBAG_CUDA_ARCH5_NAME Maxwell)
+set (TBAG_CUDA_ARCH6_NAME  Pascal)
+set (TBAG_CUDA_ARCH7_NAME   Volta)
+
+set (TBAG_CUDA_ARCH2_VERS 20 "21(20)")
+set (TBAG_CUDA_ARCH3_VERS 30 35)
+set (TBAG_CUDA_ARCH5_VERS 50 52)
+set (TBAG_CUDA_ARCH6_VERS 60 61)
+set (TBAG_CUDA_ARCH7_VERS 70)
+
+set (TBAG_CUDA_FERMI    ${TBAG_CUDA_ARCH2_NAME})
+set (TBAG_CUDA_KEPLER   ${TBAG_CUDA_ARCH3_NAME})
+set (TBAG_CUDA_MAXWELL  ${TBAG_CUDA_ARCH5_NAME})
+set (TBAG_CUDA_PASCAL   ${TBAG_CUDA_ARCH6_NAME})
+set (TBAG_CUDA_VOLTA    ${TBAG_CUDA_ARCH7_NAME})
+
+set (TBAG_CUDA_FERMI_VERS   ${TBAG_CUDA_ARCH2_VERS})
+set (TBAG_CUDA_KEPLER_VERS  ${TBAG_CUDA_ARCH3_VERS})
+set (TBAG_CUDA_MAXWELL_VERS ${TBAG_CUDA_ARCH5_VERS})
+set (TBAG_CUDA_PASCAL_VERS  ${TBAG_CUDA_ARCH6_VERS})
+set (TBAG_CUDA_VOLTA_VERS   ${TBAG_CUDA_ARCH7_VERS})
 
 # Known NVIDIA GPU achitectures.
 # This list will be used for 'CUDA_ARCH_NAME = All' option.
-set (TBAG_CUDA_KNOWN_GPU_ARCHS "20 21(20) 30 35 50 52 61")
+set (TBAG_CUDA_KNOWN_GPU_ARCHS
+        ${TBAG_CUDA_KEPLER}
+        ${TBAG_CUDA_MAXWELL}
+        ${TBAG_CUDA_PASCAL}
+        ${TBAG_CUDA_VOLTA})
+set (TBAG_CUDA_KNOWN_GPU_ARCHS_NAMES
+        ${TBAG_CUDA_KEPLER_VERS}
+        ${TBAG_CUDA_MAXWELL_VERS}
+        ${TBAG_CUDA_PASCAL_VERS}
+        ${TBAG_CUDA_VOLTA_VERS}
+        All Manual Local)
+
+if (NOT CMAKE_CROSSCOMPILING)
+    list (APPEND TBAG_CUDA_KNOWN_GPU_ARCHS_NAMES Auto)
+    set (TBAG_CUDA_KNOWN_GPU_ARCHS_DEFAULT Auto)
+else ()
+    set (TBAG_CUDA_KNOWN_GPU_ARCHS_DEFAULT All)
+endif ()
+
+set (CUDA_ARCH_NAME ${TBAG_CUDA_KNOWN_GPU_ARCHS_DEFAULT} CACHE STRING "Select target NVIDIA GPU achitecture.")
+set_property (CACHE CUDA_ARCH_NAME PROPERTY STRINGS "" ${TBAG_CUDA_KNOWN_GPU_ARCHS_NAMES})
+mark_as_advanced (CUDA_ARCH_NAME)
+
+# verify CUDA_ARCH_NAME value
+if (NOT ";${TBAG_CUDA_KNOWN_GPU_ARCHS_NAMES};" MATCHES ";${CUDA_ARCH_NAME};")
+    string (REPLACE ";" ", " TBAG_CUDA_KNOWN_GPU_ARCHS_NAMES "${TBAG_CUDA_KNOWN_GPU_ARCHS_NAMES}")
+    message (FATAL_ERROR "Only ${TBAG_CUDA_KNOWN_GPU_ARCHS_NAMES} architeture names are supported.")
+endif ()
 
 #/// A function for automatic detection of GPUs installed  (if autodetection is enabled)
 #///
@@ -53,7 +106,7 @@ function (tabg_cuda__find_detect_arch __result)
         message (FATAL_ERROR "Not found nvcc executable: ${CUDA_NVCC_EXECUTABLE}")
     endif ()
 
-    if (NOT __gpu_detect_output)
+    if (NOT CUDA_GPU_DETECT_OUTPUT)
         set (__cuda_source_file "${PROJECT_BINARY_DIR}/tabg_cuda__find_detect_arch.cu")
 
         file (WRITE ${__cuda_source_file} ""
@@ -77,23 +130,30 @@ function (tabg_cuda__find_detect_arch __result)
                 "    return 0;"
                 "}")
 
-        execute_process (COMMAND "${CUDA_NVCC_EXECUTABLE}" "--run" "${__cuda_source_file}" "-ccbin" "${CMAKE_CXX_COMPILER}" -Xcompiler /w
+        if (MSVC)
+            set (CUDA_GPU_DETECT_EXT_FLAGS -ccbin "${CMAKE_CXX_COMPILER}" -Xcompiler /w)
+        else ()
+            set (CUDA_GPU_DETECT_EXT_FLAGS -ccbin "${CMAKE_CXX_COMPILER}" -Xcompiler -w)
+        endif ()
+
+        execute_process (COMMAND "${CUDA_NVCC_EXECUTABLE}" "--run" "${__cuda_source_file}" ${CUDA_GPU_DETECT_EXT_FLAGS}
                 WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/CMakeFiles/"
                 RESULT_VARIABLE __nvcc_exit_code
                 OUTPUT_VARIABLE __nvcc_output
                 ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
 
         if (__nvcc_exit_code EQUAL 0)
-            string (REPLACE "2.1" "2.1(2.0)" __nvcc_output "${__nvcc_output}")
-            set (__gpu_detect_output ${__nvcc_output} CACHE INTERNAL "Returned GPU architetures" FORCE)
+            ## Deprecated version: 2.x
+            ## string (REPLACE "2.1" "2.1(2.0)" __nvcc_output "${__nvcc_output}")
+            set (CUDA_GPU_DETECT_OUTPUT ${__nvcc_output} CACHE INTERNAL "Returned GPU architetures" FORCE)
         endif ()
     endif ()
 
-    if (NOT __gpu_detect_output)
+    if (NOT CUDA_GPU_DETECT_OUTPUT)
         message (STATUS "Automatic GPU detection failed. Building for all known architectures.")
         set (${__result} ${TBAG_CUDA_KNOWN_GPU_ARCHS})
     else ()
-        set (${__result} ${__gpu_detect_output})
+        set (${__result} ${CUDA_GPU_DETECT_OUTPUT})
     endif ()
 
     # Update result.
@@ -104,42 +164,25 @@ endfunction ()
 #///
 #/// @param __result [out] Output result variable.
 function (tabg_cuda__select_nvcc_arch_flags __result)
-    # List of arch names
-    set (__archs_names "Fermi" "Kepler" "Maxwell" "Pascal" "All" "Manual" "Local")
-    set (__archs_name_default "All")
-    if (NOT CMAKE_CROSSCOMPILING)
-        list (APPEND __archs_names "Auto")
-        set (__archs_name_default "Auto")
-    endif ()
-
-    # set CUDA_ARCH_NAME strings (so it will be seen as dropbox in CMake-Gui)
-    set (CUDA_ARCH_NAME ${__archs_name_default} CACHE STRING "Select target NVIDIA GPU achitecture.")
-    set_property (CACHE CUDA_ARCH_NAME PROPERTY STRINGS "" ${__archs_names} )
-    mark_as_advanced (CUDA_ARCH_NAME)
-
-    # verify CUDA_ARCH_NAME value
-    if (NOT ";${__archs_names};" MATCHES ";${CUDA_ARCH_NAME};")
-        string (REPLACE ";" ", " __archs_names "${__archs_names}")
-        message (FATAL_ERROR "Only ${__archs_names} architeture names are supported.")
-    endif ()
-
     if (${CUDA_ARCH_NAME} STREQUAL "Manual")
         set (CUDA_ARCH_BIN ${TBAG_CUDA_KNOWN_GPU_ARCHS} CACHE STRING "Specify 'real' GPU architectures to build binaries for, BIN(PTX) format is supported")
-        set (CUDA_ARCH_PTX "50"                         CACHE STRING "Specify 'virtual' PTX architectures to build PTX intermediate code for")
+        set (CUDA_ARCH_PTX "61"                         CACHE STRING "Specify 'virtual' PTX architectures to build PTX intermediate code for")
         mark_as_advanced (CUDA_ARCH_BIN CUDA_ARCH_PTX)
     else ()
         unset (CUDA_ARCH_BIN CACHE)
         unset (CUDA_ARCH_PTX CACHE)
     endif ()
 
-    if (${CUDA_ARCH_NAME} STREQUAL "Fermi")
-        set (__cuda_arch_bin "20 21(20)")
-    elseif (${CUDA_ARCH_NAME} STREQUAL "Kepler")
-        set (__cuda_arch_bin "30 35")
-    elseif (${CUDA_ARCH_NAME} STREQUAL "Maxwell")
-        set (__cuda_arch_bin "50")
-    elseif (${CUDA_ARCH_NAME} STREQUAL "Pascal")
-        set (__cuda_arch_bin "61")
+    if (${CUDA_ARCH_NAME} STREQUAL "${TBAG_CUDA_FERMI}")
+        set (__cuda_arch_bin ${TBAG_CUDA_FERMI_VERS})
+    elseif (${CUDA_ARCH_NAME} STREQUAL "${TBAG_CUDA_KEPLER}")
+        set (__cuda_arch_bin ${TBAG_CUDA_KEPLER_VERS})
+    elseif (${CUDA_ARCH_NAME} STREQUAL "${TBAG_CUDA_MAXWELL}")
+        set (__cuda_arch_bin ${TBAG_CUDA_MAXWELL_VERS})
+    elseif (${CUDA_ARCH_NAME} STREQUAL "${TBAG_CUDA_PASCAL}")
+        set (__cuda_arch_bin ${TBAG_CUDA_PASCAL_VERS})
+    elseif (${CUDA_ARCH_NAME} STREQUAL "${TBAG_CUDA_VOLTA})")
+        set (__cuda_arch_bin ${TBAG_CUDA_VOLTA_VERS})
     elseif (${CUDA_ARCH_NAME} STREQUAL "All")
         set (__cuda_arch_bin ${TBAG_CUDA_KNOWN_GPU_ARCHS})
     elseif (${CUDA_ARCH_NAME} STREQUAL "Auto")
