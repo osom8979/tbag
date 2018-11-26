@@ -72,7 +72,6 @@ Err MqBase::recvWait(MqMsg & msg, uint64_t timeout_nano)
     using namespace std::chrono;
     auto const BEGIN = system_clock::now();
     nanoseconds const TIMEOUT(timeout_nano);
-    nanoseconds remaining_timeout_nano;
 
     Err code;
 

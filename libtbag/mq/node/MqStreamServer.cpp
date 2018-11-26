@@ -252,22 +252,12 @@ AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     }
 
     assert(_state == MqMachineState::MMS_ACTIVE);
-    switch (msg->event) {
-    case MqEvent::ME_MSG:
-        return onMsgEvent(msg);
-
-    case MqEvent::ME_CLOSE:
+    if (msg->event == MqEvent::ME_CLOSE) {
         onCloseEvent();
-        break;
-
-    case MqEvent::ME_NONE:
-        break;
-
-    default:
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        break;
+        return AfterAction::AA_OK;
+    } else {
+        return onMsgEvent(msg);
     }
-    return AfterAction::AA_OK;
 }
 
 AfterAction MqStreamServer::onMsgEvent(AsyncMsg * msg)
@@ -398,11 +388,11 @@ void MqStreamServer::onWriterAsync(Writer * writer)
         }
     }
 
-    if (msg_pointer.get()->stream_id) {
-        auto itr = _nodes.find(StreamPointer(reinterpret_cast<Stream*>(msg_pointer.get()->stream_id)));
+    if (msg_pointer.get()->stream) {
+        auto itr = _nodes.find(StreamPointer(reinterpret_cast<Stream*>(msg_pointer.get()->stream)));
         if (itr == _nodes.end()) {
             tDLogIfE(PARAMS.verbose, "MqStreamServer::onWriterAsync() Not found node: {}",
-                     msg_pointer.get()->stream_id);
+                     msg_pointer.get()->stream);
             afterProcessMessage(msg_pointer.get());
             return;
         }
@@ -415,7 +405,7 @@ void MqStreamServer::onWriterAsync(Writer * writer)
             writer->write_count = 0;
         }
     } else {
-        assert(msg_pointer.get()->stream_id == 0);
+        assert(msg_pointer.get()->stream == 0);
         writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), PARAMS.type);
     }
 
@@ -625,7 +615,7 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
         }
 
         // Update current node key(id);
-        _packer.msg().stream_id = reinterpret_cast<std::intptr_t>(node);
+        _packer.msg().stream = reinterpret_cast<std::intptr_t>(node);
 
         if (PARAMS.recv_cb != nullptr) {
             PARAMS.recv_cb(_packer.msg(), this);

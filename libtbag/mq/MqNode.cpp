@@ -173,6 +173,12 @@ public:
     }
 
 public:
+    void join()
+    {
+        _pool.join();
+    }
+
+public:
     Err send(MqMsg const & msg)
     {
         return _mq->send(msg);
@@ -277,6 +283,15 @@ Err MqNode::connect(std::string const & uri)
 Err MqNode::close()
 {
     _impl.reset();
+    return Err::E_SUCCESS;
+}
+
+Err MqNode::join()
+{
+    if (!_impl) {
+        return Err::E_NREADY;
+    }
+    _impl->join();
     return Err::E_SUCCESS;
 }
 

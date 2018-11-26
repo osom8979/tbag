@@ -204,22 +204,12 @@ AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
     }
 
     assert(_state == MqMachineState::MMS_ACTIVE);
-    switch (msg->event) {
-    case MqEvent::ME_MSG:
-        return onMsgEvent(msg);
-
-    case MqEvent::ME_CLOSE:
+    if (msg->event == MqEvent::ME_CLOSE) {
         onCloseEvent();
-        break;
-
-    case MqEvent::ME_NONE:
-        break;
-
-    default:
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        break;
+        return AfterAction::AA_OK;
+    } else {
+        return onMsgEvent(msg);
     }
-    return AfterAction::AA_OK;
 }
 
 AfterAction MqStreamClient::onMsgEvent(AsyncMsg * msg)

@@ -36,17 +36,22 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq      {
 namespace details {
 
+/**
+ * Message event number.
+ *
+ * @remarks
+ *  Negative integers are used by the system.
+ *  Custom events use positive integers.
+ */
 enum class MqEvent : int32_t
 {
-    ME_NONE,
-    ME_MSG,
-    ME_CLOSE,
+    ME_CLOSE = -1,
+    ME_MSG = 0,
 };
 
 inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
 {
     switch (event) {
-    case MqEvent::ME_NONE:  return "NONE";
     case MqEvent::ME_MSG:   return "MSG";
     case MqEvent::ME_CLOSE: return "CLOSE";
     default:                return "UNKNOWN";
@@ -193,14 +198,14 @@ struct MqMsg
     static_assert(sizeof(Buffer::value_type) == 1,
                   "The minimum unit of the buffer element must be 1 Byte.");
 
-    std::intptr_t stream_id = 0;
+    std::intptr_t stream = 0;
 
-    MqEvent  event;
-    Buffer   buffer;
+    MqEvent event;
+    Buffer  buffer;
 
-    MqMsg() : event(MqEvent::ME_NONE), buffer()
+    MqMsg() : event(MqEvent::ME_MSG), buffer()
     { /* EMPTY. */ }
-    MqMsg(std::size_t s) : event(MqEvent::ME_NONE), buffer(s)
+    MqMsg(std::size_t s) : event(MqEvent::ME_MSG), buffer(s)
     { /* EMPTY. */ }
     MqMsg(MqEvent e) : event(e), buffer()
     { /* EMPTY. */ }
@@ -213,9 +218,16 @@ struct MqMsg
     MqMsg(std::string const & str) : event(MqEvent::ME_MSG), buffer(str.begin(), str.end())
     { /* EMPTY. */ }
 
-    MqMsg(MqMsg const & obj) : event(obj.event), buffer(obj.buffer)
+    MqMsg(MqMsg const & obj)
+            : stream(obj.stream),
+              event(obj.event),
+              buffer(obj.buffer)
     { /* EMPTY. */ }
-    MqMsg(MqMsg && obj) TBAG_NOEXCEPT : event(std::move(obj.event)), buffer(std::move(obj.buffer))
+
+    MqMsg(MqMsg && obj) TBAG_NOEXCEPT
+            : stream(std::move(obj.stream)),
+              event(std::move(obj.event)),
+              buffer(std::move(obj.buffer))
     { /* EMPTY. */ }
 
     ~MqMsg()
@@ -224,6 +236,7 @@ struct MqMsg
     MqMsg & operator =(MqMsg const & obj)
     {
         if (this != &obj) {
+            stream = obj.stream;
             event  = obj.event;
             buffer = obj.buffer;
         }
@@ -233,6 +246,7 @@ struct MqMsg
     MqMsg & operator =(MqMsg && obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
+            std::swap(stream, obj.stream);
             std::swap(event, obj.event);
             buffer.swap(obj.buffer);
         }

@@ -120,6 +120,9 @@ public:
     Err close();
 
 public:
+    Err join();
+
+public:
     Err send(MqMsg const & msg);
     Err send(char const * buffer, std::size_t size);
 
