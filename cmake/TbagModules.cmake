@@ -951,6 +951,17 @@ macro (tbag_modules__apply_tbag_static_api)
     list (APPEND TBAG_PROJECT_DEFINITIONS TBAG_STATIC_API)
 endmacro ()
 
+macro (tbag_modules__check_tbui)
+    if (NOT Tbui_FOUND)
+        message (WARNING "Not found Tbag-ui.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_tbui)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${Tbui_INCLUDE_DIRS})
+    list (APPEND TBAG_PROJECT_LDFLAGS      ${Tbui_LIBRARIES})
+endmacro ()
+
 macro (tbag_modules__check_tinyxml2)
     if (NOT TinyXML2_FOUND)
         message (WARNING "Not found TinyXML2.")
