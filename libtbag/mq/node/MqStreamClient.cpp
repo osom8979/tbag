@@ -31,6 +31,11 @@ MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
         : MqBase(loop, params, MqMachineState::MMS_NONE),
           _client(), _packer(params.packer_size), _read_error_count(0)
 {
+    if (PARAMS.type == MqType::MT_PIPE && !libtbag::filesystem::Path(params.address).exists()) {
+        tDLogE("MqStreamClient::MqStreamClient() Not found named pipe: {}", params.address);
+        throw ErrException(Err::E_EEXIST);
+    }
+
     if (PARAMS.type == MqType::MT_PIPE) {
         _client = loop.newHandle<PipeClient>(loop, this);
     } else if (PARAMS.type == MqType::MT_TCP) {
@@ -43,16 +48,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
     assert(static_cast<bool>(_client));
     assert(_client->isInit());
 
-    _writer = loop.newHandle<Writer>(loop, this);
-    assert(static_cast<bool>(_writer));
-    assert(_writer->isInit());
-
     if (PARAMS.type == MqType::MT_PIPE) {
-        if (!libtbag::filesystem::Path(params.address).exists()) {
-            tDLogE("MqStreamClient::MqStreamClient() Not found named pipe: {}", params.address);
-            throw ErrException(Err::E_EEXIST);
-        }
-
         auto * pipe = (PipeClient*)(_client.get());
         assert(pipe != nullptr);
         pipe->connect(pipe->connect_req, params.address.c_str());
@@ -64,15 +60,21 @@ MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
         auto const INIT_CODE = addr.init(params.address, params.port);
         if (isFailure(INIT_CODE)) {
             tDLogE("MqStreamClient::MqStreamClient() Socket init error: {}", INIT_CODE);
+            _client->close();
             throw ErrException(INIT_CODE);
         }
 
         auto const BIND_CODE = tcp->connect(tcp->connect_req, addr.getCommon());
         if (isFailure(BIND_CODE)) {
             tDLogE("MqStreamClient::MqStreamClient() Socket connect error: {}", BIND_CODE);
+            _client->close();
             throw ErrException(BIND_CODE);
         }
     }
+
+    _writer = loop.newHandle<Writer>(loop, this);
+    assert(static_cast<bool>(_writer));
+    assert(_writer->isInit());
 
     _state = MqMachineState::MMS_INITIALIZED;
 }
@@ -91,7 +93,6 @@ static Err __shutdown(Stream * stream)
 
 Err MqStreamClient::shutdown()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_client));
     if (PARAMS.type == MqType::MT_PIPE) {
         return __shutdown<PipeClient>(_client.get());
@@ -103,7 +104,6 @@ Err MqStreamClient::shutdown()
 
 void MqStreamClient::close()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_client));
     if (!_client->isClosing()) {
         _client->close();
@@ -112,7 +112,6 @@ void MqStreamClient::close()
 
 void MqStreamClient::shutdownAndClose()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(_writer->queue.empty());
     auto const SHUTDOWN_CODE = shutdown();
 
@@ -137,8 +136,6 @@ void MqStreamClient::shutdownAndClose()
 
 void MqStreamClient::tearDown(bool on_message)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-
     using namespace libtbag::mq::details;
     if (isInactiveState(_state)) {
         assert(isCloseState(_state));
@@ -178,7 +175,6 @@ void MqStreamClient::tearDown(bool on_message)
 
 void MqStreamClient::onCloseMsgDone()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(!_writer->isClosing());
     _writer->close();
 
@@ -192,7 +188,6 @@ void MqStreamClient::onCloseMsgDone()
 
 AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
@@ -214,7 +209,6 @@ AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
 
 AfterAction MqStreamClient::onMsgEvent(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
@@ -236,14 +230,12 @@ AfterAction MqStreamClient::onMsgEvent(AsyncMsg * msg)
 
 void MqStreamClient::onCloseEvent()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     tDLogI("MqStreamClient::onCloseEvent() Close message confirmed.");
     tearDown(true);
 }
 
 void MqStreamClient::afterProcessMessage(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     _writer->queue.pop();
@@ -288,7 +280,6 @@ static Err __write_client(Stream * stream, uint8_t const * data, std::size_t siz
 
 void MqStreamClient::onWriterAsync(Writer * writer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(writer != nullptr);
     assert(writer == _writer.get());
     assert(writer->state == MqRequestState::MRS_ASYNC);
@@ -321,10 +312,8 @@ void MqStreamClient::onWriterAsync(Writer * writer)
 
 void MqStreamClient::onWriterClose(Writer * writer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-    assert(writer != nullptr);
-
     using namespace libtbag::mq::details;
+    assert(writer != nullptr);
     assert(isClosingState(_state));
     assert(!_client->isClosing());
     _client->close();
@@ -332,7 +321,6 @@ void MqStreamClient::onWriterClose(Writer * writer)
 
 void MqStreamClient::onCloseTimer(CloseTimer * timer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(timer != nullptr);
 
     using namespace libtbag::mq::details;
@@ -344,14 +332,12 @@ void MqStreamClient::onCloseTimer(CloseTimer * timer)
 
 void MqStreamClient::onCloseTimerClose(CloseTimer * timer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(timer != nullptr);
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onCloseTimerClose() Close timer.");
 }
 
 void MqStreamClient::onConnect(ConnectRequest & request, Err code)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_client));
     assert(_state == MqMachineState::MMS_INITIALIZED);
 
@@ -374,7 +360,6 @@ void MqStreamClient::onConnect(ConnectRequest & request, Err code)
 
 void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     if (isSuccess(code)) {
         tDLogIfD(PARAMS.verbose, "MqStreamClient::onNodeShutdown() Shutdown success.");
     } else {
@@ -384,7 +369,6 @@ void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
 
 void MqStreamClient::onWrite(WriteRequest & request, Err code)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_writer));
     assert(!_writer->queue.empty());
     assert(_writer->state == MqRequestState::MRS_REQUESTING);
@@ -403,13 +387,11 @@ void MqStreamClient::onWrite(WriteRequest & request, Err code)
 
 binf MqStreamClient::onAlloc(std::size_t suggested_size)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     return libtbag::uvpp::defaultOnAlloc(_read_buffer, suggested_size);
 }
 
 void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(_client != nullptr);
 
     if (code == Err::E_EOF) {
@@ -502,15 +484,8 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
 
 void MqStreamClient::onClose()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-
-    using namespace libtbag::mq::details;
-    assert(isClosingState(_state));
-
-    tDLogI("MqStreamClient::onClose() Close this client!");
-
-    // Last closing point.
     _state = MqMachineState::MMS_CLOSED;
+    tDLogI("MqStreamClient::onClose() Close this client!");
 }
 
 } // namespace node

@@ -41,12 +41,11 @@ MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
 
 MqEventQueue::~MqEventQueue()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
+    // EMPTY.
 }
 
 void MqEventQueue::onAsyncMsg(AsyncMsg * async)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
     auto const AFTER_ACTION = onMsg(async);
     if (AFTER_ACTION == AfterAction::AA_OK) {
@@ -59,7 +58,6 @@ void MqEventQueue::onAsyncMsg(AsyncMsg * async)
 
 void MqEventQueue::onCloseMsg(AsyncMsg * async)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(async != nullptr);
 
     ++__closed_messages__;
@@ -71,7 +69,6 @@ void MqEventQueue::onCloseMsg(AsyncMsg * async)
 
 void MqEventQueue::closeAsyncMsgs()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     for (auto & msg : __messages__) {
         assert(static_cast<bool>(msg));
         msg->close();
@@ -143,19 +140,17 @@ Err MqEventQueue::enqueue(char const * data, std::size_t size)
 
 MqEventQueue::AfterAction MqEventQueue::onMsg(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
     return AfterAction::AA_OK;
 }
 
 void MqEventQueue::onCloseMsgDone()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
+    // EMPTY.
 }
 
 Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool verify)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     if (verify) {

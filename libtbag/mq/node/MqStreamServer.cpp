@@ -32,6 +32,11 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
         : MqBase(loop, params, MqMachineState::MMS_NONE),
           _server(), _nodes(), _packer(params.packer_size)
 {
+    if (PARAMS.type == MqType::MT_PIPE && libtbag::filesystem::Path(params.address).exists()) {
+        tDLogE("MqStreamServer::MqStreamServer() Exists named pipe: {}", params.address);
+        throw ErrException(Err::E_EEXIST);
+    }
+
     if (PARAMS.type == MqType::MT_PIPE) {
         _server = loop.newHandle<PipeServer>(loop, this);
     } else if (PARAMS.type == MqType::MT_TCP) {
@@ -43,27 +48,20 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
     assert(static_cast<bool>(_server));
     assert(_server->isInit());
 
-    _writer = loop.newHandle<Writer>(loop, this);
-    assert(static_cast<bool>(_writer));
-    assert(_writer->isInit());
-
     if (PARAMS.type == MqType::MT_PIPE) {
-        if (libtbag::filesystem::Path(params.address).exists()) {
-            tDLogE("MqStreamServer::MqStreamServer() Exists named pipe: {}", params.address);
-            throw ErrException(Err::E_EEXIST);
-        }
-
         auto * pipe = (PipeServer*)(_server.get());
         assert(pipe != nullptr);
         auto const BIND_CODE = pipe->bind(params.address.c_str());
         if (isFailure(BIND_CODE)) {
             tDLogE("MqStreamServer::MqStreamServer() Pipe bind error: {}", BIND_CODE);
+            _server->close();
             throw ErrException(BIND_CODE);
         }
 
         auto const LISTEN_CODE = pipe->listen();
         if (isFailure(LISTEN_CODE)) {
             tDLogE("MqStreamServer::MqStreamServer() Pipe listen error: {}", LISTEN_CODE);
+            _server->close();
             throw ErrException(LISTEN_CODE);
         }
     } else {
@@ -74,6 +72,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
         auto const INIT_CODE = addr.init(params.address, params.port);
         if (isFailure(INIT_CODE)) {
             tDLogE("MqStreamServer::MqStreamServer() Socket init error: {}", INIT_CODE);
+            _server->close();
             throw ErrException(INIT_CODE);
         }
 
@@ -87,15 +86,21 @@ MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
         auto const BIND_CODE = tcp->bind(addr.getCommon(), flags);
         if (isFailure(BIND_CODE)) {
             tDLogE("MqStreamServer::MqStreamServer() Socket bind error: {}", BIND_CODE);
+            _server->close();
             throw ErrException(BIND_CODE);
         }
 
         auto const LISTEN_CODE = tcp->listen();
         if (isFailure(LISTEN_CODE)) {
             tDLogE("MqStreamServer::MqStreamServer() Socket listen error: {}", LISTEN_CODE);
+            _server->close();
             throw ErrException(LISTEN_CODE);
         }
     }
+
+    _writer = loop.newHandle<Writer>(loop, this);
+    assert(static_cast<bool>(_writer));
+    assert(_writer->isInit());
 
     _state = MqMachineState::MMS_ACTIVE;
 }
@@ -114,7 +119,6 @@ static Err __shutdown(Stream * stream)
 
 Err MqStreamServer::shutdown(Stream * stream)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(stream != nullptr);
     if (PARAMS.type == MqType::MT_PIPE) {
         return __shutdown<PipeNode>(stream);
@@ -126,7 +130,6 @@ Err MqStreamServer::shutdown(Stream * stream)
 
 void MqStreamServer::close(Stream * stream)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(stream != nullptr);
     if (!stream->isClosing()) {
         stream->close();
@@ -135,7 +138,6 @@ void MqStreamServer::close(Stream * stream)
 
 std::size_t MqStreamServer::shutdownNodes()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     std::size_t success_count = 0;
     for (auto node : _nodes) {
         if (isSuccess(shutdown(node.get()))) {
@@ -147,7 +149,6 @@ std::size_t MqStreamServer::shutdownNodes()
 
 std::size_t MqStreamServer::closeNodes()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     std::size_t count = 0;
     for (auto node : _nodes) {
         close(node.get());
@@ -158,7 +159,6 @@ std::size_t MqStreamServer::closeNodes()
 
 void MqStreamServer::shutdownAndClose()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(_writer->queue.empty());
     std::size_t const SHUTDOWN_COUNT = shutdownNodes();
 
@@ -185,8 +185,6 @@ void MqStreamServer::shutdownAndClose()
 
 void MqStreamServer::tearDown(bool on_message)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-
     using namespace libtbag::mq::details;
     if (isInactiveState(_state)) {
         assert(isCloseState(_state));
@@ -226,7 +224,6 @@ void MqStreamServer::tearDown(bool on_message)
 
 void MqStreamServer::onCloseMsgDone()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(!_writer->isClosing());
     _writer->close();
 
@@ -240,7 +237,6 @@ void MqStreamServer::onCloseMsgDone()
 
 AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
@@ -262,7 +258,6 @@ AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
 
 AfterAction MqStreamServer::onMsgEvent(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
@@ -284,14 +279,12 @@ AfterAction MqStreamServer::onMsgEvent(AsyncMsg * msg)
 
 void MqStreamServer::onCloseEvent()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     tDLogI("MqStreamServer::onCloseEvent() Close message confirmed.");
     tearDown(true);
 }
 
 void MqStreamServer::afterProcessMessage(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     _writer->queue.pop();
@@ -360,7 +353,6 @@ static std::size_t __write_all_nodes(NodeSet & nodes, uint8_t const * data, std:
 
 void MqStreamServer::onWriterAsync(Writer * writer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(writer != nullptr);
     assert(writer == _writer.get());
     assert(writer->state == MqRequestState::MRS_ASYNC);
@@ -424,10 +416,8 @@ void MqStreamServer::onWriterAsync(Writer * writer)
 
 void MqStreamServer::onWriterClose(Writer * writer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-    assert(writer != nullptr);
-
     using namespace libtbag::mq::details;
+    assert(writer != nullptr);
     assert(isClosingState(_state));
     assert(!_server->isClosing());
     _server->close();
@@ -435,7 +425,6 @@ void MqStreamServer::onWriterClose(Writer * writer)
 
 void MqStreamServer::onCloseTimer(CloseTimer * timer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(timer != nullptr);
 
     using namespace libtbag::mq::details;
@@ -448,14 +437,12 @@ void MqStreamServer::onCloseTimer(CloseTimer * timer)
 
 void MqStreamServer::onCloseTimerClose(CloseTimer * timer)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(timer != nullptr);
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onCloseTimerClose() Close timer.");
 }
 
 void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Err code)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(node != nullptr);
     if (isSuccess(code)) {
         tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeShutdown() Shutdown success.");
@@ -466,7 +453,6 @@ void MqStreamServer::onNodeShutdown(Stream * node, ShutdownRequest & request, Er
 
 void MqStreamServer::onNodeWrite(Stream * node, WriteRequest & request, Err code)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(static_cast<bool>(_writer));
     assert(!_writer->queue.empty());
     assert(_writer->state == MqRequestState::MRS_REQUESTING);
@@ -508,7 +494,6 @@ static Buffer & __at_read_buffer(Stream * stream, MqType type)
 
 binf MqStreamServer::onNodeAlloc(Stream * node, std::size_t suggested_size)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     return libtbag::uvpp::defaultOnAlloc(__at_read_buffer(node, PARAMS.type), suggested_size);
 }
 
@@ -546,7 +531,6 @@ static void __insert_buffer(Stream * stream, char const * buffer, std::size_t si
 
 void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, std::size_t size)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(node != nullptr);
     tDLogD("MqStreamServer::onNodeRead() code: {}", code);
 
@@ -650,8 +634,6 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
 
 void MqStreamServer::onNodeClose(Stream * node)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-
     auto const ERASE_RESULT = _nodes.erase(StreamPointer(node));
     assert(ERASE_RESULT == 1);
 
@@ -661,8 +643,6 @@ void MqStreamServer::onNodeClose(Stream * node)
 
 void MqStreamServer::onServerConnection(Stream * server, Err code)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-
     if (isFailure(code)) {
         tDLogE("MqStreamServer::onServerConnection() Connection error: {}", code);
         return;
@@ -730,15 +710,8 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
 
 void MqStreamServer::onServerClose(Stream * server)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-
-    using namespace libtbag::mq::details;
-    assert(isClosingState(_state));
-
-    tDLogI("MqStreamServer::onServerClose() Close this server!");
-
-    // Last closing point.
     _state = MqMachineState::MMS_CLOSED;
+    tDLogI("MqStreamServer::onServerClose() Close this server!");
 }
 
 } // namespace node

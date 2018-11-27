@@ -87,13 +87,19 @@ public:
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         assert(MODE != MqMode::MM_NONE);
-        if (!_pool.waitPush([&](){ init(params, mode); })) {
+        bool push_result = _pool.waitPush([&](){
+            init(params, mode);
+        });
+        assert(push_result);
+
+        if (!_loop || !_mq) {
             throw std::bad_alloc();
         }
-        assert(static_cast<bool>(_mq));
-        if (!_pool.push([&](){ runner(); })) {
-            throw std::bad_alloc();
-        }
+
+        push_result = _pool.push([&](){
+            runner();
+        });
+        assert(push_result);
 
         // [CONNECT(CLIENT) ONLY]
         // Wait until connection is completed.
@@ -132,11 +138,7 @@ public:
             _mq.reset();
             _pool.exit();
         });
-        if (!PUSH_RESULT) {
-            tDLogE("MqNode::Impl::~Impl({}/{}) Task push failed.", TYPE_NAME, MODE_NAME);
-            _mq.reset();
-            _pool.exit();
-        }
+        assert(PUSH_RESULT);
 
         tDLogIfI(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Wait for Pool to exit.", TYPE_NAME, MODE_NAME);
         _pool.join();
@@ -146,11 +148,20 @@ public:
 public:
     void init(MqParams const & params, MqMode mode)
     {
-        if (MODE == MqMode::MM_BIND) {
-            _mq = std::make_shared<MqStreamServer>(_loop, params);
-        } else {
-            assert(MODE == MqMode::MM_CONNECT);
-            _mq = std::make_shared<MqStreamClient>(_loop, params);
+        char const * const TYPE_NAME = getTypeName(params.type);
+        char const * const MODE_NAME = getModeName(mode);
+
+        try {
+            if (MODE == MqMode::MM_BIND) {
+                _mq = std::make_shared<MqStreamServer>(_loop, params);
+            } else {
+                assert(MODE == MqMode::MM_CONNECT);
+                _mq = std::make_shared<MqStreamClient>(_loop, params);
+            }
+        } catch (std::exception e) {
+            tDLogE("MqNode::Impl::init({}/{}) Standard exception: {}", TYPE_NAME, MODE_NAME, e.what());
+        } catch (...) {
+            tDLogE("MqNode::Impl::init({}/{}) Unknown exception.", TYPE_NAME, MODE_NAME);
         }
     }
 

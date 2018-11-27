@@ -35,8 +35,6 @@ MqLocalQueue::~MqLocalQueue()
 
 void MqLocalQueue::onCloseMsgDone()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
-
     using namespace libtbag::mq::details;
     assert(isClosingState(_state));
 
@@ -48,7 +46,6 @@ void MqLocalQueue::onCloseMsgDone()
 
 AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
@@ -70,7 +67,6 @@ AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
 
 AfterAction MqLocalQueue::onMsgEvent(AsyncMsg * msg)
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
@@ -102,7 +98,6 @@ AfterAction MqLocalQueue::onMsgEvent(AsyncMsg * msg)
 
 void MqLocalQueue::onCloseEvent()
 {
-    assert(THREAD_ID == std::this_thread::get_id());
     tDLogI("MqLocalQueue::onCloseEvent() Close message confirmed.");
 
     using namespace libtbag::mq::details;
