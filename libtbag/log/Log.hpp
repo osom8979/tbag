@@ -86,6 +86,9 @@ TBAG_API Logger * getDefaultLogger();
 
 TBAG_API bool existsLogger(std::string const & name);
 
+TBAG_API void setSeverity(std::string const & name, Severity level);
+TBAG_API void setDefaultSeverity(Severity level);
+
 /**
  * @remarks
  *  - 0:       OFF_SEVERITY
@@ -99,9 +102,7 @@ TBAG_API bool existsLogger(std::string const & name);
  *  - 8:     DEBUG_SEVERITY
  */
 TBAG_API void setLevel(std::string const & name, int level);
-
-TBAG_API void setSeverity(std::string const & name, Severity level);
-TBAG_API void setDefaultSeverity(Severity level);
+TBAG_API void setDefaultLevel(int level);
 
 TBAG_API Severity getSeverity(std::string const & name);
 TBAG_API Severity getDefaultSeverity();
