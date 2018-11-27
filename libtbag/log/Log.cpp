@@ -42,9 +42,14 @@ Logger * createLogger(std::string const & name, MakeType type, Args && ... args)
 
 } // namespace impl {
 
-Logger * createColorStdoutLogger(std::string const & name, bool auto_flush)
+Logger * createRawStdoutLogger(std::string const & name, bool mutex, bool auto_flush)
 {
-    return createStdoutLogger(name, MakeType::DEFAULT_COLOR, false, auto_flush);
+    return createStdoutLogger(name, MakeType::RAW, mutex, auto_flush);
+}
+
+Logger * createColorStdoutLogger(std::string const & name, bool mutex, bool auto_flush)
+{
+    return createStdoutLogger(name, MakeType::DEFAULT_COLOR, mutex, auto_flush);
 }
 
 Logger * createStdoutLogger(std::string const & name, MakeType type, bool mutex, bool auto_flush)
@@ -59,11 +64,8 @@ Logger * createStdoutLogger(std::string const & name, MakeType type, bool mutex,
     }
 }
 
-Logger * createFileLogger(std::string const & name,
-                          std::string const & path,
-                          MakeType type,
-                          bool mutex,
-                          bool auto_flush)
+Logger * createFileLogger(std::string const & name, std::string const & path,
+                          MakeType type, bool mutex, bool auto_flush)
 {
     using     MutexFileSink = sink::FileSink<std::mutex>;
     using FakeMutexFileSink = sink::FileSink<lock::FakeLock>;
@@ -75,13 +77,9 @@ Logger * createFileLogger(std::string const & name,
     }
 }
 
-Logger * createRotateFileLogger(std::string const & name,
-                                std::string const & path,
-                                std::size_t max_size,
-                                std::size_t max_file_count,
-                                MakeType type,
-                                bool mutex,
-                                bool auto_flush)
+Logger * createRotateFileLogger(std::string const & name, std::string const & path,
+                                std::size_t max_size, std::size_t max_file_count,
+                                MakeType type, bool mutex, bool auto_flush)
 {
     using     MutexRotateFileSink = sink::RotateFileSink<std::mutex>;
     using FakeMutexRotateFileSink = sink::RotateFileSink<lock::FakeLock>;
@@ -93,24 +91,31 @@ Logger * createRotateFileLogger(std::string const & name,
     }
 }
 
-Logger * createDefaultStdoutLogger(bool auto_flush)
+Logger * createDefaultRawStdoutLogger(bool mutex, bool auto_flush)
 {
-    return createStdoutLogger(TBAG_DEFAULT_LOGGER_NAME, MakeType::DEFAULT, true, auto_flush);
+    return createRawStdoutLogger(TBAG_DEFAULT_LOGGER_NAME, mutex, auto_flush);
 }
 
-Logger * createDefaultColorStdoutLogger(bool auto_flush)
+Logger * createDefaultColorStdoutLogger(bool mutex, bool auto_flush)
 {
-    return createColorStdoutLogger(TBAG_DEFAULT_LOGGER_NAME, auto_flush);
+    return createColorStdoutLogger(TBAG_DEFAULT_LOGGER_NAME, mutex, auto_flush);
 }
 
-Logger * createDefaultFileLogger(std::string const & path, bool auto_flush)
+Logger * createDefaultStdoutLogger(bool mutex, bool auto_flush)
 {
-    return createFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, MakeType::DEFAULT, true, auto_flush);
+    return createStdoutLogger(TBAG_DEFAULT_LOGGER_NAME, MakeType::DEFAULT, mutex, auto_flush);
 }
 
-Logger * createDefaultRotateFileLogger(std::string const & path, std::size_t max_size, std::size_t max_file_count, bool auto_flush)
+Logger * createDefaultFileLogger(std::string const & path, bool mutex, bool auto_flush)
 {
-    return createRotateFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, max_size, max_file_count, MakeType::DEFAULT, true, auto_flush);
+    return createFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, MakeType::DEFAULT, mutex, auto_flush);
+}
+
+Logger * createDefaultRotateFileLogger(std::string const & path, std::size_t max_size, std::size_t max_file_count,
+                                       bool mutex, bool auto_flush)
+{
+    return createRotateFileLogger(TBAG_DEFAULT_LOGGER_NAME, path, max_size, max_file_count,
+                                  MakeType::DEFAULT, mutex, auto_flush);
 }
 
 bool removeLogger(std::string const & name)
