@@ -80,6 +80,7 @@ public:
     using MqEventQueue   = libtbag::mq::details::MqEventQueue;
     using MqQueue        = libtbag::mq::details::MqQueue;
     using MqParams       = libtbag::mq::details::MqParams;
+    using MqIsConsume    = libtbag::mq::details::MqIsConsume;
 
     using AsyncMsg        = MqEventQueue::AsyncMsg;
     using AfterAction     = MqEventQueue::AfterAction;

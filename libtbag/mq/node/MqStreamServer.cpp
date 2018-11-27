@@ -266,7 +266,9 @@ AfterAction MqStreamServer::onMsgEvent(AsyncMsg * msg)
     _writer->queue.push(AsyncMsgPointer(msg));
 
     if (_writer->state != MqRequestState::MRS_WAITING) {
-        tDLogIfD(PARAMS.verbose, "MqStreamServer::onMsgEvent() Writer is already working");
+        tDLogIfD(PARAMS.verbose,
+                 "MqStreamServer::onMsgEvent() Writer is already working: queueing({})",
+                 _writer->queue.size());
         return AfterAction::AA_DELAY;
     }
 
@@ -358,6 +360,10 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     assert(writer->state == MqRequestState::MRS_ASYNC);
     writer->state = MqRequestState::MRS_REQUESTING;
 
+    tDLogIfD(PARAMS.verbose,
+             "MqStreamServer::onWriterAsync() Async write: queueing({})",
+             _writer->queue.size());
+
     if (writer->queue.empty()) {
         assert(_state == MqMachineState::MMS_CLOSING);
         writer->state = MqRequestState::MRS_WAITING;
@@ -371,13 +377,19 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
 
-    if (PARAMS.write_filter_cb != nullptr) {
+    if (PARAMS.write_cb != nullptr) {
         // Give the user a chance to filter the message.
-        if (!PARAMS.write_filter_cb(*(msg_pointer.get()), this)) {
-            tDLogIfI(PARAMS.verbose, "MqStreamServer::onWriterAsync() Filtered this message.");
+        if (PARAMS.write_cb(*(msg_pointer.get()), this) == MqIsConsume::MIC_CONSUMED) {
+            tDLogIfI(PARAMS.verbose, "MqStreamServer::onWriterAsync() Consumed this message.");
             afterProcessMessage(msg_pointer.get());
             return;
         }
+    }
+
+    if (_nodes.empty()) {
+        tDLogIfD(PARAMS.verbose, "MqStreamServer::onWriterAsync() The transport node does not exist.");
+        afterProcessMessage(msg_pointer.get());
+        return;
     }
 
     if (msg_pointer.get()->stream) {
@@ -401,6 +413,7 @@ void MqStreamServer::onWriterAsync(Writer * writer)
         writer->write_count = __write_all_nodes(_nodes, _packer.point(), _packer.size(), PARAMS.type);
     }
 
+    assert(!_nodes.empty());
     if (writer->write_count == _nodes.size()) {
         tDLogIfD(PARAMS.verbose, "MqStreamServer::onWriterAsync() Write process ({}) ... "
                  "Next, onNodeWrite() event method.", writer->write_count);

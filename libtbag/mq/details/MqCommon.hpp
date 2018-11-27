@@ -308,6 +308,12 @@ struct TBAG_API MqMsgCopyTo
     bool operator()(MqMsg * msg);
 };
 
+enum class MqIsConsume
+{
+    MIC_PASS,
+    MIC_CONSUMED,
+};
+
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_QUEUE_SIZE       = 1024;            // power of 2.
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_PACKET_SIZE      = 256;             // data buffer size.
 TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_MAX_NODE_SIZE    = 100000;          // Number of C10K.
@@ -321,7 +327,7 @@ struct MqInterface;
 /**
  * Message filter.
  */
-using MqOnWriteFilter = bool(*)(MqMsg & msg, MqInterface * mq_node);
+using MqOnWrite = MqIsConsume(*)(MqMsg & msg, MqInterface * mq_node);
 
 /**
  * Callback prototype for intercepting Receive events.
@@ -368,7 +374,7 @@ struct MqParams
     /**
      * Give the user a chance to filter the message.
      */
-    MqOnWriteFilter write_filter_cb = nullptr;
+    MqOnWrite write_cb = nullptr;
 
     /**
      * Use the receive callback.
