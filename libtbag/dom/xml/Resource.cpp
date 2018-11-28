@@ -214,6 +214,11 @@ void Resource::set(std::string const & key, std::string const & value)
     }
 }
 
+bool Resource::exists(std::string const & key) const
+{
+    return _map.find(key) != _map.end();
+}
+
 std::string & Resource::at(std::string const & key)
 {
     return _map.at(key);

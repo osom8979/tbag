@@ -199,7 +199,10 @@ public:
     __RESOURCE_MUTATOR_IMPLEMENT(long double);
 
 public:
-    std::string & at(std::string const & key);
+    bool exists(std::string const & key) const;
+
+public:
+    std::string       & at(std::string const & key);
     std::string const & at(std::string const & key) const;
 
 public:
