@@ -43,19 +43,30 @@ namespace details {
  *  Negative integers are used by the system.
  *  Custom events use positive integers.
  */
-enum class MqEvent : int32_t
-{
-    ME_CLOSE = -1,
-    ME_MSG = 0,
-};
+using MqEvent = int32_t;
+
+TBAG_CONSTEXPR MqEvent const ME_CLOSE = -1;
+TBAG_CONSTEXPR MqEvent const ME_MSG   =  0;
 
 inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
 {
     switch (event) {
-    case MqEvent::ME_MSG:   return "MSG";
-    case MqEvent::ME_CLOSE: return "CLOSE";
-    default:                return "UNKNOWN";
+    case ME_CLOSE:
+        return "CLOSE";
+    case ME_MSG:
+        return "MSG";
+    default:
+        if (event > ME_MSG) {
+            return "USER";
+        } else {
+            return "UNKNOWN";
+        }
     }
+}
+
+TBAG_CONSTEXPR MqEvent createUserMqEvent(unsigned short number) TBAG_NOEXCEPT
+{
+    return static_cast<MqEvent>(ME_MSG + number);
 }
 
 enum class MqType : int
@@ -203,9 +214,9 @@ struct MqMsg
     MqEvent event;
     Buffer  buffer;
 
-    MqMsg() : event(MqEvent::ME_MSG), buffer()
+    MqMsg() : event(ME_MSG), buffer()
     { /* EMPTY. */ }
-    MqMsg(std::size_t s) : event(MqEvent::ME_MSG), buffer(s)
+    MqMsg(std::size_t s) : event(ME_MSG), buffer(s)
     { /* EMPTY. */ }
     MqMsg(MqEvent e) : event(e), buffer()
     { /* EMPTY. */ }
@@ -213,9 +224,9 @@ struct MqMsg
     { /* EMPTY. */ }
     MqMsg(MqEvent e, Value const * d, std::size_t s) : event(e), buffer(d, d + s)
     { /* EMPTY. */ }
-    MqMsg(Value const * d, std::size_t s) : event(MqEvent::ME_MSG), buffer(d, d + s)
+    MqMsg(Value const * d, std::size_t s) : event(ME_MSG), buffer(d, d + s)
     { /* EMPTY. */ }
-    MqMsg(std::string const & str) : event(MqEvent::ME_MSG), buffer(str.begin(), str.end())
+    MqMsg(std::string const & str) : event(ME_MSG), buffer(str.begin(), str.end())
     { /* EMPTY. */ }
 
     MqMsg(MqMsg const & obj)

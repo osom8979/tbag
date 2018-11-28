@@ -13,7 +13,7 @@ using namespace libtbag::proto;
 
 TEST(MsgPacketTest, Default)
 {
-    MsgPacket::MqEvent const TEST_EVENT = MsgPacket::MqEvent::ME_MSG;
+    MsgPacket::MqEvent const TEST_EVENT = MsgPacket::ME_MSG;
     std::string const TEST_VALUE = "TEST_MSG";
 
     MsgPacket::MqMsg msg1;

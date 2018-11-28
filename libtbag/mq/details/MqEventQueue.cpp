@@ -120,7 +120,7 @@ static Err __enqueue(UniqueQueue & ready, Predicated predicated)
 
 Err MqEventQueue::enqueueClose()
 {
-    return enqueue(MqMsg(MqEvent::ME_CLOSE));
+    return enqueue(MqMsg(ME_CLOSE));
 }
 
 Err MqEventQueue::enqueue(MqMsg const & msg)

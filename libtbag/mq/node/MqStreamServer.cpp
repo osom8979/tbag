@@ -248,7 +248,7 @@ AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     }
 
     assert(_state == MqMachineState::MMS_ACTIVE);
-    if (msg->event == MqEvent::ME_CLOSE) {
+    if (msg->event == ME_CLOSE) {
         onCloseEvent();
         return AfterAction::AA_OK;
     } else {

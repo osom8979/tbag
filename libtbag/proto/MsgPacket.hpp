@@ -35,6 +35,10 @@ struct MsgPacketTypes : private Noncopyable
     using MqEvent = libtbag::mq::details::MqEvent;
     using MqMsg   = libtbag::mq::details::MqMsg;
     using Buffer  = libtbag::util::Buffer;
+
+    TBAG_CONSTEXPR static MqEvent const ME_CLOSE = libtbag::mq::details::ME_CLOSE;
+    TBAG_CONSTEXPR static MqEvent const ME_MSG   = libtbag::mq::details::ME_MSG;
+    TBAG_CONSTEXPR static MqEvent const ME_USER  = libtbag::mq::details::ME_USER;
 };
 
 /**

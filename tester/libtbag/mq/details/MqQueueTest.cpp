@@ -54,28 +54,28 @@ TEST(MqQueueTest, Default)
     MqMsg msg5;
 
     ASSERT_EQ(Err::E_SUCCESS, queue.dequeue(msg1));
-    ASSERT_EQ(MqEvent::ME_MSG, msg1.event);
+    ASSERT_EQ(ME_MSG, msg1.event);
     ASSERT_EQ(TEST1.size(), msg1.size());
     ASSERT_TRUE(std::equal(TEST1.begin(), TEST1.end(), msg1.begin(), msg1.end()));
     ASSERT_EQ(3, queue.getInaccurateSizeOfActive());
     ASSERT_EQ(QUEUE_SIZE-3, queue.getInaccurateSizeOfReady());
 
     ASSERT_EQ(Err::E_SUCCESS, queue.dequeue(msg2));
-    ASSERT_EQ(MqEvent::ME_MSG, msg2.event);
+    ASSERT_EQ(ME_MSG, msg2.event);
     ASSERT_EQ(TEST2.size(), msg2.size());
     ASSERT_TRUE(std::equal(TEST2.begin(), TEST2.end(), msg2.begin(), msg2.end()));
     ASSERT_EQ(2, queue.getInaccurateSizeOfActive());
     ASSERT_EQ(QUEUE_SIZE-2, queue.getInaccurateSizeOfReady());
 
     ASSERT_EQ(Err::E_SUCCESS, queue.dequeue(msg3));
-    ASSERT_EQ(MqEvent::ME_MSG, msg3.event);
+    ASSERT_EQ(ME_MSG, msg3.event);
     ASSERT_EQ(TEST3.size(), msg3.size());
     ASSERT_TRUE(std::equal(TEST3.begin(), TEST3.end(), msg3.begin(), msg3.end()));
     ASSERT_EQ(1, queue.getInaccurateSizeOfActive());
     ASSERT_EQ(QUEUE_SIZE-1, queue.getInaccurateSizeOfReady());
 
     ASSERT_EQ(Err::E_SUCCESS, queue.dequeue(msg4));
-    ASSERT_EQ(MqEvent::ME_MSG, msg4.event);
+    ASSERT_EQ(ME_MSG, msg4.event);
     ASSERT_EQ(TEST4.size(), msg4.size());
     ASSERT_TRUE(std::equal(TEST4.begin(), TEST4.end(), msg4.begin(), msg4.end()));
     ASSERT_EQ(0, queue.getInaccurateSizeOfActive());
