@@ -18,6 +18,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#include <cassert>
 #include <string>
 #include <utility>
 
@@ -64,15 +65,29 @@ public:
     { return _open; }
 
 public:
-    template <typename ReturnType, typename ... Arg>
-    ReturnType call(char const * name, Arg && ... args) const
+    /**
+     * Call the function of the dynamic module.
+     *
+     * @warning
+     *  In perfect forwarding, <code>void*</code> can be replaced with <code>void*&</code>,
+     *  so you must force cast all symbols.
+     *
+     * @remarks
+     *  Example:
+     *  @code{.cpp}
+     *   DynamicModule module;
+     *   module.open("module.so");
+     *   module.call<void>("func", (void*)context, (char const *)data, (int)size);
+     *  @endcode
+     */
+    template <typename ReturnT, typename ... Arg>
+    ReturnT call(char const * name, Arg && ... args) const
     {
-        typedef ReturnType (*Signature) (Arg ...);
-        Signature func = (Signature)symbol(name);
-        if (func != nullptr) {
-            return func(std::forward<Arg>(args) ...);
-        }
-        return ReturnType();
+        assert(name != nullptr);
+        typedef ReturnT (*SignatureT) (Arg ...);
+        SignatureT func = (SignatureT)symbol(name);
+        assert(func != nullptr);
+        return func(std::forward<Arg>(args) ...);
     }
 };
 
