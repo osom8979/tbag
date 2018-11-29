@@ -72,23 +72,26 @@ TBAG_CONSTEXPR MqEvent createUserMqEvent(unsigned short number) TBAG_NOEXCEPT
 enum class MqType : int
 {
     MT_NONE,
+    MT_LOCAL,
     MT_PIPE,
     MT_UDP,
     MT_TCP,
 };
 
-TBAG_CONSTEXPR char const * const PIPE_UPPER_NAME = "PIPE";
-TBAG_CONSTEXPR char const * const  UDP_UPPER_NAME = "UDP";
-TBAG_CONSTEXPR char const * const  TCP_UPPER_NAME = "TCP";
+TBAG_CONSTEXPR char const * const LOCAL_UPPER_NAME = "LOCAL";
+TBAG_CONSTEXPR char const * const  PIPE_UPPER_NAME = "PIPE";
+TBAG_CONSTEXPR char const * const   UDP_UPPER_NAME = "UDP";
+TBAG_CONSTEXPR char const * const   TCP_UPPER_NAME = "TCP";
 
 inline char const * const getTypeName(MqType type) TBAG_NOEXCEPT
 {
     switch (type) {
-    case MqType::MT_NONE: return "NONE";
-    case MqType::MT_PIPE: return PIPE_UPPER_NAME;
-    case MqType::MT_UDP:  return UDP_UPPER_NAME;
-    case MqType::MT_TCP:  return TCP_UPPER_NAME;
-    default:              return "UNKNOWN";
+    case MqType::MT_NONE:  return "NONE";
+    case MqType::MT_LOCAL: return LOCAL_UPPER_NAME;
+    case MqType::MT_PIPE:  return PIPE_UPPER_NAME;
+    case MqType::MT_UDP:   return UDP_UPPER_NAME;
+    case MqType::MT_TCP:   return TCP_UPPER_NAME;
+    default:               return "UNKNOWN";
     }
 }
 

@@ -10,6 +10,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/mq/details/MqCommon.hpp>
+#include <libtbag/mq/node/MqLocalQueue.hpp>
 #include <libtbag/mq/node/MqStreamClient.hpp>
 #include <libtbag/mq/node/MqStreamServer.hpp>
 #include <libtbag/thread/ThreadPool.hpp>
@@ -47,6 +48,7 @@ public:
     using Loop = libtbag::uvpp::Loop;
 
 public:
+    using MqLocalQueue   = libtbag::mq::node::MqLocalQueue;
     using MqStreamClient = libtbag::mq::node::MqStreamClient;
     using MqStreamServer = libtbag::mq::node::MqStreamServer;
 
@@ -88,7 +90,7 @@ public:
     {
         assert(MODE != MqMode::MM_NONE);
         bool push_result = _pool.waitPush([&](){
-            init(params, mode);
+            init(params);
         });
         assert(push_result);
 
@@ -146,17 +148,21 @@ public:
     }
 
 public:
-    void init(MqParams const & params, MqMode mode)
+    void init(MqParams const & params)
     {
         char const * const TYPE_NAME = getTypeName(params.type);
-        char const * const MODE_NAME = getModeName(mode);
+        char const * const MODE_NAME = getModeName(MODE);
 
         try {
-            if (MODE == MqMode::MM_BIND) {
-                _mq = std::make_shared<MqStreamServer>(_loop, params);
+            if (params.type == MqType::MT_LOCAL) {
+                _mq = std::make_shared<MqLocalQueue>(_loop, params);
             } else {
-                assert(MODE == MqMode::MM_CONNECT);
-                _mq = std::make_shared<MqStreamClient>(_loop, params);
+                if (MODE == MqMode::MM_BIND) {
+                    _mq = std::make_shared<MqStreamServer>(_loop, params);
+                } else {
+                    assert(MODE == MqMode::MM_CONNECT);
+                    _mq = std::make_shared<MqStreamClient>(_loop, params);
+                }
             }
         } catch (std::exception e) {
             tDLogE("MqNode::Impl::init({}/{}) Standard exception: {}", TYPE_NAME, MODE_NAME, e.what());
