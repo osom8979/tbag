@@ -111,9 +111,6 @@ protected:
     virtual void setUp   () { /* EMPTY. */ }
     virtual void tearDown() { /* EMPTY. */ }
 
-protected:
-    virtual void signal(int signum);
-
 public:
     bool waitPush(Task const & task)
     {

@@ -7,7 +7,6 @@
 
 #include <libtbag/thread/ThreadPool.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
-#include <libtbag/thread/ThreadLocalStorage.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/debug/StackTrace.hpp>
 #include <libtbag/log/Log.hpp>
@@ -36,12 +35,6 @@ namespace thread {
  */
 struct ThreadPool::ThreadPimpl
 {
-public:
-    using Tls = libtbag::thread::ThreadLocalStorage;
-
-public:
-    static Tls pimpl_pointer;
-
 public:
     std::size_t const INDEX;
     bool const SIGNAL_HANDING;
@@ -90,11 +83,10 @@ private:
             std::signal(TBAG_SIGNAL_SEGMENTATION_VIOLATION/*...*/, __signal_dispatcher_cb);
             std::signal(TBAG_SIGNAL_TERMINATION/*..............*/, __signal_dispatcher_cb);
             std::signal(TBAG_SIGNAL_ABORT/*....................*/, __signal_dispatcher_cb);
-            std::signal(TBAG_SIGNAL_INTERRUPT/*................*/, __signal_interrupt_cb);
+            std::signal(TBAG_SIGNAL_INTERRUPT/*................*/, __signal_dispatcher_cb);
         }
 
         // Initialize.
-        thread->pimpl_pointer.set(thread);
         thread->id = std::this_thread::get_id();
         thread->active = true;
 
@@ -105,14 +97,6 @@ private:
 
         // Cleanup.
         thread->active = false;
-    }
-
-    static void __signal_interrupt_cb(int signum)
-    {
-        ThreadPimpl * thread = pimpl_pointer.cast<ThreadPimpl>();
-        assert(thread != nullptr);
-        assert(thread->parent != nullptr);
-        thread->parent->signal(signum);
     }
 
     static void __signal_dispatcher_cb(int signum)
@@ -129,18 +113,16 @@ private:
         }
 
         if (existsLogger(TBAG_DEFAULT_LOGGER_NAME) && getSeverity(TBAG_DEFAULT_LOGGER_NAME) >= ALERT_SEVERITY) {
-            tDLogA("ThreadPool::signal({}) Signal catch!\n{}",
+            tDLogA("__signal_dispatcher_cb({}) Signal catch!\n{}",
                    signal_name, getStackTraceString());
         } else {
-            std::cerr << "ThreadPool::signal(" << signal_name << ") Signal catch!\n"
+            std::cerr << "__signal_dispatcher_cb(" << signal_name << ") Signal catch!\n"
                       << getStackTraceString();
         }
 
         exitForce(signum);
     }
 };
-
-ThreadPool::ThreadPimpl::Tls ThreadPool::ThreadPimpl::pimpl_pointer;
 
 // --------------------------
 // ThreadPool implementation.
@@ -401,11 +383,6 @@ std::thread::id ThreadPool::getThreadId(int i) const
     }
     _mutex.unlock();
     return id;
-}
-
-void ThreadPool::signal(int signum)
-{
-    // EMPTY.
 }
 
 bool ThreadPool::waitTask(ThreadPool & pool, Task const & task)
