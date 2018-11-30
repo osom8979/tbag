@@ -216,43 +216,28 @@ public:
 // MqNode implementation.
 // ----------------------
 
-MqNode::MqNode() : _impl(nullptr)
+MqNode::MqNode(MqParams const & params, MqMode mode)
+        : _impl(std::make_unique<Impl>(this, params, mode))
+{
+    assert(static_cast<bool>(_impl));
+}
+
+MqNode::MqNode(std::string const & uri, MqMode mode)
+        : MqNode(getParams(uri), mode)
+{
+    assert(static_cast<bool>(_impl));
+}
+
+MqNode::MqNode(MqNode && obj) TBAG_NOEXCEPT
+        : _impl(std::move(obj._impl))
 {
     // EMPTY.
-}
-
-MqNode::MqNode(MqNode const & obj) TBAG_NOEXCEPT : MqNode()
-{
-    (*this) = obj;
-}
-
-MqNode::MqNode(MqNode && obj) TBAG_NOEXCEPT : MqNode()
-{
-    (*this) = std::move(obj);
-}
-
-MqNode::~MqNode()
-{
-    _impl.reset();
-}
-
-MqNode & MqNode::operator =(MqNode const & obj) TBAG_NOEXCEPT
-{
-    copy(obj);
-    return *this;
 }
 
 MqNode & MqNode::operator =(MqNode && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
-}
-
-void MqNode::copy(MqNode const & obj) TBAG_NOEXCEPT
-{
-    if (this != &obj) {
-        _impl = obj._impl;
-    }
 }
 
 void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
@@ -262,61 +247,21 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
     }
 }
 
-MqNode::MqParams MqNode::getParams(std::string const & uri)
-{
-    return libtbag::mq::details::convertUriToParams(uri);
-}
-
-Err MqNode::bind(MqParams const & params)
-{
-    try {
-        _impl = std::make_shared<Impl>(this, params, MqMode::MM_BIND);
-    } catch (...) {
-        return Err::E_UNKEXCP;
-    }
-    return Err::E_SUCCESS;
-}
-
-Err MqNode::bind(std::string const & uri)
-{
-    return bind(getParams(uri));
-}
-
-Err MqNode::connect(MqParams const & params)
-{
-    try {
-        _impl = std::make_shared<Impl>(this, params, MqMode::MM_CONNECT);
-    } catch (...) {
-        return Err::E_UNKEXCP;
-    }
-    return Err::E_SUCCESS;
-}
-
-Err MqNode::connect(std::string const & uri)
-{
-    return connect(getParams(uri));
-}
-
-Err MqNode::close()
+MqNode::~MqNode()
 {
     _impl.reset();
-    return Err::E_SUCCESS;
 }
 
 Err MqNode::join()
 {
-    if (!_impl) {
-        return Err::E_NREADY;
-    }
+    assert(static_cast<bool>(_impl));
     _impl->join();
     return Err::E_SUCCESS;
 }
 
 Err MqNode::send(MqMsg const & msg)
 {
-    if (!_impl) {
-        return Err::E_NREADY;
-    }
+    assert(static_cast<bool>(_impl));
     return _impl->send(msg);
 }
 
@@ -327,9 +272,7 @@ Err MqNode::send(char const * buffer, std::size_t size)
 
 Err MqNode::recv(MqMsg & msg)
 {
-    if (!_impl) {
-        return Err::E_NREADY;
-    }
+    assert(static_cast<bool>(_impl));
     return _impl->recv(msg);
 }
 
@@ -337,6 +280,31 @@ Err MqNode::recvWait(MqMsg & msg, uint64_t timeout_nano)
 {
     assert(static_cast<bool>(_impl));
     return _impl->recvWait(msg, timeout_nano);
+}
+
+MqNode::MqParams MqNode::getParams(std::string const & uri)
+{
+    return libtbag::mq::details::convertUriToParams(uri);
+}
+
+MqNode MqNode::bind(MqParams const & params)
+{
+    return MqNode(params, MqMode::MM_BIND);
+}
+
+MqNode MqNode::bind(std::string const & uri)
+{
+    return bind(getParams(uri));
+}
+
+MqNode MqNode::connect(MqParams const & params)
+{
+    return MqNode(params, MqMode::MM_CONNECT);
+}
+
+MqNode MqNode::connect(std::string const & uri)
+{
+    return connect(getParams(uri));
 }
 
 } // namespace mq

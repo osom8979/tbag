@@ -13,6 +13,8 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
+#include <iostream>
+#include <string>
 #include <exception>
 #include <chrono>
 #include <uv.h>
@@ -83,11 +85,12 @@ private:
 
         if (thread->SIGNAL_HANDING) {
             using namespace libtbag::signal;
-            std::signal(TBAG_SIGNAL_ILLEGAL_INSTRUCTION, signalDispatcher);
-            std::signal(TBAG_SIGNAL_FLOATING_POINT_EXCEPTION, signalDispatcher);
-            std::signal(TBAG_SIGNAL_SEGMENTATION_VIOLATION, signalDispatcher);
-            std::signal(TBAG_SIGNAL_TERMINATION, signalDispatcher);
-            std::signal(TBAG_SIGNAL_ABORT, signalDispatcher);
+            std::signal(TBAG_SIGNAL_ILLEGAL_INSTRUCTION/*......*/, __signal_dispatcher_cb);
+            std::signal(TBAG_SIGNAL_FLOATING_POINT_EXCEPTION/*.*/, __signal_dispatcher_cb);
+            std::signal(TBAG_SIGNAL_SEGMENTATION_VIOLATION/*...*/, __signal_dispatcher_cb);
+            std::signal(TBAG_SIGNAL_TERMINATION/*..............*/, __signal_dispatcher_cb);
+            std::signal(TBAG_SIGNAL_ABORT/*....................*/, __signal_dispatcher_cb);
+            std::signal(TBAG_SIGNAL_INTERRUPT/*................*/, __signal_interrupt_cb);
         }
 
         // Initialize.
@@ -104,12 +107,36 @@ private:
         thread->active = false;
     }
 
-    static void signalDispatcher(int signum)
+    static void __signal_interrupt_cb(int signum)
     {
         ThreadPimpl * thread = pimpl_pointer.cast<ThreadPimpl>();
         assert(thread != nullptr);
         assert(thread->parent != nullptr);
         thread->parent->signal(signum);
+    }
+
+    static void __signal_dispatcher_cb(int signum)
+    {
+        using namespace libtbag::signal;
+        using namespace libtbag::debug;
+        using namespace libtbag::log;
+
+        std::string signal_name;
+        if (existSignalNumber(signum)) {
+            signal_name = getSignalName(signum);
+        } else {
+            signal_name = std::to_string(signum);
+        }
+
+        if (existsLogger(TBAG_DEFAULT_LOGGER_NAME) && getSeverity(TBAG_DEFAULT_LOGGER_NAME) >= ALERT_SEVERITY) {
+            tDLogA("ThreadPool::signal({}) Signal catch!\n{}",
+                   signal_name, getStackTraceString());
+        } else {
+            std::cerr << "ThreadPool::signal(" << signal_name << ") Signal catch!\n"
+                      << getStackTraceString();
+        }
+
+        exitForce(signum);
     }
 };
 
@@ -378,16 +405,7 @@ std::thread::id ThreadPool::getThreadId(int i) const
 
 void ThreadPool::signal(int signum)
 {
-    using namespace libtbag::signal;
-    using namespace libtbag::debug;
-    if (existSignalNumber(signum)) {
-        tDLogA("ThreadPool::signal({}) Signal catch!\n{}",
-               getSignalName(signum), getStackTraceString());
-    } else {
-        tDLogA("ThreadPool::signal({}) Signal catch!\n{}",
-               signum, getStackTraceString());
-    }
-    exitForce(signum);
+    // EMPTY.
 }
 
 bool ThreadPool::waitTask(ThreadPool & pool, Task const & task)
