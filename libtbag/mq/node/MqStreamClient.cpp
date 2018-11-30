@@ -246,18 +246,21 @@ void MqStreamClient::afterProcessMessage(AsyncMsg * msg)
         auto const CODE = _writer->send();
         assert(isSuccess(CODE));
         _writer->state = MqRequestState::MRS_ASYNC;
-        tDLogIfD(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Async next message ...");
+        tDLogIfD(PARAMS.verbose,
+                 "MqStreamClient::afterProcessMessage() Async next message (queue:{}) ...",
+                 _writer->queue.size());
         return;
     }
 
+    assert(_writer->queue.empty());
     _writer->state = MqRequestState::MRS_WAITING;
 
     // If the shutdown is delayed, proceed with it.
     if (_state == MqMachineState::MMS_DELAY_CLOSING) {
-        tDLogIfI(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Async next message ...");
+        tDLogIfN(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Delayed shutdown progresses.");
         shutdownAndClose();
     } else {
-        tDLogIfD(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Waiting for messages ...");
+        tDLogIfI(PARAMS.verbose, "MqStreamClient::afterProcessMessage() Waiting for messages.");
     }
 }
 
@@ -301,8 +304,9 @@ void MqStreamClient::onWriterAsync(Writer * writer)
     auto const WRITE_CODE = __write_client(_client.get(), _packer.point(), _packer.size(), PARAMS.type);
     if (isSuccess(WRITE_CODE)) {
         tDLogIfD(PARAMS.verbose,
-                 "MqStreamClient::onWriterAsync() Write process ... "
-                 "Next, onWrite() event method.");
+                 "MqStreamClient::onWriterAsync() Write process {}byte ... "
+                 "Next, onWrite() event method.",
+                 _packer.size());
     } else {
         tDLogW("MqStreamClient::onWriterAsync() Write error({}), "
                "skip this message.", WRITE_CODE);
@@ -419,6 +423,8 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
     }
 
     assert(isSuccess(code));
+    tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Read success. {}byte", size);
+
     _read_error_count = 0;
     _remaining_read.insert(_remaining_read.end(), buffer, buffer + size);
 
@@ -464,7 +470,10 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
             }
 
             if (isSuccess(enqueue_code)) {
-                tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Enqueue success.");
+                tDLogIfD(PARAMS.verbose,
+                         "MqStreamClient::onRead() Enqueue success. "
+                         "Perhaps the remaining queue size is {}.",
+                         _receives.getInaccurateSizeOfActive());
             } else {
                 tDLogE("MqStreamClient::onRead() Enqueue error: {}", enqueue_code);
                 break;

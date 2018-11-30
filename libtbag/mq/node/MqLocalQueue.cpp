@@ -87,7 +87,10 @@ AfterAction MqLocalQueue::onMsgEvent(AsyncMsg * msg)
         }
 
         if (isSuccess(enqueue_code)) {
-            tDLogIfD(PARAMS.verbose, "MqLocalQueue::onMsgEvent() Enqueue success.");
+            tDLogIfD(PARAMS.verbose,
+                     "MqLocalQueue::onMsgEvent() Enqueue success. "
+                     "Perhaps the remaining queue size is {}.",
+                     _receives.getInaccurateSizeOfActive());
         } else {
             tDLogE("MqLocalQueue::onMsgEvent() Enqueue error: {}", enqueue_code);
         }

@@ -297,18 +297,21 @@ void MqStreamServer::afterProcessMessage(AsyncMsg * msg)
         auto const CODE = _writer->send();
         assert(isSuccess(CODE));
         _writer->state = MqRequestState::MRS_ASYNC;
-        tDLogIfD(PARAMS.verbose, "MqStreamServer::afterProcessMessage() Async next message ...");
+        tDLogIfD(PARAMS.verbose,
+                 "MqStreamServer::afterProcessMessage() Async next message (queue:{}) ...",
+                 _writer->queue.size());
         return;
     }
 
+    assert(_writer->queue.empty());
     _writer->state = MqRequestState::MRS_WAITING;
 
     // If the shutdown is delayed, proceed with it.
     if (_state == MqMachineState::MMS_DELAY_CLOSING) {
-        tDLogIfI(PARAMS.verbose, "MqStreamServer::afterProcessMessage() Async next message ...");
+        tDLogIfN(PARAMS.verbose, "MqStreamServer::afterProcessMessage() Delayed shutdown progresses.");
         shutdownAndClose();
     } else {
-        tDLogIfD(PARAMS.verbose, "MqStreamServer::afterProcessMessage() Waiting for messages ...");
+        tDLogIfI(PARAMS.verbose, "MqStreamServer::afterProcessMessage() Waiting for messages.");
     }
 }
 
@@ -545,7 +548,6 @@ static void __insert_buffer(Stream * stream, char const * buffer, std::size_t si
 void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, std::size_t size)
 {
     assert(node != nullptr);
-    tDLogD("MqStreamServer::onNodeRead() code: {}", code);
 
     if (code == Err::E_EOF) {
         tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() End of file.");
@@ -569,6 +571,8 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
     }
 
     assert(isSuccess(code));
+    tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Read success. {}byte", size);
+
     read_error_count = 0;
     __insert_buffer(node, buffer, size, PARAMS.type);
 
@@ -627,7 +631,10 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
             }
 
             if (isSuccess(enqueue_code)) {
-                tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Enqueue success.");
+                tDLogIfD(PARAMS.verbose,
+                         "MqStreamServer::onNodeRead() Enqueue success. "
+                         "Perhaps the remaining queue size is {}.",
+                         _receives.getInaccurateSizeOfActive());
             } else {
                 tDLogE("MqStreamServer::onNodeRead() Enqueue error: {}", enqueue_code);
                 break;
