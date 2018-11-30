@@ -19,6 +19,8 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
 
+#include <string>
+#include <vector>
 #include <memory>
 
 // -------------------
@@ -71,11 +73,29 @@ public:
     { lh.swap(rh); }
 
 public:
+    inline bool exists() const TBAG_NOEXCEPT
+    { return static_cast<bool>(_impl); }
+
+    inline operator bool() const TBAG_NOEXCEPT
+    { return exists(); }
+
+public:
     Err join();
 
 public:
     Err send(MqMsg const & msg);
+
+public:
     Err send(char const * buffer, std::size_t size);
+    Err send(MqEvent event, char const * buffer, std::size_t size);
+
+public:
+    Err send(std::string const & text);
+    Err send(MqEvent event, std::string const & text);
+
+public:
+    Err send(MqMsg::Buffer const & buffer);
+    Err send(MqEvent event, MqMsg::Buffer const & buffer);
 
 public:
     Err recv(MqMsg & msg);
@@ -91,6 +111,35 @@ public:
     static MqNode connect(MqParams const & params);
     static MqNode connect(std::string const & uri);
 };
+
+// ----------
+// Utilities.
+// ----------
+
+using MqUniqueNode = std::unique_ptr<MqNode>;
+using MqSharedNode = std::shared_ptr<MqNode>;
+
+TBAG_API MqUniqueNode bindUniqueNode(MqNode::MqParams const & params);
+TBAG_API MqUniqueNode bindUniqueNode(std::string const & uri);
+
+TBAG_API MqUniqueNode connectUniqueNode(MqNode::MqParams const & params);
+TBAG_API MqUniqueNode connectUniqueNode(std::string const & uri);
+
+TBAG_API MqSharedNode bindSharedNode(MqNode::MqParams const & params);
+TBAG_API MqSharedNode bindSharedNode(std::string const & uri);
+
+TBAG_API MqSharedNode connectSharedNode(MqNode::MqParams const & params);
+TBAG_API MqSharedNode connectSharedNode(std::string const & uri);
+
+TBAG_API Err bind(MqUniqueNode & node, MqNode::MqParams const & params);
+TBAG_API Err bind(MqUniqueNode & node, std::string const & uri);
+TBAG_API Err bind(MqSharedNode & node, MqNode::MqParams const & params);
+TBAG_API Err bind(MqSharedNode & node, std::string const & uri);
+
+TBAG_API Err connect(MqUniqueNode & node, MqNode::MqParams const & params);
+TBAG_API Err connect(MqUniqueNode & node, std::string const & uri);
+TBAG_API Err connect(MqSharedNode & node, MqNode::MqParams const & params);
+TBAG_API Err connect(MqSharedNode & node, std::string const & uri);
 
 } // namespace mq
 

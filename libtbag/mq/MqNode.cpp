@@ -190,12 +190,12 @@ public:
     }
 
 public:
-    void join()
+    Err join()
     {
         _pool.join();
+        return Err::E_SUCCESS;
     }
 
-public:
     Err send(MqMsg const & msg)
     {
         return _mq->send(msg);
@@ -255,8 +255,7 @@ MqNode::~MqNode()
 Err MqNode::join()
 {
     assert(static_cast<bool>(_impl));
-    _impl->join();
-    return Err::E_SUCCESS;
+    return _impl->join();
 }
 
 Err MqNode::send(MqMsg const & msg)
@@ -268,6 +267,31 @@ Err MqNode::send(MqMsg const & msg)
 Err MqNode::send(char const * buffer, std::size_t size)
 {
     return send(MqMsg(buffer, size));
+}
+
+Err MqNode::send(MqEvent event, char const * buffer, std::size_t size)
+{
+    return send(MqMsg(event, buffer, size));
+}
+
+Err MqNode::send(std::string const & text)
+{
+    return send(MqMsg(text));
+}
+
+Err MqNode::send(MqEvent event, std::string const & text)
+{
+    return send(MqMsg(event, text));
+}
+
+Err MqNode::send(MqMsg::Buffer const & buffer)
+{
+    return send(MqMsg(buffer));
+}
+
+Err MqNode::send(MqEvent event, MqMsg::Buffer const & buffer)
+{
+    return send(MqMsg(event, buffer));
 }
 
 Err MqNode::recv(MqMsg & msg)
@@ -305,6 +329,104 @@ MqNode MqNode::connect(MqParams const & params)
 MqNode MqNode::connect(std::string const & uri)
 {
     return connect(getParams(uri));
+}
+
+// ----------
+// Utilities.
+// ----------
+
+MqUniqueNode bindUniqueNode(MqNode::MqParams const & params)
+{
+    return std::make_unique<MqNode>(params, MqNode::MqMode::MM_BIND);
+}
+
+MqUniqueNode bindUniqueNode(std::string const & uri)
+{
+    return std::make_unique<MqNode>(uri, MqNode::MqMode::MM_BIND);
+}
+
+MqUniqueNode connectUniqueNode(MqNode::MqParams const & params)
+{
+    return std::make_unique<MqNode>(params, MqNode::MqMode::MM_CONNECT);
+}
+
+MqUniqueNode connectUniqueNode(std::string const & uri)
+{
+    return std::make_unique<MqNode>(uri, MqNode::MqMode::MM_CONNECT);
+}
+
+MqSharedNode bindSharedNode(MqNode::MqParams const & params)
+{
+    return std::make_shared<MqNode>(params, MqNode::MqMode::MM_BIND);
+}
+
+MqSharedNode bindSharedNode(std::string const & uri)
+{
+    return std::make_shared<MqNode>(uri, MqNode::MqMode::MM_BIND);
+}
+
+MqSharedNode connectSharedNode(MqNode::MqParams const & params)
+{
+    return std::make_shared<MqNode>(params, MqNode::MqMode::MM_CONNECT);
+}
+
+MqSharedNode connectSharedNode(std::string const & uri)
+{
+    return std::make_shared<MqNode>(uri, MqNode::MqMode::MM_CONNECT);
+}
+
+#ifndef __TBAG_MQ_DEFAULT_TRY
+#define __TBAG_MQ_DEFAULT_TRY(body) \
+    try {                           \
+        body;                       \
+    } catch (ErrException e) {      \
+        return e.CODE;              \
+    } catch (std::exception e) {    \
+        return Err::E_UNKEXCP;      \
+    } catch (...) {                 \
+        return Err::E_UNKNOWN;      \
+    }                               \
+    return Err::E_SUCCESS;
+#endif
+
+Err bind(MqUniqueNode & node, MqNode::MqParams const & params)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = bindUniqueNode(params));
+}
+
+Err bind(MqUniqueNode & node, std::string const & uri)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = bindUniqueNode(uri));
+}
+
+Err bind(MqSharedNode & node, MqNode::MqParams const & params)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = bindSharedNode(params));
+}
+
+Err bind(MqSharedNode & node, std::string const & uri)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = bindSharedNode(uri));
+}
+
+Err connect(MqUniqueNode & node, MqNode::MqParams const & params)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = connectUniqueNode(params));
+}
+
+Err connect(MqUniqueNode & node, std::string const & uri)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = connectUniqueNode(uri));
+}
+
+Err connect(MqSharedNode & node, MqNode::MqParams const & params)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = connectSharedNode(params));
+}
+
+Err connect(MqSharedNode & node, std::string const & uri)
+{
+    __TBAG_MQ_DEFAULT_TRY(node = connectSharedNode(uri));
 }
 
 } // namespace mq

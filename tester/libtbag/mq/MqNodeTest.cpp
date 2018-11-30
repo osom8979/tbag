@@ -34,12 +34,12 @@ TEST(MqNodeTest, ClientRel_ServerRel)
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
-    std::unique_ptr<MqNode> server;
-    std::unique_ptr<MqNode> client;
+    MqUniqueNode server;
+    MqUniqueNode client;
 
     libtbag::log::SeverityGuard guard;
-    ASSERT_NO_THROW(server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND));
-    ASSERT_NO_THROW(client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
+    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
 
     client.reset();
     server.reset();
@@ -51,12 +51,12 @@ TEST(MqNodeTest, ServerRel_ClientRel)
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
-    std::unique_ptr<MqNode> server;
-    std::unique_ptr<MqNode> client;
+    MqUniqueNode server;
+    MqUniqueNode client;
 
     libtbag::log::SeverityGuard guard;
-    ASSERT_NO_THROW(server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND));
-    ASSERT_NO_THROW(client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
+    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
 
     server.reset();
     client.reset();
@@ -67,12 +67,12 @@ TEST(MqNodeTest, ClientToServerMessage)
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
-    std::unique_ptr<MqNode> server;
-    std::unique_ptr<MqNode> client;
+    MqUniqueNode server;
+    MqUniqueNode client;
 
     libtbag::log::SeverityGuard guard;
-    ASSERT_NO_THROW(server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND));
-    ASSERT_NO_THROW(client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
+    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
 
     std::string const TEST1_VAL = "T1E1ST1";
     std::string const TEST2_VAL = "T2E2ST2";
@@ -104,12 +104,12 @@ TEST(MqNodeTest, ServerToClientMessage)
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
-    std::unique_ptr<MqNode> server;
-    std::unique_ptr<MqNode> client;
+    MqUniqueNode server;
+    MqUniqueNode client;
 
     libtbag::log::SeverityGuard guard;
-    ASSERT_NO_THROW(server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND));
-    ASSERT_NO_THROW(client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
+    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
 
     std::string const TEST1_VAL = "T1E1ST1";
     std::string const TEST2_VAL = "T2E2ST2";
@@ -141,12 +141,12 @@ TEST(MqNodeTest, SendAndClose1)
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
-    std::unique_ptr<MqNode> server;
-    std::unique_ptr<MqNode> client;
+    MqUniqueNode server;
+    MqUniqueNode client;
 
     libtbag::log::SeverityGuard guard;
-    ASSERT_NO_THROW(server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND));
-    ASSERT_NO_THROW(client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
+    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
 
     ASSERT_EQ(Err::E_SUCCESS, server->send(MqNode::MqMsg(std::string("T1E1ST1"))));
     ASSERT_EQ(Err::E_SUCCESS, client->send(MqNode::MqMsg(std::string("T2E2ST2"))));
@@ -161,12 +161,12 @@ TEST(MqNodeTest, SendAndClose2)
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
-    std::unique_ptr<MqNode> server;
-    std::unique_ptr<MqNode> client;
+    MqUniqueNode server;
+    MqUniqueNode client;
 
     libtbag::log::SeverityGuard guard;
-    ASSERT_NO_THROW(server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND));
-    ASSERT_NO_THROW(client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
+    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
 
     ASSERT_EQ(Err::E_SUCCESS, server->send(MqNode::MqMsg(std::string("T1E1ST1"))));
     ASSERT_EQ(Err::E_SUCCESS, client->send(MqNode::MqMsg(std::string("T2E2ST2"))));
@@ -181,14 +181,14 @@ TEST(MqNodeTest, MultiClient)
     tttDir_Automatic_Pipe();
     auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
 
-    std::unique_ptr<MqNode> server;
-    std::unique_ptr<MqNode> client1;
-    std::unique_ptr<MqNode> client2;
+    MqUniqueNode server;
+    MqUniqueNode client1;
+    MqUniqueNode client2;
 
     libtbag::log::SeverityGuard guard;
-    ASSERT_NO_THROW(server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND));
-    ASSERT_NO_THROW(client1 = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
-    ASSERT_NO_THROW(client2 = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT));
+    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client1 = connectUniqueNode(PIPE_PATH));
+    ASSERT_NO_THROW(client2 = connectUniqueNode(PIPE_PATH));
 
     std::string const TEST1_VAL = "T1E1ST1";
     std::string const TEST2_VAL = "T2E2ST2";
