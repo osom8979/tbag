@@ -98,6 +98,9 @@ public:
     Err send(MqEvent event, MqMsg::Buffer const & buffer);
 
 public:
+    Err sendCloseMsg();
+
+public:
     Err recv(MqMsg & msg);
     Err recvWait(MqMsg & msg, uint64_t timeout_nano = 0);
 
