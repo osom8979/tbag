@@ -415,11 +415,11 @@ void MqStreamServer::onWriterAsync(Writer * writer)
 
     assert(!_nodes.empty());
     if (writer->write_count == _nodes.size()) {
-        tDLogIfD(PARAMS.verbose, "MqStreamServer::onWriterAsync() Write process ({}) ... "
-                 "Next, onNodeWrite() event method.", writer->write_count);
+        tDLogIfD(PARAMS.verbose, "MqStreamServer::onWriterAsync() Write process ({}) {}byte ... "
+                 "Next, onNodeWrite() event method.", writer->write_count, _packer.size());
     } else if (writer->write_count >= 1) {
-        tDLogW("MqStreamServer::onWriterAsync() Some write commands failed ({}/{})."
-               "Next, onNodeWrite() event method.", writer->write_count, _nodes.size());
+        tDLogW("MqStreamServer::onWriterAsync() Some write commands failed ({}/{}) {}byte ... "
+               "Next, onNodeWrite() event method.", writer->write_count, _nodes.size(), _packer.size());
     } else {
         assert(writer->write_count == 0);
         tDLogE("MqStreamServer::onWriterAsync() Write error: {} nodes", _nodes.size());

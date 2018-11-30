@@ -546,6 +546,8 @@ struct MqInterface
  *  you should clear the slash('/') after parsing.
  */
 TBAG_API std::string __append_localhost_if_pipe_schema(std::string const & uri_string);
+TBAG_API std::string __append_localhost_if_local_schema(std::string const & uri_string);
+TBAG_API std::string __append_localhost_if_pipe_or_local_schema(std::string const & uri_string);
 
 TBAG_API MqParams convertUriToParams(std::string const & uri_string, bool auto_encode = true);
 

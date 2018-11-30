@@ -91,11 +91,49 @@ std::string __append_localhost_if_pipe_schema(std::string const & uri_string)
            uri_string.substr(7);
 }
 
+std::string __append_localhost_if_local_schema(std::string const & uri_string)
+{
+    if (uri_string.size() < 8) {
+        return uri_string;
+    }
+    if (uri_string[0] != 'l' && uri_string[0] != 'L') {
+        return uri_string;
+    }
+    if (uri_string[1] != 'o' && uri_string[1] != 'O') {
+        return uri_string;
+    }
+    if (uri_string[2] != 'c' && uri_string[2] != 'C') {
+        return uri_string;
+    }
+    if (uri_string[3] != 'a' && uri_string[3] != 'A') {
+        return uri_string;
+    }
+    if (uri_string[4] != 'l' && uri_string[4] != 'L') {
+        return uri_string;
+    }
+    if (uri_string[5] != ':' && uri_string[6] != '/' && uri_string[7] != '/') {
+        return uri_string;
+    }
+
+    return uri_string.substr(0, 8) +
+           "localhost" +
+           "/" + /* clear the slash after parsing */
+           uri_string.substr(8);
+}
+
+std::string __append_localhost_if_pipe_or_local_schema(std::string const & uri_string)
+{
+    std::string result = uri_string;
+    result = __append_localhost_if_pipe_schema(result);
+    result = __append_localhost_if_local_schema(result);
+    return result;
+}
+
 MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
 {
     using namespace libtbag::network;
     using namespace libtbag::string;
-    auto const INPUT_URI = __append_localhost_if_pipe_schema(uri_string);
+    auto const INPUT_URI = __append_localhost_if_pipe_or_local_schema(uri_string);
 
     Uri uri;
     bool parse_result;
@@ -111,7 +149,9 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
 
     MqParams params;
     auto const SCHEMA = libtbag::string::upper(uri.getSchema());
-    if (SCHEMA == PIPE_UPPER_NAME) {
+    if (SCHEMA == LOCAL_UPPER_NAME) {
+        params.type = MqType::MT_LOCAL;
+    } else if (SCHEMA == PIPE_UPPER_NAME) {
         params.type = MqType::MT_PIPE;
     } else if (SCHEMA == TCP_UPPER_NAME) {
         params.type = MqType::MT_TCP;
