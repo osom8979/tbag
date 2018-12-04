@@ -18,7 +18,7 @@ endif ()
 include (TbagSimpleFindLibrary)
 tbag_simple_find_library (BasicUsageEnvironment BasicUsageEnvironment/BasicUsageEnvironment.hh BasicUsageEnvironment)
 tbag_simple_find_library (UsageEnvironment UsageEnvironment/UsageEnvironment.hh UsageEnvironment)
-tbag_simple_find_library (Groupsock groupsock/Groupsock.hh Groupsock)
+tbag_simple_find_library (Groupsock groupsock/Groupsock.hh groupsock)
 tbag_simple_find_library (LiveMedia liveMedia/liveMedia.hh liveMedia)
 
 if (BasicUsageEnvironment_FOUND OR UsageEnvironment_FOUND OR Groupsock_FOUND OR LiveMedia_FOUND)
