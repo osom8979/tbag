@@ -123,10 +123,16 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
 // Stream implementation.
 // ----------------------
 
-Udp::Udp(Loop & loop) : Handle(uhandle::UDP)
+Udp::Udp() : Handle(uhandle::UDP)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Udp::Udp(Loop & loop) : Udp()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

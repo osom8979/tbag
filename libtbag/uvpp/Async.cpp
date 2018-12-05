@@ -38,10 +38,16 @@ static void __global_uv_async_cb__(uv_async_t * handle)
 // Async implementation.
 // ---------------------
 
-Async::Async(Loop & loop) : Handle(uhandle::ASYNC)
+Async::Async() : Handle(uhandle::ASYNC)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Async::Async(Loop & loop) : Async()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

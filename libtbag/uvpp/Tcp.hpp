@@ -41,9 +41,6 @@ struct ConnectRequest;
 class TBAG_API Tcp : public Stream
 {
 public:
-    friend class Loop;
-
-public:
     using Parent = Stream;
 
 public:
@@ -53,10 +50,9 @@ public:
         BF_IPV6_ONLY,
     };
 
-protected:
-    Tcp(Loop & loop);
-
 public:
+    Tcp();
+    Tcp(Loop & loop);
     virtual ~Tcp();
 
 public:

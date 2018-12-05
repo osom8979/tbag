@@ -62,9 +62,6 @@ class Loop;
 class TBAG_API Poll : public Handle
 {
 public:
-    friend class Loop;
-
-public:
     using Parent = Handle;
     using EventType = int;
 
@@ -90,11 +87,10 @@ public:
     TBAG_CONSTEXPR static EventType const EVENT_DISCONNECT = 4;
     TBAG_CONSTEXPR static EventType const EVENT_RW = (EVENT_READABLE | EVENT_WRITABLE);
 
-protected:
+public:
+    Poll();
     explicit Poll(Loop & loop, init_fd fd);
     explicit Poll(Loop & loop, init_sock sock);
-
-public:
     virtual ~Poll();
 
 public:

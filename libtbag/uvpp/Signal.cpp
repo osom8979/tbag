@@ -37,10 +37,16 @@ static void __global_uv_signal_cb__(uv_signal_t * handle, int signum)
 // Signal implementation.
 // ----------------------
 
-Signal::Signal(Loop & loop) : Handle(uhandle::SIGNAL)
+Signal::Signal() : Handle(uhandle::SIGNAL)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Signal::Signal(Loop & loop) : Signal()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

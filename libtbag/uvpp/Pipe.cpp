@@ -50,10 +50,16 @@ static void __global_uv_pipe_connect_cb__(uv_connect_t * request, int status)
 // Pipe implementation.
 // --------------------
 
-Pipe::Pipe(Loop & loop, bool is_ipc) : Stream(uhandle::PIPE)
+Pipe::Pipe() : Stream(uhandle::PIPE)
 {
-    if (init(loop, is_ipc) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Pipe::Pipe(Loop & loop, bool is_ipc) : Pipe()
+{
+    auto const CODE = init(loop, is_ipc);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

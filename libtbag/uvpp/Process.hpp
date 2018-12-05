@@ -43,9 +43,6 @@ class Stream;
 class TBAG_API Process : public Handle
 {
 public:
-    friend class Loop;
-
-public:
     using Parent = Handle;
 
 public:
@@ -161,10 +158,9 @@ public:
 private:
     Options _options;
 
-protected:
-    Process(Loop & loop, Options const & options);
-
 public:
+    Process();
+    Process(Loop & loop, Options const & options);
     virtual ~Process();
 
 public:

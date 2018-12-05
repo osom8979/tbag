@@ -55,10 +55,16 @@ static void __global_uv_tcp_connect_cb__(uv_connect_t * request, int status)
 // Tcp implementation.
 // -------------------
 
-Tcp::Tcp(Loop & loop) : Stream(uhandle::TCP)
+Tcp::Tcp() : Stream(uhandle::TCP)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Tcp::Tcp(Loop & loop) : Tcp()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

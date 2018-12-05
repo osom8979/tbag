@@ -63,15 +63,11 @@ class Loop;
 class TBAG_API Signal : public Handle
 {
 public:
-    friend class Loop;
-
-public:
     using Parent = Handle;
 
-protected:
-    Signal(Loop & loop);
-
 public:
+    Signal();
+    Signal(Loop & loop);
     virtual ~Signal();
 
 public:

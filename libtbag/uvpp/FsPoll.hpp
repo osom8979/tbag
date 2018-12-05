@@ -43,17 +43,13 @@ class Loop;
 class TBAG_API FsPoll : public Handle
 {
 public:
-    friend class Loop;
-
-public:
     using Parent    = Handle;
     using FileState = filesystem::details::FileState;
     using TimeSpec  = filesystem::details::TimeSpec;
 
-protected:
-    FsPoll(Loop & loop);
-
 public:
+    FsPoll();
+    FsPoll(Loop & loop);
     virtual ~FsPoll();
 
 public:

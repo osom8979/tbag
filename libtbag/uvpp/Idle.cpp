@@ -38,10 +38,16 @@ static void __global_uv_idle_cb__(uv_idle_t * handle)
 // Idle implementation.
 // --------------------
 
-Idle::Idle(Loop & loop) : Handle(uhandle::IDLE)
+Idle::Idle() : Handle(uhandle::IDLE)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Idle::Idle(Loop & loop) : Idle()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

@@ -46,19 +46,11 @@ class Loop;
 class TBAG_API Async : public Handle
 {
 public:
-    friend class Loop;
-
-public:
     using Parent = Handle;
 
-protected:
-    /**
-     * @warning
-     *  it immediately starts the handle.
-     */
-    Async(Loop & loop);
-
 public:
+    Async();
+    Async(Loop & loop);
     virtual ~Async();
 
 public:

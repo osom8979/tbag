@@ -40,15 +40,11 @@ class Loop;
 class TBAG_API Timer : public Handle
 {
 public:
-    friend class Loop;
-
-public:
     using Parent = Handle;
 
-protected:
-    Timer(Loop & loop);
-
 public:
+    Timer();
+    Timer(Loop & loop);
     virtual ~Timer();
 
 public:

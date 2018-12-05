@@ -50,9 +50,6 @@ class Loop;
 class TBAG_API FsEvent : public Handle
 {
 public:
-    friend class Loop;
-
-public:
     using Parent = Handle;
 
 public:
@@ -94,10 +91,9 @@ public:
     /** Default event flags. */
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_DEFAULT = 0;
 
-protected:
-    FsEvent(Loop & loop);
-
 public:
+    FsEvent();
+    FsEvent(Loop & loop);
     virtual ~FsEvent();
 
 public:

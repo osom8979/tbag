@@ -189,7 +189,7 @@ Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT
 Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_code)
 {
     if (uv_error_code != 0) {
-        tDLogE("uv {} error [{}] {}", prefix, uv_error_code, getUvErrorName(uv_error_code));
+        tDLogE("UV~{} Error({}): {}", prefix, uv_error_code, getUvErrorName(uv_error_code));
         return convertUvErrorToErr(uv_error_code);
     }
     return Err::E_SUCCESS;

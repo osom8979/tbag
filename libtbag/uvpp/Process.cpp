@@ -384,10 +384,16 @@ std::string Process::Options::getAllArguments() const
 // Process implementation.
 // -----------------------
 
-Process::Process(Loop & loop, Options const & options) : Handle(uhandle::PROCESS)
+Process::Process() : Handle(uhandle::PROCESS)
 {
-    if (spawn(loop, options) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Process::Process(Loop & loop, Options const & options) : Process()
+{
+    auto const CODE = spawn(loop, options);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

@@ -18,24 +18,29 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvpp {
 
-Tty::Tty(Loop & loop, ufile fd, bool readable) : Stream(uhandle::TTY)
+Tty::Tty() : Stream(uhandle::TTY)
 {
-    if (init(loop, fd, readable) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
-    }
+    // EMPTY.
+}
 
-    if (guessHandle(fd) == false) {
+Tty::Tty(Loop & loop, ufile fd, bool readable) : Tty()
+{
+    auto const CODE = init(loop, fd, readable);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
+    }
+    if (!guessHandle(fd)) {
         tDLogE("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
     }
 }
 
-Tty::Tty(Loop & loop, GeneralFile fd) : Stream(uhandle::TTY)
+Tty::Tty(Loop & loop, GeneralFile fd) : Tty()
 {
-    if (init(loop, fd) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    auto const CODE = init(loop, fd);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
-
-    if (guessHandle(fd) == false) {
+    if (!guessHandle(fd)) {
         tDLogE("Tty::Tty({}) Not UV_TTY handle warning.", static_cast<int>(fd));
     }
 }

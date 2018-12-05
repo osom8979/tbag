@@ -37,10 +37,16 @@ static void __global_uv_prepare_cb__(uv_prepare_t * handle)
 // Prepare implementation.
 // -----------------------
 
-Prepare::Prepare(Loop & loop) : Handle(uhandle::PREPARE)
+Prepare::Prepare() : Handle(uhandle::PREPARE)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Prepare::Prepare(Loop & loop) : Prepare()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

@@ -37,10 +37,16 @@ static void __global_uv_check_cb__(uv_check_t * handle)
 // Check implementation.
 // ---------------------
 
-Check::Check(Loop & loop) : Handle(uhandle::CHECK)
+Check::Check() : Handle(uhandle::CHECK)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Check::Check(Loop & loop) : Check()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 

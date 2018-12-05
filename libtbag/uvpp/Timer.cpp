@@ -38,10 +38,16 @@ static void __global_uv_timer_cb__(uv_timer_t * handle)
 // Timer implementation.
 // ---------------------
 
-Timer::Timer(Loop & loop) : Handle(uhandle::TIMER)
+Timer::Timer() : Handle(uhandle::TIMER)
 {
-    if (init(loop) != Err::E_SUCCESS) {
-        throw std::bad_alloc();
+    // EMPTY.
+}
+
+Timer::Timer(Loop & loop) : Timer()
+{
+    auto const CODE = init(loop);
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
     }
 }
 
