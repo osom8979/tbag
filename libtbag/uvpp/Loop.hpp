@@ -73,8 +73,9 @@ protected: // IMPORTANT!!
     virtual ~BaseLoop();
 
 public:
-    inline std::thread::id getOwnerThreadId() const TBAG_NOEXCEPT
+    inline ThreadId getOwnerThreadId() const TBAG_NOEXCEPT
     { return _owner_thread_id; }
+
     inline bool isRunning() const TBAG_NOEXCEPT_SP_OP(_running.load())
     { return _running.load(); }
 
@@ -100,7 +101,7 @@ public:
     /** Returns the current high-resolution real time. This is expressed in nanoseconds. */
     uint64_t getNowNanoseconds() const;
 
-    /** Update the event loop’s concept of "now". */
+    /** Update the event loop's concept of "now". */
     void updateTime();
 
     /** Walk the list of handles. */
