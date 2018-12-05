@@ -13,6 +13,11 @@
 #include <cassert>
 #include <uv.h>
 
+/**
+ * Eliminates errors that can occur when an exception is propagated.
+ */
+#define DISABLE_ERASE_HANDLES_IN_THE_DESTRUCTOR_METHOD
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -244,18 +249,21 @@ Loop::Loop(bool auto_erase, bool print_internal, bool verbose)
 
 Loop::~Loop()
 {
-    if (Parent::close() != Err::E_SUCCESS) {
-        runCloseAllHandles();
-
-        if (Parent::isAlive()) {
-            stop();
-        }
-
-        // RE-TRY.
-        if (Parent::close() != Err::E_SUCCESS) {
-            tDLogE("Loop::~Loop() error.");
-        }
+    auto const CODE = Parent::close();
+    if (isSuccess(CODE)) {
+        return;
     }
+
+#if !defined(DISABLE_ERASE_HANDLES_IN_THE_DESTRUCTOR_METHOD)
+    runCloseAllHandles();
+    if (Parent::isAlive()) {
+        stop();
+    }
+    // RE-TRY.
+    if (Parent::close() != Err::E_SUCCESS) {
+        tDLogE("Loop::~Loop() error.");
+    }
+#endif
 }
 
 std::size_t Loop::closeAllHandles()
