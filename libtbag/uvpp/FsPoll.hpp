@@ -45,7 +45,6 @@ class TBAG_API FsPoll : public Handle
 public:
     using Parent    = Handle;
     using FileState = filesystem::details::FileState;
-    using TimeSpec  = filesystem::details::TimeSpec;
 
 public:
     FsPoll();

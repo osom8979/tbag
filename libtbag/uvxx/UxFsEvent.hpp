@@ -19,6 +19,7 @@
 #include <libtbag/uvpp/func/FunctionalFsEvent.hpp>
 
 #include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
