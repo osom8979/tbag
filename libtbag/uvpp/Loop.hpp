@@ -227,7 +227,7 @@ public:
         STATIC_ASSERT_CHECK_IS_BASE_OF(Handle, HandleType);
         typedef typename remove_cr<HandleType>::type ResultHandleType;
         typedef std::shared_ptr<ResultHandleType> ResultSharedHandleType;
-        SharedHandle shared(new (std::nothrow) HandleType(std::forward<Args>(args) ...));
+        SharedHandle shared(new HandleType(std::forward<Args>(args) ...));
         if (static_cast<bool>(shared)) {
             shared->setInternal(is_internal);
             return std::static_pointer_cast<ResultHandleType, Handle>(insertChildHandle(shared).lock());

@@ -76,6 +76,7 @@ public:
     inline char const * getName() const TBAG_NOEXCEPT
     { return getUvNativeHandleName(get()); }
 
+public:
     /** Pointer to the uv_loop_t where the handle is running on. */
     Loop * getLoop();
     Loop const * getLoop() const;

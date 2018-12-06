@@ -17,8 +17,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-UxLoop::UxLoop(bool auto_erase, bool print_internal, bool verbose)
-        : _loop(std::make_shared<Loop>(auto_erase, print_internal, verbose))
+/**
+ * @warning
+ *  Don't change this variables.
+ */
+TBAG_CONSTEXPR static bool const AUTO_ERASE = true;
+
+UxLoop::UxLoop(bool print_internal, bool verbose)
+        : _loop(std::make_shared<Loop>(AUTO_ERASE, print_internal, verbose))
 {
     assert(static_cast<bool>(_loop));
 }
@@ -92,16 +98,34 @@ bool UxLoop::isAlive() const
     return _loop->isAlive();
 }
 
-Err UxLoop::close()
+std::size_t UxLoop::size() const
 {
     assert(exists());
-    return _loop->close();
+    return _loop->size();
+}
+
+bool UxLoop::empty() const
+{
+    assert(exists());
+    return _loop->empty();
 }
 
 Err UxLoop::run(RunMode mode)
 {
     assert(exists());
     return _loop->run(mode);
+}
+
+Err UxLoop::close()
+{
+    assert(exists());
+    return _loop->close();
+}
+
+void UxLoop::walk(void * arg)
+{
+    assert(exists());
+    return _loop->walk(arg);
 }
 
 void UxLoop::stop()

@@ -43,7 +43,7 @@ private:
     SharedLoop _loop;
 
 public:
-    UxLoop(bool auto_erase = true, bool print_internal = false, bool verbose = false);
+    UxLoop(bool print_internal = false, bool verbose = false);
     UxLoop(std::nullptr_t) TBAG_NOEXCEPT;
     UxLoop(UxLoop const & obj) TBAG_NOEXCEPT;
     UxLoop(UxLoop && obj) TBAG_NOEXCEPT;
@@ -89,8 +89,13 @@ public:
     bool isAlive() const;
 
 public:
-    Err close();
+    std::size_t size() const;
+    bool empty() const;
+
+public:
     Err run(RunMode mode = RunMode::RUN_DEFAULT);
+    Err close();
+    void walk(void * arg = nullptr);
 
 public:
     void stop();
