@@ -16,15 +16,13 @@
 #include <libtbag/filesystem/File.hpp>
 
 #include <thread>
-#include <string>
+#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::uvpp;
 
 struct FsPollTest : public FsPoll
 {
-    using str = std::string;
-
     int counter;
     int size;
 
@@ -47,8 +45,9 @@ TEST(FsPollTest, Default)
     std::cout << "Skip this test. (The SKIP_FSPOLL_TESTER macro has been defined)\n";
     return;
 #endif
+
     char const * const TEST_FILENAME = "test.file";
-    tttDir(true, true);
+    tttDir_Automatic();
     auto path = tttDir_Get() / TEST_FILENAME;
 
     Loop loop;
@@ -59,7 +58,6 @@ TEST(FsPollTest, Default)
     ASSERT_TRUE(f.isOpen());
 
     ASSERT_EQ(Err::E_SUCCESS, fs->start(path.c_str(), 10));
-
 
     libtbag::lock::UvLock lock;
     libtbag::lock::UvCondition cond;
@@ -75,8 +73,9 @@ TEST(FsPollTest, Default)
     };
     ASSERT_EQ(Err::E_SUCCESS, idle->start());
 
-    std::thread thread = std::thread([&loop](){
-        loop.run();
+    Err loop_result = Err::E_UNKNOWN;
+    auto thread = std::thread([&](){
+        loop_result = loop.run();
     });
 
     lock.lock();
@@ -90,6 +89,7 @@ TEST(FsPollTest, Default)
     ASSERT_TRUE(f.close());
 
     thread.join();
+    ASSERT_EQ(Err::E_SUCCESS, loop_result);
     ASSERT_EQ(1, fs->counter);
     ASSERT_EQ(WRITE_SIZE, fs->size);
 }

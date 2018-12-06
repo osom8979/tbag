@@ -9,6 +9,10 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/uvpp/Poll.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/func/FunctionalIdle.hpp>
+
+#include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
 #include <libtbag/filesystem/File.hpp>
 
 #include <thread>
@@ -40,7 +44,7 @@ TEST(PollTest, Default)
 #endif
 
     char const * const TEST_FILENAME = "test.file";
-    tttDir(true, true);
+    tttDir_Automatic();
     auto path = tttDir_Get() / TEST_FILENAME;
 
     filesystem::File f;
@@ -50,16 +54,38 @@ TEST(PollTest, Default)
     Loop loop;
     auto fs = loop.newHandle<PollTest>(loop, static_cast<int>(f.getFd()));
 
+    libtbag::lock::UvLock lock;
+    libtbag::lock::UvCondition cond;
+    bool on_idle = false;
+
+    auto idle = loop.newHandle<libtbag::uvpp::func::FuncIdle>(loop);
+    idle->idle_cb = [&](){
+        lock.lock();
+        on_idle = true;
+        cond.broadcast();
+        lock.unlock();
+        idle->close();
+    };
+    ASSERT_EQ(Err::E_SUCCESS, idle->start());
     ASSERT_EQ(Err::E_SUCCESS, fs->start());
 
-    std::thread thread = std::thread([&loop](){
-        loop.run();
+    Err loop_result = Err::E_UNKNOWN;
+    auto thread = std::thread([&](){
+        loop_result = loop.run();
     });
+
+    lock.lock();
+    while (!on_idle) {
+        cond.wait(lock);
+    }
+    lock.unlock();
+
     int const WRITE_SIZE = 4;
     ASSERT_EQ(WRITE_SIZE, f.write("TEMP", WRITE_SIZE, 0));
     ASSERT_TRUE(f.close());
 
     thread.join();
+    ASSERT_EQ(Err::E_SUCCESS, loop_result);
     ASSERT_EQ(1, fs->counter);
 }
 
