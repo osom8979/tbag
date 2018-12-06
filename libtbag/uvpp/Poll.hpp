@@ -67,11 +67,11 @@ public:
 
 public:
     // @formatter:off
-    struct init_fd
+    struct init_file
     {
         int fd;
-        init_fd(int f) : fd(f) { /* EMPTY. */ }
-        init_fd & operator = (int f) { fd = f; return *this; }
+        init_file(int f) : fd(f) { /* EMPTY. */ }
+        init_file & operator = (int f) { fd = f; return *this; }
     };
     struct init_sock
     {
@@ -89,7 +89,7 @@ public:
 
 public:
     Poll();
-    explicit Poll(Loop & loop, init_fd fd);
+    explicit Poll(Loop & loop, init_file fd);
     explicit Poll(Loop & loop, init_sock sock);
     virtual ~Poll();
 

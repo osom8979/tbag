@@ -12,7 +12,6 @@
 #include <libtbag/filesystem/File.hpp>
 
 #include <thread>
-#include <string>
 #include <iostream>
 
 using namespace libtbag;
@@ -20,11 +19,9 @@ using namespace libtbag::uvpp;
 
 struct PollTest : public Poll
 {
-    using str = std::string;
-
     int counter;
 
-    PollTest(Loop & loop, int fd) : Poll(loop, init_fd(fd)), counter(0)
+    PollTest(Loop & loop, int fd) : Poll(loop, init_file(fd)), counter(0)
     { /* EMPTY. */ }
 
     virtual void onPoll(Err status, EventType events) override
@@ -39,7 +36,9 @@ TEST(PollTest, Default)
 {
 #if defined(TBAG_PLATFORM_WINDOWS) || defined(TBAG_PLATFORM_LINUX)
     std::cout << "Skip this test in Windows/Linux Platform." << std::endl;
-#else
+    return;
+#endif
+
     char const * const TEST_FILENAME = "test.file";
     tttDir(true, true);
     auto path = tttDir_Get() / TEST_FILENAME;
@@ -62,6 +61,5 @@ TEST(PollTest, Default)
 
     thread.join();
     ASSERT_EQ(1, fs->counter);
-#endif
 }
 

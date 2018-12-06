@@ -42,7 +42,7 @@ Poll::Poll() : Handle(uhandle::POLL)
     // EMPTY.
 }
 
-Poll::Poll(Loop & loop, init_fd fd) : Poll()
+Poll::Poll(Loop & loop, init_file fd) : Poll()
 {
     auto const CODE = init(loop, fd.fd);
     if (isFailure(CODE)) {

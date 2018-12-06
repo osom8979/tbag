@@ -73,7 +73,7 @@ TEST(FsPollTest, Default)
         lock.unlock();
         idle->close();
     };
-    idle->start();
+    ASSERT_EQ(Err::E_SUCCESS, idle->start());
 
     std::thread thread = std::thread([&loop](){
         loop.run();
