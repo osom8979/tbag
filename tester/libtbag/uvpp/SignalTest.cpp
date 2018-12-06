@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/uvpp/Signal.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/func/FunctionalIdle.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
 
 #include <thread>
@@ -42,16 +43,23 @@ TEST(SignalTest, Default)
 
     Loop loop;
     auto signal = loop.newHandle<SignalTest>(loop);
-    signal->start(signal::TBAG_SIGNAL_INTERRUPT);
+    ASSERT_EQ(Err::E_SUCCESS, signal->start(libtbag::signal::TBAG_SIGNAL_INTERRUPT));
 
-    std::thread thread = std::thread([&loop](){
-        loop.run();
+    auto idle = loop.newHandle<libtbag::uvpp::func::FuncIdle>(loop);
+    idle->idle_cb = [&](){
+        libtbag::signal::raise(libtbag::signal::TBAG_SIGNAL_INTERRUPT);
+        idle->close();
+    };
+    ASSERT_EQ(Err::E_SUCCESS, idle->start());
+
+    Err loop_result = Err::E_UNKNOWN;
+    auto thread = std::thread([&](){
+        loop_result = loop.run();
     });
 
-    signal::raise(signal::TBAG_SIGNAL_INTERRUPT);
     thread.join();
-
+    ASSERT_EQ(Err::E_SUCCESS, loop_result);
     ASSERT_EQ(1, signal->counter);
-    ASSERT_EQ(signal::TBAG_SIGNAL_INTERRUPT, signal->last_signum);
+    ASSERT_EQ(libtbag::signal::TBAG_SIGNAL_INTERRUPT, signal->last_signum);
 }
 
