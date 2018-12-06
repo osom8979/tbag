@@ -43,6 +43,7 @@ TEST(UxAsyncTest, Default)
 
     ASSERT_EQ(Err::E_SUCCESS, async.send());
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_TRUE(loop.empty());
 
     ASSERT_EQ(1, async_counter);
     ASSERT_EQ(1, close_counter);

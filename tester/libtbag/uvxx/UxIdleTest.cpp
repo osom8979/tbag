@@ -43,6 +43,7 @@ TEST(UxIdleTest, Default)
 
     ASSERT_EQ(Err::E_SUCCESS, idle.start());
     ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_TRUE(loop.empty());
 
     ASSERT_EQ(1, idle_counter);
     ASSERT_EQ(1, close_counter);

@@ -30,32 +30,65 @@ static void __global_uv_close_cb__(uv_handle_t * handle)
     Handle * h = static_cast<Handle*>(handle->data);
     if (h == nullptr) {
         tDLogE("__global_uv_close_cb__() handle.data is nullptr.");
+        return;
     } else if (isDeletedAddress(h)) {
         tDLogE("__global_uv_close_cb__() handle.data is deleted.");
+        return;
+    }
+
+    Loop * loop = nullptr;
+    if (handle->loop == nullptr) {
+        tDLogE("__global_uv_close_cb__() handle.loop is nullptr.");
+    } else if (isDeletedAddress(handle->loop)) {
+        tDLogE("__global_uv_close_cb__() handle.loop is deleted.");
     } else {
-        Loop * loop = nullptr;
-        if (handle->loop == nullptr) {
-            tDLogE("__global_uv_close_cb__() handle.loop is nullptr.");
-        } else if (isDeletedAddress(handle->loop)) {
-            tDLogE("__global_uv_close_cb__() handle.loop is deleted.");
-        } else {
-            loop = static_cast<Loop*>(handle->loop->data);
+        loop = static_cast<Loop*>(handle->loop->data);
+    }
+
+    if (loop != nullptr && isDeletedAddress(handle->loop) == false) {
+        loop->onClosing(h);
+    }
+
+    h->onClose(); // Handle event.
+
+    if (loop != nullptr && isDeletedAddress(handle->loop) == false) {
+        loop->onClosed(h);
+        if (loop->isAutoEraseHandle()) {
+            loop->eraseChildHandle(*h);
         }
+    }
 
-        if (loop != nullptr && isDeletedAddress(handle->loop) == false) {
-            loop->onClosing(h);
-        }
+    UNUSED_PARAM(h); // Do not call this handle any more.
+}
 
-        h->onClose(); // Handle event.
+static void __global_uv_close_no_propagation_cb__(uv_handle_t * handle)
+{
+    Handle * h = static_cast<Handle*>(handle->data);
+    if (h == nullptr) {
+        tDLogE("__global_uv_close_no_propagation_cb__() handle.data is nullptr.");
+        return;
+    } else if (isDeletedAddress(h)) {
+        tDLogE("__global_uv_close_no_propagation_cb__() handle.data is deleted.");
+        return;
+    }
 
-        if (loop != nullptr && isDeletedAddress(handle->loop) == false) {
-            loop->onClosed(h);
-            if (loop->isAutoEraseHandle()) {
-                loop->eraseChildHandle(*h);
-            }
-        }
+    if (handle->loop == nullptr) {
+        tDLogE("__global_uv_close_no_propagation_cb__() handle.loop is nullptr.");
+        return;
+    } else if (isDeletedAddress(handle->loop)) {
+        tDLogE("__global_uv_close_no_propagation_cb__() handle.loop is deleted.");
+        return;
+    }
 
-        UNUSED_PARAM(h); // Do not call this handle any more.
+    Loop * loop = static_cast<Loop*>(handle->loop->data);
+    assert(loop != nullptr);
+
+    if (isDeletedAddress(handle->loop)) {
+        return;
+    }
+
+    if (loop->isAutoEraseHandle()) {
+        loop->eraseChildHandle(*h);
     }
 }
 
@@ -136,7 +169,7 @@ void Handle::close()
 
 void Handle::tryClose()
 {
-    ::uv_close(Parent::cast<uv_handle_t>(), nullptr);
+    ::uv_close(Parent::cast<uv_handle_t>(), __global_uv_close_no_propagation_cb__);
 }
 
 bool Handle::isActive() const TBAG_NOEXCEPT

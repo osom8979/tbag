@@ -72,6 +72,7 @@ TEST(UxFsEventTest, Default)
     ASSERT_TRUE(f.close());
 
     thread.join();
+    ASSERT_TRUE(loop.empty());
     ASSERT_EQ(Err::E_SUCCESS, loop_result);
     ASSERT_EQ(1, event_counter);
     ASSERT_EQ(1, close_counter);
