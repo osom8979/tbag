@@ -77,37 +77,57 @@ void UxHandle::release()
 
 char const * UxHandle::getName() const
 {
-    return _handle.lock()->getName();
+    if (auto shared = _handle.lock()) {
+        return shared->getName();
+    }
+    return "EXPIRED_HANDLE";
 }
 
 UxHandle::Loop * UxHandle::getLoop()
 {
-    return _handle.lock()->getLoop();
+    if (auto shared = _handle.lock()) {
+        return shared->getLoop();
+    }
+    return nullptr;
 }
 
 UxHandle::Loop const * UxHandle::getLoop() const
 {
-    return _handle.lock()->getLoop();
+    if (auto shared = _handle.lock()) {
+        return shared->getLoop();
+    }
+    return nullptr;
 }
 
 void UxHandle::close()
 {
-    _handle.lock()->close();
+    if (auto shared = _handle.lock()) {
+        shared->close();
+    }
 }
 
 bool UxHandle::isInit() const
 {
-    return _handle.lock()->isInit();
+    if (auto shared = _handle.lock()) {
+        return shared->isInit();
+    }
+    return false;
 }
 
 bool UxHandle::isActive() const
 {
-    return _handle.lock()->isActive();
+    if (auto shared = _handle.lock()) {
+        return shared->isActive();
+    }
+    return false;
 }
 
 bool UxHandle::isClosing() const
 {
-    return _handle.lock()->isClosing();
+    if (auto shared = _handle.lock()) {
+        return shared->isClosing();
+    }
+    return true;
 }
 
 } // namespace uvxx

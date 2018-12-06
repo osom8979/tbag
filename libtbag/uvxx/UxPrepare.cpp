@@ -1,11 +1,11 @@
 /**
- * @file   UxAsync.cpp
- * @brief  UxAsync class implementation.
+ * @file   UxPrepare.cpp
+ * @brief  UxPrepare class implementation.
  * @author zer0
  * @date   2018-12-06
  */
 
-#include <libtbag/uvxx/UxAsync.hpp>
+#include <libtbag/uvxx/UxPrepare.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvxx/UxLoop.hpp>
 
@@ -19,12 +19,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-UxAsync::UxAsync() : UxHandle()
+UxPrepare::UxPrepare() : UxHandle()
 {
     // EMPTY.
 }
 
-UxAsync::UxAsync(UxLoop & loop) : UxHandle()
+UxPrepare::UxPrepare(UxLoop & loop) : UxHandle()
 {
     auto const CODE = init(loop);
     if (isFailure(CODE)) {
@@ -32,64 +32,72 @@ UxAsync::UxAsync(UxLoop & loop) : UxHandle()
     }
 }
 
-UxAsync::UxAsync(UxAsync const & obj) TBAG_NOEXCEPT : UxAsync()
+UxPrepare::UxPrepare(UxPrepare const & obj) TBAG_NOEXCEPT : UxPrepare()
 {
     (*this) = obj;
 }
 
-UxAsync::UxAsync(UxAsync && obj) TBAG_NOEXCEPT : UxAsync()
+UxPrepare::UxPrepare(UxPrepare && obj) TBAG_NOEXCEPT : UxPrepare()
 {
     (*this) = std::move(obj);
 }
 
-UxAsync::~UxAsync()
+UxPrepare::~UxPrepare()
 {
     // EMPTY.
 }
 
-UxAsync & UxAsync::operator =(UxAsync const & obj) TBAG_NOEXCEPT
+UxPrepare & UxPrepare::operator =(UxPrepare const & obj) TBAG_NOEXCEPT
 {
     copy(obj);
     return *this;
 }
 
-UxAsync & UxAsync::operator =(UxAsync && obj) TBAG_NOEXCEPT
+UxPrepare & UxPrepare::operator =(UxPrepare && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void UxAsync::copy(UxAsync const & obj) TBAG_NOEXCEPT
+void UxPrepare::copy(UxPrepare const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         UxHandle::copy(obj);
     }
 }
 
-void UxAsync::swap(UxAsync & obj) TBAG_NOEXCEPT
+void UxPrepare::swap(UxPrepare & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         UxHandle::swap(obj);
     }
 }
 
-Err UxAsync::init(UxLoop & loop)
+Err UxPrepare::init(UxLoop & loop)
 {
     UxHandle::release();
     assert(_handle.expired());
 
     try {
-        _handle = loop->newHandle<FuncAsync>(*loop);
+        _handle = loop->newHandle<FuncPrepare>(*loop);
     } catch (ErrException e) {
         return e.CODE;
     }
     return Err::E_SUCCESS;
 }
 
-Err UxAsync::send()
+Err UxPrepare::start()
 {
     if (auto shared = lock()) {
-        return shared->send();
+        return shared->start();
+    }
+    return Err::E_EXPIRED;
+}
+
+Err UxPrepare::stop()
+{
+    if (auto shared = lock()) {
+        return shared->stop();
     }
     return Err::E_EXPIRED;
 }

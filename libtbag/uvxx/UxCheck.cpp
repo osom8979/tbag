@@ -1,11 +1,11 @@
 /**
- * @file   UxAsync.cpp
- * @brief  UxAsync class implementation.
+ * @file   UxCheck.cpp
+ * @brief  UxCheck class implementation.
  * @author zer0
  * @date   2018-12-06
  */
 
-#include <libtbag/uvxx/UxAsync.hpp>
+#include <libtbag/uvxx/UxCheck.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvxx/UxLoop.hpp>
 
@@ -19,12 +19,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-UxAsync::UxAsync() : UxHandle()
+UxCheck::UxCheck() : UxHandle()
 {
     // EMPTY.
 }
 
-UxAsync::UxAsync(UxLoop & loop) : UxHandle()
+UxCheck::UxCheck(UxLoop & loop) : UxHandle()
 {
     auto const CODE = init(loop);
     if (isFailure(CODE)) {
@@ -32,64 +32,72 @@ UxAsync::UxAsync(UxLoop & loop) : UxHandle()
     }
 }
 
-UxAsync::UxAsync(UxAsync const & obj) TBAG_NOEXCEPT : UxAsync()
+UxCheck::UxCheck(UxCheck const & obj) TBAG_NOEXCEPT : UxCheck()
 {
     (*this) = obj;
 }
 
-UxAsync::UxAsync(UxAsync && obj) TBAG_NOEXCEPT : UxAsync()
+UxCheck::UxCheck(UxCheck && obj) TBAG_NOEXCEPT : UxCheck()
 {
     (*this) = std::move(obj);
 }
 
-UxAsync::~UxAsync()
+UxCheck::~UxCheck()
 {
     // EMPTY.
 }
 
-UxAsync & UxAsync::operator =(UxAsync const & obj) TBAG_NOEXCEPT
+UxCheck & UxCheck::operator =(UxCheck const & obj) TBAG_NOEXCEPT
 {
     copy(obj);
     return *this;
 }
 
-UxAsync & UxAsync::operator =(UxAsync && obj) TBAG_NOEXCEPT
+UxCheck & UxCheck::operator =(UxCheck && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void UxAsync::copy(UxAsync const & obj) TBAG_NOEXCEPT
+void UxCheck::copy(UxCheck const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         UxHandle::copy(obj);
     }
 }
 
-void UxAsync::swap(UxAsync & obj) TBAG_NOEXCEPT
+void UxCheck::swap(UxCheck & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         UxHandle::swap(obj);
     }
 }
 
-Err UxAsync::init(UxLoop & loop)
+Err UxCheck::init(UxLoop & loop)
 {
     UxHandle::release();
     assert(_handle.expired());
 
     try {
-        _handle = loop->newHandle<FuncAsync>(*loop);
+        _handle = loop->newHandle<FuncCheck>(*loop);
     } catch (ErrException e) {
         return e.CODE;
     }
     return Err::E_SUCCESS;
 }
 
-Err UxAsync::send()
+Err UxCheck::start()
 {
     if (auto shared = lock()) {
-        return shared->send();
+        return shared->start();
+    }
+    return Err::E_EXPIRED;
+}
+
+Err UxCheck::stop()
+{
+    if (auto shared = lock()) {
+        return shared->stop();
     }
     return Err::E_EXPIRED;
 }

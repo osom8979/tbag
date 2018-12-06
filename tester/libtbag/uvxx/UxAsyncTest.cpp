@@ -18,14 +18,18 @@ TEST(UxAsyncTest, Default)
     int close_counter = 0;
 
     UxAsync async;
+    ASSERT_FALSE(async.isInit());
+
     UxLoop loop;
     ASSERT_TRUE(loop.empty());
 
     ASSERT_EQ(Err::E_SUCCESS, async.init(loop));
+    ASSERT_TRUE(async.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
 
     ASSERT_EQ(Err::E_SUCCESS, async.init(loop));
+    ASSERT_TRUE(async.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
 
