@@ -120,7 +120,7 @@ public:
 
 // Event methods.
 public:
-    virtual void onFsEvent(const char * filename, Event events, Err status);
+    virtual void onFsEvent(char const * filename, Event events, Err status);
 };
 
 } // namespace uvpp

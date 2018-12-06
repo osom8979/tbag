@@ -45,7 +45,7 @@ struct FsEventTest : public FsEvent
 TEST(FsEventTest, Default)
 {
     char const * const TEST_FILENAME = "test.file";
-    tttDir(true, true);
+    tttDir_Automatic();
     auto path = tttDir_Get() / TEST_FILENAME;
 
     Loop loop;

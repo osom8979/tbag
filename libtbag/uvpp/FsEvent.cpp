@@ -110,7 +110,7 @@ FsEvent::Event FsEvent::getEvent(int native_events) TBAG_NOEXCEPT
 // Event methods.
 // --------------
 
-void FsEvent::onFsEvent(const char * filename, Event events, Err status)
+void FsEvent::onFsEvent(char const * filename, Event events, Err status)
 {
     tDLogD("FsEvent::onFsEvent({}, {}, {}) called.",
                  filename, static_cast<int>(events), getErrName(status));
