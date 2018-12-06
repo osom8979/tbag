@@ -19,12 +19,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-UxAsync::UxAsync() : UxHandle()
+UxAsync::UxAsync()
 {
     // EMPTY.
 }
 
-UxAsync::UxAsync(UxLoop & loop) : UxHandle()
+UxAsync::UxAsync(UxLoop & loop)
 {
     auto const CODE = init(loop);
     if (isFailure(CODE)) {
@@ -32,12 +32,12 @@ UxAsync::UxAsync(UxLoop & loop) : UxHandle()
     }
 }
 
-UxAsync::UxAsync(UxAsync const & obj) TBAG_NOEXCEPT : UxAsync()
+UxAsync::UxAsync(UxAsync const & obj) TBAG_NOEXCEPT
 {
     (*this) = obj;
 }
 
-UxAsync::UxAsync(UxAsync && obj) TBAG_NOEXCEPT : UxAsync()
+UxAsync::UxAsync(UxAsync && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }

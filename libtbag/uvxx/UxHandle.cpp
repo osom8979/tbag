@@ -19,17 +19,17 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-UxHandle::UxHandle() : _handle()
+UxHandle::UxHandle()
 {
     // EMPTY.
 }
 
-UxHandle::UxHandle(UxHandle const & obj) TBAG_NOEXCEPT : UxHandle()
+UxHandle::UxHandle(UxHandle const & obj) TBAG_NOEXCEPT
 {
     (*this) = obj;
 }
 
-UxHandle::UxHandle(UxHandle && obj) TBAG_NOEXCEPT : UxHandle()
+UxHandle::UxHandle(UxHandle && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }

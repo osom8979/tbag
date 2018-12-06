@@ -19,12 +19,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-UxIdle::UxIdle() : UxHandle()
+UxIdle::UxIdle()
 {
     // EMPTY.
 }
 
-UxIdle::UxIdle(UxLoop & loop) : UxHandle()
+UxIdle::UxIdle(UxLoop & loop)
 {
     auto const CODE = init(loop);
     if (isFailure(CODE)) {
@@ -32,12 +32,12 @@ UxIdle::UxIdle(UxLoop & loop) : UxHandle()
     }
 }
 
-UxIdle::UxIdle(UxIdle const & obj) TBAG_NOEXCEPT : UxIdle()
+UxIdle::UxIdle(UxIdle const & obj) TBAG_NOEXCEPT
 {
     (*this) = obj;
 }
 
-UxIdle::UxIdle(UxIdle && obj) TBAG_NOEXCEPT : UxIdle()
+UxIdle::UxIdle(UxIdle && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }

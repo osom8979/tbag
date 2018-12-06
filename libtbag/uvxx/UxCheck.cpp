@@ -19,12 +19,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-UxCheck::UxCheck() : UxHandle()
+UxCheck::UxCheck()
 {
     // EMPTY.
 }
 
-UxCheck::UxCheck(UxLoop & loop) : UxHandle()
+UxCheck::UxCheck(UxLoop & loop)
 {
     auto const CODE = init(loop);
     if (isFailure(CODE)) {
@@ -32,12 +32,12 @@ UxCheck::UxCheck(UxLoop & loop) : UxHandle()
     }
 }
 
-UxCheck::UxCheck(UxCheck const & obj) TBAG_NOEXCEPT : UxCheck()
+UxCheck::UxCheck(UxCheck const & obj) TBAG_NOEXCEPT
 {
     (*this) = obj;
 }
 
-UxCheck::UxCheck(UxCheck && obj) TBAG_NOEXCEPT : UxCheck()
+UxCheck::UxCheck(UxCheck && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }

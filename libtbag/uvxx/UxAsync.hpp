@@ -74,6 +74,8 @@ public:
 
 public:
     Err init(UxLoop & loop);
+
+public:
     Err send();
 };
 
