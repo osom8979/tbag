@@ -37,7 +37,9 @@ TEST(SignalTest, Default)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
     std::cout << "Skip this test in Windows Platform.\n";
-#else
+    return;
+#endif
+
     Loop loop;
     auto signal = loop.newHandle<SignalTest>(loop);
     signal->start(signal::TBAG_SIGNAL_INTERRUPT);
@@ -51,6 +53,5 @@ TEST(SignalTest, Default)
 
     ASSERT_EQ(1, signal->counter);
     ASSERT_EQ(signal::TBAG_SIGNAL_INTERRUPT, signal->last_signum);
-#endif
 }
 
