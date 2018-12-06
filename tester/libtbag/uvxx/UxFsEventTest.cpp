@@ -11,7 +11,9 @@
 #include <libtbag/uvxx/UxFsEvent.hpp>
 
 #include <libtbag/filesystem/File.hpp>
+
 #include <thread>
+#include <string>
 
 using namespace libtbag;
 using namespace libtbag::uvxx;

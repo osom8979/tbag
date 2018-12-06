@@ -7,8 +7,12 @@
 
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
-#include <libtbag/uvpp/FsPoll.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/FsPoll.hpp>
+#include <libtbag/uvpp/func/FunctionalIdle.hpp>
+
+#include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
 #include <libtbag/filesystem/File.hpp>
 
 #include <thread>
@@ -56,15 +60,30 @@ TEST(FsPollTest, Default)
 
     ASSERT_EQ(Err::E_SUCCESS, fs->start(path.c_str(), 10));
 
+
+    libtbag::lock::UvLock lock;
+    libtbag::lock::UvCondition cond;
+    bool on_idle = false;
+
+    auto idle = loop.newHandle<libtbag::uvpp::func::FuncIdle>(loop);
+    idle->idle_cb = [&](){
+        lock.lock();
+        on_idle = true;
+        cond.broadcast();
+        lock.unlock();
+        idle->close();
+    };
+    idle->start();
+
     std::thread thread = std::thread([&loop](){
         loop.run();
     });
 
-    busyWaitForAlive(loop);
-
-    while (fs->isActive() == false) {
-        // BUSY WAIT.
+    lock.lock();
+    while (!on_idle) {
+        cond.wait(lock);
     }
+    lock.unlock();
 
     int const WRITE_SIZE = 4;
     ASSERT_EQ(WRITE_SIZE, f.write("TEMP", WRITE_SIZE, 0));

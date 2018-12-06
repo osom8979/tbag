@@ -364,17 +364,6 @@ void Loop::forceClear()
     _handles.clear();
 }
 
-// ----------
-// Utilities.
-// ----------
-
-void busyWaitForAlive(Loop & loop)
-{
-    while (loop.isRunning() == false || loop.isAlive() == false) {
-        // BUSY WAIT!
-    }
-}
-
 } // namespace uvpp
 
 // --------------------
