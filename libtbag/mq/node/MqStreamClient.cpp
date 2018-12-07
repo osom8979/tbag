@@ -139,7 +139,7 @@ void MqStreamClient::tearDown(bool on_message)
     using namespace libtbag::mq::details;
     if (isInactiveState(_state)) {
         assert(isCloseState(_state));
-        tDLogIfW(PARAMS.verbose, "MqStreamClient::tearDown() It is already closing.");
+        tDLogIfD(PARAMS.verbose, "MqStreamClient::tearDown() It is already closing.");
         return;
     }
 
@@ -191,14 +191,13 @@ AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
-    if (!isActiveState(_state)) {
+    if (!isActiveState(_state) && !isClosingState(_state)) {
         tDLogIfW(PARAMS.verbose,
-                 "MqStreamClient::onMsg() Illegal client state, "
-                 "skip current message ({})", getEventName(msg->event));
+                 "MqStreamClient::onMsg() Illegal client state({}), skip current message ({})",
+                 getMachineStateName(_state), getEventName(msg->event));
         return AfterAction::AA_OK;
     }
 
-    assert(_state == MqMachineState::MMS_ACTIVE);
     if (msg->event == ME_CLOSE) {
         onCloseEvent();
         return AfterAction::AA_OK;
@@ -493,8 +492,8 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
 
 void MqStreamClient::onClose()
 {
-    _state = MqMachineState::MMS_CLOSED;
     tDLogI("MqStreamClient::onClose() Close this client!");
+    updateAndBroadcast(MqMachineState::MMS_CLOSED);
 }
 
 } // namespace node

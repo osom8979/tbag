@@ -77,6 +77,9 @@ protected:
     virtual ~MqBase();
 
 public:
+    void updateAndBroadcast(MqMachineState state);
+
+public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override;
     virtual MqParams params() const override;
 

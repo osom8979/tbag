@@ -153,14 +153,6 @@ enum class MqMachineState
     MMS_CLOSING,        ///< Obtain the close request message.
     MMS_DELAY_CLOSING,  ///< Delay the close request.
     MMS_CLOSED,         ///< Close is done.
-
-    /**
-     * Enter the destructor method.
-     *
-     * @remarks
-     *  Flags to wake up all threads waiting for a receive queue.
-     */
-    MMS_DESTROYING,
 };
 
 inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEPT
@@ -172,7 +164,6 @@ inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEP
     case MqMachineState::MMS_CLOSING:       return "CLOSING";
     case MqMachineState::MMS_DELAY_CLOSING: return "DELAY_CLOSING";
     case MqMachineState::MMS_CLOSED:        return "CLOSED";
-    case MqMachineState::MMS_DESTROYING:    return "DESTROYING";
     default:                                return "UNKNOWN";
     }
 }

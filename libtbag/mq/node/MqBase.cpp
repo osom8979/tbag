@@ -25,8 +25,14 @@ MqBase::MqBase(Loop & loop, MqParams const & params, MqMachineState state)
 
 MqBase::~MqBase()
 {
+    assert(_state == MqMachineState::MMS_CLOSED);
+    updateAndBroadcast(MqMachineState::MMS_CLOSED);
+}
+
+void MqBase::updateAndBroadcast(MqMachineState state)
+{
     _wait_lock.lock();
-    _state = MqMachineState::MMS_DESTROYING;
+    _state = state;
     _wait_cond.broadcast();
     _wait_lock.unlock();
 }
@@ -81,7 +87,7 @@ Err MqBase::recvWait(MqMsg & msg, uint64_t timeout_nano)
         if (isSuccess(code)) {
             break;
         }
-        if (_state == MqMachineState::MMS_DESTROYING) {
+        if (isCloseState(_state)) {
             code = Err::E_ECANCELED;
             break;
         }
