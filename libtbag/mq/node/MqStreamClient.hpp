@@ -130,14 +130,25 @@ private:
         { parent->onCloseTimerClose(this); }
     };
 
+    struct ConnectTimer : public Timer
+    {
+        MqStreamClient * parent = nullptr;
+
+        ConnectTimer(Loop & loop, MqStreamClient * p) : Timer(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~ConnectTimer()
+        { /* EMPTY. */ }
+
+        virtual void onTimer() override
+        { parent->onConnectTimer(this); }
+        virtual void onClose() override
+        { parent->onConnectTimerClose(this); }
+    };
+
     template <typename _BaseT>
     struct Client : public _BaseT
     {
         MqStreamClient * parent = nullptr;
-
-        ConnectRequest  connect_req;
-        ShutdownRequest shutdown_req;
-        WriteRequest    write_req;
 
         Client(Loop & loop, MqStreamClient * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
@@ -163,6 +174,7 @@ public:
     using PipeClient = Client<Pipe>;
 
 public:
+    using SharedTimer      = std::shared_ptr<Timer>;
     using SharedStream     = std::shared_ptr<Stream>;
     using SharedWriter     = std::shared_ptr<Writer>;
     using SharedTcpClient  = std::shared_ptr<TcpClient>;
@@ -172,6 +184,14 @@ private:
     SharedStream _client;
     SharedWriter _writer;
     MsgPacket    _packer;
+
+private:
+    SharedTimer _connect_timer;
+
+private:
+    ConnectRequest  _connect_req;
+    ShutdownRequest _shutdown_req;
+    WriteRequest    _write_req;
 
 private:
     std::size_t _read_error_count;
@@ -208,6 +228,10 @@ private:
 private:
     void onCloseTimer(CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
+
+public:
+    void onConnectTimer(ConnectTimer * timer);
+    void onConnectTimerClose(ConnectTimer * timer);
 
 private:
     void onConnect (ConnectRequest & request, Err code);

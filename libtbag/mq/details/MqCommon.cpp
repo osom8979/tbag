@@ -243,9 +243,9 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
         params.continuous_read_error_count = toValue<unsigned>(itr->second);
     }
 
-    itr = queries.find(TRY_RECONNECT_NAME);
+    itr = queries.find(CONNECT_TIMEOUT);
     if (itr != queries.end()) {
-        params.try_reconnect_count = toValue<unsigned>(itr->second);
+        params.connect_timeout_millisec = toValue<unsigned>(itr->second);
     }
 
     itr = queries.find(WAIT_CONNECTION_NAME);

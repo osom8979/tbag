@@ -327,13 +327,6 @@ enum class MqIsConsume
     MIC_CONSUMED,
 };
 
-TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_QUEUE_SIZE       = 1024;            // power of 2.
-TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_PACKET_SIZE      = 256;             // data buffer size.
-TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_MAX_NODE_SIZE    = 100000;          // Number of C10K.
-TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_BUILDER_SIZE     = 1 * 1024 * 1024; // FlatBuffers builder capacity.
-TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_CLOSE_MILLISEC   = 1 * 1000;        // Shutdown -> Close wait-timeout.
-TBAG_CONSTEXPR std::size_t const TBAG_MQ_DEFAULT_READ_ERROR_COUNT = 4;               // Max continuous read error count.
-
 // Forward declaration.
 struct MqInterface;
 
@@ -399,8 +392,11 @@ struct MqParams
 
     /**
      * The maximum size of the queue for transmission.
+     *
+     * @warning
+     *  This value must be a power of 2.
      */
-    std::size_t send_queue_size = TBAG_MQ_DEFAULT_QUEUE_SIZE;
+    std::size_t send_queue_size = 1024;
 
     /**
      * The default size of the transmission message packet.
@@ -408,12 +404,15 @@ struct MqParams
      * @remarks
      *  If memory is insufficient, it will be more expanded.
      */
-    std::size_t send_msg_size = TBAG_MQ_DEFAULT_PACKET_SIZE;
+    std::size_t send_msg_size = 256;
 
     /**
      * The maximum size of the queue for receive
+     *
+     * @warning
+     *  This value must be a power of 2.
      */
-    std::size_t recv_queue_size = TBAG_MQ_DEFAULT_QUEUE_SIZE;
+    std::size_t recv_queue_size = 1024;
 
     /**
      * The default size of the receive message packet.
@@ -421,17 +420,20 @@ struct MqParams
      * @remarks
      *  If memory is insufficient, it will be more expanded.
      */
-    std::size_t recv_msg_size = TBAG_MQ_DEFAULT_PACKET_SIZE;
+    std::size_t recv_msg_size = 256;
 
     /**
      * The number of clients that can be accepted.
      */
-    std::size_t max_nodes = TBAG_MQ_DEFAULT_MAX_NODE_SIZE;
+    std::size_t max_nodes = 100000;
 
     /**
      * Temporary buffer size for serialization.
+     *
+     * @remarks
+     *  This value is used by the Builder in FlatBuffers.
      */
-    std::size_t packer_size = TBAG_MQ_DEFAULT_BUILDER_SIZE;
+    std::size_t packer_size = 1 * 1024 * 1024;
 
     /**
      * Wait time to closing. If this value is 0, close immediately.
@@ -439,7 +441,7 @@ struct MqParams
      * @remarks
      *  If you request a shutdown directly, You need time to wait for an idle recv request.
      */
-    std::size_t wait_closing_millisec = TBAG_MQ_DEFAULT_CLOSE_MILLISEC;
+    std::size_t wait_closing_millisec = 1 * 1000;
 
     /**
      * Verify the restore message.
@@ -450,7 +452,7 @@ struct MqParams
      * If the consecutive read error is maximum,
      * the connection is forced to close.
      */
-    std::size_t continuous_read_error_count = TBAG_MQ_DEFAULT_READ_ERROR_COUNT;
+    std::size_t continuous_read_error_count = 4;
 
     /**
      * You are given the opportunity to filter IP addresses for acceptance.
@@ -462,12 +464,12 @@ struct MqParams
     std::string accept_ip_regex;
 
     /**
-     * Number of attempts to reconnect
+     * Connect timeout.
      *
      * @remarks
      *  - Used in client only.
      */
-    std::size_t try_reconnect_count = 0;
+    std::size_t connect_timeout_millisec = 4 * 1000;
 
     /**
      * Wait until connection is completed.
@@ -512,7 +514,7 @@ TBAG_CONSTEXPR static char const * const PACKER_SIZE_NAME     = "packer_size";
 TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME    = "wait_closing";
 TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
 TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
-TBAG_CONSTEXPR static char const * const TRY_RECONNECT_NAME   = "try_reconnect";
+TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT      = "connect_timeout";
 TBAG_CONSTEXPR static char const * const WAIT_CONNECTION_NAME = "wait_connection";
 TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
 

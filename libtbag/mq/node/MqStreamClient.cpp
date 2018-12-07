@@ -27,6 +27,10 @@ using TcpClient   = MqStreamClient::TcpClient;
 using Buffer      = MqStreamClient::Buffer;
 using AfterAction = MqStreamClient::AfterAction;
 
+using ConnectRequest  = MqStreamClient::ConnectRequest;
+using ShutdownRequest = MqStreamClient::ShutdownRequest;
+using WriteRequest    = MqStreamClient::WriteRequest;
+
 MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
         : MqBase(loop, params, MqMachineState::MMS_NONE),
           _client(), _packer(params.packer_size), _read_error_count(0)
@@ -51,7 +55,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
     if (PARAMS.type == MqType::MT_PIPE) {
         auto * pipe = (PipeClient*)(_client.get());
         assert(pipe != nullptr);
-        pipe->connect(pipe->connect_req, params.address.c_str());
+        pipe->connect(_connect_req, params.address.c_str());
     } else {
         assert(PARAMS.type == MqType::MT_TCP);
         auto * tcp = (TcpClient*)(_client.get());
@@ -64,7 +68,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
             throw ErrException(INIT_CODE);
         }
 
-        auto const BIND_CODE = tcp->connect(tcp->connect_req, addr.getCommon());
+        auto const BIND_CODE = tcp->connect(_connect_req, addr.getCommon());
         if (isFailure(BIND_CODE)) {
             tDLogE("MqStreamClient::MqStreamClient() Socket connect error: {}", BIND_CODE);
             _client->close();
@@ -76,6 +80,13 @@ MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
     assert(static_cast<bool>(_writer));
     assert(_writer->isInit());
 
+    if (params.connect_timeout_millisec >= 1) {
+        _connect_timer = loop.newHandle<ConnectTimer>(loop, this);
+        assert(static_cast<bool>(_connect_timer));
+        assert(_connect_timer->isInit());
+        _connect_timer->start(params.connect_timeout_millisec);
+    }
+
     _state = MqMachineState::MMS_INITIALIZED;
 }
 
@@ -85,20 +96,19 @@ MqStreamClient::~MqStreamClient()
 }
 
 template <typename ClientT>
-static Err __shutdown(Stream * stream)
+static Err __shutdown(Stream * stream, ShutdownRequest & request)
 {
-    auto * client = (ClientT*)(stream);
-    return client->shutdown(client->shutdown_req);
+    return ((ClientT*)(stream))->shutdown(request);
 }
 
 Err MqStreamClient::shutdown()
 {
     assert(static_cast<bool>(_client));
     if (PARAMS.type == MqType::MT_PIPE) {
-        return __shutdown<PipeClient>(_client.get());
+        return __shutdown<PipeClient>(_client.get(), _shutdown_req);
     } else {
         assert(PARAMS.type == MqType::MT_TCP);
-        return __shutdown<TcpClient>(_client.get());
+        return __shutdown<TcpClient>(_client.get(), _shutdown_req);
     }
 }
 
@@ -264,20 +274,19 @@ void MqStreamClient::afterProcessMessage(AsyncMsg * msg)
 }
 
 template <typename ClientT>
-static Err __write_client(Stream * stream, uint8_t const * data, std::size_t size)
+static Err __write_client(Stream * stream, WriteRequest & request, uint8_t const * data, std::size_t size)
 {
     assert(stream != nullptr);
-    auto * client = (ClientT*)(stream);
-    return client->write(client->write_req, (char const *)data, size);
+    return ((ClientT*)(stream))->write(request, (char const *)data, size);
 }
 
-static Err __write_client(Stream * stream, uint8_t const * data, std::size_t size, MqType type)
+static Err __write_client(Stream * stream, WriteRequest & request, uint8_t const * data, std::size_t size, MqType type)
 {
     if (type == MqType::MT_PIPE) {
-        return __write_client<PipeClient>(stream, data, size);
+        return __write_client<PipeClient>(stream, request, data, size);
     }
     assert(type == MqType::MT_TCP);
-    return __write_client<TcpClient>(stream, data, size);
+    return __write_client<TcpClient>(stream, request, data, size);
 }
 
 void MqStreamClient::onWriterAsync(Writer * writer)
@@ -300,7 +309,7 @@ void MqStreamClient::onWriterAsync(Writer * writer)
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
 
-    auto const WRITE_CODE = __write_client(_client.get(), _packer.point(), _packer.size(), PARAMS.type);
+    auto const WRITE_CODE = __write_client(_client.get(), _write_req, _packer.point(), _packer.size(), PARAMS.type);
     if (isSuccess(WRITE_CODE)) {
         tDLogIfD(PARAMS.verbose,
                  "MqStreamClient::onWriterAsync() Write process {}byte ... "
@@ -339,26 +348,50 @@ void MqStreamClient::onCloseTimerClose(CloseTimer * timer)
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onCloseTimerClose() Close timer.");
 }
 
+void MqStreamClient::onConnectTimer(ConnectTimer * timer)
+{
+    auto const CANCEL_CODE = _connect_req.cancel();
+    if (isSuccess(CANCEL_CODE)) {
+        tDLogN("MqStreamClient::onConnectTimer() Connect cancel success.");
+    } else {
+        tDLogW("MqStreamClient::onConnectTimer() Connect cancel failure: {}", CANCEL_CODE);
+    }
+
+    _connect_timer->close();
+    _state = MqMachineState::MMS_CLOSING;
+    close();
+}
+
+void MqStreamClient::onConnectTimerClose(ConnectTimer * timer)
+{
+    tDLogIfD(PARAMS.verbose, "MqStreamClient::onConnectTimerClose() Close timer.");
+}
+
 void MqStreamClient::onConnect(ConnectRequest & request, Err code)
 {
     assert(static_cast<bool>(_client));
     assert(_state == MqMachineState::MMS_INITIALIZED);
 
-    if (isFailure(code)) {
+    if (isSuccess(code)) {
+        auto const START_CODE = _client->startRead();
+        if (isSuccess(START_CODE)) {
+            tDLogI("MqStreamClient::onConnect() Connection & Read start.");
+            auto const STOP_CODE = _connect_timer->stop();
+            assert(isSuccess(STOP_CODE));
+            _state = MqMachineState::MMS_ACTIVE;
+            return;
+        } else {
+            tDLogE("MqStreamClient::onConnect() Start read error: {}", code);
+        }
+    } else {
         tDLogE("MqStreamClient::onConnect() Connect error: {}", code);
-        close();
-        return;
     }
 
-    auto const START_CODE = _client->startRead();
-    if (isFailure(START_CODE)) {
-        tDLogE("MqStreamClient::onConnect() Start read error: {}", code);
-        close();
-        return;
-    }
-
-    tDLogI("MqStreamClient::onConnect() Connection & Read start.");
-    _state = MqMachineState::MMS_ACTIVE;
+    auto const STOP_CODE = _connect_timer->stop();
+    assert(isSuccess(STOP_CODE));
+    _connect_timer->close();
+    _state = MqMachineState::MMS_CLOSING;
+    close();
 }
 
 void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)

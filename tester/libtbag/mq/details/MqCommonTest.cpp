@@ -40,11 +40,11 @@ TEST(MqCommonTest, ConvertUriToParams)
     ASSERT_TRUE(PARAMS2.tcp_ipv6_only);
     ASSERT_EQ(5, PARAMS2.send_msg_size);
 
-    auto const PARAMS3 = convertUriToParams("pipe:///home/user/test.sock?tcp_ipv6=false&try_reconnect=4");
+    auto const PARAMS3 = convertUriToParams("pipe:///home/user/test.sock?tcp_ipv6=false&connect_timeout=4");
     ASSERT_STREQ("/home/user/test.sock", PARAMS3.address.c_str());
     ASSERT_EQ(MqType::MT_PIPE, PARAMS3.type);
     ASSERT_FALSE(PARAMS3.tcp_ipv6_only);
-    ASSERT_EQ(4, PARAMS3.try_reconnect_count);
+    ASSERT_EQ(4, PARAMS3.connect_timeout_millisec);
 
     log::SeverityGuard guard;
     auto const PARAMS4 = convertUriToParams("http://localhost?recv_queue=8");
