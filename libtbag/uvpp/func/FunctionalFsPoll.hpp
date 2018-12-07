@@ -40,10 +40,11 @@ template <typename CheckType>
 struct FunctionalFsPoll : public FunctionalHandle<CheckType>
 {
     using Parent    = FunctionalHandle<CheckType>;
-    using FileState = libtbag::uvpp::FsPoll::FileState;
+    using FileState = typename Parent::FileState;
     using OnFsPoll  = std::function<void(Err, FileState const &, FileState const &)>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::FsPoll, Parent);
+    STATIC_ASSERT_CHECK_IS_SAME(libtbag::uvpp::FsPoll::FileState, FileState);
 
     OnFsPoll fs_poll_cb;
 

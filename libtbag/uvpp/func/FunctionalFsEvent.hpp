@@ -40,10 +40,11 @@ template <typename CheckType>
 struct FunctionalFsEvent : public FunctionalHandle<CheckType>
 {
     using Parent    = FunctionalHandle<CheckType>;
-    using Event     = libtbag::uvpp::FsEvent::Event;
+    using Event     = typename Parent::Event;
     using OnFsEvent = std::function<void(char const *, Event, Err)>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::FsEvent, Parent);
+    STATIC_ASSERT_CHECK_IS_SAME(libtbag::uvpp::FsEvent::Event, Event);
 
     OnFsEvent fs_event_cb;
 

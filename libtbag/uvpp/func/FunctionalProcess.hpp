@@ -48,6 +48,7 @@ struct FunctionalProcess : public FunctionalHandle<ProcessType>
     using OnExit  = std::function<void(int64_t, int)>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Process, Parent);
+    STATIC_ASSERT_CHECK_IS_SAME(libtbag::uvpp::Process::Options, Options);
 
     OnExit exit_cb;
 

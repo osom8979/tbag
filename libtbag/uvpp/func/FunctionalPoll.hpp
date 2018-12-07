@@ -40,10 +40,11 @@ template <typename CheckType>
 struct FunctionalPoll : public FunctionalHandle<CheckType>
 {
     using Parent    = FunctionalHandle<CheckType>;
-    using EventType = libtbag::uvpp::Poll::EventType;
+    using EventType = typename Parent::EventType;
     using OnPoll    = std::function<void(Err, EventType)>;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(libtbag::uvpp::Poll, Parent);
+    STATIC_ASSERT_CHECK_IS_SAME(libtbag::uvpp::Poll::EventType, EventType);
 
     OnPoll poll_cb;
 
