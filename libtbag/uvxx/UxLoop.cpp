@@ -75,9 +75,21 @@ void UxLoop::swap(UxLoop & obj) TBAG_NOEXCEPT
     }
 }
 
-void UxLoop::reset()
+Err UxLoop::release()
 {
+    assert(!isRunning());
+    assert(!isAlive());
+
+    auto const HANDLE_SIZE = size();
+    Err code = Err::E_SUCCESS;
+
+    if (HANDLE_SIZE >= 1) {
+        _loop->tryCloseAllHandles();
+        code = _loop->run(RunMode::RUN_ONCE);
+    }
     _loop.reset();
+    assert(empty());
+    return code;
 }
 
 UxLoop::ThreadId UxLoop::getOwnerThreadId() const

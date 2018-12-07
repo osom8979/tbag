@@ -183,6 +183,9 @@ public:
     /** @return close handle count. */
     std::size_t closeAllHandles();
 
+    /** @return close handle count. */
+    std::size_t tryCloseAllHandles();
+
 private:
     /** @warning Don't use this method of user level developers. */
     void runCloseAllHandles();

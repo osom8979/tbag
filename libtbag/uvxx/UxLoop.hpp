@@ -79,7 +79,7 @@ public:
     inline Loop const & operator *() const TBAG_NOEXCEPT { return *get(); }
 
 public:
-    void reset();
+    Err release();
 
 public:
     ThreadId getOwnerThreadId() const;

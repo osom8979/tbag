@@ -268,18 +268,28 @@ Loop::~Loop()
 
 std::size_t Loop::closeAllHandles()
 {
-    std::size_t close_count = 0;
-
+    std::size_t count = 0;
     for (auto & cursor : _handles) {
-        if (/**/static_cast<bool>(cursor.second) &&
-                cursor.second->isInit()          &&
-                cursor.second->isClosing() == false) {
-            cursor.second->close();
-            ++close_count;
+        auto h = cursor.second;
+        if (h && h->isInit() && !h->isClosing()) {
+            h->close();
+            ++count;
         }
     }
+    return count;
+}
 
-    return close_count;
+std::size_t Loop::tryCloseAllHandles()
+{
+    std::size_t count = 0;
+    for (auto & cursor : _handles) {
+        auto h = cursor.second;
+        if (h && h->isInit() && !h->isClosing()) {
+            h->tryClose();
+            ++count;
+        }
+    }
+    return count;
 }
 
 void Loop::runCloseAllHandles()
