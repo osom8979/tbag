@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/uvxx/UxHandle.hpp>
 #include <libtbag/uvpp/func/FunctionalStream.hpp>
+#include <libtbag/uvpp/Request.hpp>
 
 #include <memory>
 
@@ -87,7 +88,7 @@ public:
 public:
     Err shutdown(ShutdownRequest & request);
     Err listen(int backlog = BACKLOG_LIMIT);
-    Err accept(Stream & client);
+    Err accept(UxStream & client);
 
 public:
     Err startRead();

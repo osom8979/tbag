@@ -112,10 +112,12 @@ Err UxStream::listen(int backlog)
     return Err::E_EXPIRED;
 }
 
-Err UxStream::accept(Stream & client)
+Err UxStream::accept(UxStream & client)
 {
-    if (auto shared = lockStream()) {
-        return shared->accept(client);
+    auto self_shared = lockStream();
+    auto client_shared = client.lockStream();
+    if (self_shared && client_shared) {
+        return self_shared->accept(*client_shared);
     }
     return Err::E_EXPIRED;
 }

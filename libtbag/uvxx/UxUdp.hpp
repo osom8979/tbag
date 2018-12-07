@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/uvxx/UxHandle.hpp>
 #include <libtbag/uvpp/func/FunctionalUdp.hpp>
+#include <libtbag/uvpp/Request.hpp>
 
 #include <memory>
 #include <string>
