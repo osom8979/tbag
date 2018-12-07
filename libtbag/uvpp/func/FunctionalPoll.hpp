@@ -27,9 +27,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace uvpp {
 namespace func {
 
-// Forward declaration.
-class Loop;
-
 /**
  * FunctionalPoll class prototype.
  *

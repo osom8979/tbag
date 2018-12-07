@@ -25,10 +25,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace uvpp {
-
-// Forward declaration.
-class Loop;
-
 namespace func {
 
 /**
