@@ -34,7 +34,7 @@ namespace func {
  * @date   2017-09-05
  */
 template <typename TcpType>
-struct FunctionalTcp : public FunctionalStream<PipeType>
+struct FunctionalTcp : public FunctionalStream<TcpType>
 {
     using Parent    = FunctionalStream<TcpType>;
     using OnConnect = std::function<void(ConnectRequest&, Err)>;

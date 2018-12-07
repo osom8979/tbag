@@ -27,9 +27,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace uvxx {
 
-// Forward declaration.
-class UxLoop;
-
 /**
  * UxStream class prototype.
  *
