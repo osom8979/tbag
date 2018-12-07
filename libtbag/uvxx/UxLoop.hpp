@@ -15,9 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <memory>
+#include <chrono>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -99,6 +102,40 @@ public:
 
 public:
     void stop();
+};
+
+/**
+ * UxNoncopyableLoop class prototype.
+ *
+ * @author zer0
+ * @date   2018-12-07
+ */
+class UxNoncopyableLoop : public UxLoop, private Noncopyable
+{
+public:
+    TBAG_CONSTEXPR static uint32_t const DEFAULT_SLEEP_MILLISECONDS = 1000;
+
+private:
+    uint32_t _sleep_milliseconds;
+
+public:
+    UxNoncopyableLoop(bool print_internal = false, bool verbose = false,
+                      uint32_t sleep_milliseconds = DEFAULT_SLEEP_MILLISECONDS)
+            : UxLoop(print_internal, verbose),
+              _sleep_milliseconds(sleep_milliseconds)
+    {
+        // EMPTY.
+    }
+
+    ~UxNoncopyableLoop()
+    {
+        while (isRunning()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(_sleep_milliseconds));
+        }
+        if (!empty()) {
+            UxLoop::release();
+        }
+    }
 };
 
 } // namespace uvxx
