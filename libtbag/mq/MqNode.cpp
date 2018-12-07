@@ -89,19 +89,25 @@ public:
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         assert(MODE != MqMode::MM_NONE);
-        bool push_result = _pool.waitPush([&](){
-            init(params);
-        });
-        assert(push_result);
+        if (params.type == MqType::MT_LOCAL) {
+            _mq = std::make_shared<MqLocalQueue>(_loop, params);
+        } else {
+            if (MODE == MqMode::MM_BIND) {
+                _mq = std::make_shared<MqStreamServer>(_loop, params);
+            } else {
+                assert(MODE == MqMode::MM_CONNECT);
+                _mq = std::make_shared<MqStreamClient>(_loop, params);
+            }
+        }
 
         if (!_loop || !_mq) {
             throw std::bad_alloc();
         }
 
-        push_result = _pool.push([&](){
+        bool const PUSH_RESULT = _pool.push([&](){
             runner();
         });
-        assert(push_result);
+        assert(PUSH_RESULT);
 
         // [CONNECT(CLIENT) ONLY]
         // Wait until connection is completed.
@@ -136,41 +142,16 @@ public:
                      TYPE_NAME, MODE_NAME, CODE);
         }
 
-        bool const PUSH_RESULT = _pool.push([&](){
-            _mq.reset();
-            _pool.exit();
-        });
-        assert(PUSH_RESULT);
+        _pool.exit();
+        tDLogIfD(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Wait for Pool to exit.", TYPE_NAME, MODE_NAME);
 
-        tDLogIfI(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Wait for Pool to exit.", TYPE_NAME, MODE_NAME);
         _pool.join();
-        tDLogIfI(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Done.", TYPE_NAME, MODE_NAME);
+        tDLogIfN(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Done.", TYPE_NAME, MODE_NAME);
+
+        _mq.reset();
     }
 
 public:
-    void init(MqParams const & params)
-    {
-        char const * const TYPE_NAME = getTypeName(params.type);
-        char const * const MODE_NAME = getModeName(MODE);
-
-        try {
-            if (params.type == MqType::MT_LOCAL) {
-                _mq = std::make_shared<MqLocalQueue>(_loop, params);
-            } else {
-                if (MODE == MqMode::MM_BIND) {
-                    _mq = std::make_shared<MqStreamServer>(_loop, params);
-                } else {
-                    assert(MODE == MqMode::MM_CONNECT);
-                    _mq = std::make_shared<MqStreamClient>(_loop, params);
-                }
-            }
-        } catch (std::exception e) {
-            tDLogE("MqNode::Impl::init({}/{}) Standard exception: {}", TYPE_NAME, MODE_NAME, e.what());
-        } catch (...) {
-            tDLogE("MqNode::Impl::init({}/{}) Unknown exception.", TYPE_NAME, MODE_NAME);
-        }
-    }
-
     void runner()
     {
         using namespace libtbag::mq::details;

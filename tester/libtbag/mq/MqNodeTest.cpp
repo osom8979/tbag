@@ -14,6 +14,8 @@
 #include <string>
 #include <set>
 
+TBAG_CONSTEXPR static char const * const EXTENSION_NODE_PARAMS = "?verbose=true&wait_closing=1";
+
 using namespace libtbag;
 using namespace libtbag::mq;
 using namespace libtbag::mq::details;
@@ -23,7 +25,7 @@ TEST(MqNodeTest, Bind)
     libtbag::log::SeverityGuard guard;
 
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     ASSERT_NO_THROW(MqNode::bind(PIPE_PATH));
 }
@@ -32,7 +34,7 @@ TEST(MqNodeTest, ClientRel_ServerRel)
 {
     // Client release -> Server release!
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     MqUniqueNode server;
     MqUniqueNode client;
@@ -49,7 +51,7 @@ TEST(MqNodeTest, ServerRel_ClientRel)
 {
     // Server release -> Client release!
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     MqUniqueNode server;
     MqUniqueNode client;
@@ -65,7 +67,7 @@ TEST(MqNodeTest, ServerRel_ClientRel)
 TEST(MqNodeTest, ClientToServerMessage)
 {
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     MqUniqueNode server;
     MqUniqueNode client;
@@ -102,7 +104,7 @@ TEST(MqNodeTest, ClientToServerMessage)
 TEST(MqNodeTest, ServerToClientMessage)
 {
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     MqUniqueNode server;
     MqUniqueNode client;
@@ -139,7 +141,7 @@ TEST(MqNodeTest, ServerToClientMessage)
 TEST(MqNodeTest, SendAndClose1)
 {
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     MqUniqueNode server;
     MqUniqueNode client;
@@ -159,7 +161,7 @@ TEST(MqNodeTest, SendAndClose1)
 TEST(MqNodeTest, SendAndClose2)
 {
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     MqUniqueNode server;
     MqUniqueNode client;
@@ -179,7 +181,7 @@ TEST(MqNodeTest, SendAndClose2)
 TEST(MqNodeTest, MultiClient)
 {
     tttDir_Automatic_Pipe();
-    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + "?verbose=true";
+    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS;
 
     MqUniqueNode server;
     MqUniqueNode client1;
