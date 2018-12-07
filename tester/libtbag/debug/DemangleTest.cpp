@@ -25,3 +25,23 @@ TEST(DemangleTest, Default)
     ASSERT_EQ(RESULT_NAME, DEMANGLE_NAME);
 }
 
+TEST(DemangleTest, Demangler)
+{
+    ASSERT_STREQ("f()", getDemangle("_Z1fv").c_str());
+    ASSERT_STREQ("f()", getDemangle("_Z1fi").c_str());
+    ASSERT_STREQ("Foo::Bar()", getDemangle("_ZN3Foo3BarEv").c_str());
+    ASSERT_STREQ("operator%()", getDemangle("_Zrm1XS_").c_str());
+    ASSERT_STREQ("Foo::Foo()", getDemangle("_ZN3FooC1Ev").c_str());
+}
+
+TEST(DemangleTest, ComplexDemangle)
+{
+    char const * const ERROR_STRING =
+            "_ZNSt3__114__thread_proxyINS_5tupleIJNS_10unique_ptrINS_15__thread_structENS_14default_deleteIS3_EEEEZN23WorkerTest_Default_Test8TestBodyEvE3$_0EEEEEPvSA_+497";
+
+    //std::string const ABI_DEMANGLE  = getAbiDemangle(ERROR_STRING);
+    //std::string const DEMANGLE_NAME = getDemangle(ERROR_STRING);
+    //std::cout << "ABI DEMANGLE: " << ABI_DEMANGLE << std::endl;
+    //std::cout << "DEMANGLE: " << DEMANGLE_NAME << std::endl;
+}
+
