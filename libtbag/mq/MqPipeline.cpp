@@ -36,10 +36,6 @@ void MqPipeline::run(bool validate, bool verbose)
 
     Err code;
 
-    if (!onBegin()) {
-        return;
-    }
-
     while (!_exit) {
         recv = _recv.load();
         assert(recv != nullptr);
@@ -71,18 +67,6 @@ void MqPipeline::run(bool validate, bool verbose)
             send->send(send_msg);
         }
     }
-
-    onEnd(code);
-}
-
-bool MqPipeline::onBegin()
-{
-    return true;
-}
-
-void MqPipeline::onEnd(Err code)
-{
-    // EMPTY.
 }
 
 void MqPipeline::onError(Err code)

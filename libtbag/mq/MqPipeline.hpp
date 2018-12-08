@@ -53,6 +53,8 @@ public:
     { _recv.store(node); }
     inline void setSend(MqNode * node) TBAG_NOEXCEPT_SP_OP(_send.store(node))
     { _send.store(node); }
+
+public:
     inline void setWaitNano(uint64_t nano) TBAG_NOEXCEPT_SP_OP(_wait_nano.store(nano))
     { _wait_nano.store(nano); }
     inline void exit(bool flag = true) TBAG_NOEXCEPT_SP_OP(_exit.store(flag))
@@ -60,10 +62,6 @@ public:
 
 public:
     void run(bool validate = true, bool verbose = false);
-
-protected:
-    virtual bool onBegin();
-    virtual void onEnd(Err code);
 
 protected:
     virtual void onError(Err code);
