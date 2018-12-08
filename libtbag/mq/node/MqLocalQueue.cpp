@@ -22,8 +22,8 @@ namespace node {
 
 using AfterAction = MqLocalQueue::AfterAction;
 
-MqLocalQueue::MqLocalQueue(Loop & loop, MqParams const & params)
-        : MqBase(loop, params, MqMachineState::MMS_ACTIVE)
+MqLocalQueue::MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams const & params)
+        : MqBase(loop, internal, params, MqMachineState::MMS_ACTIVE)
 {
     // EMPTY.
 }
@@ -72,28 +72,31 @@ AfterAction MqLocalQueue::onMsgEvent(AsyncMsg * msg)
     using namespace libtbag::mq::details;
     assert(isActiveState(_state) || isClosingState(_state));
 
-    if (PARAMS.recv_cb != nullptr) {
-        PARAMS.recv_cb(*msg, this);
+    assert(INTERNAL.recv_cb != nullptr);
+    assert(INTERNAL.parent != nullptr);
+
+    if (INTERNAL.recv_cb(*msg, INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
+        tDLogIfD(PARAMS.verbose, "MqLocalQueue::onMsgEvent() Consumed this received message.");
+        return AfterAction::AA_OK;
+    }
+
+    Err enqueue_code;
+    COMMENT("Single-Producer recv-queue") {
+        while (!_wait_lock.tryLock()) {
+            // Busy waiting...
+        }
+        enqueue_code = _receives.enqueue(*msg);
+        _wait_cond.signal();
+        _wait_lock.unlock();
+    }
+
+    if (isSuccess(enqueue_code)) {
+        tDLogIfD(PARAMS.verbose,
+                 "MqLocalQueue::onMsgEvent() Enqueue success. "
+                 "Perhaps the remaining queue size is {}.",
+                 _receives.getInaccurateSizeOfActive());
     } else {
-        Err enqueue_code;
-
-        COMMENT("Single-Producer recv-queue") {
-            while (!_wait_lock.tryLock()) {
-                // Busy waiting...
-            }
-            enqueue_code = _receives.enqueue(*msg);
-            _wait_cond.signal();
-            _wait_lock.unlock();
-        }
-
-        if (isSuccess(enqueue_code)) {
-            tDLogIfD(PARAMS.verbose,
-                     "MqLocalQueue::onMsgEvent() Enqueue success. "
-                     "Perhaps the remaining queue size is {}.",
-                     _receives.getInaccurateSizeOfActive());
-        } else {
-            tDLogE("MqLocalQueue::onMsgEvent() Enqueue error: {}", enqueue_code);
-        }
+        tDLogE("MqLocalQueue::onMsgEvent() Enqueue error: {}", enqueue_code);
     }
 
     return AfterAction::AA_OK;

@@ -199,7 +199,7 @@ private:
     Buffer      _remaining_read;
 
 public:
-    MqStreamClient(Loop & loop, MqParams const & params);
+    MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamClient();
 
 private:

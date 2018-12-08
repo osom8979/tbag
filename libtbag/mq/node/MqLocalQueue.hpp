@@ -67,7 +67,7 @@ public:
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
 public:
-    MqLocalQueue(Loop & loop, MqParams const & params);
+    MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqLocalQueue();
 
 private:

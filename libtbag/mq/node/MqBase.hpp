@@ -43,6 +43,8 @@ class TBAG_API MqBase : protected libtbag::mq::details::MqEventQueue,
 {
 public:
     using MqMachineState = libtbag::mq::details::MqMachineState;
+    using MqInternal     = libtbag::mq::details::MqInternal;
+    using MqIsConsume    = libtbag::mq::details::MqIsConsume;
     using MqParams       = libtbag::mq::details::MqParams;
     using MqMsg          = libtbag::mq::details::MqMsg;
     using MqQueue        = libtbag::mq::details::MqQueue;
@@ -59,7 +61,8 @@ public:
     using UvCondition = libtbag::lock::UvCondition;
 
 protected:
-    MqParams const PARAMS;
+    MqInternal const INTERNAL;
+    MqParams   const PARAMS;
 
 protected:
     MqQueue _receives;
@@ -73,7 +76,7 @@ protected:
     UvCondition _wait_cond;
 
 protected:
-    MqBase(Loop & loop, MqParams const & params, MqMachineState state);
+    MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state);
     virtual ~MqBase();
 
 public:

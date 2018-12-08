@@ -31,8 +31,8 @@ using ConnectRequest  = MqStreamClient::ConnectRequest;
 using ShutdownRequest = MqStreamClient::ShutdownRequest;
 using WriteRequest    = MqStreamClient::WriteRequest;
 
-MqStreamClient::MqStreamClient(Loop & loop, MqParams const & params)
-        : MqBase(loop, params, MqMachineState::MMS_NONE),
+MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
+        : MqBase(loop, internal, params, MqMachineState::MMS_NONE),
           _client(), _packer(params.packer_size), _read_error_count(0)
 {
     if (PARAMS.type == MqType::MT_PIPE && !libtbag::filesystem::Path(params.address).exists()) {
@@ -309,6 +309,16 @@ void MqStreamClient::onWriterAsync(Writer * writer)
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
 
+    assert(INTERNAL.write_cb != nullptr);
+    assert(INTERNAL.parent != nullptr);
+
+    // Give the user a chance to filter the message.
+    if (INTERNAL.write_cb(*(msg_pointer.get()), INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
+        tDLogIfD(PARAMS.verbose, "MqStreamClient::onWriterAsync() The message to be sent has been filtered.");
+        afterProcessMessage(msg_pointer.get());
+        return;
+    }
+
     auto const WRITE_CODE = __write_client(_client.get(), _write_req, _packer.point(), _packer.size(), PARAMS.type);
     if (isSuccess(WRITE_CODE)) {
         tDLogIfD(PARAMS.verbose,
@@ -489,8 +499,11 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
             break;
         }
 
-        if (PARAMS.recv_cb != nullptr) {
-            PARAMS.recv_cb(_packer.msg(), this);
+        assert(INTERNAL.recv_cb != nullptr);
+        assert(INTERNAL.parent != nullptr);
+
+        if (INTERNAL.recv_cb(_packer.msg(), INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
+            tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Consumed this received message.");
         } else {
             COMMENT("Single-Producer recv-queue") {
                 while (!_wait_lock.tryLock()) {

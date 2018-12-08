@@ -333,12 +333,36 @@ struct MqInterface;
 /**
  * Message filter.
  */
-using MqOnWrite = MqIsConsume(*)(MqMsg & msg, MqInterface * mq_node);
+using MqOnWrite = MqIsConsume(*)(MqMsg & msg, void * parent);
 
 /**
  * Callback prototype for intercepting Receive events.
  */
-using MqOnRecv = void(*)(MqMsg const & msg, MqInterface * mq_node);
+using MqOnRecv = MqIsConsume(*)(MqMsg const & msg, void * parent);
+
+/**
+ * Internal option packs.
+ */
+struct MqInternal
+{
+    /**
+     * Give the user a chance to filter the message.
+     */
+    MqOnWrite write_cb = nullptr;
+
+    /**
+     * Use the receive callback.
+     *
+     * @remarks
+     *  When this option is set, it no longer enqueues to the recv-queue.
+     */
+    MqOnRecv recv_cb = nullptr;
+
+    /**
+     * Parent object instance pointer.
+     */
+    void * parent = nullptr;
+};
 
 /**
  * User customizable option packs.
@@ -376,19 +400,6 @@ struct MqParams
      *  - pipe: unused.
      */
     bool tcp_ipv6_only = false;
-
-    /**
-     * Give the user a chance to filter the message.
-     */
-    MqOnWrite write_cb = nullptr;
-
-    /**
-     * Use the receive callback.
-     *
-     * @remarks
-     *  When this option is set, it no longer enqueues to the recv-queue.
-     */
-    MqOnRecv recv_cb = nullptr;
 
     /**
      * The maximum size of the queue for transmission.
@@ -522,6 +533,8 @@ struct MqInterface
 {
     virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
     virtual MqParams params() const = 0;
+
+//    virtual Err close() = 0;
 
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;

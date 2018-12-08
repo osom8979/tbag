@@ -60,7 +60,7 @@ public:
     MqNode(MqParams const & params, MqMode mode);
     MqNode(std::string const & uri, MqMode mode);
     MqNode(MqNode && obj) TBAG_NOEXCEPT;
-    ~MqNode();
+    virtual ~MqNode();
 
 public:
     MqNode & operator =(MqNode && obj) TBAG_NOEXCEPT;
@@ -78,6 +78,10 @@ public:
 
     inline operator bool() const TBAG_NOEXCEPT
     { return exists(); }
+
+protected:
+    virtual bool onWrite(MqMsg & msg);
+    virtual bool onRecv(MqMsg const & msg);
 
 public:
     Err join();

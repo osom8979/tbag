@@ -28,8 +28,8 @@ using Buffer      = MqStreamServer::Buffer;
 using binf        = MqStreamServer::binf;
 using AfterAction = MqStreamServer::AfterAction;
 
-MqStreamServer::MqStreamServer(Loop & loop, MqParams const & params)
-        : MqBase(loop, params, MqMachineState::MMS_NONE),
+MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params)
+        : MqBase(loop, internal, params, MqMachineState::MMS_NONE),
           _server(), _nodes(), _packer(params.packer_size)
 {
     if (PARAMS.type == MqType::MT_PIPE && libtbag::filesystem::Path(params.address).exists()) {
@@ -379,13 +379,14 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
 
-    if (PARAMS.write_cb != nullptr) {
-        // Give the user a chance to filter the message.
-        if (PARAMS.write_cb(*(msg_pointer.get()), this) == MqIsConsume::MIC_CONSUMED) {
-            tDLogIfI(PARAMS.verbose, "MqStreamServer::onWriterAsync() Consumed this message.");
-            afterProcessMessage(msg_pointer.get());
-            return;
-        }
+    assert(INTERNAL.write_cb != nullptr);
+    assert(INTERNAL.parent != nullptr);
+
+    // Give the user a chance to filter the message.
+    if (INTERNAL.write_cb(*(msg_pointer.get()), INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
+        tDLogIfD(PARAMS.verbose, "MqStreamServer::onWriterAsync() The message to be sent has been filtered.");
+        afterProcessMessage(msg_pointer.get());
+        return;
     }
 
     if (_nodes.empty()) {
@@ -617,8 +618,11 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
         // Update current node key(id);
         _packer.msg().stream = reinterpret_cast<std::intptr_t>(node);
 
-        if (PARAMS.recv_cb != nullptr) {
-            PARAMS.recv_cb(_packer.msg(), this);
+        assert(INTERNAL.recv_cb != nullptr);
+        assert(INTERNAL.parent != nullptr);
+
+        if (INTERNAL.recv_cb(_packer.msg(), INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
+            tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Consumed this received message.");
         } else {
             COMMENT("Single-Producer recv-queue") {
                 while (!_wait_lock.tryLock()) {

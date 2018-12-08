@@ -53,7 +53,8 @@ public:
     using MqStreamServer = libtbag::mq::node::MqStreamServer;
 
 public:
-    using MqOnRecv    = libtbag::mq::details::MqOnRecv;
+    using MqInternal  = libtbag::mq::details::MqInternal;
+    using MqIsConsume = libtbag::mq::details::MqIsConsume;
     using MqInterface = libtbag::mq::details::MqInterface;
     using SharedMq    = std::shared_ptr<MqInterface>;
 
@@ -88,15 +89,20 @@ public:
             : MODE(mode), PARAMS(params), _parent(parent),
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
+        MqInternal internal;
+        internal.write_cb = &__on_write_cb__;
+        internal.recv_cb  = &__on_recv_cb__;
+        internal.parent   = parent;
+
         assert(MODE != MqMode::MM_NONE);
         if (params.type == MqType::MT_LOCAL) {
-            _mq = std::make_shared<MqLocalQueue>(_loop, params);
+            _mq = std::make_shared<MqLocalQueue>(_loop, internal, params);
         } else {
             if (MODE == MqMode::MM_BIND) {
-                _mq = std::make_shared<MqStreamServer>(_loop, params);
+                _mq = std::make_shared<MqStreamServer>(_loop, internal, params);
             } else {
                 assert(MODE == MqMode::MM_CONNECT);
-                _mq = std::make_shared<MqStreamClient>(_loop, params);
+                _mq = std::make_shared<MqStreamClient>(_loop, internal, params);
             }
         }
 
@@ -170,6 +176,19 @@ public:
         }
     }
 
+private:
+    static MqIsConsume __on_write_cb__(MqMsg & msg, void * parent)
+    {
+        assert(parent != nullptr);
+        return ((MqNode*)parent)->onWrite(msg) ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
+    }
+
+    static MqIsConsume __on_recv_cb__(MqMsg const & msg, void * parent)
+    {
+        assert(parent != nullptr);
+        return ((MqNode*)parent)->onRecv(msg) ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
+    }
+
 public:
     Err join()
     {
@@ -231,6 +250,16 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
 MqNode::~MqNode()
 {
     _impl.reset();
+}
+
+bool MqNode::onWrite(MqMsg & msg)
+{
+    return false;
+}
+
+bool MqNode::onRecv(MqMsg const & msg)
+{
+    return false;
 }
 
 Err MqNode::join()

@@ -200,7 +200,7 @@ private:
     MsgPacket    _packer;
 
 public:
-    MqStreamServer(Loop & loop, MqParams const & params);
+    MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamServer();
 
 private:

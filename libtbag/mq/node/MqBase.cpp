@@ -15,9 +15,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq   {
 namespace node {
 
-MqBase::MqBase(Loop & loop, MqParams const & params, MqMachineState state)
+MqBase::MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          PARAMS(params), _receives(params.recv_queue_size, params.recv_msg_size),
+          INTERNAL(internal), PARAMS(params), _receives(params.recv_queue_size, params.recv_msg_size),
           _state(state), _sending(0)
 {
     // EMPTY.
