@@ -331,6 +331,11 @@ enum class MqIsConsume
 struct MqInterface;
 
 /**
+ * Accept filter.
+ */
+using MqOnAccept = bool(*)(std::string const & peer, void * parent);
+
+/**
  * Message filter.
  */
 using MqOnWrite = MqIsConsume(*)(MqMsg & msg, void * parent);
@@ -345,6 +350,11 @@ using MqOnRecv = MqIsConsume(*)(MqMsg const & msg, void * parent);
  */
 struct MqInternal
 {
+    /**
+     * Clients connected to the server are filtered out.
+     */
+    MqOnAccept accept_cb = nullptr;
+
     /**
      * Give the user a chance to filter the message.
      */
@@ -466,15 +476,6 @@ struct MqParams
     std::size_t continuous_read_error_count = 4;
 
     /**
-     * You are given the opportunity to filter IP addresses for acceptance.
-     *
-     * @remarks
-     *  - tcp: use this value.
-     *  - pipe: unused.
-     */
-    std::string accept_ip_regex;
-
-    /**
      * Connect timeout.
      *
      * @remarks
@@ -491,17 +492,17 @@ struct MqParams
     std::size_t wait_on_connection_timeout_millisec = 1000;
 
     /**
-     * Verbose log message.
-     */
-    bool verbose = false;
-
-    /**
      * The wait time to not miss the send() requested by another thread.
      *
      * @remarks
      *  At least 10 nanoseconds is recommended.
      */
     std::size_t shutdown_wait_nanosec = 1000;
+
+    /**
+     * Verbose log message.
+     */
+    bool verbose = false;
 
     /**
      * Space for user-defined arbitrary data.
@@ -527,6 +528,7 @@ TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
 TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
 TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT      = "connect_timeout";
 TBAG_CONSTEXPR static char const * const WAIT_CONNECTION_NAME = "wait_connection";
+TBAG_CONSTEXPR static char const * const SHUTDOWN_WAIT_NAME   = "shutdown_wait";
 TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
 
 struct MqInterface

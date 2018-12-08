@@ -704,10 +704,14 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
     auto const ACCEPT_CODE = server->accept(*stream);
     assert(isSuccess(ACCEPT_CODE));
 
-    if (PARAMS.type == MqType::MT_TCP && !PARAMS.accept_ip_regex.empty()) {
+    if (PARAMS.type == MqType::MT_TCP) {
+        assert(INTERNAL.accept_cb != nullptr);
+        assert(INTERNAL.parent != nullptr);
+
         auto * tcp = (TcpNode*)stream.get();
         auto const PEER_IP = tcp->getPeerIp();
-        if (!std::regex_match(PEER_IP, std::regex(PARAMS.accept_ip_regex))) {
+
+        if (INTERNAL.accept_cb(PEER_IP, INTERNAL.parent)) {
             tDLogI("MqStreamServer::onServerConnection() "
                    "Filter the current peer IP: {}", PEER_IP);
             stream->close();

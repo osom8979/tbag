@@ -90,9 +90,10 @@ public:
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         MqInternal internal;
-        internal.write_cb = &__on_write_cb__;
-        internal.recv_cb  = &__on_recv_cb__;
-        internal.parent   = parent;
+        internal.accept_cb = &__on_accept_cb__;
+        internal.write_cb  = &__on_write_cb__;
+        internal.recv_cb   = &__on_recv_cb__;
+        internal.parent    = parent;
 
         assert(MODE != MqMode::MM_NONE);
         if (params.type == MqType::MT_LOCAL) {
@@ -177,6 +178,12 @@ public:
     }
 
 private:
+    static bool __on_accept_cb__(std::string const & peer, void * parent)
+    {
+        assert(parent != nullptr);
+        return ((MqNode*)parent)->onAccept(peer);
+    }
+
     static MqIsConsume __on_write_cb__(MqMsg & msg, void * parent)
     {
         assert(parent != nullptr);
@@ -250,6 +257,11 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
 MqNode::~MqNode()
 {
     _impl.reset();
+}
+
+bool MqNode::onAccept(std::string const & peer)
+{
+    return true;
 }
 
 bool MqNode::onWrite(MqMsg & msg)

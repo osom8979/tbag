@@ -253,6 +253,11 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
         params.wait_on_connection_timeout_millisec = toValue<unsigned>(itr->second);
     }
 
+    itr = queries.find(SHUTDOWN_WAIT_NAME);
+    if (itr != queries.end()) {
+        params.shutdown_wait_nanosec = toValue<bool>(itr->second);
+    }
+
     itr = queries.find(VERBOSE_NAME);
     if (itr != queries.end()) {
         params.verbose = toValue<bool>(itr->second);

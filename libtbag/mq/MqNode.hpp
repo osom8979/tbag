@@ -80,6 +80,7 @@ public:
     { return exists(); }
 
 protected:
+    virtual bool onAccept(std::string const & peer);
     virtual bool onWrite(MqMsg & msg);
     virtual bool onRecv(MqMsg const & msg);
 

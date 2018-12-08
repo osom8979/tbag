@@ -33,7 +33,6 @@
 
 #include <vector>
 #include <unordered_set>
-#include <regex>
 #include <atomic>
 #include <thread>
 #include <type_traits>
