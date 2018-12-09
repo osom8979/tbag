@@ -203,45 +203,50 @@ struct MqMsg
     static_assert(sizeof(Buffer::value_type) == 1,
                   "The minimum unit of the buffer element must be 1 Byte.");
 
+    /**
+     * Integer pointer to the stream to be connected to the socket.
+     */
     std::intptr_t stream = 0;
 
-    MqEvent event;
-    Buffer  buffer;
+    /**
+     * The event identifier.
+     */
+    MqEvent event = ME_MSG;
 
-    MqMsg() : event(ME_MSG), buffer()
+    /**
+     * The data buffer corresponding to the event.
+     */
+    Buffer buffer;
+
+    MqMsg()
     { /* EMPTY. */ }
-    MqMsg(std::size_t s) : event(ME_MSG), buffer(s)
+
+    MqMsg(MqEvent e) : event(e)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e) : event(e), buffer()
+    MqMsg(std::size_t s) : buffer(s)
     { /* EMPTY. */ }
     MqMsg(MqEvent e, std::size_t s) : event(e), buffer(s)
     { /* EMPTY. */ }
+
+    MqMsg(Value const * d, std::size_t s) : buffer(d, d + s)
+    { /* EMPTY. */ }
     MqMsg(MqEvent e, Value const * d, std::size_t s) : event(e), buffer(d, d + s)
     { /* EMPTY. */ }
-    MqMsg(Value const * d, std::size_t s) : event(ME_MSG), buffer(d, d + s)
-    { /* EMPTY. */ }
 
+    MqMsg(std::string const & str) : buffer(str.begin(), str.end())
+    { /* EMPTY. */ }
     MqMsg(MqEvent e, std::string const & str) : event(e), buffer(str.begin(), str.end())
     { /* EMPTY. */ }
-    MqMsg(std::string const & str) : event(ME_MSG), buffer(str.begin(), str.end())
-    { /* EMPTY. */ }
 
-    MqMsg(MqEvent e, Buffer const & buf) : event(e), buffer(buf)
+    MqMsg(Buffer const & buffer) : buffer(buffer)
     { /* EMPTY. */ }
-    MqMsg(Buffer const & buffer) : event(ME_MSG), buffer(buffer)
+    MqMsg(MqEvent e, Buffer const & buf) : event(e), buffer(buf)
     { /* EMPTY. */ }
 
     MqMsg(MqMsg const & obj)
-            : stream(obj.stream),
-              event(obj.event),
-              buffer(obj.buffer)
-    { /* EMPTY. */ }
-
+    { *this = obj; }
     MqMsg(MqMsg && obj) TBAG_NOEXCEPT
-            : stream(std::move(obj.stream)),
-              event(std::move(obj.event)),
-              buffer(std::move(obj.buffer))
-    { /* EMPTY. */ }
+    { *this = std::move(obj); }
 
     ~MqMsg()
     { /* EMPTY. */ }
@@ -268,13 +273,11 @@ struct MqMsg
 
     inline char * data() TBAG_NOEXCEPT_SP_OP(buffer.data())
     { return buffer.data(); }
-
     inline char const * data() const TBAG_NOEXCEPT_SP_OP(buffer.data())
     { return buffer.data(); }
 
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(buffer.empty())
     { return buffer.empty(); }
-
     inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(buffer.size())
     { return buffer.size(); }
 
