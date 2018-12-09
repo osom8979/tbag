@@ -376,6 +376,24 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     auto msg_pointer = writer->queue.front();
     assert(static_cast<bool>(msg_pointer));
 
+    // Give users the opportunity to use the original data.
+    if (INTERNAL.default_write != nullptr) {
+        assert(INTERNAL.parent != nullptr);
+        writer->write_count = INTERNAL.default_write(msg_pointer->data(), msg_pointer->size(), INTERNAL.parent);
+        if (writer->write_count >= 1) {
+            tDLogIfD(PARAMS.verbose,
+                     "MqStreamServer::onWriterAsync() Default write process... "
+                     "Next, onWrite() event method.");
+        } else {
+            assert(writer->write_count == 0);
+            tDLogIfW(PARAMS.verbose,
+                     "MqStreamServer::onWriterAsync() Default write error, "
+                     "skip this message.");
+            afterProcessMessage(msg_pointer.get());
+        }
+        return;
+    }
+
     auto const CODE = _packer.build(*(msg_pointer.get()));
     assert(isSuccess(CODE));
 
@@ -572,6 +590,13 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
 
     assert(isSuccess(code));
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Read success. {}byte", size);
+
+    // Give users the opportunity to use the original data.
+    if (INTERNAL.default_read != nullptr) {
+        assert(INTERNAL.parent != nullptr);
+        INTERNAL.default_read(buffer, size, INTERNAL.parent);
+        return;
+    }
 
     read_error_count = 0;
     __insert_buffer(node, buffer, size, PARAMS.type);

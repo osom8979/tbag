@@ -349,6 +349,16 @@ using MqOnWrite = MqIsConsume(*)(MqMsg & msg, void * parent);
 using MqOnRecv = MqIsConsume(*)(MqMsg const & msg, void * parent);
 
 /**
+ * It operates in the default write mode.
+ */
+using MqOnDefaultWrite = std::size_t(*)(char const * buffer, std::size_t size, void * parent);
+
+/**
+ * It operates in the default read mode.
+ */
+using MqOnDefaultRead = void(*)(char const * buffer, std::size_t size, void * parent);
+
+/**
  * Internal option packs.
  */
 struct MqInternal
@@ -370,6 +380,16 @@ struct MqInternal
      *  When this option is set, it no longer enqueues to the recv-queue.
      */
     MqOnRecv recv_cb = nullptr;
+
+    /**
+     * Use this option if you want to keep the socket intact.
+     */
+    MqOnDefaultWrite default_write = nullptr;
+
+    /**
+     * Use this option if you want to keep the socket intact.
+     */
+    MqOnDefaultRead default_read = nullptr;
 
     /**
      * Parent object instance pointer.
@@ -538,8 +558,6 @@ struct MqInterface
 {
     virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
     virtual MqParams params() const = 0;
-
-//    virtual Err close() = 0;
 
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;
