@@ -177,6 +177,12 @@ NetStreamClient::NetStreamClient(MqParams const & params)
     assert(static_cast<bool>(_impl));
 }
 
+NetStreamClient::NetStreamClient(std::string const & uri)
+        : _impl(std::make_unique<Impl>(this, getParams(uri)))
+{
+    assert(static_cast<bool>(_impl));
+}
+
 NetStreamClient::NetStreamClient(NetStreamClient && obj) TBAG_NOEXCEPT
         : _impl(std::move(obj._impl))
 {
@@ -199,6 +205,11 @@ void NetStreamClient::swap(NetStreamClient & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         _impl.swap(obj._impl);
     }
+}
+
+NetStreamClient::MqParams NetStreamClient::getParams(std::string const & uri)
+{
+    return libtbag::mq::details::convertUriToParams(uri);
 }
 
 void NetStreamClient::onBegin()

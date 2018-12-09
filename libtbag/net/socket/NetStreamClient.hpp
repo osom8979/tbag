@@ -22,6 +22,8 @@
 #include <cstdint>
 #include <string>
 #include <memory>
+#include <functional>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -59,6 +61,7 @@ private:
 
 public:
     NetStreamClient(MqParams const & params);
+    NetStreamClient(std::string const & uri);
     NetStreamClient(NetStreamClient && obj) TBAG_NOEXCEPT;
     virtual ~NetStreamClient();
 
@@ -79,10 +82,64 @@ public:
     inline operator bool() const TBAG_NOEXCEPT
     { return exists(); }
 
+public:
+    static MqParams getParams(std::string const & uri);
+
 protected:
     virtual void onBegin();
     virtual bool onRecv(char const * buffer, std::size_t size);
     virtual void onEnd();
+};
+
+/**
+ * Functional StreamClient prototype.
+ *
+ * @author zer0
+ * @date   2018-12-09
+ */
+struct NetFuncStreamClient : public NetStreamClient
+{
+    using OnBegin = std::function<void()>;
+    using OnRecv  = std::function<bool(char const *, std::size_t)>;
+    using OnEnd   = std::function<void()>;
+
+    OnBegin begin_cb;
+    OnRecv   recv_cb;
+    OnEnd     end_cb;
+
+    template <typename ... Args>
+    NetFuncStreamClient(Args && ... args) : NetStreamClient(std::forward<Args>(args) ...)
+    { /* EMPTY. */ }
+
+    virtual ~NetFuncStreamClient()
+    { /* EMPTY. */ }
+
+    virtual void onBegin() override
+    {
+        if (begin_cb) {
+            begin_cb();
+        } else {
+            NetStreamClient::onBegin();
+        }
+    }
+
+    virtual bool onRecv(char const * buffer, std::size_t size) override
+    {
+        if (recv_cb) {
+            return recv_cb(buffer, size);
+        } else {
+            return NetStreamClient::onRecv(buffer, size);
+        }
+    }
+
+    virtual void onEnd() override
+    {
+        if (end_cb) {
+            end_cb();
+        } else {
+            NetStreamClient::onEnd();
+        }
+    }
 };
 
 } // namespace socket
