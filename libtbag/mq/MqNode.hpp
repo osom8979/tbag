@@ -54,12 +54,26 @@ public:
     using MqMode         = libtbag::mq::details::MqMode;
     using MqParams       = libtbag::mq::details::MqParams;
 
+    using OnAccept = std::function<bool(std::string const &)>;
+    using OnWrite  = std::function<bool(MqMsg &)>;
+    using OnRecv   = std::function<bool(MqMsg const &)>;
+
+public:
+    struct Callbacks
+    {
+        OnAccept  accept_cb;
+        OnWrite   write_cb;
+        OnRecv    recv_cb;
+    };
+
 private:
     UniqueImpl _impl;
 
 public:
     MqNode(MqParams const & params, MqMode mode);
     MqNode(std::string const & uri, MqMode mode);
+    MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs);
+    MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs);
     MqNode(MqNode && obj) TBAG_NOEXCEPT;
     virtual ~MqNode();
 
@@ -149,76 +163,6 @@ TBAG_API Err connect(MqUniqueNode & node, MqNode::MqParams const & params);
 TBAG_API Err connect(MqUniqueNode & node, std::string const & uri);
 TBAG_API Err connect(MqSharedNode & node, MqNode::MqParams const & params);
 TBAG_API Err connect(MqSharedNode & node, std::string const & uri);
-
-/**
- * MqFunctionalNode class prototype.
- *
- * @author zer0
- * @date   2018-12-08
- */
-class TBAG_API MqFuncNode : public MqNode
-{
-public:
-    using MqParams = MqNode::MqParams;
-    using MqMode   = MqNode::MqMode;
-    using MqMsg    = MqNode::MqMsg;
-
-public:
-    using OnAccept = std::function<bool(std::string const &)>;
-    using OnWrite  = std::function<bool(MqMsg &)>;
-    using OnRecv   = std::function<bool(MqMsg const &)>;
-
-public:
-    struct Callbacks
-    {
-        OnAccept  accept_cb;
-        OnWrite   write_cb;
-        OnRecv    recv_cb;
-    };
-
-private:
-    Callbacks const CALLBACKS;
-
-public:
-    MqFuncNode(MqParams const & params, MqMode mode, Callbacks const & callbacks)
-            : MqNode(params, mode), CALLBACKS(callbacks)
-    { /* EMPTY. */ }
-
-    MqFuncNode(std::string const & uri, MqMode mode, Callbacks const & callbacks)
-            : MqNode(uri, mode), CALLBACKS(callbacks)
-    { /* EMPTY. */ }
-
-    virtual ~MqFuncNode()
-    { /* EMPTY. */ }
-
-protected:
-    virtual bool onAccept(std::string const & peer) override
-    {
-        if (CALLBACKS.accept_cb) {
-            return CALLBACKS.accept_cb(peer);
-        } else {
-            return MqNode::onAccept(peer);
-        }
-    }
-
-    virtual bool onWrite(MqMsg & msg) override
-    {
-        if (CALLBACKS.write_cb) {
-            return CALLBACKS.write_cb(msg);
-        } else {
-            return MqNode::onWrite(msg);
-        }
-    }
-
-    virtual bool onRecv(MqMsg const & msg) override
-    {
-        if (CALLBACKS.recv_cb) {
-            return CALLBACKS.recv_cb(msg);
-        } else {
-            return MqNode::onRecv(msg);
-        }
-    }
-};
 
 } // namespace mq
 

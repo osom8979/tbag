@@ -63,8 +63,9 @@ public:
     TBAG_CONSTEXPR static std::size_t const THREAD_SIZE = 1U;
 
 public:
-    MqMode   const MODE;
-    MqParams const PARAMS;
+    Callbacks const CALLBACKS;
+    MqMode    const MODE;
+    MqParams  const PARAMS;
 
 private:
     MqNode * _parent;
@@ -78,15 +79,15 @@ private:
     SharedMq _mq;
 
 public:
-    Impl(MqNode * parent, MqParams const & params, MqMode mode)
-            : MODE(mode), PARAMS(params), _parent(parent),
+    Impl(MqNode * parent, MqParams const & params, MqMode mode, Callbacks const & cbs = Callbacks{})
+            : CALLBACKS(cbs), MODE(mode), PARAMS(params), _parent(parent),
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         MqInternal internal;
         internal.accept_cb = &__on_accept_cb__;
         internal.write_cb  = &__on_write_cb__;
         internal.recv_cb   = &__on_recv_cb__;
-        internal.parent    = parent;
+        internal.parent    = this;
 
         assert(MODE != MqMode::MM_NONE);
         if (params.type == MqType::MT_LOCAL) {
@@ -170,19 +171,44 @@ private:
     static bool __on_accept_cb__(void * node, std::string const & peer, void * parent)
     {
         assert(parent != nullptr);
-        return ((MqNode*)parent)->onAccept(peer);
+        auto * impl = (MqNode::Impl*)parent;
+
+        if (impl->CALLBACKS.accept_cb) {
+            return impl->CALLBACKS.accept_cb(peer);
+        } else {
+            assert(impl->_parent != nullptr);
+            return impl->_parent->onAccept(peer);
+        }
     }
 
     static MqIsConsume __on_write_cb__(MqMsg & msg, void * parent)
     {
         assert(parent != nullptr);
-        return ((MqNode*)parent)->onWrite(msg) ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
+        auto * impl = (MqNode::Impl*)parent;
+
+        bool result;
+        if (impl->CALLBACKS.write_cb) {
+            result = impl->CALLBACKS.write_cb(msg);
+        } else {
+            assert(impl->_parent != nullptr);
+            result = impl->_parent->onWrite(msg);
+        }
+        return result ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
     }
 
     static MqIsConsume __on_recv_cb__(MqMsg const & msg, void * parent)
     {
         assert(parent != nullptr);
-        return ((MqNode*)parent)->onRecv(msg) ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
+        auto * impl = (MqNode::Impl*)parent;
+
+        bool result;
+        if (impl->CALLBACKS.recv_cb) {
+            result = impl->CALLBACKS.recv_cb(msg);
+        } else {
+            assert(impl->_parent != nullptr);
+            result = impl->_parent->onRecv(msg);
+        }
+        return result ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
     }
 
 public:
@@ -220,6 +246,18 @@ MqNode::MqNode(MqParams const & params, MqMode mode)
 
 MqNode::MqNode(std::string const & uri, MqMode mode)
         : MqNode(getParams(uri), mode)
+{
+    assert(static_cast<bool>(_impl));
+}
+
+MqNode::MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs)
+        : _impl(std::make_unique<Impl>(this, params, mode, cbs))
+{
+    assert(static_cast<bool>(_impl));
+}
+
+MqNode::MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs)
+        : MqNode(getParams(uri), mode, cbs)
 {
     assert(static_cast<bool>(_impl));
 }
