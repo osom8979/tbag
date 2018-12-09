@@ -19,7 +19,7 @@
 #include <libtbag/id/Id.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/network/details/FunctionalNet.hpp>
 #include <libtbag/network/udp/UdpNodeBackend.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>

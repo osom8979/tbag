@@ -145,8 +145,8 @@ static bool runSimpleServerTest(HttpServer::StreamType type, std::string const &
 TEST(NetworkHttpTest, TcpHttpServer)
 {
     log::SeverityGuard guard(log::TBAG_DEFAULT_LOGGER_NAME, log::INFO_SEVERITY);
-    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "GET"));
-    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::TCP, details::ANY_IPV4, "POST"));
+    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::TCP, libtbag::net::ANY_IPV4, "GET"));
+    ASSERT_TRUE(runSimpleServerTest(HttpServer::StreamType::TCP, libtbag::net::ANY_IPV4, "POST"));
 }
 
 TEST(NetworkHttpTest, PipeHttpServer)
@@ -179,7 +179,7 @@ TEST(NetworkHttpTest, RoutingServer)
     int on_request_down_get  = 0;
     int on_request_down_post = 0;
 
-    server.init(details::ANY_IPV4, 0);
+    server.init(libtbag::net::ANY_IPV4, 0);
     int const SERVER_PORT = server.port();
 
     std::string request_url = "http://localhost:";
@@ -288,7 +288,7 @@ TEST(NetworkHttpTest, WebSocketEcho)
     uvpp::Loop loop;
     FuncHttpServer server(loop);
 
-    ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
+    ASSERT_EQ(Err::E_SUCCESS, server.init(libtbag::net::ANY_IPV4, 0));
     int const SERVER_PORT = server.port();
     ASSERT_LT(0, SERVER_PORT);
     std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;
@@ -380,7 +380,7 @@ TEST(NetworkHttpTest, MultipleWebSocketClients)
     uvpp::Loop server_loop;
     FuncHttpServer server(server_loop);
 
-    ASSERT_EQ(Err::E_SUCCESS, server.init(details::ANY_IPV4, 0));
+    ASSERT_EQ(Err::E_SUCCESS, server.init(libtbag::net::ANY_IPV4, 0));
     int const SERVER_PORT = server.port();
     ASSERT_LT(0, SERVER_PORT);
     std::cout << "WebSocket Server bind: ws://localhost:" << SERVER_PORT << "/" << std::endl;

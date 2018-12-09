@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/network/stream/StreamServer.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
 
@@ -289,7 +290,7 @@ TEST(NetworkTcpTest, ReadStop)
     });
 
     FuncTcpClient client(loop);
-    ASSERT_EQ(Err::E_SUCCESS, client.init(LOOPBACK_IPV4, SERVER_PORT));
+    ASSERT_EQ(Err::E_SUCCESS, client.init(libtbag::net::LOOPBACK_IPV4, SERVER_PORT));
 
     int connect_cb_called = 0;
     int timer_cb_called = 0;
@@ -364,7 +365,7 @@ TEST(NetworkTcpTest, ShutdownAfterWrite)
     });
 
     FuncTcpClient client(loop);
-    ASSERT_EQ(Err::E_SUCCESS, client.init(LOOPBACK_IPV4, SERVER_PORT));
+    ASSERT_EQ(Err::E_SUCCESS, client.init(libtbag::net::LOOPBACK_IPV4, SERVER_PORT));
     ASSERT_EQ(Err::E_SUCCESS, client.startTimer(125));
 
     int connect_cb_called = 0;
@@ -444,8 +445,8 @@ TEST(NetworkTcpTest, WriteOnServerToMultiClients)
 
     FuncTcpClient client1(loop);
     FuncTcpClient client2(loop);
-    ASSERT_EQ(Err::E_SUCCESS, client1.init(LOOPBACK_IPV4, SERVER_PORT));
-    ASSERT_EQ(Err::E_SUCCESS, client2.init(LOOPBACK_IPV4, SERVER_PORT));
+    ASSERT_EQ(Err::E_SUCCESS, client1.init(libtbag::net::LOOPBACK_IPV4, SERVER_PORT));
+    ASSERT_EQ(Err::E_SUCCESS, client2.init(libtbag::net::LOOPBACK_IPV4, SERVER_PORT));
 
     int client1_read_count = 0;
     int client2_read_count = 0;
@@ -547,7 +548,7 @@ TEST(NetworkTcpTest, MultiEcho)
         server_close++;
     });
 
-    server.init(details::ANY_IPV4, 0);
+    server.init(libtbag::net::ANY_IPV4, 0);
     int const SERVER_PORT = server.port();
     std::cout << "Server port number: " << SERVER_PORT << std::endl;
     std::thread thread_server([&](){
@@ -600,7 +601,7 @@ TEST(NetworkTcpTest, MultiEcho)
         clients.at(i)->set_onClose([&, i](){
             close_result.at(i) = Err::E_SUCCESS;
         });
-        clients.at(i)->init(details::LOOPBACK_IPV4, SERVER_PORT);
+        clients.at(i)->init(libtbag::net::LOOPBACK_IPV4, SERVER_PORT);
 
         cthreads.at(i) = std::thread([&, i](){
             loop_result.at(i) = cloops.at(i)->run();

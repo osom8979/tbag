@@ -13,7 +13,6 @@
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/SocketAddress.hpp>
 
 #include <cstdint>

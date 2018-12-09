@@ -19,6 +19,8 @@
 
 #include <libtbag/id/Id.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/uvpp/Tcp.hpp>
+#include <libtbag/uvpp/Pipe.hpp>
 
 #include <cstdint>
 #include <string>
@@ -51,14 +53,12 @@ inline char const * const getStreamName(StreamType type) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (type) {
-    case StreamType::TCP:       return "TCP";
-    case StreamType::PIPE:      return "PIPE";
-    case StreamType::UNKNOWN:   return "UNKNOWN";
-    default: break;
+    case StreamType::TCP:     return "TCP";
+    case StreamType::PIPE:    return "PIPE";
+    case StreamType::UNKNOWN: return "UNKNOWN";
+    default:                  return "UNKNOWN";
     }
     // @formatter:on
-    TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return "UNKNOWN";
 }
 
 template <typename T> struct IsNetworkType : public std::false_type
@@ -66,12 +66,12 @@ template <typename T> struct IsNetworkType : public std::false_type
     TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::UNKNOWN;
 };
 
-template <> struct IsNetworkType<uvpp::Tcp> : public std::true_type
+template <> struct IsNetworkType<libtbag::uvpp::Tcp> : public std::true_type
 {
     TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::TCP;
 };
 
-template <> struct IsNetworkType<uvpp::Pipe> : public std::true_type
+template <> struct IsNetworkType<libtbag::uvpp::Pipe> : public std::true_type
 {
     TBAG_CONSTEXPR static StreamType const STREAM_TYPE = StreamType::PIPE;
 };

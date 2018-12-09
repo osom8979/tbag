@@ -18,7 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/network/details/NetInterface.hpp>
 
 #include <cassert>

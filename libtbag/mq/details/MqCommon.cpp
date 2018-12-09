@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/mq/details/MqCommon.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
@@ -170,7 +170,7 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
         params.address = params.address.substr(1); // Remove the slash('/')
         params.port = 0;
     } else {
-        if (libtbag::network::details::isIp(uri.getHost()) && uri.isPort()) {
+        if (libtbag::net::isIp(uri.getHost()) && uri.isPort()) {
             params.address = uri.getHost();
             params.port    = uri.getPortNumber();
         } else {

@@ -1,12 +1,12 @@
 /**
- * @file   NetCommon.hpp
- * @brief  NetCommon class prototype.
+ * @file   Ip.hpp
+ * @brief  Ip class prototype.
  * @author zer0
- * @date   2017-05-03
+ * @date   2018-12-09
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_NETCOMMON_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_NETCOMMON_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NET_IP_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NET_IP_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,22 +15,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/id/Id.hpp>
-#include <libtbag/debug/Assert.hpp>
 
-#include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/uvpp/Pipe.hpp>
-
-#include <cstdint>
-#include <type_traits>
-#include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace details {
+namespace net {
 
 TBAG_CONSTEXPR char const * const ANY_IPV4 = "0.0.0.0";
 TBAG_CONSTEXPR char const * const BROADCAST_SUBNET_IPV4 = "255.255.255.255";
@@ -68,12 +60,11 @@ inline bool isDynamicPort(int port) TBAG_NOEXCEPT
     return 49152 <= COMPARE_AND(port) <= 65535;
 }
 
-} // namespace details
-} // namespace network
+} // namespace net
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_DETAILS_NETCOMMON_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NET_IP_HPP__
 

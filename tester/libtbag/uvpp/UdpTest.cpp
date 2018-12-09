@@ -10,7 +10,7 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/func/FunctionalUdp.hpp>
 #include <libtbag/uvpp/func/FunctionalIdle.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 
 #include <vector>
 
@@ -18,7 +18,6 @@ using namespace libtbag;
 using namespace libtbag::uvpp;
 using namespace libtbag::uvpp::func;
 using namespace libtbag::network;
-using namespace libtbag::network::details;
 
 TEST(UdpTest, Default)
 {
@@ -51,13 +50,13 @@ TEST(UdpTest, Default)
         idle->close();
     };
 
-    ASSERT_EQ(Err::E_SUCCESS, initAddress(ANY_IPV4, 0, &recv_ipv4));
+    ASSERT_EQ(Err::E_SUCCESS, initAddress(libtbag::net::ANY_IPV4, 0, &recv_ipv4));
     ASSERT_EQ(Err::E_SUCCESS, recv_udp->bind(&recv_ipv4));
     ASSERT_EQ(Err::E_SUCCESS, recv_udp->startRecv());
 
     int const BIND_PORT = recv_udp->getSockPort();
     std::cout << "Bind port: " << BIND_PORT << std::endl;
-    ASSERT_EQ(Err::E_SUCCESS, initAddress(LOOPBACK_IPV4, BIND_PORT, &send_ipv4));
+    ASSERT_EQ(Err::E_SUCCESS, initAddress(libtbag::net::LOOPBACK_IPV4, BIND_PORT, &send_ipv4));
 
     ASSERT_EQ(Err::E_SUCCESS, idle->start());
     ASSERT_EQ(Err::E_SUCCESS, loop.run());

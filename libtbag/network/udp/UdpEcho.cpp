@@ -7,7 +7,7 @@
 
 #include <libtbag/network/udp/UdpEcho.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 
 #include <cassert>
 
@@ -90,7 +90,7 @@ Err UdpEcho::initServer(std::string const & bind_ip, int port, uint64_t timeout)
 Err UdpEcho::initClient(std::string const & bind_ip, int port, int broadcast_port, uint64_t timeout)
 {
     _type = EchoType::ET_CLIENT;
-    Err const SET_DEST_CODE = UdpNode::setDestination(details::BROADCAST_SUBNET_IPV4, broadcast_port);
+    Err const SET_DEST_CODE = UdpNode::setDestination(libtbag::net::BROADCAST_SUBNET_IPV4, broadcast_port);
     if (isFailure(SET_DEST_CODE)) {
         return SET_DEST_CODE;
     }

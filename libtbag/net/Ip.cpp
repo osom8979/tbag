@@ -1,20 +1,19 @@
 /**
- * @file   NetCommon.cpp
- * @brief  NetCommon class implementation.
+ * @file   Ip.cpp
+ * @brief  Ip class implementation.
  * @author zer0
- * @date   2017-05-03
+ * @date   2018-12-09
  */
 
-#include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace details {
+namespace net {
 
 #ifndef IPV4SEG
 #define IPV4SEG "(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"
@@ -83,8 +82,7 @@ bool isIpv6(std::string const & ip)
     return false;
 }
 
-} // namespace details
-} // namespace network
+} // namespace net
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

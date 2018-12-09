@@ -68,7 +68,7 @@ public:
         uint64_t    timeout;
         bool        verbose;
 
-        Param(std::string const & i = network::details::ANY_IPV4,
+        Param(std::string const & i = libtbag::net::ANY_IPV4,
               int p = proto::DEFAULT_TPOT_SERVER_PORT_NUMBER,
               StreamType t = StreamType::TCP,
               uint64_t o = proto::DEFAULT_TPOT_TIMEOUT_MILLISEC,

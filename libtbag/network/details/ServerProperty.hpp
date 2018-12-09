@@ -18,7 +18,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/id/Id.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/Request.hpp>

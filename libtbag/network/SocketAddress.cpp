@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/network/SocketAddress.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/bitwise/Endian.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Dns.hpp>
@@ -150,9 +150,9 @@ Err SocketAddress::initName(std::string const & host, std::string const & servic
 
 Err SocketAddress::init(std::string const & host, int port)
 {
-    if (details::isIpv4(host)) {
+    if (libtbag::net::isIpv4(host)) {
         return initIpv4(host, port);
-    } else if (details::isIpv6(host)) {
+    } else if (libtbag::net::isIpv6(host)) {
         return initIpv6(host, port);
     }
     return initName(host, std::string(), port);

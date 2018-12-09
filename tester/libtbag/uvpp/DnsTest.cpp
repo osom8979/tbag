@@ -9,7 +9,7 @@
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 
 #include <iostream>
 
@@ -53,8 +53,7 @@ TEST(DnsTest, DnsAddrInfo)
             exists_ipv6 = true;
         }
 
-        using namespace libtbag::network::details;
-        ASSERT_TRUE(isIpv4(ip) || isIpv6(ip));
+        ASSERT_TRUE(libtbag::net::isIpv4(ip) || libtbag::net::isIpv6(ip));
         ASSERT_EQ(80, getPortNumber(info->ai_addr));
     }
 

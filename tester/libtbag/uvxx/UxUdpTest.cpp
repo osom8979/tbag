@@ -10,7 +10,7 @@
 #include <libtbag/uvxx/UxUdp.hpp>
 #include <libtbag/uvxx/UxIdle.hpp>
 
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 
 #include <string>
 #include <vector>
@@ -71,8 +71,8 @@ TEST(UxUdpTest, Default)
         idle.close();
     });
 
-    std::string const ANY_IPV4      = libtbag::network::details::ANY_IPV4;
-    std::string const LOOPBACK_IPV4 = libtbag::network::details::LOOPBACK_IPV4;
+    std::string const ANY_IPV4      = libtbag::net::ANY_IPV4;
+    std::string const LOOPBACK_IPV4 = libtbag::net::LOOPBACK_IPV4;
 
     ASSERT_EQ(Err::E_SUCCESS, libtbag::uvpp::initAddress(ANY_IPV4, 0, &recv_ipv4));
     ASSERT_EQ(Err::E_SUCCESS, recv_udp.bind(&recv_ipv4));

@@ -21,7 +21,7 @@
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/container/ReuseQueue.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/uvpp/ex/SafetyAsync.hpp>
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/Timer.hpp>

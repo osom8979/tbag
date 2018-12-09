@@ -1,30 +1,17 @@
 /**
- * @file   NetCommonTest.cpp
- * @brief  NetCommon class tester.
+ * @file   IpTest.cpp
+ * @brief  Ip class tester.
  * @author zer0
- * @date   2017-05-04
+ * @date   2018-12-09
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/details/NetCommon.hpp>
-#include <libtbag/uvpp/Udp.hpp>
+#include <libtbag/net/Ip.hpp>
 
 using namespace libtbag;
-using namespace libtbag::network;
-using namespace libtbag::network::details;
+using namespace libtbag::net;
 
-//TEST(NetCommonTest, IsNetworkType)
-//{
-//    ASSERT_TRUE(IsNetworkType<uvpp::Tcp>::value);
-//    ASSERT_TRUE(IsNetworkType<uvpp::Pipe>::value);
-//    ASSERT_FALSE(IsNetworkType<int>::value);
-//
-//    ASSERT_TRUE(StreamType::TCP == IsNetworkType<uvpp::Tcp>::STREAM_TYPE);
-//    ASSERT_TRUE(StreamType::PIPE == IsNetworkType<uvpp::Pipe>::STREAM_TYPE);
-//    ASSERT_TRUE(StreamType::UNKNOWN == IsNetworkType<uvpp::Udp>::STREAM_TYPE);
-//}
-
-TEST(NetCommonTest, Ipv4)
+TEST(IpTest, Ipv4)
 {
     ASSERT_FALSE(isIpv4("255.255.256.250"));
     ASSERT_FALSE(isIpv4("255,255.256.250"));
@@ -36,7 +23,7 @@ TEST(NetCommonTest, Ipv4)
     ASSERT_TRUE(isIpv4("127.0.0.1"));
 }
 
-TEST(NetCommonTest, Ipv6)
+TEST(IpTest, Ipv6)
 {
     ASSERT_TRUE(isIpv6("2001:cdba:0000:0000:0000:0000:3257:9652"));
     ASSERT_TRUE(isIpv6("2001:cdba:0:0:0:0:3257:9652"));

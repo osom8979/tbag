@@ -7,7 +7,8 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
+#include <libtbag/network/details/NetInterface.hpp>
 #include <libtbag/network/udp/UdpNode.hpp>
 
 #include <iostream>
@@ -32,11 +33,11 @@ TEST(NetworkUdpTest, Default)
     node1.setFlags(FuncUdpNode::UDP_NODE_FLAG_USE_BIND);
     node2.setFlags(FuncUdpNode::UDP_NODE_FLAG_USE_BIND);
 
-    ASSERT_EQ(Err::E_SUCCESS, node1.init(ANY_IPV4, 0));
-    ASSERT_EQ(Err::E_SUCCESS, node2.init(ANY_IPV4, 0));
+    ASSERT_EQ(Err::E_SUCCESS, node1.init(libtbag::net::ANY_IPV4, 0));
+    ASSERT_EQ(Err::E_SUCCESS, node2.init(libtbag::net::ANY_IPV4, 0));
 
-    node1.setDestination(LOOPBACK_IPV4, node2.port());
-    node2.setDestination(LOOPBACK_IPV4, node1.port());
+    node1.setDestination(libtbag::net::LOOPBACK_IPV4, node2.port());
+    node2.setDestination(libtbag::net::LOOPBACK_IPV4, node1.port());
 
     int node1_read  = 0;
     int node1_write = 0;

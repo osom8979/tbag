@@ -10,7 +10,6 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Dns.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/SocketAddress.hpp>
 
 #include <cassert>

@@ -9,12 +9,11 @@
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 
 using namespace libtbag;
 using namespace libtbag::uvpp;
 using namespace libtbag::network;
-using namespace libtbag::network::details;
 
 TEST(NetworkDnsTest, Sync)
 {
@@ -34,18 +33,18 @@ TEST(NetworkDnsTest, Sync)
         std::string const CURRENT_IP = getIpName(info->ai_addr);
         std::cout << "Domain: " << TEST_DOMAIN_NAME << " -> Ip: " << CURRENT_IP << std::endl;
 
-        ASSERT_TRUE(isIpv4(CURRENT_IP) || isIpv6(CURRENT_IP));
+        ASSERT_TRUE(libtbag::net::isIpv4(CURRENT_IP) || libtbag::net::isIpv6(CURRENT_IP));
         ip_list.push_back(CURRENT_IP);
     }
 
     ASSERT_LE(1U, ip_list.size());
     for (auto & ip : ip_list) {
         DnsNameInfo name;
-        if (isIpv4(ip)) {
+        if (libtbag::net::isIpv4(ip)) {
             struct sockaddr_in addr = {0,};
             ASSERT_EQ(Err::E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
             ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
-        } else if (isIpv6(ip)) {
+        } else if (libtbag::net::isIpv6(ip)) {
             struct sockaddr_in6 addr = {0,};
             ASSERT_EQ(Err::E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
             ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));

@@ -7,7 +7,7 @@
 
 #include <libtbag/dom/xml/node/ServerXmlNode.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/net/Ip.hpp>
 
 #include <algorithm>
 #include <utility>
@@ -25,7 +25,7 @@ namespace node {
 // ---------------------------------
 
 SocketAddressInfo::SocketAddressInfo()
-        : ip(network::details::ANY_IPV4), port(0), enable(false)
+        : ip(libtbag::net::ANY_IPV4), port(0), enable(false)
 {
     // EMPTY.
 }
