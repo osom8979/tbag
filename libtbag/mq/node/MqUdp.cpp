@@ -247,7 +247,7 @@ void MqUdp::onWriterAsync(Writer * writer)
     // Give users the opportunity to use the original data.
     if (INTERNAL.default_write != nullptr) {
         assert(INTERNAL.parent != nullptr);
-        if (INTERNAL.default_write(msg_pointer->data(), msg_pointer->size(), INTERNAL.parent) >= 1) {
+        if (INTERNAL.default_write(nullptr, msg_pointer->data(), msg_pointer->size(), INTERNAL.parent) >= 1) {
             tDLogIfD(PARAMS.verbose,
                      "MqUdp::onWriterAsync() Default write process... "
                      "Next, onWrite() event method.");
@@ -371,7 +371,7 @@ void MqUdp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr con
     // Give users the opportunity to use the original data.
     if (INTERNAL.default_read != nullptr) {
         assert(INTERNAL.parent != nullptr);
-        INTERNAL.default_read(buffer, size, INTERNAL.parent);
+        INTERNAL.default_read(nullptr, buffer, size, INTERNAL.parent);
         return;
     }
 

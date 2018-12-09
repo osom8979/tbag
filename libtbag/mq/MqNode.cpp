@@ -15,9 +15,6 @@
 #include <libtbag/mq/node/MqStreamServer.hpp>
 #include <libtbag/thread/ThreadPool.hpp>
 
-#include <libtbag/lock/UvLock.hpp>
-#include <libtbag/lock/UvCondition.hpp>
-
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -57,10 +54,6 @@ public:
     using MqIsConsume = libtbag::mq::details::MqIsConsume;
     using MqInterface = libtbag::mq::details::MqInterface;
     using SharedMq    = std::shared_ptr<MqInterface>;
-
-public:
-    using UvLock      = libtbag::lock::UvLock;
-    using UvCondition = libtbag::lock::UvCondition;
 
 public:
     /**
@@ -136,7 +129,6 @@ public:
     ~Impl()
     {
         using namespace libtbag::mq::details;
-
         char const * const TYPE_NAME = getTypeName(PARAMS.type);
         char const * const MODE_NAME = getModeName(MODE);
 
@@ -162,23 +154,21 @@ public:
     void runner()
     {
         using namespace libtbag::mq::details;
-        auto const PARAMS = _mq->params();
-        tDLogIfI(PARAMS.verbose, "MqNode::Impl::runner({}/{}) Loop start",
-                 getTypeName(PARAMS.type), getModeName(MODE));
+        char const * const TYPE_NAME = getTypeName(PARAMS.type);
+        char const * const MODE_NAME = getModeName(MODE);
 
+        tDLogIfI(PARAMS.verbose, "MqNode::Impl::runner({}/{}) Loop start", TYPE_NAME, MODE_NAME);
         _last = _loop.run();
 
         if (isSuccess(_last)) {
-            tDLogIfI(PARAMS.verbose, "MqNode::Impl::runner({}/{}) Loop end success.",
-                     getTypeName(PARAMS.type), getModeName(MODE));
+            tDLogIfI(PARAMS.verbose, "MqNode::Impl::runner({}/{}) Loop end success.", TYPE_NAME, MODE_NAME);
         } else {
-            tDLogE("MqNode::Impl::runner({}/{}) Loop end error: {}",
-                   _last, getTypeName(PARAMS.type), getModeName(MODE));
+            tDLogE("MqNode::Impl::runner({}/{}) Loop end error: {}", _last, TYPE_NAME, MODE_NAME);
         }
     }
 
 private:
-    static bool __on_accept_cb__(std::string const & peer, void * parent)
+    static bool __on_accept_cb__(void * node, std::string const & peer, void * parent)
     {
         assert(parent != nullptr);
         return ((MqNode*)parent)->onAccept(peer);
@@ -241,6 +231,11 @@ MqNode::MqNode(MqNode && obj) TBAG_NOEXCEPT
     // EMPTY.
 }
 
+MqNode::~MqNode()
+{
+    _impl.reset();
+}
+
 MqNode & MqNode::operator =(MqNode && obj) TBAG_NOEXCEPT
 {
     swap(obj);
@@ -252,11 +247,6 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         _impl.swap(obj._impl);
     }
-}
-
-MqNode::~MqNode()
-{
-    _impl.reset();
 }
 
 bool MqNode::onAccept(std::string const & peer)

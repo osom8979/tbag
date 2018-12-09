@@ -379,7 +379,18 @@ void MqStreamServer::onWriterAsync(Writer * writer)
     // Give users the opportunity to use the original data.
     if (INTERNAL.default_write != nullptr) {
         assert(INTERNAL.parent != nullptr);
-        writer->write_count = INTERNAL.default_write(msg_pointer->data(), msg_pointer->size(), INTERNAL.parent);
+
+        Stream * destination_node = nullptr;
+        if (msg_pointer->stream != 0) {
+            if (_nodes.find(StreamPointer(reinterpret_cast<Stream*>(msg_pointer->stream))) == _nodes.end()) {
+                tDLogW("MqStreamServer::onWriterAsync() Not found node, skip this message.");
+                afterProcessMessage(msg_pointer.get());
+                return;
+            }
+            destination_node = reinterpret_cast<Stream*>(msg_pointer->stream);
+        }
+
+        writer->write_count = INTERNAL.default_write(destination_node, msg_pointer->data(), msg_pointer->size(), INTERNAL.parent);
         if (writer->write_count >= 1) {
             tDLogIfD(PARAMS.verbose,
                      "MqStreamServer::onWriterAsync() Default write process... "
@@ -594,7 +605,7 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
     // Give users the opportunity to use the original data.
     if (INTERNAL.default_read != nullptr) {
         assert(INTERNAL.parent != nullptr);
-        INTERNAL.default_read(buffer, size, INTERNAL.parent);
+        INTERNAL.default_read(node, buffer, size, INTERNAL.parent);
         return;
     }
 
@@ -687,6 +698,11 @@ void MqStreamServer::onNodeClose(Stream * node)
 
     tDLogI("MqStreamServer::onNodeClose() Close node: ({}/{})",
            _nodes.size(), PARAMS.max_nodes);
+
+    if (INTERNAL.close_node != nullptr) {
+        assert(INTERNAL.parent != nullptr);
+        INTERNAL.close_node(node, INTERNAL.parent);
+    }
 }
 
 void MqStreamServer::onServerConnection(Stream * server, Err code)
@@ -736,7 +752,7 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
         auto * tcp = (TcpNode*)stream.get();
         auto const PEER_IP = tcp->getPeerIp();
 
-        if (INTERNAL.accept_cb(PEER_IP, INTERNAL.parent)) {
+        if (INTERNAL.accept_cb(tcp, PEER_IP, INTERNAL.parent)) {
             tDLogI("MqStreamServer::onServerConnection() "
                    "Filter the current peer IP: {}", PEER_IP);
             stream->close();

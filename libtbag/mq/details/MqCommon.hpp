@@ -336,7 +336,7 @@ struct MqInterface;
 /**
  * Accept filter.
  */
-using MqOnAccept = bool(*)(std::string const & peer, void * parent);
+using MqOnAccept = bool(*)(void * node, std::string const & peer, void * parent);
 
 /**
  * Message filter.
@@ -351,12 +351,17 @@ using MqOnRecv = MqIsConsume(*)(MqMsg const & msg, void * parent);
 /**
  * It operates in the default write mode.
  */
-using MqOnDefaultWrite = std::size_t(*)(char const * buffer, std::size_t size, void * parent);
+using MqOnDefaultWrite = std::size_t(*)(void * node, char const * buffer, std::size_t size, void * parent);
 
 /**
  * It operates in the default read mode.
  */
-using MqOnDefaultRead = void(*)(char const * buffer, std::size_t size, void * parent);
+using MqOnDefaultRead = void(*)(void * node, char const * buffer, std::size_t size, void * parent);
+
+/**
+ * When the node is closed.
+ */
+using MqOnCloseNode = void(*)(void * node, void * parent);
 
 /**
  * Internal option packs.
@@ -383,13 +388,27 @@ struct MqInternal
 
     /**
      * Use this option if you want to keep the socket intact.
+     *
+     * @warning
+     *  Setting this option will no longer use the default behavior of MessageQueue.
      */
     MqOnDefaultWrite default_write = nullptr;
 
     /**
      * Use this option if you want to keep the socket intact.
+     *
+     * @warning
+     *  Setting this option will no longer use the default behavior of MessageQueue.
      */
     MqOnDefaultRead default_read = nullptr;
+
+    /**
+     * Called when the client is closed on the server socket.
+     *
+     * @warning
+     *  Used only on the server.
+     */
+    MqOnCloseNode close_node = nullptr;
 
     /**
      * Parent object instance pointer.
