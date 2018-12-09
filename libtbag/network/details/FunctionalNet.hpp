@@ -20,6 +20,7 @@
 
 #include <libtbag/functional/CallbackHelper.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/network/details/NetInterface.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <functional>

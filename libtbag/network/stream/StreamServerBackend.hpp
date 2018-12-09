@@ -19,6 +19,7 @@
 #include <libtbag/Type.hpp>
 
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/network/details/NetInterface.hpp>
 
 #include <cassert>
 

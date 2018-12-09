@@ -20,6 +20,7 @@
 
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
+#include <libtbag/network/details/NetInterface.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Request.hpp>
