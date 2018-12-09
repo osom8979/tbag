@@ -54,7 +54,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParam
     if (PARAMS.type == MqType::MT_PIPE) {
         auto * pipe = (PipeClient*)(_client.get());
         assert(pipe != nullptr);
-        pipe->connect(_connect_req, params.address.c_str());
+        pipe->connect(pipe->connect_req, params.address.c_str());
     } else {
         assert(PARAMS.type == MqType::MT_TCP);
         auto * tcp = (TcpClient*)(_client.get());
@@ -67,7 +67,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParam
             throw ErrException(INIT_CODE);
         }
 
-        auto const BIND_CODE = tcp->connect(_connect_req, addr.getCommon());
+        auto const BIND_CODE = tcp->connect(tcp->connect_req, addr.getCommon());
         if (isFailure(BIND_CODE)) {
             tDLogE("MqStreamClient::MqStreamClient() Socket connect error: {}", BIND_CODE);
             _client->close();
@@ -95,19 +95,20 @@ MqStreamClient::~MqStreamClient()
 }
 
 template <typename ClientT>
-static Err __shutdown(Stream * stream, ShutdownRequest & request)
+static Err __shutdown(Stream * stream)
 {
-    return ((ClientT*)(stream))->shutdown(request);
+    auto * node = ((ClientT*)(stream));
+    return node->shutdown(node->shutdown_req);
 }
 
 Err MqStreamClient::shutdown()
 {
     assert(static_cast<bool>(_client));
     if (PARAMS.type == MqType::MT_PIPE) {
-        return __shutdown<PipeClient>(_client.get(), _shutdown_req);
+        return __shutdown<PipeClient>(_client.get());
     } else {
         assert(PARAMS.type == MqType::MT_TCP);
-        return __shutdown<TcpClient>(_client.get(), _shutdown_req);
+        return __shutdown<TcpClient>(_client.get());
     }
 }
 
@@ -273,19 +274,20 @@ void MqStreamClient::afterProcessMessage(AsyncMsg * msg)
 }
 
 template <typename ClientT>
-static Err __write_client(Stream * stream, WriteRequest & request, uint8_t const * data, std::size_t size)
+static Err __write_client(Stream * stream, uint8_t const * data, std::size_t size)
 {
     assert(stream != nullptr);
-    return ((ClientT*)(stream))->write(request, (char const *)data, size);
+    auto * node = ((ClientT*)(stream));
+    return node->write(node->write_req, (char const *)data, size);
 }
 
-static Err __write_client(Stream * stream, WriteRequest & request, uint8_t const * data, std::size_t size, MqType type)
+static Err __write_client(Stream * stream, uint8_t const * data, std::size_t size, MqType type)
 {
     if (type == MqType::MT_PIPE) {
-        return __write_client<PipeClient>(stream, request, data, size);
+        return __write_client<PipeClient>(stream, data, size);
     }
     assert(type == MqType::MT_TCP);
-    return __write_client<TcpClient>(stream, request, data, size);
+    return __write_client<TcpClient>(stream, data, size);
 }
 
 void MqStreamClient::onWriterAsync(Writer * writer)
@@ -308,7 +310,7 @@ void MqStreamClient::onWriterAsync(Writer * writer)
     // Give users the opportunity to use the original data.
     if (INTERNAL.default_write != nullptr) {
         assert(INTERNAL.parent != nullptr);
-        if (INTERNAL.default_write(nullptr, msg_pointer->data(), msg_pointer->size(), INTERNAL.parent) >= 1) {
+        if (INTERNAL.default_write(_client.get(), msg_pointer->data(), msg_pointer->size(), INTERNAL.parent) >= 1) {
             tDLogIfD(PARAMS.verbose,
                      "MqStreamClient::onWriterAsync() Default write process... "
                      "Next, onWrite() event method.");
@@ -334,7 +336,7 @@ void MqStreamClient::onWriterAsync(Writer * writer)
         return;
     }
 
-    auto const WRITE_CODE = __write_client(_client.get(), _write_req, _packer.point(), _packer.size(), PARAMS.type);
+    auto const WRITE_CODE = __write_client(_client.get(), _packer.point(), _packer.size(), PARAMS.type);
     if (isSuccess(WRITE_CODE)) {
         tDLogIfD(PARAMS.verbose,
                  "MqStreamClient::onWriterAsync() Write process {}byte ... "
@@ -375,11 +377,20 @@ void MqStreamClient::onCloseTimerClose(CloseTimer * timer)
 
 void MqStreamClient::onConnectTimer(ConnectTimer * timer)
 {
-    auto const CANCEL_CODE = _connect_req.cancel();
-    if (isSuccess(CANCEL_CODE)) {
+    Err code;
+    if (PARAMS.type == MqType::MT_PIPE) {
+        auto * pipe = (PipeClient*)(_client.get());
+        code = pipe->connect_req.cancel();
+    } else {
+        assert(PARAMS.type == MqType::MT_TCP);
+        auto * tcp = (TcpClient*)(_client.get());
+        code = tcp->connect_req.cancel();
+    }
+
+    if (isSuccess(code)) {
         tDLogN("MqStreamClient::onConnectTimer() Connect cancel success.");
     } else {
-        tDLogW("MqStreamClient::onConnectTimer() Connect cancel failure: {}", CANCEL_CODE);
+        tDLogW("MqStreamClient::onConnectTimer() Connect cancel failure: {}", code);
     }
 
     _connect_timer->close();
@@ -404,6 +415,10 @@ void MqStreamClient::onConnect(ConnectRequest & request, Err code)
             auto const STOP_CODE = _connect_timer->stop();
             assert(isSuccess(STOP_CODE));
             _state = MqMachineState::MMS_ACTIVE;
+            if (INTERNAL.connect_cb != nullptr) {
+                assert(INTERNAL.parent);
+                INTERNAL.connect_cb(INTERNAL.parent);
+            }
             return;
         } else {
             tDLogE("MqStreamClient::onConnect() Start read error: {}", code);
@@ -485,7 +500,7 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
     // Give users the opportunity to use the original data.
     if (INTERNAL.default_read != nullptr) {
         assert(INTERNAL.parent != nullptr);
-        INTERNAL.default_read(nullptr, buffer, size, INTERNAL.parent);
+        INTERNAL.default_read(_client.get(), buffer, size, INTERNAL.parent);
         return;
     }
 

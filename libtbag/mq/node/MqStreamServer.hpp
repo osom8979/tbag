@@ -203,6 +203,12 @@ public:
     MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamServer();
 
+public:
+    // @formatter:off
+    inline SharedStream       & server()       TBAG_NOEXCEPT { return _server; }
+    inline SharedStream const & server() const TBAG_NOEXCEPT { return _server; }
+    // @formatter:on
+
 private:
     Err shutdown(Stream * stream);
     void close(Stream * stream);

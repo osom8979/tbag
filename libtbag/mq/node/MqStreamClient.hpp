@@ -145,6 +145,10 @@ private:
     {
         MqStreamClient * parent = nullptr;
 
+        ConnectRequest  connect_req;
+        ShutdownRequest shutdown_req;
+        WriteRequest    write_req;
+
         Client(Loop & loop, MqStreamClient * p) : _BaseT(loop), parent(p)
         { assert(parent != nullptr); }
         virtual ~Client()
@@ -182,11 +186,6 @@ private:
 
 private:
     SharedTimer _connect_timer;
-
-private:
-    ConnectRequest  _connect_req;
-    ShutdownRequest _shutdown_req;
-    WriteRequest    _write_req;
 
 private:
     std::size_t _read_error_count;

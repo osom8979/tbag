@@ -334,7 +334,18 @@ enum class MqIsConsume
 struct MqInterface;
 
 /**
+ * Connect event.
+ *
+ * @warning
+ *  Used only on the client.
+ */
+using MqOnConnect = bool(*)(void * parent);
+
+/**
  * Accept filter.
+ *
+ * @warning
+ *  Used only on the server.
  */
 using MqOnAccept = bool(*)(void * node, std::string const & peer, void * parent);
 
@@ -350,16 +361,27 @@ using MqOnRecv = MqIsConsume(*)(MqMsg const & msg, void * parent);
 
 /**
  * It operates in the default write mode.
+ *
+ * @remarks
+ *  - client: node is the client stream.
+ *  - server: node is the node stream.
  */
 using MqOnDefaultWrite = std::size_t(*)(void * node, char const * buffer, std::size_t size, void * parent);
 
 /**
  * It operates in the default read mode.
+ *
+ * @remarks
+ *  - client: node is the client stream.
+ *  - server: node is the node stream.
  */
 using MqOnDefaultRead = void(*)(void * node, char const * buffer, std::size_t size, void * parent);
 
 /**
  * When the node is closed.
+ *
+ * @warning
+ *  Used only on the server.
  */
 using MqOnCloseNode = void(*)(void * node, void * parent);
 
@@ -368,6 +390,14 @@ using MqOnCloseNode = void(*)(void * node, void * parent);
  */
 struct MqInternal
 {
+    /**
+     * Connect event callback.
+     *
+     * @warning
+     *  Used only on the client.
+     */
+    MqOnConnect connect_cb = nullptr;
+
     /**
      * Clients connected to the server are filtered out.
      */
