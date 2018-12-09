@@ -1,12 +1,12 @@
 /**
- * @file   NetStreamServer.hpp
- * @brief  NetStreamServer class prototype.
+ * @file   NetStreamClient.hpp
+ * @brief  NetStreamClient class prototype.
  * @author zer0
  * @date   2018-12-09
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NET_NETSTREAMSERVER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NET_NETSTREAMSERVER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NET_SOCKET_NETSTREAMCLIENT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_NET_SOCKET_NETSTREAMCLIENT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -27,15 +27,16 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace net {
+namespace net    {
+namespace socket {
 
 /**
- * NetStreamServer class prototype.
+ * NetStreamClient class prototype.
  *
  * @author zer0
  * @date   2018-12-09
  */
-class TBAG_API NetStreamServer : private Noncopyable
+class TBAG_API NetStreamClient : private Noncopyable
 {
 public:
     struct Impl;
@@ -57,18 +58,18 @@ private:
     UniqueImpl _impl;
 
 public:
-    NetStreamServer(MqParams const & params);
-    NetStreamServer(NetStreamServer && obj) TBAG_NOEXCEPT;
-    virtual ~NetStreamServer();
+    NetStreamClient(MqParams const & params);
+    NetStreamClient(NetStreamClient && obj) TBAG_NOEXCEPT;
+    virtual ~NetStreamClient();
 
 public:
-    NetStreamServer & operator =(NetStreamServer && obj) TBAG_NOEXCEPT;
+    NetStreamClient & operator =(NetStreamClient && obj) TBAG_NOEXCEPT;
 
 public:
-    void swap(NetStreamServer & obj) TBAG_NOEXCEPT;
+    void swap(NetStreamClient & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(NetStreamServer & lh, NetStreamServer & rh) TBAG_NOEXCEPT
+    inline friend void swap(NetStreamClient & lh, NetStreamClient & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
 
 public:
@@ -80,19 +81,16 @@ public:
 
 protected:
     virtual void onBegin();
+    virtual bool onRecv(char const * buffer, std::size_t size);
     virtual void onEnd();
-
-protected:
-    virtual bool onAccept(std::intptr_t id, std::string const & ip);
-    virtual bool onRecv  (std::intptr_t id, char const * buffer, std::size_t size);
-    virtual void onClose (std::intptr_t id);
 };
 
+} // namespace socket
 } // namespace net
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NET_NETSTREAMSERVER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_NET_SOCKET_NETSTREAMCLIENT_HPP__
 
