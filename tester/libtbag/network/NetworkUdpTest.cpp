@@ -9,7 +9,6 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/network/details/NetCommon.hpp>
 #include <libtbag/network/udp/UdpNode.hpp>
-#include <libtbag/network/udp/FunctionalUdpEcho.hpp>
 
 #include <iostream>
 
@@ -90,47 +89,5 @@ TEST(NetworkUdpTest, Default)
     ASSERT_EQ(1, node2_read );
     ASSERT_EQ(1, node2_write);
     ASSERT_EQ(1, node2_close);
-}
-
-TEST(NetworkUdpTest, EchoServer)
-{
-    log::SeverityGuard guard;
-
-    uvpp::Loop loop;
-    FuncUdpEchoServer server(loop, ANY_IPV4, 0, 50);
-    FuncUdpEchoClient client(loop, ANY_IPV4, 0, server.port(), 50);
-
-    std::string const TEST_MESSAGE = "TEST_ECHO_MESSAGE";
-    std::string result_message;
-
-    int server_echo_count = 0;
-    int server_end_count  = 0;
-
-    int client_echo_count = 0;
-    int client_end_count  = 0;
-
-    server.setOnEcho([&](std::string & message, SocketAddress & addr){
-        ++server_echo_count;
-    });
-    server.setOnEnd([&](){
-        ++server_end_count;
-    });
-    client.setOnEcho([&](std::string & message, SocketAddress & addr){
-        ++client_echo_count;
-        result_message = message;
-        client.close();
-    });
-    client.setOnEnd([&](){
-        ++client_end_count;
-        server.close();
-    });
-    client.echo(TEST_MESSAGE);
-
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
-    ASSERT_EQ(TEST_MESSAGE, result_message);
-    ASSERT_EQ(1, server_echo_count);
-    ASSERT_EQ(1, server_end_count);
-    ASSERT_EQ(1, client_echo_count);
-    ASSERT_EQ(1, client_end_count);
 }
 
