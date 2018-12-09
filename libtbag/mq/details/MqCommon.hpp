@@ -339,7 +339,7 @@ struct MqInterface;
  * @warning
  *  Used only on the client.
  */
-using MqOnConnect = bool(*)(void * parent);
+using MqOnConnect = void(*)(void * parent);
 
 /**
  * Accept filter.
@@ -358,6 +358,11 @@ using MqOnWrite = MqIsConsume(*)(MqMsg & msg, void * parent);
  * Callback prototype for intercepting Receive events.
  */
 using MqOnRecv = MqIsConsume(*)(MqMsg const & msg, void * parent);
+
+/**
+ * Close callback.
+ */
+using MqOnClose = void(*)(void * parent);
 
 /**
  * It operates in the default write mode.
@@ -415,6 +420,11 @@ struct MqInternal
      *  When this option is set, it no longer enqueues to the recv-queue.
      */
     MqOnRecv recv_cb = nullptr;
+
+    /**
+     * All work is done.
+     */
+    MqOnClose close_cb = nullptr;
 
     /**
      * Use this option if you want to keep the socket intact.

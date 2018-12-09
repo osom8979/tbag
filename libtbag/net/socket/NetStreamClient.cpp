@@ -53,7 +53,8 @@ public:
     TBAG_CONSTEXPR static std::size_t const THREAD_SIZE = 1U;
 
 public:
-    MqParams const PARAMS;
+    Callbacks const CALLBACKS;
+    MqParams  const PARAMS;
 
 private:
     NetStreamClient * _parent;
@@ -67,13 +68,15 @@ private:
     SharedMq _mq;
 
 public:
-    Impl(NetStreamClient * parent, MqParams const & params)
-            : PARAMS(params), _parent(parent),
+    Impl(NetStreamClient * parent, MqParams const & params, Callbacks const & cbs = Callbacks{})
+            : CALLBACKS(cbs), PARAMS(params), _parent(parent),
               _pool(THREAD_SIZE), _loop(), _last(Err::E_EBUSY)
     {
         assert(_parent != nullptr);
 
         MqInternal internal;
+        internal.connect_cb    = &__on_connect_cb__;
+        internal.close_cb      = &__on_close_cb__;
         internal.default_write = &__on_default_write_cb__;
         internal.default_read  = &__on_default_read_cb__;
         internal.parent        = this;
@@ -87,6 +90,22 @@ public:
             runner();
         });
         assert(PUSH_RESULT);
+
+        // [CONNECT(CLIENT) ONLY]
+        // Wait until connection is completed.
+        if (params.wait_on_connection_timeout_millisec > 0) {
+            auto const BEGIN_TIME = std::chrono::system_clock::now();
+            auto const TIMEOUT = std::chrono::milliseconds(params.wait_on_connection_timeout_millisec);
+
+            tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::Impl() Waiting connection ...");
+            while (_mq->state() == MqMachineState::MMS_INITIALIZED) {
+                if (std::chrono::system_clock::now() - BEGIN_TIME >= TIMEOUT) {
+                    tDLogIfW(params.verbose, "NetStreamClient::Impl::Impl() Connection timeout.");
+                    break;
+                }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        }
     }
 
     ~Impl()
@@ -99,9 +118,6 @@ public:
             tDLogIfW(PARAMS.verbose, "NetStreamClient::Impl::~Impl({}) Failed to send close-message: {}", TYPE_NAME, CODE);
         }
 
-        _pool.exit();
-        tDLogIfD(PARAMS.verbose, "NetStreamClient::Impl::~Impl({}) Wait for Pool to exit.", TYPE_NAME);
-
         _pool.join();
         tDLogIfN(PARAMS.verbose, "NetStreamClient::Impl::~Impl({}) Done.", TYPE_NAME);
 
@@ -113,17 +129,16 @@ public:
     {
         char const * const TYPE_NAME = libtbag::mq::details::getTypeName(PARAMS.type);
 
-        tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::runner({}/{}) Loop start", TYPE_NAME);
+        tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::runner({}) Loop start", TYPE_NAME);
         _last = _loop.run();
 
         if (isSuccess(_last)) {
-            tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::runner({}/{}) Loop end success.", TYPE_NAME);
+            tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::runner({}) Loop end success.", TYPE_NAME);
         } else {
-            tDLogE("NetStreamClient::Impl::runner({}/{}) Loop end error: {}", _last, TYPE_NAME);
+            tDLogE("NetStreamClient::Impl::runner({}) Loop end error: {}", _last, TYPE_NAME);
         }
 
-        assert(_parent != nullptr);
-        _parent->onEnd();
+        _pool.exit();
     }
 
 private:
@@ -131,8 +146,26 @@ private:
     {
         assert(parent != nullptr);
         auto * impl = (NetStreamClient::Impl*)parent;
-        assert(impl->_parent != nullptr);
-        impl->_parent->onBegin();
+
+        if (impl->CALLBACKS.begin_cb) {
+            impl->CALLBACKS.begin_cb();
+        } else {
+            assert(impl->_parent != nullptr);
+            impl->_parent->onBegin();
+        }
+    }
+
+    static void __on_close_cb__(void * parent)
+    {
+        assert(parent != nullptr);
+        auto * impl = (NetStreamClient::Impl*)parent;
+
+        if (impl->CALLBACKS.end_cb) {
+            impl->CALLBACKS.end_cb();
+        } else {
+            assert(impl->_parent != nullptr);
+            impl->_parent->onEnd();
+        }
     }
 
     static std::size_t __on_default_write_cb__(void * node, char const * buffer, std::size_t size, void * parent)
@@ -162,8 +195,24 @@ private:
     {
         assert(parent != nullptr);
         auto * impl = (NetStreamClient::Impl*)parent;
-        assert(impl->_parent != nullptr);
-        impl->_parent->onRecv(buffer, size);
+
+        if (impl->CALLBACKS.recv_cb) {
+            impl->CALLBACKS.recv_cb(buffer, size);
+        } else {
+            assert(impl->_parent != nullptr);
+            impl->_parent->onRecv(buffer, size);
+        }
+    }
+
+public:
+    void join()
+    {
+        _pool.join();
+    }
+
+    Err send(MqMsg const & msg)
+    {
+        return _mq->send(msg);
     }
 };
 
@@ -179,6 +228,18 @@ NetStreamClient::NetStreamClient(MqParams const & params)
 
 NetStreamClient::NetStreamClient(std::string const & uri)
         : _impl(std::make_unique<Impl>(this, getParams(uri)))
+{
+    assert(static_cast<bool>(_impl));
+}
+
+NetStreamClient::NetStreamClient(MqParams const & params, Callbacks const & cbs)
+        : _impl(std::make_unique<Impl>(this, params, cbs))
+{
+    assert(static_cast<bool>(_impl));
+}
+
+NetStreamClient::NetStreamClient(std::string const & uri, Callbacks const & cbs)
+        : _impl(std::make_unique<Impl>(this, getParams(uri), cbs))
 {
     assert(static_cast<bool>(_impl));
 }
@@ -207,6 +268,52 @@ void NetStreamClient::swap(NetStreamClient & obj) TBAG_NOEXCEPT
     }
 }
 
+void NetStreamClient::join()
+{
+    _impl->join();
+}
+
+Err NetStreamClient::send(MqMsg const & msg)
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->send(msg);
+}
+
+Err NetStreamClient::send(char const * buffer, std::size_t size)
+{
+    return send(MqMsg(buffer, size));
+}
+
+Err NetStreamClient::send(MqEvent event, char const * buffer, std::size_t size)
+{
+    return send(MqMsg(event, buffer, size));
+}
+
+Err NetStreamClient::send(std::string const & text)
+{
+    return send(MqMsg(text));
+}
+
+Err NetStreamClient::send(MqEvent event, std::string const & text)
+{
+    return send(MqMsg(event, text));
+}
+
+Err NetStreamClient::send(MqMsg::Buffer const & buffer)
+{
+    return send(MqMsg(buffer));
+}
+
+Err NetStreamClient::send(MqEvent event, MqMsg::Buffer const & buffer)
+{
+    return send(MqMsg(event, buffer));
+}
+
+Err NetStreamClient::sendCloseMsg()
+{
+    return send(MqMsg(libtbag::mq::details::ME_CLOSE, 0U));
+}
+
 NetStreamClient::MqParams NetStreamClient::getParams(std::string const & uri)
 {
     return libtbag::mq::details::convertUriToParams(uri);
@@ -217,9 +324,9 @@ void NetStreamClient::onBegin()
     // EMPTY.
 }
 
-bool NetStreamClient::onRecv(char const * buffer, std::size_t size)
+void NetStreamClient::onRecv(char const * buffer, std::size_t size)
 {
-    return true;
+    // EMPTY.
 }
 
 void NetStreamClient::onEnd()

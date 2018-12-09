@@ -408,30 +408,31 @@ void MqStreamClient::onConnect(ConnectRequest & request, Err code)
     assert(static_cast<bool>(_client));
     assert(_state == MqMachineState::MMS_INITIALIZED);
 
-    if (isSuccess(code)) {
-        auto const START_CODE = _client->startRead();
-        if (isSuccess(START_CODE)) {
-            tDLogI("MqStreamClient::onConnect() Connection & Read start.");
-            auto const STOP_CODE = _connect_timer->stop();
-            assert(isSuccess(STOP_CODE));
-            _state = MqMachineState::MMS_ACTIVE;
-            if (INTERNAL.connect_cb != nullptr) {
-                assert(INTERNAL.parent);
-                INTERNAL.connect_cb(INTERNAL.parent);
-            }
-            return;
-        } else {
-            tDLogE("MqStreamClient::onConnect() Start read error: {}", code);
-        }
-    } else {
-        tDLogE("MqStreamClient::onConnect() Connect error: {}", code);
-    }
-
     auto const STOP_CODE = _connect_timer->stop();
     assert(isSuccess(STOP_CODE));
     _connect_timer->close();
-    _state = MqMachineState::MMS_CLOSING;
-    close();
+
+    if (isFailure(code)) {
+        tDLogE("MqStreamClient::onConnect() Connect error: {}", code);
+        _state = MqMachineState::MMS_CLOSING;
+        close();
+        return;
+    }
+
+    auto const START_CODE = _client->startRead();
+    if (isFailure(START_CODE)) {
+        tDLogE("MqStreamClient::onConnect() Start read error: {}", code);
+        _state = MqMachineState::MMS_CLOSING;
+        close();
+        return;
+    }
+
+    tDLogI("MqStreamClient::onConnect() Connection & Read start.");
+    _state = MqMachineState::MMS_ACTIVE;
+    if (INTERNAL.connect_cb != nullptr) {
+        assert(INTERNAL.parent);
+        INTERNAL.connect_cb(INTERNAL.parent);
+    }
 }
 
 void MqStreamClient::onShutdown(ShutdownRequest & request, Err code)
@@ -577,6 +578,11 @@ void MqStreamClient::onClose()
 {
     tDLogI("MqStreamClient::onClose() Close this client!");
     updateAndBroadcast(MqMachineState::MMS_CLOSED);
+
+    if (INTERNAL.close_cb != nullptr) {
+        assert(INTERNAL.parent != nullptr);
+        INTERNAL.close_cb(INTERNAL.parent);
+    }
 }
 
 } // namespace node

@@ -196,6 +196,12 @@ public:
     MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamClient();
 
+public:
+    // @formatter:off
+    inline SharedStream       & client()       TBAG_NOEXCEPT { return _client; }
+    inline SharedStream const & client() const TBAG_NOEXCEPT { return _client; }
+    // @formatter:on
+
 private:
     Err shutdown();
     void close();

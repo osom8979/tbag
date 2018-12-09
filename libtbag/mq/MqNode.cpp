@@ -141,9 +141,6 @@ public:
                      TYPE_NAME, MODE_NAME, CODE);
         }
 
-        _pool.exit();
-        tDLogIfD(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Wait for Pool to exit.", TYPE_NAME, MODE_NAME);
-
         _pool.join();
         tDLogIfN(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Done.", TYPE_NAME, MODE_NAME);
 
@@ -165,6 +162,8 @@ public:
         } else {
             tDLogE("MqNode::Impl::runner({}/{}) Loop end error: {}", _last, TYPE_NAME, MODE_NAME);
         }
+
+        _pool.exit();
     }
 
 private:
