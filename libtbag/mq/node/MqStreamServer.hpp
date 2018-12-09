@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
@@ -27,10 +29,12 @@
 #include <libtbag/uvpp/Pipe.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
+
 #include <libtbag/network/SocketAddress.hpp>
 #include <libtbag/proto/MsgPacket.hpp>
 #include <libtbag/container/Pointer.hpp>
 
+#include <cassert>
 #include <vector>
 #include <unordered_set>
 #include <atomic>
@@ -63,9 +67,6 @@ public:
     using ConnectRequest  = libtbag::uvpp::ConnectRequest;
     using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
     using WriteRequest    = libtbag::uvpp::WriteRequest;
-
-    using SharedHandle = Loop::SharedHandle;
-    using WeakHandle   = Loop::WeakHandle;
 
     using Buffer = libtbag::util::Buffer;
     using binf   = libtbag::util::binf;

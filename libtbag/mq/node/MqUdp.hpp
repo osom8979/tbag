@@ -1,12 +1,12 @@
 /**
- * @file   MqStreamClient.hpp
- * @brief  MqStreamClient class prototype.
+ * @file   MqUdp.hpp
+ * @brief  MqUdp class prototype.
  * @author zer0
- * @date   2018-11-13
+ * @date   2018-12-09
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MQ_NODE_MQSTREAMCLIENT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MQ_NODE_MQSTREAMCLIENT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MQ_NODE_MQUDP_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MQ_NODE_MQUDP_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,7 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
 
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/details/MqEventQueue.hpp>
@@ -25,8 +24,7 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Async.hpp>
-#include <libtbag/uvpp/Tcp.hpp>
-#include <libtbag/uvpp/Pipe.hpp>
+#include <libtbag/uvpp/Udp.hpp>
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
 
@@ -35,12 +33,6 @@
 #include <libtbag/container/Pointer.hpp>
 
 #include <cassert>
-#include <vector>
-#include <unordered_set>
-#include <regex>
-#include <atomic>
-#include <thread>
-#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -50,24 +42,23 @@ namespace mq   {
 namespace node {
 
 /**
- * MqStreamClient class prototype.
+ * MqUdp class prototype.
  *
  * @author zer0
- * @date   2018-11-13
+ * @date   2018-12-09
  */
-class TBAG_API MqStreamClient : public libtbag::mq::node::MqBase
+class TBAG_API MqUdp : public libtbag::mq::node::MqBase
 {
 public:
-    using Loop   = libtbag::uvpp::Loop;
-    using Stream = libtbag::uvpp::Stream;
-    using Async  = libtbag::uvpp::Async;
-    using Tcp    = libtbag::uvpp::Tcp;
-    using Pipe   = libtbag::uvpp::Pipe;
-    using Timer  = libtbag::uvpp::Timer;
+    using Loop  = libtbag::uvpp::Loop;
+    using Async = libtbag::uvpp::Async;
+    using Udp   = libtbag::uvpp::Udp;
+    using Timer = libtbag::uvpp::Timer;
 
-    using ConnectRequest  = libtbag::uvpp::ConnectRequest;
-    using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
-    using WriteRequest    = libtbag::uvpp::WriteRequest;
+    using UdpSendRequest = libtbag::uvpp::UdpSendRequest;
+
+    using SharedHandle = Loop::SharedHandle;
+    using WeakHandle   = Loop::WeakHandle;
 
     using Buffer = libtbag::util::Buffer;
     using binf   = libtbag::util::binf;
@@ -90,15 +81,15 @@ public:
     using SocketAddress = libtbag::network::SocketAddress;
     using MsgPacket     = libtbag::proto::MsgPacket;
 
-private:
+public:
     struct Writer : public Async
     {
-        MqStreamClient * parent = nullptr;
+        MqUdp * parent = nullptr;
 
         MqRequestState state;
         AsyncMsgQueue  queue;
 
-        Writer(Loop & loop, MqStreamClient * p)
+        Writer(Loop & loop, MqUdp * p)
                 : Async(loop), parent(p), state(MqRequestState::MRS_WAITING), queue()
         { assert(parent != nullptr); }
         virtual ~Writer()
@@ -112,9 +103,9 @@ private:
 
     struct CloseTimer : public Timer
     {
-        MqStreamClient * parent = nullptr;
+        MqUdp * parent = nullptr;
 
-        CloseTimer(Loop & loop, MqStreamClient * p) : Timer(loop), parent(p)
+        CloseTimer(Loop & loop, MqUdp * p) : Timer(loop), parent(p)
         { assert(parent != nullptr); }
         virtual ~CloseTimer()
         { /* EMPTY. */ }
@@ -125,68 +116,37 @@ private:
         { parent->onCloseTimerClose(this); }
     };
 
-    struct ConnectTimer : public Timer
+    struct Node : public Udp
     {
-        MqStreamClient * parent = nullptr;
+        MqUdp * parent = nullptr;
 
-        ConnectTimer(Loop & loop, MqStreamClient * p) : Timer(loop), parent(p)
+        Node(Loop & loop, MqUdp * p) : Udp(loop), parent(p)
         { assert(parent != nullptr); }
-        virtual ~ConnectTimer()
+        virtual ~Node()
         { /* EMPTY. */ }
 
-        virtual void onTimer() override
-        { parent->onConnectTimer(this); }
-        virtual void onClose() override
-        { parent->onConnectTimerClose(this); }
-    };
-
-    template <typename _BaseT>
-    struct Client : public _BaseT
-    {
-        MqStreamClient * parent = nullptr;
-
-        Client(Loop & loop, MqStreamClient * p) : _BaseT(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~Client()
-        { /* EMPTY. */ }
-
-        virtual void onConnect(ConnectRequest & request, Err code) override
-        { parent->onConnect(request, code); }
-        virtual void onShutdown(ShutdownRequest & request, Err code) override
-        { parent->onShutdown(request, code); }
-        virtual void onWrite(WriteRequest & request, Err code) override
-        { parent->onWrite(request, code); }
+        virtual void onSend(UdpSendRequest & request, Err code) override
+        { parent->onSend(request, code); }
         virtual binf onAlloc(std::size_t suggested_size) override
         { return parent->onAlloc(suggested_size); }
-        virtual void onRead(Err code, char const * buffer, std::size_t size) override
-        { parent->onRead(code, buffer, size); }
+        virtual void onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags) override
+        { parent->onRecv(code, buffer, size, addr, flags); }
         virtual void onClose() override
         { parent->onClose(); }
     };
 
 public:
-    using TcpClient  = Client<Tcp>;
-    using PipeClient = Client<Pipe>;
-
-public:
-    using SharedTimer      = std::shared_ptr<Timer>;
-    using SharedStream     = std::shared_ptr<Stream>;
-    using SharedWriter     = std::shared_ptr<Writer>;
-    using SharedTcpClient  = std::shared_ptr<TcpClient>;
-    using SharedPipeClient = std::shared_ptr<PipeClient>;
+    using SharedTimer  = std::shared_ptr<Timer>;
+    using SharedNode   = std::shared_ptr<Node>;
+    using SharedWriter = std::shared_ptr<Writer>;
 
 private:
-    SharedStream _client;
+    SharedNode   _node;
     SharedWriter _writer;
     MsgPacket    _packer;
 
 private:
-    SharedTimer _connect_timer;
-
-private:
-    ConnectRequest  _connect_req;
-    ShutdownRequest _shutdown_req;
-    WriteRequest    _write_req;
+    UdpSendRequest _send_req;
 
 private:
     std::size_t _read_error_count;
@@ -194,14 +154,11 @@ private:
     Buffer      _remaining_read;
 
 public:
-    MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params);
-    virtual ~MqStreamClient();
+    MqUdp(Loop & loop, MqInternal const & internal, MqParams const & params);
+    virtual ~MqUdp();
 
 private:
-    Err shutdown();
     void close();
-
-private:
     void shutdownAndClose();
     void tearDown(bool on_message);
 
@@ -224,17 +181,11 @@ private:
     void onCloseTimer(CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
 
-public:
-    void onConnectTimer(ConnectTimer * timer);
-    void onConnectTimerClose(ConnectTimer * timer);
-
 private:
-    void onConnect (ConnectRequest & request, Err code);
-    void onShutdown(ShutdownRequest & request, Err code);
-    void onWrite   (WriteRequest & request, Err code);
-    binf onAlloc   (std::size_t suggested_size);
-    void onRead    (Err code, char const * buffer, std::size_t size);
-    void onClose   ();
+    void onSend(UdpSendRequest & request, Err code);
+    binf onAlloc(std::size_t suggested_size);
+    void onRecv(Err code, char const * buffer, std::size_t size, sockaddr const * addr, unsigned int flags);
+    void onClose();
 };
 
 } // namespace node
@@ -244,5 +195,5 @@ private:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MQ_NODE_MQSTREAMCLIENT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MQ_NODE_MQUDP_HPP__
 

@@ -15,13 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
 #include <libtbag/mq/node/MqBase.hpp>
-
-#include <libtbag/lock/UvLock.hpp>
-#include <libtbag/lock/UvCondition.hpp>
 
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -44,9 +42,6 @@ namespace node {
 class TBAG_API MqLocalQueue : public libtbag::mq::node::MqBase
 {
 public:
-    using UvLock      = libtbag::lock::UvLock;
-    using UvCondition = libtbag::lock::UvCondition;
-
     using Loop = libtbag::uvpp::Loop;
 
     using MqEvent        = libtbag::mq::details::MqEvent;

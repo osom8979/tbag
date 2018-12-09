@@ -9,7 +9,6 @@
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <cassert>
 #include <chrono>
 
 // -------------------
@@ -33,7 +32,7 @@ using WriteRequest    = MqStreamClient::WriteRequest;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
         : MqBase(loop, internal, params, MqMachineState::MMS_NONE),
-          _client(), _packer(params.packer_size), _read_error_count(0)
+          _packer(params.packer_size), _read_error_count(0)
 {
     if (PARAMS.type == MqType::MT_PIPE && !libtbag::filesystem::Path(params.address).exists()) {
         tDLogE("MqStreamClient::MqStreamClient() Not found named pipe: {}", params.address);
@@ -226,7 +225,7 @@ AfterAction MqStreamClient::onMsgEvent(AsyncMsg * msg)
     _writer->queue.push(AsyncMsgPointer(msg));
 
     if (_writer->state != MqRequestState::MRS_WAITING) {
-        tDLogIfD(PARAMS.verbose, "MqStreamClient::onMsg() Writer is already working");
+        tDLogIfD(PARAMS.verbose, "MqStreamClient::onMsgEvent() Writer is already working");
         return AfterAction::AA_DELAY;
     }
 

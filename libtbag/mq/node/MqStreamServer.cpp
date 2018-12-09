@@ -30,7 +30,7 @@ using AfterAction = MqStreamServer::AfterAction;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params)
         : MqBase(loop, internal, params, MqMachineState::MMS_NONE),
-          _server(), _nodes(), _packer(params.packer_size)
+          _packer(params.packer_size)
 {
     if (PARAMS.type == MqType::MT_PIPE && libtbag::filesystem::Path(params.address).exists()) {
         tDLogE("MqStreamServer::MqStreamServer() Exists named pipe: {}", params.address);
