@@ -26,11 +26,22 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace process {
 
-TBAG_API int execute(std::string const & file, std::vector<std::string> const & args, std::vector<std::string> const & envs, std::string const & cwd, Err * code = nullptr);
-TBAG_API int execute(std::string const & file, std::vector<std::string> const & args, std::vector<std::string> const & envs, Err * code = nullptr);
-TBAG_API int execute(std::string const & file, std::vector<std::string> const & args, Err * code = nullptr);
-TBAG_API int execute(std::vector<std::string> const & args, Err * code = nullptr);
-TBAG_API int execute(std::string const & args, Err * code = nullptr);
+TBAG_API int execute(std::string const & file,
+                     std::vector<std::string> const & args,
+                     std::vector<std::string> const & envs,
+                     std::string const & cwd,
+                     Err * code = nullptr);
+TBAG_API int execute(std::string const & file,
+                     std::vector<std::string> const & args,
+                     std::vector<std::string> const & envs,
+                     Err * code = nullptr);
+TBAG_API int execute(std::string const & file,
+                     std::vector<std::string> const & args,
+                     Err * code = nullptr);
+TBAG_API int execute(std::vector<std::string> const & args,
+                     Err * code = nullptr);
+TBAG_API int execute(std::string const & args,
+                     Err * code = nullptr);
 
 TBAG_API int runShell(std::vector<std::string> const & args, Err * code = nullptr);
 TBAG_API int runShellScript(std::string const & file, Err * code = nullptr);
