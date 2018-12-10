@@ -51,3 +51,26 @@ TEST(StdProcessTest, InAndOut)
     ASSERT_EQ(1, on_close);
 }
 
+TEST(StdProcessTest, Subprocess)
+{
+    std::string const EXE_NAME = "tbproc";
+    std::string const TEST_OUT = "test_output_subprocess";
+
+    using Path = filesystem::Path;
+    Path const PATH = Path::getExeDir() / filesystem::getExecutableName(EXE_NAME);
+
+    std::string output;
+    std::string error;
+
+    int64_t exit = -1;
+    int term = -1;
+
+    auto const CODE = subprocess(PATH.toString(), {"out"}, {}, std::string(), TEST_OUT, &exit, &term, &output, &error);
+    ASSERT_EQ(Err::E_SUCCESS, CODE);
+    ASSERT_EQ(0, exit);
+    ASSERT_EQ(0, term);
+
+    ASSERT_EQ(TEST_OUT, output);
+    ASSERT_TRUE(error.empty());
+}
+

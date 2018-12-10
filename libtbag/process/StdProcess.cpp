@@ -10,6 +10,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/FindPath.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <cassert>
 
@@ -203,6 +204,73 @@ void StdProcess::onClose()
     if (close_cb) {
         close_cb();
     }
+}
+
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+Err subprocess(std::string const & file,
+               std::vector<std::string> const & args,
+               std::vector<std::string> const & envs,
+               std::string const & cwd,
+               std::string const & input,
+               int64_t * exit,
+               int * term,
+               std::string * output,
+               std::string * error)
+{
+    std::string output_result;
+    std::string error_result;
+    int64_t exit_result = 0;
+    int term_result = 0;
+    bool on_close = false;
+
+    StdProcess proc;
+    proc.out_read_cb = [&](char const * buffer, std::size_t size){
+        output_result.insert(output_result.cend(), buffer, buffer + size);
+    };
+    proc.err_read_cb = [&](char const * buffer, std::size_t size){
+        error_result.insert(error_result.cend(), buffer, buffer + size);
+    };
+    proc.exit_cb = [&](int64_t exit_status, int term_signal){
+        exit_result = exit_status;
+        term_result = term_signal;
+    };
+    proc.close_cb = [&](){
+        on_close = true;
+    };
+
+    libtbag::uvpp::Loop loop;
+    auto const SPAWN_CODE = proc.spawn(loop, file, args, envs, cwd, input);
+    if (isFailure(SPAWN_CODE)) {
+        tDLogE("subprocess() Spawn error: {}", SPAWN_CODE);
+        return SPAWN_CODE;
+    }
+
+    auto const RUN_CODE = loop.run();
+    if (isFailure(RUN_CODE)) {
+        tDLogE("subprocess() Loop run error: {}", RUN_CODE);
+        return RUN_CODE;
+    }
+
+    assert(on_close);
+    assert(isSuccess(SPAWN_CODE));
+    assert(isSuccess(RUN_CODE));
+
+    if (exit != nullptr) {
+        *exit = exit_result;
+    }
+    if (term != nullptr) {
+        *term = term_result;
+    }
+    if (output != nullptr) {
+        *output = output_result;
+    }
+    if (error != nullptr) {
+        *error = error_result;
+    }
+    return Err::E_SUCCESS;
 }
 
 } // namespace process

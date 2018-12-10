@@ -119,6 +119,20 @@ public:
     virtual void onClose();
 };
 
+// ------------------------
+// Miscellaneous utilities.
+// ------------------------
+
+TBAG_API Err subprocess(std::string const & file,
+                        std::vector<std::string> const & args = std::vector<std::string>(),
+                        std::vector<std::string> const & envs = std::vector<std::string>(),
+                        std::string const & cwd = std::string(),
+                        std::string const & input = std::string(),
+                        int64_t * exit = nullptr,
+                        int * term = nullptr,
+                        std::string * output = nullptr,
+                        std::string * error = nullptr);
+
 } // namespace process
 
 // --------------------
