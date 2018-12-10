@@ -59,7 +59,11 @@ public:
     void Py_Finalize();
 
 public:
-    static std::string findSharedLibrary();
+    static std::string findPythonExecutable();
+    static std::string findPythonLibraryDir(std::string const & python_path);
+    static std::string findPythonLibraryDir();
+    static std::string findPythonLibrary(std::string const & dir);
+    static std::string findPythonLibrary();
 };
 
 } // namespace script
