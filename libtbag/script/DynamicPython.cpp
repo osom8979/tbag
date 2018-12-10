@@ -51,10 +51,24 @@ std::string DynamicPython::getError() const
 bool DynamicPython::open(std::string const & path)
 {
     bool const RESULT = _lib.open(path);
-    if (RESULT) {
-        _path = path;
+    if (!RESULT) {
+        return false;
     }
-    return RESULT;
+
+    _path = path;
+
+    // @formatter:off
+    _Py_Initialize      = (Py_Initialize)      _lib.symbol("Py_Initialize");
+    _Py_Finalize        = (Py_Finalize)        _lib.symbol("Py_Finalize");
+    _PyRun_SimpleString = (PyRun_SimpleString) _lib.symbol("PyRun_SimpleString");
+    _PyRun_SimpleFile   = (PyRun_SimpleFile)   _lib.symbol("PyRun_SimpleFile");
+    // @formatter:on
+    return true;
+}
+
+bool DynamicPython::openDefault()
+{
+    return open(findPythonLibrary());
 }
 
 void DynamicPython::close()
@@ -63,14 +77,24 @@ void DynamicPython::close()
     _path.clear();
 }
 
-void DynamicPython::Py_Initialize()
+void DynamicPython::Initialize()
 {
-    _lib.call<void>("Py_Initialize");
+    _Py_Initialize();
 }
 
-void DynamicPython::Py_Finalize()
+void DynamicPython::Finalize()
 {
-    _lib.call<void>("Py_Finalize");
+    _Py_Finalize();
+}
+
+int DynamicPython::Run_SimpleString(char const * command)
+{
+    return _PyRun_SimpleString(command);
+}
+
+int DynamicPython::Run_SimpleFile(FILE * fp, char const * filename)
+{
+    return _PyRun_SimpleFile(fp, filename);
 }
 
 std::string DynamicPython::findPythonExecutable()

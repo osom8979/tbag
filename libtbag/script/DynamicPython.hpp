@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/lib/SharedLibrary.hpp>
 
+#include <cstdio>
 #include <string>
 
 // -------------------
@@ -37,9 +38,23 @@ class TBAG_API DynamicPython : private Noncopyable
 public:
     using SharedLibrary = libtbag::lib::SharedLibrary;
 
+public:
+    using Py_Initialize      = void(*)(void);
+    using Py_Finalize        = void(*)(void);
+    using PyRun_SimpleString =  int(*)(char const *);
+    using PyRun_SimpleFile   =  int(*)(FILE *, char const *);
+
 private:
     std::string   _path;
     SharedLibrary _lib;
+
+private:
+    // @formatter:off
+    Py_Initialize       _Py_Initialize;
+    Py_Finalize         _Py_Finalize;
+    PyRun_SimpleString  _PyRun_SimpleString;
+    PyRun_SimpleFile    _PyRun_SimpleFile;
+    // @formatter:on
 
 public:
     DynamicPython();
@@ -52,11 +67,16 @@ public:
 
 public:
     bool open(std::string const & path);
+    bool openDefault();
     void close();
 
 public:
-    void Py_Initialize();
-    void Py_Finalize();
+    void Initialize();
+    void Finalize();
+
+public:
+    int Run_SimpleString(char const * command);
+    int Run_SimpleFile(FILE * fp, char const * filename);
 
 public:
     static std::string findPythonExecutable();
