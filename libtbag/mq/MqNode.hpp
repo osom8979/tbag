@@ -70,10 +70,8 @@ private:
     UniqueImpl _impl;
 
 public:
-    MqNode(MqParams const & params, MqMode mode);
-    MqNode(std::string const & uri, MqMode mode);
-    MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs);
-    MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs);
+    MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs = Callbacks{});
+    MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs = Callbacks{});
     MqNode(MqNode && obj) TBAG_NOEXCEPT;
     virtual ~MqNode();
 
@@ -142,27 +140,30 @@ public:
 using MqUniqueNode = std::unique_ptr<MqNode>;
 using MqSharedNode = std::shared_ptr<MqNode>;
 
-TBAG_API MqUniqueNode bindUniqueNode(MqNode::MqParams const & params);
-TBAG_API MqUniqueNode bindUniqueNode(std::string const & uri);
+using MqParams  = libtbag::mq::details::MqParams;
+using MqNodeCbs = MqNode::Callbacks;
 
-TBAG_API MqUniqueNode connectUniqueNode(MqNode::MqParams const & params);
-TBAG_API MqUniqueNode connectUniqueNode(std::string const & uri);
+TBAG_API MqUniqueNode bindUniqueNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API MqUniqueNode bindUniqueNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
 
-TBAG_API MqSharedNode bindSharedNode(MqNode::MqParams const & params);
-TBAG_API MqSharedNode bindSharedNode(std::string const & uri);
+TBAG_API MqUniqueNode connectUniqueNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API MqUniqueNode connectUniqueNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
 
-TBAG_API MqSharedNode connectSharedNode(MqNode::MqParams const & params);
-TBAG_API MqSharedNode connectSharedNode(std::string const & uri);
+TBAG_API MqSharedNode bindSharedNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API MqSharedNode bindSharedNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
 
-TBAG_API Err bind(MqUniqueNode & node, MqNode::MqParams const & params);
-TBAG_API Err bind(MqUniqueNode & node, std::string const & uri);
-TBAG_API Err bind(MqSharedNode & node, MqNode::MqParams const & params);
-TBAG_API Err bind(MqSharedNode & node, std::string const & uri);
+TBAG_API MqSharedNode connectSharedNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API MqSharedNode connectSharedNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
 
-TBAG_API Err connect(MqUniqueNode & node, MqNode::MqParams const & params);
-TBAG_API Err connect(MqUniqueNode & node, std::string const & uri);
-TBAG_API Err connect(MqSharedNode & node, MqNode::MqParams const & params);
-TBAG_API Err connect(MqSharedNode & node, std::string const & uri);
+TBAG_API Err bind(MqUniqueNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API Err bind(MqUniqueNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API Err bind(MqSharedNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API Err bind(MqSharedNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
+
+TBAG_API Err connect(MqUniqueNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API Err connect(MqUniqueNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API Err connect(MqSharedNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
+TBAG_API Err connect(MqSharedNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
 
 } // namespace mq
 

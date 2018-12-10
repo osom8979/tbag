@@ -238,18 +238,6 @@ public:
 // MqNode implementation.
 // ----------------------
 
-MqNode::MqNode(MqParams const & params, MqMode mode)
-        : _impl(std::make_unique<Impl>(this, params, mode))
-{
-    assert(static_cast<bool>(_impl));
-}
-
-MqNode::MqNode(std::string const & uri, MqMode mode)
-        : MqNode(getParams(uri), mode)
-{
-    assert(static_cast<bool>(_impl));
-}
-
 MqNode::MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs)
         : _impl(std::make_unique<Impl>(this, params, mode, cbs))
 {
@@ -389,44 +377,44 @@ MqNode MqNode::connect(std::string const & uri)
 // Utilities.
 // ----------
 
-MqUniqueNode bindUniqueNode(MqNode::MqParams const & params)
+MqUniqueNode bindUniqueNode(MqParams const & params, MqNodeCbs const & cbs)
 {
-    return std::make_unique<MqNode>(params, MqNode::MqMode::MM_BIND);
+    return std::make_unique<MqNode>(params, MqNode::MqMode::MM_BIND, cbs);
 }
 
-MqUniqueNode bindUniqueNode(std::string const & uri)
+MqUniqueNode bindUniqueNode(std::string const & uri, MqNodeCbs const & cbs)
 {
-    return std::make_unique<MqNode>(uri, MqNode::MqMode::MM_BIND);
+    return std::make_unique<MqNode>(uri, MqNode::MqMode::MM_BIND, cbs);
 }
 
-MqUniqueNode connectUniqueNode(MqNode::MqParams const & params)
+MqUniqueNode connectUniqueNode(MqParams const & params, MqNodeCbs const & cbs)
 {
-    return std::make_unique<MqNode>(params, MqNode::MqMode::MM_CONNECT);
+    return std::make_unique<MqNode>(params, MqNode::MqMode::MM_CONNECT, cbs);
 }
 
-MqUniqueNode connectUniqueNode(std::string const & uri)
+MqUniqueNode connectUniqueNode(std::string const & uri, MqNodeCbs const & cbs)
 {
-    return std::make_unique<MqNode>(uri, MqNode::MqMode::MM_CONNECT);
+    return std::make_unique<MqNode>(uri, MqNode::MqMode::MM_CONNECT, cbs);
 }
 
-MqSharedNode bindSharedNode(MqNode::MqParams const & params)
+MqSharedNode bindSharedNode(MqParams const & params, MqNodeCbs const & cbs)
 {
-    return std::make_shared<MqNode>(params, MqNode::MqMode::MM_BIND);
+    return std::make_shared<MqNode>(params, MqNode::MqMode::MM_BIND, cbs);
 }
 
-MqSharedNode bindSharedNode(std::string const & uri)
+MqSharedNode bindSharedNode(std::string const & uri, MqNodeCbs const & cbs)
 {
-    return std::make_shared<MqNode>(uri, MqNode::MqMode::MM_BIND);
+    return std::make_shared<MqNode>(uri, MqNode::MqMode::MM_BIND, cbs);
 }
 
-MqSharedNode connectSharedNode(MqNode::MqParams const & params)
+MqSharedNode connectSharedNode(MqParams const & params, MqNodeCbs const & cbs)
 {
-    return std::make_shared<MqNode>(params, MqNode::MqMode::MM_CONNECT);
+    return std::make_shared<MqNode>(params, MqNode::MqMode::MM_CONNECT, cbs);
 }
 
-MqSharedNode connectSharedNode(std::string const & uri)
+MqSharedNode connectSharedNode(std::string const & uri, MqNodeCbs const & cbs)
 {
-    return std::make_shared<MqNode>(uri, MqNode::MqMode::MM_CONNECT);
+    return std::make_shared<MqNode>(uri, MqNode::MqMode::MM_CONNECT, cbs);
 }
 
 #ifndef __TBAG_MQ_DEFAULT_TRY
@@ -443,45 +431,47 @@ MqSharedNode connectSharedNode(std::string const & uri)
     return Err::E_SUCCESS;
 #endif
 
-Err bind(MqUniqueNode & node, MqNode::MqParams const & params)
+Err bind(MqUniqueNode & node, MqParams const & params, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = bindUniqueNode(params));
+    __TBAG_MQ_DEFAULT_TRY(node = bindUniqueNode(params, cbs));
 }
 
-Err bind(MqUniqueNode & node, std::string const & uri)
+Err bind(MqUniqueNode & node, std::string const & uri, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = bindUniqueNode(uri));
+    __TBAG_MQ_DEFAULT_TRY(node = bindUniqueNode(uri, cbs));
 }
 
-Err bind(MqSharedNode & node, MqNode::MqParams const & params)
+Err bind(MqSharedNode & node, MqParams const & params, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = bindSharedNode(params));
+    __TBAG_MQ_DEFAULT_TRY(node = bindSharedNode(params, cbs));
 }
 
-Err bind(MqSharedNode & node, std::string const & uri)
+Err bind(MqSharedNode & node, std::string const & uri, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = bindSharedNode(uri));
+    __TBAG_MQ_DEFAULT_TRY(node = bindSharedNode(uri, cbs));
 }
 
-Err connect(MqUniqueNode & node, MqNode::MqParams const & params)
+Err connect(MqUniqueNode & node, MqParams const & params, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = connectUniqueNode(params));
+    __TBAG_MQ_DEFAULT_TRY(node = connectUniqueNode(params, cbs));
 }
 
-Err connect(MqUniqueNode & node, std::string const & uri)
+Err connect(MqUniqueNode & node, std::string const & uri, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = connectUniqueNode(uri));
+    __TBAG_MQ_DEFAULT_TRY(node = connectUniqueNode(uri, cbs));
 }
 
-Err connect(MqSharedNode & node, MqNode::MqParams const & params)
+Err connect(MqSharedNode & node, MqParams const & params, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = connectSharedNode(params));
+    __TBAG_MQ_DEFAULT_TRY(node = connectSharedNode(params, cbs));
 }
 
-Err connect(MqSharedNode & node, std::string const & uri)
+Err connect(MqSharedNode & node, std::string const & uri, MqNodeCbs const & cbs)
 {
-    __TBAG_MQ_DEFAULT_TRY(node = connectSharedNode(uri));
+    __TBAG_MQ_DEFAULT_TRY(node = connectSharedNode(uri, cbs));
 }
+
+#undef __TBAG_MQ_DEFAULT_TRY
 
 } // namespace mq
 
