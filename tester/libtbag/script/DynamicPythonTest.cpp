@@ -11,6 +11,10 @@
 using namespace libtbag;
 using namespace libtbag::script;
 
+TEST(DynamicPythonTest, FindLibrary)
+{
+}
+
 TEST(DynamicPythonTest, Default)
 {
     DynamicPython object;

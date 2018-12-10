@@ -15,8 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
+#include <libtbag/lib/SharedLibrary.hpp>
 
-#include <memory>
 #include <string>
 
 // -------------------
@@ -31,68 +32,23 @@ namespace script {
  * @author zer0
  * @date   2018-10-31
  */
-class TBAG_API DynamicPython
+class TBAG_API DynamicPython : private Noncopyable
 {
 public:
-    struct Impl;
-    friend struct Impl;
-
-public:
-    using SharedImpl = std::shared_ptr<Impl>;
+    using SharedLibrary = libtbag::lib::SharedLibrary;
 
 private:
-    SharedImpl _impl;
+    std::string   _path;
+    SharedLibrary _lib;
 
 public:
     DynamicPython();
-    DynamicPython(std::nullptr_t) TBAG_NOEXCEPT;
-    DynamicPython(DynamicPython const & obj) TBAG_NOEXCEPT;
-    DynamicPython(DynamicPython && obj) TBAG_NOEXCEPT;
     ~DynamicPython();
-
-public:
-    DynamicPython & operator =(DynamicPython const & obj) TBAG_NOEXCEPT;
-    DynamicPython & operator =(DynamicPython && obj) TBAG_NOEXCEPT;
-
-public:
-    void copy(DynamicPython const & obj) TBAG_NOEXCEPT;
-    void swap(DynamicPython & obj) TBAG_NOEXCEPT;
-
-public:
-    inline friend void swap(DynamicPython & lh, DynamicPython & rh) TBAG_NOEXCEPT { lh.swap(rh); }
-
-public:
-    inline bool exists() const TBAG_NOEXCEPT
-    { return static_cast<bool>(_impl); }
-
-    inline operator bool() const TBAG_NOEXCEPT
-    { return exists(); }
-
-public:
-    inline Impl       * get()       TBAG_NOEXCEPT { return _impl.get(); }
-    inline Impl const * get() const TBAG_NOEXCEPT { return _impl.get(); }
-
-public:
-    /**
-     * Implemented for std::less<> compatibility.
-     *
-     * @see std::set
-     * @see std::map
-     * @see std::less
-     */
-    friend inline bool operator <(DynamicPython const & x, DynamicPython const & y) TBAG_NOEXCEPT
-    {
-        return x.get() < y.get();
-    }
-
-    inline bool operator ==(DynamicPython const & obj) const TBAG_NOEXCEPT
-    {
-        return get() == obj.get();
-    }
 
 public:
     bool isOpen() const;
     std::string getPath() const;
+    std::string getError() const;
 
 public:
     bool open(std::string const & path);
@@ -101,6 +57,9 @@ public:
 public:
     void Py_Initialize();
     void Py_Finalize();
+
+public:
+    static std::string findSharedLibrary();
 };
 
 } // namespace script
