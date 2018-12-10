@@ -215,6 +215,27 @@ Err ProcessManager::kill(int pid, int signum)
     return Err::E_ENFOUND;
 }
 
+void ProcessManager::onOutRead(int pid, char const * buffer, std::size_t size)
+{
+    if (out_read_cb) {
+        out_read_cb(pid, buffer, size);
+    }
+}
+
+void ProcessManager::onErrRead(int pid, char const * buffer, std::size_t size)
+{
+    if (err_read_cb) {
+        err_read_cb(pid, buffer, size);
+    }
+}
+
+void ProcessManager::onExit(int pid, int64_t exit_status, int term_signal)
+{
+    if (exit_cb) {
+        exit_cb(pid, exit_status, term_signal);
+    }
+}
+
 } // namespace process
 
 // --------------------

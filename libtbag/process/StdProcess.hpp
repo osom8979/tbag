@@ -26,6 +26,7 @@
 #include <atomic>
 #include <vector>
 #include <string>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -51,6 +52,11 @@ public:
     using SharedProc = std::shared_ptr<FuncProcess>;
     using SharedPipe = std::shared_ptr<FuncPipe>;
 
+    using OnOutRead = std::function<void(char const *, std::size_t)>;
+    using OnErrRead = std::function<void(char const *, std::size_t)>;
+    using OnExit    = std::function<void(int64_t, int)>;
+    using OnClose   = std::function<void()>;
+
 private:
     SharedProc _process;
     SharedPipe _in;
@@ -68,6 +74,12 @@ private:
     int     _pid;
     int64_t _exit_status;
     int     _term_signal;
+
+public:
+    OnOutRead  out_read_cb;
+    OnErrRead  err_read_cb;
+    OnExit     exit_cb;
+    OnClose    close_cb;
 
 public:
     StdProcess();
@@ -90,19 +102,21 @@ public:
               std::string const & input = std::string());
 
 public:
+    // @formatter:off
     std::string              getFile() const { return _process->atOptions().file; }
     std::vector<std::string> getArgs() const { return _process->atOptions().args; }
     std::vector<std::string> getEnvs() const { return _process->atOptions().envs; }
     std::string              getCwd () const { return _process->atOptions().cwd;  }
+    // @formatter:on
 
 public:
     Err kill(int signum);
 
 public:
-    virtual void onOutRead(char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onErrRead(char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onExit(int64_t exit_status, int term_signal) { /* EMPTY. */ }
-    virtual void onClose() { /* EMPTY. */ }
+    virtual void onOutRead(char const * buffer, std::size_t size);
+    virtual void onErrRead(char const * buffer, std::size_t size);
+    virtual void onExit(int64_t exit_status, int term_signal);
+    virtual void onClose();
 };
 
 } // namespace process

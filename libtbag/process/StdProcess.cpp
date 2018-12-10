@@ -177,6 +177,34 @@ Err StdProcess::kill(int signum)
     return Err::E_EXPIRED;
 }
 
+void StdProcess::onOutRead(char const * buffer, std::size_t size)
+{
+    if (out_read_cb) {
+        out_read_cb(buffer, size);
+    }
+}
+
+void StdProcess::onErrRead(char const * buffer, std::size_t size)
+{
+    if (err_read_cb) {
+        err_read_cb(buffer, size);
+    }
+}
+
+void StdProcess::onExit(int64_t exit_status, int term_signal)
+{
+    if (exit_cb) {
+        exit_cb(exit_status, term_signal);
+    }
+}
+
+void StdProcess::onClose()
+{
+    if (close_cb) {
+        close_cb();
+    }
+}
+
 } // namespace process
 
 // --------------------

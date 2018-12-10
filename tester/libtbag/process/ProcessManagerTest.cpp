@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/process/FunctionalProcessManager.hpp>
+#include <libtbag/process/ProcessManager.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
@@ -17,7 +17,7 @@ using namespace libtbag::uvpp;
 
 TEST(ProcessManagerTest, Default)
 {
-    //log::SeverityGuard guard;
+    log::SeverityGuard guard;
 
     std::string const EXE_NAME = "tbproc";
     std::string const TEST_OUT = "test_output_string";
@@ -30,16 +30,16 @@ TEST(ProcessManagerTest, Default)
     int on_error = 0;
     int on_exit  = 0;
 
-    FuncProcessManager pm;
-    pm.setOnOutRead([&](int pid, char const * buffer, std::size_t size){
+    ProcessManager pm;
+    pm.out_read_cb = [&](int pid, char const * buffer, std::size_t size){
         ++on_read;
-    });
-    pm.setOnErrRead([&](int pid, char const * buffer, std::size_t size){
+    };
+    pm.err_read_cb = [&](int pid, char const * buffer, std::size_t size){
         ++on_error;
-    });
-    pm.setOnExit([&](int pid, int64_t exit_status, int term_signal){
+    };
+    pm.exit_cb = [&](int pid, int64_t exit_status, int term_signal){
         ++on_exit;
-    });
+    };
 
     for (int i = 0; i < TEST_COUNT; ++i) {
         ASSERT_NE(0, pm.exec(PATH.toString(), {"out"}, {}, std::string(), TEST_OUT));

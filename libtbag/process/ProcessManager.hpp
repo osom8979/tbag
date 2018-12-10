@@ -28,6 +28,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -88,7 +89,7 @@ public:
 
 public:
     using SharedProc = std::shared_ptr<Proc>;
-    using   WeakProc =   std::weak_ptr<Proc>;
+    using WeakProc   = std::weak_ptr<Proc>;
 
     using ProcMap  = std::unordered_map<int, SharedProc>;
     using ProcPair = ProcMap::value_type;
@@ -98,9 +99,18 @@ public:
 
     using ProcessInfo = util::ProcessInfo;
 
+    using OnOutRead = std::function<void(int, char const *, std::size_t)>;
+    using OnErrRead = std::function<void(int, char const *, std::size_t)>;
+    using OnExit    = std::function<void(int, int64_t, int)>;
+
 private:
-    mutable Mutex _mutex;
+    Mutex mutable _mutex;
     ProcMap _procs;
+
+public:
+    OnOutRead  out_read_cb;
+    OnErrRead  err_read_cb;
+    OnExit     exit_cb;
 
 public:
     ProcessManager();
@@ -131,9 +141,9 @@ public:
     Err kill(int pid, int signum);
 
 public:
-    virtual void onOutRead(int pid, char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onErrRead(int pid, char const * buffer, std::size_t size) { /* EMPTY. */ }
-    virtual void onExit(int pid, int64_t exit_status, int term_signal) { /* EMPTY. */ }
+    virtual void onOutRead(int pid, char const * buffer, std::size_t size);
+    virtual void onErrRead(int pid, char const * buffer, std::size_t size);
+    virtual void onExit(int pid, int64_t exit_status, int term_signal);
 };
 
 } // namespace process

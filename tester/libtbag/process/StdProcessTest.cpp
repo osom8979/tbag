@@ -6,7 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/process/FunctionalStdProcess.hpp>
+#include <libtbag/process/StdProcess.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -27,19 +27,19 @@ TEST(StdProcessTest, InAndOut)
     int on_exit  = 0;
     int on_close = 0;
 
-    FuncStdProcess proc;
-    proc.setOnOutRead([&](char const * buffer, std::size_t size){
+    StdProcess proc;
+    proc.out_read_cb = [&](char const * buffer, std::size_t size){
         output.assign(buffer, buffer + size);
-    });
-    proc.setOnErrRead([&](char const * buffer, std::size_t size){
+    };
+    proc.err_read_cb = [&](char const * buffer, std::size_t size){
         error.assign(buffer, buffer + size);
-    });
-    proc.setOnExit([&](int64_t exit_status, int term_signal){
+    };
+    proc.exit_cb = [&](int64_t exit_status, int term_signal){
         ++on_exit;
-    });
-    proc.setOnClose([&](){
+    };
+    proc.close_cb = [&](){
         ++on_close;
-    });
+    };
 
     uvpp::Loop loop;
     ASSERT_EQ(Err::E_SUCCESS, proc.spawn(loop, PATH.toString(), {"out"}, {}, std::string(), TEST_OUT));
