@@ -228,10 +228,10 @@ Err subprocess(std::string const & file,
 
     StdProcess proc;
     proc.out_read_cb = [&](char const * buffer, std::size_t size){
-        output_result.insert(output_result.cend(), buffer, buffer + size);
+        output_result.append(buffer, size);
     };
     proc.err_read_cb = [&](char const * buffer, std::size_t size){
-        error_result.insert(error_result.cend(), buffer, buffer + size);
+        error_result.append(buffer, size);
     };
     proc.exit_cb = [&](int64_t exit_status, int term_signal){
         exit_result = exit_status;
