@@ -65,6 +65,13 @@ TBAG_CONSTEXPR int const MAX_JPG_QUALITY = 100;
 TBAG_CONSTEXPR int const MIN_JPG_QUALITY = 1;
 TBAG_CONSTEXPR int const DEFAULT_JPG_QUALITY = 80;
 
+TBAG_API bool writePng(char const * path, int width, int height, int channels, char const * data, int stride_bytes);
+TBAG_API bool writePng(char const * path, int width, int height, int channels, char const * data);
+TBAG_API bool writeJpg(char const * path, int width, int height, int channels, char const * data, int jpeg_quality);
+TBAG_API bool writeJpg(char const * path, int width, int height, int channels, char const * data);
+TBAG_API bool writeBmp(char const * path, int width, int height, int channels, char const * data);
+TBAG_API bool writeTga(char const * path, int width, int height, int channels, char const * data);
+
 /**
  * Read image file.
  *

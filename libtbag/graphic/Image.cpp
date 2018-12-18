@@ -24,6 +24,36 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graphic {
 
+bool writePng(char const * path, int width, int height, int channels, char const * data, int stride_bytes)
+{
+    return stbi_write_png(path, width, height, channels, data, stride_bytes) != 0;
+}
+
+bool writePng(char const * path, int width, int height, int channels, char const * data)
+{
+    return writePng(path, width, height, channels, data, width * channels);
+}
+
+bool writeJpg(char const * path, int width, int height, int channels, char const * data, int jpeg_quality)
+{
+    return stbi_write_jpg(path, width, height, channels, data, jpeg_quality) != 0;
+}
+
+bool writeJpg(char const * path, int width, int height, int channels, char const * data)
+{
+    return writeJpg(path, width, height, channels, data, DEFAULT_JPG_QUALITY);
+}
+
+bool writeBmp(char const * path, int width, int height, int channels, char const * data)
+{
+    return stbi_write_bmp(path, width, height, channels, data) != 0;
+}
+
+bool writeTga(char const * path, int width, int height, int channels, char const * data)
+{
+    return stbi_write_tga(path, width, height, channels, data) != 0;
+}
+
 Err readImage(std::string const & path, ImageRgb24 & image)
 {
     if (filesystem::Path(path).exists() == false) {
