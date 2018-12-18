@@ -129,7 +129,7 @@ std::string __append_localhost_if_pipe_or_local_schema(std::string const & uri_s
     return result;
 }
 
-MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
+MqParams convertUriToParams(std::string const & uri_string, MqParams const & default_params, bool auto_encode)
 {
     using namespace libtbag::network;
     using namespace libtbag::string;
@@ -147,7 +147,7 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
         return MqParams();
     }
 
-    MqParams params;
+    MqParams params = default_params;
     auto const SCHEMA = libtbag::string::upper(uri.getSchema());
     if (SCHEMA == LOCAL_UPPER_NAME) {
         params.type = MqType::MT_LOCAL;
@@ -264,6 +264,11 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
     }
 
     return params;
+}
+
+MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
+{
+    return convertUriToParams(uri_string, MqParams(), auto_encode);
 }
 
 } // namespace details
