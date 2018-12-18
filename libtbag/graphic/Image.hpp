@@ -79,6 +79,8 @@ TBAG_API bool writeTga(char const * path, int width, int height, int channels, c
  *  Ignore alpha channel.
  */
 TBAG_API Err readImage(std::string const & path, ImageRgb24 & image);
+TBAG_API Err readImage(std::string const & path, libtbag::util::Buffer & image,
+                       int * width = nullptr, int * height = nullptr, int * channels = nullptr);
 
 /** Write RGB24 image file. */
 TBAG_API Err writeImage(std::string const & path, ImageRgb24 const & image);

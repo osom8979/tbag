@@ -54,64 +54,91 @@ bool writeTga(char const * path, int width, int height, int channels, char const
     return stbi_write_tga(path, width, height, channels, data) != 0;
 }
 
-Err readImage(std::string const & path, ImageRgb24 & image)
+Err readImage(std::string const & path, libtbag::util::Buffer & image, int * width, int * height, int * channels)
 {
-    if (filesystem::Path(path).exists() == false) {
+    if (!filesystem::Path(path).exists()) {
         return Err::E_EEXIST;
     }
-    //if (filesystem::Path(path).isReadable() == false) {
+    //if (!filesystem::Path(path).isReadable()) {
     //    return Err::E_RDERR;
     //}
 
-    int   width = 0;
-    int  height = 0;
-    int channel = 0;
+    int read_width = 0;
+    int read_height = 0;
+    int read_channels = 0;
 
     // process data if not NULL ...
     // x = width, y = height, n = # 8-bit components per pixel ...
     // replace '0' with '1'..'4' to force that many components per pixel
     // but 'n' will always be the number that it would have been if you said 0
-    unsigned char * data = ::stbi_load(path.c_str(), &width, &height, &channel, 0);
+    unsigned char * data = ::stbi_load(path.c_str(), &read_width, &read_height, &read_channels, 0);
     if (data == nullptr) {
         return Err::E_RDERR;
     }
+
+    image.assign(data, data + (read_width * read_height * read_channels));
+    if (width != nullptr) {
+        *width = read_width;
+    }
+    if (height != nullptr) {
+        *height = read_height;
+    }
+    if (channels != nullptr) {
+        *channels = read_channels;
+    }
+
+    stbi_image_free(data);
+    return Err::E_SUCCESS;
+}
+
+Err readImage(std::string const & path, ImageRgb24 & image)
+{
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+
+    libtbag::util::Buffer buffer;
+    auto const CODE = readImage(path, buffer, &width, &height, &channels);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+
+    auto const * data = buffer.data();
+    assert(data != nullptr);
 
     // 1: grey
     // 2: grey, alpha
     // 3: red, green, blue
     // 4: red, green, blue, alpha
-    assert(1 <= COMPARE_AND(channel) <= 4);
+    assert(1 <= COMPARE_AND(channels) <= 4);
     assert(width > 0);
     assert(height > 0);
     image.resize(static_cast<unsigned>(width), static_cast<unsigned>(height));
+    auto const SIZE = static_cast<std::size_t>(width * height);
 
-    if (channel == 1) {
-        std::size_t const SIZE = static_cast<std::size_t>(width * height);
+    if (channels == 1) {
         for (std::size_t i = 0; i < SIZE; ++i) {
             image[i].r = *(data + i);
             image[i].g = *(data + i);
             image[i].b = *(data + i);
         }
-    } else if (channel == 2) {
-        std::size_t const SIZE = static_cast<std::size_t>(width * height);
+    } else if (channels == 2) {
         for (std::size_t i = 0; i < SIZE; ++i) {
             image[i].r = *(data + (2 * i));
             image[i].g = *(data + (2 * i));
             image[i].b = *(data + (2 * i));
         }
-    } else if (channel == 3 || channel == 4) {
-        std::size_t const SIZE = static_cast<std::size_t>(width * height);
+    } else if (channels == 3 || channels == 4) {
         for (std::size_t i = 0; i < SIZE; ++i) {
-            image[i].r = *(data + (channel * i) + 0);
-            image[i].g = *(data + (channel * i) + 1);
-            image[i].b = *(data + (channel * i) + 2);
-            /* image[i].a = *(data + (channel * i) + 3); */
+            image[i].r = *(data + (channels * i) + 0);
+            image[i].g = *(data + (channels * i) + 1);
+            image[i].b = *(data + (channels * i) + 2);
+            /* image[i].a = *(data + (channels * i) + 3); */
         }
     } else {
         assert(false && "Inaccessible block.");
     }
 
-    stbi_image_free(data);
     return Err::E_SUCCESS;
 }
 
@@ -130,18 +157,18 @@ static Err writeImageToFile(std::string const & path, ImageType const & image, i
     auto const WIDTH     = image.width();
     auto const HEIGHT    = image.height();
     auto const CHANNELS  = GetChannels<ImageType>::channels;
-    auto const * DATA    = image.data();
+    auto const * DATA    = (char const *)image.data();
     auto const LOWER_EXT = string::lower(PATH.getExtensionName());
 
     int result = 0;
     if (LOWER_EXT == PNG_LOWER_EXT) {
-        result = stbi_write_png(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
+        result = writePng(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
     } else if (LOWER_EXT == JPG_LOWER_EXT) {
-        result = stbi_write_jpg(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA, if_jpeg_quality);
+        result = writeJpg(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA, if_jpeg_quality);
     } else if (LOWER_EXT == BMP_LOWER_EXT) {
-        result = stbi_write_bmp(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
+        result = writeBmp(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
     } else if (LOWER_EXT == TGA_LOWER_EXT) {
-        result = stbi_write_tga(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
+        result = writeTga(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
     } else {
         return Err::E_ILLARGS;
     }
