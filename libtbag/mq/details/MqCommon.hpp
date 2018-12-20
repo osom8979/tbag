@@ -500,7 +500,7 @@ struct MqParams
      *  - tcp: unused.
      *  - pipe: Used in server only.
      */
-    bool remove_exists_pipe = false;
+    bool remove_exists_pipe = true;
 
     /**
      * The maximum size of the queue for transmission.
