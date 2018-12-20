@@ -18,6 +18,8 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/app/Service.hpp>
+#include <libtbag/app/Application.hpp>
+
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/xml/DefaultXmlModel.hpp>
@@ -42,7 +44,7 @@ namespace ex  {
  * @author zer0
  * @date   2017-06-02
  */
-class TBAG_API ServiceApp : public Service
+class TBAG_API ServiceApp : public Application, public Service
 {
 public:
     using Version = util::Version;

@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/app/Application.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/app/details/ServiceInterface.hpp>
 
 #include <memory>
@@ -32,7 +32,7 @@ namespace app {
  * @author zer0
  * @date   2017-05-25
  */
-class TBAG_API Service : public Application
+class TBAG_API Service : private Noncopyable
 {
 public:
     using ServiceInterface = details::ServiceInterface;
@@ -45,9 +45,7 @@ private:
     bool _is_start;
 
 public:
-    Service(int argc, char ** argv, char ** envs, bool init_tbag = false);
-    Service(int argc, char ** argv, bool init_tbag = false);
-    Service(bool init_tbag = false);
+    Service();
     virtual ~Service();
 
 public:

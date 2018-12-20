@@ -53,7 +53,7 @@ TBAG_CONSTEXPR static char const * const SERVICE_APP_MAIN_REMARKS = "\n"
         ""/* -- END -- */;
 
 ServiceApp::ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs, bool init_tbag)
-        : libtbag::app::Service(argc, argv, envs, init_tbag),
+        : libtbag::app::Application(argc, argv, envs, init_tbag),
           _options(SERVICE_APP_OPTIONS_PREFIX, SERVICE_APP_OPTIONS_DELIMITER),
           _envs(envs), _version(), _config(), _config_path(),
           _enable_help(false), _enable_verbose(false), _enable_version(false), _enable_create_config(false)
