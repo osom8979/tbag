@@ -33,8 +33,17 @@ MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParam
           _packer(params.packer_size)
 {
     if (PARAMS.type == MqType::MT_PIPE && libtbag::filesystem::Path(params.address).exists()) {
-        tDLogE("MqStreamServer::MqStreamServer() Exists named pipe: {}", params.address);
-        throw ErrException(Err::E_EEXIST);
+        if (PARAMS.remove_exists_pipe) {
+            if (libtbag::filesystem::Path(params.address).remove()) {
+                tDLogI("MqStreamServer::MqStreamServer() Remove named pipe: {}", params.address);
+            } else {
+                tDLogE("MqStreamServer::MqStreamServer() Failed to remove named pipe: ", params.address);
+                throw ErrException(Err::E_EEXIST);
+            }
+        } else {
+            tDLogE("MqStreamServer::MqStreamServer() Exists named pipe: {}", params.address);
+            throw ErrException(Err::E_EEXIST);
+        }
     }
 
     if (PARAMS.type == MqType::MT_PIPE) {

@@ -494,6 +494,15 @@ struct MqParams
     bool tcp_ipv6_only = false;
 
     /**
+     * If a pipe file exists, remove it first.
+     *
+     * @remarks
+     *  - tcp: unused.
+     *  - pipe: Used in server only.
+     */
+    bool remove_exists_pipe = false;
+
+    /**
      * The maximum size of the queue for transmission.
      *
      * @warning
@@ -599,6 +608,7 @@ struct MqParams
 };
 
 TBAG_CONSTEXPR static char const * const TCP_IPV6_ONLY_NAME   = "tcp_ipv6";
+TBAG_CONSTEXPR static char const * const REMOVE_PIPE_NAME     = "remove_pipe";
 TBAG_CONSTEXPR static char const * const SEND_QUEUE_SIZE_NAME = "send_queue";
 TBAG_CONSTEXPR static char const * const SEND_MSG_SIZE_NAME   = "send_msg";
 TBAG_CONSTEXPR static char const * const RECV_QUEUE_SIZE_NAME = "recv_queue";

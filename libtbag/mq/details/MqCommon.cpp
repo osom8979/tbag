@@ -198,6 +198,11 @@ MqParams convertUriToParams(std::string const & uri_string, MqParams const & def
         params.tcp_ipv6_only = toValue<bool>(itr->second);
     }
 
+    itr = queries.find(REMOVE_PIPE_NAME);
+    if (itr != queries.end()) {
+        params.remove_exists_pipe = toValue<bool>(itr->second);
+    }
+
     itr = queries.find(SEND_QUEUE_SIZE_NAME);
     if (itr != queries.end()) {
         params.send_queue_size = toValue<unsigned>(itr->second);
