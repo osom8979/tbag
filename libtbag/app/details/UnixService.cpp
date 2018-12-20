@@ -65,7 +65,7 @@ struct UnixService::Impl : private Noncopyable
 
         } else if (pid < 0) {
             Err const FORK_ERROR_CODE = getGlobalSystemError();
-            tDLogE("UnixService::Impl::eliminateControlTerminals() fork() {} error", getErrName(FORK_ERROR_CODE));
+            tDLogE("UnixService::Impl::eliminateControlTerminals() fork() {} error", FORK_ERROR_CODE);
             return FORK_ERROR_CODE;
         }
 
@@ -75,7 +75,7 @@ struct UnixService::Impl : private Noncopyable
         sid = setsid(); // Be a session leader.
         if (sid == -1) {
             Err const SETSID_ERROR_CODE = getGlobalSystemError();
-            tDLogE("UnixService::Impl::eliminateControlTerminals() setsid() {} error", getErrName(SETSID_ERROR_CODE));
+            tDLogE("UnixService::Impl::eliminateControlTerminals() setsid() {} error", SETSID_ERROR_CODE);
             return SETSID_ERROR_CODE;
         }
 
@@ -95,7 +95,8 @@ struct UnixService::Impl : private Noncopyable
         // Reason:
         //  It works with root privileges.
 
-        tDLogI("UnixService::Impl::eliminateControlTerminals() Fork child process: SID({}) PGID({}) PPID({}) PID({})",
+        tDLogI("UnixService::Impl::eliminateControlTerminals() "
+               "Fork child process: SID({}) PGID({}) PPID({}) PID({})",
                (int)sid, (int)pgid, (int)ppid, (int)pid);
 
         return Err::E_SUCCESS;
@@ -109,7 +110,7 @@ struct UnixService::Impl : private Noncopyable
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
         if (chdir("/") != 0) {
             Err const CHDIR_ERROR_CODE = getGlobalSystemError();
-            tDLogE("UnixService::Impl::changeRootDirectory() chdir() {} error", getErrName(CHDIR_ERROR_CODE));
+            tDLogE("UnixService::Impl::changeRootDirectory() chdir() {} error", CHDIR_ERROR_CODE);
             return CHDIR_ERROR_CODE;
         }
         return Err::E_SUCCESS;
@@ -162,7 +163,7 @@ struct UnixService::Impl : private Noncopyable
         pid_file = open(path.c_str(), (O_RDWR | O_CREAT), 0600);
         if (pid_file == -1) {
             Err const OPEN_ERROR_CODE = getGlobalSystemError();
-            tDLogE("UnixService::Impl::createPidFile() open() {} error", getErrName(OPEN_ERROR_CODE));
+            tDLogE("UnixService::Impl::createPidFile() open() {} error", OPEN_ERROR_CODE);
             return OPEN_ERROR_CODE;
         }
 
@@ -173,7 +174,7 @@ struct UnixService::Impl : private Noncopyable
 
             // Couldn't get lock on lock file.
             Err const LOCKF_ERROR_CODE = getGlobalSystemError();
-            tDLogE("UnixService::Impl::createPidFile() lockf() {} error", getErrName(LOCKF_ERROR_CODE));
+            tDLogE("UnixService::Impl::createPidFile() lockf() {} error", LOCKF_ERROR_CODE);
             return LOCKF_ERROR_CODE;
         }
 
@@ -181,7 +182,7 @@ struct UnixService::Impl : private Noncopyable
         // Write pid to lock file.
         ssize_t const write_size = write(pid_file, PID_STRING.c_str(), PID_STRING.length());
         if (write_size == -1) {
-            tDLogW("UnixService::Impl::createPidFile() Write PID error: {}", getErrName(getGlobalSystemError()));
+            tDLogW("UnixService::Impl::createPidFile() Write PID error: {}", getGlobalSystemError());
         }
         return Err::E_SUCCESS;
 #else
