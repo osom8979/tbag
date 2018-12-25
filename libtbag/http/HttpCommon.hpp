@@ -660,7 +660,7 @@ struct HttpProperty : public HttpCommon, public HttpBaseRequest, public HttpBase
  */
 struct HttpFilterInterface
 {
-    virtual bool filter(HttpBaseRequest const & request) = 0;
+    virtual bool filter(HttpRequest const & request) = 0;
 };
 
 /**
@@ -689,7 +689,7 @@ struct HttpBaseFilter : public HttpFilterInterface
     virtual ~HttpBaseFilter()
     { /* EMPTY. */ }
 
-    virtual bool filter(HttpBaseRequest const & request) override
+    virtual bool filter(HttpRequest const & request) override
     {
         if (method.empty()) {
             return std::regex_match(request.path, regex);
@@ -764,10 +764,10 @@ TBAG_API uint8_t getMaskingKeyByteIndex (WsPayloadBit payload_bit) TBAG_NOEXCEPT
 
 TBAG_API uint32_t copyMaskingKeyFromBuffer(char const * data) TBAG_NOEXCEPT;
 
-TBAG_API std::string  getPayloadData   (uint32_t mask, std::string const & data);
-TBAG_API util::Buffer getPayloadData   (uint32_t mask, util::Buffer const & data);
-TBAG_API util::Buffer getPayloadData   (uint32_t mask, char const * data, std::size_t size);
-TBAG_API void         updatePayloadData(uint32_t mask, char * result, std::size_t size);
+TBAG_API std::string getPayloadData   (uint32_t mask, std::string const & data);
+TBAG_API HttpBuffer  getPayloadData   (uint32_t mask, HttpBuffer const & data);
+TBAG_API HttpBuffer  getPayloadData   (uint32_t mask, char const * data, std::size_t size);
+TBAG_API void        updatePayloadData(uint32_t mask, char * result, std::size_t size);
 
 TBAG_API uint64_t getPayloadLength(char const * total_data);
 TBAG_API uint64_t getPayloadLength(char const * data, uint8_t payload_length_7bit, WsPayloadBit payload_bit);
@@ -872,25 +872,27 @@ inline bool isWsStatusCodeUserDefined(uint16_t code) TBAG_NOEXCEPT
  */
 struct TBAG_API WsStatus
 {
-    uint16_t    code;
+    uint16_t code = TBAG_UNKNOWN_WEBSOCKET_STATUS_CODE;
     std::string reason;
 
     WsStatus();
     WsStatus(uint16_t c);
     WsStatus(uint16_t c, std::string const & r);
+
     explicit WsStatus(WsStatusCode s);
     explicit WsStatus(char const * buffer, std::size_t size);
-    explicit WsStatus(util::Buffer const & payload);
+    explicit WsStatus(HttpBuffer const & payload);
+
     ~WsStatus();
 
     void setWsStatusCode(WsStatusCode s);
     WsStatusCode getWsStatusCode() const TBAG_NOEXCEPT;
 
     Err parse(char const * buffer, std::size_t size);
-    Err parse(util::Buffer const & payload);
+    Err parse(HttpBuffer const & payload);
 
     static Err getStatusCode(char const * payload_begin, std::size_t payload_length, uint16_t * result);
-    static Err     getReason(char const * payload_begin, std::size_t payload_length, std::string * result);
+    static Err getReason(char const * payload_begin, std::size_t payload_length, std::string * result);
 
     std::string toString() const;
 };

@@ -18,6 +18,7 @@
 #include <libtbag/string/Format.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
+#include <cstring>
 #include <sstream>
 
 #include <http_parser.h>
@@ -836,19 +837,19 @@ uint32_t copyMaskingKeyFromBuffer(char const * data) TBAG_NOEXCEPT
 
 std::string getPayloadData(uint32_t mask, std::string const & data)
 {
-    util::Buffer const INPUT(data.begin(), data.end());
-    util::Buffer const OUTPUT = getPayloadData(mask, INPUT);
+    HttpBuffer const INPUT(data.begin(), data.end());
+    HttpBuffer const OUTPUT = getPayloadData(mask, INPUT);
     return std::string(OUTPUT.begin(), OUTPUT.end());
 }
 
-util::Buffer getPayloadData(uint32_t mask, util::Buffer const & data)
+HttpBuffer getPayloadData(uint32_t mask, HttpBuffer const & data)
 {
     return getPayloadData(mask, data.data(), data.size());
 }
 
-util::Buffer getPayloadData(uint32_t mask, char const * data, std::size_t size)
+HttpBuffer getPayloadData(uint32_t mask, char const * data, std::size_t size)
 {
-    util::Buffer result(data, data + size);
+    HttpBuffer result(data, data + size);
     updatePayloadData(mask, result.data(), result.size());
     return result;
 }
@@ -971,12 +972,18 @@ WsStatus::WsStatus(WsStatusCode s)
 
 WsStatus::WsStatus(char const * buffer, std::size_t size) : code(0), reason()
 {
-    parse(buffer, size);
+    auto const PARSE_RESULT = parse(buffer, size);
+    if (isFailure(PARSE_RESULT)) {
+        throw ErrException(PARSE_RESULT);
+    }
 }
 
-WsStatus::WsStatus(util::Buffer const & payload) : code(0), reason()
+WsStatus::WsStatus(HttpBuffer const & payload) : code(0), reason()
 {
-    parse(payload);
+    auto const PARSE_RESULT = parse(payload);
+    if (isFailure(PARSE_RESULT)) {
+        throw ErrException(PARSE_RESULT);
+    }
 }
 
 WsStatus::~WsStatus()
@@ -986,7 +993,7 @@ WsStatus::~WsStatus()
 
 void WsStatus::setWsStatusCode(WsStatusCode s)
 {
-    code   = getWsStatusCodeNumber(s);
+    code = getWsStatusCodeNumber(s);
     reason = getWsStatusCodeReason(s);
 }
 
@@ -997,18 +1004,18 @@ WsStatusCode WsStatus::getWsStatusCode() const TBAG_NOEXCEPT
 
 Err WsStatus::parse(char const * buffer, std::size_t size)
 {
-    Err const   CODE_RESULT = getStatusCode(buffer, size, &code);
-    Err const REASON_RESULT = getReason(buffer, size, &reason);
-    if (isSuccess(CODE_RESULT) && isSuccess(REASON_RESULT)) {
-        return Err::E_SUCCESS;
+    Err const CODE_RESULT = getStatusCode(buffer, size, &code);
+    if (isFailure(CODE_RESULT)) {
+        return CODE_RESULT;
     }
-
-    code = 0;
-    reason.clear();
-    return Err::E_PARSING;
+    Err const REASON_RESULT = getReason(buffer, size, &reason);
+    if (isFailure(REASON_RESULT)) {
+        return REASON_RESULT;
+    }
+    return Err::E_SUCCESS;
 }
 
-Err WsStatus::parse(util::Buffer const & payload)
+Err WsStatus::parse(HttpBuffer const & payload)
 {
     return parse(payload.data(), payload.size());
 }
@@ -1020,7 +1027,7 @@ Err WsStatus::getStatusCode(char const * payload_begin, std::size_t payload_leng
     }
 
     uint16_t temp = 0;
-    ::memcpy(&temp, &payload_begin[0], sizeof(temp));
+    memcpy(&temp, &payload_begin[0], sizeof(temp));
     if (result != nullptr) {
         *result = bitwise::toHost(temp);
     }
