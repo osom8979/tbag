@@ -176,28 +176,37 @@ using SimpleHttpsClient = SimpleClient<HttpsClient>;
 // HTTP Request.
 // -------------
 
-using HttpRequest  = libtbag::http::HttpRequest;
-using HttpResponse = libtbag::http::HttpResponse;
-
-TBAG_CONSTEXPR uint64_t const DEFAULT_HTTP_TIMEOUT_MILLISEC = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC;
-
-TBAG_API Err requestWithSync(Uri const & uri, HttpRequest const & request, HttpResponse & response,
-                             uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC,
+TBAG_API Err requestWithSync(Uri const & uri,
+                             libtbag::http::HttpRequest const & request,
+                             libtbag::http::HttpResponse & response,
+                             uint64_t timeout = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC,
                              HttpClient::StreamType type = HttpClient::StreamType::TCP);
 
-TBAG_API Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
-TBAG_API Err requestWithSync(std::string const & uri, HttpResponse & response, uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API Err requestWithSync(std::string const & uri,
+                             libtbag::http::HttpRequest const & request,
+                             libtbag::http::HttpResponse & response,
+                             uint64_t timeout = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API Err requestWithSync(std::string const & uri,
+                             libtbag::http::HttpResponse & response,
+                             uint64_t timeout = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC);
 
 // --------------
 // HTTPS Request.
 // --------------
 
-TBAG_API Err requestWithTlsSync(Uri const & uri, HttpRequest const & request, HttpResponse & response,
-                                uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC,
+TBAG_API Err requestWithTlsSync(Uri const & uri,
+                                libtbag::http::HttpRequest const & request,
+                                libtbag::http::HttpResponse & response,
+                                uint64_t timeout = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC,
                                 HttpsClient::StreamType type = HttpsClient::StreamType::TCP);
 
-TBAG_API Err requestWithTlsSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
-TBAG_API Err requestWithTlsSync(std::string const & uri, HttpResponse & response, uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API Err requestWithTlsSync(std::string const & uri,
+                                libtbag::http::HttpRequest const & request,
+                                libtbag::http::HttpResponse & response,
+                                uint64_t timeout = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API Err requestWithTlsSync(std::string const & uri,
+                                libtbag::http::HttpResponse & response,
+                                uint64_t timeout = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC);
 
 } // namespace http
 } // namespace network

@@ -27,7 +27,9 @@ using namespace libtbag::network;
 using namespace libtbag::network::http;
 using namespace libtbag::network::http::func;
 
-using WeakClient = HttpServer::WeakClient;
+using WeakClient   = HttpServer::WeakClient;
+using HttpRequest  = libtbag::http::HttpRequest;
+using HttpResponse = libtbag::http::HttpResponse;
 
 //#define MASSIVE_NETWORK_HTTP_TEST
 
