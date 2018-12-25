@@ -317,15 +317,13 @@ TBAG_API bool existsInSplitValues(HttpHeader const & header, std::string const &
  */
 TBAG_API std::string toMessageHeader(HttpHeader const & header);
 
-struct HttpCommon
-{
-    /** Use 'http_' as a prefix to avoid variable name conflicts. */
-    int http_major = DEFAULT_HTTP_VERSION_MAJOR;
-    int http_minor = DEFAULT_HTTP_VERSION_MINOR;
-
-    HttpHeader header;
-    HttpBuffer body;
-};
+// Forward declarations.
+struct HttpCommon;
+struct HttpBaseRequest;
+struct HttpBaseResponse;
+struct HttpRequest;
+struct HttpResponse;
+struct HttpProperty;
 
 /**
  * @remarks
@@ -344,68 +342,71 @@ TBAG_API std::string toDebugHeaderString(HttpCommon const & common);
 TBAG_API std::vector<int> getWsVersions(HttpHeader const & header);
 TBAG_API bool testWsVersion(HttpHeader const & header, int test_version = WEBSOCKET_VERSION_HYBI13);
 
+/**
+ * HttpCommon structure.
+ *
+ * @author zer0
+ * @date   2018-12-25
+ */
+struct HttpCommon
+{
+    /** Use 'http_' as a prefix to avoid variable name conflicts. */
+    int http_major = DEFAULT_HTTP_VERSION_MAJOR;
+    int http_minor = DEFAULT_HTTP_VERSION_MINOR;
+
+    HttpHeader header;
+    HttpBuffer body;
+
+    HttpHeader getRegularization() const
+    { return libtbag::http::getRegularization(header); }
+    void regularization()
+    { header = getRegularization(); }
+
+    std::string getHeaderValue(std::string const & key) const
+    { return libtbag::http::getHeaderValue(header, key); }
+    std::string getIgnoreCase(std::string const & key) const
+    { return libtbag::http::getIgnoreCase(header, key); }
+
+    std::size_t insert(std::string const & key, std::string const & val)
+    { return libtbag::http::insert(header, key, val); }
+    std::size_t insert(HttpHeader const & insert_header)
+    { return libtbag::http::insert(header, insert_header); }
+
+    std::size_t insertIfNotExists(std::string const & key, std::string const & val)
+    { return libtbag::http::insertIfNotExists(header, key, val); }
+    std::size_t insertIfNotExists(HttpHeader const & insert_header)
+    { return libtbag::http::insertIfNotExists(header, insert_header); }
+
+    bool exists(std::string const & key) const
+    { return libtbag::http::exists(header, key); }
+    bool exists(std::string const & key, std::string const & val) const
+    { return libtbag::http::exists(header, key, val); }
+
+    bool existsInSplitValues(std::string const & key, std::string const & val) const
+    { return libtbag::http::existsInSplitValues(header, key, val); }
+    bool existsInSplitValues(std::string const & key, std::string const & val, std::string const & delimiter) const
+    { return libtbag::http::existsInSplitValues(header, key, val, delimiter); }
+
+    std::string getBodyString() const
+    { return std::string(body.begin(), body.end()); }
+    void setBodyString(std::string const & body_string)
+    { body.assign(body_string.begin(), body_string.end()); }
+    void appendBodyString(std::string const & body_string)
+    { body.insert(body.end(), body_string.begin(), body_string.end()); }
+
+    std::string toVersionString() const
+    { return libtbag::http::toVersionString(http_major, http_minor); }
+    std::string toDebugHeaderString() const
+    { return libtbag::http::toDebugHeaderString(header); }
+
+    std::vector<int> getWsVersions() const
+    { return libtbag::http::getWsVersions(header); }
+    bool testWsVersion(int test_version = WEBSOCKET_VERSION_HYBI13) const
+    { return libtbag::http::testWsVersion(header, test_version); }
+};
+
 TBAG_API std::string generateRandomWebSocketKey();
 TBAG_API std::string getUpgradeWebSocketKey(std::string const & key);
-
-/**
- * Http request information.
- *
- * @author zer0
- * @date   2017-09-30
- *
- * @see <https://tools.ietf.org/html/rfc2616#section-5.1>
- */
-struct HttpBaseRequest
-{
-    std::string method;
-    std::string path;
-};
-
-/**
- * Http response information.
- *
- * @author zer0
- * @date   2017-09-30
- *
- * @see <https://tools.ietf.org/html/rfc2616#section-6.1>
- */
-struct HttpBaseResponse
-{
-    int code = TBAG_UNKNOWN_HTTP_STATUS;
-    std::string reason;
-};
-
-// @formatter:off
-struct HttpRequest  : public HttpCommon, public HttpBaseRequest  { /* EMPTY. */ };
-struct HttpResponse : public HttpCommon, public HttpBaseResponse { /* EMPTY. */ };
-// @formatter:on
-
-struct HttpProperty : public HttpCommon, public HttpBaseRequest, public HttpBaseResponse
-{
-    operator HttpRequest() const
-    {
-        HttpRequest result;
-        result.http_minor = http_minor;
-        result.http_major = http_major;
-        result.header = header;
-        result.body = body;
-        result.method = method;
-        result.path = path;
-        return result;
-    }
-
-    operator HttpResponse() const
-    {
-        HttpResponse result;
-        result.http_minor = http_minor;
-        result.http_major = http_major;
-        result.header = header;
-        result.body = body;
-        result.code = code;
-        result.reason = reason;
-        return result;
-    }
-};
 
 TBAG_API void clear(HttpCommon & common);
 TBAG_API void clear(HttpBaseRequest & request);
@@ -457,6 +458,38 @@ TBAG_API std::string toDebugRequestString(HttpCommon const & common, HttpBaseReq
 TBAG_API std::string toDebugRequestString(HttpRequest const & request);
 TBAG_API std::string toDebugRequestString(HttpProperty const & property);
 
+/**
+ * Http request information.
+ *
+ * @author zer0
+ * @date   2017-09-30
+ *
+ * @see <https://tools.ietf.org/html/rfc2616#section-5.1>
+ */
+struct HttpBaseRequest
+{
+    std::string method;
+    std::string path;
+};
+
+struct HttpRequest : public HttpCommon, public HttpBaseRequest
+{
+    bool checkWsRequest(int test_version = WEBSOCKET_VERSION_HYBI13) const
+    { return libtbag::http::checkWsRequest(*this, test_version); }
+
+    void updateDefaultRequest()
+    { libtbag::http::updateDefaultRequest(*this); }
+    void updateDefaultWsRequest(std::string const & ws_key)
+    { libtbag::http::updateDefaultWsRequest(*this, ws_key); }
+
+    std::string toRequestLine() const
+    { return libtbag::http::toRequestLine(*this); }
+    std::string toRequestString() const
+    { return libtbag::http::toRequestString(*this); }
+    std::string toDebugRequestString() const
+    { return libtbag::http::toDebugRequestString(*this); }
+};
+
 TBAG_API void setHttpStatus(HttpBaseResponse & response, HttpStatus s);
 TBAG_API void setHttpStatus(HttpBaseResponse & response, std::string const & name);
 
@@ -501,6 +534,123 @@ TBAG_API std::string toResponseString(HttpProperty const & property);
 TBAG_API std::string toDebugResponseString(HttpCommon const & common, HttpBaseResponse const & response);
 TBAG_API std::string toDebugResponseString(HttpResponse const & response);
 TBAG_API std::string toDebugResponseString(HttpProperty const & property);
+
+/**
+ * Http response information.
+ *
+ * @author zer0
+ * @date   2017-09-30
+ *
+ * @see <https://tools.ietf.org/html/rfc2616#section-6.1>
+ */
+struct HttpBaseResponse
+{
+    int code = TBAG_UNKNOWN_HTTP_STATUS;
+    std::string reason;
+
+    void setHttpStatus(HttpStatus s)
+    { libtbag::http::setHttpStatus(*this, s); }
+    void setHttpStatus(std::string const & name)
+    { libtbag::http::setHttpStatus(*this, name); }
+
+    HttpStatus getHttpStatus() const
+    { return libtbag::http::getHttpStatus(code); }
+};
+
+struct HttpResponse : public HttpCommon, public HttpBaseResponse
+{
+    bool checkWsResponse(std::string const & original_key) const
+    { return libtbag::http::checkWsResponse(*this, original_key); }
+
+    void updateDefaultResponse()
+    { libtbag::http::updateDefaultResponse(*this); }
+    void updateDefaultWsResponse(std::string const & key)
+    { libtbag::http::updateDefaultWsResponse(*this, key); }
+    void updateDefaultWsResponse(HttpHeader const & request_header)
+    { libtbag::http::updateDefaultWsResponse(*this, request_header); }
+    void updateDefaultWsResponse(HttpCommon const & request_common)
+    { libtbag::http::updateDefaultWsResponse(*this, request_common); }
+
+    std::string toStatusLine() const
+    { return libtbag::http::toStatusLine(*this); }
+    std::string toResponseString() const
+    { return libtbag::http::toResponseString(*this); }
+    std::string toDebugResponseString() const
+    { return libtbag::http::toDebugResponseString(*this); }
+};
+
+struct HttpProperty : public HttpCommon, public HttpBaseRequest, public HttpBaseResponse
+{
+    operator HttpRequest() const
+    {
+        HttpRequest result;
+        // @formatter:off
+        result.http_minor = http_minor;
+        result.http_major = http_major;
+        result.header     = header;
+        result.body       = body;
+        result.method     = method;
+        result.path       = path;
+        // @formatter:on
+        return result;
+    }
+
+    operator HttpResponse() const
+    {
+        HttpResponse result;
+        // @formatter:off
+        result.http_minor = http_minor;
+        result.http_major = http_major;
+        result.header     = header;
+        result.body       = body;
+        result.code       = code;
+        result.reason     = reason;
+        // @formatter:on
+        return result;
+    }
+
+    // -------------------
+    // HttpRequest Members
+    // -------------------
+
+    bool checkWsRequest(int test_version = WEBSOCKET_VERSION_HYBI13) const
+    { return libtbag::http::checkWsRequest(*this, test_version); }
+
+    void updateDefaultRequest()
+    { libtbag::http::updateDefaultRequest(*this); }
+    void updateDefaultWsRequest(std::string const & ws_key)
+    { libtbag::http::updateDefaultWsRequest(*this, ws_key); }
+
+    std::string toRequestLine() const
+    { return libtbag::http::toRequestLine(*this); }
+    std::string toRequestString() const
+    { return libtbag::http::toRequestString(*this); }
+    std::string toDebugRequestString() const
+    { return libtbag::http::toDebugRequestString(*this); }
+
+    // --------------------
+    // HttpResponse Members
+    // --------------------
+
+    bool checkWsResponse(std::string const & original_key) const
+    { return libtbag::http::checkWsResponse(*this, original_key); }
+
+    void updateDefaultResponse()
+    { libtbag::http::updateDefaultResponse(*this); }
+    void updateDefaultWsResponse(std::string const & key)
+    { libtbag::http::updateDefaultWsResponse(*this, key); }
+    void updateDefaultWsResponse(HttpHeader const & request_header)
+    { libtbag::http::updateDefaultWsResponse(*this, request_header); }
+    void updateDefaultWsResponse(HttpCommon const & request_common)
+    { libtbag::http::updateDefaultWsResponse(*this, request_common); }
+
+    std::string toStatusLine() const
+    { return libtbag::http::toStatusLine(*this); }
+    std::string toResponseString() const
+    { return libtbag::http::toResponseString(*this); }
+    std::string toDebugResponseString() const
+    { return libtbag::http::toDebugResponseString(*this); }
+};
 
 /**
  * Http filter interface.
