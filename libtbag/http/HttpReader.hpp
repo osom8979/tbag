@@ -3,10 +3,11 @@
  * @brief  HttpReader class prototype.
  * @author zer0
  * @date   2017-10-03
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPREADER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPREADER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_HTTPREADER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_HTTPREADER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -18,10 +19,9 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/network/http/base/HttpCommon.hpp>
-#include <libtbag/network/http/base/HttpParser.hpp>
-#include <libtbag/network/http/ws/WsFrameBuffer.hpp>
-#include <libtbag/util/BufferInfo.hpp>
+#include <libtbag/http/HttpCommon.hpp>
+#include <libtbag/http/HttpParser.hpp>
+#include <libtbag/http/WsFrameBuffer.hpp>
 
 #include <cstdint>
 #include <string>
@@ -30,15 +30,14 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace base    {
+namespace http {
 
 /**
  * HttpReader interface.
  *
  * @author zer0
  * @date   2017-10-06
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 struct HttpReaderInterface
 {
@@ -71,6 +70,7 @@ struct HttpReaderInterface
  *
  * @author zer0
  * @date   2017-10-03
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 class TBAG_API HttpReader : public HttpParser, public HttpReaderInterface
 {
@@ -105,6 +105,7 @@ public:
  *
  * @author zer0
  * @date   2017-10-03
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 template <typename ByPassType>
 struct HttpReaderForCallback : public HttpReader
@@ -132,16 +133,11 @@ struct HttpReaderForCallback : public HttpReader
     { parent->onParseError(code, arg); }
 };
 
-} // namespace base
-
-using namespace libtbag::network::http::base;
-
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPREADER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_HTTPREADER_HPP__
 

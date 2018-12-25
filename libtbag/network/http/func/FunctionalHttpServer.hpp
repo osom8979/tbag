@@ -120,9 +120,9 @@ public:
 
     TBAG_VOID_CALLBACK_HELPER(onClientOpen        , WeakClient);
     TBAG_VOID_CALLBACK_HELPER(onClientContinue    , WeakClient);
-    TBAG_RETN_CALLBACK_HELPER(onClientSwitchingProtocol, bool, true, WeakClient, HttpRequest const &);
-    TBAG_VOID_CALLBACK_HELPER(onClientWsMessage   , WeakClient, ws::WsOpCode, util::Buffer const &);
-    TBAG_VOID_CALLBACK_HELPER(onClientRequest     , WeakClient, HttpRequest const &);
+    TBAG_RETN_CALLBACK_HELPER(onClientSwitchingProtocol, bool, true, WeakClient, libtbag::http::HttpRequest const &);
+    TBAG_VOID_CALLBACK_HELPER(onClientWsMessage   , WeakClient, libtbag::http::WsOpCode, util::Buffer const &);
+    TBAG_VOID_CALLBACK_HELPER(onClientRequest     , WeakClient, libtbag::http::HttpRequest const &);
 };
 
 using FuncHttpServer = FunctionalHttpServer<HttpServer>;

@@ -19,7 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 
-#include <libtbag/network/http/base/HttpProperty.hpp>
+#include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/util/Structures.hpp>
 #include <libtbag/util/Version.hpp>
 
@@ -183,7 +183,7 @@ public:
 
 #ifndef _TPOT_CREATE_PATH_STRUCTURE
 #define _TPOT_CREATE_PATH_STRUCTURE(class_name, path_name, method) \
-    struct class_name : public libtbag::network::http::HttpMethod##method \
+    struct class_name : public libtbag::http::HttpMethod##method \
     { \
         TBAG_CONSTEXPR static char const * const getName() TBAG_NOEXCEPT { return     path_name; } \
         TBAG_CONSTEXPR static char const * const getPath() TBAG_NOEXCEPT { return "/" path_name; } \

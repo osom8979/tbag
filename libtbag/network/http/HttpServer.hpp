@@ -20,11 +20,10 @@
 
 #include <libtbag/net/Ip.hpp>
 #include <libtbag/network/stream/StreamServer.hpp>
-#include <libtbag/network/http/base/HttpProperty.hpp>
-#include <libtbag/network/http/base/HttpParser.hpp>
-#include <libtbag/network/http/base/HttpReader.hpp>
-#include <libtbag/network/http/base/HttpFilter.hpp>
-#include <libtbag/network/http/ws/WsFrameBuffer.hpp>
+#include <libtbag/http/HttpCommon.hpp>
+#include <libtbag/http/HttpParser.hpp>
+#include <libtbag/http/HttpReader.hpp>
+#include <libtbag/http/WsFrameBuffer.hpp>
 #include <libtbag/network/Uri.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
@@ -78,6 +77,17 @@ public:
     using ReadGuard  = lock::ReadLockGuard;
     using WriteGuard = lock::WriteLockGuard;
 
+    using HttpRequest  = libtbag::http::HttpRequest;
+    using HttpResponse = libtbag::http::HttpResponse;
+    using HttpProperty = libtbag::http::HttpProperty;
+    using WsFrame      = libtbag::http::WsFrame;
+    using WsStatus     = libtbag::http::WsStatus;
+    using WsStatusCode = libtbag::http::WsStatusCode;
+    using WsOpCode     = libtbag::http::WsOpCode;
+
+    using HttpFilterInterface = libtbag::http::HttpFilterInterface;
+    using HttpBaseFilter      = libtbag::http::HttpBaseFilter;
+
     /**
      * HttpNode class prototype.
      *
@@ -85,10 +95,10 @@ public:
      * @date   2017-08-09
      * @date   2017-10-16 (Refactoring)
      */
-    class TBAG_API HttpNode : public stream::StreamNode, public HttpReaderInterface
+    class TBAG_API HttpNode : public stream::StreamNode, public libtbag::http::HttpReaderInterface
     {
     private:
-        HttpReaderForCallback<HttpNode> _reader;
+        libtbag::http::HttpReaderForCallback<HttpNode> _reader;
 
     public:
         HttpNode(Loop & loop, StreamType type, HttpServer * parent);

@@ -40,8 +40,8 @@ Err HttpServer::HttpNode::writeResponse()
 Err HttpServer::HttpNode::writeResponse(HttpResponse const & response)
 {
     HttpResponse update_response = response;
-    update_response.updateDefaultResponse();
-    std::string const & RESPONSE_STRING = update_response.toResponseString();
+    libtbag::http::updateDefaultResponse(update_response);
+    std::string const & RESPONSE_STRING = libtbag::http::toResponseString(update_response);
     return write(RESPONSE_STRING.data(), RESPONSE_STRING.size());
 }
 
@@ -53,8 +53,8 @@ Err HttpServer::HttpNode::writeWsResponse(HttpRequest const & request)
 Err HttpServer::HttpNode::writeWsResponse(HttpRequest const & request, HttpResponse const & response)
 {
     HttpResponse ws_response = response;
-    ws_response.updateDefaultWsResponse(request);
-    std::string const & RESPONSE_STRING = ws_response.toResponseString();
+    libtbag::http::updateDefaultWsResponse(ws_response, request);
+    std::string const & RESPONSE_STRING = libtbag::http::toResponseString(ws_response);
     return write(RESPONSE_STRING.data(), RESPONSE_STRING.size());
 }
 

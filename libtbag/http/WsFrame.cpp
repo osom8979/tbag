@@ -3,9 +3,10 @@
  * @brief  WsFrame class implementation.
  * @author zer0
  * @date   2017-10-01
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::ws -> libtbag::http)
  */
 
-#include <libtbag/network/http/ws/WsFrame.hpp>
+#include <libtbag/http/WsFrame.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/bitwise/Endian.hpp>
@@ -18,9 +19,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace ws      {
+namespace http {
 
 WsFrame::WsFrame() : fin (false), rsv1(false), rsv2(false), rsv3(false),
                      opcode(WsOpCode::WSOC_CONTINUATION_FRAME), mask(false),
@@ -40,7 +39,7 @@ void WsFrame::swap(WsFrame & obj)
     std::swap(rsv1, obj.rsv1);
     std::swap(rsv2, obj.rsv2);
     std::swap(rsv3, obj.rsv3);
-    ws::swap(opcode, obj.opcode);
+    libtbag::http::swap(opcode, obj.opcode);
     std::swap(mask, obj.mask);
     std::swap(masking_key, obj.masking_key);
     payload.swap(obj.payload);
@@ -328,9 +327,7 @@ std::string WsFrame::toDebugString(bool print_payload) const
     return ss.str();
 }
 
-} // namespace ws
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

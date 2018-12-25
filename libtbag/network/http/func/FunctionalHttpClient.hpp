@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/functional/CallbackHelper.hpp>
 
@@ -44,6 +45,10 @@ public:
     using Loop       = HttpClient::Loop;
     using StreamType = HttpClient::StreamType;
     using ReadPacket = HttpClient::ReadPacket;
+
+    using WsOpCode     = libtbag::http::WsOpCode;
+    using EventType    = libtbag::http::EventType;
+    using HttpProperty = libtbag::http::HttpProperty;
 
     STATIC_ASSERT_CHECK_IS_BASE_OF(HttpClient, Parent);
 
@@ -156,7 +161,7 @@ public:
 public:
     // @formatter:off
     TBAG_VOID_CALLBACK_HELPER(onContinue   , void*);
-    TBAG_VOID_CALLBACK_HELPER(onWsMessage  , ws::WsOpCode, util::Buffer const &, void*);
+    TBAG_VOID_CALLBACK_HELPER(onWsMessage  , WsOpCode, util::Buffer const &, void*);
     TBAG_VOID_CALLBACK_HELPER(onRegularHttp, HttpProperty const &, void*);
     // @formatter:on
 };

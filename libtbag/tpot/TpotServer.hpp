@@ -43,14 +43,14 @@ class TBAG_API TpotServer : protected proto::TpotPacket,
                             protected process::ProcessManager
 {
 public:
-    using TpotPacket     = proto::TpotPacket;
-    using ProcessManager = process::ProcessManager;
+    using TpotPacket     = libtbag::proto::TpotPacket;
+    using ProcessManager = libtbag::process::ProcessManager;
 
-    using Loop           = uvpp::Loop;
-    using HttpRequest    = network::http::HttpRequest;
-    using HttpResponse   = network::http::HttpResponse;
-    using HttpProperty   = network::http::HttpProperty;
-    using HttpServer     = network::http::HttpServer;
+    using Loop           = libtbag::uvpp::Loop;
+    using HttpRequest    = libtbag::http::HttpRequest;
+    using HttpResponse   = libtbag::http::HttpResponse;
+    using HttpProperty   = libtbag::http::HttpProperty;
+    using HttpServer     = libtbag::network::http::HttpServer;
     using StreamType     = HttpServer::StreamType;
     using WeakClient     = HttpServer::WeakClient;
     using HttpNode       = HttpServer::HttpNode;

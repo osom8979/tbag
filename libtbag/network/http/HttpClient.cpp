@@ -38,33 +38,33 @@ Err HttpClient::writeRequest()
 Err HttpClient::writeRequest(HttpRequest const & request)
 {
     HttpRequest update_request = request;
-    update_request.updateDefaultRequest();
-    std::string const & REQUEST_STRING = update_request.toRequestString();
+    libtbag::http::updateDefaultRequest(update_request);
+    std::string const & REQUEST_STRING = libtbag::http::toRequestString(update_request);
     return write(REQUEST_STRING.data(), REQUEST_STRING.size());
 }
 
 Err HttpClient::writeWsRequest()
 {
     HttpRequest request;
-    request.setHttpMethod(HttpMethod::M_GET);
-    request.insert(HEADER_HOST, std::string());
-    request.insert(HEADER_ORIGIN, std::string());
+    request.method = libtbag::http::getHttpMethodName(libtbag::http::HttpMethod::M_GET);
+    libtbag::http::insert(request.header, libtbag::http::HEADER_HOST, std::string());
+    libtbag::http::insert(request.header, libtbag::http::HEADER_ORIGIN, std::string());
     return writeWsRequest(request);
 }
 
 Err HttpClient::writeWsRequest(HttpRequest const & request)
 {
     HttpRequest ws_request = request;
-    ws_request.updateDefaultWsRequest(_reader.getKey());
+    updateDefaultWsRequest(ws_request, _reader.getKey());
 
-    if (ws_request.exists(HEADER_ORIGIN) == false) {
-        tDLogW("HttpClient::writeWsRequest() Not found {} header.", HEADER_ORIGIN);
+    if (!libtbag::http::exists(ws_request.header, libtbag::http::HEADER_ORIGIN)) {
+        tDLogW("HttpClient::writeWsRequest() Not found {} header.", libtbag::http::HEADER_ORIGIN);
     }
-    if (ws_request.getHttpMethod() != HttpMethod::M_GET) {
+    if (libtbag::http::getHttpMethod(ws_request.method) != libtbag::http::HttpMethod::M_GET) {
         tDLogW("HttpClient::writeWsRequest() Not a GET method: {}", request.method);
     }
 
-    std::string const & REQUEST_STRING = ws_request.toRequestString();
+    std::string const & REQUEST_STRING = libtbag::http::toRequestString(ws_request);
     return write(REQUEST_STRING.data(), REQUEST_STRING.size());
 }
 

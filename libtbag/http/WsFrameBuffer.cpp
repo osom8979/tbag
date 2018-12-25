@@ -3,9 +3,10 @@
  * @brief  WsFrameBuffer class implementation.
  * @author zer0
  * @date   2017-10-01
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::ws -> libtbag::http)
  */
 
-#include <libtbag/network/http/ws/WsFrameBuffer.hpp>
+#include <libtbag/http/WsFrameBuffer.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <algorithm>
@@ -15,9 +16,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace ws      {
+namespace http {
 
 WsFrameBuffer::WsFrameBuffer() : _buffer_size(0), _frames_size(0)
 {
@@ -147,9 +146,7 @@ bool WsFrameBuffer::next(Err * code, std::size_t * size)
     return true;
 }
 
-} // namespace ws
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

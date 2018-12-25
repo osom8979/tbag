@@ -19,7 +19,7 @@
 
 #include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/network/stream/StreamClient.hpp>
-#include <libtbag/network/http/base/HttpReader.hpp>
+#include <libtbag/http/HttpReader.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
@@ -35,16 +35,20 @@ namespace http    {
  * @author zer0
  * @date   2017-05-19
  */
-class TBAG_API HttpClient : public stream::StreamClient, public HttpReaderInterface
+class TBAG_API HttpClient : public libtbag::network::stream::StreamClient,
+                            public libtbag::http::HttpReaderInterface
 {
 public:
-    using StreamType = details::StreamType;
-    using Parent     = stream::StreamClient;
-    using Loop       = uvpp::Loop;
-    using Masking    = random::MaskingDevice;
+    using StreamType  = libtbag::network::details::StreamType;
+    using Parent      = libtbag::network::stream::StreamClient;
+    using Loop        = libtbag::uvpp::Loop;
+    using Masking     = libtbag::random::MaskingDevice;
+    using EventType   = libtbag::http::EventType;
+    using HttpRequest = libtbag::http::HttpRequest;
+    using WsFrame     = libtbag::http::WsFrame;
 
 private:
-    HttpReaderForCallback<HttpClient> _reader;
+    libtbag::http::HttpReaderForCallback<HttpClient> _reader;
     Masking _device;
 
 public:

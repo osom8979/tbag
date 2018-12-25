@@ -19,7 +19,7 @@
 
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/network/http/HttpsClient.hpp>
-#include <libtbag/network/http/base/HttpProperty.hpp>
+#include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/network/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
@@ -51,6 +51,13 @@ public:
     TBAG_CONSTEXPR static bool const IS_HTTP  = std::is_same<ParentClient, HttpClient>::value;
     TBAG_CONSTEXPR static bool const IS_HTTPS = std::is_same<ParentClient, HttpsClient>::value;
     static_assert(IS_HTTP || IS_HTTPS, "ParentClient must be HttpClient or HttpsClient.");
+
+public:
+    using HttpRequest  = libtbag::http::HttpRequest;
+    using HttpResponse = libtbag::http::HttpResponse;
+    using HttpProperty = libtbag::http::HttpProperty;
+    using WsOpCode     = libtbag::http::WsOpCode;
+    using EventType    = libtbag::http::EventType;
 
 public:
     using OnResponse = std::function<void(HttpResponse const &)>;
@@ -168,6 +175,11 @@ using SimpleHttpsClient = SimpleClient<HttpsClient>;
 // -------------
 // HTTP Request.
 // -------------
+
+using HttpRequest  = libtbag::http::HttpRequest;
+using HttpResponse = libtbag::http::HttpResponse;
+
+TBAG_CONSTEXPR uint64_t const DEFAULT_HTTP_TIMEOUT_MILLISEC = libtbag::http::DEFAULT_HTTP_TIMEOUT_MILLISEC;
 
 TBAG_API Err requestWithSync(Uri const & uri, HttpRequest const & request, HttpResponse & response,
                              uint64_t timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC,

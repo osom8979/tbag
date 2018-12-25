@@ -3,18 +3,17 @@
  * @brief  WsFrameBuffer class tester.
  * @author zer0
  * @date   2017-10-01
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/ws/WsFrameBuffer.hpp>
+#include <libtbag/http/WsFrameBuffer.hpp>
 #include <libtbag/bitwise/Endian.hpp>
 
 #include <vector>
 
 using namespace libtbag;
-using namespace libtbag::network;
-using namespace libtbag::network::http;
-using namespace libtbag::network::http::ws;
+using namespace libtbag::http;
 
 TEST(WsFrameBufferTest, Default)
 {

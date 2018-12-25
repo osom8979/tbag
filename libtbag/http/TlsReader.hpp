@@ -3,10 +3,11 @@
  * @brief  TlsReader class prototype.
  * @author zer0
  * @date   2017-11-11
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_TLS_TLSREADER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_TLS_TLSREADER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_TLSREADER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_TLSREADER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -27,17 +28,16 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace tls     {
+namespace http {
 
 /**
  * TlsReader class prototype.
  *
  * @author zer0
  * @date   2017-11-11
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
  */
-class TBAG_API TlsReader
+class TBAG_API TlsReader : private Noncopyable
 {
 public:
     struct Impl;
@@ -80,13 +80,11 @@ public:
     std::vector<char> decode(Err * code);
 };
 
-} // namespace tls
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_TLS_TLSREADER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_TLSREADER_HPP__
 

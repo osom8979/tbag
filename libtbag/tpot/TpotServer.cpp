@@ -146,8 +146,9 @@ public:
         assert(_parent != nullptr);
         if (auto shared = HttpServer::toSharedNode(node)) {
             HttpResponse response;
-            response.setHttpStatus(network::http::HttpStatus::SC_NOT_FOUND);
-            response.setBody(TPOT_HTML_BAD_REQUEST_BODY);
+            libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_NOT_FOUND);
+            std::string const BODY(TPOT_HTML_BAD_REQUEST_BODY);
+            response.body.assign(BODY.begin(), BODY.end());
             shared->writeResponse(response);
         }
     }
@@ -159,8 +160,9 @@ public:
             auto & body = request.body;
             if (_parent->parse(body.data(), body.size(), &shared) != Err::E_SUCCESS) {
                 HttpResponse response;
-                response.setHttpStatus(network::http::HttpStatus::SC_BAD_REQUEST);
-                response.setBody(TPOT_HTML_BAD_REQUEST_BODY);
+                libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_BAD_REQUEST);
+                std::string const BODY(TPOT_HTML_BAD_REQUEST_BODY);
+                response.body.assign(BODY.begin(), BODY.end());
                 shared->writeResponse(response);
             }
         }
@@ -258,8 +260,8 @@ void TpotServer::onVersionRequest(util::Header const & header, void * arg)
     buildVersionResponse(util::Header(header.id), PACKET_VERSION.getMajor(), PACKET_VERSION.getMinor());
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 
@@ -271,8 +273,8 @@ void TpotServer::onEchoRequest(util::Header const & header, std::string const & 
     buildEchoResponse(util::Header(header.id), message);
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 
@@ -288,8 +290,8 @@ void TpotServer::onLoginRequest(util::Header const & header, std::string const &
     buildLoginResponse(util::Header(header.id), key);
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 
@@ -305,8 +307,8 @@ void TpotServer::onLogoutRequest(util::Header const & header, void * arg)
     buildLogoutResponse(util::Header(header.id));
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 
@@ -329,8 +331,8 @@ void TpotServer::onExecRequest(util::Header const & header, util::ExecParam cons
     buildExecResponse(util::Header(header.id, code), PID);
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 
@@ -344,8 +346,8 @@ void TpotServer::onProcessListRequest(util::Header const & header, void * arg)
     buildProcessListResponse(util::Header(header.id), list);
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 
@@ -373,8 +375,8 @@ void TpotServer::onProcessKillRequest(util::Header const & header, int pid, int 
     buildProcessKillResponse(util::Header(header.id, code));
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 
@@ -401,8 +403,8 @@ void TpotServer::onProcessRemoveRequest(util::Header const & header, int pid, vo
     buildProcessRemoveResponse(util::Header(header.id, code));
 
     HttpResponse response;
-    response.setHttpStatus(network::http::HttpStatus::SC_OK);
-    response.appendBody(getTpotPacketPointer(), getTpotPacketSize());
+    libtbag::http::setHttpStatus(response, libtbag::http::HttpStatus::SC_OK);
+    response.body.insert(response.body.end(), getTpotPacketPointer(), getTpotPacketPointer() + getTpotPacketSize());
     node->writeResponse(response);
 }
 

@@ -3,19 +3,17 @@
  * @brief  HttpReader class implementation.
  * @author zer0
  * @date   2017-10-03
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 
-#include <libtbag/network/http/base/HttpReader.hpp>
+#include <libtbag/http/HttpReader.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/network/http/ws/WsUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace base    {
+namespace http {
 
 HttpReader::HttpReader(bool use_websocket) : HttpReader(generateRandomWebSocketKey(), use_websocket)
 {
@@ -79,25 +77,25 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
         // This block can be accessed form the 'Server' object.
         if (_enable_websocket && isUpgrade()) {
             // WebSocket interrupt process (HTTP Request).
-            if (checkWsRequest()) {
+            if (checkWsRequest(property())) {
                 tDLogI("HttpReader::parse() Switching protocol!");
-                _switching_protocol = onSwitchingProtocol(*this, arg);
+                _switching_protocol = onSwitchingProtocol(property(), arg);
                 return Err::E_SUCCESS;
             } else {
                 tDLogW("HttpReader::parse() Unknown WebSocket request. Switches to the regular HTTP protocol.");
             }
         }
 
-        onRegularHttp(*this, arg);
+        onRegularHttp(property(), arg);
         return Err::E_SUCCESS;
 
     } else if (direction == ParserType::RESPONSE) {
         // This block can be accessed form the 'Client' object.
-        if (_enable_websocket && checkWsResponse(_key)) {
+        if (_enable_websocket && checkWsResponse(property(), _key)) {
             tDLogI("HttpReader::parse() Upgrade complete!");
-            _switching_protocol = onSwitchingProtocol(*this, arg);
+            _switching_protocol = onSwitchingProtocol(property(), arg);
         } else {
-            onRegularHttp(*this, arg);
+            onRegularHttp(property(), arg);
         }
         return Err::E_SUCCESS;
     }
@@ -106,9 +104,7 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
     return Err::E_ENOSYS;
 }
 
-} // namespace base
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

@@ -3,9 +3,10 @@
  * @brief  HttpParser class implementation.
  * @author zer0
  * @date   2017-10-03
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 
-#include <libtbag/network/http/base/HttpParser.hpp>
+#include <libtbag/http/HttpParser.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -15,9 +16,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace base    {
+namespace http {
 
 // @formatter:off
 static int __global_http_on_message_begin__   (http_parser * parser);
@@ -119,7 +118,7 @@ public:
 
     void clearCache()
     {
-        __cache__.property.clear();
+        libtbag::http::clear(__cache__.property);
         __cache__.header_field_temp.clear();
     }
 };
@@ -201,7 +200,7 @@ int __global_http_on_header_value__(http_parser * parser, const char * at, std::
 
     property.code = impl->parser.status_code;
     if (impl->__cache__.header_field_temp.empty() == false) {
-        property.insert(impl->__cache__.header_field_temp, std::string(at, at + length));
+        libtbag::http::insert(property.header, impl->__cache__.header_field_temp, std::string(at, at + length));
     }
     impl->__cache__.header_field_temp.clear();
     return impl->parent->onHeaderValue(at, length);
@@ -215,7 +214,9 @@ int __global_http_on_headers_complete__(http_parser * parser)
     assert(impl->parent != nullptr);
     auto & property = impl->__cache__.property;
 
-    property.setVersion(parser->http_major, parser->http_minor);
+    property.http_minor = parser->http_minor;
+    property.http_major = parser->http_major;
+
     impl->header_complete = true;
     return impl->parent->onHeadersComplete();
 }
@@ -302,7 +303,7 @@ Err HttpParser::execute(char const * data, std::size_t size, std::size_t * read_
     }
 
     if (isFinish()) {
-        swap(_impl->__cache__.property);
+        libtbag::http::swap(_property, _impl->__cache__.property);
     }
     if (read_size != nullptr) {
         *read_size = EXEC_SIZE;
@@ -355,9 +356,7 @@ char const * HttpParser::getErrnoDescription() const
     return ::http_errno_description(static_cast<http_errno>(_impl->parser.http_errno));
 }
 
-} // namespace base
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

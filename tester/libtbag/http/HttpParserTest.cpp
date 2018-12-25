@@ -3,15 +3,14 @@
  * @brief  HttpParser class tester.
  * @author zer0
  * @date   2017-10-03
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/http/base/HttpParser.hpp>
+#include <libtbag/http/HttpParser.hpp>
 
 using namespace libtbag;
-using namespace libtbag::network;
-using namespace libtbag::network::http;
-using namespace libtbag::network::http::base;
+using namespace libtbag::http;
 
 TEST(HttpParserTest, Request)
 {
@@ -37,13 +36,13 @@ TEST(HttpParserTest, Request)
     ASSERT_EQ(Err::E_SUCCESS, http.execute(TEST_DATA, TEST_DATA_LENGTH, &read_size));
     ASSERT_EQ(TEST_DATA_LENGTH, read_size);
 
-    ASSERT_EQ(1, http.http_major);
-    ASSERT_EQ(1, http.http_minor);
-    ASSERT_EQ(10U, http.sizeOfHeaders());
-    ASSERT_STREQ("github.com", http.get("Host").c_str());
-    ASSERT_STREQ("POST", http.method.c_str());
-    ASSERT_STREQ("/joyent/http-parser", http.path.c_str());
-    ASSERT_LT(0, http.body.size());
+    ASSERT_EQ(1, http.property().http_major);
+    ASSERT_EQ(1, http.property().http_minor);
+    ASSERT_EQ(10U, http.property().header.size());
+    ASSERT_STREQ("github.com", getHeaderValue(http.property().header, "Host").c_str());
+    ASSERT_STREQ("POST", http.property().method.c_str());
+    ASSERT_STREQ("/joyent/http-parser", http.property().path.c_str());
+    ASSERT_LT(0, http.property().body.size());
 }
 
 TEST(HttpParserTest, Response)
@@ -79,10 +78,10 @@ TEST(HttpParserTest, Response)
         }
     }
 
-    ASSERT_EQ(1, http.http_major);
-    ASSERT_EQ(1, http.http_minor);
-    ASSERT_EQ(8U, http.sizeOfHeaders());
-    ASSERT_EQ(301, http.code);
-    ASSERT_LT(0, http.body.size());
+    ASSERT_EQ(1, http.property().http_major);
+    ASSERT_EQ(1, http.property().http_minor);
+    ASSERT_EQ(8U, http.property().header.size());
+    ASSERT_EQ(301, http.property().code);
+    ASSERT_LT(0, http.property().body.size());
 }
 

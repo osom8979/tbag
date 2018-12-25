@@ -59,8 +59,8 @@ Err TpotClient::request(std::string const & method, std::string const & path,
         ss << _param.ip;
     }
 
-    HttpProperty request;
-    request.setHttpMethod(getHttpMethod(method));
+    libtbag::http::HttpProperty request;
+    request.method = method;
     request.body.assign(buffer, buffer + size);
 
     network::Uri uri(ss.str());

@@ -3,10 +3,11 @@
  * @brief  HttpParser class prototype.
  * @author zer0
  * @date   2017-10-03
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPARSER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPARSER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_HTTPPARSER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_HTTPPARSER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,7 +18,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
-#include <libtbag/network/http/base/HttpProperty.hpp>
+#include <libtbag/http/HttpCommon.hpp>
 
 #include <memory>
 #include <string>
@@ -26,9 +27,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace base    {
+namespace http {
 
 /**
  * HttpParser class prototype.
@@ -37,28 +36,36 @@ namespace base    {
  * @date   2017-05-18
  * @date   2017-10-02 (Rename: HttpParser -> HttpPacket)
  * @date   2017-10-03 (Rename: HttpPacket -> HttpParser)
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::base -> libtbag::http)
  */
-class TBAG_API HttpParser : public HttpProperty,
-                            private Noncopyable
+class TBAG_API HttpParser : private Noncopyable
 {
 public:
     enum class ParserType
     {
-        REQUEST, RESPONSE, BOTH
+        REQUEST,
+        RESPONSE,
+        BOTH
     };
 
 public:
     struct ParserImpl;
     friend struct ParserImpl;
 
+public:
     using UniqueParserImpl = std::shared_ptr<ParserImpl>;
 
 private:
     UniqueParserImpl _impl;
+    HttpProperty _property;
 
 public:
     HttpParser(ParserType type = ParserType::BOTH);
     virtual ~HttpParser();
+
+public:
+    inline HttpProperty       & property()       TBAG_NOEXCEPT { return _property; }
+    inline HttpProperty const & property() const TBAG_NOEXCEPT { return _property; }
 
 public:
     void clear();
@@ -109,16 +116,11 @@ public:
     // @formatter:on
 };
 
-} // namespace base
-
-using namespace libtbag::network::http::base;
-
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_BASE_HTTPPARSER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_HTTPPARSER_HPP__
 

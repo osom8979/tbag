@@ -3,10 +3,11 @@
  * @brief  WsFrame class prototype.
  * @author zer0
  * @date   2017-10-01
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::ws -> libtbag::http)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WS_WSFRAME_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WS_WSFRAME_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_WSFRAME_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_WSFRAME_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -18,11 +19,7 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/network/http/base/HttpCommon.hpp>
-#include <libtbag/network/http/ws/WsOpCode.hpp>
-#include <libtbag/network/http/ws/WsStatus.hpp>
-#include <libtbag/network/http/ws/WsPyloadBit.hpp>
-#include <libtbag/network/http/ws/WsUtils.hpp>
+#include <libtbag/http/HttpCommon.hpp>
 
 #include <string>
 
@@ -30,9 +27,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace ws      {
+namespace http {
 
 /**
  * WsFrame class prototype.
@@ -40,7 +35,8 @@ namespace ws      {
  * @author zer0
  * @date   2017-06-11
  * @date   2017-08-07 (Rename: WebSocketFrame -> WsFrame)
- * @date   2017-10-01 (Move namespace: libtbag::network::http -> libtbag::network::http::ws)
+ * @date   2017-10-01 (Change namespace: libtbag::network::http -> libtbag::network::http::ws)
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::ws -> libtbag::http)
  *
  * @remarks
  *    0                   1                   2                   3
@@ -180,16 +176,11 @@ public:
     std::string toDebugString(bool print_payload = false) const;
 };
 
-} // namespace ws
-
-using namespace libtbag::network::http::ws;
-
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WS_WSFRAME_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_WSFRAME_HPP__
 

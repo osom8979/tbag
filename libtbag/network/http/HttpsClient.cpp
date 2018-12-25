@@ -39,8 +39,8 @@ Err HttpsClient::writeRequest()
 Err HttpsClient::writeRequest(HttpRequest const & request)
 {
     HttpRequest update_request = request;
-    update_request.updateDefaultRequest();
-    std::string const & REQUEST_STRING = update_request.toRequestString();
+    libtbag::http::updateDefaultRequest(update_request);
+    std::string const & REQUEST_STRING = libtbag::http::toRequestString(update_request);
     return writeTls(REQUEST_STRING.data(), REQUEST_STRING.size());
 }
 

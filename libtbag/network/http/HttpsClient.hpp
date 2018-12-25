@@ -18,8 +18,8 @@
 #include <libtbag/Err.hpp>
 
 #include <libtbag/network/stream/StreamClient.hpp>
-#include <libtbag/network/http/base/HttpReader.hpp>
-#include <libtbag/network/http/tls/TlsReader.hpp>
+#include <libtbag/http/HttpReader.hpp>
+#include <libtbag/http/TlsReader.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
@@ -35,13 +35,16 @@ namespace http    {
  * @author zer0
  * @date   2018-02-04
  */
-class TBAG_API HttpsClient : public stream::StreamClient, public HttpReaderInterface
+class TBAG_API HttpsClient : public libtbag::network::stream::StreamClient,
+                             public libtbag::http::HttpReaderInterface
 {
 public:
-    using StreamType = details::StreamType;
-    using Parent     = stream::StreamClient;
-    using Loop       = uvpp::Loop;
-    using TlsReader  = tls::TlsReader;
+    using StreamType  = libtbag::network::details::StreamType;
+    using Parent      = libtbag::network::stream::StreamClient;
+    using Loop        = libtbag::uvpp::Loop;
+    using TlsReader   = libtbag::http::TlsReader;
+    using EventType   = libtbag::http::EventType;
+    using HttpRequest = libtbag::http::HttpRequest;
 
 public:
     enum class TlsState
@@ -53,7 +56,7 @@ public:
     };
 
 private:
-    HttpReaderForCallback<HttpsClient> _reader;
+    libtbag::http::HttpReaderForCallback<HttpsClient> _reader;
     TlsReader _tls;
     TlsState  _state;
 

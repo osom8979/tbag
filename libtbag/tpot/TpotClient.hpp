@@ -18,7 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/network/http/base/HttpProperty.hpp>
+#include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/proto/TpotPacket.hpp>
 
@@ -44,9 +44,9 @@ class TBAG_API TpotClient : protected proto::TpotPacket
 public:
     using Parent = proto::TpotPacket;
 
-    using HttpClient   = network::http::HttpClient;
-    using HttpRequest  = network::http::HttpRequest;
-    using HttpResponse = network::http::HttpResponse;
+    using HttpClient   = libtbag::network::http::HttpClient;
+    using HttpRequest  = libtbag::http::HttpRequest;
+    using HttpResponse = libtbag::http::HttpResponse;
     using StreamType   = HttpClient::StreamType;
 
 public:

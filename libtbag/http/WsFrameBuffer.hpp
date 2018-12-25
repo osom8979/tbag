@@ -3,10 +3,11 @@
  * @brief  WsFrameBuffer class prototype.
  * @author zer0
  * @date   2017-10-01
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::ws -> libtbag::http)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WS_WSFRAMEBUFFER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WS_WSFRAMEBUFFER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_WSFRAMEBUFFER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_WSFRAMEBUFFER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,11 +16,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/network/http/ws/WsFrame.hpp>
+#include <libtbag/http/WsFrame.hpp>
 
 #include <vector>
 
@@ -27,16 +26,15 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
-namespace http    {
-namespace ws      {
+namespace http {
 
 /**
  * WsFrameBuffer class prototype.
  *
  * @author zer0
  * @date   2017-08-07
- * @date   2017-10-01 (Move namespace: libtbag::network::http -> libtbag::network::http::ws)
+ * @date   2017-10-01 (Change namespace: libtbag::network::http -> libtbag::network::http::ws)
+ * @date   2018-12-25 (Change namespace: libtbag::network::http::ws -> libtbag::http)
  */
 class TBAG_API WsFrameBuffer
 {
@@ -106,16 +104,11 @@ public:
     bool next(Err * code = nullptr, std::size_t * size = nullptr);
 };
 
-} // namespace ws
-
-using namespace libtbag::network::http::ws;
-
 } // namespace http
-} // namespace network
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_HTTP_WS_WSFRAMEBUFFER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_WSFRAMEBUFFER_HPP__
 

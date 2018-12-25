@@ -70,15 +70,15 @@ Err requestWithSync(Uri const & uri,
 
     HttpRequest builder = request;
     if (builder.method.empty()) {
-        builder.setHttpMethod(HttpMethod::M_GET);
+        builder.method = libtbag::http::getHttpMethodName(libtbag::http::HttpMethod::M_GET);
     }
     if (builder.path.empty()) {
         builder.path.assign(uri.getRequestPath());
     }
-    if (builder.exists(HEADER_HOST) == false) {
-        builder.insert(HEADER_HOST, uri.getHost());
+    if (!libtbag::http::exists(builder.header, libtbag::http::HEADER_HOST)) {
+        libtbag::http::insert(builder.header, libtbag::http::HEADER_HOST, uri.getHost());
     }
-    builder.updateDefaultRequest();
+    libtbag::http::updateDefaultRequest(builder);
 
     tDLogI("requestWithSync() Request {}: {}", builder.method, uri.toString());
     Err code = Err::E_UNKNOWN;
@@ -110,7 +110,7 @@ Err requestWithSync(Uri const & uri,
                     uint64_t timeout,
                     HttpClient::StreamType type)
 {
-    return __impl::requestWithSync<HttpClient>(uri, DEFAULT_HTTP_PORT, request, response, timeout, type);
+    return __impl::requestWithSync<HttpClient>(uri, libtbag::http::DEFAULT_HTTP_PORT, request, response, timeout, type);
 }
 
 Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout)
@@ -120,7 +120,7 @@ Err requestWithSync(std::string const & uri, HttpRequest const & request, HttpRe
 
 Err requestWithSync(std::string const & uri, HttpResponse & response, uint64_t timeout)
 {
-    return requestWithSync(Uri(uri), HttpProperty(), response, timeout);
+    return requestWithSync(Uri(uri), libtbag::http::HttpProperty(), response, timeout);
 }
 
 Err requestWithTlsSync(Uri const & uri,
@@ -129,7 +129,7 @@ Err requestWithTlsSync(Uri const & uri,
                        uint64_t timeout,
                        HttpsClient::StreamType type)
 {
-    return __impl::requestWithSync<HttpsClient>(uri, DEFAULT_HTTPS_PORT, request, response, timeout, type);
+    return __impl::requestWithSync<HttpsClient>(uri, libtbag::http::DEFAULT_HTTPS_PORT, request, response, timeout, type);
 }
 
 Err requestWithTlsSync(std::string const & uri, HttpRequest const & request, HttpResponse & response, uint64_t timeout)
@@ -139,7 +139,7 @@ Err requestWithTlsSync(std::string const & uri, HttpRequest const & request, Htt
 
 Err requestWithTlsSync(std::string const & uri, HttpResponse & response, uint64_t timeout)
 {
-    return requestWithTlsSync(Uri(uri), HttpProperty(), response, timeout);
+    return requestWithTlsSync(Uri(uri), libtbag::http::HttpProperty(), response, timeout);
 }
 
 } // namespace http
