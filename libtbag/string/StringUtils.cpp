@@ -24,6 +24,13 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+std::string getStdEndLine()
+{
+    std::stringstream ss;
+    ss << std::endl;
+    return ss.str();
+}
+
 std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter, bool remove_empty)
 {
     if (source.empty() || delimiter.empty()) {
@@ -172,30 +179,25 @@ std::string convertByteArrayToHexString(uint8_t const * bytes, std::size_t size,
 }
 
 std::string convertByteArrayToHexStringBox(uint8_t const * bytes, std::size_t size, int line_width,
-                                           std::string const & prefix,
-                                           std::string const & separator)
+                                           std::string const & prefix, std::string const & separator, std::string const & new_line)
 {
     if (line_width < 1) {
+        line_width = DEFAULT_LINE_WIDTH;
+    }
+    if (line_width >= size) {
         return convertByteArrayToHexString(bytes, size, prefix, separator);
     }
 
-    std::vector<uint8_t> line_buffer;
-    std::size_t const ROW = size / line_width;
-
-    std::size_t i = 0;
     std::stringstream ss;
-    for (i = 0; i < ROW; ++i) {
-        line_buffer.assign(bytes + (i * line_width), bytes + ((i + 1) * line_width));
-        if (i != 0) {
-            ss << std::endl;
-        }
-        ss << convertByteVectorToHexString(line_buffer, prefix, separator);
-    }
+    ss << convertByteArrayToHexString(bytes, line_width, prefix, separator);
+    bytes += line_width;
+    size = size > line_width ? size - line_width : 0;
 
-    // Last line.
-    if ((ROW * line_width) < size) {
-        line_buffer.assign(bytes + (ROW * line_width), bytes + size);
-        ss << std::endl << convertByteVectorToHexString(line_buffer, prefix, separator);
+    std::size_t data_size;
+    while (size > 0) {
+        ss << new_line << convertByteArrayToHexString(bytes, (line_width < size ? line_width : size), prefix, separator);
+        bytes += line_width;
+        size = size > line_width ? size - line_width : 0;
     }
 
     return ss.str();

@@ -304,23 +304,49 @@ TEST(StringUtilsTest, ConvertAddressToHexString)
 
 TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
 {
-    int const WIDTH = 16;
-    int const HEIGHT = 5;
-    int const SIZE = WIDTH * HEIGHT;
+    std::vector<uint8_t> const DATA1 = {0x01,0x02};
+    std::vector<uint8_t> const DATA2 = {0x01,0x02,0x03,0x04};
+    std::vector<uint8_t> const DATA3 = {0x01,0x02,0x03,0x04,0x05,0x06};
+    std::vector<uint8_t> const DATA4 = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08};
+    std::vector<uint8_t> const DATA5 = {0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A};
 
-    int i = 0;
-    std::vector<uint8_t> buffer;
-    for (i = 0; i < SIZE - 1; ++i) {
-        buffer.push_back(i);
-    }
-    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
+    std::string const PREFIX = "0x";
+    std::string const SEPARATOR = " ";
+    std::string const NEW_LINE = "/";
 
-    buffer.push_back(i++);
-    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
+    std::string const RESULT1 = "0x01 0x02";
+    std::string const RESULT2 = "0x01 0x02 0x03 0x04";
+    std::string const RESULT3 = "0x01 0x02 0x03 0x04/0x05 0x06";
+    std::string const RESULT4 = "0x01 0x02 0x03 0x04/0x05 0x06 0x07 0x08";
+    std::string const RESULT5 = "0x01 0x02 0x03 0x04/0x05 0x06 0x07 0x08/0x09 0x0A";
 
-    buffer.push_back(i++);
-    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
+    int const WIDTH = 4;
+    ASSERT_EQ(RESULT1, convertByteVectorToHexStringBox(DATA1, WIDTH, PREFIX, SEPARATOR, NEW_LINE));
+    ASSERT_EQ(RESULT2, convertByteVectorToHexStringBox(DATA2, WIDTH, PREFIX, SEPARATOR, NEW_LINE));
+    ASSERT_EQ(RESULT3, convertByteVectorToHexStringBox(DATA3, WIDTH, PREFIX, SEPARATOR, NEW_LINE));
+    ASSERT_EQ(RESULT4, convertByteVectorToHexStringBox(DATA4, WIDTH, PREFIX, SEPARATOR, NEW_LINE));
+    ASSERT_EQ(RESULT5, convertByteVectorToHexStringBox(DATA5, WIDTH, PREFIX, SEPARATOR, NEW_LINE));
 }
+
+//TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
+//{
+//    int const WIDTH = 16;
+//    int const HEIGHT = 5;
+//    int const SIZE = WIDTH * HEIGHT;
+//
+//    int i = 0;
+//    std::vector<uint8_t> buffer;
+//    for (i = 0; i < SIZE - 1; ++i) {
+//        buffer.push_back(i);
+//    }
+//    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
+//
+//    buffer.push_back(i++);
+//    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
+//
+//    buffer.push_back(i++);
+//    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
+//}
 
 TEST(StringUtilsTest, ToString)
 {

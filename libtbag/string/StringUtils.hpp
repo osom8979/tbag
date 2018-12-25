@@ -81,6 +81,8 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
     return ss.str();
 }
 
+TBAG_API std::string getStdEndLine();
+
 /**
  * Separate tokens.
  *
@@ -107,6 +109,7 @@ TBAG_API std::string convertStringWithThreadId(std::thread::id const & id);
 TBAG_CONSTEXPR char const * const STRING_EMPTY = "";
 TBAG_CONSTEXPR char const * const STRING_SPACE = " ";
 TBAG_CONSTEXPR char const * const STRING_HEX_PREFIX = "0x";
+TBAG_CONSTEXPR int const DEFAULT_LINE_WIDTH = 2 * 8;
 
 /**
  * Byte array to HEX string.
@@ -117,9 +120,10 @@ TBAG_API std::string convertByteArrayToHexString(uint8_t const * bytes, std::siz
                                                  std::string const & prefix = STRING_HEX_PREFIX,
                                                  std::string const & separator = STRING_EMPTY);
 TBAG_API std::string convertByteArrayToHexStringBox(uint8_t const * bytes, std::size_t size,
-                                                    int line_width = (2 * 8),
+                                                    int line_width = DEFAULT_LINE_WIDTH,
                                                     std::string const & prefix = STRING_HEX_PREFIX,
-                                                    std::string const & separator = STRING_SPACE);
+                                                    std::string const & separator = STRING_SPACE,
+                                                    std::string const & new_line = NEW_LINE);
 
 template <typename T>
 std::string convertByteVectorToHexString(std::vector<T> const & bytes,
@@ -130,12 +134,13 @@ std::string convertByteVectorToHexString(std::vector<T> const & bytes,
 }
 
 template <typename T>
-std::string convertByteVectorToHexStringBox(std::vector<T> const & bytes, int line_width = (2 * 8),
+std::string convertByteVectorToHexStringBox(std::vector<T> const & bytes, int line_width = DEFAULT_LINE_WIDTH,
                                             std::string const & prefix = STRING_HEX_PREFIX,
-                                            std::string const & separator = STRING_SPACE)
+                                            std::string const & separator = STRING_SPACE,
+                                            std::string const & new_line = NEW_LINE)
 {
     return convertByteArrayToHexStringBox((uint8_t const *)bytes.data(),
-                                          bytes.size(), line_width, prefix, separator);
+                                          bytes.size(), line_width, prefix, separator, new_line);
 }
 
 TBAG_CONSTEXPR std::size_t const HEX_STRING_ADDRESS_BYTE_SIZE =
