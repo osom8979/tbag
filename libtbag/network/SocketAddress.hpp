@@ -52,16 +52,16 @@ private:
 
 public:
     SocketAddress();
-    SocketAddress(struct sockaddr     const * addr);
-    SocketAddress(struct sockaddr_in  const * addr);
-    SocketAddress(struct sockaddr_in6 const * addr);
+    explicit SocketAddress(struct sockaddr     const * addr);
+    explicit SocketAddress(struct sockaddr_in  const * addr);
+    explicit SocketAddress(struct sockaddr_in6 const * addr);
     SocketAddress(SocketAddress const & obj);
-    SocketAddress(SocketAddress && obj);
+    SocketAddress(SocketAddress && obj) TBAG_NOEXCEPT;
     virtual ~SocketAddress();
 
 public:
     SocketAddress & operator =(SocketAddress const & obj);
-    SocketAddress & operator =(SocketAddress && obj);
+    SocketAddress & operator =(SocketAddress && obj) TBAG_NOEXCEPT;
 
 public:
     Err init(struct sockaddr     const * addr);

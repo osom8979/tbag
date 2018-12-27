@@ -53,7 +53,7 @@ SocketAddress::SocketAddress(SocketAddress const & obj)
     (*this) = obj;
 }
 
-SocketAddress::SocketAddress(SocketAddress && obj)
+SocketAddress::SocketAddress(SocketAddress && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }
@@ -71,7 +71,7 @@ SocketAddress & SocketAddress::operator =(SocketAddress const & obj)
     return *this;
 }
 
-SocketAddress & SocketAddress::operator =(SocketAddress && obj)
+SocketAddress & SocketAddress::operator =(SocketAddress && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         std::swap(_addr, obj._addr);
@@ -160,7 +160,7 @@ Err SocketAddress::init(std::string const & host, int port)
 
 Err SocketAddress::init(Uri const & uri)
 {
-    if (uri.isHost() == false) {
+    if (!uri.isHost()) {
         tDLogE("SocketAddress::initUri() Unknown host from uri: {}.", uri.getString());
         return Err::E_ILLARGS;
     }
@@ -168,7 +168,7 @@ Err SocketAddress::init(Uri const & uri)
         return init(uri.getHost(), uri.getPortNumber());
     }
 
-    if (uri.isSchema() == false) {
+    if (!uri.isSchema()) {
         tDLogE("SocketAddress::initUri() Unknown schema from uri: {}.", uri.getString());
         return Err::E_ILLARGS;
     }
@@ -176,8 +176,8 @@ Err SocketAddress::init(Uri const & uri)
     std::string const SERVICE = uri.getSchema();
     std::string const HOST    = uri.getHost();
 
-    assert(SERVICE.empty() == false);
-    assert(HOST.empty() == false);
+    assert(!SERVICE.empty());
+    assert(!HOST.empty());
 
     return initName(HOST, SERVICE);
 }
