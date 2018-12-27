@@ -70,6 +70,22 @@
 # define TBAG_ALIGNMENT_DEFAULT_PAGE_SIZE        TBAG_ALIGNMENT_SIZE_4096BYTE
 #endif
 
+#if defined(TBAG_COMP_MSVC)
+#define TBAG_ALIGNED_STRUCT_BEGIN(alignment) \
+    __pragma(pack(1)); struct __declspec(align(alignment))
+  #define TBAG_ALIGNED_STRUCT_END(name, size) \
+    __pragma(pack()); static_assert(sizeof(name) == size, "compiler breaks packing rules")
+#elif defined(TBAG_COMP_GNUC) || defined(TBAG_COMP_CLANG)
+# define TBAG_ALIGNED_STRUCT_BEGIN(alignment) \
+    _Pragma("pack(1)") struct __attribute__((aligned(alignment)))
+# define TBAG_ALIGNED_STRUCT_END(name, size) \
+    _Pragma("pack()") static_assert(sizeof(name) == size, "compiler breaks packing rules")
+#else
+# warning Unknown compiler, please define structure alignment macros
+# define TBAG_ALIGNED_STRUCT_BEGIN(alignment) struct
+# define TBAG_ALIGNED_STRUCT_END(name, size)
+#endif
+
 #ifndef TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED
 # if defined(TBAG_COMP_GNUC_CXX) /*&& (TBAG_COMP_GNUC_VERSION >= 40600)*/
 #  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED                 \
