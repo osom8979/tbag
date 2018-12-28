@@ -39,7 +39,7 @@ TEST(MqNodeTest, ClientRel_ServerRel)
     MqUniqueNode server;
     MqUniqueNode client;
 
-    libtbag::log::SeverityGuard guard;
+    //libtbag::log::SeverityGuard guard;
     ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
     ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
 

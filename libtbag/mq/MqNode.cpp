@@ -8,6 +8,7 @@
 #include <libtbag/mq/MqNode.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/mq/node/MqLocalQueue.hpp>
@@ -110,20 +111,12 @@ public:
         });
         assert(PUSH_RESULT);
 
-        // [CONNECT(CLIENT) ONLY]
-        // Wait until connection is completed.
-        if (MODE == MqMode::MM_CONNECT && params.wait_on_connection_timeout_millisec > 0) {
-            auto const BEGIN_TIME = std::chrono::system_clock::now();
-            auto const TIMEOUT = std::chrono::milliseconds(params.wait_on_connection_timeout_millisec);
-
-            tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting connection ...");
-            while (_mq->state() == MqMachineState::MMS_INITIALIZED) {
-                if (std::chrono::system_clock::now() - BEGIN_TIME >= TIMEOUT) {
-                    tDLogIfW(params.verbose, "MqNode::Impl::Impl() Connection timeout.");
-                    break;
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
+        if (params.wait_on_activation_timeout_millisec > 0) {
+            auto const TIMEOUT = params.wait_on_activation_timeout_millisec * MILLISECONDS_TO_NANOSECONDS;
+            tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting connection {}ms ...",
+                     params.wait_on_activation_timeout_millisec);
+            auto const WAIT_CODE = _mq->waitEnable(TIMEOUT);
+            tDLogIfW(WAIT_CODE == Err::E_TIMEOUT, "MqNode::Impl::Impl() Connection timeout.");
         }
     }
 
@@ -230,7 +223,7 @@ public:
 
     Err recvWait(MqMsg & msg, uint64_t timeout_nano)
     {
-        return _mq->recvWait(msg, timeout_nano);
+        return _mq->waitRecv(msg, timeout_nano);
     }
 };
 

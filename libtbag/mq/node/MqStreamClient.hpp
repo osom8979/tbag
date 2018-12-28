@@ -91,6 +91,22 @@ public:
     using MsgPacket     = libtbag::proto::MsgPacket;
 
 private:
+    struct Initializer : public Async
+    {
+        MqStreamClient * parent = nullptr;
+
+        Initializer(Loop & loop, MqStreamClient * p)
+                : Async(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~Initializer()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onInitializerAsync(this); }
+        virtual void onClose() override
+        { parent->onInitializerClose(this); }
+    };
+
     struct Writer : public Async
     {
         MqStreamClient * parent = nullptr;
@@ -203,43 +219,69 @@ public:
     // @formatter:on
 
 private:
-    Err shutdown();
-    void close();
+    void onInitializerAsync(Initializer * init);
+    void onInitializerClose(Initializer * init);
 
-private:
-    void shutdownAndClose();
-    void tearDown(bool on_message);
-
-private:
     virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
-private:
-    AfterAction onMsgEvent(AsyncMsg * msg);
-    void onCloseEvent();
-
-private:
-    void afterProcessMessage(AsyncMsg * msg);
-
-private:
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
 
-private:
     void onCloseTimer(CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
 
-public:
     void onConnectTimer(ConnectTimer * timer);
     void onConnectTimerClose(ConnectTimer * timer);
 
-private:
-    void onConnect (ConnectRequest & request, Err code);
+    void onConnect(ConnectRequest & request, Err code);
     void onShutdown(ShutdownRequest & request, Err code);
-    void onWrite   (WriteRequest & request, Err code);
-    binf onAlloc   (std::size_t suggested_size);
-    void onRead    (Err code, char const * buffer, std::size_t size);
-    void onClose   ();
+    void onWrite(WriteRequest & request, Err code);
+    binf onAlloc(std::size_t suggested_size);
+    void onRead(Err code, char const * buffer, std::size_t size);
+    void onClose();
+
+private:
+    // ---------------------
+    // Alias of event steps.
+    // ---------------------
+
+    /**
+     * Initialize process.
+     */
+    void onInitStep1_ASYNC(Loop & loop);
+    void onInitStep2_INIT(Loop & loop);
+    void onInitStep3_TIMEOUT();
+    void onInitStep3_CONNECT(Err code);
+    void onInit_SUCCESS();
+    void onInit_FAILURE();
+
+    /**
+     * Send message process.
+     */
+    void onSendStep1_EVENT(AsyncMsg * msg);
+    void onSendStep2_ASYNC();
+    void onSendStep3_ASYNC_ORIGINAL(AsyncMsg * msg);
+    void onSendStep3_ASYNC_MQMSG(AsyncMsg * msg);
+    void onSendStep4_WRITE_DONE(Err code);
+    void onSendStep5_NEXT_MESSAGE(AsyncMsg * msg);
+
+    /**
+     * Teardown process.
+     *
+     * @param[in] from_message_event
+     *      Called from a message event.
+     */
+    void onTearDownStep1(bool from_message_event);
+    void onTearDownStep2_SHUTDOWN();
+    void onTearDownStep3_TIMEOUT();
+
+    /**
+     * Close process.
+     */
+    void onCloseStep1_EVENT_QUEUE_CLOSED();
+    void onCloseStep2_WRITER_CLOSED();
+    void onCloseStep3_CLIENT_CLOSED();
 };
 
 } // namespace node

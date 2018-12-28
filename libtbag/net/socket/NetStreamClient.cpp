@@ -91,20 +91,12 @@ public:
         });
         assert(PUSH_RESULT);
 
-        // [CONNECT(CLIENT) ONLY]
-        // Wait until connection is completed.
-        if (params.wait_on_connection_timeout_millisec > 0) {
-            auto const BEGIN_TIME = std::chrono::system_clock::now();
-            auto const TIMEOUT = std::chrono::milliseconds(params.wait_on_connection_timeout_millisec);
-
-            tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::Impl() Waiting connection ...");
-            while (_mq->state() == MqMachineState::MMS_INITIALIZED) {
-                if (std::chrono::system_clock::now() - BEGIN_TIME >= TIMEOUT) {
-                    tDLogIfW(params.verbose, "NetStreamClient::Impl::Impl() Connection timeout.");
-                    break;
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
-            }
+        if (params.wait_on_activation_timeout_millisec > 0) {
+            auto const TIMEOUT = params.wait_on_activation_timeout_millisec * MILLISECONDS_TO_NANOSECONDS;
+            tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::Impl() Waiting connection {}ms ...",
+                     params.wait_on_activation_timeout_millisec);
+            auto const WAIT_CODE = _mq->waitEnable(TIMEOUT);
+            tDLogIfW(WAIT_CODE == Err::E_TIMEOUT, "NetStreamClient::Impl::Impl() Connection timeout.");
         }
     }
 

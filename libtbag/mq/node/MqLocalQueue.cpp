@@ -25,7 +25,7 @@ using AfterAction = MqLocalQueue::AfterAction;
 MqLocalQueue::MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams const & params)
         : MqBase(loop, internal, params, MqMachineState::MMS_ACTIVE)
 {
-    // EMPTY.
+    MqBase::enableWait();
 }
 
 MqLocalQueue::~MqLocalQueue()

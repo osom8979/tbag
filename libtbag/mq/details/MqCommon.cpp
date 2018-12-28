@@ -248,14 +248,14 @@ MqParams convertUriToParams(std::string const & uri_string, MqParams const & def
         params.continuous_read_error_count = toValue<unsigned>(itr->second);
     }
 
-    itr = queries.find(CONNECT_TIMEOUT);
+    itr = queries.find(CONNECT_TIMEOUT_NAME);
     if (itr != queries.end()) {
         params.connect_timeout_millisec = toValue<unsigned>(itr->second);
     }
 
-    itr = queries.find(WAIT_CONNECTION_NAME);
+    itr = queries.find(WAIT_ACTIVATION_NAME);
     if (itr != queries.end()) {
-        params.wait_on_connection_timeout_millisec = toValue<unsigned>(itr->second);
+        params.wait_on_activation_timeout_millisec = toValue<unsigned>(itr->second);
     }
 
     itr = queries.find(SHUTDOWN_WAIT_NAME);

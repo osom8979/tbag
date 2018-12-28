@@ -132,14 +132,19 @@ inline char const * const getRequestStateName(MqRequestState state) TBAG_NOEXCEP
 enum class MqMachineState
 {
     MMS_NONE,
+    MMS_INITIALIZING,
 
     /**
-     * Construct done.
+     * Initialize done.
      *
      * @remarks
      *  The server skips this state and immediately goes to the ACTIVE state.
      */
     MMS_INITIALIZED,
+
+    MMS_HELLO_1,
+    MMS_HELLO_2,
+    MMS_HELLO_DONE,
 
     /**
      * Active machine state.
@@ -150,16 +155,20 @@ enum class MqMachineState
      */
     MMS_ACTIVE,
 
-    MMS_CLOSING,        ///< Obtain the close request message.
-    MMS_DELAY_CLOSING,  ///< Delay the close request.
-    MMS_CLOSED,         ///< Close is done.
+    MMS_CLOSING, ///< Obtain the close request message.
+    MMS_DELAY_CLOSING, // TODO: REMOVE
+    MMS_CLOSED,  ///< Close is done.
 };
 
 inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEPT
 {
     switch (state) {
     case MqMachineState::MMS_NONE:          return "NONE";
+    case MqMachineState::MMS_INITIALIZING:  return "INITIALIZING";
     case MqMachineState::MMS_INITIALIZED:   return "INITIALIZED";
+    case MqMachineState::MMS_HELLO_1:       return "HELLO_1";
+    case MqMachineState::MMS_HELLO_2:       return "HELLO_2";
+    case MqMachineState::MMS_HELLO_DONE:    return "HELLO_DONE";
     case MqMachineState::MMS_ACTIVE:        return "ACTIVE";
     case MqMachineState::MMS_CLOSING:       return "CLOSING";
     case MqMachineState::MMS_DELAY_CLOSING: return "DELAY_CLOSING";
@@ -370,6 +379,9 @@ using MqOnClose = void(*)(void * parent);
  * @remarks
  *  - client: node is the client stream.
  *  - server: node is the node stream.
+ *
+ * @return
+ *  The number of successful packet transmissions should be returned.
  */
 using MqOnDefaultWrite = std::size_t(*)(void * node, char const * buffer, std::size_t size, void * parent);
 
@@ -427,7 +439,7 @@ struct MqInternal
     MqOnClose close_cb = nullptr;
 
     /**
-     * Use this option if you want to keep the socket intact.
+     * Use this option to write the original of the packet.
      *
      * @warning
      *  Setting this option will no longer use the default behavior of MessageQueue.
@@ -435,7 +447,7 @@ struct MqInternal
     MqOnDefaultWrite default_write = nullptr;
 
     /**
-     * Use this option if you want to keep the socket intact.
+     * Use this option to read the original of the packet.
      *
      * @warning
      *  Setting this option will no longer use the default behavior of MessageQueue.
@@ -575,12 +587,9 @@ struct MqParams
     std::size_t connect_timeout_millisec = 4 * 1000;
 
     /**
-     * Wait until connection is completed.
-     *
-     * @remarks
-     *  The server is not used.
+     * Wait until activation is completed.
      */
-    std::size_t wait_on_connection_timeout_millisec = 1000;
+    std::size_t wait_on_activation_timeout_millisec = 1000;
 
     /**
      * The wait time to not miss the send() requested by another thread.
@@ -618,8 +627,8 @@ TBAG_CONSTEXPR static char const * const PACKER_SIZE_NAME     = "packer_size";
 TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME    = "wait_closing";
 TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
 TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
-TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT      = "connect_timeout";
-TBAG_CONSTEXPR static char const * const WAIT_CONNECTION_NAME = "wait_connection";
+TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT_NAME = "connect_timeout";
+TBAG_CONSTEXPR static char const * const WAIT_ACTIVATION_NAME = "wait_activation";
 TBAG_CONSTEXPR static char const * const SHUTDOWN_WAIT_NAME   = "shutdown_wait";
 TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
 
@@ -631,7 +640,11 @@ struct MqInterface
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;
 
-    virtual Err recvWait(MqMsg & msg, uint64_t timeout_nano) = 0;
+    /**
+     * Wait for the recv-queue to become active.
+     */
+    virtual Err waitEnable(uint64_t timeout_nano) = 0;
+    virtual Err waitRecv(MqMsg & msg, uint64_t timeout_nano) = 0;
 };
 
 // -----------------------

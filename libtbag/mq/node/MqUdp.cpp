@@ -67,6 +67,7 @@ MqUdp::MqUdp(Loop & loop, MqInternal const & internal, MqParams const & params)
     assert(_writer->isInit());
 
     _state = MqMachineState::MMS_INITIALIZED;
+    //MqBase::enableWait();
 }
 
 MqUdp::~MqUdp()
@@ -447,7 +448,8 @@ void MqUdp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr con
 void MqUdp::onClose()
 {
     tDLogI("MqUdp::onClose() Close this client!");
-    updateAndBroadcast(MqMachineState::MMS_CLOSED);
+    _state = MqMachineState::MMS_CLOSED;
+    MqBase::disableWait();
 }
 
 } // namespace node

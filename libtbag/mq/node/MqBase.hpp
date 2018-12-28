@@ -72,6 +72,7 @@ protected:
     AtomicInt   _sending;
 
 protected:
+    bool        _wait_enable;
     UvLock      _wait_lock;
     UvCondition _wait_cond;
 
@@ -79,8 +80,9 @@ protected:
     MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state);
     virtual ~MqBase();
 
-public:
-    void updateAndBroadcast(MqMachineState state);
+protected:
+    void enableWait(bool wait_enable = true);
+    void disableWait();
 
 public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override;
@@ -91,7 +93,8 @@ public:
     virtual Err recv(MqMsg & msg) override;
 
 public:
-    virtual Err recvWait(MqMsg & msg, uint64_t timeout_nano) override;
+    virtual Err waitEnable(uint64_t timeout_nano) override;
+    virtual Err waitRecv(MqMsg & msg, uint64_t timeout_nano) override;
 };
 
 } // namespace node

@@ -112,6 +112,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParam
     assert(_writer->isInit());
 
     _state = MqMachineState::MMS_ACTIVE;
+    MqBase::enableWait();
 }
 
 MqStreamServer::~MqStreamServer()
@@ -786,7 +787,8 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
 void MqStreamServer::onServerClose(Stream * server)
 {
     tDLogI("MqStreamServer::onServerClose() Close this server!");
-    updateAndBroadcast(MqMachineState::MMS_CLOSED);
+    _state = MqMachineState::MMS_CLOSED;
+    MqBase::disableWait();
 
     if (INTERNAL.close_cb != nullptr) {
         assert(INTERNAL.parent != nullptr);

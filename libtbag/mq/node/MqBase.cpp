@@ -18,23 +18,28 @@ namespace node {
 MqBase::MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
           INTERNAL(internal), PARAMS(params), _receives(params.recv_queue_size, params.recv_msg_size),
-          _state(state), _sending(0)
+          _state(state), _sending(0), _wait_enable(false)
 {
     // EMPTY.
 }
 
 MqBase::~MqBase()
 {
+    disableWait();
     assert(_state == MqMachineState::MMS_CLOSED);
-    updateAndBroadcast(MqMachineState::MMS_CLOSED);
 }
 
-void MqBase::updateAndBroadcast(MqMachineState state)
+void MqBase::enableWait(bool enable)
 {
     _wait_lock.lock();
-    _state = state;
+    _wait_enable = enable;
     _wait_cond.broadcast();
     _wait_lock.unlock();
+}
+
+void MqBase::disableWait()
+{
+    enableWait(false);
 }
 
 MqBase::MqMachineState MqBase::state() const TBAG_NOEXCEPT
@@ -73,7 +78,36 @@ Err MqBase::recv(MqMsg & msg)
     return _receives.dequeue(msg);
 }
 
-Err MqBase::recvWait(MqMsg & msg, uint64_t timeout_nano)
+Err MqBase::waitEnable(uint64_t timeout_nano)
+{
+    using namespace std::chrono;
+    auto const BEGIN = system_clock::now();
+    nanoseconds const TIMEOUT(timeout_nano);
+
+    Err code;
+
+    _wait_lock.lock();
+    while (true) {
+        if (_wait_enable) {
+            code = Err::E_SUCCESS;
+            break;
+        }
+
+        if (timeout_nano == 0) {
+            _wait_cond.wait(_wait_lock);
+        } else {
+            _wait_cond.wait(_wait_lock, (TIMEOUT - (system_clock::now() - BEGIN)).count());
+            if ((system_clock::now() - BEGIN) >= TIMEOUT) {
+                code = Err::E_TIMEOUT;
+                break;
+            }
+        }
+    }
+    _wait_lock.unlock();
+    return code;
+}
+
+Err MqBase::waitRecv(MqMsg & msg, uint64_t timeout_nano)
 {
     using namespace std::chrono;
     auto const BEGIN = system_clock::now();
@@ -87,7 +121,7 @@ Err MqBase::recvWait(MqMsg & msg, uint64_t timeout_nano)
         if (isSuccess(code)) {
             break;
         }
-        if (isCloseState(_state)) {
+        if (!_wait_enable) {
             code = Err::E_ECANCELED;
             break;
         }

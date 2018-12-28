@@ -20,7 +20,7 @@
 
 #ifndef TBAG_INACCESSIBLE_BLOCK_ASSERT
 #define TBAG_INACCESSIBLE_BLOCK_ASSERT() \
-    assert(false && "Inaccessible block")
+    assert(false && "Inaccessible block") // NOLINT
 #endif
 
 // -------------------
