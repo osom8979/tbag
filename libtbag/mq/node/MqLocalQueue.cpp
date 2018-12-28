@@ -42,6 +42,7 @@ void MqLocalQueue::onCloseMsgDone()
 
     // Last closing point.
     _state = MqMachineState::MMS_CLOSED;
+    MqBase::disableWait();
 }
 
 AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
@@ -50,9 +51,8 @@ AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
 
     using namespace libtbag::mq::details;
     if (!isActiveState(_state)) {
-        tDLogIfW(PARAMS.verbose,
-                 "MqLocalQueue::onMsg() Illegal client state, "
-                 "skip current message ({})", getEventName(msg->event));
+        tDLogIfW(PARAMS.verbose, "MqLocalQueue::onMsg() Illegal client state, skip current message ({})",
+                 getEventName(msg->event));
         return AfterAction::AA_OK;
     }
 
@@ -61,23 +61,20 @@ AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
         onCloseEvent();
         return AfterAction::AA_OK;
     } else {
-        return onMsgEvent(msg);
+        onMsgEvent(msg);
+        return AfterAction::AA_OK;
     }
 }
 
-AfterAction MqLocalQueue::onMsgEvent(AsyncMsg * msg)
+void MqLocalQueue::onMsgEvent(AsyncMsg * msg)
 {
     assert(msg != nullptr);
-
-    using namespace libtbag::mq::details;
-    assert(isActiveState(_state) || isClosingState(_state));
-
     assert(INTERNAL.recv_cb != nullptr);
     assert(INTERNAL.parent != nullptr);
 
     if (INTERNAL.recv_cb(*msg, INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
         tDLogIfD(PARAMS.verbose, "MqLocalQueue::onMsgEvent() Consumed this received message.");
-        return AfterAction::AA_OK;
+        return;
     }
 
     Err enqueue_code;
@@ -91,15 +88,11 @@ AfterAction MqLocalQueue::onMsgEvent(AsyncMsg * msg)
     }
 
     if (isSuccess(enqueue_code)) {
-        tDLogIfD(PARAMS.verbose,
-                 "MqLocalQueue::onMsgEvent() Enqueue success. "
-                 "Perhaps the remaining queue size is {}.",
-                 _receives.getInaccurateSizeOfActive());
+        tDLogIfD(PARAMS.verbose, "MqLocalQueue::onMsgEvent() Enqueue success. "
+                 "Perhaps the remaining queue size is {}.", _receives.getInaccurateSizeOfActive());
     } else {
         tDLogE("MqLocalQueue::onMsgEvent() Enqueue error: {}", enqueue_code);
     }
-
-    return AfterAction::AA_OK;
 }
 
 void MqLocalQueue::onCloseEvent()
@@ -123,8 +116,7 @@ void MqLocalQueue::onCloseEvent()
     // [IMPORTANT]
     // From this moment on, there is no send-queue producer.
     assert(_sending == 0);
-
-    closeAsyncMsgs();
+    MqEventQueue::closeAsyncMsgs();
 }
 
 } // namespace node

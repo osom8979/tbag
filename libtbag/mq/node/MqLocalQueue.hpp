@@ -70,7 +70,7 @@ private:
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
 private:
-    AfterAction onMsgEvent(AsyncMsg * msg);
+    void onMsgEvent(AsyncMsg * msg);
     void onCloseEvent();
 };
 
