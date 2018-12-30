@@ -173,7 +173,7 @@ private:
         }
     }
 
-    static std::size_t __on_default_write_cb__(void * node, char const * buffer, std::size_t size, void * parent)
+    static std::size_t __on_default_write_cb__(void * node, MqEvent event, char const * buffer, std::size_t size, void * parent)
     {
         assert(parent != nullptr);
         auto * impl = (NetStreamServer::Impl*)parent;

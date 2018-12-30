@@ -383,7 +383,7 @@ using MqOnClose = void(*)(void * parent);
  * @return
  *  The number of successful packet transmissions should be returned.
  */
-using MqOnDefaultWrite = std::size_t(*)(void * node, char const * buffer, std::size_t size, void * parent);
+using MqOnDefaultWrite = std::size_t(*)(void * node, MqEvent event, char const * buffer, std::size_t size, void * parent);
 
 /**
  * It operates in the default read mode.
@@ -409,11 +409,8 @@ struct MqInternal
 {
     /**
      * Connect event callback.
-     *
-     * @warning
-     *  Used only on the client.
      */
-    MqOnConnect connect_cb = nullptr;
+    MqOnConnect connect_cb = nullptr; // TODO: Rename active_cb
 
     /**
      * Clients connected to the server are filtered out.

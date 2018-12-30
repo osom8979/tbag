@@ -248,7 +248,7 @@ void MqUdp::onWriterAsync(Writer * writer)
     // Give users the opportunity to use the original data.
     if (INTERNAL.default_write != nullptr) {
         assert(INTERNAL.parent != nullptr);
-        if (INTERNAL.default_write(nullptr, msg_pointer->data(), msg_pointer->size(), INTERNAL.parent) >= 1) {
+        if (INTERNAL.default_write(nullptr, msg_pointer->event, msg_pointer->data(), msg_pointer->size(), INTERNAL.parent) >= 1) {
             tDLogIfD(PARAMS.verbose,
                      "MqUdp::onWriterAsync() Default write process... "
                      "Next, onWrite() event method.");

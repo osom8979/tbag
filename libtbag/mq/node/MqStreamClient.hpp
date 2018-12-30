@@ -254,7 +254,7 @@ private:
     void onInitStep3_TIMEOUT();
     void onInitStep3_CONNECT(Err code);
     void onInit_SUCCESS();
-    void onInit_FAILURE();
+    void onInit_FAILURE(Err code);
 
     /**
      * Send message process.
@@ -279,9 +279,10 @@ private:
     /**
      * Close process.
      */
-    void onCloseStep1_EVENT_QUEUE_CLOSED();
-    void onCloseStep2_WRITER_CLOSED();
-    void onCloseStep3_CLIENT_CLOSED();
+    void onCloseStep1();
+    void onCloseStep2_EVENT_QUEUE_CLOSED();
+    void onCloseStep3_WRITER_CLOSED();
+    void onCloseStep4_CLIENT_CLOSED();
 };
 
 } // namespace node

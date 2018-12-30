@@ -91,6 +91,22 @@ public:
     using MsgPacket     = libtbag::proto::MsgPacket;
 
 private:
+    struct Initializer : public Async
+    {
+        MqStreamServer * parent = nullptr;
+
+        Initializer(Loop & loop, MqStreamServer * p)
+                : Async(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~Initializer()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onInitializerAsync(this); }
+        virtual void onClose() override
+        { parent->onInitializerClose(this); }
+    };
+
     struct Writer : public Async
     {
         MqStreamServer * parent = nullptr;
@@ -210,27 +226,11 @@ public:
     // @formatter:on
 
 private:
-    Err shutdown(Stream * stream);
-    void close(Stream * stream);
+    void onInitializerAsync(Initializer * init);
+    void onInitializerClose(Initializer * init);
 
-private:
-    std::size_t shutdownNodes();
-    std::size_t closeNodes();
-
-private:
-    void shutdownAndClose();
-    void tearDown(bool on_message);
-
-private:
     virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
-
-private:
-    AfterAction onMsgEvent(AsyncMsg * msg);
-    void onCloseEvent();
-
-private:
-    void afterProcessMessage(AsyncMsg * msg);
 
 private:
     void onWriterAsync(Writer * writer);
@@ -250,6 +250,47 @@ private:
 private:
     void onServerConnection(Stream * server, Err code);
     void onServerClose     (Stream * server);
+
+private:
+    // ---------------------
+    // Alias of event steps.
+    // ---------------------
+
+    /**
+     * Initialize process.
+     */
+    void onInitStep1_ASYNC(Loop & loop);
+    void onInitStep2_INIT(Loop & loop);
+    void onInit_SUCCESS();
+    void onInit_FAILURE(Err code);
+
+    /**
+     * Send message process.
+     */
+    void onSendStep1_EVENT(AsyncMsg * msg);
+    void onSendStep2_ASYNC();
+    void onSendStep3_ASYNC_ORIGINAL(AsyncMsg * msg);
+    void onSendStep3_ASYNC_MQMSG(AsyncMsg * msg);
+    void onSendStep4_WRITE_DONE(Err code);
+    void onSendStep5_NEXT_MESSAGE(AsyncMsg * msg);
+
+    /**
+     * Teardown process.
+     *
+     * @param[in] from_message_event
+     *      Called from a message event.
+     */
+    void onTearDownStep1(bool from_message_event);
+    void onTearDownStep2_SHUTDOWN();
+    void onTearDownStep3_TIMEOUT();
+
+    /**
+     * Close process.
+     */
+    void onCloseStep1();
+    void onCloseStep2_EVENT_QUEUE_CLOSED();
+    void onCloseStep3_WRITER_CLOSED();
+    void onCloseStep4_CLIENT_CLOSED();
 };
 
 } // namespace node
