@@ -60,9 +60,13 @@ public:
     using UvLock      = libtbag::lock::UvLock;
     using UvCondition = libtbag::lock::UvCondition;
 
-protected:
+public:
     MqInternal const INTERNAL;
     MqParams   const PARAMS;
+
+    bool const IS_SOCKET_SERVER;
+    bool const IS_SOCKET_CLIENT;
+    bool const IS_MQ_NODE;
 
 protected:
     MqQueue _receives;
@@ -72,15 +76,16 @@ protected:
     AtomicInt   _sending;
 
 protected:
-    bool        _wait_enable;
-    UvLock      _wait_lock;
-    UvCondition _wait_cond;
+    UvLock mutable _wait_lock;
+    UvCondition    _wait_cond;
+    bool           _wait_enable;
 
 protected:
     MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state);
     virtual ~MqBase();
 
 protected:
+    bool isWaitEnable() const;
     void enableWait(bool wait_enable = true);
     void disableWait();
 

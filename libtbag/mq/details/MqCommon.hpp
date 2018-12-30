@@ -397,7 +397,7 @@ struct MqInternal
     /**
      * Connect event callback.
      */
-    MqOnConnect connect_cb = nullptr; // TODO: Rename active_cb
+    MqOnConnect connect_cb = nullptr;
 
     /**
      * Clients connected to the server are filtered out.
@@ -451,6 +451,39 @@ struct MqInternal
      */
     void * parent = nullptr;
 };
+
+inline bool isSocketClientMode(MqInternal const & internal) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    return internal.connect_cb    &&
+           internal.close_cb      &&
+           internal.default_write &&
+           internal.default_read  &&
+           internal.parent;
+    // @formatter:on
+}
+
+inline bool isSocketServerMode(MqInternal const & internal) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    return internal.accept_cb     &&
+           internal.close_cb      &&
+           internal.default_write &&
+           internal.default_read  &&
+           internal.close_node    &&
+           internal.parent;
+    // @formatter:on
+}
+
+inline bool isMqNodeMode(MqInternal const & internal) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    return internal.accept_cb &&
+           internal.write_cb  &&
+           internal.recv_cb   &&
+           internal.parent;
+    // @formatter:on
+}
 
 /**
  * User customizable option packs.

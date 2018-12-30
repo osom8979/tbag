@@ -514,11 +514,6 @@ void MqStreamServer::onInit_SUCCESS()
     tDLogI("MqStreamServer::onInit_SUCCESS() Active state!");
     _state = MqMachineState::MMS_ACTIVE;
     MqBase::enableWait();
-
-    if (INTERNAL.connect_cb != nullptr) {
-        assert(INTERNAL.parent);
-        INTERNAL.connect_cb(INTERNAL.parent);
-    }
 }
 
 void MqStreamServer::onInit_FAILURE(Err code)

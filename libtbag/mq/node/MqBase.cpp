@@ -17,7 +17,11 @@ namespace node {
 
 MqBase::MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state)
         : MqEventQueue(loop, params.send_queue_size, params.send_msg_size),
-          INTERNAL(internal), PARAMS(params), _receives(params.recv_queue_size, params.recv_msg_size),
+          INTERNAL(internal), PARAMS(params),
+          IS_SOCKET_SERVER(libtbag::mq::details::isSocketServerMode(internal)),
+          IS_SOCKET_CLIENT(libtbag::mq::details::isSocketClientMode(internal)),
+          IS_MQ_NODE(libtbag::mq::details::isMqNodeMode(internal)),
+          _receives(params.recv_queue_size, params.recv_msg_size),
           _state(state), _sending(0), _wait_enable(false)
 {
     // EMPTY.
@@ -27,6 +31,15 @@ MqBase::~MqBase()
 {
     disableWait();
     assert(_state == MqMachineState::MMS_CLOSED);
+}
+
+bool MqBase::isWaitEnable() const
+{
+    bool result;
+    _wait_lock.lock();
+    result = _wait_enable;
+    _wait_lock.unlock();
+    return result;
 }
 
 void MqBase::enableWait(bool enable)
