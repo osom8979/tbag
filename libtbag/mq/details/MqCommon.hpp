@@ -45,16 +45,22 @@ namespace details {
  */
 using MqEvent = int32_t;
 
-TBAG_CONSTEXPR MqEvent const ME_CLOSE = -1;
 TBAG_CONSTEXPR MqEvent const ME_MSG   =  0;
+TBAG_CONSTEXPR MqEvent const ME_CLOSE = -1;
+TBAG_CONSTEXPR MqEvent const ME_HANDSHAKE_HELLO_1 = -1000;
+TBAG_CONSTEXPR MqEvent const ME_HANDSHAKE_HELLO_2 = -1001;
+TBAG_CONSTEXPR MqEvent const ME_HANDSHAKE_DONE    = -1002;
 
 inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
 {
     switch (event) {
-    case ME_CLOSE:
-        return "CLOSE";
-    case ME_MSG:
-        return "MSG";
+    // @formatter:off
+    case ME_MSG:                return "MSG";
+    case ME_CLOSE:              return "CLOSE";
+    case ME_HANDSHAKE_HELLO_1:  return "HANDSHAKE_HELLO_1";
+    case ME_HANDSHAKE_HELLO_2:  return "HANDSHAKE_HELLO_1";
+    case ME_HANDSHAKE_DONE:     return "HANDSHAKE_DONE";
+    // @formatter:on
     default:
         if (event > ME_MSG) {
             return "USER";
@@ -142,9 +148,9 @@ enum class MqMachineState
      */
     MMS_INITIALIZED,
 
-    MMS_HELLO_1,
-    MMS_HELLO_2,
-    MMS_HELLO_DONE,
+    MMS_HELLO_1,    ///< Client -> Server
+    MMS_HELLO_2,    ///< Server -> Client [CLIENT DONE]
+    MMS_HELLO_DONE, ///< Client -> Server [SERVER DONE]
 
     /**
      * Active machine state.
