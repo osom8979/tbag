@@ -36,7 +36,7 @@ MqLocalQueue::~MqLocalQueue()
 void MqLocalQueue::onCloseMsgDone()
 {
     using namespace libtbag::mq::details;
-    assert(isClosingState(_state));
+    assert(_state == MqMachineState::MMS_CLOSING);
 
     tDLogI("MqLocalQueue::onClose() Close this client!");
 
@@ -100,8 +100,7 @@ void MqLocalQueue::onCloseEvent()
     tDLogI("MqLocalQueue::onCloseEvent() Close message confirmed.");
 
     using namespace libtbag::mq::details;
-    if (isInactiveState(_state)) {
-        assert(isCloseState(_state));
+    if (_state != MqMachineState::MMS_ACTIVE) {
         tDLogIfW(PARAMS.verbose, "MqLocalQueue::onCloseEvent() It is already closing.");
         return;
     }

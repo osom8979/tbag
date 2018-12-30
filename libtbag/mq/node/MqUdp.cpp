@@ -102,8 +102,7 @@ void MqUdp::shutdownAndClose()
 void MqUdp::tearDown(bool on_message)
 {
     using namespace libtbag::mq::details;
-    if (isInactiveState(_state)) {
-        assert(isCloseState(_state));
+    if (_state != MqMachineState::MMS_ACTIVE) {
         tDLogIfD(PARAMS.verbose, "MqUdp::tearDown() It is already closing.");
         return;
     }
@@ -130,7 +129,6 @@ void MqUdp::tearDown(bool on_message)
     if (active_send_size > 0 || _writer->state != MqRequestState::MRS_WAITING) {
         // Clear any remaining transmission queues and continue with system shutdown.
         tDLogI("MqUdp::tearDown() Delay the shutdown request ...");
-        _state = MqMachineState::MMS_DELAY_CLOSING;
         return;
     }
 
@@ -220,7 +218,7 @@ void MqUdp::afterProcessMessage(AsyncMsg * msg)
     _writer->state = MqRequestState::MRS_WAITING;
 
     // If the shutdown is delayed, proceed with it.
-    if (_state == MqMachineState::MMS_DELAY_CLOSING) {
+    if (_state == MqMachineState::MMS_CLOSING) {
         tDLogIfN(PARAMS.verbose, "MqUdp::afterProcessMessage() Delayed shutdown progresses.");
         shutdownAndClose();
     } else {

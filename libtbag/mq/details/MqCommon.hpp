@@ -156,7 +156,6 @@ enum class MqMachineState
     MMS_ACTIVE,
 
     MMS_CLOSING, ///< Obtain the close request message.
-    MMS_DELAY_CLOSING, // TODO: REMOVE
     MMS_CLOSED,  ///< Close is done.
 };
 
@@ -171,7 +170,6 @@ inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEP
     case MqMachineState::MMS_HELLO_DONE:    return "HELLO_DONE";
     case MqMachineState::MMS_ACTIVE:        return "ACTIVE";
     case MqMachineState::MMS_CLOSING:       return "CLOSING";
-    case MqMachineState::MMS_DELAY_CLOSING: return "DELAY_CLOSING";
     case MqMachineState::MMS_CLOSED:        return "CLOSED";
     default:                                return "UNKNOWN";
     }
@@ -182,20 +180,9 @@ inline bool isActiveState(MqMachineState state) TBAG_NOEXCEPT
     return (state == MqMachineState::MMS_ACTIVE);
 }
 
-inline bool isInactiveState(MqMachineState state) TBAG_NOEXCEPT
-{
-    return !isActiveState(state);
-}
-
 inline bool isClosingState(MqMachineState state) TBAG_NOEXCEPT
 {
-    return (state == MqMachineState::MMS_CLOSING ||
-            state == MqMachineState::MMS_DELAY_CLOSING);
-}
-
-inline bool isCloseState(MqMachineState state) TBAG_NOEXCEPT
-{
-    return (isClosingState(state) || state == MqMachineState::MMS_CLOSED);
+    return state == MqMachineState::MMS_CLOSING;
 }
 
 /**

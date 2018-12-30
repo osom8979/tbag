@@ -262,29 +262,29 @@ public:
             // EMPTY.
         };
 
-        env_layout   env;
-        def_layout   config;
-        mod_layout   module;
-        txt_layout   text;
-        def_layout   image;
-        def_layout   drawable;
-        def_layout   animation;
-        def_layout   sprite;
-        def_layout   lmdb;
-        sql_layout   sqlite;
-        tmp_layout   temp;
-        key_layout   keystore;
-        lua_layout   lua;
-        def_layout   raw;
-        def_layout   bagex;
-        def_layout   exe;
-        def_layout   font;
-        def_layout   music;
-        def_layout   sound;
-        def_layout   shader;
-        def_layout   layout;
-        def_layout   style;
-        def_layout   color;
+        env_layout env;
+        def_layout config;
+        mod_layout module;
+        txt_layout text;
+        def_layout image;
+        def_layout drawable;
+        def_layout animation;
+        def_layout sprite;
+        def_layout lmdb;
+        sql_layout sqlite;
+        tmp_layout temp;
+        key_layout keystore;
+        lua_layout lua;
+        def_layout raw;
+        def_layout bagex;
+        def_layout exe;
+        def_layout font;
+        def_layout music;
+        def_layout sound;
+        def_layout shader;
+        def_layout layout;
+        def_layout style;
+        def_layout color;
 
         using usr_layouts = std::vector<usr_layout>;
 

@@ -73,7 +73,7 @@ AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
     assert(msg != nullptr);
 
     using namespace libtbag::mq::details;
-    if (!isActiveState(_state) && !isClosingState(_state)) {
+    if (_state != MqMachineState::MMS_ACTIVE && _state != MqMachineState::MMS_CLOSING) {
         tDLogIfW(PARAMS.verbose, "MqStreamClient::onMsg() Illegal client state({}), skip current message ({})",
                  getMachineStateName(_state), getEventName(msg->event));
         return AfterAction::AA_OK;
@@ -588,7 +588,7 @@ void MqStreamClient::onTearDownStep1(bool from_message_event)
     assert(static_cast<bool>(_writer));
 
     using namespace libtbag::mq::details;
-    if (isInactiveState(_state)) {
+    if (_state != MqMachineState::MMS_ACTIVE) {
         // After acquiring the 'Close Message', the second call can be made to the 'Read Event'.
         tDLogIfD(PARAMS.verbose, "MqStreamClient::onTearDownStep1() It is already closing.");
         return;
