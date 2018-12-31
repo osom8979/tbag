@@ -196,12 +196,15 @@ public:
     using SharedPipeClient = std::shared_ptr<PipeClient>;
 
 private:
-    SharedStream _client;
-    SharedWriter _writer;
-    MsgPacket    _packer;
+    Loop & _loop;
 
 private:
-    SharedTimer _connect_timer;
+    SharedStream _client;
+    SharedWriter _writer;
+    SharedTimer  _connector;
+
+private:
+    MsgPacket _packer;
 
 private:
     std::size_t _read_error_count;
@@ -222,8 +225,8 @@ private:
     void onInitializerAsync(Initializer * init);
     void onInitializerClose(Initializer * init);
 
-    virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
+    virtual void onCloseMsgDone() override;
 
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
@@ -249,8 +252,8 @@ private:
     /**
      * Initialize process.
      */
-    void onInitStep1_ASYNC(Loop & loop);
-    void onInitStep2_INIT(Loop & loop);
+    void onInitStep1_ASYNC();
+    void onInitStep2_INIT();
     void onInitStep3_TIMEOUT();
     void onInitStep3_CONNECT(Err code);
     void onInit_SUCCESS();
