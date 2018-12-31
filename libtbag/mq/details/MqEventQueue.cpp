@@ -119,7 +119,7 @@ MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::s
     return _ready->singlethreaded_validate(min, max);
 }
 
-using AsyncMsg = MqEventQueue::AsyncMsg;
+using AsyncMsg    = MqEventQueue::AsyncMsg;
 using UniqueQueue = MqEventQueue::UniqueQueue;
 
 template <typename Predicated>

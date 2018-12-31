@@ -64,10 +64,6 @@ public:
     MqInternal const INTERNAL;
     MqParams   const PARAMS;
 
-    bool const IS_SOCKET_SERVER;
-    bool const IS_SOCKET_CLIENT;
-    bool const IS_MQ_NODE;
-
 protected:
     MqQueue _receives;
 
@@ -81,11 +77,11 @@ protected:
     bool           _wait_enable;
 
 protected:
+    MqBase(MqInternal const & internal, MqParams const & params, MqMachineState state);
     MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state);
     virtual ~MqBase();
 
 protected:
-    bool isWaitEnable() const;
     void enableWait(bool wait_enable = true);
     void disableWait();
 
