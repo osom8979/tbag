@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/mq/details/MqEventQueue.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -16,32 +17,21 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq      {
 namespace details {
 
-MqEventQueue::MqEventQueue(Loop & loop, std::size_t size, std::size_t msg_size)
-        : THREAD_ID(std::this_thread::get_id()),
-          QUEUE_SIZE(BoundedMpMcQueue::calcMinimumQueueSize(size)),
-          __messages__(), __closed_messages__(0)
+MqEventQueue::MqEventQueue() : _queue_size(0), _close_counter(0)
 {
-    _ready = std::make_unique<BoundedMpMcQueue>(QUEUE_SIZE);
-    assert(static_cast<bool>(_ready));
+    // EMPTY.
+}
 
-    __messages__.resize(QUEUE_SIZE);
-    for (std::size_t i = 0; i < QUEUE_SIZE; ++i) {
-        auto async = loop.newHandle<AsyncMsg>(loop, msg_size, this);
-        assert(static_cast<bool>(async));
-
-        bool const ENQUEUE_RESULT = _ready->enqueue(async.get());
-        assert(ENQUEUE_RESULT);
-
-        __messages__.at(i) = async;
+MqEventQueue::MqEventQueue(Loop & loop, std::size_t queue_size, std::size_t packet_size) : MqEventQueue()
+{
+    if (!initialize(loop, queue_size, packet_size)) {
+        throw std::bad_alloc();
     }
-
-    std::size_t const READY_QUEUE_SIZE = _ready->potentially_inaccurate_count();
-    assert(QUEUE_SIZE == READY_QUEUE_SIZE);
 }
 
 MqEventQueue::~MqEventQueue()
 {
-    // EMPTY.
+    clear();
 }
 
 void MqEventQueue::onAsyncMsg(AsyncMsg * async)
@@ -58,21 +48,60 @@ void MqEventQueue::onAsyncMsg(AsyncMsg * async)
 
 void MqEventQueue::onCloseMsg(AsyncMsg * async)
 {
-    assert(async != nullptr);
-
-    ++__closed_messages__;
-    assert(__closed_messages__ <= QUEUE_SIZE);
-    if (__closed_messages__ == QUEUE_SIZE) {
+    ++_close_counter;
+    assert(_close_counter <= _queue_size);
+    if (_close_counter == _queue_size) {
         onCloseMsgDone();
     }
 }
 
-void MqEventQueue::closeAsyncMsgs()
+bool MqEventQueue::initialize(Loop & loop, std::size_t queue_size, std::size_t packet_size)
 {
-    for (auto & msg : __messages__) {
+    if (exists()) {
+        return false;
+    }
+
+    _close_counter = 0;
+    _queue_size = BoundedMpMcQueue::calcMinimumQueueSize(queue_size);
+    assert(_queue_size >= 1);
+
+    _ready = std::make_unique<BoundedMpMcQueue>(_queue_size);
+    assert(static_cast<bool>(_ready));
+
+    _active.resize(_queue_size);
+    for (std::size_t i = 0; i < _queue_size; ++i) {
+        auto async = loop.newHandle<AsyncMsg>(loop, packet_size, this);
+        assert(static_cast<bool>(async));
+
+        bool const ENQUEUE_RESULT = _ready->enqueue(async.get());
+        assert(ENQUEUE_RESULT);
+
+        _active.at(i) = async;
+    }
+
+    assert(_ready->potentially_inaccurate_count() == _queue_size);
+    return true;
+}
+
+void MqEventQueue::closeAsyncMessages()
+{
+    for (auto & msg : _active) {
         assert(static_cast<bool>(msg));
         msg->close();
     }
+}
+
+void MqEventQueue::clear()
+{
+    if (_queue_size >= 1 && _queue_size != _close_counter) {
+        tDLogW("MqEventQueue::clear() An unclosed handle exists: {}/{}",
+               _close_counter, _queue_size);
+    }
+
+    _queue_size = 0;
+    _close_counter = 0;
+    _ready.reset();
+    _active.clear();
 }
 
 std::size_t MqEventQueue::getInaccurateSizeOfReady() const
@@ -82,7 +111,7 @@ std::size_t MqEventQueue::getInaccurateSizeOfReady() const
 
 std::size_t MqEventQueue::getInaccurateSizeOfActive() const
 {
-    return QUEUE_SIZE - getInaccurateSizeOfReady();
+    return _queue_size - getInaccurateSizeOfReady();
 }
 
 MqEventQueue::MiscValidity MqEventQueue::validateOfReady(std::size_t min, std::size_t max) const
@@ -140,7 +169,6 @@ Err MqEventQueue::enqueue(char const * data, std::size_t size)
 
 MqEventQueue::AfterAction MqEventQueue::onMsg(AsyncMsg * msg)
 {
-    assert(msg != nullptr);
     return AfterAction::AA_OK;
 }
 
@@ -155,7 +183,7 @@ Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool verify)
 
     if (verify) {
         bool ok = false;
-        for (auto & cursor : __messages__) {
+        for (auto & cursor : _active) {
             assert(static_cast<bool>(cursor));
             if (msg == cursor.get()) {
                 ok = true;

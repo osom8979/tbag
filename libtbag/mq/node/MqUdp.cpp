@@ -304,7 +304,7 @@ void MqUdp::onCloseTimer(CloseTimer * timer)
     assert(isClosingState(_state));
 
     timer->close();
-    closeAsyncMsgs();
+    closeAsyncMessages();
 }
 
 void MqUdp::onCloseTimerClose(CloseTimer * timer)

@@ -29,7 +29,6 @@
 #include <cassert>
 #include <queue>
 #include <vector>
-#include <thread>
 #include <memory>
 
 // -------------------
@@ -119,44 +118,44 @@ public:
 
         virtual void onAsync() override
         { parent->onAsyncMsg(this); }
-
         virtual void onClose() override
         { parent->onCloseMsg(this); }
     };
 
 public:
-    using UniqueQueue     = std::unique_ptr<BoundedMpMcQueue>;
-    using SharedAsyncMsg  = std::shared_ptr<AsyncMsg>;
-    using SharedAsyncMsgs = std::vector<SharedAsyncMsg>;
-    using ThreadId        = std::thread::id;
-
-public:
-    ThreadId const THREAD_ID;
-    std::size_t const QUEUE_SIZE;
+    using UniqueQueue    = std::unique_ptr<BoundedMpMcQueue>;
+    using SharedAsyncMsg = std::shared_ptr<AsyncMsg>;
+    using AsyncMessages  = std::vector<SharedAsyncMsg>;
 
 private:
-    /**
-     * @warning
-     *  It must be accessed only from the loop thread.
-     */
-    SharedAsyncMsgs __messages__;
-    std::size_t     __closed_messages__;
+    std::size_t _queue_size = 0;
+    std::size_t _close_counter = 0;
 
 private:
-    UniqueQueue _ready;
+    UniqueQueue   _ready;
+    AsyncMessages _active;
 
 public:
+    MqEventQueue();
     MqEventQueue(Loop & loop,
-                 std::size_t size = DEFAULT_QUEUE_SIZE,
-                 std::size_t msg_size = DEFAULT_PACKET_SIZE);
+                 std::size_t queue_size = DEFAULT_QUEUE_SIZE,
+                 std::size_t packet_size = DEFAULT_PACKET_SIZE);
     virtual ~MqEventQueue();
+
+public:
+    inline bool exists() const TBAG_NOEXCEPT
+    { return static_cast<bool>(_ready); }
 
 protected:
     virtual void onAsyncMsg(AsyncMsg * async);
     virtual void onCloseMsg(AsyncMsg * async);
 
-protected:
-    void closeAsyncMsgs();
+public:
+    bool initialize(Loop & loop,
+                    std::size_t queue_size = DEFAULT_QUEUE_SIZE,
+                    std::size_t packet_size = DEFAULT_PACKET_SIZE);
+    void closeAsyncMessages();
+    void clear();
 
 public:
     std::size_t getInaccurateSizeOfReady() const;

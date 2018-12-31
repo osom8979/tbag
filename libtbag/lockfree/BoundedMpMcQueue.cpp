@@ -171,6 +171,9 @@ BoundedMpMcQueue::~BoundedMpMcQueue()
 
 std::size_t BoundedMpMcQueue::calcMinimumQueueSize(std::size_t request_size)
 {
+    if (request_size <= 1) {
+        return 1;
+    }
     using namespace libtbag::bitwise;
     if (isPowerOf2(request_size)) {
         return request_size;

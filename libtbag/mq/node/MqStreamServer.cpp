@@ -881,7 +881,7 @@ void MqStreamServer::onCloseStep1()
         }
     }
 
-    MqEventQueue::closeAsyncMsgs();
+    MqEventQueue::closeAsyncMessages();
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onCloseStep1() Close request of all messages.");
 }
 

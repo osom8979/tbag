@@ -115,7 +115,7 @@ void MqLocalQueue::onCloseEvent()
     // [IMPORTANT]
     // From this moment on, there is no send-queue producer.
     assert(_sending == 0);
-    MqEventQueue::closeAsyncMsgs();
+    MqEventQueue::closeAsyncMessages();
 }
 
 } // namespace node

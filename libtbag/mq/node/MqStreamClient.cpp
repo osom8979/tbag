@@ -675,7 +675,7 @@ void MqStreamClient::onCloseStep1()
     assert(_state == MqMachineState::MMS_CLOSING);
     assert(_writer->queue.empty());
 
-    MqEventQueue::closeAsyncMsgs();
+    MqEventQueue::closeAsyncMessages();
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onCloseStep1() Close request of all messages.");
 }
 

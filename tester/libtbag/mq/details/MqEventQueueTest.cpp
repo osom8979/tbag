@@ -49,7 +49,7 @@ struct MqSendQueueTest : public MqEventQueue
             } else {
                 ++close_failure;
             }
-            closeAsyncMsgs();
+            closeAsyncMessages();
         }
         return AfterAction::AA_OK;
     }
