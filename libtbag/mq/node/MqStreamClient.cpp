@@ -31,7 +31,7 @@ using ShutdownRequest = MqStreamClient::ShutdownRequest;
 using WriteRequest    = MqStreamClient::WriteRequest;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(internal, params, MqMachineState::MMS_NONE),
+        : MqBase(internal, params, MqMachineState::MMS_CLOSED),
           _loop(loop), _packer(params.packer_size), _read_error_count(0)
 {
     assert(!MqEventQueue::exists());
@@ -275,7 +275,7 @@ void MqStreamClient::onInitStep1_ASYNC()
     assert(!static_cast<bool>(_client));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_NONE || _state == MqMachineState::MMS_CLOSED);
+    assert(_state == MqMachineState::MMS_CLOSED);
 
     auto init = _loop.newHandle<Initializer>(_loop, this);
     assert(static_cast<bool>(init));

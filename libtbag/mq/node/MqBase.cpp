@@ -33,7 +33,7 @@ MqBase::MqBase(Loop & loop, MqInternal const & internal, MqParams const & params
 
 MqBase::~MqBase()
 {
-    assert(_state == MqMachineState::MMS_NONE || _state == MqMachineState::MMS_CLOSED);
+    assert(_state == MqMachineState::MMS_CLOSED);
     disableWait();
 }
 

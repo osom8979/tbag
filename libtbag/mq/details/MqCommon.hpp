@@ -47,19 +47,13 @@ using MqEvent = int32_t;
 
 TBAG_CONSTEXPR MqEvent const ME_MSG   =  0;
 TBAG_CONSTEXPR MqEvent const ME_CLOSE = -1;
-TBAG_CONSTEXPR MqEvent const ME_HANDSHAKE_HELLO_1 = -1000;
-TBAG_CONSTEXPR MqEvent const ME_HANDSHAKE_HELLO_2 = -1001;
-TBAG_CONSTEXPR MqEvent const ME_HANDSHAKE_DONE    = -1002;
 
 inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
 {
     switch (event) {
     // @formatter:off
-    case ME_MSG:                return "MSG";
-    case ME_CLOSE:              return "CLOSE";
-    case ME_HANDSHAKE_HELLO_1:  return "HANDSHAKE_HELLO_1";
-    case ME_HANDSHAKE_HELLO_2:  return "HANDSHAKE_HELLO_1";
-    case ME_HANDSHAKE_DONE:     return "HANDSHAKE_DONE";
+    case ME_MSG:   return "MSG";
+    case ME_CLOSE: return "CLOSE";
     // @formatter:on
     default:
         if (event > ME_MSG) {
@@ -137,7 +131,11 @@ inline char const * const getRequestStateName(MqRequestState state) TBAG_NOEXCEP
 
 enum class MqMachineState
 {
-    MMS_NONE,
+    MMS_CLOSED,
+
+    /**
+     * Initializing...
+     */
     MMS_INITIALIZING,
 
     /**
@@ -148,10 +146,6 @@ enum class MqMachineState
      */
     MMS_INITIALIZED,
 
-    MMS_HELLO_1,    ///< Client -> Server
-    MMS_HELLO_2,    ///< Server -> Client [CLIENT DONE]
-    MMS_HELLO_DONE, ///< Client -> Server [SERVER DONE]
-
     /**
      * Active machine state.
      *
@@ -161,22 +155,20 @@ enum class MqMachineState
      */
     MMS_ACTIVE,
 
-    MMS_CLOSING, ///< Obtain the close request message.
-    MMS_CLOSED,  ///< Close is done.
+    /**
+     * Obtain the close request message.
+     */
+    MMS_CLOSING,
 };
 
 inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEPT
 {
     switch (state) {
-    case MqMachineState::MMS_NONE:          return "NONE";
+    case MqMachineState::MMS_CLOSED:        return "CLOSED";
     case MqMachineState::MMS_INITIALIZING:  return "INITIALIZING";
     case MqMachineState::MMS_INITIALIZED:   return "INITIALIZED";
-    case MqMachineState::MMS_HELLO_1:       return "HELLO_1";
-    case MqMachineState::MMS_HELLO_2:       return "HELLO_2";
-    case MqMachineState::MMS_HELLO_DONE:    return "HELLO_DONE";
     case MqMachineState::MMS_ACTIVE:        return "ACTIVE";
     case MqMachineState::MMS_CLOSING:       return "CLOSING";
-    case MqMachineState::MMS_CLOSED:        return "CLOSED";
     default:                                return "UNKNOWN";
     }
 }

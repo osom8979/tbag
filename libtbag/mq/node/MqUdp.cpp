@@ -21,7 +21,7 @@ using AfterAction = MqUdp::AfterAction;
 using UdpSendRequest = MqUdp::UdpSendRequest;
 
 MqUdp::MqUdp(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(loop, internal, params, MqMachineState::MMS_NONE),
+        : MqBase(loop, internal, params, MqMachineState::MMS_CLOSED),
           _packer(params.packer_size), _read_error_count(0)
 {
     if (PARAMS.type == MqType::MT_UDP) {
