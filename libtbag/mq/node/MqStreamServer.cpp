@@ -29,16 +29,17 @@ using binf        = MqStreamServer::binf;
 using AfterAction = MqStreamServer::AfterAction;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(loop, internal, params, MqMachineState::MMS_NONE),
-          _packer(params.packer_size)
+        : MqBase(internal, params, MqMachineState::MMS_NONE),
+          _loop(loop), _packer(params.packer_size)
 {
+    assert(!MqEventQueue::exists());
+
     if (params.type != MqType::MT_PIPE && params.type != MqType::MT_TCP) {
         tDLogE("MqStreamServer::MqStreamServer() Unsupported type: {}({})",
                libtbag::mq::details::getTypeName(params.type), (int)(params.type));
         throw ErrException(Err::E_ILLARGS);
     }
-
-    onInitStep1_ASYNC(loop);
+    onInitStep1_ASYNC();
 }
 
 MqStreamServer::~MqStreamServer()
@@ -49,21 +50,14 @@ MqStreamServer::~MqStreamServer()
 void MqStreamServer::onInitializerAsync(Initializer * init)
 {
     assert(init != nullptr);
-    auto * loop = init->getLoop();
-    assert(loop != nullptr);
     init->close();
-    onInitStep2_INIT(*loop);
+    onInitStep2_INIT();
 }
 
 void MqStreamServer::onInitializerClose(Initializer * init)
 {
     assert(init != nullptr);
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onInitializerClose() Close initializer.");
-}
-
-void MqStreamServer::onCloseMsgDone()
-{
-    onCloseStep2_EVENT_QUEUE_CLOSED();
 }
 
 AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
@@ -87,6 +81,12 @@ AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
     }
 }
 
+void MqStreamServer::onCloseMsgDone()
+{
+    MqEventQueue::clear();
+    onCloseStep2_EVENT_QUEUE_CLOSED();
+}
+
 void MqStreamServer::onWriterAsync(Writer * writer)
 {
     assert(writer != nullptr);
@@ -97,6 +97,8 @@ void MqStreamServer::onWriterAsync(Writer * writer)
 void MqStreamServer::onWriterClose(Writer * writer)
 {
     assert(writer != nullptr);
+    assert(writer == _writer.get());
+    _writer.reset();
     onCloseStep3_WRITER_CLOSED();
 }
 
@@ -104,7 +106,6 @@ void MqStreamServer::onCloseTimer(CloseTimer * timer)
 {
     assert(timer != nullptr);
     timer->close();
-
     onTearDownStep3_TIMEOUT();
 }
 
@@ -333,15 +334,12 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
     assert(server != nullptr);
     assert(isSuccess(code));
 
-    Loop * loop = server->getLoop();
-    assert(loop != nullptr);
-
     SharedStream stream;
     if (PARAMS.type == MqType::MT_PIPE) {
-        stream = loop->newHandle<PipeNode>(*loop, this);
+        stream = _loop.newHandle<PipeNode>(_loop, this);
     } else {
         assert(PARAMS.type == MqType::MT_TCP);
-        stream = loop->newHandle<TcpNode>(*loop, this);
+        stream = _loop.newHandle<TcpNode>(_loop, this);
     }
     assert(static_cast<bool>(stream));
     assert(stream->isInit());
@@ -386,6 +384,7 @@ void MqStreamServer::onServerConnection(Stream * server, Err code)
 
 void MqStreamServer::onServerClose(Stream * server)
 {
+    _server.reset();
     onCloseStep4_CLIENT_CLOSED();
 }
 
@@ -393,33 +392,36 @@ void MqStreamServer::onServerClose(Stream * server)
 // Alias of event steps.
 // ---------------------
 
-void MqStreamServer::onInitStep1_ASYNC(Loop & loop)
+void MqStreamServer::onInitStep1_ASYNC()
 {
     assert(!static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
+    assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_NONE || _state == MqMachineState::MMS_CLOSED);
 
-    auto init = loop.newHandle<Initializer>(loop, this);
+    auto init = _loop.newHandle<Initializer>(_loop, this);
     assert(static_cast<bool>(init));
     assert(init->isInit());
 
     auto const CODE = init->send();
     assert(isSuccess(CODE));
+
     _state = MqMachineState::MMS_INITIALIZING;
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onInitStep1_ASYNC() Asynchronous initialization request.");
 }
 
-void MqStreamServer::onInitStep2_INIT(Loop & loop)
+void MqStreamServer::onInitStep2_INIT()
 {
     assert(!static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
+    assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_INITIALIZING);
 
     if (PARAMS.type == MqType::MT_PIPE) {
-        _server = loop.newHandle<PipeServer>(loop, this);
+        _server = _loop.newHandle<PipeServer>(_loop, this);
     } else {
         assert(PARAMS.type == MqType::MT_TCP);
-        _server = loop.newHandle<TcpServer>(loop, this);
+        _server = _loop.newHandle<TcpServer>(_loop, this);
     }
 
     assert(static_cast<bool>(_server));
@@ -502,14 +504,16 @@ void MqStreamServer::onInit_SUCCESS()
 {
     assert(static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
+    assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_INITIALIZED);
 
-    auto * loop = _server->getLoop();
-    assert(loop != nullptr);
-
-    _writer = loop->newHandle<Writer>(*loop, this);
+    _writer = _loop.newHandle<Writer>(_loop, this);
     assert(static_cast<bool>(_writer));
     assert(_writer->isInit());
+
+    bool const EVENT_QUEUE_INIT = MqEventQueue::initialize(_loop, PARAMS.send_queue_size, PARAMS.send_msg_size);
+    assert(EVENT_QUEUE_INIT);
+    assert(MqEventQueue::exists());
 
     tDLogI("MqStreamServer::onInit_SUCCESS() Active state!");
     _state = MqMachineState::MMS_ACTIVE;
@@ -520,17 +524,19 @@ void MqStreamServer::onInit_FAILURE(Err code)
 {
     assert(static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
+    assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_INITIALIZED);
 
     _state = MqMachineState::MMS_CLOSING;
+    assert(!_server->isClosing());
     _server->close();
-    _server.reset();
 }
 
 void MqStreamServer::onSendStep1_EVENT(AsyncMsg * msg)
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_ACTIVE || _state == MqMachineState::MMS_CLOSING);
     assert(msg != nullptr);
 
@@ -550,6 +556,7 @@ void MqStreamServer::onSendStep2_ASYNC()
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_ACTIVE || _state == MqMachineState::MMS_CLOSING);
     assert(_writer->state == MqRequestState::MRS_ASYNC);
     assert(!_writer->queue.empty());
@@ -573,6 +580,9 @@ void MqStreamServer::onSendStep2_ASYNC()
 
 void MqStreamServer::onSendStep3_ASYNC_ORIGINAL(AsyncMsg * msg)
 {
+    assert(static_cast<bool>(_server));
+    assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(msg != nullptr);
     assert(INTERNAL.default_write != nullptr);
     assert(INTERNAL.parent != nullptr);
@@ -639,6 +649,9 @@ static std::size_t __write_all_nodes(NodeSet & nodes, uint8_t const * data, std:
 
 void MqStreamServer::onSendStep3_ASYNC_MQMSG(AsyncMsg * msg)
 {
+    assert(static_cast<bool>(_server));
+    assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(msg != nullptr);
     assert(INTERNAL.write_cb != nullptr);
     assert(INTERNAL.parent != nullptr);
@@ -706,6 +719,7 @@ void MqStreamServer::onSendStep4_WRITE_DONE(Err code)
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_ACTIVE || _state == MqMachineState::MMS_CLOSING);
     assert(!_writer->queue.empty());
     assert(_writer->state == MqRequestState::MRS_REQUESTING);
@@ -729,6 +743,9 @@ void MqStreamServer::onSendStep4_WRITE_DONE(Err code)
 
 void MqStreamServer::onSendStep5_NEXT_MESSAGE(AsyncMsg * msg)
 {
+    assert(static_cast<bool>(_server));
+    assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(msg != nullptr);
 
     _writer->queue.pop();
@@ -760,6 +777,7 @@ void MqStreamServer::onTearDownStep1(bool from_message_event)
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
 
     using namespace libtbag::mq::details;
     if (_state != MqMachineState::MMS_ACTIVE) {
@@ -828,6 +846,7 @@ void MqStreamServer::onTearDownStep2_SHUTDOWN()
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
     assert(_writer->queue.empty());
 
@@ -851,10 +870,7 @@ void MqStreamServer::onTearDownStep2_SHUTDOWN()
         tDLogW("MqStreamServer::onTearDownStep2_SHUTDOWN() All shutdowns failed.");
     }
 
-    auto * loop = _server->getLoop();
-    assert(loop != nullptr);
-
-    auto timer = loop->newHandle<CloseTimer>(*loop, this);
+    auto timer = _loop.newHandle<CloseTimer>(_loop, this);
     assert(static_cast<bool>(timer));
 
     auto const START_CODE = timer->start(PARAMS.wait_closing_millisec);
@@ -863,6 +879,11 @@ void MqStreamServer::onTearDownStep2_SHUTDOWN()
 
 void MqStreamServer::onTearDownStep3_TIMEOUT()
 {
+    assert(static_cast<bool>(_server));
+    assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
+    assert(_state == MqMachineState::MMS_CLOSING);
+
     onCloseStep1();
 }
 
@@ -870,6 +891,7 @@ void MqStreamServer::onCloseStep1()
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
+    assert(MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
     assert(_writer->queue.empty());
 
@@ -889,12 +911,12 @@ void MqStreamServer::onCloseStep2_EVENT_QUEUE_CLOSED()
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
+    assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
     assert(_writer->queue.empty());
     assert(!_writer->isClosing());
 
     _writer->close();
-    _writer.reset();
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onCloseStep2_EVENT_QUEUE_CLOSED() Close request of writer.");
 }
 
@@ -902,11 +924,11 @@ void MqStreamServer::onCloseStep3_WRITER_CLOSED()
 {
     assert(static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
+    assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
     assert(!_server->isClosing());
 
     _server->close();
-    _server.reset();
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onCloseStep3_WRITER_CLOSED() Close request of server.");
 }
 
@@ -914,6 +936,7 @@ void MqStreamServer::onCloseStep4_CLIENT_CLOSED()
 {
     assert(!static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
+    assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
 
     tDLogI("MqStreamServer::onCloseStep4_CLIENT_CLOSED() Close server!");

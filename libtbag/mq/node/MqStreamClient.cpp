@@ -712,8 +712,8 @@ void MqStreamClient::onCloseStep2_EVENT_QUEUE_CLOSED()
     assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
     assert(_writer->queue.empty());
-
     assert(!_writer->isClosing());
+
     _writer->close();
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onCloseStep2_EVENT_QUEUE_CLOSED() Close request of writer.");
 }
@@ -724,8 +724,8 @@ void MqStreamClient::onCloseStep3_WRITER_CLOSED()
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
-
     assert(!_client->isClosing());
+
     _client->close();
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onCloseStep3_WRITER_CLOSED() Close request of client.");
 }

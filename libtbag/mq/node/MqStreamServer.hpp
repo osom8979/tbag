@@ -210,10 +210,17 @@ public:
     using NodeSet       = std::unordered_set<StreamPointer, StreamPointer::Hash, StreamPointer::EqualTo>;
 
 private:
+    Loop & _loop;
+
+private:
     SharedStream _server;
     SharedWriter _writer;
-    NodeSet      _nodes;
-    MsgPacket    _packer;
+
+private:
+    NodeSet _nodes;
+
+private:
+    MsgPacket _packer;
 
 public:
     MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params);
@@ -229,25 +236,21 @@ private:
     void onInitializerAsync(Initializer * init);
     void onInitializerClose(Initializer * init);
 
-    virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
+    virtual void onCloseMsgDone() override;
 
-private:
     void onWriterAsync(Writer * writer);
     void onWriterClose(Writer * writer);
 
-private:
     void onCloseTimer(CloseTimer * timer);
     void onCloseTimerClose(CloseTimer * timer);
 
-private:
     void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
     void onNodeWrite   (Stream * node, WriteRequest & request, Err code);
     binf onNodeAlloc   (Stream * node, std::size_t suggested_size);
     void onNodeRead    (Stream * node, Err code, char const * buffer, std::size_t size);
     void onNodeClose   (Stream * node);
 
-private:
     void onServerConnection(Stream * server, Err code);
     void onServerClose     (Stream * server);
 
@@ -259,8 +262,8 @@ private:
     /**
      * Initialize process.
      */
-    void onInitStep1_ASYNC(Loop & loop);
-    void onInitStep2_INIT(Loop & loop);
+    void onInitStep1_ASYNC();
+    void onInitStep2_INIT();
     void onInit_SUCCESS();
     void onInit_FAILURE(Err code);
 
