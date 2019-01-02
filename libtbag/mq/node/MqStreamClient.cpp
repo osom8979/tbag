@@ -32,7 +32,7 @@ using WriteRequest    = MqStreamClient::WriteRequest;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
         : MqBase(internal, params, MqMachineState::MMS_CLOSED),
-          _loop(loop), _packer(params.packer_size), _read_error_count(0)
+          _loop(loop), _packer(params.packer_size), _read_error_count(0), _reconnect(0)
 {
     assert(!MqEventQueue::exists());
 
@@ -284,6 +284,7 @@ void MqStreamClient::onInitStep1_ASYNC()
     auto const CODE = init->send();
     assert(isSuccess(CODE));
 
+    ++_reconnect;
     _state = MqMachineState::MMS_INITIALIZING;
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onInitStep1_ASYNC() Asynchronous initialization request.");
 }
@@ -744,6 +745,18 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
     if (INTERNAL.close_cb != nullptr) {
         assert(INTERNAL.parent != nullptr);
         INTERNAL.close_cb(INTERNAL.parent);
+    }
+
+    if (PARAMS.reconnect_count == 0 || _reconnect < PARAMS.reconnect_count) {
+        if (PARAMS.reconnect_count == 0) {
+            tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect infinity.");
+        } else {
+            tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: {}/{}",
+                   _reconnect, PARAMS.reconnect_count);
+        }
+        onInitStep1_ASYNC();
+    } else {
+        tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Close done.");
     }
 }
 

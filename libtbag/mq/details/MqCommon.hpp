@@ -602,6 +602,14 @@ struct MqParams
     std::size_t connect_timeout_millisec = 4 * 1000;
 
     /**
+     * Reconnect count.
+     *
+     * @remarks
+     *  If this variable is 0, it tries infinitely.
+     */
+    std::size_t reconnect_count = 1;
+
+    /**
      * Wait until activation is completed.
      */
     std::size_t wait_on_activation_timeout_millisec = 1000;
@@ -643,6 +651,7 @@ TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME    = "wait_closing";
 TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
 TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
 TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT_NAME = "connect_timeout";
+TBAG_CONSTEXPR static char const * const RECONNECT_COUNT_NAME = "reconnect";
 TBAG_CONSTEXPR static char const * const WAIT_ACTIVATION_NAME = "wait_activation";
 TBAG_CONSTEXPR static char const * const SHUTDOWN_WAIT_NAME   = "shutdown_wait";
 TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";

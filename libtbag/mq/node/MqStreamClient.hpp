@@ -211,6 +211,9 @@ private:
     Buffer      _read_buffer;
     Buffer      _remaining_read;
 
+private:
+    std::size_t _reconnect;
+
 public:
     MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamClient();
