@@ -489,10 +489,10 @@ inline bool isMqNodeMode(MqInternal const & internal) TBAG_NOEXCEPT
     // @formatter:on
 }
 
+TBAG_CONSTEXPR std::size_t const __SIZE_T_MAX__ = libtbag::type::TypeInfo<std::size_t>::maximum();
 TBAG_CONSTEXPR std::size_t const RECONNECT_INFINITY = 0;
-TBAG_CONSTEXPR std::size_t const RECONNECT_DONE = libtbag::type::TypeInfo<std::size_t>::maximum();
-
-TBAG_CONSTEXPR std::size_t const WAIT_ON_ACTIVATION_INFINITY = libtbag::type::TypeInfo<std::size_t>::maximum();
+TBAG_CONSTEXPR std::size_t const RECONNECT_DONE = __SIZE_T_MAX__;
+TBAG_CONSTEXPR std::size_t const WAIT_ON_ACTIVATION_INFINITY = __SIZE_T_MAX__;
 
 /**
  * User customizable option packs.
@@ -710,6 +710,8 @@ TBAG_API std::string __append_localhost_if_pipe_or_local_schema(std::string cons
 
 TBAG_API MqParams convertUriToParams(std::string const & uri_string, MqParams const & default_params, bool auto_encode = true);
 TBAG_API MqParams convertUriToParams(std::string const & uri_string, bool auto_encode = true);
+
+TBAG_API Err waitOnActivation(MqParams const & params, MqInterface * mq);
 
 } // namespace details
 } // namespace mq

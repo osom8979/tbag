@@ -286,6 +286,33 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
     return convertUriToParams(uri_string, MqParams(), auto_encode);
 }
 
+Err waitOnActivation(MqParams const & params, MqInterface * mq)
+{
+    if (params.wait_on_activation_timeout_millisec == 0) {
+        return Err::E_ALREADY;
+    }
+
+    Err code;
+    if (params.wait_on_activation_timeout_millisec == WAIT_ON_ACTIVATION_INFINITY) {
+        tDLogIfI(params.verbose, "waitOnActivation() Waiting enable: infinity ...");
+        code = mq->waitEnable(0);
+    } else {
+        auto const TIMEOUT = params.wait_on_activation_timeout_millisec * MILLISECONDS_TO_NANOSECONDS;
+        tDLogIfI(params.verbose, "waitOnActivation() Waiting enable: {}ms ...",
+                 params.wait_on_activation_timeout_millisec);
+        code = mq->waitEnable(TIMEOUT);
+    }
+
+    if (isSuccess(code)) {
+        tDLogIfD(params.verbose, "waitOnActivation() Wait done.");
+    } else {
+        assert(code == Err::E_TIMEOUT);
+        tDLogW("waitOnActivation() Connection timeout.");
+    }
+
+    return code;
+}
+
 } // namespace details
 } // namespace mq
 

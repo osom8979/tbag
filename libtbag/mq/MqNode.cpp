@@ -111,26 +111,7 @@ public:
         });
         assert(PUSH_RESULT);
 
-        if (params.wait_on_activation_timeout_millisec != 0) {
-            Err wait_code;
-            using namespace libtbag::mq::details;
-            if (params.wait_on_activation_timeout_millisec == WAIT_ON_ACTIVATION_INFINITY) {
-                tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting enable: infinity ...");
-                wait_code = _mq->waitEnable(0);
-            } else {
-                auto const TIMEOUT = params.wait_on_activation_timeout_millisec * MILLISECONDS_TO_NANOSECONDS;
-                tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting enable: {}ms ...",
-                         params.wait_on_activation_timeout_millisec);
-                wait_code = _mq->waitEnable(TIMEOUT);
-            }
-
-            if (isSuccess(wait_code)) {
-                tDLogIfD(PARAMS.verbose, "MqNode::Impl::Impl() Wait done.");
-            } else {
-                assert(wait_code == Err::E_TIMEOUT);
-                tDLogW("MqNode::Impl::Impl() Connection timeout.");
-            }
-        }
+        libtbag::mq::details::waitOnActivation(params, _mq.get());
     }
 
     ~Impl()

@@ -91,13 +91,7 @@ public:
         });
         assert(PUSH_RESULT);
 
-        if (params.wait_on_activation_timeout_millisec > 0) {
-            auto const TIMEOUT = params.wait_on_activation_timeout_millisec * MILLISECONDS_TO_NANOSECONDS;
-            tDLogIfI(PARAMS.verbose, "NetStreamClient::Impl::Impl() Waiting connection {}ms ...",
-                     params.wait_on_activation_timeout_millisec);
-            auto const WAIT_CODE = _mq->waitEnable(TIMEOUT);
-            tDLogIfW(WAIT_CODE == Err::E_TIMEOUT, "NetStreamClient::Impl::Impl() Connection timeout.");
-        }
+        libtbag::mq::details::waitOnActivation(params, _mq.get());
     }
 
     ~Impl()
