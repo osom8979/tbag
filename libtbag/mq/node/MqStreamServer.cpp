@@ -525,7 +525,7 @@ void MqStreamServer::onInit_FAILURE(Err code)
     assert(static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_INITIALIZED);
+    assert(libtbag::mq::details::isInitializeState(_state));
 
     _state = MqMachineState::MMS_CLOSING;
     assert(!_server->isClosing());

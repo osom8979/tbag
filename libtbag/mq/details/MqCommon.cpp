@@ -258,6 +258,11 @@ MqParams convertUriToParams(std::string const & uri_string, MqParams const & def
         params.reconnect_count = toValue<unsigned>(itr->second);
     }
 
+    itr = queries.find(RECONNECT_DELAY_NAME);
+    if (itr != queries.end()) {
+        params.reconnect_delay_millisec = toValue<unsigned>(itr->second);
+    }
+
     itr = queries.find(WAIT_ACTIVATION_NAME);
     if (itr != queries.end()) {
         params.wait_on_activation_timeout_millisec = toValue<unsigned>(itr->second);

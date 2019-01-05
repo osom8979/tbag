@@ -10,6 +10,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <chrono>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -62,6 +63,16 @@ void MqStreamClient::onInitializerClose(Initializer * init)
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onInitializerClose() Closed initializer.");
 }
 
+void MqStreamClient::onTerminatorAsync(Terminator * terminator)
+{
+}
+
+void MqStreamClient::onTerminatorClose(Terminator * terminator)
+{
+    assert(terminator != nullptr);
+    tDLogIfD(PARAMS.verbose, "MqStreamClient::onTerminatorClose() Closed terminator.");
+}
+
 AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
 {
     assert(msg != nullptr);
@@ -75,6 +86,7 @@ AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
 
     if (msg->event == ME_CLOSE) {
         tDLogI("MqStreamClient::onMsg() Close message confirmed.");
+        _reconnect = libtbag::mq::details::RECONNECT_DONE;
         onTearDownStep1(true);
         return AfterAction::AA_OK;
     } else {
@@ -432,7 +444,7 @@ void MqStreamClient::onInit_FAILURE(Err code)
     assert(static_cast<bool>(_client));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_INITIALIZED);
+    assert(libtbag::mq::details::isInitializeState(_state));
 
     _state = MqMachineState::MMS_CLOSING;
     assert(!_client->isClosing());
@@ -747,17 +759,29 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
         INTERNAL.close_cb(INTERNAL.parent);
     }
 
-    if (PARAMS.reconnect_count == 0 || _reconnect < PARAMS.reconnect_count) {
-        if (PARAMS.reconnect_count == 0) {
-            tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect infinity.");
-        } else {
-            tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: {}/{}",
-                   _reconnect, PARAMS.reconnect_count);
-        }
-        onInitStep1_ASYNC();
-    } else {
+    if (_reconnect == libtbag::mq::details::RECONNECT_DONE) {
         tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Close done.");
+        return;
     }
+
+    if (PARAMS.reconnect_count == 0) {
+        tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect");
+        std::this_thread::sleep_for(std::chrono::milliseconds(PARAMS.reconnect_delay_millisec));
+        onInitStep1_ASYNC();
+        return;
+    }
+
+    if (_reconnect < PARAMS.reconnect_count) {
+        tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: {}/{}",
+               _reconnect, PARAMS.reconnect_count);
+        std::this_thread::sleep_for(std::chrono::milliseconds(PARAMS.reconnect_delay_millisec));
+        onInitStep1_ASYNC();
+        return;
+    }
+
+    assert(_reconnect == PARAMS.reconnect_count);
+    tDLogW("MqStreamClient::onCloseStep4_CLIENT_CLOSED() The maximum number of reconnection count: {}",
+           PARAMS.reconnect_count);
 }
 
 } // namespace node

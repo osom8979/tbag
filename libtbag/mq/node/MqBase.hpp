@@ -70,6 +70,7 @@ protected:
 protected:
     AtomicState _state;
     AtomicInt   _sending;
+    AtomicInt   _exiting;
 
 protected:
     UvLock mutable _wait_lock;
@@ -82,7 +83,7 @@ protected:
     virtual ~MqBase();
 
 protected:
-    void enableWait(bool wait_enable = true);
+    void enableWait(bool enable = true);
     void disableWait();
 
 public:

@@ -98,6 +98,12 @@ protected:
     virtual bool onRecv(MqMsg const & msg);
 
 public:
+    MqParams params() const;
+
+public:
+    Err waitEnable(uint64_t timeout_nano = 0);
+
+public:
     Err join();
 
 public:

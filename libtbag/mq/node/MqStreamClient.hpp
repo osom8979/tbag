@@ -107,6 +107,22 @@ private:
         { parent->onInitializerClose(this); }
     };
 
+    struct Terminator : public Async
+    {
+        MqStreamClient * parent = nullptr;
+
+        Terminator(Loop & loop, MqStreamClient * p)
+                : Async(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~Terminator()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onTerminatorAsync(this); }
+        virtual void onClose() override
+        { parent->onTerminatorClose(this); }
+    };
+
     struct Writer : public Async
     {
         MqStreamClient * parent = nullptr;
@@ -227,6 +243,9 @@ public:
 private:
     void onInitializerAsync(Initializer * init);
     void onInitializerClose(Initializer * init);
+
+    void onTerminatorAsync(Terminator * terminator);
+    void onTerminatorClose(Terminator * terminator);
 
     virtual AfterAction onMsg(AsyncMsg * msg) override;
     virtual void onCloseMsgDone() override;

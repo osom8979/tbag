@@ -111,12 +111,25 @@ public:
         });
         assert(PUSH_RESULT);
 
-        if (params.wait_on_activation_timeout_millisec > 0) {
-            auto const TIMEOUT = params.wait_on_activation_timeout_millisec * MILLISECONDS_TO_NANOSECONDS;
-            tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting connection {}ms ...",
-                     params.wait_on_activation_timeout_millisec);
-            auto const WAIT_CODE = _mq->waitEnable(TIMEOUT);
-            tDLogIfW(WAIT_CODE == Err::E_TIMEOUT, "MqNode::Impl::Impl() Connection timeout.");
+        if (params.wait_on_activation_timeout_millisec != 0) {
+            Err wait_code;
+            using namespace libtbag::mq::details;
+            if (params.wait_on_activation_timeout_millisec == WAIT_ON_ACTIVATION_INFINITY) {
+                tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting enable: infinity ...");
+                wait_code = _mq->waitEnable(0);
+            } else {
+                auto const TIMEOUT = params.wait_on_activation_timeout_millisec * MILLISECONDS_TO_NANOSECONDS;
+                tDLogIfI(PARAMS.verbose, "MqNode::Impl::Impl() Waiting enable: {}ms ...",
+                         params.wait_on_activation_timeout_millisec);
+                wait_code = _mq->waitEnable(TIMEOUT);
+            }
+
+            if (isSuccess(wait_code)) {
+                tDLogIfD(PARAMS.verbose, "MqNode::Impl::Impl() Wait done.");
+            } else {
+                assert(wait_code == Err::E_TIMEOUT);
+                tDLogW("MqNode::Impl::Impl() Connection timeout.");
+            }
         }
     }
 
@@ -205,6 +218,21 @@ private:
     }
 
 public:
+    MqMachineState state() const
+    {
+        return _mq->state();
+    }
+
+    MqParams params() const
+    {
+        return _mq->params();
+    }
+
+    Err waitEnable(uint64_t timeout_nano)
+    {
+        return _mq->waitEnable(timeout_nano);
+    }
+
     Err join()
     {
         _pool.join();
@@ -280,6 +308,18 @@ bool MqNode::onWrite(MqMsg & msg)
 bool MqNode::onRecv(MqMsg const & msg)
 {
     return false;
+}
+
+MqParams MqNode::params() const
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->params();
+}
+
+Err MqNode::waitEnable(uint64_t timeout_nano)
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->waitEnable(timeout_nano);
 }
 
 Err MqNode::join()

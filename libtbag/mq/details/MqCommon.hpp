@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/util/BufferInfo.hpp>
+#include <libtbag/type/TypeTable.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -176,6 +177,11 @@ inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEP
 inline bool isActiveState(MqMachineState state) TBAG_NOEXCEPT
 {
     return (state == MqMachineState::MMS_ACTIVE);
+}
+
+inline bool isInitializeState(MqMachineState state) TBAG_NOEXCEPT
+{
+    return (state == MqMachineState::MMS_INITIALIZING || state == MqMachineState::MMS_INITIALIZED);
 }
 
 inline bool isClosingState(MqMachineState state) TBAG_NOEXCEPT
@@ -483,6 +489,11 @@ inline bool isMqNodeMode(MqInternal const & internal) TBAG_NOEXCEPT
     // @formatter:on
 }
 
+TBAG_CONSTEXPR std::size_t const RECONNECT_INFINITY = 0;
+TBAG_CONSTEXPR std::size_t const RECONNECT_DONE = libtbag::type::TypeInfo<std::size_t>::maximum();
+
+TBAG_CONSTEXPR std::size_t const WAIT_ON_ACTIVATION_INFINITY = libtbag::type::TypeInfo<std::size_t>::maximum();
+
 /**
  * User customizable option packs.
  */
@@ -610,9 +621,17 @@ struct MqParams
     std::size_t reconnect_count = 1;
 
     /**
-     * Wait until activation is completed.
+     * Reconnect delay timer.
      */
-    std::size_t wait_on_activation_timeout_millisec = 1000;
+    std::size_t reconnect_delay_millisec = 1 * 1000;
+
+    /**
+     * Wait until activation is completed.
+     *
+     * @remarks
+     *  If this variable is 0, disable this feature.
+     */
+    std::size_t wait_on_activation_timeout_millisec = WAIT_ON_ACTIVATION_INFINITY;
 
     /**
      * The wait time to not miss the send() requested by another thread.
@@ -652,6 +671,7 @@ TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
 TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
 TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT_NAME = "connect_timeout";
 TBAG_CONSTEXPR static char const * const RECONNECT_COUNT_NAME = "reconnect";
+TBAG_CONSTEXPR static char const * const RECONNECT_DELAY_NAME = "reconnect_delay";
 TBAG_CONSTEXPR static char const * const WAIT_ACTIVATION_NAME = "wait_activation";
 TBAG_CONSTEXPR static char const * const SHUTDOWN_WAIT_NAME   = "shutdown_wait";
 TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
@@ -661,6 +681,8 @@ struct MqInterface
     virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
     virtual MqParams params() const = 0;
 
+    //virtual Err exit() = 0;
+
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;
 
@@ -669,6 +691,8 @@ struct MqInterface
      */
     virtual Err waitEnable(uint64_t timeout_nano) = 0;
     virtual Err waitRecv(MqMsg & msg, uint64_t timeout_nano) = 0;
+
+    //virtual Err waitClosed(uint64_t timeout_nano) = 0;
 };
 
 // -----------------------
