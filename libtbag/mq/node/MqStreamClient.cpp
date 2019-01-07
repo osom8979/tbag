@@ -32,7 +32,7 @@ using ShutdownRequest = MqStreamClient::ShutdownRequest;
 using WriteRequest    = MqStreamClient::WriteRequest;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(internal, params, MqMachineState::MMS_INITIALIZING),
+        : MqBase(internal, params, MqMachineState::MMS_CLOSED),
           _loop(loop), _packer(params.packer_size), _read_error_count(0), _reconnect(0), _exiting(0)
 {
     assert(!MqEventQueue::exists());
@@ -47,6 +47,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParam
     assert(static_cast<bool>(_terminator));
     assert(_terminator->isInit());
 
+    _state = MqMachineState::MMS_INITIALIZING;
     onInitStep1_ASYNC();
 }
 
@@ -57,7 +58,7 @@ MqStreamClient::~MqStreamClient()
 
 Err MqStreamClient::exit()
 {
-    if (_state != libtbag::mq::details::MqMachineState::MMS_CLOSED) {
+    if (_state == libtbag::mq::details::MqMachineState::MMS_CLOSED) {
         return Err::E_ILLSTATE;
     }
 
@@ -96,6 +97,8 @@ void MqStreamClient::onTerminatorAsync(Terminator * terminator)
 void MqStreamClient::onTerminatorClose(Terminator * terminator)
 {
     assert(terminator != nullptr);
+    assert(terminator == _terminator.get());
+    _terminator.reset();
     onCloseStep4_TERMINATOR_CLOSED();
 }
 
@@ -323,7 +326,6 @@ void MqStreamClient::onInitStep1_ASYNC()
     assert(isSuccess(CODE));
 
     ++_reconnect;
-    _state = MqMachineState::MMS_INITIALIZING;
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onInitStep1_ASYNC() Asynchronous initialization request.");
 }
 
@@ -806,6 +808,7 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
     while (_exiting > 0) {
         // Busy waiting...
     }
+
     assert(_exiting == 0);
     assert(static_cast<bool>(_terminator));
     assert(!_terminator->isClosing());
@@ -814,6 +817,12 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
 
 void MqStreamClient::onCloseStep4_TERMINATOR_CLOSED()
 {
+    assert(!static_cast<bool>(_client));
+    assert(!static_cast<bool>(_writer));
+    assert(!static_cast<bool>(_terminator));
+    assert(!MqEventQueue::exists());
+    assert(_state == MqMachineState::MMS_CLOSED);
+
     if (INTERNAL.close_cb != nullptr) {
         assert(INTERNAL.parent != nullptr);
         INTERNAL.close_cb(INTERNAL.parent);
