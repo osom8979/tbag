@@ -65,6 +65,9 @@ public:
     MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqLocalQueue();
 
+public:
+    virtual Err exit() override;
+
 private:
     virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;

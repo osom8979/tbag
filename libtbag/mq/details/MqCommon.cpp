@@ -268,9 +268,9 @@ MqParams convertUriToParams(std::string const & uri_string, MqParams const & def
         params.wait_on_activation_timeout_millisec = toValue<unsigned>(itr->second);
     }
 
-    itr = queries.find(SHUTDOWN_WAIT_NAME);
+    itr = queries.find(WAIT_NEXT_OPCODE_NAME);
     if (itr != queries.end()) {
-        params.shutdown_wait_nanosec = toValue<bool>(itr->second);
+        params.wait_next_opcode_nanosec = toValue<bool>(itr->second);
     }
 
     itr = queries.find(VERBOSE_NAME);

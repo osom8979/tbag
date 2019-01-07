@@ -47,6 +47,11 @@ MqStreamServer::~MqStreamServer()
     // EMPTY.
 }
 
+Err MqStreamServer::exit()
+{
+    return Err::E_UNSUPOP;
+}
+
 void MqStreamServer::onInitializerAsync(Initializer * init)
 {
     assert(init != nullptr);
@@ -788,7 +793,7 @@ void MqStreamServer::onTearDownStep1(bool from_message_event)
     assert(isActiveState(_state));
 
     _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.shutdown_wait_nanosec));
+    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
     while (_sending > 0) {
         // Busy waiting...
     }

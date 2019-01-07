@@ -62,7 +62,7 @@ MqBase::MqParams MqBase::params() const
 
 Err MqBase::send(MqMsg const & msg)
 {
-    if (!details::isActiveState(_state)) {
+    if (!libtbag::mq::details::isActiveState(_state)) {
         return Err::E_ILLSTATE;
     }
 

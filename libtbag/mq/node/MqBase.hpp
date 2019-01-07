@@ -70,7 +70,6 @@ protected:
 protected:
     AtomicState _state;
     AtomicInt   _sending;
-    AtomicInt   _exiting;
 
 protected:
     UvLock mutable _wait_lock;

@@ -64,6 +64,22 @@ TEST(MqNodeTest, ServerRel_ClientRel)
     client.reset();
 }
 
+TEST(MqNodeTest, Reconnect)
+{
+//    tttDir_Automatic_Pipe();
+//    auto const PIPE_PATH = std::string("pipe://") + tttDir_Pipe_Get() + EXTENSION_NODE_PARAMS +
+//            "&reconnect=0&wait_activation=0";
+//
+//    //libtbag::log::SeverityGuard guard;
+//    MqUniqueNode client;
+//    ASSERT_NO_THROW(client = connectUniqueNode(PIPE_PATH));
+//
+//    MqUniqueNode server;
+//    ASSERT_NO_THROW(server = bindUniqueNode(PIPE_PATH));
+//
+//    ASSERT_EQ(Err::E_SUCCESS, client->waitEnable());
+}
+
 TEST(MqNodeTest, ClientToServerMessage)
 {
     tttDir_Automatic_Pipe();

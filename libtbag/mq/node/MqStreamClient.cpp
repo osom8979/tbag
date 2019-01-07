@@ -32,8 +32,8 @@ using ShutdownRequest = MqStreamClient::ShutdownRequest;
 using WriteRequest    = MqStreamClient::WriteRequest;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(internal, params, MqMachineState::MMS_CLOSED),
-          _loop(loop), _packer(params.packer_size), _read_error_count(0), _reconnect(0)
+        : MqBase(internal, params, MqMachineState::MMS_INITIALIZING),
+          _loop(loop), _packer(params.packer_size), _read_error_count(0), _reconnect(0), _exiting(0)
 {
     assert(!MqEventQueue::exists());
 
@@ -42,12 +42,38 @@ MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParam
                libtbag::mq::details::getTypeName(params.type), (int)(params.type));
         throw ErrException(Err::E_ILLARGS);
     }
+
+    _terminator = _loop.newHandle<Terminator>(_loop, this);
+    assert(static_cast<bool>(_terminator));
+    assert(_terminator->isInit());
+
     onInitStep1_ASYNC();
 }
 
 MqStreamClient::~MqStreamClient()
 {
     // EMPTY.
+}
+
+Err MqStreamClient::exit()
+{
+    if (_state != libtbag::mq::details::MqMachineState::MMS_CLOSED) {
+        return Err::E_ILLSTATE;
+    }
+
+    // [WARNING]
+    // This point is a dangerous point
+    // where the number of times to send(<code>_exiting</code>) out can be missed.
+    // To avoid this, use sleep() on that thread.
+    //
+    // Note:
+    // the moment when the <code>_state</code> information becomes
+    // <code>MqMachineState::MMS_CLOSED</code>.
+
+    ++_exiting;
+    Err const CODE = Err::E_UNSUPOP;
+    --_exiting;
+    return CODE;
 }
 
 void MqStreamClient::onInitializerAsync(Initializer * init)
@@ -70,7 +96,7 @@ void MqStreamClient::onTerminatorAsync(Terminator * terminator)
 void MqStreamClient::onTerminatorClose(Terminator * terminator)
 {
     assert(terminator != nullptr);
-    tDLogIfD(PARAMS.verbose, "MqStreamClient::onTerminatorClose() Closed terminator.");
+    onCloseStep4_TERMINATOR_CLOSED();
 }
 
 AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
@@ -287,7 +313,7 @@ void MqStreamClient::onInitStep1_ASYNC()
     assert(!static_cast<bool>(_client));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_CLOSED);
+    assert(_state == MqMachineState::MMS_INITIALIZING);
 
     auto init = _loop.newHandle<Initializer>(_loop, this);
     assert(static_cast<bool>(init));
@@ -631,7 +657,7 @@ void MqStreamClient::onTearDownStep1(bool from_message_event)
     assert(isActiveState(_state));
 
     _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.shutdown_wait_nanosec));
+    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
     while (_sending > 0) {
         // Busy waiting...
     }
@@ -750,38 +776,48 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
     assert(!MqEventQueue::exists());
     assert(_state == MqMachineState::MMS_CLOSING);
 
-    tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Close client!");
+    if (_reconnect != libtbag::mq::details::RECONNECT_DONE) {
+        if (PARAMS.reconnect_count == 0 || _reconnect < PARAMS.reconnect_count) {
+            if (PARAMS.reconnect_count == 0) {
+                tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: INFINITY");
+            } else {
+                tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: {}/{}",
+                       _reconnect, PARAMS.reconnect_count);
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(PARAMS.reconnect_delay_millisec));
+            _state = MqMachineState::MMS_INITIALIZING;
+            onInitStep1_ASYNC();
+            return;
+        }
+
+        assert(_reconnect == PARAMS.reconnect_count);
+        tDLogIfW(PARAMS.verbose,
+                 "MqStreamClient::onCloseStep4_CLIENT_CLOSED() "
+                 "The maximum number of reconnection count: {}",
+                 PARAMS.reconnect_count);
+    }
+
+    tDLogI("MqStreamClient::onCloseStep4_TERMINATOR_CLOSED() Close client!");
     _state = MqMachineState::MMS_CLOSED;
     MqBase::disableWait();
 
+    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
+    while (_exiting > 0) {
+        // Busy waiting...
+    }
+    assert(_exiting == 0);
+    assert(static_cast<bool>(_terminator));
+    assert(!_terminator->isClosing());
+    _terminator->close();
+}
+
+void MqStreamClient::onCloseStep4_TERMINATOR_CLOSED()
+{
     if (INTERNAL.close_cb != nullptr) {
         assert(INTERNAL.parent != nullptr);
         INTERNAL.close_cb(INTERNAL.parent);
     }
-
-    if (_reconnect == libtbag::mq::details::RECONNECT_DONE) {
-        tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Close done.");
-        return;
-    }
-
-    if (PARAMS.reconnect_count == 0) {
-        tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect");
-        std::this_thread::sleep_for(std::chrono::milliseconds(PARAMS.reconnect_delay_millisec));
-        onInitStep1_ASYNC();
-        return;
-    }
-
-    if (_reconnect < PARAMS.reconnect_count) {
-        tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: {}/{}",
-               _reconnect, PARAMS.reconnect_count);
-        std::this_thread::sleep_for(std::chrono::milliseconds(PARAMS.reconnect_delay_millisec));
-        onInitStep1_ASYNC();
-        return;
-    }
-
-    assert(_reconnect == PARAMS.reconnect_count);
-    tDLogW("MqStreamClient::onCloseStep4_CLIENT_CLOSED() The maximum number of reconnection count: {}",
-           PARAMS.reconnect_count);
 }
 
 } // namespace node

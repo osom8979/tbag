@@ -33,6 +33,11 @@ MqLocalQueue::~MqLocalQueue()
     // EMPTY.
 }
 
+Err MqLocalQueue::exit()
+{
+    return Err::E_UNSUPOP;
+}
+
 void MqLocalQueue::onCloseMsgDone()
 {
     using namespace libtbag::mq::details;
@@ -107,7 +112,7 @@ void MqLocalQueue::onCloseEvent()
 
     assert(isActiveState(_state));
     _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.shutdown_wait_nanosec));
+    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
     while (_sending > 0) {
         // Busy waiting...
     }

@@ -639,7 +639,7 @@ struct MqParams
      * @remarks
      *  At least 10 nanoseconds is recommended.
      */
-    std::size_t shutdown_wait_nanosec = 1000;
+    std::size_t wait_next_opcode_nanosec = 1000;
 
     /**
      * Verbose log message.
@@ -658,30 +658,30 @@ struct MqParams
     { /* EMPTY. */ }
 };
 
-TBAG_CONSTEXPR static char const * const TCP_IPV6_ONLY_NAME   = "tcp_ipv6";
-TBAG_CONSTEXPR static char const * const REMOVE_PIPE_NAME     = "remove_pipe";
-TBAG_CONSTEXPR static char const * const SEND_QUEUE_SIZE_NAME = "send_queue";
-TBAG_CONSTEXPR static char const * const SEND_MSG_SIZE_NAME   = "send_msg";
-TBAG_CONSTEXPR static char const * const RECV_QUEUE_SIZE_NAME = "recv_queue";
-TBAG_CONSTEXPR static char const * const RECV_MSG_SIZE_NAME   = "recv_msg";
-TBAG_CONSTEXPR static char const * const MAX_NODES_NAME       = "max_nodes";
-TBAG_CONSTEXPR static char const * const PACKER_SIZE_NAME     = "packer_size";
-TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME    = "wait_closing";
-TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME      = "verify_msg";
-TBAG_CONSTEXPR static char const * const READ_ERROR_NAME      = "read_error";
-TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT_NAME = "connect_timeout";
-TBAG_CONSTEXPR static char const * const RECONNECT_COUNT_NAME = "reconnect";
-TBAG_CONSTEXPR static char const * const RECONNECT_DELAY_NAME = "reconnect_delay";
-TBAG_CONSTEXPR static char const * const WAIT_ACTIVATION_NAME = "wait_activation";
-TBAG_CONSTEXPR static char const * const SHUTDOWN_WAIT_NAME   = "shutdown_wait";
-TBAG_CONSTEXPR static char const * const VERBOSE_NAME         = "verbose";
+TBAG_CONSTEXPR static char const * const TCP_IPV6_ONLY_NAME    = "tcp_ipv6";
+TBAG_CONSTEXPR static char const * const REMOVE_PIPE_NAME      = "remove_pipe";
+TBAG_CONSTEXPR static char const * const SEND_QUEUE_SIZE_NAME  = "send_queue";
+TBAG_CONSTEXPR static char const * const SEND_MSG_SIZE_NAME    = "send_msg";
+TBAG_CONSTEXPR static char const * const RECV_QUEUE_SIZE_NAME  = "recv_queue";
+TBAG_CONSTEXPR static char const * const RECV_MSG_SIZE_NAME    = "recv_msg";
+TBAG_CONSTEXPR static char const * const MAX_NODES_NAME        = "max_nodes";
+TBAG_CONSTEXPR static char const * const PACKER_SIZE_NAME      = "packer_size";
+TBAG_CONSTEXPR static char const * const WAIT_CLOSING_NAME     = "wait_closing";
+TBAG_CONSTEXPR static char const * const VERIFY_MSG_NAME       = "verify_msg";
+TBAG_CONSTEXPR static char const * const READ_ERROR_NAME       = "read_error";
+TBAG_CONSTEXPR static char const * const CONNECT_TIMEOUT_NAME  = "connect_timeout";
+TBAG_CONSTEXPR static char const * const RECONNECT_COUNT_NAME  = "reconnect";
+TBAG_CONSTEXPR static char const * const RECONNECT_DELAY_NAME  = "reconnect_delay";
+TBAG_CONSTEXPR static char const * const WAIT_ACTIVATION_NAME  = "wait_activation";
+TBAG_CONSTEXPR static char const * const WAIT_NEXT_OPCODE_NAME = "wait_next_opcode";
+TBAG_CONSTEXPR static char const * const VERBOSE_NAME          = "verbose";
 
 struct MqInterface
 {
     virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
     virtual MqParams params() const = 0;
 
-    //virtual Err exit() = 0;
+    virtual Err exit() = 0;
 
     virtual Err send(MqMsg const & msg) = 0;
     virtual Err recv(MqMsg & msg) = 0;

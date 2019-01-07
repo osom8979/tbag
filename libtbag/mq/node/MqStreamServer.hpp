@@ -232,6 +232,9 @@ public:
     inline SharedStream const & server() const TBAG_NOEXCEPT { return _server; }
     // @formatter:on
 
+public:
+    virtual Err exit() override;
+
 private:
     void onInitializerAsync(Initializer * init);
     void onInitializerClose(Initializer * init);

@@ -206,6 +206,7 @@ public:
 
 public:
     using SharedTimer      = std::shared_ptr<Timer>;
+    using SharedTerminator = std::shared_ptr<Terminator>;
     using SharedStream     = std::shared_ptr<Stream>;
     using SharedWriter     = std::shared_ptr<Writer>;
     using SharedTcpClient  = std::shared_ptr<TcpClient>;
@@ -215,9 +216,10 @@ private:
     Loop & _loop;
 
 private:
-    SharedStream _client;
-    SharedWriter _writer;
-    SharedTimer  _connector;
+    SharedStream     _client;
+    SharedWriter     _writer;
+    SharedTimer      _connector;
+    SharedTerminator _terminator;
 
 private:
     MsgPacket _packer;
@@ -230,6 +232,9 @@ private:
 private:
     std::size_t _reconnect;
 
+private:
+    AtomicInt _exiting;
+
 public:
     MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamClient();
@@ -239,6 +244,9 @@ public:
     inline SharedStream       & client()       TBAG_NOEXCEPT { return _client; }
     inline SharedStream const & client() const TBAG_NOEXCEPT { return _client; }
     // @formatter:on
+
+public:
+    virtual Err exit() override;
 
 private:
     void onInitializerAsync(Initializer * init);
@@ -308,6 +316,7 @@ private:
     void onCloseStep2_EVENT_QUEUE_CLOSED();
     void onCloseStep3_WRITER_CLOSED();
     void onCloseStep4_CLIENT_CLOSED();
+    void onCloseStep4_TERMINATOR_CLOSED();
 };
 
 } // namespace node

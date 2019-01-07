@@ -157,6 +157,9 @@ public:
     MqUdp(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqUdp();
 
+public:
+    virtual Err exit() override;
+
 private:
     void close();
     void shutdownAndClose();
