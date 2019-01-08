@@ -23,8 +23,16 @@ namespace node {
 using AfterAction = MqLocalQueue::AfterAction;
 
 MqLocalQueue::MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(loop, internal, params, MqMachineState::MMS_ACTIVE)
+        : MqBase(loop, internal, params)
 {
+    assert(!MqEventQueue::exists());
+
+    if (params.type != MqType::MT_LOCAL) {
+        tDLogE("MqLocalQueue::MqLocalQueue() Unsupported type: {}({})", getTypeName(), getTypeInteger());
+        throw ErrException(Err::E_ILLARGS);
+    }
+
+    _state = MqMachineState::MMS_ACTIVE;
     MqBase::enableWait();
 }
 

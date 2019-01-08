@@ -32,14 +32,13 @@ using ShutdownRequest = MqStreamClient::ShutdownRequest;
 using WriteRequest    = MqStreamClient::WriteRequest;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(internal, params, MqMachineState::MMS_CLOSED),
+        : MqBase(internal, params),
           _loop(loop), _packer(params.packer_size), _read_error_count(0), _reconnect(0)
 {
     assert(!MqEventQueue::exists());
 
     if (params.type != MqType::MT_PIPE && params.type != MqType::MT_TCP) {
-        tDLogE("MqStreamClient::MqStreamClient() Unsupported type: {}({})",
-               libtbag::mq::details::getTypeName(params.type), (int)(params.type));
+        tDLogE("MqStreamClient::MqStreamClient() Unsupported type: {}({})", getTypeName(), getTypeInteger());
         throw ErrException(Err::E_ILLARGS);
     }
 

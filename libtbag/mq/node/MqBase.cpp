@@ -18,16 +18,16 @@ namespace node {
 using MqMachineState = MqBase::MqMachineState;
 using MqParams       = MqBase::MqParams;
 
-MqBase::MqBase(MqInternal const & internal, MqParams const & params, MqMachineState state)
+MqBase::MqBase(MqInternal const & internal, MqParams const & params)
         : MqEventQueue(), INTERNAL(internal), PARAMS(params),
           _receives(params.recv_queue_size, params.recv_msg_size),
-          _state(state), _sending(0), _exiting(0), _wait_enable(false)
+          _state(MqMachineState::MMS_CLOSED), _sending(0), _exiting(0), _wait_enable(false)
 {
     // EMPTY.
 }
 
-MqBase::MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state)
-        : MqBase(internal, params, state)
+MqBase::MqBase(Loop & loop, MqInternal const & internal, MqParams const & params)
+        : MqBase(internal, params)
 {
     if (!MqEventQueue::initialize(loop, params.send_queue_size, params.send_msg_size)) {
         throw std::bad_alloc();

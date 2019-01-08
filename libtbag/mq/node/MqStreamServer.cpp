@@ -29,14 +29,12 @@ using binf        = MqStreamServer::binf;
 using AfterAction = MqStreamServer::AfterAction;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(internal, params, MqMachineState::MMS_INITIALIZED),
-          _loop(loop), _packer(params.packer_size)
+        : MqBase(internal, params), _loop(loop), _packer(params.packer_size)
 {
     assert(!MqEventQueue::exists());
 
     if (params.type != MqType::MT_PIPE && params.type != MqType::MT_TCP) {
-        tDLogE("MqStreamServer::MqStreamServer() Unsupported type: {}({})",
-               libtbag::mq::details::getTypeName(params.type), (int)(params.type));
+        tDLogE("MqStreamServer::MqStreamServer() Unsupported type: {}({})", getTypeName(), getTypeInteger());
         throw ErrException(Err::E_ILLARGS);
     }
 

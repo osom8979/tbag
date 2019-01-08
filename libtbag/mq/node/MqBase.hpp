@@ -171,9 +171,15 @@ protected:
     bool           _wait_enable;
 
 protected:
-    MqBase(MqInternal const & internal, MqParams const & params, MqMachineState state);
-    MqBase(Loop & loop, MqInternal const & internal, MqParams const & params, MqMachineState state);
+    MqBase(MqInternal const & internal, MqParams const & params);
+    MqBase(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqBase();
+
+public:
+    inline int getTypeInteger() const TBAG_NOEXCEPT
+    { return static_cast<int>(PARAMS.type); }
+    inline char const * const getTypeName() const TBAG_NOEXCEPT
+    { return libtbag::mq::details::getTypeName(PARAMS.type); }
 
 protected:
     void enableWait(bool enable = true);
