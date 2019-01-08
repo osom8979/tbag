@@ -46,12 +46,21 @@ public:
     virtual ~MqLocalQueue();
 
 private:
+    virtual void onTerminatorAsync(Terminator * terminator) override;
+    virtual void onTerminatorClose(Terminator * terminator) override;
+
     virtual void onCloseMsgDone() override;
     virtual AfterAction onMsg(AsyncMsg * msg) override;
 
+    void onRead(AsyncMsg * msg);
+
 private:
-    void onMsgEvent(AsyncMsg * msg);
-    void onCloseEvent();
+    /**
+     * Close process.
+     */
+    void onCloseStep1();
+    void onCloseStep2_EVENT_QUEUE_CLOSED();
+    void onCloseStep3_TERMINATOR_CLOSED();
 };
 
 } // namespace node
