@@ -33,7 +33,7 @@ using WriteRequest    = MqStreamClient::WriteRequest;
 
 MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params)
         : MqBase(internal, params, MqMachineState::MMS_CLOSED),
-          _loop(loop), _packer(params.packer_size), _read_error_count(0), _reconnect(0), _exiting(0)
+          _loop(loop), _packer(params.packer_size), _read_error_count(0), _reconnect(0)
 {
     assert(!MqEventQueue::exists());
 
@@ -54,27 +54,6 @@ MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParam
 MqStreamClient::~MqStreamClient()
 {
     // EMPTY.
-}
-
-Err MqStreamClient::exit()
-{
-    if (_state == libtbag::mq::details::MqMachineState::MMS_CLOSED) {
-        return Err::E_ILLSTATE;
-    }
-
-    // [WARNING]
-    // This point is a dangerous point
-    // where the number of times to send(<code>_exiting</code>) out can be missed.
-    // To avoid this, use sleep() on that thread.
-    //
-    // Note:
-    // the moment when the <code>_state</code> information becomes
-    // <code>MqMachineState::MMS_CLOSED</code>.
-
-    ++_exiting;
-    Err const CODE = Err::E_UNSUPOP;
-    --_exiting;
-    return CODE;
 }
 
 void MqStreamClient::onInitializerAsync(Initializer * init)
@@ -145,7 +124,7 @@ void MqStreamClient::onWriterClose(Writer * writer)
     onCloseStep3_WRITER_CLOSED();
 }
 
-void MqStreamClient::onCloseTimer(CloseTimer * timer)
+void MqStreamClient::onCloseTimerTimer(CloseTimer * timer)
 {
     assert(timer != nullptr);
     timer->close();

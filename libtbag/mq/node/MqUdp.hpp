@@ -50,72 +50,17 @@ namespace node {
 class TBAG_API MqUdp : public libtbag::mq::node::MqBase
 {
 public:
-    using Loop  = libtbag::uvpp::Loop;
-    using Async = libtbag::uvpp::Async;
-    using Udp   = libtbag::uvpp::Udp;
-    using Timer = libtbag::uvpp::Timer;
+    using Udp = libtbag::uvpp::Udp;
 
     using UdpSendRequest = libtbag::uvpp::UdpSendRequest;
 
     using SharedHandle = Loop::SharedHandle;
     using WeakHandle   = Loop::WeakHandle;
 
-    using Buffer = libtbag::util::Buffer;
-    using binf   = libtbag::util::binf;
-    using cbinf  = libtbag::util::cbinf;
-
-    using MqEvent        = libtbag::mq::details::MqEvent;
-    using MqType         = libtbag::mq::details::MqType;
-    using MqRequestState = libtbag::mq::details::MqRequestState;
-    using MqMachineState = libtbag::mq::details::MqMachineState;
-    using MqMsg          = libtbag::mq::details::MqMsg;
-    using MqEventQueue   = libtbag::mq::details::MqEventQueue;
-    using MqQueue        = libtbag::mq::details::MqQueue;
-    using MqParams       = libtbag::mq::details::MqParams;
-
-    using AsyncMsg        = MqEventQueue::AsyncMsg;
-    using AfterAction     = MqEventQueue::AfterAction;
-    using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
-    using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
-
     using SocketAddress = libtbag::network::SocketAddress;
     using MsgPacket     = libtbag::proto::MsgPacket;
 
 public:
-    struct Writer : public Async
-    {
-        MqUdp * parent = nullptr;
-
-        MqRequestState state;
-        AsyncMsgQueue  queue;
-
-        Writer(Loop & loop, MqUdp * p)
-                : Async(loop), parent(p), state(MqRequestState::MRS_WAITING), queue()
-        { assert(parent != nullptr); }
-        virtual ~Writer()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onWriterAsync(this); }
-        virtual void onClose() override
-        { parent->onWriterClose(this); }
-    };
-
-    struct CloseTimer : public Timer
-    {
-        MqUdp * parent = nullptr;
-
-        CloseTimer(Loop & loop, MqUdp * p) : Timer(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~CloseTimer()
-        { /* EMPTY. */ }
-
-        virtual void onTimer() override
-        { parent->onCloseTimer(this); }
-        virtual void onClose() override
-        { parent->onCloseTimerClose(this); }
-    };
-
     struct Node : public Udp
     {
         MqUdp * parent = nullptr;
@@ -157,8 +102,12 @@ public:
     MqUdp(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqUdp();
 
-public:
-    virtual Err exit() override;
+private:
+    virtual void onInitializerAsync(Initializer * init) override;
+    virtual void onInitializerClose(Initializer * init) override;
+
+    virtual void onTerminatorAsync(Terminator * terminator) override;
+    virtual void onTerminatorClose(Terminator * terminator) override;
 
 private:
     void close();
@@ -177,12 +126,11 @@ private:
     void afterProcessMessage(AsyncMsg * msg);
 
 private:
-    void onWriterAsync(Writer * writer);
-    void onWriterClose(Writer * writer);
+    virtual void onWriterAsync(Writer * writer) override;
+    virtual void onWriterClose(Writer * writer) override;
 
-private:
-    void onCloseTimer(CloseTimer * timer);
-    void onCloseTimerClose(CloseTimer * timer);
+    virtual void onCloseTimerTimer(CloseTimer * timer) override;
+    virtual void onCloseTimerClose(CloseTimer * timer) override;
 
 private:
     void onSend(UdpSendRequest & request, Err code);

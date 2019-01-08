@@ -30,7 +30,7 @@ using AfterAction = MqStreamServer::AfterAction;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params)
         : MqBase(internal, params, MqMachineState::MMS_INITIALIZED),
-          _loop(loop), _packer(params.packer_size), _exiting(0)
+          _loop(loop), _packer(params.packer_size)
 {
     assert(!MqEventQueue::exists());
 
@@ -51,27 +51,6 @@ MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParam
 MqStreamServer::~MqStreamServer()
 {
     // EMPTY.
-}
-
-Err MqStreamServer::exit()
-{
-    if (_state == libtbag::mq::details::MqMachineState::MMS_CLOSED) {
-        return Err::E_ILLSTATE;
-    }
-
-    // [WARNING]
-    // This point is a dangerous point
-    // where the number of times to send(<code>_exiting</code>) out can be missed.
-    // To avoid this, use sleep() on that thread.
-    //
-    // Note:
-    // the moment when the <code>_state</code> information becomes
-    // <code>MqMachineState::MMS_CLOSED</code>.
-
-    ++_exiting;
-    Err const CODE = Err::E_UNSUPOP;
-    --_exiting;
-    return CODE;
 }
 
 void MqStreamServer::onInitializerAsync(Initializer * init)
@@ -141,7 +120,7 @@ void MqStreamServer::onWriterClose(Writer * writer)
     onCloseStep3_WRITER_CLOSED();
 }
 
-void MqStreamServer::onCloseTimer(CloseTimer * timer)
+void MqStreamServer::onCloseTimerTimer(CloseTimer * timer)
 {
     assert(timer != nullptr);
     timer->close();

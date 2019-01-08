@@ -33,11 +33,6 @@ MqLocalQueue::~MqLocalQueue()
     // EMPTY.
 }
 
-Err MqLocalQueue::exit()
-{
-    return Err::E_UNSUPOP;
-}
-
 void MqLocalQueue::onCloseMsgDone()
 {
     using namespace libtbag::mq::details;

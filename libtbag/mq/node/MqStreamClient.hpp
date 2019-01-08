@@ -58,105 +58,18 @@ namespace node {
 class TBAG_API MqStreamClient : public libtbag::mq::node::MqBase
 {
 public:
-    using Loop   = libtbag::uvpp::Loop;
     using Stream = libtbag::uvpp::Stream;
-    using Async  = libtbag::uvpp::Async;
     using Tcp    = libtbag::uvpp::Tcp;
     using Pipe   = libtbag::uvpp::Pipe;
-    using Timer  = libtbag::uvpp::Timer;
 
     using ConnectRequest  = libtbag::uvpp::ConnectRequest;
     using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
     using WriteRequest    = libtbag::uvpp::WriteRequest;
 
-    using Buffer = libtbag::util::Buffer;
-    using binf   = libtbag::util::binf;
-    using cbinf  = libtbag::util::cbinf;
-
-    using MqEvent        = libtbag::mq::details::MqEvent;
-    using MqType         = libtbag::mq::details::MqType;
-    using MqRequestState = libtbag::mq::details::MqRequestState;
-    using MqMachineState = libtbag::mq::details::MqMachineState;
-    using MqMsg          = libtbag::mq::details::MqMsg;
-    using MqEventQueue   = libtbag::mq::details::MqEventQueue;
-    using MqQueue        = libtbag::mq::details::MqQueue;
-    using MqParams       = libtbag::mq::details::MqParams;
-
-    using AsyncMsg        = MqEventQueue::AsyncMsg;
-    using AfterAction     = MqEventQueue::AfterAction;
-    using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
-    using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
-
     using SocketAddress = libtbag::network::SocketAddress;
     using MsgPacket     = libtbag::proto::MsgPacket;
 
 private:
-    struct Initializer : public Async
-    {
-        MqStreamClient * parent = nullptr;
-
-        Initializer(Loop & loop, MqStreamClient * p)
-                : Async(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~Initializer()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onInitializerAsync(this); }
-        virtual void onClose() override
-        { parent->onInitializerClose(this); }
-    };
-
-    struct Terminator : public Async
-    {
-        MqStreamClient * parent = nullptr;
-
-        Terminator(Loop & loop, MqStreamClient * p)
-                : Async(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~Terminator()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onTerminatorAsync(this); }
-        virtual void onClose() override
-        { parent->onTerminatorClose(this); }
-    };
-
-    struct Writer : public Async
-    {
-        MqStreamClient * parent = nullptr;
-
-        MqRequestState state;
-        AsyncMsgQueue  queue;
-
-        Writer(Loop & loop, MqStreamClient * p)
-                : Async(loop), parent(p), state(MqRequestState::MRS_WAITING), queue()
-        { assert(parent != nullptr); }
-        virtual ~Writer()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onWriterAsync(this); }
-        virtual void onClose() override
-        { parent->onWriterClose(this); }
-    };
-
-    struct CloseTimer : public Timer
-    {
-        MqStreamClient * parent = nullptr;
-
-        CloseTimer(Loop & loop, MqStreamClient * p) : Timer(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~CloseTimer()
-        { /* EMPTY. */ }
-
-        virtual void onTimer() override
-        { parent->onCloseTimer(this); }
-        virtual void onClose() override
-        { parent->onCloseTimerClose(this); }
-    };
-
     struct ConnectTimer : public Timer
     {
         MqStreamClient * parent = nullptr;
@@ -206,7 +119,6 @@ public:
 
 public:
     using SharedTimer      = std::shared_ptr<Timer>;
-    using SharedTerminator = std::shared_ptr<Terminator>;
     using SharedStream     = std::shared_ptr<Stream>;
     using SharedWriter     = std::shared_ptr<Writer>;
     using SharedTcpClient  = std::shared_ptr<TcpClient>;
@@ -216,10 +128,9 @@ private:
     Loop & _loop;
 
 private:
-    SharedStream     _client;
-    SharedWriter     _writer;
-    SharedTimer      _connector;
-    SharedTerminator _terminator;
+    SharedStream _client;
+    SharedWriter _writer;
+    SharedTimer  _connector;
 
 private:
     MsgPacket _packer;
@@ -232,9 +143,6 @@ private:
 private:
     std::size_t _reconnect;
 
-private:
-    AtomicInt _exiting;
-
 public:
     MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamClient();
@@ -245,25 +153,23 @@ public:
     inline SharedStream const & client() const TBAG_NOEXCEPT { return _client; }
     // @formatter:on
 
-public:
-    virtual Err exit() override;
-
 private:
-    void onInitializerAsync(Initializer * init);
-    void onInitializerClose(Initializer * init);
+    virtual void onInitializerAsync(Initializer * init) override;
+    virtual void onInitializerClose(Initializer * init) override;
 
-    void onTerminatorAsync(Terminator * terminator);
-    void onTerminatorClose(Terminator * terminator);
+    virtual void onTerminatorAsync(Terminator * terminator) override;
+    virtual void onTerminatorClose(Terminator * terminator) override;
 
     virtual AfterAction onMsg(AsyncMsg * msg) override;
     virtual void onCloseMsgDone() override;
 
-    void onWriterAsync(Writer * writer);
-    void onWriterClose(Writer * writer);
+    virtual void onWriterAsync(Writer * writer) override;
+    virtual void onWriterClose(Writer * writer) override;
 
-    void onCloseTimer(CloseTimer * timer);
-    void onCloseTimerClose(CloseTimer * timer);
+    virtual void onCloseTimerTimer(CloseTimer * timer) override;
+    virtual void onCloseTimerClose(CloseTimer * timer) override;
 
+private:
     void onConnectTimer(ConnectTimer * timer);
     void onConnectTimerClose(ConnectTimer * timer);
 

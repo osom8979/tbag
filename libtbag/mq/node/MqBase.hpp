@@ -19,10 +19,14 @@
 #include <libtbag/mq/details/MqEventQueue.hpp>
 #include <libtbag/mq/details/MqQueue.hpp>
 
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Async.hpp>
+#include <libtbag/uvpp/Timer.hpp>
+
 #include <libtbag/lock/UvLock.hpp>
 #include <libtbag/lock/UvCondition.hpp>
-#include <libtbag/uvpp/Loop.hpp>
 
+#include <cassert>
 #include <atomic>
 
 // -------------------
@@ -42,23 +46,109 @@ class TBAG_API MqBase : protected libtbag::mq::details::MqEventQueue,
                         public    libtbag::mq::details::MqInterface
 {
 public:
+    using Loop  = libtbag::uvpp::Loop;
+    using Async = libtbag::uvpp::Async;
+    using Timer = libtbag::uvpp::Timer;
+
+    using Buffer = libtbag::util::Buffer;
+    using binf   = libtbag::util::binf;
+    using cbinf  = libtbag::util::cbinf;
+
+    using MqEvent        = libtbag::mq::details::MqEvent;
+    using MqType         = libtbag::mq::details::MqType;
+    using MqRequestState = libtbag::mq::details::MqRequestState;
     using MqMachineState = libtbag::mq::details::MqMachineState;
-    using MqInternal     = libtbag::mq::details::MqInternal;
-    using MqIsConsume    = libtbag::mq::details::MqIsConsume;
-    using MqParams       = libtbag::mq::details::MqParams;
     using MqMsg          = libtbag::mq::details::MqMsg;
+    using MqEventQueue   = libtbag::mq::details::MqEventQueue;
     using MqQueue        = libtbag::mq::details::MqQueue;
+    using MqInternal     = libtbag::mq::details::MqInternal;
+    using MqParams       = libtbag::mq::details::MqParams;
+    using MqIsConsume    = libtbag::mq::details::MqIsConsume;
 
-public:
-    using Loop = libtbag::uvpp::Loop;
+    using AsyncMsg        = MqEventQueue::AsyncMsg;
+    using AfterAction     = MqEventQueue::AfterAction;
+    using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
+    using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
-public:
     using AtomicState = std::atomic<MqMachineState>;
     using AtomicInt   = std::atomic_int;
 
-public:
     using UvLock      = libtbag::lock::UvLock;
     using UvCondition = libtbag::lock::UvCondition;
+
+public:
+    struct Initializer : public Async
+    {
+        MqBase * parent = nullptr;
+
+        Initializer(Loop & loop, MqBase * p)
+                : Async(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~Initializer()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onInitializerAsync(this); }
+        virtual void onClose() override
+        { parent->onInitializerClose(this); }
+    };
+
+    struct Terminator : public Async
+    {
+        MqBase * parent = nullptr;
+
+        Terminator(Loop & loop, MqBase * p)
+                : Async(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~Terminator()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onTerminatorAsync(this); }
+        virtual void onClose() override
+        { parent->onTerminatorClose(this); }
+    };
+
+    struct Writer : public Async
+    {
+        MqBase * parent = nullptr;
+
+        MqRequestState state;
+        AsyncMsgQueue  queue;
+        std::size_t    write_count;
+
+        Writer(Loop & loop, MqBase * p)
+                : Async(loop), parent(p),
+                  state(MqRequestState::MRS_WAITING),
+                  queue(), write_count(0)
+        { assert(parent != nullptr); }
+        virtual ~Writer()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onWriterAsync(this); }
+        virtual void onClose() override
+        { parent->onWriterClose(this); }
+    };
+
+    struct CloseTimer : public Timer
+    {
+        MqBase * parent = nullptr;
+
+        CloseTimer(Loop & loop, MqBase * p) : Timer(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~CloseTimer()
+        { /* EMPTY. */ }
+
+        virtual void onTimer() override
+        { parent->onCloseTimerTimer(this); }
+        virtual void onClose() override
+        { parent->onCloseTimerClose(this); }
+    };
+
+public:
+    using SharedInitializer = std::shared_ptr<Initializer>;
+    using SharedTerminator  = std::shared_ptr<Terminator>;
 
 public:
     MqInternal const INTERNAL;
@@ -68,8 +158,12 @@ protected:
     MqQueue _receives;
 
 protected:
+    SharedTerminator _terminator;
+
+protected:
     AtomicState _state;
     AtomicInt   _sending;
+    AtomicInt   _exiting;
 
 protected:
     UvLock mutable _wait_lock;
@@ -85,15 +179,28 @@ protected:
     void enableWait(bool enable = true);
     void disableWait();
 
+protected:
+    virtual void onInitializerAsync(Initializer * init) { /* EMPTY. */ }
+    virtual void onInitializerClose(Initializer * init) { /* EMPTY. */ }
+
+    virtual void onTerminatorAsync(Terminator * terminator) { /* EMPTY. */ }
+    virtual void onTerminatorClose(Terminator * terminator) { /* EMPTY. */ }
+
+    virtual void onWriterAsync(Writer * writer) { /* EMPTY. */ }
+    virtual void onWriterClose(Writer * writer) { /* EMPTY. */ }
+
+    virtual void onCloseTimerTimer(CloseTimer * timer) { /* EMPTY. */ }
+    virtual void onCloseTimerClose(CloseTimer * timer) { /* EMPTY. */ }
+
 public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override;
     virtual MqParams params() const override;
 
-public:
+    virtual Err exit() override;
+
     virtual Err send(MqMsg const & msg) override;
     virtual Err recv(MqMsg & msg) override;
 
-public:
     virtual Err waitEnable(uint64_t timeout_nano) override;
     virtual Err waitRecv(MqMsg & msg, uint64_t timeout_nano) override;
 };

@@ -57,109 +57,18 @@ namespace node {
 class TBAG_API MqStreamServer : public libtbag::mq::node::MqBase
 {
 public:
-    using Loop   = libtbag::uvpp::Loop;
     using Stream = libtbag::uvpp::Stream;
-    using Async  = libtbag::uvpp::Async;
     using Tcp    = libtbag::uvpp::Tcp;
     using Pipe   = libtbag::uvpp::Pipe;
-    using Timer  = libtbag::uvpp::Timer;
 
     using ConnectRequest  = libtbag::uvpp::ConnectRequest;
     using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
     using WriteRequest    = libtbag::uvpp::WriteRequest;
 
-    using Buffer = libtbag::util::Buffer;
-    using binf   = libtbag::util::binf;
-    using cbinf  = libtbag::util::cbinf;
-
-    using MqEvent        = libtbag::mq::details::MqEvent;
-    using MqType         = libtbag::mq::details::MqType;
-    using MqRequestState = libtbag::mq::details::MqRequestState;
-    using MqMachineState = libtbag::mq::details::MqMachineState;
-    using MqMsg          = libtbag::mq::details::MqMsg;
-    using MqEventQueue   = libtbag::mq::details::MqEventQueue;
-    using MqQueue        = libtbag::mq::details::MqQueue;
-    using MqParams       = libtbag::mq::details::MqParams;
-    using MqIsConsume    = libtbag::mq::details::MqIsConsume;
-
-    using AsyncMsg        = MqEventQueue::AsyncMsg;
-    using AfterAction     = MqEventQueue::AfterAction;
-    using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
-    using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
-
     using SocketAddress = libtbag::network::SocketAddress;
     using MsgPacket     = libtbag::proto::MsgPacket;
 
 private:
-    struct Initializer : public Async
-    {
-        MqStreamServer * parent = nullptr;
-
-        Initializer(Loop & loop, MqStreamServer * p)
-                : Async(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~Initializer()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onInitializerAsync(this); }
-        virtual void onClose() override
-        { parent->onInitializerClose(this); }
-    };
-
-    struct Terminator : public Async
-    {
-        MqStreamServer * parent = nullptr;
-
-        Terminator(Loop & loop, MqStreamServer * p)
-                : Async(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~Terminator()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onTerminatorAsync(this); }
-        virtual void onClose() override
-        { parent->onTerminatorClose(this); }
-    };
-
-    struct Writer : public Async
-    {
-        MqStreamServer * parent = nullptr;
-
-        MqRequestState state;
-        AsyncMsgQueue  queue;
-        std::size_t    write_count;
-
-        Writer(Loop & loop, MqStreamServer * p)
-                : Async(loop), parent(p),
-                  state(MqRequestState::MRS_WAITING),
-                  queue(), write_count(0)
-        { assert(parent != nullptr); }
-        virtual ~Writer()
-        { /* EMPTY. */ }
-
-        virtual void onAsync() override
-        { parent->onWriterAsync(this); }
-        virtual void onClose() override
-        { parent->onWriterClose(this); }
-    };
-
-    struct CloseTimer : public Timer
-    {
-        MqStreamServer * parent = nullptr;
-
-        CloseTimer(Loop & loop, MqStreamServer * p) : Timer(loop), parent(p)
-        { assert(parent != nullptr); }
-        virtual ~CloseTimer()
-        { /* EMPTY. */ }
-
-        virtual void onTimer() override
-        { parent->onCloseTimer(this); }
-        virtual void onClose() override
-        { parent->onCloseTimerClose(this); }
-    };
-
     template <typename _BaseT>
     struct Node : public _BaseT
     {
@@ -214,7 +123,6 @@ public:
     using PipeServer = Server<Pipe>;
 
 public:
-    using SharedTerminator = std::shared_ptr<Terminator>;
     using SharedStream     = std::shared_ptr<Stream>;
     using SharedWriter     = std::shared_ptr<Writer>;
     using SharedTcpNode    = std::shared_ptr<TcpNode>;
@@ -230,18 +138,14 @@ private:
     Loop & _loop;
 
 private:
-    SharedStream     _server;
-    SharedWriter     _writer;
-    SharedTerminator _terminator;
+    SharedStream _server;
+    SharedWriter _writer;
 
 private:
     NodeSet _nodes;
 
 private:
     MsgPacket _packer;
-
-private:
-    AtomicInt _exiting;
 
 public:
     MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params);
@@ -253,25 +157,23 @@ public:
     inline SharedStream const & server() const TBAG_NOEXCEPT { return _server; }
     // @formatter:on
 
-public:
-    virtual Err exit() override;
-
 private:
-    void onInitializerAsync(Initializer * init);
-    void onInitializerClose(Initializer * init);
+    virtual void onInitializerAsync(Initializer * init) override;
+    virtual void onInitializerClose(Initializer * init) override;
 
-    void onTerminatorAsync(Terminator * terminator);
-    void onTerminatorClose(Terminator * terminator);
+    virtual void onTerminatorAsync(Terminator * terminator) override;
+    virtual void onTerminatorClose(Terminator * terminator) override;
 
     virtual AfterAction onMsg(AsyncMsg * msg) override;
     virtual void onCloseMsgDone() override;
 
-    void onWriterAsync(Writer * writer);
-    void onWriterClose(Writer * writer);
+    virtual void onWriterAsync(Writer * writer) override;
+    virtual void onWriterClose(Writer * writer) override;
 
-    void onCloseTimer(CloseTimer * timer);
-    void onCloseTimerClose(CloseTimer * timer);
+    virtual void onCloseTimerTimer(CloseTimer * timer) override;
+    virtual void onCloseTimerClose(CloseTimer * timer) override;
 
+private:
     void onNodeShutdown(Stream * node, ShutdownRequest & request, Err code);
     void onNodeWrite   (Stream * node, WriteRequest & request, Err code);
     binf onNodeAlloc   (Stream * node, std::size_t suggested_size);

@@ -75,9 +75,20 @@ MqUdp::~MqUdp()
     // EMPTY.
 }
 
-Err MqUdp::exit()
+void MqUdp::onInitializerAsync(Initializer * init)
 {
-    return Err::E_UNSUPOP;
+}
+
+void MqUdp::onInitializerClose(Initializer * init)
+{
+}
+
+void MqUdp::onTerminatorAsync(Terminator * terminator)
+{
+}
+
+void MqUdp::onTerminatorClose(Terminator * terminator)
+{
 }
 
 void MqUdp::close()
@@ -301,7 +312,7 @@ void MqUdp::onWriterClose(Writer * writer)
     _node->close();
 }
 
-void MqUdp::onCloseTimer(CloseTimer * timer)
+void MqUdp::onCloseTimerTimer(CloseTimer * timer)
 {
     assert(timer != nullptr);
 

@@ -15,10 +15,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace mq   {
 namespace node {
 
+using MqMachineState = MqBase::MqMachineState;
+using MqParams       = MqBase::MqParams;
+
 MqBase::MqBase(MqInternal const & internal, MqParams const & params, MqMachineState state)
         : MqEventQueue(), INTERNAL(internal), PARAMS(params),
           _receives(params.recv_queue_size, params.recv_msg_size),
-          _state(state), _sending(0), _wait_enable(false)
+          _state(state), _sending(0), _exiting(0), _wait_enable(false)
 {
     // EMPTY.
 }
@@ -58,6 +61,29 @@ MqBase::MqMachineState MqBase::state() const TBAG_NOEXCEPT
 MqBase::MqParams MqBase::params() const
 {
     return PARAMS;
+}
+
+Err MqBase::exit()
+{
+    if (_state == libtbag::mq::details::MqMachineState::MMS_CLOSED) {
+        return Err::E_ILLSTATE;
+    }
+
+    assert(static_cast<bool>(_terminator));
+
+    // [WARNING]
+    // This point is a dangerous point
+    // where the number of times to send(<code>_exiting</code>) out can be missed.
+    // To avoid this, use sleep() on that thread.
+    //
+    // Note:
+    // the moment when the <code>_state</code> information becomes
+    // <code>MqMachineState::MMS_CLOSED</code>.
+
+    ++_exiting;
+    Err const CODE = _terminator->send();
+    --_exiting;
+    return CODE;
 }
 
 Err MqBase::send(MqMsg const & msg)

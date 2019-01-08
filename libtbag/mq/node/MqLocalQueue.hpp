@@ -42,34 +42,8 @@ namespace node {
 class TBAG_API MqLocalQueue : public libtbag::mq::node::MqBase
 {
 public:
-    using Loop = libtbag::uvpp::Loop;
-
-    using MqEvent        = libtbag::mq::details::MqEvent;
-    using MqType         = libtbag::mq::details::MqType;
-    using MqRequestState = libtbag::mq::details::MqRequestState;
-    using MqMachineState = libtbag::mq::details::MqMachineState;
-    using MqMsg          = libtbag::mq::details::MqMsg;
-    using MqEventQueue   = libtbag::mq::details::MqEventQueue;
-    using MqQueue        = libtbag::mq::details::MqQueue;
-
-    using Buffer = libtbag::util::Buffer;
-    using binf   = libtbag::util::binf;
-    using cbinf  = libtbag::util::cbinf;
-
-    using AsyncMsg        = MqEventQueue::AsyncMsg;
-    using AfterAction     = MqEventQueue::AfterAction;
-    using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
-    using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
-
-private:
-    AtomicInt _exiting;
-
-public:
     MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqLocalQueue();
-
-public:
-    virtual Err exit() override;
 
 private:
     virtual void onCloseMsgDone() override;
