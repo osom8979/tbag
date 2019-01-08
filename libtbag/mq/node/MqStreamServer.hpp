@@ -107,6 +107,22 @@ private:
         { parent->onInitializerClose(this); }
     };
 
+    struct Terminator : public Async
+    {
+        MqStreamServer * parent = nullptr;
+
+        Terminator(Loop & loop, MqStreamServer * p)
+                : Async(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~Terminator()
+        { /* EMPTY. */ }
+
+        virtual void onAsync() override
+        { parent->onTerminatorAsync(this); }
+        virtual void onClose() override
+        { parent->onTerminatorClose(this); }
+    };
+
     struct Writer : public Async
     {
         MqStreamServer * parent = nullptr;
@@ -198,6 +214,7 @@ public:
     using PipeServer = Server<Pipe>;
 
 public:
+    using SharedTerminator = std::shared_ptr<Terminator>;
     using SharedStream     = std::shared_ptr<Stream>;
     using SharedWriter     = std::shared_ptr<Writer>;
     using SharedTcpNode    = std::shared_ptr<TcpNode>;
@@ -213,14 +230,18 @@ private:
     Loop & _loop;
 
 private:
-    SharedStream _server;
-    SharedWriter _writer;
+    SharedStream     _server;
+    SharedWriter     _writer;
+    SharedTerminator _terminator;
 
 private:
     NodeSet _nodes;
 
 private:
     MsgPacket _packer;
+
+private:
+    AtomicInt _exiting;
 
 public:
     MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params);
@@ -238,6 +259,9 @@ public:
 private:
     void onInitializerAsync(Initializer * init);
     void onInitializerClose(Initializer * init);
+
+    void onTerminatorAsync(Terminator * terminator);
+    void onTerminatorClose(Terminator * terminator);
 
     virtual AfterAction onMsg(AsyncMsg * msg) override;
     virtual void onCloseMsgDone() override;
@@ -297,6 +321,7 @@ private:
     void onCloseStep2_EVENT_QUEUE_CLOSED();
     void onCloseStep3_WRITER_CLOSED();
     void onCloseStep4_CLIENT_CLOSED();
+    void onCloseStep5_TERMINATOR_CLOSED();
 };
 
 } // namespace node

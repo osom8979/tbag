@@ -61,6 +61,9 @@ public:
     using AsyncMsgPointer = libtbag::container::Pointer<AsyncMsg>;
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
+private:
+    AtomicInt _exiting;
+
 public:
     MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqLocalQueue();

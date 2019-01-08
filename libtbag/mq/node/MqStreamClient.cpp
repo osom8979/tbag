@@ -99,7 +99,7 @@ void MqStreamClient::onTerminatorClose(Terminator * terminator)
     assert(terminator != nullptr);
     assert(terminator == _terminator.get());
     _terminator.reset();
-    onCloseStep4_TERMINATOR_CLOSED();
+    onCloseStep5_TERMINATOR_CLOSED();
 }
 
 AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
@@ -815,7 +815,7 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
     _terminator->close();
 }
 
-void MqStreamClient::onCloseStep4_TERMINATOR_CLOSED()
+void MqStreamClient::onCloseStep5_TERMINATOR_CLOSED()
 {
     assert(!static_cast<bool>(_client));
     assert(!static_cast<bool>(_writer));

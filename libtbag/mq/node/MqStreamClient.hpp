@@ -316,7 +316,7 @@ private:
     void onCloseStep2_EVENT_QUEUE_CLOSED();
     void onCloseStep3_WRITER_CLOSED();
     void onCloseStep4_CLIENT_CLOSED();
-    void onCloseStep4_TERMINATOR_CLOSED();
+    void onCloseStep5_TERMINATOR_CLOSED();
 };
 
 } // namespace node

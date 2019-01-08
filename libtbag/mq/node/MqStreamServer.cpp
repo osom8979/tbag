@@ -29,8 +29,8 @@ using binf        = MqStreamServer::binf;
 using AfterAction = MqStreamServer::AfterAction;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(internal, params, MqMachineState::MMS_CLOSED),
-          _loop(loop), _packer(params.packer_size)
+        : MqBase(internal, params, MqMachineState::MMS_INITIALIZED),
+          _loop(loop), _packer(params.packer_size), _exiting(0)
 {
     assert(!MqEventQueue::exists());
 
@@ -39,6 +39,12 @@ MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParam
                libtbag::mq::details::getTypeName(params.type), (int)(params.type));
         throw ErrException(Err::E_ILLARGS);
     }
+
+    _terminator = _loop.newHandle<Terminator>(_loop, this);
+    assert(static_cast<bool>(_terminator));
+    assert(_terminator->isInit());
+
+    _state = MqMachineState::MMS_INITIALIZING;
     onInitStep1_ASYNC();
 }
 
@@ -49,7 +55,23 @@ MqStreamServer::~MqStreamServer()
 
 Err MqStreamServer::exit()
 {
-    return Err::E_UNSUPOP;
+    if (_state == libtbag::mq::details::MqMachineState::MMS_CLOSED) {
+        return Err::E_ILLSTATE;
+    }
+
+    // [WARNING]
+    // This point is a dangerous point
+    // where the number of times to send(<code>_exiting</code>) out can be missed.
+    // To avoid this, use sleep() on that thread.
+    //
+    // Note:
+    // the moment when the <code>_state</code> information becomes
+    // <code>MqMachineState::MMS_CLOSED</code>.
+
+    ++_exiting;
+    Err const CODE = Err::E_UNSUPOP;
+    --_exiting;
+    return CODE;
 }
 
 void MqStreamServer::onInitializerAsync(Initializer * init)
@@ -63,6 +85,18 @@ void MqStreamServer::onInitializerClose(Initializer * init)
 {
     assert(init != nullptr);
     tDLogIfD(PARAMS.verbose, "MqStreamServer::onInitializerClose() Close initializer.");
+}
+
+void MqStreamServer::onTerminatorAsync(Terminator * terminator)
+{
+}
+
+void MqStreamServer::onTerminatorClose(Terminator * terminator)
+{
+    assert(terminator != nullptr);
+    assert(terminator == _terminator.get());
+    _terminator.reset();
+    onCloseStep5_TERMINATOR_CLOSED();
 }
 
 AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
@@ -402,7 +436,7 @@ void MqStreamServer::onInitStep1_ASYNC()
     assert(!static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_CLOSED);
+    assert(_state == MqMachineState::MMS_INITIALIZING);
 
     auto init = _loop.newHandle<Initializer>(_loop, this);
     assert(static_cast<bool>(init));
@@ -947,6 +981,25 @@ void MqStreamServer::onCloseStep4_CLIENT_CLOSED()
     tDLogI("MqStreamServer::onCloseStep4_CLIENT_CLOSED() Close server!");
     _state = MqMachineState::MMS_CLOSED;
     MqBase::disableWait();
+
+    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
+    while (_exiting > 0) {
+        // Busy waiting...
+    }
+
+    assert(_exiting == 0);
+    assert(static_cast<bool>(_terminator));
+    assert(!_terminator->isClosing());
+    _terminator->close();
+}
+
+void MqStreamServer::onCloseStep5_TERMINATOR_CLOSED()
+{
+    assert(!static_cast<bool>(_server));
+    assert(!static_cast<bool>(_writer));
+    assert(!static_cast<bool>(_terminator));
+    assert(!MqEventQueue::exists());
+    assert(_state == MqMachineState::MMS_CLOSED);
 
     if (INTERNAL.close_cb != nullptr) {
         assert(INTERNAL.parent != nullptr);
