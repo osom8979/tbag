@@ -178,8 +178,16 @@ protected:
 public:
     inline int getTypeInteger() const TBAG_NOEXCEPT
     { return static_cast<int>(PARAMS.type); }
+
     inline char const * const getTypeName() const TBAG_NOEXCEPT
     { return libtbag::mq::details::getTypeName(PARAMS.type); }
+
+protected:
+    /** Obtain an inaccurate active send-queue size. */
+    std::size_t getActiveSendSize() const;
+
+    /** Obtain an inaccurate active recv-queue size. */
+    std::size_t getActiveRecvSize() const;
 
 protected:
     void enableWait(bool enable = true);

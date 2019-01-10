@@ -40,6 +40,16 @@ MqBase::~MqBase()
     disableWait();
 }
 
+std::size_t MqBase::getActiveSendSize() const
+{
+    return MqEventQueue::getInaccurateSizeOfActive();
+}
+
+std::size_t MqBase::getActiveRecvSize() const
+{
+    return _receives.getInaccurateSizeOfActive();
+}
+
 void MqBase::enableWait(bool enable)
 {
     _wait_lock.lock();
@@ -72,9 +82,9 @@ void MqBase::changeClosingState()
     _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
     std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
     while (_sending > 0) {
-        // Busy waiting...
+        COMMENT("Busy waiting");
     }
-    // [IMPORTANT] From this moment on, there is no send-queue producer.
+    IMPORTANT("From this moment on, there is no send-queue producer.");
     assert(_sending == 0);
 }
 
@@ -84,9 +94,9 @@ void MqBase::changeClosedState()
     disableWait();
     std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
     while (_exiting > 0) {
-        // Busy waiting...
+        COMMENT("Busy waiting");
     }
-    // [IMPORTANT] From this moment on, there is no exit-request producer.
+    IMPORTANT("From this moment on, there is no exit-request producer.");
     assert(_exiting == 0);
 }
 
