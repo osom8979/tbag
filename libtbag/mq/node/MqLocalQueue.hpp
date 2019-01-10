@@ -58,6 +58,7 @@ private:
     /**
      * Close process.
      */
+    void onCloseStep1_TERMINATOR();
     void onCloseStep1();
     void onCloseStep2_EVENT_QUEUE_CLOSED();
     void onCloseStep3_TERMINATOR_CLOSED();

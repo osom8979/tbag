@@ -198,6 +198,17 @@ protected:
     virtual void onCloseTimerTimer(CloseTimer * timer) { /* EMPTY. */ }
     virtual void onCloseTimerClose(CloseTimer * timer) { /* EMPTY. */ }
 
+protected:
+    void createTerminator(Loop & loop);
+    void closeTerminator();
+
+protected:
+    void changeClosingState();
+    void changeClosedState();
+
+public:
+    Err enqueueReceiveForSingleProducer(AsyncMsg const & msg);
+
 public:
     virtual MqMachineState state() const TBAG_NOEXCEPT override;
     virtual MqParams params() const override;

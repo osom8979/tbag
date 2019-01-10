@@ -36,9 +36,7 @@ MqLocalQueue::MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams co
     assert(EVENT_QUEUE_INIT);
     assert(MqEventQueue::exists());
 
-    _terminator = loop.newHandle<Terminator>(loop, this);
-    assert(static_cast<bool>(_terminator));
-    assert(_terminator->isInit());
+    createTerminator(loop);
 
     _state = MqMachineState::MMS_ACTIVE;
     MqBase::enableWait();
@@ -51,6 +49,9 @@ MqLocalQueue::~MqLocalQueue()
 
 void MqLocalQueue::onTerminatorAsync(Terminator * terminator)
 {
+    assert(terminator != nullptr);
+    assert(terminator == _terminator.get());
+    onCloseStep1_TERMINATOR();
 }
 
 void MqLocalQueue::onTerminatorClose(Terminator * terminator)
@@ -70,15 +71,16 @@ void MqLocalQueue::onCloseMsgDone()
 AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
 {
     assert(msg != nullptr);
+    auto const STATE = _state.load();
 
     using namespace libtbag::mq::details;
-    if (_state != MqMachineState::MMS_ACTIVE && _state != MqMachineState::MMS_CLOSING) {
+    if (STATE != MqMachineState::MMS_ACTIVE && STATE != MqMachineState::MMS_CLOSING) {
         tDLogIfW(PARAMS.verbose, "MqLocalQueue::onMsg() Illegal local-queue state({}), skip current message ({})",
                  getMachineStateName(_state), getEventName(msg->event));
         return AfterAction::AA_OK;
     }
 
-    assert(_state == MqMachineState::MMS_ACTIVE);
+    assert(STATE == MqMachineState::MMS_ACTIVE);
     if (msg->event == ME_CLOSE) {
         onCloseStep1();
         return AfterAction::AA_OK;
@@ -91,7 +93,9 @@ AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
 void MqLocalQueue::onRead(AsyncMsg * msg)
 {
     assert(MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_ACTIVE || _state == MqMachineState::MMS_CLOSING);
+    auto const STATE = _state.load();
+
+    assert(STATE == MqMachineState::MMS_ACTIVE || STATE == MqMachineState::MMS_CLOSING);
     assert(msg != nullptr);
     assert(INTERNAL.recv_cb != nullptr);
     assert(INTERNAL.parent != nullptr);
@@ -101,65 +105,43 @@ void MqLocalQueue::onRead(AsyncMsg * msg)
         return;
     }
 
-    Err enqueue_code;
-    COMMENT("Single-Producer recv-queue") {
-        while (!_wait_lock.tryLock()) {
-            // Busy waiting...
-        }
-        enqueue_code = _receives.enqueue(*msg);
-        _wait_cond.signal();
-        _wait_lock.unlock();
-    }
+    enqueueReceiveForSingleProducer(*msg);
+}
 
-    if (isSuccess(enqueue_code)) {
-        tDLogIfD(PARAMS.verbose, "MqLocalQueue::onRead() Enqueue success. "
-                 "Perhaps the remaining queue size is {}.", _receives.getInaccurateSizeOfActive());
-    } else {
-        tDLogE("MqLocalQueue::onRead() Enqueue error: {}", enqueue_code);
-    }
+void MqLocalQueue::onCloseStep1_TERMINATOR()
+{
 }
 
 void MqLocalQueue::onCloseStep1()
 {
-    tDLogI("MqLocalQueue::onCloseStep1() Close message confirmed.");
+    auto const STATE = _state.load();
 
-    using namespace libtbag::mq::details;
-    if (_state != MqMachineState::MMS_ACTIVE) {
+    if (STATE == MqMachineState::MMS_ACTIVE) {
+        tDLogI("MqLocalQueue::onCloseStep1() Close message confirmed.");
+    } else {
         tDLogIfW(PARAMS.verbose, "MqLocalQueue::onCloseStep1() It is already closing.");
         return;
     }
 
-    assert(isActiveState(_state));
-    _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
-    while (_sending > 0) {
-        // Busy waiting...
-    }
+    changeClosingState();
+    assert(STATE == MqMachineState::MMS_CLOSING);
 
-    // [IMPORTANT]
-    // From this moment on, there is no send-queue producer.
-    assert(_sending == 0);
     MqEventQueue::closeAsyncMessages();
 }
 
 void MqLocalQueue::onCloseStep2_EVENT_QUEUE_CLOSED()
 {
+    auto const STATE = _state.load();
+
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_CLOSING);
+    assert(STATE == MqMachineState::MMS_CLOSING);
 
     tDLogI("MqLocalQueue::onCloseStep2_EVENT_QUEUE_CLOSED() Close local-queue!");
-    _state = MqMachineState::MMS_CLOSED;
-    MqBase::disableWait();
 
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
-    while (_exiting > 0) {
-        // Busy waiting...
-    }
+    changeClosedState();
+    assert(STATE == MqMachineState::MMS_CLOSED);
 
-    assert(_exiting == 0);
-    assert(static_cast<bool>(_terminator));
-    assert(!_terminator->isClosing());
-    _terminator->close();
+    closeTerminator();
 }
 
 void MqLocalQueue::onCloseStep3_TERMINATOR_CLOSED()

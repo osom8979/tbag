@@ -53,6 +53,64 @@ void MqBase::disableWait()
     enableWait(false);
 }
 
+void MqBase::createTerminator(Loop & loop)
+{
+    _terminator = loop.newHandle<Terminator>(loop, this);
+    assert(static_cast<bool>(_terminator));
+    assert(_terminator->isInit());
+}
+
+void MqBase::closeTerminator()
+{
+    assert(static_cast<bool>(_terminator));
+    assert(!_terminator->isClosing());
+    _terminator->close();
+}
+
+void MqBase::changeClosingState()
+{
+    _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
+    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
+    while (_sending > 0) {
+        // Busy waiting...
+    }
+    // [IMPORTANT] From this moment on, there is no send-queue producer.
+    assert(_sending == 0);
+}
+
+void MqBase::changeClosedState()
+{
+    _state = MqMachineState::MMS_CLOSED; // This prevents the exit() method from receiving further input.
+    disableWait();
+    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
+    while (_exiting > 0) {
+        // Busy waiting...
+    }
+    // [IMPORTANT] From this moment on, there is no exit-request producer.
+    assert(_exiting == 0);
+}
+
+Err MqBase::enqueueReceiveForSingleProducer(AsyncMsg const & msg)
+{
+    while (!_wait_lock.tryLock()) {
+        // Busy waiting...
+    }
+    Err const CODE = _receives.enqueue(msg);
+    _wait_cond.signal();
+    _wait_lock.unlock();
+
+    if (isSuccess(CODE)) {
+        tDLogIfD(PARAMS.verbose,
+                 "MqBase::enqueueReceiveForSingleProducer() Enqueue success. "
+                 "Perhaps the remaining queue size is {}.",
+                 _receives.getInaccurateSizeOfActive());
+    } else {
+        tDLogE("MqBase::enqueueReceiveForSingleProducer() Enqueue error: {}", CODE);
+    }
+
+    return CODE;
+}
+
 MqBase::MqMachineState MqBase::state() const TBAG_NOEXCEPT
 {
     return _state;
