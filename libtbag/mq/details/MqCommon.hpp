@@ -176,7 +176,12 @@ inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEP
 
 inline bool isActiveState(MqMachineState state) TBAG_NOEXCEPT
 {
-    return (state == MqMachineState::MMS_ACTIVE);
+    return state == MqMachineState::MMS_ACTIVE;
+}
+
+inline bool isActiveOrClosingState(MqMachineState state) TBAG_NOEXCEPT
+{
+    return state == MqMachineState::MMS_ACTIVE || state == MqMachineState::MMS_CLOSING;
 }
 
 inline bool isInitializeState(MqMachineState state) TBAG_NOEXCEPT
@@ -678,9 +683,6 @@ TBAG_CONSTEXPR static char const * const VERBOSE_NAME          = "verbose";
 
 struct MqInterface
 {
-    virtual MqMachineState state() const TBAG_NOEXCEPT = 0;
-    virtual MqParams params() const = 0;
-
     virtual Err exit() = 0;
 
     virtual Err send(MqMsg const & msg) = 0;

@@ -199,14 +199,9 @@ private:
     }
 
 public:
-    MqMachineState state() const
-    {
-        return _mq->state();
-    }
-
     MqParams params() const
     {
-        return _mq->params();
+        return PARAMS;
     }
 
     Err waitEnable(uint64_t timeout_nano)

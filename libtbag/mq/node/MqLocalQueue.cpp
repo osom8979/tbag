@@ -51,7 +51,10 @@ void MqLocalQueue::onTerminatorAsync(Terminator * terminator)
 {
     assert(terminator != nullptr);
     assert(terminator == _terminator.get());
-    onCloseStep1_TERMINATOR();
+
+    if (_state == MqMachineState::MMS_ACTIVE) {
+        onCloseStep1();
+    }
 }
 
 void MqLocalQueue::onTerminatorClose(Terminator * terminator)
@@ -71,31 +74,27 @@ void MqLocalQueue::onCloseMsgDone()
 AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
 {
     assert(msg != nullptr);
-    auto const STATE = _state.load();
 
     using namespace libtbag::mq::details;
-    if (STATE != MqMachineState::MMS_ACTIVE && STATE != MqMachineState::MMS_CLOSING) {
+    if (!libtbag::mq::details::isActiveOrClosingState(_state)) {
         tDLogIfW(PARAMS.verbose, "MqLocalQueue::onMsg() Illegal local-queue state({}), skip current message ({})",
                  getMachineStateName(_state), getEventName(msg->event));
         return AfterAction::AA_OK;
     }
 
-    assert(STATE == MqMachineState::MMS_ACTIVE);
+    assert(_state == MqMachineState::MMS_ACTIVE);
     if (msg->event == ME_CLOSE) {
         onCloseStep1();
-        return AfterAction::AA_OK;
     } else {
         onRead(msg);
-        return AfterAction::AA_OK;
     }
+    return AfterAction::AA_OK;
 }
 
 void MqLocalQueue::onRead(AsyncMsg * msg)
 {
     assert(MqEventQueue::exists());
-    auto const STATE = _state.load();
-
-    assert(STATE == MqMachineState::MMS_ACTIVE || STATE == MqMachineState::MMS_CLOSING);
+    assert(libtbag::mq::details::isActiveOrClosingState(_state));
     assert(msg != nullptr);
     assert(INTERNAL.recv_cb != nullptr);
     assert(INTERNAL.parent != nullptr);
@@ -108,15 +107,9 @@ void MqLocalQueue::onRead(AsyncMsg * msg)
     enqueueReceiveForSingleProducer(*msg);
 }
 
-void MqLocalQueue::onCloseStep1_TERMINATOR()
-{
-}
-
 void MqLocalQueue::onCloseStep1()
 {
-    auto const STATE = _state.load();
-
-    if (STATE == MqMachineState::MMS_ACTIVE) {
+    if (_state == MqMachineState::MMS_ACTIVE) {
         tDLogI("MqLocalQueue::onCloseStep1() Close message confirmed.");
     } else {
         tDLogIfW(PARAMS.verbose, "MqLocalQueue::onCloseStep1() It is already closing.");
@@ -124,22 +117,20 @@ void MqLocalQueue::onCloseStep1()
     }
 
     changeClosingState();
-    assert(STATE == MqMachineState::MMS_CLOSING);
+    assert(_state == MqMachineState::MMS_CLOSING);
 
     MqEventQueue::closeAsyncMessages();
 }
 
 void MqLocalQueue::onCloseStep2_EVENT_QUEUE_CLOSED()
 {
-    auto const STATE = _state.load();
-
     assert(!MqEventQueue::exists());
-    assert(STATE == MqMachineState::MMS_CLOSING);
+    assert(_state == MqMachineState::MMS_CLOSING);
 
     tDLogI("MqLocalQueue::onCloseStep2_EVENT_QUEUE_CLOSED() Close local-queue!");
 
     changeClosedState();
-    assert(STATE == MqMachineState::MMS_CLOSED);
+    assert(_state == MqMachineState::MMS_CLOSED);
 
     closeTerminator();
 }

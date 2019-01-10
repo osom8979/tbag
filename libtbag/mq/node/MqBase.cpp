@@ -21,7 +21,8 @@ using MqParams       = MqBase::MqParams;
 MqBase::MqBase(MqInternal const & internal, MqParams const & params)
         : MqEventQueue(), INTERNAL(internal), PARAMS(params),
           _receives(params.recv_queue_size, params.recv_msg_size),
-          _state(MqMachineState::MMS_CLOSED), _sending(0), _exiting(0), _wait_enable(false)
+          _state(MqMachineState::MMS_CLOSED), _sending(0), _exiting(0),
+          _wait_enable(false)
 {
     // EMPTY.
 }
@@ -119,16 +120,6 @@ Err MqBase::enqueueReceiveForSingleProducer(AsyncMsg const & msg)
     }
 
     return CODE;
-}
-
-MqBase::MqMachineState MqBase::state() const TBAG_NOEXCEPT
-{
-    return _state;
-}
-
-MqBase::MqParams MqBase::params() const
-{
-    return PARAMS;
 }
 
 Err MqBase::exit()

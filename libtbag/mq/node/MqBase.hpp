@@ -71,6 +71,7 @@ public:
     using AsyncMsgQueue   = std::queue<AsyncMsgPointer>;
 
     using AtomicState = std::atomic<MqMachineState>;
+    using AtomicBool  = std::atomic_bool;
     using AtomicInt   = std::atomic_int;
 
     using UvLock      = libtbag::lock::UvLock;
@@ -176,6 +177,9 @@ protected:
     virtual ~MqBase();
 
 public:
+    inline MqMachineState state() const TBAG_NOEXCEPT
+    { return _state.load(); }
+
     inline int getTypeInteger() const TBAG_NOEXCEPT
     { return static_cast<int>(PARAMS.type); }
 
@@ -218,9 +222,6 @@ public:
     Err enqueueReceiveForSingleProducer(AsyncMsg const & msg);
 
 public:
-    virtual MqMachineState state() const TBAG_NOEXCEPT override;
-    virtual MqParams params() const override;
-
     virtual Err exit() override;
 
     virtual Err send(MqMsg const & msg) override;
