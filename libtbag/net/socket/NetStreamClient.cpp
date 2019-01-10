@@ -97,7 +97,7 @@ public:
     ~Impl()
     {
         char const * const TYPE_NAME = libtbag::mq::details::getTypeName(PARAMS.type);
-        auto const CODE = _mq->send(MqMsg(libtbag::mq::details::ME_CLOSE));
+        auto const CODE = _mq->exit();
         if (isSuccess(CODE)) {
             tDLogIfD(PARAMS.verbose, "NetStreamClient::Impl::~Impl({}) Send a close message.", TYPE_NAME);
         } else {

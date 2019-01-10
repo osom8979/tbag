@@ -120,7 +120,7 @@ public:
         char const * const TYPE_NAME = getTypeName(PARAMS.type);
         char const * const MODE_NAME = getModeName(MODE);
 
-        auto const CODE = _mq->send(MqMsg(ME_CLOSE));
+        auto const CODE = _mq->exit();
         if (isSuccess(CODE)) {
             tDLogIfD(PARAMS.verbose, "MqNode::Impl::~Impl({}/{}) Send a close message.",
                      TYPE_NAME, MODE_NAME);
@@ -338,11 +338,6 @@ Err MqNode::send(MqMsg::Buffer const & buffer)
 Err MqNode::send(MqEvent event, MqMsg::Buffer const & buffer)
 {
     return send(MqMsg(event, buffer));
-}
-
-Err MqNode::sendCloseMsg()
-{
-    return send(MqMsg(libtbag::mq::details::ME_CLOSE, 0U));
 }
 
 Err MqNode::recv(MqMsg & msg)

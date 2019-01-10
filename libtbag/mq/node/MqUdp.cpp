@@ -66,7 +66,7 @@ MqUdp::MqUdp(Loop & loop, MqInternal const & internal, MqParams const & params)
     assert(static_cast<bool>(_writer));
     assert(_writer->isInit());
 
-    _state = MqMachineState::MMS_INITIALIZED;
+    _state = MqMachineState::MMS_ACTIVE;
     //MqBase::enableWait();
 }
 

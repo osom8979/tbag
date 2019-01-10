@@ -147,6 +147,9 @@ private:
 private:
     MsgPacket _packer;
 
+private:
+    bool _exit;
+
 public:
     MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqStreamServer();
@@ -207,12 +210,14 @@ private:
     void onSendStep5_NEXT_MESSAGE(AsyncMsg * msg);
 
     /**
-     * Teardown process.
-     *
-     * @param[in] from_message_event
-     *      Called from a message event.
+     * Termination request.
      */
-    void onTearDownStep1(bool from_message_event);
+    void onTerminationRequest();
+
+    /**
+     * Teardown process.
+     */
+    void onTearDownStep1();
     void onTearDownStep2_SHUTDOWN();
     void onTearDownStep3_TIMEOUT();
 

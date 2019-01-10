@@ -51,10 +51,7 @@ void MqLocalQueue::onTerminatorAsync(Terminator * terminator)
 {
     assert(terminator != nullptr);
     assert(terminator == _terminator.get());
-
-    if (_state == MqMachineState::MMS_ACTIVE) {
-        onCloseStep1();
-    }
+    onTerminationRequest();
 }
 
 void MqLocalQueue::onTerminatorClose(Terminator * terminator)
@@ -83,10 +80,10 @@ AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
     }
 
     assert(_state == MqMachineState::MMS_ACTIVE);
-    if (msg->event == ME_CLOSE) {
-        onCloseStep1();
-    } else {
+    if (msg->event >= ME_MSG) {
         onRead(msg);
+    } else {
+        tDLogW("MqLocalQueue::onMsg() Ignore system messages: {}", msg->event);
     }
     return AfterAction::AA_OK;
 }
@@ -105,6 +102,16 @@ void MqLocalQueue::onRead(AsyncMsg * msg)
     }
 
     enqueueReceiveForSingleProducer(*msg);
+}
+
+void MqLocalQueue::onTerminationRequest()
+{
+    if (_state == MqMachineState::MMS_ACTIVE) {
+        onCloseStep1();
+    } else {
+        tDLogIfW(PARAMS.verbose, "MqLocalQueue::onTerminationRequest() It is already closing.");
+        return;
+    }
 }
 
 void MqLocalQueue::onCloseStep1()

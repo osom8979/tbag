@@ -56,6 +56,11 @@ private:
 
 private:
     /**
+     * Termination request.
+     */
+    void onTerminationRequest();
+
+    /**
      * Close process.
      */
     void onCloseStep1();

@@ -142,6 +142,7 @@ private:
 
 private:
     std::size_t _reconnect;
+    bool _exit;
 
 public:
     MqStreamClient(Loop & loop, MqInternal const & internal, MqParams const & params);
@@ -206,12 +207,14 @@ private:
     void onSendStep5_NEXT_MESSAGE(AsyncMsg * msg);
 
     /**
-     * Teardown process.
-     *
-     * @param[in] from_message_event
-     *      Called from a message event.
+     * Termination request.
      */
-    void onTearDownStep1(bool from_message_event);
+    void onTerminationRequest();
+
+    /**
+     * Teardown process.
+     */
+    void onTearDownStep1();
     void onTearDownStep2_SHUTDOWN();
     void onTearDownStep3_TIMEOUT();
 

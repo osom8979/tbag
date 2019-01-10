@@ -140,14 +140,6 @@ enum class MqMachineState
     MMS_INITIALIZING,
 
     /**
-     * Initialize done.
-     *
-     * @remarks
-     *  The server skips this state and immediately goes to the ACTIVE state.
-     */
-    MMS_INITIALIZED,
-
-    /**
      * Active machine state.
      *
      * @remarks
@@ -167,7 +159,6 @@ inline char const * const getMachineStateName(MqMachineState state) TBAG_NOEXCEP
     switch (state) {
     case MqMachineState::MMS_CLOSED:        return "CLOSED";
     case MqMachineState::MMS_INITIALIZING:  return "INITIALIZING";
-    case MqMachineState::MMS_INITIALIZED:   return "INITIALIZED";
     case MqMachineState::MMS_ACTIVE:        return "ACTIVE";
     case MqMachineState::MMS_CLOSING:       return "CLOSING";
     default:                                return "UNKNOWN";
@@ -186,7 +177,7 @@ inline bool isActiveOrClosingState(MqMachineState state) TBAG_NOEXCEPT
 
 inline bool isInitializeState(MqMachineState state) TBAG_NOEXCEPT
 {
-    return (state == MqMachineState::MMS_INITIALIZING || state == MqMachineState::MMS_INITIALIZED);
+    return state == MqMachineState::MMS_INITIALIZING;
 }
 
 inline bool isClosingState(MqMachineState state) TBAG_NOEXCEPT

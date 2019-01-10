@@ -8,6 +8,9 @@
 #include <libtbag/mq/node/MqBase.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <chrono>
+#include <thread>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

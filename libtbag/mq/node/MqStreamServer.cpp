@@ -29,7 +29,7 @@ using binf        = MqStreamServer::binf;
 using AfterAction = MqStreamServer::AfterAction;
 
 MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParams const & params)
-        : MqBase(internal, params), _loop(loop), _packer(params.packer_size)
+        : MqBase(internal, params), _loop(loop), _packer(params.packer_size), _exit(false)
 {
     assert(!MqEventQueue::exists());
 
@@ -64,6 +64,9 @@ void MqStreamServer::onInitializerClose(Initializer * init)
 
 void MqStreamServer::onTerminatorAsync(Terminator * terminator)
 {
+    assert(terminator != nullptr);
+    assert(terminator == _terminator.get());
+    onTerminationRequest();
 }
 
 void MqStreamServer::onTerminatorClose(Terminator * terminator)
@@ -85,14 +88,13 @@ AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
         return AfterAction::AA_OK;
     }
 
-    if (msg->event == ME_CLOSE) {
-        tDLogI("MqStreamServer::onMsg() Close message confirmed.");
-        onTearDownStep1(true);
+    if (msg->event < ME_MSG) {
+        tDLogW("MqStreamClient::onMsg() Ignore system messages: {}", msg->event);
         return AfterAction::AA_OK;
-    } else {
-        onSendStep1_EVENT(msg);
-        return AfterAction::AA_DELAY;
     }
+
+    onSendStep1_EVENT(msg);
+    return AfterAction::AA_DELAY;
 }
 
 void MqStreamServer::onCloseMsgDone()
@@ -397,17 +399,15 @@ void MqStreamServer::onInitStep1_ASYNC()
     assert(!static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_INITIALIZING);
+    assert(libtbag::mq::details::isInitializeState(_state));
 
     auto init = _loop.newHandle<Initializer>(_loop, this);
     assert(static_cast<bool>(init));
     assert(init->isInit());
 
+    tDLogIfD(PARAMS.verbose, "MqStreamServer::onInitStep1_ASYNC() Asynchronous initialization request.");
     auto const CODE = init->send();
     assert(isSuccess(CODE));
-
-    _state = MqMachineState::MMS_INITIALIZING;
-    tDLogIfD(PARAMS.verbose, "MqStreamServer::onInitStep1_ASYNC() Asynchronous initialization request.");
 }
 
 void MqStreamServer::onInitStep2_INIT()
@@ -415,7 +415,7 @@ void MqStreamServer::onInitStep2_INIT()
     assert(!static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_INITIALIZING);
+    assert(libtbag::mq::details::isInitializeState(_state));
 
     if (PARAMS.type == MqType::MT_PIPE) {
         _server = _loop.newHandle<PipeServer>(_loop, this);
@@ -426,6 +426,11 @@ void MqStreamServer::onInitStep2_INIT()
 
     assert(static_cast<bool>(_server));
     assert(_server->isInit());
+
+    if (_exit) {
+        onInit_FAILURE(Err::E_ECANCELED);
+        return;
+    }
 
     // Remove exists named pipe.
     if (PARAMS.type == MqType::MT_PIPE && libtbag::filesystem::Path(PARAMS.address).exists()) {
@@ -494,9 +499,6 @@ void MqStreamServer::onInitStep2_INIT()
         }
     }
 
-    _state = MqMachineState::MMS_INITIALIZED;
-    tDLogIfD(PARAMS.verbose, "MqStreamServer::onInitStep2_INIT() Initialization succeeded.");
-
     onInit_SUCCESS();
 }
 
@@ -505,7 +507,7 @@ void MqStreamServer::onInit_SUCCESS()
     assert(static_cast<bool>(_server));
     assert(!static_cast<bool>(_writer));
     assert(!MqEventQueue::exists());
-    assert(_state == MqMachineState::MMS_INITIALIZED);
+    assert(libtbag::mq::details::isInitializeState(_state));
 
     _writer = _loop.newHandle<Writer>(_loop, this);
     assert(static_cast<bool>(_writer));
@@ -773,7 +775,34 @@ void MqStreamServer::onSendStep5_NEXT_MESSAGE(AsyncMsg * msg)
     }
 }
 
-void MqStreamServer::onTearDownStep1(bool from_message_event)
+void MqStreamServer::onTerminationRequest()
+{
+    _exit = true;
+
+    switch (state()) {
+    case MqMachineState::MMS_CLOSED:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+
+    case MqMachineState::MMS_INITIALIZING:
+        tDLogIfI(PARAMS.verbose, "MqStreamServer::onTerminationRequest() Delay termination.");
+        break;
+
+    case MqMachineState::MMS_ACTIVE:
+        onTearDownStep1();
+        break;
+
+    case MqMachineState::MMS_CLOSING:
+        COMMENT("Already state");
+        break;
+
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+    }
+}
+
+void MqStreamServer::onTearDownStep1()
 {
     assert(static_cast<bool>(_server));
     assert(static_cast<bool>(_writer));
@@ -791,14 +820,7 @@ void MqStreamServer::onTearDownStep1(bool from_message_event)
     assert(_state == MqMachineState::MMS_CLOSING);
     assert(static_cast<bool>(_writer));
 
-    std::size_t active_send_size = getActiveSendSize();
-    if (from_message_event) {
-        assert(active_send_size >= 1);
-        // Subtract the current message.
-        --active_send_size;
-    }
-
-    if (active_send_size > 0 || _writer->state != MqRequestState::MRS_WAITING) {
+    if (getActiveSendSize() > 0 || _writer->state != MqRequestState::MRS_WAITING) {
         // Clear any remaining transmission queues and continue with system shutdown.
         tDLogI("MqStreamServer::onTearDownStep1() Delay the shutdown request ...");
         return;
