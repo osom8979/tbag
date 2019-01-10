@@ -128,10 +128,8 @@ void MqLocalQueue::onCloseStep2_EVENT_QUEUE_CLOSED()
     assert(_state == MqMachineState::MMS_CLOSING);
 
     tDLogI("MqLocalQueue::onCloseStep2_EVENT_QUEUE_CLOSED() Close local-queue!");
-
     changeClosedState();
     assert(_state == MqMachineState::MMS_CLOSED);
-
     closeTerminator();
 }
 

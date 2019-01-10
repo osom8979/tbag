@@ -101,7 +101,7 @@ void MqBase::changeClosedState()
     assert(_exiting == 0);
 }
 
-Err MqBase::enqueueReceiveForSingleProducer(AsyncMsg const & msg)
+Err MqBase::enqueueReceiveForSingleProducer(MqMsg const & msg)
 {
     while (!_wait_lock.tryLock()) {
         // Busy waiting...

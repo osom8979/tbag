@@ -135,7 +135,7 @@ void MqUdp::tearDown(bool on_message)
     assert(_sending == 0);
     assert(static_cast<bool>(_writer));
 
-    std::size_t active_send_size = getInaccurateSizeOfActive();
+    std::size_t active_send_size = getActiveSendSize();
     if (on_message) {
         assert(active_send_size >= 1);
         // Subtract the current message.
@@ -428,22 +428,8 @@ void MqUdp::onRecv(Err code, char const * buffer, std::size_t size, sockaddr con
         if (INTERNAL.recv_cb(_packer.msg(), INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
             tDLogIfD(PARAMS.verbose, "MqUdp::onRecv() Consumed this received message.");
         } else {
-            COMMENT("Single-Producer recv-queue") {
-                while (!_wait_lock.tryLock()) {
-                    // Busy waiting...
-                }
-                enqueue_code = _receives.enqueue(_packer.msg());
-                _wait_cond.signal();
-                _wait_lock.unlock();
-            }
-
-            if (isSuccess(enqueue_code)) {
-                tDLogIfD(PARAMS.verbose,
-                         "MqUdp::onRecv() Enqueue success. "
-                         "Perhaps the remaining queue size is {}.",
-                         _receives.getInaccurateSizeOfActive());
-            } else {
-                tDLogE("MqUdp::onRecv() Enqueue error: {}", enqueue_code);
+            enqueue_code = enqueueReceiveForSingleProducer(_packer.msg());
+            if (isFailure(enqueue_code)) {
                 break;
             }
         }

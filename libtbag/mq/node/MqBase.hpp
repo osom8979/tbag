@@ -166,7 +166,7 @@ protected:
     AtomicInt   _sending;
     AtomicInt   _exiting;
 
-protected:
+private:
     UvLock mutable _wait_lock;
     UvCondition    _wait_cond;
     bool           _wait_enable;
@@ -219,7 +219,7 @@ protected:
     void changeClosedState();
 
 public:
-    Err enqueueReceiveForSingleProducer(AsyncMsg const & msg);
+    Err enqueueReceiveForSingleProducer(MqMsg const & msg);
 
 public:
     virtual Err exit() override;

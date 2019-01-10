@@ -42,9 +42,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParam
         throw ErrException(Err::E_ILLARGS);
     }
 
-    _terminator = _loop.newHandle<Terminator>(_loop, this);
-    assert(static_cast<bool>(_terminator));
-    assert(_terminator->isInit());
+    createTerminator(loop);
 
     _state = MqMachineState::MMS_INITIALIZING;
     onInitStep1_ASYNC();
@@ -249,22 +247,8 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
         if (INTERNAL.recv_cb(_packer.msg(), INTERNAL.parent) == MqIsConsume::MIC_CONSUMED) {
             tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Consumed this received message.");
         } else {
-            COMMENT("Single-Producer recv-queue") {
-                while (!_wait_lock.tryLock()) {
-                    // Busy waiting...
-                }
-                enqueue_code = _receives.enqueue(_packer.msg());
-                _wait_cond.signal();
-                _wait_lock.unlock();
-            }
-
-            if (isSuccess(enqueue_code)) {
-                tDLogIfD(PARAMS.verbose,
-                         "MqStreamClient::onRead() Enqueue success. "
-                         "Perhaps the remaining queue size is {}.",
-                         _receives.getInaccurateSizeOfActive());
-            } else {
-                tDLogE("MqStreamClient::onRead() Enqueue error: {}", enqueue_code);
+            enqueue_code = enqueueReceiveForSingleProducer(_packer.msg());
+            if (isFailure(enqueue_code)) {
                 break;
             }
         }
@@ -636,18 +620,11 @@ void MqStreamClient::onTearDownStep1(bool from_message_event)
     }
     assert(isActiveState(_state));
 
-    _state = MqMachineState::MMS_CLOSING; // This prevents the send() method from receiving further input.
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
-    while (_sending > 0) {
-        // Busy waiting...
-    }
-
-    // [IMPORTANT]
-    // From this moment on, there is no send-queue producer.
-    assert(_sending == 0);
+    changeClosingState();
+    assert(_state == MqMachineState::MMS_CLOSING);
     assert(static_cast<bool>(_writer));
 
-    std::size_t active_send_size = getInaccurateSizeOfActive();
+    std::size_t active_send_size = getActiveSendSize();
     if (from_message_event) {
         assert(active_send_size >= 1);
         // Subtract the current message.
@@ -779,18 +756,9 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
     }
 
     tDLogI("MqStreamClient::onCloseStep4_TERMINATOR_CLOSED() Close client!");
-    _state = MqMachineState::MMS_CLOSED;
-    MqBase::disableWait();
-
-    std::this_thread::sleep_for(std::chrono::nanoseconds(PARAMS.wait_next_opcode_nanosec));
-    while (_exiting > 0) {
-        // Busy waiting...
-    }
-
-    assert(_exiting == 0);
-    assert(static_cast<bool>(_terminator));
-    assert(!_terminator->isClosing());
-    _terminator->close();
+    changeClosedState();
+    assert(_state == MqMachineState::MMS_CLOSED);
+    closeTerminator();
 }
 
 void MqStreamClient::onCloseStep5_TERMINATOR_CLOSED()
