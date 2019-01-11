@@ -163,7 +163,6 @@ public:
     MiscValidity validateOfReady(std::size_t min = 0, std::size_t max = 0) const;
 
 public:
-    Err enqueueClose();
     Err enqueue(MqMsg const & msg);
     Err enqueue(MqEvent e, char const * data, std::size_t size);
     Err enqueue(char const * data, std::size_t size);

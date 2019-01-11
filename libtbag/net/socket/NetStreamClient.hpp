@@ -115,9 +115,6 @@ public:
     Err send(MqEvent event, MqMsg::Buffer const & buffer);
 
 public:
-    Err sendCloseMsg();
-
-public:
     static MqParams getParams(std::string const & uri);
 
 protected:

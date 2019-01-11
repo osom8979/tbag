@@ -143,9 +143,14 @@ Err MqBase::exit()
     // <code>MqMachineState::MMS_CLOSED</code>.
 
     ++_exiting;
-    Err const CODE = _terminator->send();
+    Err code;
+    if (_terminator->isClosing()) {
+        code = Err::E_CLOSING;
+    } else {
+        code = _terminator->send();
+    }
     --_exiting;
-    return CODE;
+    return code;
 }
 
 Err MqBase::send(MqMsg const & msg)

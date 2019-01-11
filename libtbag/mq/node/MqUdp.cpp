@@ -177,12 +177,12 @@ AfterAction MqUdp::onMsg(AsyncMsg * msg)
         return AfterAction::AA_OK;
     }
 
-    if (msg->event == ME_CLOSE) {
-        onCloseEvent();
+    if (msg->event < ME_MSG) {
+        //onCloseEvent();
         return AfterAction::AA_OK;
-    } else {
-        return onMsgEvent(msg);
     }
+
+    return onMsgEvent(msg);
 }
 
 AfterAction MqUdp::onMsgEvent(AsyncMsg * msg)

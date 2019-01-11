@@ -24,6 +24,7 @@ using namespace libtbag::mq::details;
 struct MqSendQueueTest : public MqEventQueue
 {
     TBAG_CONSTEXPR static char const * TEST_VALUE = "TEST";
+    TBAG_CONSTEXPR static MqEvent CLOSE_EVENT_VALUE = 1;
 
     int send_success = 0;
     int send_failure = 0;
@@ -44,7 +45,7 @@ struct MqSendQueueTest : public MqEventQueue
                 ++send_failure;
             }
         } else {
-            if (msg->event == ME_CLOSE) {
+            if (msg->event == CLOSE_EVENT_VALUE) {
                 ++close_success;
             } else {
                 ++close_failure;
@@ -75,7 +76,7 @@ TEST(MqEventQueueTest, Default)
         if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
         if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
         if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
-        if (isSuccess(queue.enqueueClose())) { ++success_count; }
+        if (isSuccess(queue.enqueue(MqMsg(MqSendQueueTest::CLOSE_EVENT_VALUE)))) { ++success_count; }
         // @formatter:on
     });
 

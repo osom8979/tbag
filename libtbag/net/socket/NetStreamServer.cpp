@@ -327,11 +327,6 @@ Err NetStreamServer::send(MqEvent event, MqMsg::Buffer const & buffer)
     return send(MqMsg(event, buffer));
 }
 
-Err NetStreamServer::sendCloseMsg()
-{
-    return send(MqMsg(libtbag::mq::details::ME_CLOSE, 0U));
-}
-
 NetStreamServer::MqParams NetStreamServer::getParams(std::string const & uri)
 {
     return libtbag::mq::details::convertUriToParams(uri);

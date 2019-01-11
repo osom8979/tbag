@@ -147,11 +147,6 @@ static Err __enqueue(UniqueQueue & ready, Predicated predicated)
     return CODE;
 }
 
-Err MqEventQueue::enqueueClose()
-{
-    return enqueue(MqMsg(ME_CLOSE));
-}
-
 Err MqEventQueue::enqueue(MqMsg const & msg)
 {
     return __enqueue(_ready, MqMsgCopyFrom(msg));

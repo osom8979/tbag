@@ -47,14 +47,12 @@ namespace details {
 using MqEvent = int32_t;
 
 TBAG_CONSTEXPR MqEvent const ME_MSG   =  0;
-TBAG_CONSTEXPR MqEvent const ME_CLOSE = -1;
 
 inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
 {
     switch (event) {
     // @formatter:off
-    case ME_MSG:   return "MSG";
-    case ME_CLOSE: return "CLOSE";
+    case ME_MSG: return "MSG";
     // @formatter:on
     default:
         if (event > ME_MSG) {
