@@ -483,10 +483,9 @@ inline bool isMqNodeMode(MqInternal const & internal) TBAG_NOEXCEPT
     // @formatter:on
 }
 
-TBAG_CONSTEXPR std::size_t const __SIZE_T_MAX__ = libtbag::type::TypeInfo<std::size_t>::maximum();
+TBAG_CONSTEXPR std::size_t const WAIT_ON_ACTIVATION_INFINITY
+        = libtbag::type::TypeInfo<std::size_t>::maximum();
 TBAG_CONSTEXPR std::size_t const RECONNECT_INFINITY = 0;
-TBAG_CONSTEXPR std::size_t const RECONNECT_DONE = __SIZE_T_MAX__;
-TBAG_CONSTEXPR std::size_t const WAIT_ON_ACTIVATION_INFINITY = __SIZE_T_MAX__;
 
 /**
  * User customizable option packs.
@@ -682,8 +681,6 @@ struct MqInterface
      */
     virtual Err waitEnable(uint64_t timeout_nano) = 0;
     virtual Err waitRecv(MqMsg & msg, uint64_t timeout_nano) = 0;
-
-    //virtual Err waitClosed(uint64_t timeout_nano) = 0;
 };
 
 // -----------------------

@@ -763,8 +763,9 @@ void MqStreamClient::onCloseStep4_CLIENT_CLOSED()
     assert(_state == MqMachineState::MMS_CLOSING);
 
     if (!_exit) {
-        if (PARAMS.reconnect_count == 0 || _reconnect < PARAMS.reconnect_count) {
-            if (PARAMS.reconnect_count == 0) {
+        using namespace libtbag::mq::details;
+        if (PARAMS.reconnect_count == RECONNECT_INFINITY || _reconnect < PARAMS.reconnect_count) {
+            if (PARAMS.reconnect_count == RECONNECT_INFINITY) {
                 tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: INFINITY");
             } else {
                 tDLogI("MqStreamClient::onCloseStep4_CLIENT_CLOSED() Try reconnect: {}/{}",
