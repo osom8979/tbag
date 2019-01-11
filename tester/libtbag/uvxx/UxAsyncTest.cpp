@@ -49,32 +49,3 @@ TEST(UxAsyncTest, Default)
     ASSERT_EQ(1, close_counter);
 }
 
-TEST(UxAsyncTest, AsyncCloseAsync)
-{
-    // ASYNC -> CLOSE -> ASYNC = CLOSE
-
-    int async_counter = 0;
-    int close_counter = 0;
-
-    UxLoop loop;
-    UxAsync async(loop);
-    ASSERT_TRUE(async.isInit());
-
-    async.setOnAsync([&](){
-        ++async_counter;
-    });
-    async.setOnClose([&](){
-        ++close_counter;
-    });
-
-    ASSERT_EQ(Err::E_SUCCESS, async.send());
-    async.close();
-    ASSERT_EQ(Err::E_SUCCESS, async.send());
-
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
-    ASSERT_TRUE(loop.empty());
-
-    ASSERT_EQ(0, async_counter);
-    ASSERT_EQ(1, close_counter);
-}
-
