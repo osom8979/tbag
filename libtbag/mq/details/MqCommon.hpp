@@ -46,7 +46,7 @@ namespace details {
  */
 using MqEvent = int32_t;
 
-TBAG_CONSTEXPR MqEvent const ME_MSG   =  0;
+TBAG_CONSTEXPR MqEvent const ME_MSG = 0;
 
 inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
 {
