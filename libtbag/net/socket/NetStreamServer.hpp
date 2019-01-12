@@ -107,16 +107,16 @@ public:
     Err send(MqMsg const & msg);
 
 public:
-    Err send(char const * buffer, std::size_t size);
-    Err send(MqEvent event, char const * buffer, std::size_t size);
+    Err send(char const * buffer, std::size_t size, std::intptr_t id = 0);
+    Err send(MqEvent event, char const * buffer, std::size_t size, std::intptr_t id = 0);
 
 public:
-    Err send(std::string const & text);
-    Err send(MqEvent event, std::string const & text);
+    Err send(std::string const & text, std::intptr_t id = 0);
+    Err send(MqEvent event, std::string const & text, std::intptr_t id = 0);
 
 public:
-    Err send(MqMsg::Buffer const & buffer);
-    Err send(MqEvent event, MqMsg::Buffer const & buffer);
+    Err send(MqMsg::Buffer const & buffer, std::intptr_t id = 0);
+    Err send(MqEvent event, MqMsg::Buffer const & buffer, std::intptr_t id = 0);
 
 public:
     static MqParams getParams(std::string const & uri);

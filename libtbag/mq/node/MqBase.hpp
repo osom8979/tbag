@@ -176,16 +176,6 @@ protected:
     MqBase(Loop & loop, MqInternal const & internal, MqParams const & params);
     virtual ~MqBase();
 
-public:
-    inline MqMachineState state() const TBAG_NOEXCEPT
-    { return _state.load(); }
-
-    inline int getTypeInteger() const TBAG_NOEXCEPT
-    { return static_cast<int>(PARAMS.type); }
-
-    inline char const * const getTypeName() const TBAG_NOEXCEPT
-    { return libtbag::mq::details::getTypeName(PARAMS.type); }
-
 protected:
     /** Obtain an inaccurate active send-queue size. */
     std::size_t getActiveSendSize() const;
@@ -193,9 +183,16 @@ protected:
     /** Obtain an inaccurate active recv-queue size. */
     std::size_t getActiveRecvSize() const;
 
-protected:
     void enableWait(bool enable = true);
     void disableWait();
+
+    void createTerminator(Loop & loop);
+    void closeTerminator();
+
+    void changeClosingState();
+    void changeClosedState();
+
+    Err enqueueReceiveForSingleProducer(MqMsg const & msg);
 
 protected:
     virtual void onInitializerAsync(Initializer * init) { /* EMPTY. */ }
@@ -210,16 +207,15 @@ protected:
     virtual void onCloseTimerTimer(CloseTimer * timer) { /* EMPTY. */ }
     virtual void onCloseTimerClose(CloseTimer * timer) { /* EMPTY. */ }
 
-protected:
-    void createTerminator(Loop & loop);
-    void closeTerminator();
-
-protected:
-    void changeClosingState();
-    void changeClosedState();
-
 public:
-    Err enqueueReceiveForSingleProducer(MqMsg const & msg);
+    inline MqMachineState state() const TBAG_NOEXCEPT
+    { return _state.load(); }
+
+    inline int getTypeInteger() const TBAG_NOEXCEPT
+    { return static_cast<int>(PARAMS.type); }
+
+    inline char const * const getTypeName() const TBAG_NOEXCEPT
+    { return libtbag::mq::details::getTypeName(PARAMS.type); }
 
 public:
     virtual Err exit() override;

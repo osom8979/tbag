@@ -41,6 +41,8 @@ namespace http {
  */
 struct HttpReaderInterface
 {
+    using Buffer = libtbag::util::Buffer;
+
     /** Incomplete (Parsing is not finish). Wait for the next packet. */
     virtual void onContinue(void * arg) { /* EMPTY. */ }
 
@@ -56,7 +58,7 @@ struct HttpReaderInterface
     virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) { return true; }
 
     /** When a message has been received from WebSocket client/server. */
-    virtual void onWsMessage(WsOpCode opcode, util::Buffer const & payload, void * arg) { /* EMPTY. */ }
+    virtual void onWsMessage(WsOpCode opcode, Buffer const & payload, void * arg) { /* EMPTY. */ }
 
     /** Regular http message. */
     virtual void onRegularHttp(HttpProperty const & property, void * arg) { /* EMPTY. */ }

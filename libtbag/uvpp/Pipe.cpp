@@ -147,7 +147,7 @@ std::string Pipe::getPeerName() const
     //
     // New in version 1.3.0.
 
-    using namespace filesystem::details;
+    using namespace libtbag::filesystem::details;
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_pipe_getpeername(Parent::cast<uv_pipe_t>(), name, &size);

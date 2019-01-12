@@ -215,26 +215,26 @@ struct MqMsg
     MqMsg()
     { /* EMPTY. */ }
 
-    MqMsg(MqEvent e) : event(e)
+    MqMsg(MqEvent e, std::intptr_t id = 0) : event(e), stream(id)
     { /* EMPTY. */ }
-    MqMsg(std::size_t s) : buffer(s)
+    MqMsg(std::size_t s, std::intptr_t id = 0) : buffer(s), stream(id)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e, std::size_t s) : event(e), buffer(s)
-    { /* EMPTY. */ }
-
-    MqMsg(Value const * d, std::size_t s) : buffer(d, d + s)
-    { /* EMPTY. */ }
-    MqMsg(MqEvent e, Value const * d, std::size_t s) : event(e), buffer(d, d + s)
+    MqMsg(MqEvent e, std::size_t s, std::intptr_t id = 0) : event(e), buffer(s), stream(id)
     { /* EMPTY. */ }
 
-    MqMsg(std::string const & str) : buffer(str.begin(), str.end())
+    MqMsg(Value const * d, std::size_t s, std::intptr_t id = 0) : buffer(d, d + s), stream(id)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e, std::string const & str) : event(e), buffer(str.begin(), str.end())
+    MqMsg(MqEvent e, Value const * d, std::size_t s, std::intptr_t id = 0) : event(e), buffer(d, d + s), stream(id)
     { /* EMPTY. */ }
 
-    MqMsg(Buffer const & buffer) : buffer(buffer)
+    MqMsg(std::string const & str, std::intptr_t id = 0) : buffer(str.begin(), str.end()), stream(id)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e, Buffer const & buf) : event(e), buffer(buf)
+    MqMsg(MqEvent e, std::string const & str, std::intptr_t id = 0) : event(e), buffer(str.begin(), str.end()), stream(id)
+    { /* EMPTY. */ }
+
+    MqMsg(Buffer const & buffer, std::intptr_t id = 0) : buffer(buffer), stream(id)
+    { /* EMPTY. */ }
+    MqMsg(MqEvent e, Buffer const & buf, std::intptr_t id = 0) : event(e), buffer(buf), stream(id)
     { /* EMPTY. */ }
 
     MqMsg(MqMsg const & obj)
@@ -340,6 +340,9 @@ using MqOnConnect = void(*)(void * parent);
  *
  * @warning
  *  Used only on the server.
+ *
+ * @remarks
+ *  The reason for not using peer as <code>sockaddr</code> is to accommodate the Named-PIPE path as well.
  */
 using MqOnAccept = bool(*)(void * node, std::string const & peer, void * parent);
 

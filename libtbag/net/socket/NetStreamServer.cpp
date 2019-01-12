@@ -297,34 +297,34 @@ Err NetStreamServer::send(MqMsg const & msg)
     return _impl->send(msg);
 }
 
-Err NetStreamServer::send(char const * buffer, std::size_t size)
+Err NetStreamServer::send(char const * buffer, std::size_t size, std::intptr_t id)
 {
-    return send(MqMsg(buffer, size));
+    return send(MqMsg(buffer, size, id));
 }
 
-Err NetStreamServer::send(MqEvent event, char const * buffer, std::size_t size)
+Err NetStreamServer::send(MqEvent event, char const * buffer, std::size_t size, std::intptr_t id)
 {
-    return send(MqMsg(event, buffer, size));
+    return send(MqMsg(event, buffer, size, id));
 }
 
-Err NetStreamServer::send(std::string const & text)
+Err NetStreamServer::send(std::string const & text, std::intptr_t id)
 {
-    return send(MqMsg(text));
+    return send(MqMsg(text, id));
 }
 
-Err NetStreamServer::send(MqEvent event, std::string const & text)
+Err NetStreamServer::send(MqEvent event, std::string const & text, std::intptr_t id)
 {
-    return send(MqMsg(event, text));
+    return send(MqMsg(event, text, id));
 }
 
-Err NetStreamServer::send(MqMsg::Buffer const & buffer)
+Err NetStreamServer::send(MqMsg::Buffer const & buffer, std::intptr_t id)
 {
-    return send(MqMsg(buffer));
+    return send(MqMsg(buffer, id));
 }
 
-Err NetStreamServer::send(MqEvent event, MqMsg::Buffer const & buffer)
+Err NetStreamServer::send(MqEvent event, MqMsg::Buffer const & buffer, std::intptr_t id)
 {
-    return send(MqMsg(event, buffer));
+    return send(MqMsg(event, buffer, id));
 }
 
 NetStreamServer::MqParams NetStreamServer::getParams(std::string const & uri)

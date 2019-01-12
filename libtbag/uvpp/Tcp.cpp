@@ -178,7 +178,6 @@ std::string Tcp::getPeerIp()
     return getIpName(address);
 }
 
-
 int Tcp::getSockPort()
 {
     uint8_t buffer[SOCKADDR_MAX_BYTE_SIZE] = {0,};
