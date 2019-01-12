@@ -109,7 +109,17 @@ public:
         // EMPTY.
     }
 
-protected:
+private:
+    virtual void onBegin() override
+    {
+        PARENT->onBegin();
+    }
+
+    virtual void onEnd() override
+    {
+        PARENT->onEnd();
+    }
+
     virtual bool onAccept(std::intptr_t id, std::string const & ip) override
     {
         if (!PARENT->onAccept(id, ip)) {
@@ -160,19 +170,20 @@ private:
     bool onSwitchingProtocol(Node * node, HttpProperty const & property)
     {
         assert(node != nullptr);
-        return true;
+        return PARENT->onSwitchingProtocol(node->ID, static_cast<HttpRequest>(property));
     }
 
     void onWsMessage(Node * node, WsOpCode opcode, Buffer const & payload)
     {
         assert(node != nullptr);
+        PARENT->onWsMessage(node->ID, opcode, payload);
     }
 
     void onRegularHttp(Node * node, HttpProperty const & property)
     {
         assert(node != nullptr);
 
-        auto response = PARENT->onRegularHttp(static_cast<HttpRequest>(property));
+        auto response = PARENT->onRegularHttp(node->ID, property);
         libtbag::http::updateDefaultResponse(response);
 
         auto const CODE = send(libtbag::http::toResponseString(response), node->ID);
@@ -184,6 +195,7 @@ private:
     void onParseError(Node * node, Err code)
     {
         assert(node != nullptr);
+        PARENT->onError(node->ID, code);
     }
 };
 
@@ -191,7 +203,17 @@ private:
 // HttpServer implementation.
 // --------------------------
 
-using HttpResponse = HttpServer::HttpResponse;
+HttpServer::HttpServer(std::string const & uri, bool use_websocket)
+        : HttpServer(libtbag::mq::details::convertUriToParams(uri), use_websocket)
+{
+    assert(static_cast<bool>(_impl));
+}
+
+HttpServer::HttpServer(std::string const & uri, std::string const & key, bool use_websocket)
+        : HttpServer(libtbag::mq::details::convertUriToParams(uri), key, use_websocket)
+{
+    assert(static_cast<bool>(_impl));
+}
 
 HttpServer::HttpServer(MqParams const & params, bool use_websocket)
         : HttpServer(params, std::string(), use_websocket)
@@ -210,6 +232,16 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
+void HttpServer::onBegin()
+{
+    // EMPTY.
+}
+
+void HttpServer::onEnd()
+{
+    // EMPTY.
+}
+
 bool HttpServer::onAccept(std::intptr_t id, std::string const & ip)
 {
     return true;
@@ -220,12 +252,12 @@ void HttpServer::onClose(std::intptr_t id)
     // EMPTY.
 }
 
-HttpResponse HttpServer::onRegularHttp(HttpRequest const & request)
+HttpServer::HttpResponse HttpServer::onRegularHttp(std::intptr_t id, HttpRequest const & request)
 {
     return HttpResponse{};
 }
 
-bool HttpServer::onSwitchingProtocol(HttpRequest const & request)
+bool HttpServer::onSwitchingProtocol(std::intptr_t id, HttpRequest const & request)
 {
     return true;
 }
@@ -235,7 +267,7 @@ void HttpServer::onWsMessage(std::intptr_t id, WsOpCode opcode, Buffer const & p
     // EMPTY.
 }
 
-void HttpServer::onError(Err code)
+void HttpServer::onError(std::intptr_t id, Err code)
 {
     // EMPTY.
 }

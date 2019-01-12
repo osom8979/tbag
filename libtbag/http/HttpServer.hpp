@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/http/WsFrame.hpp>
@@ -33,7 +34,7 @@ namespace http {
  * @author zer0
  * @date   2019-01-11
  */
-class TBAG_API HttpServer
+class TBAG_API HttpServer : private Noncopyable
 {
 public:
     struct Impl;
@@ -51,23 +52,29 @@ private:
     UniqueImpl _impl;
 
 public:
+    HttpServer(std::string const & uri, bool use_websocket = false);
+    HttpServer(std::string const & uri, std::string const & key, bool use_websocket = false);
     HttpServer(MqParams const & params, bool use_websocket = false);
     HttpServer(MqParams const & params, std::string const & key, bool use_websocket = false);
     ~HttpServer();
+
+protected:
+    virtual void onBegin();
+    virtual void onEnd();
 
 protected:
     virtual bool onAccept(std::intptr_t id, std::string const & ip);
     virtual void onClose(std::intptr_t id);
 
 protected:
-    virtual HttpResponse onRegularHttp(HttpRequest const & request);
+    virtual HttpResponse onRegularHttp(std::intptr_t id, HttpRequest const & request);
 
 protected:
-    virtual bool onSwitchingProtocol(HttpRequest const & request);
+    virtual bool onSwitchingProtocol(std::intptr_t id, HttpRequest const & request);
     virtual void onWsMessage(std::intptr_t id, WsOpCode opcode, Buffer const & payload);
 
 protected:
-    virtual void onError(Err code);
+    virtual void onError(std::intptr_t id, Err code);
 
 public:
     Err writeWsFrame(std::intptr_t id, WsFrame const & frame);
