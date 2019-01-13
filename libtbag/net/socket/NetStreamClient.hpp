@@ -98,6 +98,7 @@ public:
 
 public:
     void join();
+    Err exit();
 
 public:
     Err send(MqMsg const & msg);

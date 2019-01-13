@@ -269,7 +269,7 @@ void HttpServer::onWsMessage(std::intptr_t id, WsOpCode opcode, Buffer const & p
 
 void HttpServer::onError(std::intptr_t id, Err code)
 {
-    // EMPTY.
+    assert(static_cast<bool>(_impl));
 }
 
 Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)

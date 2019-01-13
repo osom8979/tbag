@@ -228,6 +228,11 @@ public:
         _pool.join();
     }
 
+    Err exit()
+    {
+        return _mq->exit();
+    }
+
     Err send(MqMsg const & msg)
     {
         return _mq->send(msg);
@@ -288,7 +293,14 @@ void NetStreamServer::swap(NetStreamServer & obj) TBAG_NOEXCEPT
 
 void NetStreamServer::join()
 {
+    assert(static_cast<bool>(_impl));
     _impl->join();
+}
+
+Err NetStreamServer::exit()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->exit();
 }
 
 Err NetStreamServer::send(MqMsg const & msg)

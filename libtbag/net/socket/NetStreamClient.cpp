@@ -196,6 +196,11 @@ public:
         _pool.join();
     }
 
+    Err exit()
+    {
+        return _mq->exit();
+    }
+
     Err send(MqMsg const & msg)
     {
         return _mq->send(msg);
@@ -256,7 +261,14 @@ void NetStreamClient::swap(NetStreamClient & obj) TBAG_NOEXCEPT
 
 void NetStreamClient::join()
 {
+    assert(static_cast<bool>(_impl));
     _impl->join();
+}
+
+Err NetStreamClient::exit()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->exit();
 }
 
 Err NetStreamClient::send(MqMsg const & msg)

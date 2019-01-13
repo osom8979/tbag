@@ -104,7 +104,8 @@ public:
     Err waitEnable(uint64_t timeout_nano = 0);
 
 public:
-    Err join();
+    void join();
+    Err exit();
 
 public:
     Err send(MqMsg const & msg);

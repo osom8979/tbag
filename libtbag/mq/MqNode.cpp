@@ -209,10 +209,14 @@ public:
         return _mq->waitEnable(timeout_nano);
     }
 
-    Err join()
+    void join()
     {
         _pool.join();
-        return Err::E_SUCCESS;
+    }
+
+    Err exit()
+    {
+        return _mq->exit();
     }
 
     Err send(MqMsg const & msg)
@@ -298,10 +302,16 @@ Err MqNode::waitEnable(uint64_t timeout_nano)
     return _impl->waitEnable(timeout_nano);
 }
 
-Err MqNode::join()
+void MqNode::join()
 {
     assert(static_cast<bool>(_impl));
-    return _impl->join();
+    _impl->join();
+}
+
+Err MqNode::exit()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->exit();
 }
 
 Err MqNode::send(MqMsg const & msg)

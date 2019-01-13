@@ -80,6 +80,25 @@ public:
     std::vector<char> decode(Err * code);
 };
 
+enum class TlsState
+{
+    TS_NOT_READY,
+    TS_HELLO,
+    TS_EXCHANGE_KEY,
+    TS_FINISH,
+};
+
+inline char const * const getTlsState(TlsState state) TBAG_NOEXCEPT
+{
+    switch (state) {
+    case TlsState::TS_NOT_READY:    return "NOT_READY";
+    case TlsState::TS_HELLO:        return "HELLO";
+    case TlsState::TS_EXCHANGE_KEY: return "EXCHANGE_KEY";
+    case TlsState::TS_FINISH:       return "FINISH";
+    default:                        return "UNKNOWN";
+    }
+}
+
 } // namespace http
 
 // --------------------
