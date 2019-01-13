@@ -9,6 +9,7 @@
 
 #include <libtbag/crypto/TlsReader.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/filesystem/File.hpp>
 
 #include <openssl/err.h>
 #include <openssl/ssl.h>
@@ -183,34 +184,68 @@ struct TlsReader::Impl : private Noncopyable
      * @remarks
      *  X.509 base64
      */
-    bool initPemPath(std::string const & cert_pem, std::string const & key_pem)
+    bool initPem(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len)
     {
+        assert(cert_buffer != nullptr);
+        assert(cert_len >= 1);
+        assert(key_buffer != nullptr);
+        assert(key_len >= 1);
+
         SSL_METHOD const * method = SSLv23_server_method();
         if (method == nullptr) {
-            tDLogE("TlsReader::Impl::initPemPath() OpenSSL method error.");
+            tDLogE("TlsReader::Impl::initPem() OpenSSL method error.");
             return false;
         }
 
         context = SSL_CTX_new(method);
         if (context == nullptr) {
-            tDLogE("TlsReader::Impl::initPemPath() OpenSSL Unable to create a new SSL context structure.");
+            tDLogE("TlsReader::Impl::initPem() OpenSSL Unable to create a new SSL context structure.");
             return false;
         }
 
         SSL_CTX_set_ecdh_auto(context, 1);
 
-        auto const CERT_CODE = SSL_CTX_use_certificate_file(context, cert_pem.c_str(), SSL_FILETYPE_PEM);
+        auto const CERT_CODE = SSL_CTX_use_certificate_memory(context, cert_buffer, cert_len, SSL_FILETYPE_PEM);
         if (CERT_CODE <= 0) {
-            tDLogE("TlsReader::Impl::initPemPath() Certificate file error: {}", getError(CERT_CODE));
+            tDLogE("TlsReader::Impl::initPem() Certificate memory error: {}", getError(CERT_CODE));
             return false;
         }
 
-        auto const KEY_CODE = SSL_CTX_use_PrivateKey_file(context, key_pem.c_str(), SSL_FILETYPE_PEM);
+        auto const KEY_CODE = SSL_CTX_use_PrivateKey_memory(context, key_buffer, key_len, SSL_FILETYPE_PEM);
         if (KEY_CODE <= 0) {
-            tDLogE("TlsReader::Impl::initPemPath() Private key file error: {}", getError(KEY_CODE));
+            tDLogE("TlsReader::Impl::initPem() Private key memory error: {}", getError(KEY_CODE));
             return false;
         }
+
+        // Verify private key
+        if (!SSL_CTX_check_private_key(context)) {
+            tDLogE("TlsReader::Impl::initPem() Private key does not match the public certificate.");
+            return false;
+        }
+
         return true;
+    }
+
+    bool initPemPath(std::string const & cert_pem, std::string const & key_pem)
+    {
+        using namespace libtbag::util;
+        using namespace libtbag::filesystem;
+
+        Buffer cert_buffer;
+        auto const CERT_CODE = readFile(cert_pem, cert_buffer);
+        if (isFailure(CERT_CODE)) {
+            tDLogE("TlsReader::Impl::initPemPath() Read error({}) of certificate file: {}", CERT_CODE, cert_pem);
+            return false;
+        }
+
+        Buffer key_buffer;
+        auto const KEY_CODE = readFile(key_pem, key_buffer);
+        if (isFailure(KEY_CODE)) {
+            tDLogE("TlsReader::Impl::initPemPath() Read error({}) of private key file: {}", KEY_CODE, key_pem);
+            return false;
+        }
+
+        return initPem(cert_buffer.data(), (int)cert_buffer.size(), key_buffer.data(), (int)key_buffer.size());
     }
 
     bool initBio()
@@ -466,15 +501,34 @@ struct TlsReader::Impl : private Noncopyable
 TlsReader::TlsReader() : _impl(std::make_unique<Impl>(this))
 {
     assert(_impl != nullptr);
-    if (!_impl->init() || !_impl->initBio()) {
+    if (!_impl->init()) {
+        throw std::bad_alloc();
+    }
+    if (!_impl->initBio()) {
         throw std::bad_alloc();
     }
 }
 
-TlsReader::TlsReader(std::string const & cert_pem, std::string const & key_pem) : TlsReader()
+TlsReader::TlsReader(std::string const & cert_pem, std::string const & key_pem)
+        : _impl(std::make_unique<Impl>(this))
 {
     assert(_impl != nullptr);
-    if (!_impl->initPemPath(cert_pem, key_pem) || !_impl->initBio()) {
+    if (!_impl->initPemPath(cert_pem, key_pem)) {
+        throw std::bad_alloc();
+    }
+    if (!_impl->initBio()) {
+        throw std::bad_alloc();
+    }
+}
+
+TlsReader::TlsReader(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len)
+        : _impl(std::make_unique<Impl>(this))
+{
+    assert(_impl != nullptr);
+    if (!_impl->initPem(cert_buffer, cert_len, key_buffer, key_len)) {
+        throw std::bad_alloc();
+    }
+    if (!_impl->initBio()) {
         throw std::bad_alloc();
     }
 }

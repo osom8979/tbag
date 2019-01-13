@@ -54,6 +54,7 @@ private:
 public:
     TlsReader();
     explicit TlsReader(std::string const & cert_pem, std::string const & key_pem);
+    explicit TlsReader(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len);
     ~TlsReader();
 
 public:
