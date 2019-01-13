@@ -4,10 +4,11 @@
  * @author zer0
  * @date   2017-11-11
  * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
+ * @date   2019-01-13 (Change namespace: libtbag::http -> libtbag::crypto)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_TLSREADER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_TLSREADER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_TLSREADER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_TLSREADER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -28,7 +29,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace http {
+namespace crypto {
 
 /**
  * TlsReader class prototype.
@@ -36,6 +37,7 @@ namespace http {
  * @author zer0
  * @date   2017-11-11
  * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
+ * @date   2019-01-13 (Change namespace: libtbag::http -> libtbag::crypto)
  */
 class TBAG_API TlsReader : private Noncopyable
 {
@@ -51,7 +53,8 @@ private:
 
 public:
     TlsReader();
-    virtual ~TlsReader();
+    explicit TlsReader(std::string const & cert_pem, std::string const & key_pem);
+    ~TlsReader();
 
 public:
     bool isFinished() const;
@@ -99,11 +102,11 @@ inline char const * const getTlsState(TlsState state) TBAG_NOEXCEPT
     }
 }
 
-} // namespace http
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_TLSREADER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_TLSREADER_HPP__
 

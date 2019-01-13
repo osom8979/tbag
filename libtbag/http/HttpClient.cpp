@@ -9,7 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/net/socket/NetStreamClient.hpp>
 #include <libtbag/http/HttpReader.hpp>
-#include <libtbag/http/TlsReader.hpp>
+#include <libtbag/crypto/TlsReader.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/Type.hpp>
 
@@ -37,7 +37,8 @@ public:
     using HttpReaderInterface = libtbag::http::HttpReaderInterface;
     using Reader              = libtbag::http::HttpReaderForCallback<Impl>;
     using Masking             = libtbag::random::MaskingDevice;
-    using TlsReader           = libtbag::http::TlsReader;
+    using TlsReader           = libtbag::crypto::TlsReader;
+    using TlsState            = libtbag::crypto::TlsState;
 
 public:
     STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpReaderInterface::Buffer);

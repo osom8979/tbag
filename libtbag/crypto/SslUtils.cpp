@@ -45,7 +45,6 @@ void releaseSsl()
     ERR_remove_state(0); // If zero we look it up.
 }
 
-
 } // namespace crypto
 
 // --------------------

@@ -4,9 +4,10 @@
  * @author zer0
  * @date   2017-11-11
  * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
+ * @date   2019-01-13 (Change namespace: libtbag::http -> libtbag::crypto)
  */
 
-#include <libtbag/http/TlsReader.hpp>
+#include <libtbag/crypto/TlsReader.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <openssl/err.h>
@@ -21,7 +22,94 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace http {
+namespace crypto {
+
+#if !defined(SSLerror)
+#define SSLerror(r)  ERR_PUT_error(ERR_LIB_SSL,(0xfff),(r),__FILE__,__LINE__)
+#endif
+
+static int SSL_CTX_use_PrivateKey_memory(SSL_CTX * ctx, char const * buffer, int len, int type)
+{
+    int j, ret = 0;
+    EVP_PKEY * pkey = nullptr;
+    BIO * in = nullptr;
+
+    in = BIO_new(BIO_s_file_internal());
+    if (in == nullptr) {
+        SSLerror(ERR_R_BUF_LIB);
+        goto end;
+    }
+
+    if (BIO_read(in, (void*)buffer, len) <= 0) {
+        SSLerror(ERR_R_SYS_LIB);
+        goto end;
+    }
+
+    if (type == SSL_FILETYPE_PEM) {
+        j = ERR_R_PEM_LIB;
+        pkey = PEM_read_bio_PrivateKey(in, nullptr,
+                                       ctx->default_passwd_callback,
+                                       ctx->default_passwd_callback_userdata);
+    } else if (type == SSL_FILETYPE_ASN1) {
+        j = ERR_R_ASN1_LIB;
+        pkey = d2i_PrivateKey_bio(in, nullptr);
+    } else {
+        SSLerror(SSL_R_BAD_SSL_FILETYPE);
+        goto end;
+    }
+
+    if (pkey == nullptr) {
+        SSLerror(j);
+        goto end;
+    }
+    ret = SSL_CTX_use_PrivateKey(ctx, pkey);
+    EVP_PKEY_free(pkey);
+
+end:
+    BIO_free(in);
+    return (ret);
+}
+
+static int SSL_CTX_use_certificate_memory(SSL_CTX * ctx, char const * buffer, int len, int type)
+{
+    int j, ret = 0;
+    X509 * x = nullptr;
+    BIO * in = nullptr;
+
+    in = BIO_new(BIO_s_file_internal());
+    if (in == nullptr) {
+        SSLerror(ERR_R_BUF_LIB);
+        goto end;
+    }
+
+    if (BIO_read(in, (void*)buffer, len) <= 0) {
+        SSLerror(ERR_R_SYS_LIB);
+        goto end;
+    }
+    if (type == SSL_FILETYPE_ASN1) {
+        j = ERR_R_ASN1_LIB;
+        x = d2i_X509_bio(in, nullptr);
+    } else if (type == SSL_FILETYPE_PEM) {
+        j = ERR_R_PEM_LIB;
+        x = PEM_read_bio_X509(in, nullptr, ctx->default_passwd_callback,
+                              ctx->default_passwd_callback_userdata);
+    } else {
+        SSLerror(SSL_R_BAD_SSL_FILETYPE);
+        goto end;
+    }
+
+    if (x == nullptr) {
+        SSLerror(j);
+        goto end;
+    }
+
+    ret = SSL_CTX_use_certificate(ctx, x);
+
+end:
+    X509_free(x);
+    BIO_free(in);
+    return (ret);
+}
 
 /**
  * Use the OpenSSL-TLS.
@@ -48,14 +136,27 @@ struct TlsReader::Impl : private Noncopyable
 
     Impl(TlsReader * p) : parent(p), ssl(nullptr), context(nullptr), write_bio(nullptr), read_bio(nullptr)
     {
-        if (init() == false) {
-            throw std::bad_alloc();
-        }
+        assert(parent != nullptr);
     }
 
     ~Impl()
     {
         release();
+    }
+
+    bool isFinished() const
+    {
+        return SSL_is_init_finished(ssl);
+    }
+
+    std::string getCipherName() const
+    {
+        return SSL_get_cipher(ssl);
+    }
+
+    int getError(int ret_code) const
+    {
+        return SSL_get_error(ssl, ret_code);
     }
 
     bool init()
@@ -73,10 +174,50 @@ struct TlsReader::Impl : private Noncopyable
         }
 
         SSL_CTX_set_verify(context, SSL_VERIFY_NONE, nullptr);
+        return true;
+    }
 
+    /**
+     * Initialize Privacy-enhanced Electronic Mail (Privacy Enhanced Mail, PEM) file.
+     *
+     * @remarks
+     *  X.509 base64
+     */
+    bool initPemPath(std::string const & cert_pem, std::string const & key_pem)
+    {
+        SSL_METHOD const * method = SSLv23_server_method();
+        if (method == nullptr) {
+            tDLogE("TlsReader::Impl::initPemPath() OpenSSL method error.");
+            return false;
+        }
+
+        context = SSL_CTX_new(method);
+        if (context == nullptr) {
+            tDLogE("TlsReader::Impl::initPemPath() OpenSSL Unable to create a new SSL context structure.");
+            return false;
+        }
+
+        SSL_CTX_set_ecdh_auto(context, 1);
+
+        auto const CERT_CODE = SSL_CTX_use_certificate_file(context, cert_pem.c_str(), SSL_FILETYPE_PEM);
+        if (CERT_CODE <= 0) {
+            tDLogE("TlsReader::Impl::initPemPath() Certificate file error: {}", getError(CERT_CODE));
+            return false;
+        }
+
+        auto const KEY_CODE = SSL_CTX_use_PrivateKey_file(context, key_pem.c_str(), SSL_FILETYPE_PEM);
+        if (KEY_CODE <= 0) {
+            tDLogE("TlsReader::Impl::initPemPath() Private key file error: {}", getError(KEY_CODE));
+            return false;
+        }
+        return true;
+    }
+
+    bool initBio()
+    {
         ssl = SSL_new(context);
         if (ssl == nullptr) {
-            tDLogE("TlsReader::Impl::init() OpenSSL SSL error.");
+            tDLogE("TlsReader::Impl::initBio() OpenSSL SSL error.");
             return false;
         }
 
@@ -96,21 +237,6 @@ struct TlsReader::Impl : private Noncopyable
             SSL_CTX_free(context);
             context = nullptr;
         }
-    }
-
-    bool isFinished() const
-    {
-        return SSL_is_init_finished(ssl);
-    }
-
-    std::string getCipherName() const
-    {
-        return SSL_get_cipher(ssl);
-    }
-
-    int getError(int ret_code) const
-    {
-        return SSL_get_error(ssl, ret_code);
     }
 
     int checkError(int ret_code) const
@@ -337,9 +463,20 @@ struct TlsReader::Impl : private Noncopyable
 // TlsReader implementation.
 // -------------------------
 
-TlsReader::TlsReader() : _impl(new Impl(this))
+TlsReader::TlsReader() : _impl(std::make_unique<Impl>(this))
 {
-    // EMPTY.
+    assert(_impl != nullptr);
+    if (!_impl->init() || !_impl->initBio()) {
+        throw std::bad_alloc();
+    }
+}
+
+TlsReader::TlsReader(std::string const & cert_pem, std::string const & key_pem) : TlsReader()
+{
+    assert(_impl != nullptr);
+    if (!_impl->initPemPath(cert_pem, key_pem) || !_impl->initBio()) {
+        throw std::bad_alloc();
+    }
 }
 
 TlsReader::~TlsReader()
@@ -434,7 +571,7 @@ std::vector<char> TlsReader::decode(Err * code)
     return result;
 }
 
-} // namespace http
+} // namespace crypto
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
