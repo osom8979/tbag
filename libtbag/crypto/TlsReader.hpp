@@ -48,6 +48,9 @@ public:
 public:
     using UniqueImpl = std::unique_ptr<Impl>;
 
+public:
+    struct reference_ssl_context { /* EMPTY. */ };
+
 private:
     UniqueImpl _impl;
 
@@ -55,6 +58,7 @@ public:
     TlsReader();
     explicit TlsReader(std::string const & cert_pem, std::string const & key_pem);
     explicit TlsReader(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len);
+    explicit TlsReader(reference_ssl_context const & UNUSED_PARAM(init), TlsReader const & tls);
     ~TlsReader();
 
 public:
