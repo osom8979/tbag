@@ -270,6 +270,8 @@ void HttpServer::onWsMessage(std::intptr_t id, WsOpCode opcode, Buffer const & p
 void HttpServer::onError(std::intptr_t id, Err code)
 {
     assert(static_cast<bool>(_impl));
+    auto const SEND_CODE = _impl->sendClose(id);
+    tDLogE("HttpServer::onError({}) Close node({}) request: {}", code, id, SEND_CODE);
 }
 
 Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)
