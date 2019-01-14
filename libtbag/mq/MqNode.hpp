@@ -105,6 +105,8 @@ public:
 
 public:
     void join();
+
+public:
     Err exit();
 
 public:
@@ -121,6 +123,9 @@ public:
 public:
     Err send(MqMsg::Buffer const & buffer);
     Err send(MqEvent event, MqMsg::Buffer const & buffer);
+
+public:
+    Err sendClose(std::intptr_t id = 0);
 
 public:
     Err recv(MqMsg & msg);

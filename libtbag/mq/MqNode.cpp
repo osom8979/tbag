@@ -350,6 +350,11 @@ Err MqNode::send(MqEvent event, MqMsg::Buffer const & buffer)
     return send(MqMsg(event, buffer));
 }
 
+Err MqNode::sendClose(std::intptr_t id)
+{
+    return send(MqMsg(libtbag::mq::details::ME_CLOSE, id));
+}
+
 Err MqNode::recv(MqMsg & msg)
 {
     assert(static_cast<bool>(_impl));

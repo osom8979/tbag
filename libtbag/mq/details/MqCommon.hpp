@@ -217,26 +217,26 @@ struct MqMsg
     MqMsg()
     { /* EMPTY. */ }
 
-    MqMsg(MqEvent e, std::intptr_t id = 0) : event(e), stream(id)
+    explicit MqMsg(MqEvent e, std::intptr_t id = 0) : event(e), stream(id)
     { /* EMPTY. */ }
-    MqMsg(std::size_t s, std::intptr_t id = 0) : buffer(s), stream(id)
+    explicit MqMsg(std::size_t s, std::intptr_t id = 0) : buffer(s), stream(id)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e, std::size_t s, std::intptr_t id = 0) : event(e), buffer(s), stream(id)
-    { /* EMPTY. */ }
-
-    MqMsg(Value const * d, std::size_t s, std::intptr_t id = 0) : buffer(d, d + s), stream(id)
-    { /* EMPTY. */ }
-    MqMsg(MqEvent e, Value const * d, std::size_t s, std::intptr_t id = 0) : event(e), buffer(d, d + s), stream(id)
+    explicit MqMsg(MqEvent e, std::size_t s, std::intptr_t id = 0) : event(e), buffer(s), stream(id)
     { /* EMPTY. */ }
 
-    MqMsg(std::string const & str, std::intptr_t id = 0) : buffer(str.begin(), str.end()), stream(id)
+    explicit MqMsg(Value const * d, std::size_t s, std::intptr_t id = 0) : buffer(d, d + s), stream(id)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e, std::string const & str, std::intptr_t id = 0) : event(e), buffer(str.begin(), str.end()), stream(id)
+    explicit MqMsg(MqEvent e, Value const * d, std::size_t s, std::intptr_t id = 0) : event(e), buffer(d, d + s), stream(id)
     { /* EMPTY. */ }
 
-    MqMsg(Buffer const & buffer, std::intptr_t id = 0) : buffer(buffer), stream(id)
+    explicit MqMsg(std::string const & str, std::intptr_t id = 0) : buffer(str.begin(), str.end()), stream(id)
     { /* EMPTY. */ }
-    MqMsg(MqEvent e, Buffer const & buf, std::intptr_t id = 0) : event(e), buffer(buf), stream(id)
+    explicit MqMsg(MqEvent e, std::string const & str, std::intptr_t id = 0) : event(e), buffer(str.begin(), str.end()), stream(id)
+    { /* EMPTY. */ }
+
+    explicit MqMsg(Buffer const & buffer, std::intptr_t id = 0) : buffer(buffer), stream(id)
+    { /* EMPTY. */ }
+    explicit MqMsg(MqEvent e, Buffer const & buf, std::intptr_t id = 0) : event(e), buffer(buf), stream(id)
     { /* EMPTY. */ }
 
     MqMsg(MqMsg const & obj)
