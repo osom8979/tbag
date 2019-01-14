@@ -75,6 +75,13 @@ protected:
     virtual void onError(std::intptr_t id, Err code);
 
 public:
+    void join();
+
+public:
+    Err exit();
+    Err close(std::intptr_t id);
+
+public:
     Err writeWsFrame(std::intptr_t id, WsFrame const & frame);
     Err writeText   (std::intptr_t id, char const * buffer, std::size_t size, bool finish = true);
     Err writeText   (std::intptr_t id, std::string const & text, bool finish = true);

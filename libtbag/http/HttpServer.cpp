@@ -262,6 +262,24 @@ void HttpServer::onError(std::intptr_t id, Err code)
     tDLogE("HttpServer::onError({}) Close node({}) request: {}", code, id, SEND_CODE);
 }
 
+void HttpServer::join()
+{
+    assert(static_cast<bool>(_impl));
+    _impl->join();
+}
+
+Err HttpServer::exit()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->exit();
+}
+
+Err HttpServer::close(std::intptr_t id)
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->sendClose(id);
+}
+
 Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)
 {
     assert(static_cast<bool>(_impl));

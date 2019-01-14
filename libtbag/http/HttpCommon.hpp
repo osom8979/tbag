@@ -31,6 +31,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace http {
 
+TBAG_CONSTEXPR char const * const HTTP_SCHEMA_LOWER  = "http";
+TBAG_CONSTEXPR char const * const HTTPS_SCHEMA_LOWER = "https";
+
 TBAG_CONSTEXPR char const * const HTTP = "HTTP";
 TBAG_CONSTEXPR char const * const   SP = " ";
 TBAG_CONSTEXPR char const * const CRLF = "\r\n";

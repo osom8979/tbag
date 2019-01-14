@@ -71,6 +71,12 @@ protected:
     virtual void onError(Err code);
 
 public:
+    void join();
+
+public:
+    Err exit();
+
+public:
     Err writeRequest();
     Err writeRequest(HttpRequest const & request);
 

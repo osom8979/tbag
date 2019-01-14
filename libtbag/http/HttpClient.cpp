@@ -428,6 +428,18 @@ void HttpClient::onError(Err code)
     tDLogE("HttpClient::onError({}) Exit request: {}", code, EXIT_CODE);
 }
 
+void HttpClient::join()
+{
+    assert(static_cast<bool>(_impl));
+    _impl->join();
+}
+
+Err HttpClient::exit()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->exit();
+}
+
 Err HttpClient::writeRequest()
 {
     assert(static_cast<bool>(_impl));
