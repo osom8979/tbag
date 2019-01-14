@@ -105,6 +105,10 @@ public:
         auto const IDLE_START_CODE = _idle->start();
         assert(isSuccess(IDLE_START_CODE));
 
+        if (params.on_create_loop != nullptr) {
+            params.on_create_loop(_loop, params);
+        }
+
         bool const PUSH_RESULT = _pool.push([&](){
             runner();
             _pool.exit();

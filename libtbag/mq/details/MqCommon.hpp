@@ -19,6 +19,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/type/TypeTable.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -328,6 +329,8 @@ enum class MqIsConsume
 
 // Forward declaration.
 struct MqInterface;
+struct MqInternal;
+struct MqParams;
 
 /**
  * Connect event.
@@ -493,6 +496,11 @@ TBAG_CONSTEXPR std::size_t const WAIT_ON_ACTIVATION_INFINITY
 TBAG_CONSTEXPR std::size_t const RECONNECT_INFINITY = 0;
 
 /**
+ * Event for loop creation.
+ */
+using MqOnCreateLoop = void(*)(libtbag::uvpp::Loop & loop, MqParams const & params);
+
+/**
  * User customizable option packs.
  */
 struct MqParams
@@ -648,6 +656,11 @@ struct MqParams
      * Space for user-defined arbitrary data.
      */
     void * user = nullptr;
+
+    /**
+     * Provides a callback that allows the user to control the loop.
+     */
+    MqOnCreateLoop on_create_loop = nullptr;
 
     MqParams()
     { /* EMPTY. */ }

@@ -52,8 +52,6 @@ private:
     UniqueImpl _impl;
 
 public:
-    HttpClient(std::string const & uri, bool use_websocket = false, bool enable_tls = false);
-    HttpClient(std::string const & uri, std::string const & key, bool use_websocket = false, bool enable_tls = false);
     HttpClient(MqParams const & params, bool use_websocket = false, bool enable_tls = false);
     HttpClient(MqParams const & params, std::string const & key, bool use_websocket = false, bool enable_tls = false);
     ~HttpClient();

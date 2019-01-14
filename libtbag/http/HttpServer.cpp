@@ -203,18 +203,6 @@ private:
 // HttpServer implementation.
 // --------------------------
 
-HttpServer::HttpServer(std::string const & uri, bool use_websocket)
-        : HttpServer(libtbag::mq::details::convertUriToParams(uri), use_websocket)
-{
-    assert(static_cast<bool>(_impl));
-}
-
-HttpServer::HttpServer(std::string const & uri, std::string const & key, bool use_websocket)
-        : HttpServer(libtbag::mq::details::convertUriToParams(uri), key, use_websocket)
-{
-    assert(static_cast<bool>(_impl));
-}
-
 HttpServer::HttpServer(MqParams const & params, bool use_websocket)
         : HttpServer(params, std::string(), use_websocket)
 {

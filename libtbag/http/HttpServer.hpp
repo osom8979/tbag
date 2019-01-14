@@ -52,8 +52,6 @@ private:
     UniqueImpl _impl;
 
 public:
-    HttpServer(std::string const & uri, bool use_websocket = false);
-    HttpServer(std::string const & uri, std::string const & key, bool use_websocket = false);
     HttpServer(MqParams const & params, bool use_websocket = false);
     HttpServer(MqParams const & params, std::string const & key, bool use_websocket = false);
     ~HttpServer();

@@ -379,18 +379,6 @@ public:
 // HttpClient implementation.
 // --------------------------
 
-HttpClient::HttpClient(std::string const & uri, bool use_websocket, bool enable_tls)
-        : HttpClient(libtbag::mq::details::convertUriToParams(uri), use_websocket, enable_tls)
-{
-    assert(static_cast<bool>(_impl));
-}
-
-HttpClient::HttpClient(std::string const & uri, std::string const & key, bool use_websocket, bool enable_tls)
-        : HttpClient(libtbag::mq::details::convertUriToParams(uri), key, use_websocket, enable_tls)
-{
-    assert(static_cast<bool>(_impl));
-}
-
 HttpClient::HttpClient(MqParams const & params, bool use_websocket, bool enable_tls)
         : HttpClient(params, libtbag::http::generateRandomWebSocketKey(), use_websocket, enable_tls)
 {
