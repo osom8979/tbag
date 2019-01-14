@@ -92,8 +92,14 @@ AfterAction MqStreamClient::onMsg(AsyncMsg * msg)
         return AfterAction::AA_OK;
     }
 
-    if (msg->event < ME_MSG) {
-        tDLogW("MqStreamClient::onMsg() Ignore system messages: {}", msg->event);
+    if (msg->event == ME_CLOSE) {
+        tDLogI("MqStreamClient::onMsg() Close client.");
+        auto const EXIT_CODE = exit();
+        assert(isSuccess(EXIT_CODE));
+        return AfterAction::AA_OK;
+
+    } else if (msg->event < ME_MSG) {
+        tDLogW("MqStreamClient::onMsg() Unsupported system messages: {}", msg->event);
         return AfterAction::AA_OK;
     }
 

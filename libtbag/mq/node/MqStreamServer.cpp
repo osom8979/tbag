@@ -88,8 +88,29 @@ AfterAction MqStreamServer::onMsg(AsyncMsg * msg)
         return AfterAction::AA_OK;
     }
 
-    if (msg->event < ME_MSG) {
-        tDLogW("MqStreamClient::onMsg() Ignore system messages: {}", msg->event);
+    if (msg->event == ME_CLOSE) {
+        if (msg->stream == 0) {
+            tDLogI("MqStreamServer::onMsg() Close server.");
+            auto const EXIT_CODE = exit();
+            assert(isSuccess(EXIT_CODE));
+        } else {
+            StreamPointer stream(reinterpret_cast<Stream*>(msg->stream));
+            if (_nodes.find(stream) != _nodes.end()) {
+                assert(static_cast<bool>(stream));
+                if (stream->isClosing()) {
+                    tDLogD("MqStreamServer::onMsg() Already closing: {}", msg->stream);
+                } else {
+                    stream->close();
+                    tDLogI("MqStreamServer::onMsg() Close stream: {}", msg->stream);
+                }
+            } else {
+                tDLogW("MqStreamServer::onMsg() Not found node, skip this message.");
+            }
+        }
+        return AfterAction::AA_OK;
+
+    } else if (msg->event < ME_MSG) {
+        tDLogW("MqStreamServer::onMsg() Unsupported system messages: {}", msg->event);
         return AfterAction::AA_OK;
     }
 

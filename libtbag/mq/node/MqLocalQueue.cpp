@@ -80,11 +80,16 @@ AfterAction MqLocalQueue::onMsg(AsyncMsg * msg)
     }
 
     assert(_state == MqMachineState::MMS_ACTIVE);
-    if (msg->event >= ME_MSG) {
+    if (msg->event == ME_CLOSE) {
+        tDLogI("MqLocalQueue::onMsg() Close local-queue.");
+        auto const EXIT_CODE = exit();
+        assert(isSuccess(EXIT_CODE));
+    } else if (msg->event >= ME_MSG) {
         onRead(msg);
     } else {
         tDLogW("MqLocalQueue::onMsg() Ignore system messages: {}", msg->event);
     }
+
     return AfterAction::AA_OK;
 }
 
