@@ -203,6 +203,16 @@ private:
     }
 
 public:
+    Loop & loop()
+    {
+        return _loop;
+    }
+
+    Loop const & loop() const
+    {
+        return _loop;
+    }
+
     MqParams params() const
     {
         return PARAMS;
@@ -277,6 +287,18 @@ void MqNode::swap(MqNode & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         _impl.swap(obj._impl);
     }
+}
+
+MqNode::Loop & MqNode::loop()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
+}
+
+MqNode::Loop const & MqNode::loop() const
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
 }
 
 bool MqNode::onAccept(std::string const & peer)

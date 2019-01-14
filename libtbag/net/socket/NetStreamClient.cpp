@@ -195,6 +195,16 @@ private:
     }
 
 public:
+    Loop & loop()
+    {
+        return _loop;
+    }
+
+    Loop const & loop() const
+    {
+        return _loop;
+    }
+
     void join()
     {
         _pool.join();
@@ -261,6 +271,18 @@ void NetStreamClient::swap(NetStreamClient & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         _impl.swap(obj._impl);
     }
+}
+
+NetStreamClient::Loop & NetStreamClient::loop()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
+}
+
+NetStreamClient::Loop const & NetStreamClient::loop() const
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
 }
 
 void NetStreamClient::join()

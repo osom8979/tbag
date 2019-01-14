@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <cstdint>
 #include <string>
@@ -45,9 +46,8 @@ public:
     friend struct Impl;
 
 public:
-    using UniqueImpl = std::unique_ptr<Impl>;
-
-public:
+    using UniqueImpl     = std::unique_ptr<Impl>;
+    using Loop           = libtbag::uvpp::Loop;
     using MqEvent        = libtbag::mq::details::MqEvent;
     using MqType         = libtbag::mq::details::MqType;
     using MqRequestState = libtbag::mq::details::MqRequestState;
@@ -95,6 +95,10 @@ public:
 
     inline operator bool() const TBAG_NOEXCEPT
     { return exists(); }
+
+public:
+    Loop & loop();
+    Loop const & loop() const;
 
 public:
     void join();
