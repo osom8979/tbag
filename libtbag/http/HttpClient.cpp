@@ -531,7 +531,7 @@ HttpClient::MqParams HttpClient::getDefaultParams(libtbag::network::Uri const & 
     params.reconnect_delay_millisec = 0;
     params.wait_on_activation_timeout_millisec = 0;
     params.wait_next_opcode_nanosec = 1000;
-    params.verbose = false;
+    params.verbose = true;
     params.user = nullptr;
     params.on_create_loop = nullptr;
 

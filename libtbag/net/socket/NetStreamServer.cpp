@@ -114,6 +114,8 @@ public:
             _pool.exit();
         });
         assert(PUSH_RESULT);
+
+        libtbag::mq::details::waitOnActivation(params, _mq.get());
     }
 
     ~Impl()

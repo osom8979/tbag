@@ -20,7 +20,6 @@
 
 #include <string>
 #include <functional>
-#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -45,9 +44,6 @@ public:
 
     using OnHttp  = std::function<HttpResponse(std::intptr_t, HttpRequest const &)>;
     using OnError = std::function<void(std::intptr_t, Err)>;
-
-    using Mutex = std::mutex;
-    using Guard = std::lock_guard<Mutex>;
 
 public:
     struct Callbacks

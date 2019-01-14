@@ -136,11 +136,12 @@ protected:
 
         auto const CODE = writeRequest(_request);
         assert(isSuccess(CODE));
+        tDLogI("SimpleHttpClient::Impl::onBegin() Write request: {}", _request.toRequestLine());
     }
 
     virtual void onEnd() override
     {
-        // Done.
+        tDLogD("SimpleHttpClient::Impl::onEnd() Done.");
     }
 
 public:
@@ -158,6 +159,8 @@ public:
 protected:
     virtual void onRegularHttp(HttpResponse const & response) override
     {
+        tDLogD("SimpleHttpClient::Impl::onRegularHttp() Response result: {}", response.toStatusLine());
+
         _response = response;
         stopTimerAndExit();
     }

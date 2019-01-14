@@ -367,12 +367,9 @@ HttpServer::MqParams HttpServer::getDefaultParams(std::string const & host, int 
     params.recv_queue_size = 1024;
     params.wait_closing_millisec = 1000;
     params.continuous_read_error_count = 4;
-    params.connect_timeout_millisec = 4 * 1000;
-    params.reconnect_count = 1;
-    params.reconnect_delay_millisec = 0;
     params.wait_on_activation_timeout_millisec = libtbag::mq::details::WAIT_ON_ACTIVATION_INFINITY;
     params.wait_next_opcode_nanosec = 1000;
-    params.verbose = false;
+    params.verbose = true;
     params.user = nullptr;
     params.on_create_loop = nullptr;
     return params;
