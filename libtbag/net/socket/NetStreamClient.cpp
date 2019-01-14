@@ -139,9 +139,6 @@ private:
 
         if (impl->CALLBACKS.begin_cb) {
             impl->CALLBACKS.begin_cb();
-        } else {
-            assert(impl->_parent != nullptr);
-            impl->_parent->onBegin();
         }
     }
 
@@ -152,9 +149,6 @@ private:
 
         if (impl->CALLBACKS.end_cb) {
             impl->CALLBACKS.end_cb();
-        } else {
-            assert(impl->_parent != nullptr);
-            impl->_parent->onEnd();
         }
     }
 
@@ -188,9 +182,6 @@ private:
 
         if (impl->CALLBACKS.recv_cb) {
             impl->CALLBACKS.recv_cb(buffer, size);
-        } else {
-            assert(impl->_parent != nullptr);
-            impl->_parent->onRecv(buffer, size);
         }
     }
 
@@ -341,21 +332,6 @@ Err NetStreamClient::sendClose(std::intptr_t id)
 NetStreamClient::MqParams NetStreamClient::getParams(std::string const & uri)
 {
     return libtbag::mq::details::convertUriToParams(uri);
-}
-
-void NetStreamClient::onBegin()
-{
-    // EMPTY.
-}
-
-void NetStreamClient::onRecv(char const * buffer, std::size_t size)
-{
-    // EMPTY.
-}
-
-void NetStreamClient::onEnd()
-{
-    // EMPTY.
 }
 
 } // namespace socket

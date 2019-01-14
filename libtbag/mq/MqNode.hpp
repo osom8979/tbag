@@ -38,7 +38,7 @@ namespace mq {
  * @author zer0
  * @date   2018-11-11
  */
-class TBAG_API MqNode : private Noncopyable
+class TBAG_API MqNode TBAG_FINAL : private Noncopyable
 {
 public:
     struct Impl;
@@ -55,13 +55,13 @@ public:
     using MqMode         = libtbag::mq::details::MqMode;
     using MqParams       = libtbag::mq::details::MqParams;
 
-    using OnAccept = std::function<bool(std::string const &)>;
-    using OnWrite  = std::function<bool(MqMsg &)>;
-    using OnRecv   = std::function<bool(MqMsg const &)>;
-
 public:
     struct Callbacks
     {
+        using OnAccept = std::function<bool(std::string const &)>;
+        using OnWrite  = std::function<bool(MqMsg &)>;
+        using OnRecv   = std::function<bool(MqMsg const &)>;
+
         OnAccept  accept_cb;
         OnWrite   write_cb;
         OnRecv    recv_cb;
@@ -74,7 +74,7 @@ public:
     MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs = Callbacks{});
     MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs = Callbacks{});
     MqNode(MqNode && obj) TBAG_NOEXCEPT;
-    virtual ~MqNode();
+    ~MqNode();
 
 public:
     MqNode & operator =(MqNode && obj) TBAG_NOEXCEPT;
@@ -97,11 +97,6 @@ public:
     Loop & loop();
     Loop const & loop() const;
 
-protected:
-    virtual bool onAccept(std::string const & peer);
-    virtual bool onWrite(MqMsg & msg);
-    virtual bool onRecv(MqMsg const & msg);
-
 public:
     MqParams params() const;
 
@@ -117,19 +112,15 @@ public:
 public:
     Err send(MqMsg const & msg);
 
-public:
     Err send(char const * buffer, std::size_t size);
     Err send(MqEvent event, char const * buffer, std::size_t size);
 
-public:
     Err send(std::string const & text);
     Err send(MqEvent event, std::string const & text);
 
-public:
     Err send(MqMsg::Buffer const & buffer);
     Err send(MqEvent event, MqMsg::Buffer const & buffer);
 
-public:
     Err sendClose(std::intptr_t id = 0);
 
 public:
@@ -139,7 +130,6 @@ public:
 public:
     static MqParams getParams(std::string const & uri);
 
-public:
     static MqNode bind(MqParams const & params);
     static MqNode bind(std::string const & uri);
 

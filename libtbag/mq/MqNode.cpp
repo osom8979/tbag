@@ -166,10 +166,8 @@ private:
 
         if (impl->CALLBACKS.accept_cb) {
             return impl->CALLBACKS.accept_cb(peer);
-        } else {
-            assert(impl->_parent != nullptr);
-            return impl->_parent->onAccept(peer);
         }
+        return true;
     }
 
     static MqIsConsume __on_write_cb__(MqMsg & msg, void * parent)
@@ -177,14 +175,10 @@ private:
         assert(parent != nullptr);
         auto * impl = (MqNode::Impl*)parent;
 
-        bool result;
         if (impl->CALLBACKS.write_cb) {
-            result = impl->CALLBACKS.write_cb(msg);
-        } else {
-            assert(impl->_parent != nullptr);
-            result = impl->_parent->onWrite(msg);
+            return impl->CALLBACKS.write_cb(msg) ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
         }
-        return result ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
+        return MqIsConsume::MIC_PASS;
     }
 
     static MqIsConsume __on_recv_cb__(MqMsg const & msg, void * parent)
@@ -192,14 +186,10 @@ private:
         assert(parent != nullptr);
         auto * impl = (MqNode::Impl*)parent;
 
-        bool result;
         if (impl->CALLBACKS.recv_cb) {
-            result = impl->CALLBACKS.recv_cb(msg);
-        } else {
-            assert(impl->_parent != nullptr);
-            result = impl->_parent->onRecv(msg);
+            return impl->CALLBACKS.recv_cb(msg) ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
         }
-        return result ? MqIsConsume::MIC_CONSUMED : MqIsConsume::MIC_PASS;
+        return MqIsConsume::MIC_PASS;
     }
 
 public:
@@ -299,21 +289,6 @@ MqNode::Loop const & MqNode::loop() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->loop();
-}
-
-bool MqNode::onAccept(std::string const & peer)
-{
-    return true;
-}
-
-bool MqNode::onWrite(MqMsg & msg)
-{
-    return false;
-}
-
-bool MqNode::onRecv(MqMsg const & msg)
-{
-    return false;
 }
 
 MqParams MqNode::params() const

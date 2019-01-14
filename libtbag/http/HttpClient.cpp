@@ -30,16 +30,16 @@ namespace http {
  * @author zer0
  * @date   2019-01-11
  */
-struct HttpClient::Impl : public libtbag::net::socket::NetStreamClient,
-                          public libtbag::http::HttpReaderInterface
+struct HttpClient::Impl : public libtbag::http::HttpReaderInterface
 {
 public:
-    using NetStreamClient     = libtbag::net::socket::NetStreamClient;
     using HttpReaderInterface = libtbag::http::HttpReaderInterface;
     using Reader              = libtbag::http::HttpReaderForCallback<Impl>;
     using Masking             = libtbag::random::MaskingDevice;
     using TlsReader           = libtbag::crypto::TlsReader;
     using TlsState            = libtbag::crypto::TlsState;
+    using NetStreamClient     = libtbag::net::socket::NetStreamClient;
+    using UniqueClient        = std::unique_ptr<NetStreamClient>;
 
 public:
     STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpReaderInterface::Buffer);
@@ -49,17 +49,24 @@ public:
     bool const ENABLE_TLS;
 
 private:
-    Reader    _reader;
-    Masking   _masking;
-    TlsReader _tls;
-    TlsState  _state;
+    UniqueClient _client;
+    Reader       _reader;
+    Masking      _masking;
+    TlsReader    _tls;
+    TlsState     _state;
 
 public:
     Impl(HttpClient * parent, MqParams const & params, std::string const & key, bool use_websocket, bool enable_tls)
-            : NetStreamClient(params), PARENT(parent), ENABLE_TLS(enable_tls),
+            : PARENT(parent), ENABLE_TLS(enable_tls),
               _reader(this, key, use_websocket), _state(TlsState::TS_NOT_READY)
     {
         assert(PARENT != nullptr);
+        NetStreamClient::Callbacks cbs;
+        cbs.begin_cb = [&](){ onBegin(); };
+        cbs.end_cb   = [&](){ onEnd(); };
+        cbs.recv_cb  = [&](char const * b, std::size_t l){ onRecv(b, l); };
+        _client = std::make_unique<NetStreamClient>(params, cbs);
+        assert(static_cast<bool>(_client));
     }
 
     ~Impl()
@@ -68,6 +75,30 @@ public:
     }
 
 public:
+    Loop & loop()
+    {
+        assert(static_cast<bool>(_client));
+        return _client->loop();
+    }
+
+    Loop const & loop() const
+    {
+        assert(static_cast<bool>(_client));
+        return _client->loop();
+    }
+
+    void join()
+    {
+        assert(static_cast<bool>(_client));
+        _client->join();
+    }
+
+    Err exit()
+    {
+        assert(static_cast<bool>(_client));
+        return _client->exit();
+    }
+
     Err sendTls(void const * data, std::size_t size)
     {
         Err encode_code = Err::E_UNKNOWN;
@@ -75,7 +106,7 @@ public:
         if (isFailure(encode_code)) {
             return encode_code;
         }
-        return send(encode_result.data(), encode_result.size());
+        return _client->send(encode_result.data(), encode_result.size());
     }
 
     Err sendTls(std::string const & text)
@@ -84,7 +115,7 @@ public:
     }
 
 private:
-    virtual void onBegin() override
+    void onBegin()
     {
         if (ENABLE_TLS) {
             onBeginTls();
@@ -108,7 +139,7 @@ private:
         }
 
         // HANDSHAKE 01. Client hello
-        Err const WRITE_CODE = send(buffer.data(), buffer.size());
+        Err const WRITE_CODE = _client->send(buffer.data(), buffer.size());
         if (isFailure(WRITE_CODE)) {
             PARENT->onError(WRITE_CODE);
             return;
@@ -122,12 +153,12 @@ private:
         _state = TlsState::TS_HELLO;
     }
 
-    virtual void onEnd() override
+    void onEnd()
     {
         PARENT->onEnd();
     }
 
-    virtual void onRecv(char const * buffer, std::size_t size) override
+    void onRecv(char const * buffer, std::size_t size)
     {
         if (ENABLE_TLS) {
             onRecvTls(buffer, size);
@@ -185,7 +216,7 @@ private:
         _tls.readFromWriteBuffer(write_buffer); // Skip error code check.
 
         if (!write_buffer.empty()) {
-            Err const WRITE_CODE = send(write_buffer.data(), write_buffer.size());
+            Err const WRITE_CODE = _client->send(write_buffer.data(), write_buffer.size());
             if (isSuccess(WRITE_CODE)) {
                 tDLogD("HttpClient::Impl::onHandshakeHello() SSL connection using {}", _tls.getCipherName());
                 _state = TlsState::TS_EXCHANGE_KEY;
@@ -289,7 +320,7 @@ public:
         if (ENABLE_TLS) {
             return sendTls(libtbag::http::toRequestString(update_request));
         } else {
-            return send(libtbag::http::toRequestString(update_request));
+            return _client->send(libtbag::http::toRequestString(update_request));
         }
     }
 
@@ -318,7 +349,7 @@ public:
         if (ENABLE_TLS) {
             return sendTls(libtbag::http::toRequestString(ws_request));
         } else {
-            return send(libtbag::http::toRequestString(ws_request));
+            return _client->send(libtbag::http::toRequestString(ws_request));
         }
     }
 
@@ -340,7 +371,7 @@ public:
         if (ENABLE_TLS) {
             return sendTls(buffer.data(), buffer.size());
         } else {
-            return send(buffer.data(), buffer.size());
+            return _client->send(buffer.data(), buffer.size());
         }
     }
 
@@ -531,7 +562,7 @@ HttpClient::MqParams HttpClient::getDefaultParams(libtbag::network::Uri const & 
     params.reconnect_delay_millisec = 0;
     params.wait_on_activation_timeout_millisec = 0;
     params.wait_next_opcode_nanosec = 1000;
-    params.verbose = true;
+    params.verbose = false;
     params.user = nullptr;
     params.on_create_loop = nullptr;
 

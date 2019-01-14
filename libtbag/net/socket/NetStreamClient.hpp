@@ -39,7 +39,7 @@ namespace socket {
  * @author zer0
  * @date   2018-12-09
  */
-class TBAG_API NetStreamClient : private Noncopyable
+class TBAG_API NetStreamClient TBAG_FINAL : private Noncopyable
 {
 public:
     struct Impl;
@@ -56,13 +56,13 @@ public:
     using MqMode         = libtbag::mq::details::MqMode;
     using MqParams       = libtbag::mq::details::MqParams;
 
-    using OnBegin = std::function<void(void)>;
-    using OnRecv  = std::function<void(char const *, std::size_t)>;
-    using OnEnd   = std::function<void(void)>;
-
 public:
     struct Callbacks
     {
+        using OnBegin = std::function<void(void)>;
+        using OnRecv  = std::function<void(char const *, std::size_t)>;
+        using OnEnd   = std::function<void(void)>;
+
         OnBegin begin_cb;
         OnRecv  recv_cb;
         OnEnd   end_cb;
@@ -77,7 +77,7 @@ public:
     NetStreamClient(MqParams const & params, Callbacks const & cbs);
     NetStreamClient(std::string const & uri, Callbacks const & cbs);
     NetStreamClient(NetStreamClient && obj) TBAG_NOEXCEPT;
-    virtual ~NetStreamClient();
+    ~NetStreamClient();
 
 public:
     NetStreamClient & operator =(NetStreamClient && obj) TBAG_NOEXCEPT;
@@ -109,28 +109,19 @@ public:
 public:
     Err send(MqMsg const & msg);
 
-public:
     Err send(char const * buffer, std::size_t size);
     Err send(MqEvent event, char const * buffer, std::size_t size);
 
-public:
     Err send(std::string const & text);
     Err send(MqEvent event, std::string const & text);
 
-public:
     Err send(MqMsg::Buffer const & buffer);
     Err send(MqEvent event, MqMsg::Buffer const & buffer);
 
-public:
     Err sendClose(std::intptr_t id = 0);
 
 public:
     static MqParams getParams(std::string const & uri);
-
-protected:
-    virtual void onBegin();
-    virtual void onRecv(char const * buffer, std::size_t size);
-    virtual void onEnd();
 };
 
 } // namespace socket

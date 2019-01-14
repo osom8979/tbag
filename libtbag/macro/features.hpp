@@ -16,6 +16,14 @@
 #include <libtbag/macro/platform.hpp>
 #include <libtbag/macro/compiler.hpp>
 
+#ifndef TBAG_FINAL
+# if defined(TBAG_HAS_FINAL)
+#  define TBAG_FINAL final
+# else
+#  define TBAG_FINAL
+# endif
+#endif
+
 #ifndef TBAG_CONSTEXPR
 # if defined(TBAG_HAS_CONSTEXPR)
 #  define TBAG_CONSTEXPR constexpr

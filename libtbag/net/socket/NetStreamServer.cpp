@@ -96,9 +96,6 @@ public:
         _idle->idle_cb = [&](){
             if (CALLBACKS.begin_cb) {
                 CALLBACKS.begin_cb();
-            } else {
-                assert(_parent != nullptr);
-                _parent->onBegin();
             }
             _idle->close();
         };
@@ -160,10 +157,8 @@ private:
 
         if (impl->CALLBACKS.accept_cb) {
             return impl->CALLBACKS.accept_cb(reinterpret_cast<std::intptr_t>(node), peer);
-        } else {
-            assert(impl->_parent != nullptr);
-            return impl->_parent->onAccept(reinterpret_cast<std::intptr_t>(node), peer);
         }
+        return true;
     }
 
     static void __on_close_cb__(void * parent)
@@ -173,9 +168,6 @@ private:
 
         if (impl->CALLBACKS.end_cb) {
             impl->CALLBACKS.end_cb();
-        } else {
-            assert(impl->_parent != nullptr);
-            impl->_parent->onEnd();
         }
     }
 
@@ -208,10 +200,7 @@ private:
         auto * impl = (NetStreamServer::Impl*)parent;
 
         if (impl->CALLBACKS.recv_cb) {
-            return impl->CALLBACKS.recv_cb(reinterpret_cast<std::intptr_t>(node), buffer, size);
-        } else {
-            assert(impl->_parent != nullptr);
-            impl->_parent->onRecv(reinterpret_cast<std::intptr_t>(node), buffer, size);
+            impl->CALLBACKS.recv_cb(reinterpret_cast<std::intptr_t>(node), buffer, size);
         }
     }
 
@@ -222,9 +211,6 @@ private:
 
         if (impl->CALLBACKS.close_cb) {
             impl->CALLBACKS.close_cb(reinterpret_cast<std::intptr_t>(node));
-        } else {
-            assert(impl->_parent != nullptr);
-            impl->_parent->onClose(reinterpret_cast<std::intptr_t>(node));
         }
     }
 
@@ -375,31 +361,6 @@ Err NetStreamServer::sendClose(std::intptr_t id)
 NetStreamServer::MqParams NetStreamServer::getParams(std::string const & uri)
 {
     return libtbag::mq::details::convertUriToParams(uri);
-}
-
-void NetStreamServer::onBegin()
-{
-    // EMPTY.
-}
-
-void NetStreamServer::onEnd()
-{
-    // EMPTY.
-}
-
-bool NetStreamServer::onAccept(std::intptr_t id, std::string const & ip)
-{
-    return true;
-}
-
-void NetStreamServer::onRecv(std::intptr_t id, char const * buffer, std::size_t size)
-{
-    // EMPTY.
-}
-
-void NetStreamServer::onClose(std::intptr_t id)
-{
-    // EMPTY.
 }
 
 } // namespace socket

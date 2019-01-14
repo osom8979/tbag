@@ -29,11 +29,12 @@ namespace http {
  * @author zer0
  * @date   2019-01-11
  */
-struct HttpServer::Impl : public libtbag::net::socket::NetStreamServer
+struct HttpServer::Impl : private Noncopyable
 {
 public:
-    using NetStreamServer     = libtbag::net::socket::NetStreamServer;
     using HttpReaderInterface = libtbag::http::HttpReaderInterface;
+    using NetStreamServer     = libtbag::net::socket::NetStreamServer;
+    using UniqueServer        = std::unique_ptr<NetStreamServer>;
 
 public:
     STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpReaderInterface::Buffer);
@@ -96,13 +97,21 @@ public:
     bool         const ENABLE_WEBSOCKET;
 
 private:
-    NodeMap _nodes;
+    UniqueServer _server;
+    NodeMap      _nodes;
 
 public:
     Impl(HttpServer * parent, MqParams const & params, std::string const & key, bool use_websocket)
-            : NetStreamServer(params), PARENT(parent), KEY(key), ENABLE_WEBSOCKET(use_websocket)
+            : PARENT(parent), KEY(key), ENABLE_WEBSOCKET(use_websocket)
     {
         assert(PARENT != nullptr);
+        NetStreamServer::Callbacks cbs;
+        cbs.begin_cb  = [&](){ onBegin(); };
+        cbs.end_cb    = [&](){ onEnd(); };
+        cbs.accept_cb = [&](std::intptr_t id, std::string const & ip) -> bool { return onAccept(id, ip); };
+        cbs.recv_cb   = [&](std::intptr_t id, char const * b, std::size_t l){ onRecv(id, b, l); };
+        cbs.close_cb  = [&](std::intptr_t id){ onClose(id); };
+        _server = std::make_unique<NetStreamServer>(params, cbs);
     }
 
     ~Impl()
@@ -110,18 +119,49 @@ public:
         // EMPTY.
     }
 
+public:
+    Loop & loop()
+    {
+        assert(static_cast<bool>(_server));
+        return _server->loop();
+    }
+
+    Loop const & loop() const
+    {
+        assert(static_cast<bool>(_server));
+        return _server->loop();
+    }
+
+    void join()
+    {
+        assert(static_cast<bool>(_server));
+        _server->join();
+    }
+
+    Err exit()
+    {
+        assert(static_cast<bool>(_server));
+        return _server->exit();
+    }
+
+    Err close(std::intptr_t id)
+    {
+        assert(static_cast<bool>(_server));
+        return _server->sendClose(id);
+    }
+
 private:
-    virtual void onBegin() override
+    void onBegin()
     {
         PARENT->onBegin();
     }
 
-    virtual void onEnd() override
+    void onEnd()
     {
         PARENT->onEnd();
     }
 
-    virtual bool onAccept(std::intptr_t id, std::string const & ip) override
+    bool onAccept(std::intptr_t id, std::string const & ip)
     {
         if (!PARENT->onAccept(id, ip)) {
             return false;
@@ -145,7 +185,7 @@ private:
         return true;
     }
 
-    virtual void onRecv(std::intptr_t id, char const * buffer, std::size_t size) override
+    void onRecv(std::intptr_t id, char const * buffer, std::size_t size)
     {
         auto itr = _nodes.find(id);
         assert(itr != _nodes.end());
@@ -156,7 +196,7 @@ private:
         node->parse(buffer, size);
     }
 
-    virtual void onClose(std::intptr_t id) override
+    void onClose(std::intptr_t id)
     {
         auto const ERASE_RESULT = _nodes.erase(id);
         assert(ERASE_RESULT == 1);
@@ -187,7 +227,7 @@ private:
         auto response = PARENT->onRegularHttp(node->ID, property);
         libtbag::http::updateDefaultResponse(response);
 
-        auto const CODE = send(libtbag::http::toResponseString(response), node->ID);
+        auto const CODE = _server->send(libtbag::http::toResponseString(response), node->ID);
         if (isFailure(CODE)) {
             onParseError(node, CODE);
         }
@@ -197,6 +237,70 @@ private:
     {
         assert(node != nullptr);
         PARENT->onError(node->ID, code);
+    }
+
+public:
+    Err writeWsFrame(std::intptr_t id, WsFrame const & frame)
+    {
+        if (!ENABLE_WEBSOCKET) {
+            return Err::E_ILLSTATE;
+        }
+
+        Buffer buffer;
+        auto const SIZE = frame.copyTo(buffer);
+
+        if (SIZE == 0) {
+            tDLogE("HttpServer::Impl::writeWsFrame() WsFrame -> Buffer copy error");
+            return Err::E_ECOPY;
+        }
+        return _server->send(buffer.data(), buffer.size(), id);
+    }
+
+    Err writeText(std::intptr_t id, char const * buffer, std::size_t size, bool finish)
+    {
+        WsFrame frame;
+        frame.text(buffer, size, finish);
+        return writeWsFrame(id, frame);
+    }
+
+    Err writeText(std::intptr_t id, std::string const & text, bool finish)
+    {
+        WsFrame frame;
+        frame.text(text, finish);
+        return writeWsFrame(id, frame);
+    }
+
+    Err writeBinary(std::intptr_t id, char const * buffer, std::size_t size, bool finish)
+    {
+        WsFrame frame;
+        frame.binary(buffer, size, finish);
+        return writeWsFrame(id, frame);
+    }
+
+    Err writeBinary(std::intptr_t id, Buffer const & buffer, bool finish)
+    {
+        WsFrame frame;
+        frame.binary(buffer, finish);
+        return writeWsFrame(id, frame);
+    }
+
+    Err writeClose(std::intptr_t id, WsStatus const & status)
+    {
+        WsFrame frame;
+        frame.close(status);
+        return writeWsFrame(id, frame);
+    }
+
+    Err writeClose(std::intptr_t id, WsStatusCode code)
+    {
+        WsFrame frame;
+        frame.close(code);
+        return writeWsFrame(id, frame);
+    }
+
+    Err writeClose(std::intptr_t id)
+    {
+        return writeClose(id, WsStatusCode::WSSC_NORMAL_CLOSURE);
     }
 };
 
@@ -271,8 +375,8 @@ void HttpServer::onWsMessage(std::intptr_t id, WsOpCode opcode, Buffer const & p
 void HttpServer::onError(std::intptr_t id, Err code)
 {
     assert(static_cast<bool>(_impl));
-    auto const SEND_CODE = _impl->sendClose(id);
-    tDLogE("HttpServer::onError({}) Close node({}) request: {}", code, id, SEND_CODE);
+    auto const CLOSE_CODE = close(id);
+    tDLogE("HttpServer::onError({}) Close node({}) request: {}", code, id, CLOSE_CODE);
 }
 
 void HttpServer::join()
@@ -290,71 +394,55 @@ Err HttpServer::exit()
 Err HttpServer::close(std::intptr_t id)
 {
     assert(static_cast<bool>(_impl));
-    return _impl->sendClose(id);
+    return _impl->close(id);
 }
 
 Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)
 {
     assert(static_cast<bool>(_impl));
-    if (!_impl->ENABLE_WEBSOCKET) {
-        return Err::E_ILLSTATE;
-    }
-
-    Buffer buffer;
-    auto const SIZE = frame.copyTo(buffer);
-
-    if (SIZE == 0) {
-        tDLogE("HttpServer::writeWsFrame() WsFrame -> Buffer copy error");
-        return Err::E_ECOPY;
-    }
-    return _impl->send(buffer.data(), buffer.size(), id);
+    return _impl->writeWsFrame(id, frame);
 }
 
 Err HttpServer::writeText(std::intptr_t id, char const * buffer, std::size_t size, bool finish)
 {
-    WsFrame frame;
-    frame.text(buffer, size, finish);
-    return writeWsFrame(id, frame);
+    assert(static_cast<bool>(_impl));
+    return _impl->writeText(id, buffer, size, finish);
 }
 
 Err HttpServer::writeText(std::intptr_t id, std::string const & text, bool finish)
 {
-    WsFrame frame;
-    frame.text(text, finish);
-    return writeWsFrame(id, frame);
+    assert(static_cast<bool>(_impl));
+    return _impl->writeText(id, text, finish);
 }
 
 Err HttpServer::writeBinary(std::intptr_t id, char const * buffer, std::size_t size, bool finish)
 {
-    WsFrame frame;
-    frame.binary(buffer, size, finish);
-    return writeWsFrame(id, frame);
+    assert(static_cast<bool>(_impl));
+    return _impl->writeBinary(id, buffer, size, finish);
 }
 
 Err HttpServer::writeBinary(std::intptr_t id, Buffer const & buffer, bool finish)
 {
-    WsFrame frame;
-    frame.binary(buffer, finish);
-    return writeWsFrame(id, frame);
+    assert(static_cast<bool>(_impl));
+    return _impl->writeBinary(id, buffer, finish);
 }
 
 Err HttpServer::writeClose(std::intptr_t id, WsStatus const & status)
 {
-    WsFrame frame;
-    frame.close(status);
-    return writeWsFrame(id, frame);
+    assert(static_cast<bool>(_impl));
+    return _impl->writeClose(id, status);
 }
 
 Err HttpServer::writeClose(std::intptr_t id, WsStatusCode code)
 {
-    WsFrame frame;
-    frame.close(code);
-    return writeWsFrame(id, frame);
+    assert(static_cast<bool>(_impl));
+    return _impl->writeClose(id, code);
 }
 
 Err HttpServer::writeClose(std::intptr_t id)
 {
-    return writeClose(id, WsStatusCode::WSSC_NORMAL_CLOSURE);
+    assert(static_cast<bool>(_impl));
+    return _impl->writeClose(id);
 }
 
 HttpServer::MqParams HttpServer::getDefaultParams(std::string const & host, int port)
@@ -369,7 +457,7 @@ HttpServer::MqParams HttpServer::getDefaultParams(std::string const & host, int 
     params.continuous_read_error_count = 4;
     params.wait_on_activation_timeout_millisec = libtbag::mq::details::WAIT_ON_ACTIVATION_INFINITY;
     params.wait_next_opcode_nanosec = 1000;
-    params.verbose = true;
+    params.verbose = false;
     params.user = nullptr;
     params.on_create_loop = nullptr;
     return params;

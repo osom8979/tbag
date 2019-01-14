@@ -39,7 +39,7 @@ namespace socket {
  * @author zer0
  * @date   2018-12-09
  */
-class TBAG_API NetStreamServer : private Noncopyable
+class TBAG_API NetStreamServer TBAG_FINAL : private Noncopyable
 {
 public:
     struct Impl;
@@ -56,15 +56,15 @@ public:
     using MqMode         = libtbag::mq::details::MqMode;
     using MqParams       = libtbag::mq::details::MqParams;
 
-    using OnBegin  = std::function<void(void)>;
-    using OnEnd    = std::function<void(void)>;
-    using OnAccept = std::function<bool(std::intptr_t, std::string const &)>;
-    using OnRecv   = std::function<void(std::intptr_t, char const *, std::size_t)>;
-    using OnClose  = std::function<void(std::intptr_t)>;
-
 public:
     struct Callbacks
     {
+        using OnBegin  = std::function<void(void)>;
+        using OnEnd    = std::function<void(void)>;
+        using OnAccept = std::function<bool(std::intptr_t, std::string const &)>;
+        using OnRecv   = std::function<void(std::intptr_t, char const *, std::size_t)>;
+        using OnClose  = std::function<void(std::intptr_t)>;
+
         OnBegin   begin_cb;
         OnEnd     end_cb;
         OnAccept  accept_cb;
@@ -81,7 +81,7 @@ public:
     NetStreamServer(MqParams const & params, Callbacks const & cbs);
     NetStreamServer(std::string const & uri, Callbacks const & cbs);
     NetStreamServer(NetStreamServer && obj) TBAG_NOEXCEPT;
-    virtual ~NetStreamServer();
+    ~NetStreamServer();
 
 public:
     NetStreamServer & operator =(NetStreamServer && obj) TBAG_NOEXCEPT;
@@ -113,32 +113,19 @@ public:
 public:
     Err send(MqMsg const & msg);
 
-public:
     Err send(char const * buffer, std::size_t size, std::intptr_t id = 0);
     Err send(MqEvent event, char const * buffer, std::size_t size, std::intptr_t id = 0);
 
-public:
     Err send(std::string const & text, std::intptr_t id = 0);
     Err send(MqEvent event, std::string const & text, std::intptr_t id = 0);
 
-public:
     Err send(MqMsg::Buffer const & buffer, std::intptr_t id = 0);
     Err send(MqEvent event, MqMsg::Buffer const & buffer, std::intptr_t id = 0);
 
-public:
     Err sendClose(std::intptr_t id = 0);
 
 public:
     static MqParams getParams(std::string const & uri);
-
-protected:
-    virtual void onBegin();
-    virtual void onEnd();
-
-protected:
-    virtual bool onAccept(std::intptr_t id, std::string const & ip);
-    virtual void onRecv  (std::intptr_t id, char const * buffer, std::size_t size);
-    virtual void onClose (std::intptr_t id);
 };
 
 } // namespace socket
