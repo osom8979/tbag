@@ -57,7 +57,7 @@ private:
 public:
     HttpClient(MqParams const & params, bool use_websocket = false, bool enable_tls = false);
     HttpClient(MqParams const & params, std::string const & key, bool use_websocket = false, bool enable_tls = false);
-    ~HttpClient();
+    virtual ~HttpClient();
 
 public:
     Loop & loop();

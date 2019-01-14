@@ -20,6 +20,7 @@
 #include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/http/WsFrame.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/network/Uri.hpp>
 
 #include <memory>
 
@@ -56,7 +57,7 @@ private:
 public:
     HttpServer(MqParams const & params, bool use_websocket = false);
     HttpServer(MqParams const & params, std::string const & key, bool use_websocket = false);
-    ~HttpServer();
+    virtual ~HttpServer();
 
 public:
     Loop & loop();
@@ -66,18 +67,14 @@ protected:
     virtual void onBegin();
     virtual void onEnd();
 
-protected:
     virtual bool onAccept(std::intptr_t id, std::string const & ip);
     virtual void onClose(std::intptr_t id);
 
-protected:
     virtual HttpResponse onRegularHttp(std::intptr_t id, HttpRequest const & request);
 
-protected:
     virtual bool onSwitchingProtocol(std::intptr_t id, HttpRequest const & request);
     virtual void onWsMessage(std::intptr_t id, WsOpCode opcode, Buffer const & payload);
 
-protected:
     virtual void onError(std::intptr_t id, Err code);
 
 public:
@@ -96,6 +93,9 @@ public:
     Err writeClose  (std::intptr_t id, WsStatus const & status);
     Err writeClose  (std::intptr_t id, WsStatusCode code);
     Err writeClose  (std::intptr_t id);
+
+public:
+    static MqParams getDefaultParams(std::string const & host, int port = libtbag::http::DEFAULT_HTTP_PORT);
 };
 
 } // namespace http

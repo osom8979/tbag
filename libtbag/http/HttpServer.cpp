@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/net/socket/NetStreamServer.hpp>
 #include <libtbag/http/HttpReader.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/Type.hpp>
 
 #include <cassert>
@@ -354,6 +355,27 @@ Err HttpServer::writeClose(std::intptr_t id, WsStatusCode code)
 Err HttpServer::writeClose(std::intptr_t id)
 {
     return writeClose(id, WsStatusCode::WSSC_NORMAL_CLOSURE);
+}
+
+HttpServer::MqParams HttpServer::getDefaultParams(std::string const & host, int port)
+{
+    MqParams params;
+    params.type = libtbag::mq::details::MqType::MT_TCP;
+    params.address = host;
+    params.port = port;
+    params.send_queue_size = 1024;
+    params.recv_queue_size = 1024;
+    params.wait_closing_millisec = 1000;
+    params.continuous_read_error_count = 4;
+    params.connect_timeout_millisec = 4 * 1000;
+    params.reconnect_count = 1;
+    params.reconnect_delay_millisec = 0;
+    params.wait_on_activation_timeout_millisec = libtbag::mq::details::WAIT_ON_ACTIVATION_INFINITY;
+    params.wait_next_opcode_nanosec = 1000;
+    params.verbose = false;
+    params.user = nullptr;
+    params.on_create_loop = nullptr;
+    return params;
 }
 
 } // namespace http
