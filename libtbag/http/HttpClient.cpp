@@ -393,7 +393,7 @@ HttpClient::HttpClient(MqParams const & params, std::string const & key, bool us
 
 HttpClient::~HttpClient()
 {
-    // EMPTY.
+    assert(static_cast<bool>(_impl));
 }
 
 void HttpClient::onBegin()

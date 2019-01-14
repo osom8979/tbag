@@ -64,13 +64,20 @@ public:
 TBAG_API HttpResponse request(std::string const & uri,
                               std::string const & method,
                               HttpCommon const & common,
-                              int timeout_millisec = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+                              int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 
 // @formatter:off
 TBAG_API HttpResponse requestGet   (std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestPost  (std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestPut   (std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestDelete(std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+// @formatter:on
+
+// @formatter:off
+TBAG_API HttpResponse requestGet   (std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API HttpResponse requestPost  (std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API HttpResponse requestPut   (std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+TBAG_API HttpResponse requestDelete(std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 // @formatter:on
 
 } // namespace http

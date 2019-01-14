@@ -86,6 +86,7 @@ TBAG_CONSTEXPR char const * const DEFAULT_VALUE_OF_TRANSFER_ENCODING = "identity
 TBAG_CONSTEXPR char const * const HEADER_DELIMITER = ":";
 TBAG_CONSTEXPR char const * const VALUE_DELIMITER  = ",";
 TBAG_CONSTEXPR char const * const PATH_DELIMITER   = "/";
+TBAG_CONSTEXPR char const * const ROOT_PATH        = "/";
 
 TBAG_CONSTEXPR uint64_t const DEFAULT_HTTP_TIMEOUT_MILLISEC = 8 * 1000;
 
@@ -252,6 +253,8 @@ TBAG_API HttpMethod   getHttpMethod      (std::string const & name);
     _TBAG_XX(503, SERVICE_UNAVAILABLE            , "Service Unavailable"             ) \
     _TBAG_XX(504, GATEWAY_TIMEOUT                , "Gateway Timeout"                 ) \
     _TBAG_XX(505, HTTP_VERSION_NOT_SUPPORTED     , "HTTP Version Not Supported"      ) \
+    /* [UNOFFICIAL] 6xx: libtbag exception */                                          \
+    _TBAG_XX(600, TBAG_UNKNOWN_EXCEPTION         , "Unknown libtbag exception"       ) \
     /* END */
 #endif
 

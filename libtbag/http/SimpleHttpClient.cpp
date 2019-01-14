@@ -69,7 +69,7 @@ public:
     {
         auto * impl = (Impl*)(params.user);
         assert(impl != nullptr);
-        impl->onCreateLoop(loop);
+        impl->onCreateLoop(loop, params);
     }
 
     static bool isTls(Uri const & uri)
@@ -78,18 +78,18 @@ public:
         return lower(trim(uri.getSchema())) == HTTPS_SCHEMA_LOWER;
     }
 
-    static MqParams getParams(Uri const & uri, void * user)
+    static MqParams getParams(Uri const & uri, void * user, int timeout_millisec)
     {
         MqParams params;
         params.type = MqType::MT_TCP;
-        params.send_queue_size = 4;
+        params.send_queue_size = 2;
         params.recv_queue_size = 8;
-        params.wait_closing_millisec = 1 * 1000;
+        params.wait_closing_millisec = 0;
         params.continuous_read_error_count = 4;
-        params.connect_timeout_millisec = 4 * 1000;
-        params.reconnect_count = 3;
-        params.reconnect_delay_millisec = 1 * 1000;
-        params.wait_on_activation_timeout_millisec = 8 * 1000;
+        params.connect_timeout_millisec = (std::size_t)(timeout_millisec >= 1 ? timeout_millisec : 4 * 1000);
+        params.reconnect_count = 1;
+        params.reconnect_delay_millisec = 0;
+        params.wait_on_activation_timeout_millisec = 0;
         params.wait_next_opcode_nanosec = 1000;
         params.verbose = false;
         params.user = user;
@@ -115,16 +115,32 @@ public:
 
 public:
     Impl(Uri const & uri, std::string const & method, HttpCommon const & common, int timeout_millisec)
-            : HttpClient(getParams(uri, this), false, isTls(uri)), TIMEOUT_MILLISEC(timeout_millisec)
+            : HttpClient(getParams(uri, this, timeout_millisec), false, isTls(uri)), TIMEOUT_MILLISEC(timeout_millisec)
     {
         // @formatter:off
-        _request.path       = uri.getRequestPath();
-        _request.method     = method;
         _request.http_major = common.http_major;
         _request.http_minor = common.http_minor;
         _request.header     = common.header;
         _request.body       = common.body;
         // @formatter:on
+
+        auto const REQUEST_PATH = uri.getRequestPath();
+        if (REQUEST_PATH.empty()) {
+            _request.path = ROOT_PATH;
+        } else {
+            _request.path = uri.getRequestPath();
+        }
+
+        if (method.empty()) {
+            _request.method = HttpMethodGET::getMethod();
+        } else {
+            _request.method = method;
+        }
+
+        if (!_request.exists(HEADER_HOST)) {
+            _request.insert(HEADER_HOST, uri.getHost());
+        }
+        _request.updateDefaultRequest();
     }
 
     ~Impl()
@@ -139,20 +155,20 @@ public:
     }
 
 protected:
-    void onCreateLoop(Loop & loop)
+    void onCreateLoop(Loop & loop, MqParams const & params)
     {
-        if (TIMEOUT_MILLISEC <= 0) {
-            return;
-        }
-
-        _timeout = loop.newHandle<Timeout>(loop, this);
-        assert(static_cast<bool>(_timeout));
-        assert(_timeout->isInit());
-
-        auto const CODE = _timeout->start(TIMEOUT_MILLISEC);
-        assert(isSuccess(CODE));
-
-        tDLogD("SimpleHttpClient::Impl::onCreateLoop() Start timer: {}ms", TIMEOUT_MILLISEC);
+//        if (params.connect_timeout_millisec <= 0) {
+//            return;
+//        }
+//
+//        _timeout = loop.newHandle<Timeout>(loop, this);
+//        assert(static_cast<bool>(_timeout));
+//        assert(_timeout->isInit());
+//
+//        auto const CODE = _timeout->start(params.connect_timeout_millisec);
+//        assert(isSuccess(CODE));
+//
+//        tDLogD("SimpleHttpClient::Impl::onCreateLoop() Start timer: {}ms", params.connect_timeout_millisec);
     }
 
     void onTimeout(Timeout * timeout)
@@ -161,6 +177,12 @@ protected:
         assert(timeout == _timeout.get());
         tDLogW("SimpleHttpClient::Impl::onTimeout() Timeout!");
         stopTimerAndExit();
+    }
+
+    virtual void onBegin() override
+    {
+        auto const CODE = writeRequest(_request);
+        assert(isSuccess(CODE));
     }
 
     virtual void onRegularHttp(HttpResponse const & response) override
@@ -172,17 +194,18 @@ protected:
     virtual void onError(Err code) override
     {
         tDLogE("SimpleHttpClient::Impl::onError() Error code: {}", code);
+        _response.setHttpStatus(HttpStatus::SC_TBAG_UNKNOWN_EXCEPTION);
         stopTimerAndExit();
     }
 
     void stopTimerAndExit()
     {
-        if (TIMEOUT_MILLISEC > 0) {
-            assert(static_cast<bool>(_timeout));
-            if (!_timeout->isClosing()) {
-                _timeout->close();
-            }
-        }
+//        if (TIMEOUT_MILLISEC > 0) {
+//            assert(static_cast<bool>(_timeout));
+//            if (!_timeout->isClosing()) {
+//                _timeout->close();
+//            }
+//        }
         auto const EXIT_CODE = exit();
         assert(isSuccess(EXIT_CODE));
     }
@@ -215,31 +238,26 @@ HttpResponse SimpleHttpClient::waitResponse() const
 // Miscellaneous utilities
 // -----------------------
 
-HttpResponse request(std::string const & uri, std::string const & method,
-                     HttpCommon const & common, int timeout_millisec)
-{
-    return SimpleHttpClient(uri, method, common, timeout_millisec).waitResponse();
-}
+HttpResponse request(std::string const & uri, std::string const & method, HttpCommon const & common, int timeout)
+{ return SimpleHttpClient(uri, method, common, timeout).waitResponse(); }
 
 HttpResponse requestGet(std::string const & uri, HttpCommon const & common, int timeout)
-{
-    return request(uri, HttpMethodGET::getMethod(), common, timeout);
-}
-
+{ return request(uri, HttpMethodGET::getMethod(), common, timeout); }
 HttpResponse requestPost(std::string const & uri, HttpCommon const & common, int timeout)
-{
-    return request(uri, HttpMethodPOST::getMethod(), common, timeout);
-}
-
+{ return request(uri, HttpMethodPOST::getMethod(), common, timeout); }
 HttpResponse requestPut(std::string const & uri, HttpCommon const & common, int timeout)
-{
-    return request(uri, HttpMethodPUT::getMethod(), common, timeout);
-}
-
+{ return request(uri, HttpMethodPUT::getMethod(), common, timeout); }
 HttpResponse requestDelete(std::string const & uri, HttpCommon const & common, int timeout)
-{
-    return request(uri, HttpMethodDELETE::getMethod(), common, timeout);
-}
+{ return request(uri, HttpMethodDELETE::getMethod(), common, timeout); }
+
+HttpResponse requestGet(std::string const & uri, int timeout)
+{ return requestGet(uri, HttpCommon{}, timeout); }
+HttpResponse requestPost(std::string const & uri, int timeout)
+{ return requestPost(uri, HttpCommon{}, timeout); }
+HttpResponse requestPut(std::string const & uri, int timeout)
+{ return requestPut(uri, HttpCommon{}, timeout); }
+HttpResponse requestDelete(std::string const & uri, int timeout)
+{ return requestDelete(uri, HttpCommon{}, timeout); }
 
 } // namespace http
 

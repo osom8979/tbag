@@ -6,13 +6,14 @@
  */
 
 #include <gtest/gtest.h>
+#include <libtbag/http/SimpleHttpClient.hpp>
 #include <libtbag/http/HttpServer.hpp>
+#include <libtbag/log/Log.hpp>
 
 using namespace libtbag;
 using namespace libtbag::http;
 
 TEST(HttpServerTest, Default)
 {
-    //HttpServer object;
 }
 
