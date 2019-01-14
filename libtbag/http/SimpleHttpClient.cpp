@@ -15,6 +15,7 @@
 #include <libtbag/uvpp/Timer.hpp>
 
 #include <cassert>
+#include <chrono>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -53,76 +54,33 @@ public:
 
 public:
     using SharedTimeout = std::shared_ptr<Timeout>;
+    using TimePoint = std::chrono::system_clock::time_point;
 
 public:
     int const TIMEOUT_MILLISEC;
+    TimePoint const START_TIME;
 
 private:
     SharedTimeout _timeout;
-
-private:
-    HttpRequest  _request;
-    HttpResponse _response;
+    HttpRequest   _request;
+    HttpResponse  _response;
 
 public:
-    static void __on_create_loop__(Loop & loop, MqParams const & params)
-    {
-        auto * impl = (Impl*)(params.user);
-        assert(impl != nullptr);
-        impl->onCreateLoop(loop, params);
-    }
-
-    static bool isTls(Uri const & uri)
+    static bool isTlsSchema(Uri const & uri)
     {
         using namespace libtbag::string;
         return lower(trim(uri.getSchema())) == HTTPS_SCHEMA_LOWER;
     }
 
-    static MqParams getParams(Uri const & uri, void * user, int timeout_millisec)
-    {
-        MqParams params;
-        params.type = MqType::MT_TCP;
-        params.send_queue_size = 2;
-        params.recv_queue_size = 8;
-        params.wait_closing_millisec = 0;
-        params.continuous_read_error_count = 4;
-        params.connect_timeout_millisec = (std::size_t)(timeout_millisec >= 1 ? timeout_millisec : 4 * 1000);
-        params.reconnect_count = 1;
-        params.reconnect_delay_millisec = 0;
-        params.wait_on_activation_timeout_millisec = 0;
-        params.wait_next_opcode_nanosec = 1000;
-        params.verbose = false;
-        params.user = user;
-        params.on_create_loop = &__on_create_loop__;
-
-        if (libtbag::net::isIp(uri.getHost()) && uri.isPort()) {
-            params.address = uri.getHost();
-            params.port    = uri.getPortNumber();
-        } else {
-            std::string host;
-            int port;
-            if (isSuccess(uri.requestAddrInfo(host, port, Uri::AddrFlags::MOST_IPV4))) {
-                params.address = host;
-                params.port    = port;
-            } else {
-                params.address = uri.getHost();
-                params.port    = uri.getPortNumber();
-            }
-        }
-
-        return params;
-    }
-
 public:
     Impl(Uri const & uri, std::string const & method, HttpCommon const & common, int timeout_millisec)
-            : HttpClient(getParams(uri, this, timeout_millisec), false, isTls(uri)), TIMEOUT_MILLISEC(timeout_millisec)
+            : HttpClient(getDefaultParams(uri, timeout_millisec), false, isTlsSchema(uri)),
+              TIMEOUT_MILLISEC(timeout_millisec), START_TIME(std::chrono::system_clock::now())
     {
-        // @formatter:off
         _request.http_major = common.http_major;
         _request.http_minor = common.http_minor;
-        _request.header     = common.header;
-        _request.body       = common.body;
-        // @formatter:on
+        _request.header = common.header;
+        _request.body = common.body;
 
         auto const REQUEST_PATH = uri.getRequestPath();
         if (REQUEST_PATH.empty()) {
@@ -155,36 +113,49 @@ public:
     }
 
 protected:
-    void onCreateLoop(Loop & loop, MqParams const & params)
-    {
-//        if (params.connect_timeout_millisec <= 0) {
-//            return;
-//        }
-//
-//        _timeout = loop.newHandle<Timeout>(loop, this);
-//        assert(static_cast<bool>(_timeout));
-//        assert(_timeout->isInit());
-//
-//        auto const CODE = _timeout->start(params.connect_timeout_millisec);
-//        assert(isSuccess(CODE));
-//
-//        tDLogD("SimpleHttpClient::Impl::onCreateLoop() Start timer: {}ms", params.connect_timeout_millisec);
-    }
-
-    void onTimeout(Timeout * timeout)
-    {
-        assert(timeout != nullptr);
-        assert(timeout == _timeout.get());
-        tDLogW("SimpleHttpClient::Impl::onTimeout() Timeout!");
-        stopTimerAndExit();
-    }
-
     virtual void onBegin() override
     {
+        if (TIMEOUT_MILLISEC > 0) {
+            using namespace std::chrono;
+            auto const ELAPSED_TIME = system_clock::now() - START_TIME;
+            if (ELAPSED_TIME >= milliseconds(TIMEOUT_MILLISEC)) {
+                tDLogW("SimpleHttpClient::Impl::onBegin() Connection timeout!");
+                return;
+            }
+
+            auto const NEXT_TIMEOUT = TIMEOUT_MILLISEC - duration_cast<milliseconds>(ELAPSED_TIME).count();
+            assert(NEXT_TIMEOUT >= 1);
+
+            _timeout = loop().newHandle<Timeout>(loop(), this);
+            assert(static_cast<bool>(_timeout));
+            assert(_timeout->isInit());
+
+            auto const START_CODE = _timeout->start(NEXT_TIMEOUT);
+            assert(isSuccess(START_CODE));
+        }
+
         auto const CODE = writeRequest(_request);
         assert(isSuccess(CODE));
     }
 
+    virtual void onEnd() override
+    {
+        // Done.
+    }
+
+public:
+    void onTimeout(Timeout * timeout)
+    {
+        assert(timeout != nullptr);
+        assert(timeout == _timeout.get());
+
+        tDLogW("SimpleHttpClient::Impl::onTimeout() Timeout!");
+        _response.setHttpStatus(HttpStatus::SC_TBAG_LIBRARY_TIMEOUT);
+
+        stopTimerAndExit();
+    }
+
+protected:
     virtual void onRegularHttp(HttpResponse const & response) override
     {
         _response = response;
@@ -200,12 +171,13 @@ protected:
 
     void stopTimerAndExit()
     {
-//        if (TIMEOUT_MILLISEC > 0) {
-//            assert(static_cast<bool>(_timeout));
-//            if (!_timeout->isClosing()) {
-//                _timeout->close();
-//            }
-//        }
+        if (TIMEOUT_MILLISEC > 0) {
+            assert(static_cast<bool>(_timeout));
+            if (!_timeout->isClosing()) {
+                _timeout->close();
+            }
+        }
+
         auto const EXIT_CODE = exit();
         assert(isSuccess(EXIT_CODE));
     }

@@ -220,6 +220,18 @@ HttpServer::~HttpServer()
     // EMPTY.
 }
 
+HttpServer::Loop & HttpServer::loop()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
+}
+
+HttpServer::Loop const & HttpServer::loop() const
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
+}
+
 void HttpServer::onBegin()
 {
     // EMPTY.

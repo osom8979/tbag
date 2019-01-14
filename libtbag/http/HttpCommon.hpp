@@ -255,6 +255,7 @@ TBAG_API HttpMethod   getHttpMethod      (std::string const & name);
     _TBAG_XX(505, HTTP_VERSION_NOT_SUPPORTED     , "HTTP Version Not Supported"      ) \
     /* [UNOFFICIAL] 6xx: libtbag exception */                                          \
     _TBAG_XX(600, TBAG_UNKNOWN_EXCEPTION         , "Unknown libtbag exception"       ) \
+    _TBAG_XX(601, TBAG_LIBRARY_TIMEOUT           , "libtbag timeout exception"       ) \
     /* END */
 #endif
 

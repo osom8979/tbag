@@ -19,6 +19,8 @@
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/http/WsFrame.hpp>
+#include <libtbag/network/Uri.hpp>
+#include <libtbag/uvpp/Loop.hpp>
 
 #include <memory>
 
@@ -42,6 +44,7 @@ public:
 
 public:
     using UniqueImpl   = std::unique_ptr<Impl>;
+    using Loop         = libtbag::uvpp::Loop;
     using MqParams     = libtbag::mq::details::MqParams;
     using HttpRequest  = libtbag::http::HttpRequest;
     using HttpResponse = libtbag::http::HttpResponse;
@@ -55,6 +58,10 @@ public:
     HttpClient(MqParams const & params, bool use_websocket = false, bool enable_tls = false);
     HttpClient(MqParams const & params, std::string const & key, bool use_websocket = false, bool enable_tls = false);
     ~HttpClient();
+
+public:
+    Loop & loop();
+    Loop const & loop() const;
 
 protected:
     virtual void onBegin();
@@ -91,6 +98,10 @@ public:
     Err writeBinary (char const * buffer, std::size_t size, bool finish = true);
     Err writeBinary (Buffer const & buffer, bool finish = true);
     Err writeClose  ();
+
+public:
+    static MqParams getDefaultParams(std::string const & uri, int timeout_millisec);
+    static MqParams getDefaultParams(libtbag::network::Uri const & uri, int timeout_millisec);
 };
 
 } // namespace http

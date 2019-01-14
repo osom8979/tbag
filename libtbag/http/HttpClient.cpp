@@ -11,6 +11,7 @@
 #include <libtbag/http/HttpReader.hpp>
 #include <libtbag/crypto/TlsReader.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/Type.hpp>
 
 #include <cassert>
@@ -396,6 +397,18 @@ HttpClient::~HttpClient()
     assert(static_cast<bool>(_impl));
 }
 
+HttpClient::Loop & HttpClient::loop()
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
+}
+
+HttpClient::Loop const & HttpClient::loop() const
+{
+    assert(static_cast<bool>(_impl));
+    return _impl->loop();
+}
+
 void HttpClient::onBegin()
 {
     // EMPTY.
@@ -498,6 +511,46 @@ Err HttpClient::writeClose()
 {
     assert(static_cast<bool>(_impl));
     return _impl->writeClose();
+}
+
+HttpClient::MqParams HttpClient::getDefaultParams(std::string const & uri, int timeout_millisec)
+{
+    return getDefaultParams(libtbag::network::Uri(uri), timeout_millisec);
+}
+
+HttpClient::MqParams HttpClient::getDefaultParams(libtbag::network::Uri const & uri, int timeout_millisec)
+{
+    MqParams params;
+    params.type = libtbag::mq::details::MqType::MT_TCP;
+    params.send_queue_size = 2;
+    params.recv_queue_size = 8;
+    params.wait_closing_millisec = 0;
+    params.continuous_read_error_count = 4;
+    params.connect_timeout_millisec = (std::size_t)(timeout_millisec >= 1 ? timeout_millisec : 4 * 1000);
+    params.reconnect_count = 1;
+    params.reconnect_delay_millisec = 0;
+    params.wait_on_activation_timeout_millisec = 0;
+    params.wait_next_opcode_nanosec = 1000;
+    params.verbose = false;
+    params.user = nullptr;
+    params.on_create_loop = nullptr;
+
+    if (libtbag::net::isIp(uri.getHost()) && uri.isPort()) {
+        params.address = uri.getHost();
+        params.port    = uri.getPortNumber();
+    } else {
+        std::string host;
+        int port;
+        if (isSuccess(uri.requestAddrInfo(host, port, libtbag::network::Uri::AddrFlags::MOST_IPV4))) {
+            params.address = host;
+            params.port    = port;
+        } else {
+            params.address = uri.getHost();
+            params.port    = uri.getPortNumber();
+        }
+    }
+
+    return params;
 }
 
 } // namespace http
