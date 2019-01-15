@@ -16,11 +16,18 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/http/HttpClient.hpp>
 
+#include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/uvpp/Timer.hpp>
+#include <libtbag/network/Uri.hpp>
+
+#include <cassert>
 #include <string>
 #include <memory>
+#include <chrono>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,25 +40,60 @@ namespace http {
  *
  * @author zer0
  * @date   2019-01-14
+ * @date   2019-01-15 (Merge with SimpleHttpClient::Impl class)
  */
-class TBAG_API SimpleHttpClient : private Noncopyable
+class TBAG_API SimpleHttpClient TBAG_FINAL : private Noncopyable
 {
 public:
-    struct Impl;
-    friend struct Impl;
+    using MqParams     = libtbag::mq::details::MqParams;
+    using MqType       = libtbag::mq::details::MqType;
+    using Uri          = libtbag::network::Uri;
+    using Loop         = libtbag::uvpp::Loop;
+    using Timer        = libtbag::uvpp::Timer;
+    using UniqueClient = std::unique_ptr<HttpClient>;
 
 public:
-    using UniqueImpl = std::unique_ptr<Impl>;
+    struct Timeout : public Timer
+    {
+        SimpleHttpClient * parent = nullptr;
+
+        Timeout(Loop & loop, SimpleHttpClient * p) : Timer(loop), parent(p)
+        { assert(parent != nullptr); }
+        virtual ~Timeout()
+        { /* EMPTY. */ }
+
+        virtual void onTimer() override
+        { parent->onTimeout(this); }
+    };
+
+public:
+    using SharedTimeout = std::shared_ptr<Timeout>;
+    using TimePoint = std::chrono::system_clock::time_point;
+
+public:
+    int const TIMEOUT_MILLISEC;
+    TimePoint const START_TIME;
 
 private:
-    UniqueImpl _impl;
+    UniqueClient  _client;
+    SharedTimeout _timeout;
+    HttpRequest   _request;
+    HttpResponse  _response;
 
 public:
-    SimpleHttpClient(std::string const & uri,
-                     std::string const & method,
-                     HttpCommon const & common,
-                     int timeout_millisec = DEFAULT_HTTP_TIMEOUT_MILLISEC);
-    virtual ~SimpleHttpClient();
+    SimpleHttpClient(std::string const & uri, std::string const & method,
+                     HttpCommon const & common, int timeout_millisec = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+    SimpleHttpClient(Uri const & uri, std::string const & method,
+                     HttpCommon const & common, int timeout_millisec = DEFAULT_HTTP_TIMEOUT_MILLISEC);
+    ~SimpleHttpClient();
+
+private:
+    void onBegin();
+    void onEnd();
+    void onTimeout(Timeout * timeout);
+    void onRegularHttp(HttpResponse const & response);
+    void onError(Err code);
+    void stopTimerAndExit();
 
 public:
     HttpResponse waitResponse() const;

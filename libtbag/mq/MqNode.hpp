@@ -17,14 +17,14 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/mq/details/MqCommon.hpp>
+
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/thread/ThreadPool.hpp>
+#include <libtbag/mq/details/MqCommon.hpp>
 
 #include <string>
-#include <vector>
 #include <memory>
 #include <functional>
-#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,16 +37,11 @@ namespace mq {
  *
  * @author zer0
  * @date   2018-11-11
+ * @date   2019-01-15 (Merge with MqNode::Impl class)
  */
-class TBAG_API MqNode TBAG_FINAL : private Noncopyable
+class TBAG_API MqNode : private Noncopyable
 {
 public:
-    struct Impl;
-    friend struct Impl;
-
-public:
-    using UniqueImpl     = std::unique_ptr<Impl>;
-    using Loop           = libtbag::uvpp::Loop;
     using MqEvent        = libtbag::mq::details::MqEvent;
     using MqType         = libtbag::mq::details::MqType;
     using MqRequestState = libtbag::mq::details::MqRequestState;
@@ -54,54 +49,82 @@ public:
     using MqMsg          = libtbag::mq::details::MqMsg;
     using MqMode         = libtbag::mq::details::MqMode;
     using MqParams       = libtbag::mq::details::MqParams;
+    using MqInternal     = libtbag::mq::details::MqInternal;
+    using MqIsConsume    = libtbag::mq::details::MqIsConsume;
+    using MqInterface    = libtbag::mq::details::MqInterface;
+
+    using Loop     = libtbag::uvpp::Loop;
+    using Pool     = libtbag::thread::ThreadPool;
+    using UniqueMq = std::unique_ptr<MqInterface>;
+
+    using OnAccept = std::function<bool(std::string const &)>;
+    using OnWrite  = std::function<bool(MqMsg &)>;
+    using OnRecv   = std::function<bool(MqMsg const &)>;
 
 public:
     struct Callbacks
     {
-        using OnAccept = std::function<bool(std::string const &)>;
-        using OnWrite  = std::function<bool(MqMsg &)>;
-        using OnRecv   = std::function<bool(MqMsg const &)>;
-
         OnAccept  accept_cb;
         OnWrite   write_cb;
         OnRecv    recv_cb;
     };
 
+public:
+    /**
+     * @warning
+     *  Don't change this variable.
+     */
+    TBAG_CONSTEXPR static std::size_t const THREAD_SIZE = 1U;
+
 private:
-    UniqueImpl _impl;
+    MqParams const PARAMS;
+    MqMode   const MODE;
+
+private:
+    Pool     _pool;
+    Loop     _loop;
+    UniqueMq _mq;
+    Err      _last;
+
+private:
+    Callbacks _callbacks;
 
 public:
-    MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs = Callbacks{});
-    MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs = Callbacks{});
-    MqNode(MqNode && obj) TBAG_NOEXCEPT;
+    MqNode(MqParams const & params, MqMode mode, MqInternal const & internal);
+    MqNode(std::string const & uri, MqMode mode, MqInternal const & internal);
+
+    MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs);
+    MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs);
+
+    MqNode(MqParams const & params, MqMode mode);
+    MqNode(std::string const & uri, MqMode mode);
+
     ~MqNode();
 
 public:
-    MqNode & operator =(MqNode && obj) TBAG_NOEXCEPT;
+    // @formatter:off
+    MqParams   params() const TBAG_NOEXCEPT { return PARAMS; }
+    MqType       type() const TBAG_NOEXCEPT { return PARAMS.type; }
+    MqMode       mode() const TBAG_NOEXCEPT { return   MODE; }
+    Loop       & loop()       TBAG_NOEXCEPT { return  _loop; }
+    Loop const & loop() const TBAG_NOEXCEPT { return  _loop; }
+    // @formatter:on
 
 public:
-    void swap(MqNode & obj) TBAG_NOEXCEPT;
+    inline char const * const getTypeName() const TBAG_NOEXCEPT
+    { return libtbag::mq::details::getTypeName(PARAMS.type); }
 
-public:
-    inline friend void swap(MqNode & lh, MqNode & rh) TBAG_NOEXCEPT
-    { lh.swap(rh); }
+    inline char const * const getModeName() const TBAG_NOEXCEPT
+    { return libtbag::mq::details::getModeName(MODE); }
 
-public:
-    inline bool exists() const TBAG_NOEXCEPT
-    { return static_cast<bool>(_impl); }
+private:
+    friend bool onAcceptCb(void * node, std::string const & peer, void * parent);
+    friend MqIsConsume onWriteCb(MqMsg & msg, void * parent);
+    friend MqIsConsume onRecvCb(MqMsg const & msg, void * parent);
 
-    inline operator bool() const TBAG_NOEXCEPT
-    { return exists(); }
-
-public:
-    Loop & loop();
-    Loop const & loop() const;
-
-public:
-    MqParams params() const;
-
-public:
-    Err waitEnable(uint64_t timeout_nano = 0);
+private:
+    bool init(MqInternal const & internal);
+    void runner();
 
 public:
     void join();
@@ -112,14 +135,14 @@ public:
 public:
     Err send(MqMsg const & msg);
 
-    Err send(char const * buffer, std::size_t size);
-    Err send(MqEvent event, char const * buffer, std::size_t size);
+    Err send(char const * buffer, std::size_t size, std::intptr_t id = 0);
+    Err send(MqEvent event, char const * buffer, std::size_t size, std::intptr_t id = 0);
 
-    Err send(std::string const & text);
-    Err send(MqEvent event, std::string const & text);
+    Err send(std::string const & text, std::intptr_t id = 0);
+    Err send(MqEvent event, std::string const & text, std::intptr_t id = 0);
 
-    Err send(MqMsg::Buffer const & buffer);
-    Err send(MqEvent event, MqMsg::Buffer const & buffer);
+    Err send(MqMsg::Buffer const & buffer, std::intptr_t id = 0);
+    Err send(MqEvent event, MqMsg::Buffer const & buffer, std::intptr_t id = 0);
 
     Err sendClose(std::intptr_t id = 0);
 
@@ -128,46 +151,11 @@ public:
     Err recvWait(MqMsg & msg, uint64_t timeout_nano = 0);
 
 public:
+    Err waitEnable(uint64_t timeout_nano = 0);
+
+public:
     static MqParams getParams(std::string const & uri);
-
-    static MqNode bind(MqParams const & params);
-    static MqNode bind(std::string const & uri);
-
-    static MqNode connect(MqParams const & params);
-    static MqNode connect(std::string const & uri);
 };
-
-// ----------
-// Utilities.
-// ----------
-
-using MqUniqueNode = std::unique_ptr<MqNode>;
-using MqSharedNode = std::shared_ptr<MqNode>;
-
-using MqParams  = libtbag::mq::details::MqParams;
-using MqNodeCbs = MqNode::Callbacks;
-
-TBAG_API MqUniqueNode bindUniqueNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API MqUniqueNode bindUniqueNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
-
-TBAG_API MqUniqueNode connectUniqueNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API MqUniqueNode connectUniqueNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
-
-TBAG_API MqSharedNode bindSharedNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API MqSharedNode bindSharedNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
-
-TBAG_API MqSharedNode connectSharedNode(MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API MqSharedNode connectSharedNode(std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
-
-TBAG_API Err bind(MqUniqueNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API Err bind(MqUniqueNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API Err bind(MqSharedNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API Err bind(MqSharedNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
-
-TBAG_API Err connect(MqUniqueNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API Err connect(MqUniqueNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API Err connect(MqSharedNode & node, MqParams const & params, MqNodeCbs const & cbs = MqNodeCbs{});
-TBAG_API Err connect(MqSharedNode & node, std::string const & uri, MqNodeCbs const & cbs = MqNodeCbs{});
 
 } // namespace mq
 

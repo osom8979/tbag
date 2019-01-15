@@ -40,6 +40,11 @@ MqLocalQueue::MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams co
 
     _state = MqMachineState::MMS_ACTIVE;
     MqBase::enableWait();
+
+    if (INTERNAL.active_cb != nullptr) {
+        assert(INTERNAL.parent);
+        INTERNAL.active_cb(INTERNAL.parent);
+    }
 }
 
 MqLocalQueue::~MqLocalQueue()

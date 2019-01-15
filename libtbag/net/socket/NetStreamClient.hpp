@@ -15,16 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/mq/details/MqCommon.hpp>
-#include <libtbag/uvpp/Loop.hpp>
-
-#include <cstdint>
-#include <string>
-#include <memory>
-#include <functional>
-#include <utility>
+#include <libtbag/mq/MqNode.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,90 +29,36 @@ namespace socket {
  *
  * @author zer0
  * @date   2018-12-09
+ * @date   2019-01-15 (Merge with NetStreamClient::Impl class)
  */
-class TBAG_API NetStreamClient TBAG_FINAL : private Noncopyable
+class TBAG_API NetStreamClient TBAG_FINAL : public libtbag::mq::MqNode
 {
 public:
-    struct Impl;
-    friend struct Impl;
+    using OnBegin = std::function<void(void)>;
+    using OnEnd   = std::function<void(void)>;
+    using OnRecv  = std::function<void(char const *, std::size_t)>;
 
-public:
-    using UniqueImpl     = std::unique_ptr<Impl>;
-    using Loop           = libtbag::uvpp::Loop;
-    using MqEvent        = libtbag::mq::details::MqEvent;
-    using MqType         = libtbag::mq::details::MqType;
-    using MqRequestState = libtbag::mq::details::MqRequestState;
-    using MqMachineState = libtbag::mq::details::MqMachineState;
-    using MqMsg          = libtbag::mq::details::MqMsg;
-    using MqMode         = libtbag::mq::details::MqMode;
-    using MqParams       = libtbag::mq::details::MqParams;
-
-public:
     struct Callbacks
     {
-        using OnBegin = std::function<void(void)>;
-        using OnRecv  = std::function<void(char const *, std::size_t)>;
-        using OnEnd   = std::function<void(void)>;
-
         OnBegin begin_cb;
-        OnRecv  recv_cb;
         OnEnd   end_cb;
+        OnRecv  recv_cb;
     };
 
 private:
-    UniqueImpl _impl;
+    Callbacks _callbacks;
 
 public:
-    NetStreamClient(MqParams const & params);
-    NetStreamClient(std::string const & uri);
     NetStreamClient(MqParams const & params, Callbacks const & cbs);
     NetStreamClient(std::string const & uri, Callbacks const & cbs);
-    NetStreamClient(NetStreamClient && obj) TBAG_NOEXCEPT;
     ~NetStreamClient();
 
-public:
-    NetStreamClient & operator =(NetStreamClient && obj) TBAG_NOEXCEPT;
-
-public:
-    void swap(NetStreamClient & obj) TBAG_NOEXCEPT;
-
-public:
-    inline friend void swap(NetStreamClient & lh, NetStreamClient & rh) TBAG_NOEXCEPT
-    { lh.swap(rh); }
-
-public:
-    inline bool exists() const TBAG_NOEXCEPT
-    { return static_cast<bool>(_impl); }
-
-    inline operator bool() const TBAG_NOEXCEPT
-    { return exists(); }
-
-public:
-    Loop & loop();
-    Loop const & loop() const;
-
-public:
-    void join();
-
-public:
-    Err exit();
-
-public:
-    Err send(MqMsg const & msg);
-
-    Err send(char const * buffer, std::size_t size);
-    Err send(MqEvent event, char const * buffer, std::size_t size);
-
-    Err send(std::string const & text);
-    Err send(MqEvent event, std::string const & text);
-
-    Err send(MqMsg::Buffer const & buffer);
-    Err send(MqEvent event, MqMsg::Buffer const & buffer);
-
-    Err sendClose(std::intptr_t id = 0);
-
-public:
-    static MqParams getParams(std::string const & uri);
+private:
+    using size = std::size_t;
+    friend void onConnectCb(void * parent);
+    friend void onCloseCb(void * parent);
+    friend size onWriteCb(void * node, MqEvent event, char const * buffer, std::size_t size, void * parent);
+    friend void onReadCb(void * node, char const * buffer, std::size_t size, void * parent);
 };
 
 } // namespace socket

@@ -438,9 +438,9 @@ void MqStreamClient::onInit_SUCCESS()
     _state = MqMachineState::MMS_ACTIVE;
     MqBase::enableWait();
 
-    if (INTERNAL.connect_cb != nullptr) {
+    if (INTERNAL.active_cb != nullptr) {
         assert(INTERNAL.parent);
-        INTERNAL.connect_cb(INTERNAL.parent);
+        INTERNAL.active_cb(INTERNAL.parent);
     }
 }
 

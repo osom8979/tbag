@@ -15,14 +15,23 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/mq/details/MqCommon.hpp>
-#include <libtbag/http/HttpCommon.hpp>
-#include <libtbag/http/WsFrame.hpp>
-#include <libtbag/uvpp/Loop.hpp>
-#include <libtbag/network/Uri.hpp>
 
+#include <libtbag/http/HttpCommon.hpp>
+#include <libtbag/http/HttpReader.hpp>
+#include <libtbag/http/WsFrame.hpp>
+
+#include <libtbag/mq/details/MqCommon.hpp>
+#include <libtbag/net/socket/NetStreamServer.hpp>
+#include <libtbag/net/Ip.hpp>
+#include <libtbag/uvpp/Loop.hpp>
+
+#include <libtbag/crypto/TlsReader.hpp>
+#include <libtbag/random/MaskingDevice.hpp>
+#include <libtbag/Type.hpp>
+
+#include <string>
 #include <memory>
+#include <unordered_map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,15 +44,11 @@ namespace http {
  *
  * @author zer0
  * @date   2019-01-11
+ * @date   2019-01-15 (Merge with HttpClient::Impl class)
  */
-class TBAG_API HttpServer : private Noncopyable
+class TBAG_API HttpServer TBAG_FINAL : private Noncopyable
 {
 public:
-    struct Impl;
-    friend struct Impl;
-
-public:
-    using UniqueImpl   = std::unique_ptr<Impl>;
     using Loop         = libtbag::uvpp::Loop;
     using MqParams     = libtbag::mq::details::MqParams;
     using HttpRequest  = libtbag::http::HttpRequest;
@@ -51,31 +56,126 @@ public:
     using Buffer       = libtbag::util::Buffer;
     using WsFrame      = libtbag::http::WsFrame;
 
+    using HttpReaderInterface = libtbag::http::HttpReaderInterface;
+    using NetStreamServer     = libtbag::net::socket::NetStreamServer;
+    using UniqueServer        = std::unique_ptr<NetStreamServer>;
+
+    using OnBegin    = std::function<void(void)>;
+    using OnEnd      = std::function<void(void)>;
+    using OnAccept   = std::function<bool(std::intptr_t, std::string const &)>;
+    using OnClose    = std::function<void(std::intptr_t)>;
+    using OnContinue = std::function<void(std::intptr_t)>;
+    using OnSwitch   = std::function<bool(std::intptr_t, HttpRequest const &)>;
+    using OnMessage  = std::function<void(std::intptr_t, WsOpCode, Buffer const &)>;
+    using OnHttp     = std::function<HttpResponse(std::intptr_t, HttpRequest const &)>;
+    using OnError    = std::function<void(std::intptr_t, Err)>;
+
+public:
+    struct Callbacks
+    {
+        OnBegin    begin_cb;
+        OnEnd      end_cb;
+        OnAccept   accept_cb;
+        OnClose    close_cb;
+        OnContinue continue_cb;
+        OnSwitch   switch_cb;
+        OnMessage  message_cb;
+        OnHttp     http_cb;
+        OnError    error_cb;
+    };
+
+public:
+    STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpReaderInterface::Buffer);
+
+public:
+    /**
+     * Client node properties.
+     *
+     * @author zer0
+     * @date   2019-01-11
+     */
+    struct Node : public HttpReaderInterface
+    {
+    public:
+        using Reader = libtbag::http::HttpReaderForCallback<Node>;
+
+    public:
+        HttpServer *  const PARENT;
+        std::intptr_t const ID;
+
+    private:
+        Reader _reader;
+
+    public:
+        Node(HttpServer * parent, std::intptr_t id, std::string const & key, bool use_websocket)
+                : PARENT(parent), ID(id), _reader(this, key, use_websocket)
+        { assert(PARENT != nullptr); }
+
+        virtual ~Node()
+        { /* EMPTY. */ }
+
+    public:
+        Err parse(char const * buffer, std::size_t size)
+        { return _reader.parse(buffer, size); }
+
+    public:
+        virtual void onContinue(void * arg) override
+        { return PARENT->onContinue(this); }
+
+        virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) override
+        { return PARENT->onSwitchingProtocol(this, property); }
+
+        virtual void onWsMessage(WsOpCode opcode, Buffer const & payload, void * arg) override
+        { return PARENT->onWsMessage(this, opcode, payload); }
+
+        virtual void onRegularHttp(HttpProperty const & property, void * arg) override
+        { return PARENT->onRegularHttp(this, property); }
+
+        virtual void onParseError(Err code, void * arg) override
+        { return PARENT->onParseError(this, code); }
+    };
+
+public:
+    using SharedNode = std::shared_ptr<Node>;
+    using NodeMap    = std::unordered_map<std::intptr_t, SharedNode>;
+
+public:
+    std::string const KEY;
+    bool const ENABLE_WEBSOCKET;
+
 private:
-    UniqueImpl _impl;
+    UniqueServer _server;
+    NodeMap      _nodes;
+
+private:
+    Callbacks _callbacks;
 
 public:
-    HttpServer(MqParams const & params, bool use_websocket = false);
-    HttpServer(MqParams const & params, std::string const & key, bool use_websocket = false);
-    virtual ~HttpServer();
+    HttpServer(std::string const & host, int ip, Callbacks const & cbs, bool use_websocket = false);
+    HttpServer(MqParams const & params, Callbacks const & cbs, bool use_websocket = false);
+    HttpServer(MqParams const & params, Callbacks const & cbs, std::string const & key, bool use_websocket = false);
+    ~HttpServer();
 
 public:
-    Loop & loop();
+    // @formatter:off
+    Loop       & loop();
     Loop const & loop() const;
+    // @formatter:on
 
-protected:
-    virtual void onBegin();
-    virtual void onEnd();
+private:
+    void onBegin();
+    void onEnd();
 
-    virtual bool onAccept(std::intptr_t id, std::string const & ip);
-    virtual void onClose(std::intptr_t id);
+    bool onAccept(std::intptr_t id, std::string const & ip);
+    void onRecv(std::intptr_t id, char const * buffer, std::size_t size);
+    void onClose(std::intptr_t id);
 
-    virtual HttpResponse onRegularHttp(std::intptr_t id, HttpRequest const & request);
-
-    virtual bool onSwitchingProtocol(std::intptr_t id, HttpRequest const & request);
-    virtual void onWsMessage(std::intptr_t id, WsOpCode opcode, Buffer const & payload);
-
-    virtual void onError(std::intptr_t id, Err code);
+private:
+    void onContinue(Node * node);
+    bool onSwitchingProtocol(Node * node, HttpProperty const & property);
+    void onWsMessage(Node * node, WsOpCode opcode, Buffer const & payload);
+    void onRegularHttp(Node * node, HttpProperty const & property);
+    void onParseError(Node * node, Err code);
 
 public:
     void join();

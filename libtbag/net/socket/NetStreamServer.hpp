@@ -15,16 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
-#include <libtbag/Noncopyable.hpp>
-#include <libtbag/mq/details/MqCommon.hpp>
-#include <libtbag/uvpp/Loop.hpp>
-
-#include <cstdint>
-#include <string>
-#include <memory>
-#include <functional>
-#include <utility>
+#include <libtbag/mq/MqNode.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,33 +29,20 @@ namespace socket {
  *
  * @author zer0
  * @date   2018-12-09
+ * @date   2019-01-15 (Merge with NetStreamServer::Impl class)
  */
-class TBAG_API NetStreamServer TBAG_FINAL : private Noncopyable
+class TBAG_API NetStreamServer TBAG_FINAL : public libtbag::mq::MqNode
 {
 public:
-    struct Impl;
-    friend struct Impl;
-
-public:
-    using UniqueImpl     = std::unique_ptr<Impl>;
-    using Loop           = libtbag::uvpp::Loop;
-    using MqEvent        = libtbag::mq::details::MqEvent;
-    using MqType         = libtbag::mq::details::MqType;
-    using MqRequestState = libtbag::mq::details::MqRequestState;
-    using MqMachineState = libtbag::mq::details::MqMachineState;
-    using MqMsg          = libtbag::mq::details::MqMsg;
-    using MqMode         = libtbag::mq::details::MqMode;
-    using MqParams       = libtbag::mq::details::MqParams;
+    using OnBegin  = std::function<void(void)>;
+    using OnEnd    = std::function<void(void)>;
+    using OnAccept = std::function<bool(std::intptr_t, std::string const &)>;
+    using OnRecv   = std::function<void(std::intptr_t, char const *, std::size_t)>;
+    using OnClose  = std::function<void(std::intptr_t)>;
 
 public:
     struct Callbacks
     {
-        using OnBegin  = std::function<void(void)>;
-        using OnEnd    = std::function<void(void)>;
-        using OnAccept = std::function<bool(std::intptr_t, std::string const &)>;
-        using OnRecv   = std::function<void(std::intptr_t, char const *, std::size_t)>;
-        using OnClose  = std::function<void(std::intptr_t)>;
-
         OnBegin   begin_cb;
         OnEnd     end_cb;
         OnAccept  accept_cb;
@@ -73,59 +51,21 @@ public:
     };
 
 private:
-    UniqueImpl _impl;
+    Callbacks _callbacks;
 
 public:
-    NetStreamServer(MqParams const & params);
-    NetStreamServer(std::string const & uri);
     NetStreamServer(MqParams const & params, Callbacks const & cbs);
     NetStreamServer(std::string const & uri, Callbacks const & cbs);
-    NetStreamServer(NetStreamServer && obj) TBAG_NOEXCEPT;
     ~NetStreamServer();
 
-public:
-    NetStreamServer & operator =(NetStreamServer && obj) TBAG_NOEXCEPT;
-
-public:
-    void swap(NetStreamServer & obj) TBAG_NOEXCEPT;
-
-public:
-    inline friend void swap(NetStreamServer & lh, NetStreamServer & rh) TBAG_NOEXCEPT
-    { lh.swap(rh); }
-
-public:
-    inline bool exists() const TBAG_NOEXCEPT
-    { return static_cast<bool>(_impl); }
-
-    inline operator bool() const TBAG_NOEXCEPT
-    { return exists(); }
-
-public:
-    Loop & loop();
-    Loop const & loop() const;
-
-public:
-    void join();
-
-public:
-    Err exit();
-
-public:
-    Err send(MqMsg const & msg);
-
-    Err send(char const * buffer, std::size_t size, std::intptr_t id = 0);
-    Err send(MqEvent event, char const * buffer, std::size_t size, std::intptr_t id = 0);
-
-    Err send(std::string const & text, std::intptr_t id = 0);
-    Err send(MqEvent event, std::string const & text, std::intptr_t id = 0);
-
-    Err send(MqMsg::Buffer const & buffer, std::intptr_t id = 0);
-    Err send(MqEvent event, MqMsg::Buffer const & buffer, std::intptr_t id = 0);
-
-    Err sendClose(std::intptr_t id = 0);
-
-public:
-    static MqParams getParams(std::string const & uri);
+private:
+    using size = std::size_t;
+    friend void onBindCb(void * parent);
+    friend bool onAcceptCb(void * node, std::string const & peer, void * parent);
+    friend void onCloseServerCb(void * parent);
+    friend size onWriteNodeCb(void * node, MqEvent event, char const * buffer, std::size_t size, void * parent);
+    friend void onReadNodeCb(void * node, char const * buffer, std::size_t size, void * parent);
+    friend void onCloseNodeCb(void * node, void * parent);
 };
 
 } // namespace socket
