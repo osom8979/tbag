@@ -33,6 +33,9 @@ namespace json {
  */
 struct JsonObjectInterface
 {
+    JsonObjectInterface() { /* EMPTY. */ }
+    virtual ~JsonObjectInterface() { /* EMPTY. */ }
+
     virtual std::string toJsonString() const = 0;
     virtual bool fromJsonString(std::string const & json) = 0;
 };

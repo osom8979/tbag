@@ -43,6 +43,9 @@ struct HttpReaderInterface
 {
     using Buffer = libtbag::util::Buffer;
 
+    HttpReaderInterface() { /* EMPTY. */ }
+    virtual ~HttpReaderInterface() { /* EMPTY. */ }
+
     /** Incomplete (Parsing is not finish). Wait for the next packet. */
     virtual void onContinue(void * arg) { /* EMPTY. */ }
 

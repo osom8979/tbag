@@ -49,6 +49,9 @@ enum class AnimationType : int
  */
 struct AnimationInterface
 {
+    AnimationInterface() { /* EMPTY. */ }
+    virtual ~AnimationInterface() { /* EMPTY. */ }
+
     virtual void onUpdate(std::chrono::milliseconds const & duration, float ratio, float interpolated) = 0;
     virtual void onEnd() = 0;
 };

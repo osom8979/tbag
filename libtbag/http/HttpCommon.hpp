@@ -669,6 +669,9 @@ struct HttpProperty : public HttpCommon, public HttpBaseRequest, public HttpBase
  */
 struct HttpFilterInterface
 {
+    HttpFilterInterface() { /* EMPTY. */ }
+    virtual ~HttpFilterInterface() { /* EMPTY. */ }
+
     virtual bool filter(HttpRequest const & request) = 0;
 };
 

@@ -667,6 +667,9 @@ TBAG_CONSTEXPR static char const * const VERBOSE_NAME          = "verbose";
 
 struct MqInterface
 {
+    MqInterface() { /* EMPTY. */ }
+    virtual ~MqInterface() { /* EMPTY. */ }
+
     virtual Err exit() = 0;
 
     virtual Err send(MqMsg const & msg) = 0;

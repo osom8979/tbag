@@ -56,6 +56,9 @@ public:
      */
     struct CheckerInterface
     {
+        CheckerInterface() { /* EMPTY. */ }
+        virtual ~CheckerInterface() { /* EMPTY. */ }
+
         /**
          * Rotate check method.
          *
@@ -77,6 +80,9 @@ public:
      */
     struct UpdaterInterface
     {
+        UpdaterInterface() { /* EMPTY. */ }
+        virtual ~UpdaterInterface() { /* EMPTY. */ }
+
         virtual Path update(Path const & prev) = 0;
     };
 
