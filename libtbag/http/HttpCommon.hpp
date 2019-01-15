@@ -481,6 +481,8 @@ struct HttpBaseRequest
 
 struct HttpRequest : public HttpCommon, public HttpBaseRequest
 {
+    void setMethod(HttpMethod m)
+    { method = libtbag::http::getHttpMethodName(m); }
     bool checkWsRequest(int test_version = WEBSOCKET_VERSION_HYBI13) const
     { return libtbag::http::checkWsRequest(*this, test_version); }
 

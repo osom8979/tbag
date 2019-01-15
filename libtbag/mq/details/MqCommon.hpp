@@ -201,11 +201,6 @@ struct MqMsg
                   "The minimum unit of the buffer element must be 1 Byte.");
 
     /**
-     * Integer pointer to the stream to be connected to the socket.
-     */
-    std::intptr_t stream = 0;
-
-    /**
      * The event identifier.
      */
     MqEvent event = ME_MSG;
@@ -215,29 +210,43 @@ struct MqMsg
      */
     Buffer buffer;
 
+    /**
+     * Integer pointer to the stream to be connected to the socket.
+     */
+    std::intptr_t stream = 0;
+
     MqMsg()
     { /* EMPTY. */ }
 
-    explicit MqMsg(MqEvent e, std::intptr_t id = 0) : event(e), stream(id)
+    explicit MqMsg(MqEvent e, std::intptr_t id = 0)
+            : event(e), buffer(), stream(id)
     { /* EMPTY. */ }
-    explicit MqMsg(std::size_t s, std::intptr_t id = 0) : buffer(s), stream(id)
+    explicit MqMsg(std::size_t s, std::intptr_t id = 0)
+            : event(ME_MSG), buffer(s), stream(id)
     { /* EMPTY. */ }
-    explicit MqMsg(MqEvent e, std::size_t s, std::intptr_t id = 0) : event(e), buffer(s), stream(id)
-    { /* EMPTY. */ }
-
-    explicit MqMsg(Value const * d, std::size_t s, std::intptr_t id = 0) : buffer(d, d + s), stream(id)
-    { /* EMPTY. */ }
-    explicit MqMsg(MqEvent e, Value const * d, std::size_t s, std::intptr_t id = 0) : event(e), buffer(d, d + s), stream(id)
+    explicit MqMsg(MqEvent e, std::size_t s, std::intptr_t id = 0)
+            : event(e), buffer(s), stream(id)
     { /* EMPTY. */ }
 
-    explicit MqMsg(std::string const & str, std::intptr_t id = 0) : buffer(str.begin(), str.end()), stream(id)
+    explicit MqMsg(Value const * d, std::size_t s, std::intptr_t id = 0)
+            : event(ME_MSG), buffer(d, d + s), stream(id)
     { /* EMPTY. */ }
-    explicit MqMsg(MqEvent e, std::string const & str, std::intptr_t id = 0) : event(e), buffer(str.begin(), str.end()), stream(id)
+    explicit MqMsg(MqEvent e, Value const * d, std::size_t s, std::intptr_t id = 0)
+            : event(e), buffer(d, d + s), stream(id)
     { /* EMPTY. */ }
 
-    explicit MqMsg(Buffer const & buffer, std::intptr_t id = 0) : buffer(buffer), stream(id)
+    explicit MqMsg(std::string const & str, std::intptr_t id = 0)
+            : event(ME_MSG), buffer(str.begin(), str.end()), stream(id)
     { /* EMPTY. */ }
-    explicit MqMsg(MqEvent e, Buffer const & buf, std::intptr_t id = 0) : event(e), buffer(buf), stream(id)
+    explicit MqMsg(MqEvent e, std::string const & str, std::intptr_t id = 0)
+            : event(e), buffer(str.begin(), str.end()), stream(id)
+    { /* EMPTY. */ }
+
+    explicit MqMsg(Buffer const & buffer, std::intptr_t id = 0)
+            : event(ME_MSG), buffer(buffer), stream(id)
+    { /* EMPTY. */ }
+    explicit MqMsg(MqEvent e, Buffer const & buf, std::intptr_t id = 0)
+            : event(e), buffer(buf), stream(id)
     { /* EMPTY. */ }
 
     MqMsg(MqMsg const & obj)
