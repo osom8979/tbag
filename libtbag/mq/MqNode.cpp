@@ -61,18 +61,16 @@ MqIsConsume onRecvCb(MqMsg const & msg, void * parent)
 // MqNode implementation
 // ---------------------
 
-MqNode::MqNode(MqParams const & params, MqMode mode, MqInternal const & internal)
+MqNode::MqNode(MqParams const & params, MqMode mode, no_init const & UNUSED_PARAM(no))
         : PARAMS(params), MODE(mode), _pool(THREAD_SIZE), _last(Err::E_EBUSY), _callbacks()
 {
-    if (!init(internal)) {
-        throw std::bad_alloc();
-    }
+    assert(!static_cast<bool>(_mq));
 }
 
-MqNode::MqNode(std::string const & uri, MqMode mode, MqInternal const & internal)
-        : MqNode(getParams(uri), mode, internal)
+MqNode::MqNode(std::string const & uri, MqMode mode, no_init const & UNUSED_PARAM(no))
+        : MqNode(getParams(uri), mode, no_init{})
 {
-    assert(static_cast<bool>(_mq));
+    assert(!static_cast<bool>(_mq));
 }
 
 MqNode::MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs)

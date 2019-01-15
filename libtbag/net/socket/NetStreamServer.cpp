@@ -93,7 +93,12 @@ void onCloseNodeCb(void * node, void * parent)
     }
 }
 
-static MqInternal createServerInternal(NetStreamServer * parent) TBAG_NOEXCEPT
+// ------------------------------
+// NetStreamServer implementation
+// ------------------------------
+
+NetStreamServer::NetStreamServer(MqParams const & params, Callbacks const & cbs)
+        : libtbag::mq::MqNode(params, MqMode::MM_BIND, MqNode::no_init{}), _callbacks(cbs)
 {
     MqInternal internal;
     internal.active_cb     = &onBindCb;
@@ -102,20 +107,11 @@ static MqInternal createServerInternal(NetStreamServer * parent) TBAG_NOEXCEPT
     internal.default_write = &onWriteNodeCb;
     internal.default_read  = &onReadNodeCb;
     internal.close_node    = &onCloseNodeCb;
-    internal.parent        = parent;
-    return internal;
-}
+    internal.parent        = this;
 
-// ------------------------------
-// NetStreamServer implementation
-// ------------------------------
-
-NetStreamServer::NetStreamServer(MqParams const & params, Callbacks const & cbs)
-TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
-        : _callbacks(cbs), libtbag::mq::MqNode(params, MqMode::MM_BIND, createServerInternal(this))
-TBAG_ATTRIBUTE_DIAGNOSTIC_POP
-{
-    // EMPTY.
+    if (!init(internal)) {
+        throw std::bad_alloc();
+    }
 }
 
 NetStreamServer::NetStreamServer(std::string const & uri, Callbacks const & cbs)

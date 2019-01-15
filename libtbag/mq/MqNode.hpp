@@ -70,6 +70,9 @@ public:
     };
 
 public:
+    struct no_init { /* EMPTY. */ };
+
+public:
     /**
      * @warning
      *  Don't change this variable.
@@ -90,8 +93,8 @@ private:
     Callbacks _callbacks;
 
 public:
-    MqNode(MqParams const & params, MqMode mode, MqInternal const & internal);
-    MqNode(std::string const & uri, MqMode mode, MqInternal const & internal);
+    MqNode(MqParams const & params, MqMode mode, no_init const & UNUSED_PARAM(no));
+    MqNode(std::string const & uri, MqMode mode, no_init const & UNUSED_PARAM(no));
 
     MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs);
     MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs);
@@ -122,8 +125,10 @@ private:
     friend MqIsConsume onWriteCb(MqMsg & msg, void * parent);
     friend MqIsConsume onRecvCb(MqMsg const & msg, void * parent);
 
-private:
+protected:
     bool init(MqInternal const & internal);
+
+private:
     void runner();
 
 public:

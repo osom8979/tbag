@@ -47,6 +47,7 @@ HttpServer::HttpServer(MqParams const & params, Callbacks const & cbs, std::stri
         onClose(id);
     };
     _server = std::make_unique<NetStreamServer>(params, server_cbs);
+    assert(static_cast<bool>(_server));
 }
 
 HttpServer::~HttpServer()
