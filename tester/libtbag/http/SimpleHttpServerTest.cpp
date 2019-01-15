@@ -39,5 +39,5 @@ TEST(SimpleHttpServerTest, Default)
     auto const RESPONSE = requestGet("http://localhost:18080");
     ASSERT_EQ(200, RESPONSE.code);
     ASSERT_EQ(TEST_BODY, RESPONSE.getBodyString());
-};
+}
 
