@@ -20,31 +20,23 @@ namespace http {
 // SimpleHttpServer implementation
 // -------------------------------
 
+TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
 SimpleHttpServer::SimpleHttpServer(std::string const & host, int port, Callbacks const & cbs)
-        : HttpServer(initAndParams(host, port, cbs))
-        /* ---------------------------------------------------------------------- *
-         * Don't initialize <code>_callbacks</code> member.                       *
-         * This member is initialized in the <code>initAndParams()</code> method. *
-         * ---------------------------------------------------------------------- */
+        : CALLBACKS(cbs), HttpServer(getDefaultParams(host, port))
 {
     // EMPTY.
 }
+TBAG_ATTRIBUTE_DIAGNOSTIC_POP
 
 SimpleHttpServer::~SimpleHttpServer()
 {
     // EMPTY.
 }
 
-SimpleHttpServer::MqParams SimpleHttpServer::initAndParams(std::string const & host, int port, Callbacks const & cbs)
-{
-   _callbacks = cbs;
-    return HttpServer::getDefaultParams(host, port);
-}
-
 void SimpleHttpServer::onBegin()
 {
-    if (_callbacks.begin_cb) {
-        _callbacks.begin_cb();
+    if (CALLBACKS.begin_cb) {
+        CALLBACKS.begin_cb();
     } else {
         HttpServer::onBegin();
     }
@@ -52,8 +44,8 @@ void SimpleHttpServer::onBegin()
 
 void SimpleHttpServer::onEnd()
 {
-    if (_callbacks.end_cb) {
-        _callbacks.end_cb();
+    if (CALLBACKS.end_cb) {
+        CALLBACKS.end_cb();
     } else {
         HttpServer::onEnd();
     }
@@ -61,8 +53,8 @@ void SimpleHttpServer::onEnd()
 
 bool SimpleHttpServer::onAccept(std::intptr_t id, std::string const & ip)
 {
-    if (_callbacks.accept_cb) {
-        return _callbacks.accept_cb(id, ip);
+    if (CALLBACKS.accept_cb) {
+        return CALLBACKS.accept_cb(id, ip);
     } else {
         return HttpServer::onAccept(id, ip);
     }
@@ -70,8 +62,8 @@ bool SimpleHttpServer::onAccept(std::intptr_t id, std::string const & ip)
 
 void SimpleHttpServer::onClose(std::intptr_t id)
 {
-    if (_callbacks.close_cb) {
-        _callbacks.close_cb(id);
+    if (CALLBACKS.close_cb) {
+        CALLBACKS.close_cb(id);
     } else {
         HttpServer::onClose(id);
     }
@@ -79,8 +71,8 @@ void SimpleHttpServer::onClose(std::intptr_t id)
 
 HttpResponse SimpleHttpServer::onRegularHttp(std::intptr_t id, HttpRequest const & request)
 {
-    if (_callbacks.http_cb) {
-        return _callbacks.http_cb(id, request);
+    if (CALLBACKS.http_cb) {
+        return CALLBACKS.http_cb(id, request);
     } else {
         return HttpServer::onRegularHttp(id, request);
     }
@@ -88,8 +80,8 @@ HttpResponse SimpleHttpServer::onRegularHttp(std::intptr_t id, HttpRequest const
 
 void SimpleHttpServer::onError(std::intptr_t id, Err code)
 {
-    if (_callbacks.error_cb) {
-        _callbacks.error_cb(id, code);
+    if (CALLBACKS.error_cb) {
+        CALLBACKS.error_cb(id, code);
     } else {
         HttpServer::onError(id, code);
     }

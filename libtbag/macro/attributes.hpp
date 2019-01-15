@@ -100,6 +100,20 @@
 # endif
 #endif
 
+#ifndef TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
+# if defined(TBAG_COMP_CLANG)
+#  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER    \
+    _Pragma("GCC diagnostic push")                  \
+    _Pragma("GCC diagnostic ignored \"-Wreorder\"")
+# elif defined(TBAG_COMP_GNUC_CXX)
+#  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
+# elif defined(TBAG_COMP_MSVC)
+#  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
+# else
+#  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
+# endif
+#endif
+
 #ifndef TBAG_ATTRIBUTE_DIAGNOSTIC_POP
 # if defined(TBAG_COMP_GNUC_CXX)
 #  define TBAG_ATTRIBUTE_DIAGNOSTIC_POP  _Pragma("GCC diagnostic pop")

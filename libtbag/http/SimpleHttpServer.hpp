@@ -59,23 +59,11 @@ public:
     };
 
 private:
-    Callbacks _callbacks;
+    Callbacks const CALLBACKS;
 
 public:
     SimpleHttpServer(std::string const & host, int port, Callbacks const & cbs);
     virtual ~SimpleHttpServer();
-
-private:
-    /**
-     * @remarks
-     *  Tricky method used to prevent reordering warnings.
-     *
-     *  CLANG WARNING:
-     *  @code
-     *   warning: field '_callbacks' will be initialized after base 'HttpServer' [-Wreorder]
-     *  @endcode
-     */
-    MqParams initAndParams(std::string const & host, int port, Callbacks const & cbs);
 
 protected:
     virtual void onBegin() override;
