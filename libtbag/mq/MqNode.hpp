@@ -48,6 +48,8 @@ public:
     using MqMachineState = libtbag::mq::details::MqMachineState;
     using MqMsg          = libtbag::mq::details::MqMsg;
     using MqMode         = libtbag::mq::details::MqMode;
+    using MqBind         = libtbag::mq::details::MqBind;
+    using MqConnect      = libtbag::mq::details::MqConnect;
     using MqParams       = libtbag::mq::details::MqParams;
     using MqInternal     = libtbag::mq::details::MqInternal;
     using MqIsConsume    = libtbag::mq::details::MqIsConsume;
@@ -101,6 +103,11 @@ public:
 
     MqNode(MqParams const & params, MqMode mode);
     MqNode(std::string const & uri, MqMode mode);
+
+    explicit MqNode(MqBind, MqParams const & params);
+    explicit MqNode(MqBind, std::string const & uri);
+    explicit MqNode(MqConnect, MqParams const & params);
+    explicit MqNode(MqConnect, std::string const & uri);
 
     ~MqNode();
 

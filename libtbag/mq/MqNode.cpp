@@ -93,17 +93,20 @@ MqNode::MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs)
     assert(static_cast<bool>(_mq));
 }
 
-MqNode::MqNode(MqParams const & params, MqMode mode)
-        : MqNode(params, mode, Callbacks{})
-{
-    assert(static_cast<bool>(_mq));
-}
-
-MqNode::MqNode(std::string const & uri, MqMode mode)
-        : MqNode(uri, mode, Callbacks{})
-{
-    assert(static_cast<bool>(_mq));
-}
+// @formatter:off
+MqNode::MqNode(MqParams const & params, MqMode mode) : MqNode(params, mode, Callbacks{})
+{ assert(static_cast<bool>(_mq)); }
+MqNode::MqNode(std::string const & uri, MqMode mode) : MqNode(uri, mode, Callbacks{})
+{ assert(static_cast<bool>(_mq)); }
+MqNode::MqNode(MqBind, MqParams const & params) : MqNode(params, MqMode::MM_BIND)
+{ assert(static_cast<bool>(_mq)); }
+MqNode::MqNode(MqBind, std::string const & uri) : MqNode(uri, MqMode::MM_BIND)
+{ assert(static_cast<bool>(_mq)); }
+MqNode::MqNode(MqConnect, MqParams const & params) : MqNode(params, MqMode::MM_CONNECT)
+{ assert(static_cast<bool>(_mq)); }
+MqNode::MqNode(MqConnect, std::string const & uri) : MqNode(uri, MqMode::MM_CONNECT)
+{ assert(static_cast<bool>(_mq)); }
+// @formatter:on
 
 MqNode::~MqNode()
 {

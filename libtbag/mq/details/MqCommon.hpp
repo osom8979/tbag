@@ -31,6 +31,7 @@
 #include <memory>
 #include <algorithm>
 #include <utility>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -105,12 +106,33 @@ enum class MqMode : int
     MM_CONNECT,
 };
 
+struct MqBind
+{
+    TBAG_CONSTEXPR static char const * const name = "BIND";
+    TBAG_CONSTEXPR static MqMode const mode = MqMode::MM_BIND;
+};
+
+struct MqConnect
+{
+    TBAG_CONSTEXPR static char const * const name = "CONNECT";
+    TBAG_CONSTEXPR static MqMode const mode = MqMode::MM_CONNECT;
+};
+
+// @formatter:off
+template <typename T> struct IsMqMode  : public std::false_type { /* EMPTY. */ };
+template <> struct IsMqMode<MqBind>    : public std::true_type  { /* EMPTY. */ };
+template <> struct IsMqMode<MqConnect> : public std::true_type  { /* EMPTY. */ };
+// @formatter:on
+
+TBAG_CONSTEXPR MqBind    const MQ_BIND    = MqBind{};
+TBAG_CONSTEXPR MqConnect const MQ_CONNECT = MqConnect{};
+
 inline char const * const getModeName(MqMode mode) TBAG_NOEXCEPT
 {
     switch (mode) {
     case MqMode::MM_NONE:    return "NONE";
-    case MqMode::MM_BIND:    return "BIND";
-    case MqMode::MM_CONNECT: return "CONNECT";
+    case MqMode::MM_BIND:    return MqBind::name;
+    case MqMode::MM_CONNECT: return MqConnect::name;
     default:                 return "UNKNOWN";
     }
 }
