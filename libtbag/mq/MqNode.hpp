@@ -21,10 +21,12 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/thread/ThreadPool.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <string>
 #include <memory>
 #include <functional>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -99,16 +101,14 @@ public:
     MqNode(MqParams const & params, MqMode mode, no_init_t);
     MqNode(std::string const & uri, MqMode mode, no_init_t);
 
-    MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs);
-    MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs);
+    MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs = Callbacks{});
+    MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs = Callbacks{});
 
-    MqNode(MqParams const & params, MqMode mode);
-    MqNode(std::string const & uri, MqMode mode);
+    MqNode(MqBindMode, MqParams const & params, Callbacks const & cbs = Callbacks{});
+    MqNode(MqBindMode, std::string const & uri, Callbacks const & cbs = Callbacks{});
 
-    explicit MqNode(MqBindMode, MqParams const & params);
-    explicit MqNode(MqBindMode, std::string const & uri);
-    explicit MqNode(MqConnectMode, MqParams const & params);
-    explicit MqNode(MqConnectMode, std::string const & uri);
+    MqNode(MqConnectMode, MqParams const & params, Callbacks const & cbs = Callbacks{});
+    MqNode(MqConnectMode, std::string const & uri, Callbacks const & cbs = Callbacks{});
 
     ~MqNode();
 
@@ -170,10 +170,14 @@ public:
     static MqParams getParams(std::string const & uri);
 };
 
-/** Bind node. */
-class MqBind : public MqNode
+/**
+ * Bind node.
+ *
+ * @author zer0
+ * @date   2019-01-16
+ */
+struct MqBind : public MqNode
 {
-public:
     MqBind(MqParams const & params, no_init_t) : MqNode(params, MqMode::MM_BIND, no_init) { /* EMPTY. */ }
     MqBind(std::string const & uri, no_init_t) : MqNode(uri, MqMode::MM_BIND, no_init) { /* EMPTY. */ }
 
@@ -186,10 +190,14 @@ public:
     ~MqBind() { /* EMPTY. */ }
 };
 
-/** Connect node. */
-class MqConn : public MqNode
+/**
+ * Connect node.
+ *
+ * @author zer0
+ * @date   2019-01-16
+ */
+struct MqConn : public MqNode
 {
-public:
     MqConn(MqParams const & params, no_init_t) : MqNode(params, MqMode::MM_CONNECT, no_init) { /* EMPTY. */ }
     MqConn(std::string const & uri, no_init_t) : MqNode(uri, MqMode::MM_CONNECT, no_init) { /* EMPTY. */ }
 
@@ -200,6 +208,86 @@ public:
     MqConn(std::string const & uri) : MqNode(uri, MqMode::MM_CONNECT) { /* EMPTY. */ }
 
     ~MqConn() { /* EMPTY. */ }
+};
+
+/**
+ * Syntactic sugar for end users.
+ *
+ * @author zer0
+ * @date   2019-01-16
+ */
+struct MqTypes
+{
+    using Err    = libtbag::Err;
+    using Buffer = libtbag::util::Buffer;
+
+    using MqEvent        = libtbag::mq::details::MqEvent;
+    using MqType         = libtbag::mq::details::MqType;
+    using MqRequestState = libtbag::mq::details::MqRequestState;
+    using MqMachineState = libtbag::mq::details::MqMachineState;
+    using MqMsg          = libtbag::mq::details::MqMsg;
+    using MqMode         = libtbag::mq::details::MqMode;
+    using MqBindMode     = libtbag::mq::details::MqBindMode;
+    using MqConnectMode  = libtbag::mq::details::MqConnectMode;
+    using MqParams       = libtbag::mq::details::MqParams;
+    using MqInternal     = libtbag::mq::details::MqInternal;
+    using MqIsConsume    = libtbag::mq::details::MqIsConsume;
+    using MqInterface    = libtbag::mq::details::MqInterface;
+
+    using MqOnActive       = libtbag::mq::details::MqOnActive;
+    using MqOnAccept       = libtbag::mq::details::MqOnAccept;
+    using MqOnWrite        = libtbag::mq::details::MqOnWrite;
+    using MqOnRecv         = libtbag::mq::details::MqOnRecv;
+    using MqOnClose        = libtbag::mq::details::MqOnClose;
+    using MqOnDefaultWrite = libtbag::mq::details::MqOnDefaultWrite;
+    using MqOnDefaultRead  = libtbag::mq::details::MqOnDefaultRead;
+    using MqOnCloseNode    = libtbag::mq::details::MqOnCloseNode;
+    using MqOnCreateLoop   = libtbag::mq::details::MqOnCreateLoop;
+
+    using MqNode = libtbag::mq::MqNode;
+    using MqBind = libtbag::mq::MqBind;
+    using MqConn = libtbag::mq::MqConn;
+
+    using MqUniqueNode = std::unique_ptr<MqNode>;
+    using MqSharedNode = std::shared_ptr<MqNode>;
+
+    using MqUniqueBind = std::unique_ptr<MqBind>;
+    using MqSharedBind = std::shared_ptr<MqBind>;
+
+    using MqUniqueConn = std::unique_ptr<MqConn>;
+    using MqSharedConn = std::shared_ptr<MqConn>;
+
+    template <typename ... Args>
+    MqUniqueNode bindUniqueNode(Args && ... args)
+    { return std::make_unique<MqNode>(libtbag::mq::details::MQ_BIND, std::forward<Args>(args) ...); }
+
+    template <typename ... Args>
+    MqSharedNode bindSharedNode(Args && ... args)
+    { return std::make_shared<MqNode>(libtbag::mq::details::MQ_BIND, std::forward<Args>(args) ...); }
+
+    template <typename ... Args>
+    MqUniqueBind bindUnique(Args && ... args)
+    { return std::make_unique<MqBind>(std::forward<Args>(args) ...); }
+
+    template <typename ... Args>
+    MqSharedBind bindShared(Args && ... args)
+    { return std::make_shared<MqBind>(std::forward<Args>(args) ...); }
+
+    template <typename ... Args>
+    MqUniqueNode connectUniqueNode(Args && ... args)
+    { return std::make_unique<MqNode>(libtbag::mq::details::MQ_CONNECT, std::forward<Args>(args) ...); }
+
+    template <typename ... Args>
+    MqSharedNode connectSharedNode(Args && ... args)
+    { return std::make_shared<MqNode>(libtbag::mq::details::MQ_CONNECT, std::forward<Args>(args) ...); }
+
+    template <typename ... Args>
+    MqUniqueConn connectUnique(Args && ... args)
+    { return std::make_unique<MqConn>(std::forward<Args>(args) ...); }
+
+    template <typename ... Args>
+    MqSharedConn bindShared(Args && ... args)
+    { return std::make_shared<MqConn>(std::forward<Args>(args) ...); }
 };
 
 } // namespace mq
