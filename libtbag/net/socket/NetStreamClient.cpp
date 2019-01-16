@@ -79,7 +79,7 @@ void onReadCb(void * node, char const * buffer, std::size_t size, void * parent)
 // ------------------------------
 
 NetStreamClient::NetStreamClient(MqParams const & params, Callbacks const & cbs)
-        : libtbag::mq::MqNode(params, MqMode::MM_CONNECT, MqNode::no_init{}), _callbacks(cbs)
+        : libtbag::mq::MqConn(params, no_init), _callbacks(cbs)
 {
     MqInternal internal;
     internal.active_cb     = &onConnectCb;

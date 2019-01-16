@@ -48,8 +48,8 @@ public:
     using MqMachineState = libtbag::mq::details::MqMachineState;
     using MqMsg          = libtbag::mq::details::MqMsg;
     using MqMode         = libtbag::mq::details::MqMode;
-    using MqBind         = libtbag::mq::details::MqBind;
-    using MqConnect      = libtbag::mq::details::MqConnect;
+    using MqBindMode     = libtbag::mq::details::MqBindMode;
+    using MqConnectMode  = libtbag::mq::details::MqConnectMode;
     using MqParams       = libtbag::mq::details::MqParams;
     using MqInternal     = libtbag::mq::details::MqInternal;
     using MqIsConsume    = libtbag::mq::details::MqIsConsume;
@@ -72,7 +72,8 @@ public:
     };
 
 public:
-    struct no_init { /* EMPTY. */ };
+    struct no_init_t { /* EMPTY. */ };
+    TBAG_CONSTEXPR static no_init_t const no_init = no_init_t{};
 
 public:
     /**
@@ -95,8 +96,8 @@ private:
     Callbacks _callbacks;
 
 public:
-    MqNode(MqParams const & params, MqMode mode, no_init const & UNUSED_PARAM(no));
-    MqNode(std::string const & uri, MqMode mode, no_init const & UNUSED_PARAM(no));
+    MqNode(MqParams const & params, MqMode mode, no_init_t);
+    MqNode(std::string const & uri, MqMode mode, no_init_t);
 
     MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs);
     MqNode(std::string const & uri, MqMode mode, Callbacks const & cbs);
@@ -104,10 +105,10 @@ public:
     MqNode(MqParams const & params, MqMode mode);
     MqNode(std::string const & uri, MqMode mode);
 
-    explicit MqNode(MqBind, MqParams const & params);
-    explicit MqNode(MqBind, std::string const & uri);
-    explicit MqNode(MqConnect, MqParams const & params);
-    explicit MqNode(MqConnect, std::string const & uri);
+    explicit MqNode(MqBindMode, MqParams const & params);
+    explicit MqNode(MqBindMode, std::string const & uri);
+    explicit MqNode(MqConnectMode, MqParams const & params);
+    explicit MqNode(MqConnectMode, std::string const & uri);
 
     ~MqNode();
 
@@ -167,6 +168,38 @@ public:
 
 public:
     static MqParams getParams(std::string const & uri);
+};
+
+/** Bind node. */
+class MqBind : public MqNode
+{
+public:
+    MqBind(MqParams const & params, no_init_t) : MqNode(params, MqMode::MM_BIND, no_init) { /* EMPTY. */ }
+    MqBind(std::string const & uri, no_init_t) : MqNode(uri, MqMode::MM_BIND, no_init) { /* EMPTY. */ }
+
+    MqBind(MqParams const & params, Callbacks const & cbs) : MqNode(params, MqMode::MM_BIND, cbs) { /* EMPTY. */ }
+    MqBind(std::string const & uri, Callbacks const & cbs) : MqNode(uri, MqMode::MM_BIND, cbs) { /* EMPTY. */ }
+
+    MqBind(MqParams const & params) : MqNode(params, MqMode::MM_BIND) { /* EMPTY. */ }
+    MqBind(std::string const & uri) : MqNode(uri, MqMode::MM_BIND) { /* EMPTY. */ }
+
+    ~MqBind() { /* EMPTY. */ }
+};
+
+/** Connect node. */
+class MqConn : public MqNode
+{
+public:
+    MqConn(MqParams const & params, no_init_t) : MqNode(params, MqMode::MM_CONNECT, no_init) { /* EMPTY. */ }
+    MqConn(std::string const & uri, no_init_t) : MqNode(uri, MqMode::MM_CONNECT, no_init) { /* EMPTY. */ }
+
+    MqConn(MqParams const & params, Callbacks const & cbs) : MqNode(params, MqMode::MM_CONNECT, cbs) { /* EMPTY. */ }
+    MqConn(std::string const & uri, Callbacks const & cbs) : MqNode(uri, MqMode::MM_CONNECT, cbs) { /* EMPTY. */ }
+
+    MqConn(MqParams const & params) : MqNode(params, MqMode::MM_CONNECT) { /* EMPTY. */ }
+    MqConn(std::string const & uri) : MqNode(uri, MqMode::MM_CONNECT) { /* EMPTY. */ }
+
+    ~MqConn() { /* EMPTY. */ }
 };
 
 } // namespace mq

@@ -98,7 +98,7 @@ void onCloseNodeCb(void * node, void * parent)
 // ------------------------------
 
 NetStreamServer::NetStreamServer(MqParams const & params, Callbacks const & cbs)
-        : libtbag::mq::MqNode(params, MqMode::MM_BIND, MqNode::no_init{}), _callbacks(cbs)
+        : libtbag::mq::MqBind(params, no_init), _callbacks(cbs)
 {
     MqInternal internal;
     internal.active_cb     = &onBindCb;

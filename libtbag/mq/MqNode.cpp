@@ -61,14 +61,14 @@ MqIsConsume onRecvCb(MqMsg const & msg, void * parent)
 // MqNode implementation
 // ---------------------
 
-MqNode::MqNode(MqParams const & params, MqMode mode, no_init const & UNUSED_PARAM(no))
+MqNode::MqNode(MqParams const & params, MqMode mode, no_init_t)
         : PARAMS(params), MODE(mode), _pool(THREAD_SIZE), _last(Err::E_EBUSY), _callbacks()
 {
     assert(!static_cast<bool>(_mq));
 }
 
-MqNode::MqNode(std::string const & uri, MqMode mode, no_init const & UNUSED_PARAM(no))
-        : MqNode(getParams(uri), mode, no_init{})
+MqNode::MqNode(std::string const & uri, MqMode mode, no_init_t)
+        : MqNode(getParams(uri), mode, no_init)
 {
     assert(!static_cast<bool>(_mq));
 }
@@ -98,13 +98,13 @@ MqNode::MqNode(MqParams const & params, MqMode mode) : MqNode(params, mode, Call
 { assert(static_cast<bool>(_mq)); }
 MqNode::MqNode(std::string const & uri, MqMode mode) : MqNode(uri, mode, Callbacks{})
 { assert(static_cast<bool>(_mq)); }
-MqNode::MqNode(MqBind, MqParams const & params) : MqNode(params, MqMode::MM_BIND)
+MqNode::MqNode(MqBindMode, MqParams const & params) : MqNode(params, MqMode::MM_BIND)
 { assert(static_cast<bool>(_mq)); }
-MqNode::MqNode(MqBind, std::string const & uri) : MqNode(uri, MqMode::MM_BIND)
+MqNode::MqNode(MqBindMode, std::string const & uri) : MqNode(uri, MqMode::MM_BIND)
 { assert(static_cast<bool>(_mq)); }
-MqNode::MqNode(MqConnect, MqParams const & params) : MqNode(params, MqMode::MM_CONNECT)
+MqNode::MqNode(MqConnectMode, MqParams const & params) : MqNode(params, MqMode::MM_CONNECT)
 { assert(static_cast<bool>(_mq)); }
-MqNode::MqNode(MqConnect, std::string const & uri) : MqNode(uri, MqMode::MM_CONNECT)
+MqNode::MqNode(MqConnectMode, std::string const & uri) : MqNode(uri, MqMode::MM_CONNECT)
 { assert(static_cast<bool>(_mq)); }
 // @formatter:on
 

@@ -106,33 +106,33 @@ enum class MqMode : int
     MM_CONNECT,
 };
 
-struct MqBind
+struct MqBindMode
 {
     TBAG_CONSTEXPR static char const * const name = "BIND";
     TBAG_CONSTEXPR static MqMode const mode = MqMode::MM_BIND;
 };
 
-struct MqConnect
+struct MqConnectMode
 {
     TBAG_CONSTEXPR static char const * const name = "CONNECT";
     TBAG_CONSTEXPR static MqMode const mode = MqMode::MM_CONNECT;
 };
 
 // @formatter:off
-template <typename T> struct IsMqMode  : public std::false_type { /* EMPTY. */ };
-template <> struct IsMqMode<MqBind>    : public std::true_type  { /* EMPTY. */ };
-template <> struct IsMqMode<MqConnect> : public std::true_type  { /* EMPTY. */ };
+template <typename T> struct IsMqMode      : public std::false_type { /* EMPTY. */ };
+template <> struct IsMqMode<MqBindMode>    : public std::true_type  { /* EMPTY. */ };
+template <> struct IsMqMode<MqConnectMode> : public std::true_type  { /* EMPTY. */ };
 // @formatter:on
 
-TBAG_CONSTEXPR MqBind    const MQ_BIND    = MqBind{};
-TBAG_CONSTEXPR MqConnect const MQ_CONNECT = MqConnect{};
+TBAG_CONSTEXPR MqBindMode    const MQ_BIND    = MqBindMode{};
+TBAG_CONSTEXPR MqConnectMode const MQ_CONNECT = MqConnectMode{};
 
 inline char const * const getModeName(MqMode mode) TBAG_NOEXCEPT
 {
     switch (mode) {
     case MqMode::MM_NONE:    return "NONE";
-    case MqMode::MM_BIND:    return MqBind::name;
-    case MqMode::MM_CONNECT: return MqConnect::name;
+    case MqMode::MM_BIND:    return MqBindMode::name;
+    case MqMode::MM_CONNECT: return MqConnectMode::name;
     default:                 return "UNKNOWN";
     }
 }

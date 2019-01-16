@@ -31,7 +31,7 @@ namespace socket {
  * @date   2018-12-09
  * @date   2019-01-15 (Merge with NetStreamClient::Impl class)
  */
-class TBAG_API NetStreamClient TBAG_FINAL : public libtbag::mq::MqNode
+class TBAG_API NetStreamClient TBAG_FINAL : public libtbag::mq::MqConn
 {
 public:
     using OnBegin = std::function<void(void)>;
