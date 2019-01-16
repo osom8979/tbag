@@ -70,7 +70,7 @@ std::size_t onWriteNodeCb(void * node, MqEvent event, char const * buffer, std::
     }
 
     if (isFailure(code)) {
-        tDLogE("NetStreamServer::Impl::__on_default_write_cb__() Write error: {}", code);
+        tDLogE("onWriteNodeCb() Write error: {}", code);
     }
     return isSuccess(code) ? 1U : 0U;
 }
