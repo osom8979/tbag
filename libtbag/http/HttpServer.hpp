@@ -120,19 +120,19 @@ public:
 
     public:
         virtual void onContinue(void * arg) override
-        { return PARENT->onContinue(this); }
+        { PARENT->onContinue(this); }
 
         virtual bool onSwitchingProtocol(HttpProperty const & property, void * arg) override
         { return PARENT->onSwitchingProtocol(this, property); }
 
         virtual void onWsMessage(WsOpCode opcode, Buffer const & payload, void * arg) override
-        { return PARENT->onWsMessage(this, opcode, payload); }
+        { PARENT->onWsMessage(this, opcode, payload); }
 
         virtual void onRegularHttp(HttpProperty const & property, void * arg) override
-        { return PARENT->onRegularHttp(this, property); }
+        { PARENT->onRegularHttp(this, property); }
 
         virtual void onParseError(Err code, void * arg) override
-        { return PARENT->onParseError(this, code); }
+        { PARENT->onParseError(this, code); }
     };
 
 public:

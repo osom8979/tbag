@@ -20,6 +20,7 @@
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/type/TypeTable.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -640,11 +641,8 @@ struct MqParams
      */
     MqOnCreateLoop on_create_loop = nullptr;
 
-    MqParams()
-    { /* EMPTY. */ }
-
-    ~MqParams()
-    { /* EMPTY. */ }
+    MqParams() { /* EMPTY. */ }
+    ~MqParams() { /* EMPTY. */ }
 };
 
 TBAG_CONSTEXPR static char const * const TCP_IPV6_ONLY_NAME    = "tcp_ipv6";
