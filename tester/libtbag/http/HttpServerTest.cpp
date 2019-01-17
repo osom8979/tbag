@@ -11,7 +11,8 @@
 #include <libtbag/http/SimpleHttpClient.hpp>
 #include <libtbag/log/Log.hpp>
 
-#define __PRINT_REQUEST_STRING
+//#define __PRINT_REQUEST_STRING
+//#define __PRINT_RESPONSE_STRING
 
 TBAG_CONSTEXPR static int _TEST_SERVER_PORT = 18080;
 TBAG_CONSTEXPR static char const * const _TEST_SERVER_HOST = "0.0.0.0";
@@ -34,13 +35,19 @@ TEST(HttpServerTest, Default)
         return res;
     };
 
-//    libtbag::log::SeverityGuard guard;
+    libtbag::log::SeverityGuard guard;
     HttpServer server(_TEST_SERVER_HOST, _TEST_SERVER_PORT, cbs);
 
     auto const URL = std::string("http://localhost:") + std::to_string(_TEST_SERVER_PORT);
     auto const RESPONSE = requestGet(URL);
     ASSERT_EQ(200, RESPONSE.code);
     ASSERT_EQ(TEST_BODY, RESPONSE.getBodyString());
+
+#if defined(__PRINT_RESPONSE_STRING)
+    std::cout << RESPONSE.toDebugResponseString() << std::endl
+              << "[Body]" << std::endl
+              << RESPONSE.getBodyString() << std::endl;
+#endif
 }
 
 TEST(HttpServerTest, Callbacks)
