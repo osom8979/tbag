@@ -4,10 +4,14 @@ PROJECT_NUMBER          = "${VERSION}"
 PROJECT_BRIEF           = "${MAIN_BRIEF}"
 OUTPUT_DIRECTORY        = "${PROJECT_BINARY_DIR}"
 OUTPUT_LANGUAGE         = Korean-en
-ALIASES                 = translate{2}="<dl class='section remarks'><dt>Translate-\1</dt><dd>\2</dd></dl>"
+ALIASES                 = translate{2}="<dl class='section remarks'><dt>Translate-\1</dt><dd>\2</dd></dl>" \
+                          methods="<dl class='section remarks'><dt>Methods</dt><dd>" \
+                          method{3}="<div class='opblock'><div class='opblock-block opblock-\1'><span class='opblock-summary-method'>\1</span><span class='opblock-summary opblock-summary-path'>\2</span><span class='opblock-summary opblock-summary-description'>\3</span></div></div>" \
+                          dmethod{3}="<div class='opblock'><div class='opblock-block opblock-DEPRECATED'><span class='opblock-summary-method'>\1</span><span class='opblock-summary opblock-summary-path'>\2</span><span class='opblock-summary opblock-summary-description'>\3</span></div></div>" \
+                          endmethod="</dd></dl>"
 MARKDOWN_SUPPORT        = NO
 WARN_IF_UNDOCUMENTED    = NO
-INPUT                   = "${PROJECT_SOURCE_DIR}/libtbag"
+INPUT                   = "${PROJECT_SOURCE_DIR}/README.md" "${PROJECT_SOURCE_DIR}/libtbag"
 FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ *.d *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.inc *.simd
 RECURSIVE               = YES
 EXCLUDE_PATTERNS        = *libtbag/3rd/* *.capnp.c++ *.capnp.h *_generated.h

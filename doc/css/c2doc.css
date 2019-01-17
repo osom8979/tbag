@@ -1,0 +1,112 @@
+.opblock {
+    margin-bottom: 10px;
+}
+
+.opblock-block {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+    border: 1px solid #000;
+    border-radius: 4px;
+
+    box-sizing: border-box;
+    box-shadow: 0 0 3px rgba(0,0,0,.19);
+
+    padding: 5px;
+}
+
+.opblock-summary {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+
+    -webkit-box-flex: 0;
+    -ms-flex: 0 3 auto;
+    flex: 0 3 auto;
+
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+
+    word-break: break-all;
+    padding: 0 10px;
+}
+
+.opblock-method {
+    background: #000;
+    min-width: 80px;
+    padding: 6px 15px;
+    border-radius: 3px;
+
+    font-family: sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+
+    text-shadow: 0 1px 0 rgba(0,0,0,.1);
+    text-align: center;
+    color: #fff;
+}
+
+.opblock-summary-path {
+    font-size: 16px;
+    font-family: monospace;
+    font-weight: 600;
+    color: #3b4151;
+}
+
+.opblock-summary-description {
+    font-size: 13px;
+    font-family: sans-serif;
+    color: #3b4151;
+}
+
+.opblock-block.opblock-POST {
+    background: rgba(73,204,144,.1);
+    border-color: #49cc90;
+}
+
+.opblock-block.opblock-POST .opblock-method {
+    background: #49cc90;
+}
+
+.opblock-block.opblock-PUT {
+    background: rgba(252,161,48,.1);
+    border-color: #fca130;
+}
+
+.opblock-block.opblock-PUT .opblock-method {
+    background: #fca130;
+}
+
+.opblock-block.opblock-GET {
+    background: rgba(97,175,254,.1);
+    border-color: #61affe;
+}
+
+.opblock-block.opblock-GET .opblock-method {
+    background: #61affe;
+}
+
+.opblock-block.opblock-DELETE {
+    background: rgba(249,62,62,.1);
+    border-color: #f93e3e;
+}
+
+.opblock-block.opblock-DELETE .opblock-method {
+    background: #f93e3e;
+}
+
+.opblock-block.opblock-DEPRECATED {
+    background: hsla(0,0%,92%,.1);
+    border-color: #ebebeb;
+}
+
+.opblock-block.opblock-DEPRECATED .opblock-method {
+    background: #ebebeb;
+}
+
+.opblock-block.opblock-DEPRECATED .opblock-summary-path {
+    text-decoration: line-through
+}
+
