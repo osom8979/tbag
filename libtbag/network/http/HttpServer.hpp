@@ -24,7 +24,7 @@
 #include <libtbag/http/HttpParser.hpp>
 #include <libtbag/http/HttpReader.hpp>
 #include <libtbag/http/WsFrameBuffer.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/container/ReuseQueue.hpp>

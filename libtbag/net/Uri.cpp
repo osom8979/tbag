@@ -3,9 +3,10 @@
  * @brief  Uri class implementation.
  * @author zer0
  * @date   2017-05-19
+ * @date   2019-01-19 (Move: libtbag/network -> libtbag/net)
  */
 
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 #include <libtbag/codec/PercentEncoding.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/bitwise/BitFlags.hpp>
@@ -26,7 +27,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
+namespace net {
 
 int _is_triple_slash(char const * buffer, int size)
 {
@@ -447,7 +448,7 @@ bool __check_error__http_parser_url_fields()
     return test_result;
 }
 
-} // namespace network
+} // namespace net
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

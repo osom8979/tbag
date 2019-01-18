@@ -17,7 +17,7 @@
 using namespace libtbag;
 using namespace libtbag::uvpp;
 using namespace libtbag::uvpp::func;
-using namespace libtbag::network;
+using namespace libtbag::net;
 
 TEST(UdpTest, Default)
 {

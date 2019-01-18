@@ -3,6 +3,7 @@
  * @brief  SocketAddress class prototype.
  * @author zer0
  * @date   2017-06-18
+ * @date   2019-01-19 (Move: libtbag/network -> libtbag/net)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_SOCKETADDRESS_HPP__
@@ -16,7 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 
 #include <string>
 
@@ -33,13 +34,14 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
+namespace net {
 
 /**
  * SocketAddress class prototype.
  *
  * @author zer0
  * @date   2017-06-18
+ * @date   2019-01-19 (Move: libtbag/network -> libtbag/net)
  */
 class TBAG_API SocketAddress
 {
@@ -90,7 +92,7 @@ public:
     int getPortNumber() const;
 };
 
-} // namespace network
+} // namespace net
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

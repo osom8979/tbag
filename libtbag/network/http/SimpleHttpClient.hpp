@@ -20,7 +20,7 @@
 #include <libtbag/network/http/HttpClient.hpp>
 #include <libtbag/network/http/HttpsClient.hpp>
 #include <libtbag/http/HttpCommon.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <functional>
@@ -175,6 +175,8 @@ using SimpleHttpsClient = SimpleClient<HttpsClient>;
 // -------------
 // HTTP Request.
 // -------------
+
+using Uri = libtbag::net::Uri;
 
 TBAG_API Err requestWithSync(Uri const & uri,
                              libtbag::http::HttpRequest const & request,

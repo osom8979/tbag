@@ -30,7 +30,7 @@
 #include <libtbag/uvpp/Timer.hpp>
 #include <libtbag/uvpp/Request.hpp>
 
-#include <libtbag/network/SocketAddress.hpp>
+#include <libtbag/net/SocketAddress.hpp>
 #include <libtbag/proto/MsgPacket.hpp>
 #include <libtbag/container/Pointer.hpp>
 
@@ -66,7 +66,7 @@ public:
     using ShutdownRequest = libtbag::uvpp::ShutdownRequest;
     using WriteRequest    = libtbag::uvpp::WriteRequest;
 
-    using SocketAddress = libtbag::network::SocketAddress;
+    using SocketAddress = libtbag::net::SocketAddress;
     using MsgPacket     = libtbag::proto::MsgPacket;
 
 private:

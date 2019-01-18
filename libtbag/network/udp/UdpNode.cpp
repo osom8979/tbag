@@ -11,7 +11,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/bitwise/BitFlags.hpp>
 
-#include <libtbag/network/SocketAddress.hpp>
+#include <libtbag/net/SocketAddress.hpp>
 #include <libtbag/uvpp/Request.hpp>
 
 #include <cassert>
@@ -35,7 +35,7 @@ namespace udp     {
  */
 struct UdpNode::Internal : private Noncopyable
 {
-    using SocketAddress  = network::SocketAddress;
+    using SocketAddress  = net::SocketAddress;
     using UdpSendRequest = uvpp::UdpSendRequest;
 
     struct AsyncSend : public SafetyAsync::JobInterface
@@ -364,7 +364,7 @@ Err UdpNode::init(char const * destination, int port)
     }
 
     if (bitwise::checkFlag(_flags, UDP_NODE_FLAG_USE_BIND)) {
-        SocketAddress addr;
+        libtbag::net::SocketAddress addr;
         Err const ADDRESS_INIT_CODE = addr.init(destination, port);
         if (ADDRESS_INIT_CODE != Err::E_SUCCESS) {
             tDLogE("UdpNode::init() Address initialize {} error.", getErrName(ADDRESS_INIT_CODE));

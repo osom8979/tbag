@@ -17,7 +17,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/uvpp/Stream.hpp>
-#include <libtbag/network/Uri.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

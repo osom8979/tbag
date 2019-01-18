@@ -13,7 +13,7 @@
 #include <libtbag/uvpp/Request.hpp>
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/network/SocketAddress.hpp>
+#include <libtbag/net/SocketAddress.hpp>
 
 #include <cstdint>
 #include <uv.h>
@@ -250,7 +250,7 @@ Err initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr co
 
 Err initCommonClient(Tcp & tcp, ConnectRequest & request, std::string const & host, int port)
 {
-    libtbag::network::SocketAddress addr;
+    libtbag::net::SocketAddress addr;
     Err const CODE = addr.init(host, port);
     if (CODE != Err::E_SUCCESS) {
         return CODE;
@@ -282,7 +282,7 @@ Err initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
 
 Err initCommonServer(Tcp & tcp, std::string const & ip, int port)
 {
-    libtbag::network::SocketAddress addr;
+    libtbag::net::SocketAddress addr;
     Err const CODE = addr.init(ip, port);
     if (CODE != Err::E_SUCCESS) {
         return CODE;

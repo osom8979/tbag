@@ -3,14 +3,15 @@
  * @brief  Uri class tester.
  * @author zer0
  * @date   2017-05-19
+ * @date   2019-01-19 (Move: libtbag/network -> libtbag/net)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 #include <libtbag/net/Ip.hpp>
 
 using namespace libtbag;
-using namespace libtbag::network;
+using namespace libtbag::net;
 
 TEST(UriTest, _is_triple_slash)
 {

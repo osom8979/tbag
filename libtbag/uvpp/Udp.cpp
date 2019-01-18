@@ -10,7 +10,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Dns.hpp>
-#include <libtbag/network/SocketAddress.hpp>
+#include <libtbag/net/SocketAddress.hpp>
 
 #include <cassert>
 #include <uv.h>
@@ -473,7 +473,7 @@ bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr, unsigned int flags
 
 bool initRecvUdp(Udp & udp, std::string const & host, int port, unsigned int flags)
 {
-    libtbag::network::SocketAddress addr;
+    libtbag::net::SocketAddress addr;
     if (addr.init(host, port) != Err::E_SUCCESS) {
         return false;
     }

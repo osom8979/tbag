@@ -22,7 +22,7 @@
 
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Timer.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 
 #include <cassert>
 #include <string>
@@ -47,7 +47,7 @@ class TBAG_API SimpleHttpClient TBAG_FINAL : private Noncopyable
 public:
     using MqParams     = libtbag::mq::details::MqParams;
     using MqType       = libtbag::mq::details::MqType;
-    using Uri          = libtbag::network::Uri;
+    using Uri          = libtbag::net::Uri;
     using Loop         = libtbag::uvpp::Loop;
     using Timer        = libtbag::uvpp::Timer;
     using UniqueClient = std::unique_ptr<HttpClient>;

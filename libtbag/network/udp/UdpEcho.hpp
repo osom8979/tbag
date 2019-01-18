@@ -19,7 +19,7 @@
 
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/func/FunctionalTimer.hpp>
-#include <libtbag/network/SocketAddress.hpp>
+#include <libtbag/net/SocketAddress.hpp>
 #include <libtbag/network/udp/UdpNode.hpp>
 
 #include <cstdint>
@@ -86,6 +86,8 @@ protected:
     virtual void onWrite(Err code) final override;
     virtual void onRead (Err code, ReadPacket const & packet) final override;
     virtual void onClose() final override;
+
+    using SocketAddress = libtbag::net::SocketAddress;
 
 public:
     virtual void onEcho(std::string & message, SocketAddress & addr) { /* EMPTY. */ }

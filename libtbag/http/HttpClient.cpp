@@ -399,10 +399,10 @@ Err HttpClient::writeClose()
 
 MqParams HttpClient::getDefaultParams(std::string const & uri, int timeout_millisec)
 {
-    return getDefaultParams(libtbag::network::Uri(uri), timeout_millisec);
+    return getDefaultParams(Uri(uri), timeout_millisec);
 }
 
-MqParams HttpClient::getDefaultParams(libtbag::network::Uri const & uri, int timeout_millisec)
+MqParams HttpClient::getDefaultParams(Uri const & uri, int timeout_millisec)
 {
     MqParams params;
     params.type = libtbag::mq::details::MqType::MT_TCP;
@@ -425,7 +425,7 @@ MqParams HttpClient::getDefaultParams(libtbag::network::Uri const & uri, int tim
     } else {
         std::string host;
         int port;
-        if (isSuccess(uri.requestAddrInfo(host, port, libtbag::network::Uri::AddrFlags::MOST_IPV4))) {
+        if (isSuccess(uri.requestAddrInfo(host, port, Uri::AddrFlags::MOST_IPV4))) {
             params.address = host;
             params.port    = port;
         } else {

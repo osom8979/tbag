@@ -65,7 +65,7 @@ SimpleHttpClient::SimpleHttpClient(Uri const & uri, std::string const & method,
 
 SimpleHttpClient::SimpleHttpClient(std::string const & uri, std::string const & method,
                                    HttpCommon const & common, int timeout_millisec)
-        : SimpleHttpClient(libtbag::network::Uri(uri), method, common, timeout_millisec)
+        : SimpleHttpClient(libtbag::net::Uri(uri), method, common, timeout_millisec)
 {
     assert(static_cast<bool>(_client));
 }

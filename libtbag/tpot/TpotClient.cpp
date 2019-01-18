@@ -9,7 +9,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <libtbag/network/http/SimpleHttpClient.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 
 #include <libtbag/string/HelpCommander.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -63,7 +63,7 @@ Err TpotClient::request(std::string const & method, std::string const & path,
     request.method = method;
     request.body.assign(buffer, buffer + size);
 
-    network::Uri uri(ss.str());
+    net::Uri uri(ss.str());
     return requestWithSync(uri, request, response, _param.timeout, _param.type);
 }
 

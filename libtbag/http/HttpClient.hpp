@@ -21,7 +21,7 @@
 #include <libtbag/http/WsFrame.hpp>
 
 #include <libtbag/mq/details/MqCommon.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 #include <libtbag/net/socket/NetStreamClient.hpp>
 #include <libtbag/net/Ip.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -51,6 +51,7 @@ class TBAG_API HttpClient TBAG_FINAL : public libtbag::http::HttpReaderInterface
 {
 public:
     using Loop         = libtbag::uvpp::Loop;
+    using Uri          = libtbag::net::Uri;
     using MqParams     = libtbag::mq::details::MqParams;
     using HttpRequest  = libtbag::http::HttpRequest;
     using HttpResponse = libtbag::http::HttpResponse;
@@ -161,7 +162,7 @@ public:
 
 public:
     static MqParams getDefaultParams(std::string const & uri, int timeout_millisec);
-    static MqParams getDefaultParams(libtbag::network::Uri const & uri, int timeout_millisec);
+    static MqParams getDefaultParams(Uri const & uri, int timeout_millisec);
 };
 
 } // namespace http

@@ -3,9 +3,10 @@
  * @brief  SocketAddress class implementation.
  * @author zer0
  * @date   2017-06-18
+ * @date   2019-01-19 (Move: libtbag/network -> libtbag/net)
  */
 
-#include <libtbag/network/SocketAddress.hpp>
+#include <libtbag/net/SocketAddress.hpp>
 #include <libtbag/net/Ip.hpp>
 #include <libtbag/bitwise/Endian.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
@@ -20,7 +21,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
+namespace net {
 
 SocketAddress::SocketAddress()
 {
@@ -202,7 +203,7 @@ int SocketAddress::getPortNumber() const
     return 0;
 }
 
-} // namespace network
+} // namespace net
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

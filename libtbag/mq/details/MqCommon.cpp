@@ -7,7 +7,7 @@
 
 #include <libtbag/mq/details/MqCommon.hpp>
 #include <libtbag/net/Ip.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <cassert>
@@ -131,7 +131,7 @@ std::string __append_localhost_if_pipe_or_local_schema(std::string const & uri_s
 
 MqParams convertUriToParams(std::string const & uri_string, MqParams const & default_params, bool auto_encode)
 {
-    using namespace libtbag::network;
+    using namespace libtbag::net;
     using namespace libtbag::string;
     auto const INPUT_URI = __append_localhost_if_pipe_or_local_schema(uri_string);
 

@@ -3,6 +3,7 @@
  * @brief  Uri class prototype.
  * @author zer0
  * @date   2017-05-19
+ * @date   2019-01-19 (Move: libtbag/network -> libtbag/net)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NETWORK_URI_HPP__
@@ -31,7 +32,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace network {
+namespace net {
 
 enum _uri_state
 {
@@ -71,6 +72,7 @@ TBAG_API int _is_triple_slash2(char const * buffer);
  *
  * @author zer0
  * @date   2017-05-19
+ * @date   2019-01-19 (Move: libtbag/network -> libtbag/net)
  */
 class TBAG_API Uri
 {
@@ -217,7 +219,7 @@ public:
  */
 TBAG_API bool __check_error__http_parser_url_fields();
 
-} // namespace network
+} // namespace net
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

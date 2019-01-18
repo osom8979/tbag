@@ -19,7 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/uvpp/Handle.hpp>
 #include <libtbag/uvpp/Request.hpp>
-#include <libtbag/network/Uri.hpp>
+#include <libtbag/net/Uri.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
