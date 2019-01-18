@@ -25,7 +25,7 @@
 /**
  * Successfully parse triple slashes.
  */
-#define ENABLE_TRIPLE_SLASH_FAKER
+//#define ENABLE_TRIPLE_SLASH_FAKER
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

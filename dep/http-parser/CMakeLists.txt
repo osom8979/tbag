@@ -17,6 +17,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}
     add_compile_options (-w)
 endif ()
 
+add_definitions (-DDISABLE_TRIPLE_SLASH_IS_FAIL)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 

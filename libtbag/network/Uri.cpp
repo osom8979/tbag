@@ -295,7 +295,7 @@ bool Uri::parse(std::string const & uri, bool is_connect)
 
     auto updateField = [&](http_parser_url_fields field, FieldInfo & info){
 #if !defined(DISABLE_HTTP_PARSER_URL_FIELDS)
-        if (bitwise::checkFlag<uint16_t>(parser.field_set, field))
+        if (libtbag::bitwise::checkFlag<uint16_t>(parser.field_set, field))
 #endif
         {
             bool enable = true;

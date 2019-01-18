@@ -62,7 +62,7 @@ public:
     using UniqueImpl = std::unique_ptr<Impl>;
 
 public:
-    TBAG_CONSTEXPR static int const DEFAULT_KEY_LENGTH = 2014;
+    TBAG_CONSTEXPR static int const DEFAULT_KEY_LENGTH = 2048;
 
 private:
     UniqueImpl _impl;

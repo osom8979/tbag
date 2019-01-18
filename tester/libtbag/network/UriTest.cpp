@@ -40,7 +40,6 @@ TEST(UriTest, EnableTripleSlash)
 {
     Uri uri;
     bool const PARSE_RESULT = uri.parse("http:///hoho?q1=a1&q2=a2#fragment");
-#if defined(ENABLE_TRIPLE_SLASH_FAKER)
     ASSERT_TRUE(PARSE_RESULT);
     auto const QUERIES = uri.getQueryMap();
     ASSERT_STREQ("a1", QUERIES.at("q1").c_str());
@@ -49,9 +48,6 @@ TEST(UriTest, EnableTripleSlash)
     ASSERT_STREQ("http", uri.getSchema().c_str());
     ASSERT_STREQ("/hoho", uri.getPath().c_str());
     ASSERT_TRUE(uri.getHost().empty());
-#else
-    ASSERT_FALSE(PARSE_RESULT);
-#endif
 }
 
 TEST(UriTest, Default)
