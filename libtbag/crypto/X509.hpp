@@ -95,16 +95,28 @@ TBAG_API std::string generateCsrVersion1(std::string const & pem_private_key);
  * @param[in] request_options
  *      Various request text options.
  */
-TBAG_API std::string decoderCsr(std::string const & pem_csr,
-                                std::string const & name_options,
-                                std::string const & request_options);
-TBAG_API std::string decoderCsr(std::string const & pem_csr);
+TBAG_API std::string getPrintbleInformationFromPemCsr(
+        std::string const & pem_csr,
+        std::string const & name_options,
+        std::string const & request_options);
+TBAG_API std::string getPrintbleInformationFromPemCsr(std::string const & pem_csr);
 
 TBAG_CONSTEXPR char const * const CERTIFICATION_AUTHORITY = "CA";
 
-TBAG_CONSTEXPR int DEFAULT_DAYS = 30;
+TBAG_CONSTEXPR int const DEFAULT_DAYS = 30;
+TBAG_CONSTEXPR int const DEFAULT_SERIAL_NUMBER = 1;
 
-TBAG_API bool signCertificate(int days = DEFAULT_DAYS);
+TBAG_API std::string generateSelfSignedCertificate(
+        std::string const & ca_pem_private_key,
+        std::string const & pem_csr,
+        int serial_number = DEFAULT_SERIAL_NUMBER,
+        int days = DEFAULT_DAYS);
+
+TBAG_API std::string getPrintbleInformationFromPemX509(
+        std::string const & pem_x509,
+        std::string const & name_options,
+        std::string const & request_options);
+TBAG_API std::string getPrintbleInformationFromPemX509(std::string const & pem_x509);
 
 } // namespace crypto
 

@@ -328,9 +328,9 @@ static std::string getPrinterbleX509CsrInformation(X509_REQ * x509_req,
     return std::string(buffer.begin(), buffer.end());
 }
 
-std::string decoderCsr(std::string const & pem_csr,
-                       std::string const & name_options,
-                       std::string const & request_options)
+std::string getPrintbleInformationFromPemCsr(std::string const & pem_csr,
+                                             std::string const & name_options,
+                                             std::string const & request_options)
 {
     auto x509_req = readPemX509Csr(pem_csr);
     auto const NAME_FLAG = getNameExFlag(name_options);
@@ -338,9 +338,156 @@ std::string decoderCsr(std::string const & pem_csr,
     return getPrinterbleX509CsrInformation(x509_req.get(), NAME_FLAG, REQUEST_FLAG);
 }
 
-std::string decoderCsr(std::string const & pem_csr)
+std::string getPrintbleInformationFromPemCsr(std::string const & pem_csr)
 {
-    return decoderCsr(pem_csr, std::string(), std::string());
+    return getPrintbleInformationFromPemCsr(pem_csr, std::string(), std::string());
+}
+
+static bool verifyX509Csr(std::string const & pem_csr)
+{
+    auto x509_req = readPemX509Csr(pem_csr);
+    auto pkey = X509_REQ_get_pubkey(x509_req.get());
+    if (pkey == nullptr) {
+        return false;
+    }
+    auto const RESULT = X509_REQ_verify(x509_req.get(), pkey);
+    EVP_PKEY_free(pkey);
+    return (RESULT == 0);
+}
+
+static std::string getX509Pem(X509 * x509)
+{
+    std::shared_ptr<BIO> mem(BIO_new(BIO_s_mem()), [](BIO * bio){
+        BIO_free_all(bio);
+    });
+
+    if (PEM_write_bio_X509(mem.get(), x509) != 1) {
+        return std::string();
+    }
+
+    int const PUBLIC_LENGTH = BIO_pending(mem.get());
+    std::vector<char> buffer;
+    buffer.resize(PUBLIC_LENGTH);
+
+    BIO_read(mem.get(), buffer.data(), buffer.size());
+    return std::string(buffer.begin(), buffer.end());
+}
+
+std::string generateSelfSignedCertificate(
+        std::string const & ca_pem_private_key,
+        std::string const & pem_csr,
+        int serial_number, int days)
+{
+    auto ca_pkey = readPemPrivateKey(ca_pem_private_key);
+    auto x509_req = readPemX509Csr(pem_csr);
+
+    std::shared_ptr<X509> x509(X509_new(), [](X509 * x){
+        X509_free(x);
+    });
+
+    int const VERSION = 2;
+    X509_set_version(x509.get(), VERSION);
+
+    ASN1_INTEGER_set(X509_get_serialNumber(x509.get()), serial_number);
+
+    if (!X509_set_issuer_name(x509.get(), X509_REQ_get_subject_name(x509_req))) {
+        return std::string();
+    }
+    if (!X509_gmtime_adj(X509_get_notBefore(x509.get()), 0)) {
+        return std::string();
+    }
+    if (!X509_time_adj_ex(X509_get_notAfter(x509.get()), days, 0, nullptr)) {
+        return std::string();
+    }
+    if (!X509_set_subject_name(x509.get(), X509_REQ_get_subject_name(x509_req))) {
+        return std::string();
+    }
+
+    auto * temp_pkey = X509_REQ_get_pubkey(x509_req.get());
+    if (temp_pkey == nullptr) {
+        return std::string();
+    }
+
+    std::shared_ptr<EVP_PKEY> req_pkey(temp_pkey, [](EVP_PKEY * pkey){
+        EVP_PKEY_free(pkey);
+    });
+    X509_set_pubkey(x509.get(), req_pkey.get());
+
+//    std::shared_ptr<X509_STORE> store(X509_STORE_new(), [](X509_STORE * store){
+//        X509_STORE_free(store);
+//    });
+//    X509_STORE_set_default_paths(store.get());
+//    EVP_PKEY * upkey;
+//    X509_STORE_CTX xsc;
+//    upkey = X509_get_pubkey(cacert);
+//    EVP_PKEY_copy_parameters(upkey,pkey);
+//    EVP_PKEY_free(upkey);
+//    if (!X509_STORE_CTX_init(&xsc, store.get(), x509.get(), nullptr)) {
+//        return false;
+//    }
+//    X509_STORE_CTX_cleanup(&xsc);
+
+    if (!X509_sign(x509.get(), ca_pkey.get(), EVP_sha1())) {
+        return std::string();
+    }
+    return getX509Pem(x509.get());
+}
+
+static std::shared_ptr<X509> readPemX509(std::string const & pem_x509)
+{
+    std::shared_ptr<BIO> key_mem(BIO_new(BIO_s_mem()), [](BIO * bio){
+        BIO_free_all(bio);
+    });
+
+    int const X509_SIZE = static_cast<int>(pem_x509.size());
+    int const WRITTEN_SIZE = BIO_write(key_mem.get(), pem_x509.data(), X509_SIZE);
+    assert(WRITTEN_SIZE == X509_SIZE);
+
+    X509 * temp_x509 = nullptr;
+    PEM_read_bio_X509(key_mem.get(), &temp_x509, nullptr, nullptr);
+
+    std::shared_ptr<X509> x509;
+    if (temp_x509 != nullptr) {
+        x509.reset(temp_x509, [](X509 * x){
+            X509_free(x);
+        });
+    }
+    return x509;
+}
+
+static std::string getPrinterbleX509Information(X509 * x509,
+                                                unsigned long name_flag,
+                                                unsigned long request_flag)
+{
+    std::shared_ptr<BIO> mem(BIO_new(BIO_s_mem()), [](BIO * bio){
+        BIO_free_all(bio);
+    });
+
+    if (X509_print_ex(mem.get(), x509, name_flag, request_flag) != 1) {
+        return std::string();
+    }
+
+    int const MEM_LENGTH = BIO_pending(mem.get());
+    std::vector<char> buffer;
+    buffer.resize(MEM_LENGTH);
+
+    BIO_read(mem.get(), buffer.data(), buffer.size());
+    return std::string(buffer.begin(), buffer.end());
+}
+
+std::string getPrintbleInformationFromPemX509(std::string const & pem_x509,
+                                             std::string const & name_options,
+                                             std::string const & request_options)
+{
+    auto x509 = readPemX509(pem_x509);
+    auto const NAME_FLAG = getNameExFlag(name_options);
+    auto const REQUEST_FLAG = getCertExFlag(request_options);
+    return getPrinterbleX509Information(x509.get(), NAME_FLAG, REQUEST_FLAG);
+}
+
+std::string getPrintbleInformationFromPemX509(std::string const & pem_x509)
+{
+    return getPrintbleInformationFromPemX509(pem_x509, std::string(), std::string());
 }
 
 } // namespace crypto

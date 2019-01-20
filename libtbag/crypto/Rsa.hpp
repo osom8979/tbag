@@ -101,6 +101,10 @@ public:
                             CipherAlgorithm algorithm, int key_length = DEFAULT_KEY_LENGTH);
     static bool generatePem(std::string & public_key, std::string & private_key,
                             std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
+
+    static std::string generatePemPrivateKey(int key_length = DEFAULT_KEY_LENGTH);
+    static std::string generatePemPrivateKey(CipherAlgorithm algorithm, int key_length = DEFAULT_KEY_LENGTH);
+    static std::string generatePemPrivateKey(std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
 };
 
 } // namespace crypto

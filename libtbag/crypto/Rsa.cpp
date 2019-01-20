@@ -233,6 +233,33 @@ bool Rsa::generatePem(std::string & public_key, std::string & private_key, std::
     return false;
 }
 
+std::string Rsa::generatePemPrivateKey(int key_length)
+{
+    Rsa rsa;
+    if (rsa.gen(key_length)) {
+        return rsa.getPrivateKey();
+    }
+    return std::string();
+}
+
+std::string Rsa::generatePemPrivateKey(CipherAlgorithm algorithm, int key_length)
+{
+    Rsa rsa;
+    if (rsa.gen(algorithm, key_length)) {
+        return rsa.getPrivateKey();
+    }
+    return std::string();
+}
+
+std::string Rsa::generatePemPrivateKey(std::string const & name, int key_length)
+{
+    Rsa rsa;
+    if (rsa.gen(name, key_length)) {
+        return rsa.getPrivateKey();
+    }
+    return std::string();
+}
+
 } // namespace crypto
 
 // --------------------

@@ -14,20 +14,26 @@ using namespace libtbag::crypto;
 
 TEST(X509Test, Csr)
 {
-    std::string public_key;
-    std::string private_key;
+    auto const PRIVATE_KEY = Rsa::generatePemPrivateKey();
+    ASSERT_FALSE(PRIVATE_KEY.empty());
 
-    ASSERT_TRUE(Rsa::generatePem(public_key, private_key));
-    ASSERT_FALSE(public_key.empty());
-    ASSERT_FALSE(private_key.empty());
-
-    std::string const CSR = generateCsrVersion1(private_key);
+    auto const CSR = generateCsrVersion1(PRIVATE_KEY);
     ASSERT_FALSE(CSR.empty());
 
-    std::cout << decoderCsr(CSR) << std::endl;
+    std::cout << getPrintbleInformationFromPemCsr(CSR) << std::endl;
 }
 
 TEST(X509Test, Sign)
 {
+    auto const PRIVATE_KEY = Rsa::generatePemPrivateKey();
+    ASSERT_FALSE(PRIVATE_KEY.empty());
+
+    auto const CSR = generateCsrVersion1(PRIVATE_KEY);
+    ASSERT_FALSE(CSR.empty());
+
+    auto const CERTIFICATE = generateSelfSignedCertificate(PRIVATE_KEY, CSR);
+    ASSERT_FALSE(CERTIFICATE.empty());
+
+    std::cout << getPrintbleInformationFromPemX509(CERTIFICATE) << std::endl;
 }
 
