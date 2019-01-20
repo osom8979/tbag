@@ -68,5 +68,29 @@ TEST(TlsTest, Default)
     // [SERVER] ExchangeKey
     ASSERT_EQ(Err::E_SSL_NONE, client.handshake());
     ASSERT_TRUE(client.isFinished());
+
+    std::string const TEST_MESSAGE = "TEST_MESSAGE";
+
+    COMMENT("Client -> Server") {
+        Err encode_code = Err::E_UNKNOWN;
+        auto encode_result = client.encode(TEST_MESSAGE.data(), TEST_MESSAGE.size(), &encode_code);
+        ASSERT_EQ(Err::E_SUCCESS, encode_code);
+
+        Err decode_code = Err::E_UNKNOWN;
+        auto cursor = server.decode(encode_result.data(), encode_result.size(), &decode_code);
+        ASSERT_EQ(Err::E_SUCCESS, decode_code);
+        ASSERT_EQ(TEST_MESSAGE, std::string(cursor.begin(), cursor.end()));
+    }
+
+    COMMENT("Server -> Client") {
+        Err encode_code = Err::E_UNKNOWN;
+        auto encode_result = server.encode(TEST_MESSAGE.data(), TEST_MESSAGE.size(), &encode_code);
+        ASSERT_EQ(Err::E_SUCCESS, encode_code);
+
+        Err decode_code = Err::E_UNKNOWN;
+        auto cursor = client.decode(encode_result.data(), encode_result.size(), &decode_code);
+        ASSERT_EQ(Err::E_SUCCESS, decode_code);
+        ASSERT_EQ(TEST_MESSAGE, std::string(cursor.begin(), cursor.end()));
+    }
 }
 
