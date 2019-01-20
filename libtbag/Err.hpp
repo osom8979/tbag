@@ -83,12 +83,13 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EXITPROC , "Exit process"            ) \
     _TBAG_XX(_EXCHANGE , "Error exchange"          ) \
     /* SSL */ \
-    _TBAG_XX(_SSL      , "SSL error"               ) \
-    _TBAG_XX(_SSLWREAD , "SSL want read"           ) \
-    _TBAG_XX(_SSLEREAD , "SSL empty read buffer"   ) \
-    _TBAG_XX(_SSLWWRITE, "SSL want write"          ) \
-    _TBAG_XX(_SSLEWRITE, "SSL empty write buffer"  ) \
-    _TBAG_XX(_SSLWX509 , "SSL want x509 loopup"    ) \
+    _TBAG_XX(_SSL      , "SSL library error"          ) \
+    _TBAG_XX(_SSL_NONE , "SSL I/O operation completed") \
+    _TBAG_XX(_SSLWREAD , "SSL want read"              ) \
+    _TBAG_XX(_SSLEREAD , "SSL empty read buffer"      ) \
+    _TBAG_XX(_SSLWWRITE, "SSL want write"             ) \
+    _TBAG_XX(_SSLEWRITE, "SSL empty write buffer"     ) \
+    _TBAG_XX(_SSLWX509 , "SSL want x509 loopup"       ) \
     /* OpenCL */ \
     _TBAG_XX(_OPENCL   , "OpenCL error"            ) \
     /* CUDA */ \

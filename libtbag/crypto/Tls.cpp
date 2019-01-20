@@ -36,13 +36,13 @@ static int SSL_CTX_use_PrivateKey_memory(SSL_CTX * ctx, char const * buffer, int
     EVP_PKEY * pkey = nullptr;
     BIO * in = nullptr;
 
-    in = BIO_new(BIO_s_file_internal());
+    in = BIO_new(BIO_s_mem());
     if (in == nullptr) {
         SSLerror(ERR_R_BUF_LIB);
         goto end;
     }
 
-    if (BIO_read(in, (void*)buffer, len) <= 0) {
+    if (BIO_write(in, (void*)buffer, len) <= 0) {
         SSLerror(ERR_R_SYS_LIB);
         goto end;
     }
@@ -78,13 +78,13 @@ static int SSL_CTX_use_certificate_memory(SSL_CTX * ctx, char const * buffer, in
     X509 * x = nullptr;
     BIO * in = nullptr;
 
-    in = BIO_new(BIO_s_file_internal());
+    in = BIO_new(BIO_s_mem());
     if (in == nullptr) {
         SSLerror(ERR_R_BUF_LIB);
         goto end;
     }
 
-    if (BIO_read(in, (void*)buffer, len) <= 0) {
+    if (BIO_write(in, (void*)buffer, len) <= 0) {
         SSLerror(ERR_R_SYS_LIB);
         goto end;
     }
@@ -146,7 +146,7 @@ struct Tls::Impl : private Noncopyable
 
     Impl(std::string const & cert_pem, std::string const & key_pem)
     {
-        if (!initPemPath(cert_pem, key_pem)) {
+        if (!initPem(cert_pem, key_pem)) {
             throw std::bad_alloc();
         }
         if (!initBio()) {
@@ -234,13 +234,13 @@ struct Tls::Impl : private Noncopyable
 
         auto const CERT_CODE = SSL_CTX_use_certificate_memory(context.get(), cert_buffer, cert_len, SSL_FILETYPE_PEM);
         if (CERT_CODE <= 0) {
-            tDLogE("Tls::Impl::initPem() Certificate memory error: {}", getError(CERT_CODE));
+            tDLogE("Tls::Impl::initPem() Certificate memory error: {}", CERT_CODE);
             return false;
         }
 
         auto const KEY_CODE = SSL_CTX_use_PrivateKey_memory(context.get(), key_buffer, key_len, SSL_FILETYPE_PEM);
         if (KEY_CODE <= 0) {
-            tDLogE("Tls::Impl::initPem() Private key memory error: {}", getError(KEY_CODE));
+            tDLogE("Tls::Impl::initPem() Private key memory error: {}", KEY_CODE);
             return false;
         }
 
@@ -251,6 +251,11 @@ struct Tls::Impl : private Noncopyable
         }
 
         return true;
+    }
+
+    bool initPem(std::string const & cert_pem, std::string const & key_pem)
+    {
+        return initPem(cert_pem.data(), (int)cert_pem.size(), key_pem.data(), (int)key_pem.size());
     }
 
     bool initPemPath(std::string const & cert_pem, std::string const & key_pem)
@@ -380,14 +385,14 @@ struct Tls::Impl : private Noncopyable
         // @formatter:off
         auto const REASON = SSL_get_error(ssl.get(), CODE);
         switch (REASON) {
-        case SSL_ERROR_NONE:              return Err::E_SSL;
+        case SSL_ERROR_NONE:              return Err::E_SSL_NONE;
         case SSL_ERROR_SSL:               return Err::E_SSL;
         case SSL_ERROR_WANT_READ:         return Err::E_SSLWREAD;
         case SSL_ERROR_WANT_WRITE:        return Err::E_SSLWWRITE;
         case SSL_ERROR_WANT_X509_LOOKUP:  return Err::E_SSLWX509;
         default:
             tDLogE("Tls::Impl::handshake() OpenSSL SSL_do_handshake() error: code({}) reason({})", CODE, REASON);
-            return Err::E_SSL;
+            return Err::E_UNKNOWN;
         }
         // @formatter:on
     }
