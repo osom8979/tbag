@@ -1,10 +1,11 @@
 /**
- * @file   TlsReader.hpp
- * @brief  TlsReader class prototype.
+ * @file   Tls.hpp
+ * @brief  Tls class prototype.
  * @author zer0
  * @date   2017-11-11
  * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
  * @date   2019-01-13 (Change namespace: libtbag::http -> libtbag::crypto)
+ * @date   2019-01-20 (Rename: TlsReader -> Tls)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_CRYPTO_TLSREADER_HPP__
@@ -32,14 +33,15 @@ NAMESPACE_LIBTBAG_OPEN
 namespace crypto {
 
 /**
- * TlsReader class prototype.
+ * Tls class prototype.
  *
  * @author zer0
  * @date   2017-11-11
  * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
  * @date   2019-01-13 (Change namespace: libtbag::http -> libtbag::crypto)
+ * @date   2019-01-20 (Rename: TlsReader -> Tls)
  */
-class TBAG_API TlsReader : private Noncopyable
+class TBAG_API Tls : private Noncopyable
 {
 public:
     struct Impl;
@@ -55,11 +57,11 @@ private:
     UniqueImpl _impl;
 
 public:
-    TlsReader();
-    explicit TlsReader(std::string const & cert_pem, std::string const & key_pem);
-    explicit TlsReader(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len);
-    explicit TlsReader(reference_ssl_context const & UNUSED_PARAM(init), TlsReader const & tls);
-    ~TlsReader();
+    Tls();
+    explicit Tls(std::string const & cert_pem, std::string const & key_pem);
+    explicit Tls(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len);
+    explicit Tls(reference_ssl_context const & UNUSED_PARAM(init), Tls const & tls);
+    ~Tls();
 
 public:
     bool isFinished() const;

@@ -5,9 +5,10 @@
  * @date   2017-11-11
  * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
  * @date   2019-01-13 (Change namespace: libtbag::http -> libtbag::crypto)
+ * @date   2019-01-20 (Rename: TlsReader -> Tls)
  */
 
-#include <libtbag/crypto/TlsReader.hpp>
+#include <libtbag/crypto/Tls.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/File.hpp>
 
@@ -125,7 +126,7 @@ end:
  *          |<- DATA/TLS/Decode ->  SSL_read() <-  BIO(Read) <-   writeToReadBuffer() <-|
  *  </pre>
  */
-struct TlsReader::Impl : private Noncopyable
+struct Tls::Impl : private Noncopyable
 {
     std::shared_ptr<SSL_CTX> context;
     std::shared_ptr<SSL> ssl;
@@ -200,7 +201,7 @@ struct TlsReader::Impl : private Noncopyable
             SSL_CTX_free(ctx);
         });
         if (!context) {
-            tDLogE("TlsReader::Impl::init() OpenSSL Unable to create a new SSL context structure.");
+            tDLogE("Tls::Impl::init() OpenSSL Unable to create a new SSL context structure.");
             return false;
         }
         SSL_CTX_set_verify(context.get(), SSL_VERIFY_NONE, nullptr);
@@ -225,7 +226,7 @@ struct TlsReader::Impl : private Noncopyable
         });
 
         if (!context) {
-            tDLogE("TlsReader::Impl::initPem() OpenSSL Unable to create a new SSL context structure.");
+            tDLogE("Tls::Impl::initPem() OpenSSL Unable to create a new SSL context structure.");
             return false;
         }
 
@@ -233,19 +234,19 @@ struct TlsReader::Impl : private Noncopyable
 
         auto const CERT_CODE = SSL_CTX_use_certificate_memory(context.get(), cert_buffer, cert_len, SSL_FILETYPE_PEM);
         if (CERT_CODE <= 0) {
-            tDLogE("TlsReader::Impl::initPem() Certificate memory error: {}", getError(CERT_CODE));
+            tDLogE("Tls::Impl::initPem() Certificate memory error: {}", getError(CERT_CODE));
             return false;
         }
 
         auto const KEY_CODE = SSL_CTX_use_PrivateKey_memory(context.get(), key_buffer, key_len, SSL_FILETYPE_PEM);
         if (KEY_CODE <= 0) {
-            tDLogE("TlsReader::Impl::initPem() Private key memory error: {}", getError(KEY_CODE));
+            tDLogE("Tls::Impl::initPem() Private key memory error: {}", getError(KEY_CODE));
             return false;
         }
 
         // Verify private key
         if (!SSL_CTX_check_private_key(context.get())) {
-            tDLogE("TlsReader::Impl::initPem() Private key does not match the public certificate.");
+            tDLogE("Tls::Impl::initPem() Private key does not match the public certificate.");
             return false;
         }
 
@@ -260,14 +261,14 @@ struct TlsReader::Impl : private Noncopyable
         Buffer cert_buffer;
         auto const CERT_CODE = readFile(cert_pem, cert_buffer);
         if (isFailure(CERT_CODE)) {
-            tDLogE("TlsReader::Impl::initPemPath() Read error({}) of certificate file: {}", CERT_CODE, cert_pem);
+            tDLogE("Tls::Impl::initPemPath() Read error({}) of certificate file: {}", CERT_CODE, cert_pem);
             return false;
         }
 
         Buffer key_buffer;
         auto const KEY_CODE = readFile(key_pem, key_buffer);
         if (isFailure(KEY_CODE)) {
-            tDLogE("TlsReader::Impl::initPemPath() Read error({}) of private key file: {}", KEY_CODE, key_pem);
+            tDLogE("Tls::Impl::initPemPath() Read error({}) of private key file: {}", KEY_CODE, key_pem);
             return false;
         }
 
@@ -288,7 +289,7 @@ struct TlsReader::Impl : private Noncopyable
         });
 
         if (!ssl) {
-            tDLogE("TlsReader::Impl::initBio() OpenSSL SSL error.");
+            tDLogE("Tls::Impl::initBio() OpenSSL SSL error.");
             return false;
         }
 
@@ -385,7 +386,7 @@ struct TlsReader::Impl : private Noncopyable
         case SSL_ERROR_WANT_WRITE:        return Err::E_SSLWWRITE;
         case SSL_ERROR_WANT_X509_LOOKUP:  return Err::E_SSLWX509;
         default:
-            tDLogE("TlsReader::Impl::handshake() OpenSSL SSL_do_handshake() error: code({}) reason({})", CODE, REASON);
+            tDLogE("Tls::Impl::handshake() OpenSSL SSL_do_handshake() error: code({}) reason({})", CODE, REASON);
             return Err::E_SSL;
         }
         // @formatter:on
@@ -437,7 +438,7 @@ struct TlsReader::Impl : private Noncopyable
             // The write operation was not successful,
             // because either the connection was closed,
             // an error occurred or action must be taken by the calling process.
-            tDLogE("TlsReader::Impl::encode() OpenSSL SSL_write() error: reason({})",
+            tDLogE("Tls::Impl::encode() OpenSSL SSL_write() error: reason({})",
                    SSL_get_error(ssl.get(), WRITE_RESULT));
             return Err::E_SSL;
         }
@@ -489,7 +490,7 @@ struct TlsReader::Impl : private Noncopyable
             }
         }
 
-        tDLogD("TlsReader::Impl::read({}) SSL_read() result: {}", buffer_size, READ_RESULT);
+        tDLogD("Tls::Impl::read({}) SSL_read() result: {}", buffer_size, READ_RESULT);
         assert(READ_RESULT > 0);
         result.assign(buffer.begin(), buffer.begin() + READ_RESULT);
         return Err::E_SUCCESS;
@@ -524,93 +525,93 @@ struct TlsReader::Impl : private Noncopyable
     }
 };
 
-// -------------------------
-// TlsReader implementation.
-// -------------------------
+// ------------------
+// Tls implementation
+// ------------------
 
-TlsReader::TlsReader() : _impl(std::make_unique<Impl>())
+Tls::Tls() : _impl(std::make_unique<Impl>())
 {
     assert(static_cast<bool>(_impl));
 }
 
-TlsReader::TlsReader(std::string const & cert_pem, std::string const & key_pem)
+Tls::Tls(std::string const & cert_pem, std::string const & key_pem)
         : _impl(std::make_unique<Impl>(cert_pem, key_pem))
 {
     assert(static_cast<bool>(_impl));
 }
 
-TlsReader::TlsReader(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len)
+Tls::Tls(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len)
         : _impl(std::make_unique<Impl>(cert_buffer, cert_len, key_buffer, key_len))
 {
     assert(static_cast<bool>(_impl));
 }
 
-TlsReader::TlsReader(reference_ssl_context const & UNUSED_PARAM(init), TlsReader const & tls)
+Tls::Tls(reference_ssl_context const & UNUSED_PARAM(init), Tls const & tls)
         : _impl(std::make_unique<Impl>(tls._impl->context))
 {
     assert(static_cast<bool>(_impl));
 }
 
-TlsReader::~TlsReader()
+Tls::~Tls()
 {
     // EMPTY.
 }
 
-bool TlsReader::isFinished() const
+bool Tls::isFinished() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->isFinished();
 }
 
-std::string TlsReader::getCipherName() const
+std::string Tls::getCipherName() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->getCipherName();
 }
 
-void TlsReader::accept()
+void Tls::accept()
 {
     assert(static_cast<bool>(_impl));
     _impl->accept();
 }
 
-void TlsReader::connect()
+void Tls::connect()
 {
     assert(static_cast<bool>(_impl));
     _impl->connect();
 }
 
-Err TlsReader::handshake()
+Err Tls::handshake()
 {
     assert(static_cast<bool>(_impl));
     return _impl->handshake();
 }
 
-Err TlsReader::readFromWriteBuffer(std::vector<char> & result)
+Err Tls::readFromWriteBuffer(std::vector<char> & result)
 {
     assert(static_cast<bool>(_impl));
     return _impl->readFromWriteBuffer(result);
 }
 
-Err TlsReader::writeToReadBuffer(void const * data, std::size_t size, std::size_t * write_size)
+Err Tls::writeToReadBuffer(void const * data, std::size_t size, std::size_t * write_size)
 {
     assert(static_cast<bool>(_impl));
     return _impl->writeToReadBuffer(data, size, write_size);
 }
 
-int TlsReader::pendingOfEncodeBufferSize() const
+int Tls::pendingOfEncodeBufferSize() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->pendingWriteBio();
 }
 
-int TlsReader::pendingOfDecodeBufferSize() const
+int Tls::pendingOfDecodeBufferSize() const
 {
     assert(static_cast<bool>(_impl));
     return _impl->pendingReadBio();
 }
 
-std::vector<char> TlsReader::encode(void const * data, std::size_t size, Err * code)
+std::vector<char> Tls::encode(void const * data, std::size_t size, Err * code)
 {
     assert(static_cast<bool>(_impl));
     std::vector<char> result;
@@ -621,7 +622,7 @@ std::vector<char> TlsReader::encode(void const * data, std::size_t size, Err * c
     return result;
 }
 
-std::vector<char> TlsReader::decode(void const * data, std::size_t size, Err * code)
+std::vector<char> Tls::decode(void const * data, std::size_t size, Err * code)
 {
     assert(static_cast<bool>(_impl));
     std::vector<char> result;
@@ -632,7 +633,7 @@ std::vector<char> TlsReader::decode(void const * data, std::size_t size, Err * c
     return result;
 }
 
-std::vector<char> TlsReader::decode(Err * code)
+std::vector<char> Tls::decode(Err * code)
 {
     assert(static_cast<bool>(_impl));
     std::vector<char> result;

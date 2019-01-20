@@ -70,7 +70,7 @@ Err HttpClient::writeWsRequest(HttpRequest const & request)
 
 Err HttpClient::writeWsFrame(WsFrame const & frame)
 {
-    if (_reader.isEnableWebsocket() == false) {
+    if (!_reader.isEnableWebsocket()) {
         return Err::E_ILLSTATE;
     }
 

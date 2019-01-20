@@ -26,7 +26,7 @@
 #include <libtbag/net/Ip.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
-#include <libtbag/crypto/TlsReader.hpp>
+#include <libtbag/crypto/Tls.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/Type.hpp>
 
@@ -61,7 +61,7 @@ public:
     using HttpReaderInterface = libtbag::http::HttpReaderInterface;
     using Reader              = libtbag::http::HttpReaderForCallback<HttpClient>;
     using Masking             = libtbag::random::MaskingDevice;
-    using TlsReader           = libtbag::crypto::TlsReader;
+    using Tls                 = libtbag::crypto::Tls;
     using TlsState            = libtbag::crypto::TlsState;
     using NetStreamClient     = libtbag::net::socket::NetStreamClient;
     using UniqueClient        = std::unique_ptr<NetStreamClient>;
@@ -97,7 +97,7 @@ private:
     UniqueClient _client;
     Reader       _reader;
     Masking      _masking;
-    TlsReader    _tls;
+    Tls          _tls;
     TlsState     _state;
 
 private:

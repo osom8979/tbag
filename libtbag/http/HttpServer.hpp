@@ -25,7 +25,7 @@
 #include <libtbag/net/Ip.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
-#include <libtbag/crypto/TlsReader.hpp>
+#include <libtbag/crypto/Tls.hpp>
 #include <libtbag/random/MaskingDevice.hpp>
 #include <libtbag/Type.hpp>
 

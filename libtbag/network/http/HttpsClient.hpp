@@ -19,7 +19,7 @@
 
 #include <libtbag/network/stream/StreamClient.hpp>
 #include <libtbag/http/HttpReader.hpp>
-#include <libtbag/crypto/TlsReader.hpp>
+#include <libtbag/crypto/Tls.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 // -------------------
@@ -42,14 +42,14 @@ public:
     using StreamType  = libtbag::network::details::StreamType;
     using Parent      = libtbag::network::stream::StreamClient;
     using Loop        = libtbag::uvpp::Loop;
-    using TlsReader   = libtbag::crypto::TlsReader;
+    using Tls         = libtbag::crypto::Tls;
     using TlsState    = libtbag::crypto::TlsState;
     using EventType   = libtbag::http::EventType;
     using HttpRequest = libtbag::http::HttpRequest;
 
 private:
     libtbag::http::HttpReaderForCallback<HttpsClient> _reader;
-    TlsReader _tls;
+    Tls       _tls;
     TlsState  _state;
 
 public:
