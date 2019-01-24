@@ -127,6 +127,13 @@ function (tbag_preview)
     tbag_preview__print_variable (CMAKE_INSTALL_PREFIX)
     tbag_preview__print ("")
 
+    tbag_preview__print_variable (CMAKE_SKIP_BUILD_RPATH)
+    tbag_preview__print_variable (CMAKE_BUILD_WITH_INSTALL_RPATH)
+    tbag_preview__print_variable (CMAKE_INSTALL_RPATH_USE_LINK_PATH)
+    tbag_preview__print_variable (CMAKE_INSTALL_RPATH)
+    tbag_preview__print_variable (CMAKE_INSTALL_NAME_DIR)
+    tbag_preview__print ("")
+
     tbag_preview__print_variable (CMAKE_SIZEOF_VOID_P)
     tbag_preview__print ("")
 

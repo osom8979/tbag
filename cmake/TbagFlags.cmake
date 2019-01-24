@@ -82,9 +82,26 @@ endmacro ()
 
 #/// Setup RPATH variables.
 macro (tbag_flags__set_install_rpath)
+    set (CMAKE_SKIP_BUILD_RPATH             FALSE)
+    set (CMAKE_BUILD_WITH_INSTALL_RPATH     FALSE)
     set (CMAKE_INSTALL_RPATH_USE_LINK_PATH  TRUE)
-    set (CMAKE_INSTALL_RPATH     "${CMAKE_INSTALL_PREFIX}/lib")
-    set (CMAKE_INSTALL_NAME_DIR  "${CMAKE_INSTALL_PREFIX}/lib")
+
+    if (DEFINED CMAKE_INSTALL_PREFIX)
+        set (__rpath_prefix "${CMAKE_INSTALL_PREFIX}")
+    else ()
+        set (__rpath_prefix "/usr/local")
+    endif ()
+    set (__rpath_prefix_lib "${__rpath_prefix}/lib")
+
+    list (FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${__rpath_prefix_lib}" __is_system_dir)
+    if ("${__is_system_dir}" STREQUAL "-1")
+        set (CMAKE_INSTALL_RPATH    "${__rpath_prefix_lib}")
+        set (CMAKE_INSTALL_NAME_DIR "${__rpath_prefix_lib}")
+    endif ()
+
+    unset (__is_system_dir)
+    unset (__rpath_prefix)
+    unset (__rpath_prefix_lib)
 endmacro ()
 
 #/// Default tbag project setup.
