@@ -9,7 +9,7 @@ tbag_modules__update_c_family_subdir_objects (
         3rd/lmdbxx 3rd/sol2 3rd/sqlite3 3rd/sqlite_orm 3rd/tinyxml2
         database tpot crypto res dummy tty gpu rstl lockfree net
         locale app memory proto archive util security codec network
-        io graph science 3rd lock animation filesystem algorithm
+        io graph science lock animation filesystem algorithm
         uvpp math script time graphic container uvxx system common
         iterator type macro http typography lib dom log mq id string
         geometry pattern bitwise random tmp thread preprocessor

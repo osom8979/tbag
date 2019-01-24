@@ -1,6 +1,6 @@
 /**
- * @file   TlsReader.cpp
- * @brief  TlsReader class implementation.
+ * @file   Tls.cpp
+ * @brief  Tls class implementation.
  * @author zer0
  * @date   2017-11-11
  * @date   2018-12-25 (Change namespace: libtbag::network::http::tls -> libtbag::http)
