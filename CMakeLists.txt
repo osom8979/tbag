@@ -146,7 +146,7 @@ if (USE_DOXYGEN)
         configure_file ("${DOXYFILE_INPUT}" "${DOXYFILE_OUTPUT}")
         tbag_doxygen__generate_index ("${PROJECT_BINARY_DIR}/doxygen.html")
         tbag_doxygen__target ("${DOXYFILE_OUTPUT}" "${PROJECT_BINARY_DIR}")
-        tbag_doxygen__target_zip ("${DOXYFILE_OUTPUT_ZIP}" "${DOXYFILE_HTML_DIR}")
+        tbag_doxygen__target_tgz ("${DOXYFILE_OUTPUT_ZIP}" "${DOXYFILE_HTML_DIR}")
     endif ()
 endif ()
 

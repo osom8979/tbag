@@ -39,7 +39,8 @@ function (tbag_doxygen__target __doxyfile __working)
     #endif ()
 
     if (DOXYGEN_FOUND)
-        add_custom_target (doxygen ALL "${DOXYGEN_EXECUTABLE}" "${__doxyfile}"
+        add_custom_target (doxygen ALL
+                           "${DOXYGEN_EXECUTABLE}" "${__doxyfile}"
                            WORKING_DIRECTORY "${__working}")
     endif ()
 endfunction ()
@@ -48,9 +49,10 @@ endfunction ()
 #///
 #/// @param __output [in] Output result path.
 #/// @param __source [in] Document directory path.
-function (tbag_doxygen__target_zip __output __source)
+function (tbag_doxygen__target_tgz __output __source)
     if (DOXYGEN_FOUND)
-        add_custom_target (doxygen_zip ALL "${CMAKE_COMMAND}" -E tar czf "${__output}" "${__source}"
+        add_custom_target (doxygen_tgz ALL
+                           "${CMAKE_COMMAND}" -E tar czf "${__output}" "${__source}"
                            DEPENDS doxygen)
     endif ()
 endfunction ()
