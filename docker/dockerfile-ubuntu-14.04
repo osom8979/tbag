@@ -38,5 +38,6 @@ RUN make
 RUN make install
 
 # tbag test.
-CMD ./tester
+WORKDIR /
+CMD /usr/local/bin/tpot
 
