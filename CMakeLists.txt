@@ -47,6 +47,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     #set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG") ## Default
     set  (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 endif ()
+set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_TBAG_LIBRARY_DEBUGGING_LOG")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DDISABLE_TBAG_LOG")
 
 # Setup the THIRD_PREFIX variable.
@@ -57,10 +58,9 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
-tbag_config__set_option (USE_TBAG_DEBUGGING_LOGGER  ON) ## Enable tbag debugging logger.
-tbag_config__set_option (USE_CCACHE                 ON) ## Enable ccache compile.
-tbag_config__set_option (USE_PCH                   OFF) ## Enable PCH compile.
-tbag_config__set_option (USE_GOLD                   ON) ## Enable ld.gold linker if gcc compiler.
+tbag_config__set_option (USE_CCACHE  ON) ## Enable ccache compile.
+tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compiler.
+tbag_config__set_option (USE_PCH    OFF) ## Enable PCH compile.
 
 ## Configure settings.
 if (USE_CCACHE)
@@ -72,6 +72,20 @@ if (USE_GOLD AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif ()
 tbag_config__find_thread ()
 tbag_config__default_generate_c_header ()
+
+tbag_config__set_library_option (USE_OPENGL   OpenGL    OPENGL_FOUND)
+tbag_config__set_library_option (USE_OPENAL   OpenAL    OPENAL_FOUND)
+tbag_config__set_library_option (USE_CUDA     TbagCUDA  CUDA_FOUND)
+tbag_config__set_library_option (USE_DOXYGEN  Doxygen   DOXYGEN_FOUND)
+
+if (OPENGL_FOUND AND OPENAL_FOUND)
+    message (STATUS "Enable GUI library")
+    set (ENABLE_GLAL ON)
+else ()
+    message (STATUS "Disable GUI library")
+    set (ENABLE_GLAL OFF)
+endif ()
+tbag_config__set_option (USE_GUI ${ENABLE_GLAL})
 
 ## External project.
 include (${CMAKE_SOURCE_DIR}/external/External.cmake)
@@ -119,20 +133,6 @@ endif ()
 if (WITH_COVERAGE)
     message (STATUS "Enable coverage.")
 endif ()
-
-tbag_config__set_library_option (USE_OPENGL   OpenGL    OPENGL_FOUND)
-tbag_config__set_library_option (USE_OPENAL   OpenAL    OPENAL_FOUND)
-tbag_config__set_library_option (USE_CUDA     TbagCUDA  CUDA_FOUND)
-tbag_config__set_library_option (USE_DOXYGEN  Doxygen   DOXYGEN_FOUND)
-
-if (OPENGL_FOUND AND OPENAL_FOUND)
-    message (STATUS "Enable GUI library")
-    set (ENABLE_GLAL ON)
-else ()
-    message (STATUS "Disable GUI library")
-    set (ENABLE_GLAL OFF)
-endif ()
-tbag_config__set_option (USE_GUI ${ENABLE_GLAL})
 
 if (USE_DOXYGEN)
     find_package (TbagDoxygen)

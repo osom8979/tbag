@@ -28,11 +28,6 @@ tbag_modules__append_definitions (
 ## Thread settings.
 tbag_modules__apply_thread ()
 
-## Tbag debugging logger.
-if (USE_TBAG_DEBUGGING_LOGGER)
-    tbag_modules__append_definitions (ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
-endif ()
-
 ## External.
 tbag_modules__apply_ext_uv       ()
 tbag_modules__apply_ext_z        ()

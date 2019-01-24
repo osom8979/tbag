@@ -9,6 +9,7 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/libtbag.h>
 #include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/locale/Locale.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cstdlib>
@@ -19,9 +20,6 @@ static char const * const DEFAULT_GTEST_FILTER = "-Network*Test.*";
 
 int main(int argc, char **argv)
 {
-    __tbag_debug(LIBTBAG_MAIN_TITLE);
-    __tbag_debug("Default locale name: {}", libtbag::locale::getDefaultIcuLocaleName());
-
     tbInitialize();
 
 #if defined(TBAG_PLATFORM_WINDOWS)
@@ -33,6 +31,9 @@ int main(int argc, char **argv)
 
     libtbag::signal::registerDefaultStdTerminateHandler();
     libtbag::signal::registerDefaultHandler();
+
+    tDLogI(LIBTBAG_MAIN_TITLE);
+    tDLogI("Default locale name: {}", libtbag::locale::getDefaultIcuLocaleName());
 
     libtbag::DemoAsset asset;
     asset.create_temp_dir();

@@ -350,65 +350,67 @@ add_custom_target (vorbis DEPENDS ${vorbis_EXT_LIBRARIES})
 ## SFML ##
 ##########
 
-if ("${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "" OR "${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "debug")
-    set (sfml_POSTFIX -d)
-else ()
-    set (sfml_POSTFIX)
-endif ()
+if (USE_GUI)
+    if ("${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "" OR "${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "debug")
+        set (sfml_POSTFIX -d)
+    else ()
+        set (sfml_POSTFIX)
+    endif ()
 
-set (sfml_EXT_SOURCE_DIR            "${CMAKE_SOURCE_DIR}/external/sfml")
-set (sfml_EXT_INCLUDE_DIR           "${EXT_INSTALL_DIR}/include")
-set (sfml_system_EXT_STATIC_LIB     "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-system-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (sfml_window_EXT_STATIC_LIB     "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-window-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (sfml_graphics_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-graphics-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (sfml_audio_EXT_STATIC_LIB      "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-audio-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (sfml_EXT_LIBRARIES             "${sfml_system_EXT_STATIC_LIB}"
-                                    "${sfml_window_EXT_STATIC_LIB}"
-                                    "${sfml_graphics_EXT_STATIC_LIB}"
-                                    "${sfml_audio_EXT_STATIC_LIB}")
-exists_files (sfml_EXT_EXISTS ${sfml_EXT_LIBRARIES})
+    set (sfml_EXT_SOURCE_DIR            "${CMAKE_SOURCE_DIR}/external/sfml")
+    set (sfml_EXT_INCLUDE_DIR           "${EXT_INSTALL_DIR}/include")
+    set (sfml_system_EXT_STATIC_LIB     "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-system-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    set (sfml_window_EXT_STATIC_LIB     "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-window-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    set (sfml_graphics_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-graphics-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    set (sfml_audio_EXT_STATIC_LIB      "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-audio-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    set (sfml_EXT_LIBRARIES             "${sfml_system_EXT_STATIC_LIB}"
+            "${sfml_window_EXT_STATIC_LIB}"
+            "${sfml_graphics_EXT_STATIC_LIB}"
+            "${sfml_audio_EXT_STATIC_LIB}")
+    exists_files (sfml_EXT_EXISTS ${sfml_EXT_LIBRARIES})
 
-if (sfml_EXT_EXISTS)
-    message (STATUS "Skip external/sfml_system (Exists: ${sfml_system_EXT_STATIC_LIB})")
-    message (STATUS "Skip external/sfml_window (Exists: ${sfml_window_EXT_STATIC_LIB})")
-    message (STATUS "Skip external/sfml_graphics (Exists: ${sfml_graphics_EXT_STATIC_LIB})")
-    message (STATUS "Skip external/sfml_audio (Exists: ${sfml_audio_EXT_STATIC_LIB})")
-else ()
-    message (STATUS "Add external/sfml")
-    ExternalProject_Add (sfml_ext
-            PREFIX "${EXT_PREFIX_DIR}"
-            #--Configure step-------------
-            SOURCE_DIR "${sfml_EXT_SOURCE_DIR}"
-            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
-                       "-DBUILD_SHARED_LIBS=OFF"
-                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
-                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
-                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
-                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-                       "-DSFML_BUILD_FRAMEWORKS=OFF"
-                       "-DSFML_INSTALL_XCODE_TEMPLATES=OFF"
-                       "-DSFML_DEPENDENCIES_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-                       "-DSFML_INSTALL_PKGCONFIG_FILES=OFF"
-                       "-DSTB_INCLUDE_DIR=${CMAKE_SOURCE_DIR}/dep/stb"
-                       "-DFREETYPE_INCLUDE_DIR=${EXT_INSTALL_DIR}/include"
-                       "-DCMAKE_FIND_ROOT_PATH=${EXT_INSTALL_DIR}"
-                       "-DSFML_BUILD_WINDOW=ON"
-                       "-DSFML_BUILD_GRAPHICS=ON"
-                       "-DSFML_BUILD_AUDIO=ON"
-                       "-DSFML_BUILD_NETWORK=OFF"
-                       "-DSFML_BUILD_DOC=OFF"
-            #--Output logging-------------
-            LOG_DOWNLOAD  1
-            LOG_UPDATE    1
-            LOG_CONFIGURE 1
-            LOG_BUILD     0
-            LOG_TEST      1
-            LOG_INSTALL   1
-            #--Dependencies---------------
-            DEPENDS ogg vorbis flac freetype)
-    fake_output_library (sfml_ext_output sfml_ext ${sfml_EXT_LIBRARIES})
+    if (sfml_EXT_EXISTS)
+        message (STATUS "Skip external/sfml_system (Exists: ${sfml_system_EXT_STATIC_LIB})")
+        message (STATUS "Skip external/sfml_window (Exists: ${sfml_window_EXT_STATIC_LIB})")
+        message (STATUS "Skip external/sfml_graphics (Exists: ${sfml_graphics_EXT_STATIC_LIB})")
+        message (STATUS "Skip external/sfml_audio (Exists: ${sfml_audio_EXT_STATIC_LIB})")
+    else ()
+        message (STATUS "Add external/sfml")
+        ExternalProject_Add (sfml_ext
+                PREFIX "${EXT_PREFIX_DIR}"
+                #--Configure step-------------
+                SOURCE_DIR "${sfml_EXT_SOURCE_DIR}"
+                CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                           "-DBUILD_SHARED_LIBS=OFF"
+                           "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                           "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                           "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                           "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                           "-DSFML_BUILD_FRAMEWORKS=OFF"
+                           "-DSFML_INSTALL_XCODE_TEMPLATES=OFF"
+                           "-DSFML_DEPENDENCIES_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                           "-DSFML_INSTALL_PKGCONFIG_FILES=OFF"
+                           "-DSTB_INCLUDE_DIR=${CMAKE_SOURCE_DIR}/dep/stb"
+                           "-DFREETYPE_INCLUDE_DIR=${EXT_INSTALL_DIR}/include"
+                           "-DCMAKE_FIND_ROOT_PATH=${EXT_INSTALL_DIR}"
+                           "-DSFML_BUILD_WINDOW=ON"
+                           "-DSFML_BUILD_GRAPHICS=ON"
+                           "-DSFML_BUILD_AUDIO=ON"
+                           "-DSFML_BUILD_NETWORK=OFF"
+                           "-DSFML_BUILD_DOC=OFF"
+                #--Output logging-------------
+                LOG_DOWNLOAD  1
+                LOG_UPDATE    1
+                LOG_CONFIGURE 1
+                LOG_BUILD     0
+                LOG_TEST      1
+                LOG_INSTALL   1
+                #--Dependencies---------------
+                DEPENDS ogg vorbis flac freetype)
+        fake_output_library (sfml_ext_output sfml_ext ${sfml_EXT_LIBRARIES})
+    endif ()
+    add_custom_target (sfml DEPENDS ${sfml_EXT_LIBRARIES})
 endif ()
-add_custom_target (sfml DEPENDS ${sfml_EXT_LIBRARIES})
 
 ############
 ## LUAJIT ##
