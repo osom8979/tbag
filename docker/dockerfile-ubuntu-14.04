@@ -33,10 +33,10 @@ WORKDIR $BUILD_DIR
 RUN /bin/bash $WORKING_DIR/script/travis_install.sh
 
 # tbag build.
-RUN cmake -G "Unix Makefiles" $WORKING_DIR
+RUN cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release $WORKING_DIR
 RUN make
+RUN make install
 
 # tbag test.
-#CMD ["/bin/bash"]
 CMD ./tester
 

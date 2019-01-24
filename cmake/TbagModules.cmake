@@ -1030,10 +1030,29 @@ macro (tbag_modules__update_objects __find_dir __suffix)
     list (APPEND TBAG_PROJECT_OBJECTS ${__find_compile_objs})
 endmacro ()
 
+macro (tbag_modules__update_subdir_object)
+    foreach (__obj_cusor ${ARGN})
+        list (APPEND TBAG_PROJECT_OBJECTS "${TBAG_PROJECT_CONST_DIR_PATH}/${__obj_cusor}")
+    endforeach ()
+endmacro ()
+
+#/// Find & register object files.
+#///
+#/// @param __find_dir [in] find directory.
+macro (tbag_modules__update_c_family_objects __find_dir)
+    tbag_modules__update_objects ("${__find_dir}" ".c")
+    tbag_modules__update_objects ("${__find_dir}" ".cc")
+    tbag_modules__update_objects ("${__find_dir}" ".cpp")
+endmacro ()
+
+macro (tbag_modules__update_c_family_subdir_objects)
+    foreach (__subdir_cusor ${ARGN})
+        tbag_modules__update_c_family_objects ("${TBAG_PROJECT_CONST_DIR_PATH}/${__subdir_cusor}")
+    endforeach ()
+endmacro ()
+
 macro (tbag_modules__update_default_objects)
-    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".c")
-    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cc")
-    tbag_modules__update_objects ("${TBAG_PROJECT_CONST_DIR_PATH}" ".cpp")
+    tbag_modules__update_c_family_objects ("${TBAG_PROJECT_CONST_DIR_PATH}")
 endmacro ()
 
 macro (tbag_modules__update_cuda_objects)

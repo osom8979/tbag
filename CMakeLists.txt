@@ -57,7 +57,6 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
-tbag_config__set_option (USE_TBAG_UI                ON) ## Enable game engine framework.
 tbag_config__set_option (USE_TBAG_DEBUGGING_LOGGER  ON) ## Enable tbag debugging logger.
 tbag_config__set_option (USE_CCACHE                 ON) ## Enable ccache compile.
 tbag_config__set_option (USE_PCH                   OFF) ## Enable PCH compile.
@@ -73,7 +72,6 @@ if (USE_GOLD AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif ()
 tbag_config__find_thread ()
 tbag_config__default_generate_c_header ()
-tbag_config__generate_export_api_c_header (TBUI TBUI "${CMAKE_SOURCE_DIR}/libtbui/export.h" "/*EMPTY*/")
 
 ## External project.
 include (${CMAKE_SOURCE_DIR}/external/External.cmake)
@@ -104,13 +102,11 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lfds)
 ## CI Preset.
 if (RUN_TRAVIS)
     message (STATUS "Enable Travis CI")
-    set (USE_TBAG_UI OFF)
     tbag_config__set_option (WITH_COVERAGE         ON)
     tbag_config__set_option (SKIP_FSPOLL_TESTER    ON)
     tbag_config__set_option (SKIP_FINDPATH_TESTER  ON)
 elseif (RUN_APPVEYOR)
     message (STATUS "Enable AppVeyor CI")
-    set (USE_TBAG_UI OFF)
     tbag_config__set_option (WITH_COVERAGE         OFF)
     tbag_config__set_option (SKIP_FSPOLL_TESTER    OFF)
     tbag_config__set_option (SKIP_FINDPATH_TESTER  OFF)
@@ -124,16 +120,19 @@ if (WITH_COVERAGE)
     message (STATUS "Enable coverage.")
 endif ()
 
-if (USE_TBAG_UI)
-    tbag_config__set_library_option (USE_OPENGL OpenGL OPENGL_FOUND)
-    tbag_config__set_library_option (USE_OPENAL OpenAL OPENAL_FOUND)
+tbag_config__set_library_option (USE_OPENGL   OpenGL    OPENGL_FOUND)
+tbag_config__set_library_option (USE_OPENAL   OpenAL    OPENAL_FOUND)
+tbag_config__set_library_option (USE_CUDA     TbagCUDA  CUDA_FOUND)
+tbag_config__set_library_option (USE_DOXYGEN  Doxygen   DOXYGEN_FOUND)
+
+if (OPENGL_FOUND AND OPENAL_FOUND)
+    message (STATUS "Enable GUI library")
+    set (ENABLE_GLAL ON)
+else ()
+    message (STATUS "Disable GUI library")
+    set (ENABLE_GLAL OFF)
 endif ()
-
-## CUDA settings.
-tbag_config__set_library_option (USE_CUDA TbagCUDA CUDA_FOUND)
-
-## Doxygen settings.
-tbag_config__set_library_option (USE_DOXYGEN Doxygen DOXYGEN_FOUND)
+tbag_config__set_option (USE_GUI ${ENABLE_GLAL})
 
 if (USE_DOXYGEN)
     find_package (TbagDoxygen)

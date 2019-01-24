@@ -24,11 +24,11 @@ Index of this file:
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#include "imgui.h"
+#include <libtbag/3rd/imgui/imgui.h>
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
-#include "imgui_internal.h"
+#include <libtbag/3rd/imgui/imgui_internal.h>
 
 #include <stdio.h>      // vsnprintf, sscanf, printf
 #if !defined(alloca)
@@ -119,7 +119,7 @@ namespace IMGUI_STB_NAMESPACE
 #ifdef IMGUI_STB_RECT_PACK_FILENAME
 #include IMGUI_STB_RECT_PACK_FILENAME
 #else
-#include "imstb_rectpack.h"
+#include <libtbag/3rd/imgui/imstb_rectpack.h>
 #endif
 #endif
 
@@ -142,7 +142,7 @@ namespace IMGUI_STB_NAMESPACE
 #ifdef IMGUI_STB_TRUETYPE_FILENAME
 #include IMGUI_STB_TRUETYPE_FILENAME
 #else
-#include "imstb_truetype.h"
+#include <libtbag/3rd/imgui/imstb_truetype.h>
 #endif
 #endif
 

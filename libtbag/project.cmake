@@ -3,7 +3,18 @@
 include (TbagModules)
 
 tbag_modules__apply_default ()
-tbag_modules__update_default_objects ()
+
+tbag_modules__update_c_family_subdir_objects (
+        3rd/date 3rd/demangle 3rd/entt 3rd/fmt 3rd/jsoncpp 3rd/lmdb
+        3rd/lmdbxx 3rd/sol2 3rd/sqlite3 3rd/sqlite_orm 3rd/tinyxml2
+        database tpot crypto res dummy tty gpu rstl lockfree net
+        locale app memory proto archive util security codec network
+        io graph science 3rd lock animation filesystem algorithm
+        uvpp math script time graphic container uvxx system common
+        iterator type macro http typography lib dom log mq id string
+        geometry pattern bitwise random tmp thread preprocessor
+        signal functional loop process debug flow)
+tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
 
 ## TBAG EXPORT API.
 tbag_modules__append_definitions (
@@ -23,11 +34,15 @@ if (USE_TBAG_DEBUGGING_LOGGER)
 endif ()
 
 ## External.
-tbag_modules__apply_ext_uv     ()
-tbag_modules__apply_ext_z      ()
-tbag_modules__apply_ext_ressl  ()
-tbag_modules__apply_ext_luajit ()
+tbag_modules__apply_ext_uv       ()
+tbag_modules__apply_ext_z        ()
+tbag_modules__apply_ext_ressl    ()
+tbag_modules__apply_ext_luajit   ()
 tbag_modules__apply_ext_luajit_install_conf (luaconf_copy "${CMAKE_SOURCE_DIR}/libtbag/script/luajit-2.0.3/luaconf.h")
+tbag_modules__apply_ext_ogg      ()
+tbag_modules__apply_ext_flac     ()
+tbag_modules__apply_ext_vorbis   ()
+tbag_modules__apply_ext_freetype ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
@@ -37,6 +52,15 @@ tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_flatbuffers ()
 tbag_modules__apply_dep_lemon       ()
 tbag_modules__apply_dep_lfds        ()
+
+if (USE_GUI)
+    tbag_modules__update_c_family_subdir_objects (3rd/imgui)
+    tbag_modules__apply_ext_sfml_ignore_gl_al ()
+    tbag_modules__check_opengl ()
+    tbag_modules__apply_opengl ()
+    tbag_modules__check_openal ()
+    tbag_modules__apply_openal ()
+endif ()
 
 set (TPOT_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
 set (TPOT_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot_t2s.h")
