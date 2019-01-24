@@ -90,6 +90,8 @@ TBAG_API std::string generateCsrVersion1(X509NameEntries const & entries, std::s
 TBAG_API std::string generateCsrVersion1(std::string const & pem_private_key);
 
 /**
+ * @param[in] pem_csr
+ *      String of PEM CSR.
  * @param[in] name_options
  *      Various certificate name options.
  * @param[in] request_options

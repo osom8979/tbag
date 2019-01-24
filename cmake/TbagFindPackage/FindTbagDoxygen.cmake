@@ -44,9 +44,14 @@ function (tbag_doxygen__target __doxyfile __working)
     endif ()
 endfunction ()
 
-#/// Default doxygen generator.
-macro (tbag_doxygen)
-    tbag_doxygen__generate_index ("${PROJECT_BINARY_DIR}/doxygen.html")
-    tbag_doxygen__target ("${PROJECT_BINARY_DIR}/Doxyfile" "${PROJECT_BINARY_DIR}")
-endmacro ()
+#/// Use Doxygen to create the HTML based API documentation.
+#///
+#/// @param __output [in] Output result path.
+#/// @param __source [in] Document directory path.
+function (tbag_doxygen__target_zip __output __source)
+    if (DOXYGEN_FOUND)
+        add_custom_target (doxygen_zip ALL "${CMAKE_COMMAND}" -E tar czf "${__output}" "${__source}"
+                           DEPENDS doxygen)
+    endif ()
+endfunction ()
 
