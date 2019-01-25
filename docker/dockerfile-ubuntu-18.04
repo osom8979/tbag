@@ -3,15 +3,15 @@ MAINTAINER zer0 <osom8979@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-# For the add-apt-repository
 RUN apt-get -qq update
 RUN apt-get install -y g++ cmake
+RUN apt-get install -y software-properties-common git curl ccache
 
-ENV WORKING_DIR  /working
-ENV BUILD_DIR    /build
+ENV WORKING_DIR  /tbag/working
+ENV BUILD_DIR    /tbag/build
 
-RUN mkdir $WORKING_DIR
-RUN mkdir $BUILD_DIR
+RUN mkdir -p $WORKING_DIR
+RUN mkdir -p $BUILD_DIR
 
 # tbag update.
 COPY . $WORKING_DIR
