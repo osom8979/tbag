@@ -5,6 +5,11 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -qq update
 RUN apt-get install -y g++ cmake
+RUN apt-get install -y software-properties-common git curl ccache
+
+RUN add-apt-repository ppa:jonathonf/ffmpeg-4
+RUN apt-get -qq update
+RUN apt-get install -y ffmpeg libavcodec-dev libavformat-dev libswscale-dev libavdevice-dev
 
 ENV WORKING_DIR /tbag/working
 ENV BUILD_DIR   /tbag/build
@@ -21,11 +26,7 @@ RUN cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release $WORKING_DIR
 RUN make
 RUN make install
 
-# remove build files.
+# tbag test.
 WORKDIR /
-RUN rm -rf $WORKING_DIR
-RUN rm -rf $BUILD_DIR
-
-# run tpot.
 CMD /usr/local/bin/tpot
 
