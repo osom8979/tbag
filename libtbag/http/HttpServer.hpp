@@ -125,6 +125,7 @@ private:
     NodeMap      _nodes;
 
 public:
+    HttpServer(std::string const & uri, Callbacks const & callbacks);
     HttpServer(std::string const & address, int port, Callbacks const & callbacks);
     HttpServer(Params const & params);
     ~HttpServer();
@@ -156,6 +157,9 @@ public:
 public:
     Err exit();
     Err close(std::intptr_t id);
+
+public:
+    Err writeWsResponse(std::intptr_t id, HttpRequest const & request);
 
 public:
     Err writeWsFrame(std::intptr_t id, WsFrame const & frame);

@@ -15,6 +15,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace http {
 
+HttpServer::HttpServer(std::string const & uri, Callbacks const & callbacks)
+        : HttpServer(Params(uri, callbacks))
+{
+    assert(static_cast<bool>(_server));
+}
+
 HttpServer::HttpServer(std::string const & address, int port, Callbacks const & callbacks)
         : HttpServer(Params(address, port, callbacks))
 {
@@ -188,6 +194,14 @@ Err HttpServer::close(std::intptr_t id)
 {
     assert(static_cast<bool>(_server));
     return _server->sendClose(id);
+}
+
+Err HttpServer::writeWsResponse(std::intptr_t id, HttpRequest const & request)
+{
+    HttpResponse response;
+    libtbag::http::updateDefaultWsResponse(response, request);
+    auto const RESPONSE_STRING = libtbag::http::toResponseString(response);
+    return _server->send(RESPONSE_STRING.data(), RESPONSE_STRING.size(), id);
 }
 
 Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)

@@ -38,6 +38,9 @@ namespace http {
 TBAG_CONSTEXPR char const * const HTTP_SCHEMA_LOWER  = "http";
 TBAG_CONSTEXPR char const * const HTTPS_SCHEMA_LOWER = "https";
 
+TBAG_CONSTEXPR char const * const WS_SCHEMA_LOWER  = "ws";
+TBAG_CONSTEXPR char const * const WSS_SCHEMA_LOWER = "wss";
+
 TBAG_CONSTEXPR char const * const HTTP = "HTTP";
 TBAG_CONSTEXPR char const * const   SP = " ";
 TBAG_CONSTEXPR char const * const CRLF = "\r\n";
@@ -946,6 +949,23 @@ struct HttpParams : public libtbag::mq::details::MqParams
             return websocket_key;
         }
     }
+
+    void updateWithSchema(std::string const & schema)
+    {
+        if (schema == HTTP_SCHEMA_LOWER) {
+            enable_tls = false;
+            enable_websocket = false;
+        } else if (schema == HTTPS_SCHEMA_LOWER) {
+            enable_tls = true;
+            enable_websocket = false;
+        } else if (schema == WS_SCHEMA_LOWER) {
+            enable_tls = false;
+            enable_websocket = true;
+        } else if (schema == WSS_SCHEMA_LOWER) {
+            enable_tls = true;
+            enable_websocket = true;
+        }
+    }
 };
 
 struct HttpClientCallbacks
@@ -981,8 +1001,16 @@ struct HttpClientParams : public HttpParams, public HttpClientCallbacks
     { /* EMPTY. */ }
 
     HttpClientParams(std::string const & uri, HttpClientCallbacks const & callbacks)
-            : HttpClientParams(libtbag::net::getAddrInfo(uri), callbacks)
+            : HttpClientParams(libtbag::net::Uri(uri), callbacks)
     { /* EMPTY. */ }
+
+    HttpClientParams(libtbag::net::Uri const & uri, HttpClientCallbacks const & callbacks)
+            : HttpClientParams(libtbag::net::getAddrInfo(uri), callbacks)
+    {
+        if (uri.isSchema()) {
+            updateWithSchema(uri.getSchema());
+        }
+    }
 
     HttpClientParams(libtbag::net::AddInfoResult const & addr, HttpClientCallbacks const & callbacks)
             : HttpClientParams(addr.address, addr.port, callbacks)
@@ -1051,8 +1079,16 @@ struct HttpServerParams : public HttpParams, public HttpServerCallbacks
     { /* EMPTY. */ }
 
     HttpServerParams(std::string const & uri, HttpServerCallbacks const & callbacks)
-            : HttpServerParams(libtbag::net::getAddrInfo(uri), callbacks)
+            : HttpServerParams(libtbag::net::Uri(uri), callbacks)
     { /* EMPTY. */ }
+
+    HttpServerParams(libtbag::net::Uri const & uri, HttpServerCallbacks const & callbacks)
+            : HttpServerParams(libtbag::net::getAddrInfo(uri), callbacks)
+    {
+        if (uri.isSchema()) {
+            updateWithSchema(uri.getSchema());
+        }
+    }
 
     HttpServerParams(libtbag::net::AddInfoResult const & addr, HttpServerCallbacks const & callbacks)
             : HttpServerParams(addr.address, addr.port, callbacks)

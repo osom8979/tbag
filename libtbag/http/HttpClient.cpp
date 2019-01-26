@@ -18,6 +18,12 @@ namespace http {
 using Loop     = HttpClient::Loop;
 using MqParams = HttpClient::MqParams;
 
+HttpClient::HttpClient(std::string const & uri, Callbacks const & callbacks)
+        : HttpClient(Params(uri, callbacks))
+{
+    assert(static_cast<bool>(_client));
+}
+
 HttpClient::HttpClient(std::string const & address, int port, Callbacks const & callbacks)
         : HttpClient(Params(address, port, callbacks))
 {

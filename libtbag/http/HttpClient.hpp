@@ -85,6 +85,7 @@ private:
     TlsState     _state;
 
 public:
+    HttpClient(std::string const & uri, Callbacks const & callbacks);
     HttpClient(std::string const & address, int port, Callbacks const & callbacks);
     HttpClient(Params const & params);
     virtual ~HttpClient();
