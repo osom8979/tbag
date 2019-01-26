@@ -55,6 +55,8 @@ public:
     using MqParams     = libtbag::mq::details::MqParams;
     using HttpRequest  = libtbag::http::HttpRequest;
     using HttpResponse = libtbag::http::HttpResponse;
+    using Callbacks    = libtbag::http::HttpClientCallbacks;
+    using Params       = libtbag::http::HttpClientParams;
     using Buffer       = libtbag::util::Buffer;
     using WsFrame      = libtbag::http::WsFrame;
 
@@ -73,7 +75,7 @@ public:
     STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpReaderInterface::Buffer);
 
 private:
-    HttpClientParams const PARAMS;
+    Params const PARAMS;
 
 private:
     UniqueClient _client;
@@ -83,7 +85,8 @@ private:
     TlsState     _state;
 
 public:
-    HttpClient(HttpClientParams const & params);
+    HttpClient(std::string const & address, int port, Callbacks const & callbacks);
+    HttpClient(Params const & params);
     virtual ~HttpClient();
 
 public:

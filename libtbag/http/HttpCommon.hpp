@@ -19,6 +19,7 @@
 #include <libtbag/algorithm/Swap.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/net/Ip.hpp>
+#include <libtbag/net/Uri.hpp>
 #include <libtbag/mq/details/MqCommon.hpp>
 
 #include <cstdint>
@@ -947,7 +948,7 @@ struct HttpParams : public libtbag::mq::details::MqParams
     }
 };
 
-struct HttpClientParams : public HttpParams
+struct HttpClientCallbacks
 {
     using OnBegin   = std::function<void(void)>;
     using OnEnd     = std::function<void(void)>;
@@ -963,10 +964,34 @@ struct HttpClientParams : public HttpParams
     OnMessage message_cb;
     OnError   error_cb;
 
-    HttpClientParams()
+    HttpClientCallbacks()
+    { /* EMPTY. */ }
+
+    ~HttpClientCallbacks()
+    { /* EMPTY. */ }
+};
+
+struct HttpClientParams : public HttpParams, public HttpClientCallbacks
+{
+    HttpClientParams() : HttpClientParams(HttpClientCallbacks())
+    { /* EMPTY. */ }
+
+    HttpClientParams(HttpClientCallbacks const & callbacks)
+            : HttpClientParams(libtbag::net::LOOPBACK_IPV4, DEFAULT_HTTP_PORT, callbacks)
+    { /* EMPTY. */ }
+
+    HttpClientParams(std::string const & uri, HttpClientCallbacks const & callbacks)
+            : HttpClientParams(libtbag::net::getAddrInfo(uri), callbacks)
+    { /* EMPTY. */ }
+
+    HttpClientParams(libtbag::net::AddInfoResult const & addr, HttpClientCallbacks const & callbacks)
+            : HttpClientParams(addr.address, addr.port, callbacks)
+    { /* EMPTY. */ }
+
+    HttpClientParams(std::string const & addr, int p, HttpClientCallbacks const & callbacks)
     {
-        address = libtbag::net::LOOPBACK_IPV4;
-        port = DEFAULT_HTTP_PORT;
+        address = addr;
+        port = p;
 
         send_queue_size = 2;
         recv_queue_size = 4;
@@ -974,13 +999,20 @@ struct HttpClientParams : public HttpParams
         wait_closing_millisec = 0;
         reconnect_delay_millisec = 0;
         wait_on_activation_timeout_millisec = 0;
+
+        begin_cb   = callbacks.begin_cb;
+        end_cb     = callbacks.end_cb;
+        http_cb    = callbacks.http_cb;
+        switch_cb  = callbacks.switch_cb;
+        message_cb = callbacks.message_cb;
+        error_cb   = callbacks.error_cb;
     }
 
     ~HttpClientParams()
     { /* EMPTY. */ }
 };
 
-struct HttpServerParams : public HttpParams
+struct HttpServerCallbacks
 {
     using OnBegin    = std::function<void(void)>;
     using OnEnd      = std::function<void(void)>;
@@ -1002,10 +1034,44 @@ struct HttpServerParams : public HttpParams
     OnHttp     http_cb;
     OnError    error_cb;
 
-    HttpServerParams()
+    HttpServerCallbacks()
+    { /* EMPTY. */ }
+
+    ~HttpServerCallbacks()
+    { /* EMPTY. */ }
+};
+
+struct HttpServerParams : public HttpParams, public HttpServerCallbacks
+{
+    HttpServerParams() : HttpServerParams(HttpServerCallbacks())
+    { /* EMPTY. */ }
+
+    HttpServerParams(HttpServerCallbacks const & callbacks)
+            : HttpServerParams(libtbag::net::ANY_IPV4, DEFAULT_HTTP_PORT, callbacks)
+    { /* EMPTY. */ }
+
+    HttpServerParams(std::string const & uri, HttpServerCallbacks const & callbacks)
+            : HttpServerParams(libtbag::net::getAddrInfo(uri), callbacks)
+    { /* EMPTY. */ }
+
+    HttpServerParams(libtbag::net::AddInfoResult const & addr, HttpServerCallbacks const & callbacks)
+            : HttpServerParams(addr.address, addr.port, callbacks)
+    { /* EMPTY. */ }
+
+    HttpServerParams(std::string const & addr, int p, HttpServerCallbacks const & callbacks)
     {
-        address = libtbag::net::ANY_IPV4;
-        port = DEFAULT_HTTP_PORT;
+        address = addr;
+        port = p;
+
+        begin_cb    = callbacks.begin_cb;
+        end_cb      = callbacks.end_cb;
+        accept_cb   = callbacks.accept_cb;
+        close_cb    = callbacks.close_cb;
+        continue_cb = callbacks.continue_cb;
+        switch_cb   = callbacks.switch_cb;
+        message_cb  = callbacks.message_cb;
+        http_cb     = callbacks.http_cb;
+        error_cb    = callbacks.error_cb;
     }
 
     ~HttpServerParams()

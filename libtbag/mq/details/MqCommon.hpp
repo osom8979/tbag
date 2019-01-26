@@ -636,6 +636,7 @@ struct TBAG_API MqParams
      * Wait until activation is completed.
      *
      * @remarks
+     *  This variable is used by the frontend thread to check that the background thread's loop is active. @n
      *  If this variable is 0, disable this feature.
      */
     std::size_t wait_on_activation_timeout_millisec = WAIT_ON_ACTIVATION_INFINITY;

@@ -53,36 +53,14 @@ public:
     using MqParams     = libtbag::mq::details::MqParams;
     using HttpRequest  = libtbag::http::HttpRequest;
     using HttpResponse = libtbag::http::HttpResponse;
+    using Callbacks    = libtbag::http::HttpServerCallbacks;
+    using Params       = libtbag::http::HttpServerParams;
     using Buffer       = libtbag::util::Buffer;
     using WsFrame      = libtbag::http::WsFrame;
 
     using HttpReaderInterface = libtbag::http::HttpReaderInterface;
     using NetStreamServer     = libtbag::net::socket::NetStreamServer;
     using UniqueServer        = std::unique_ptr<NetStreamServer>;
-
-    using OnBegin    = std::function<void(void)>;
-    using OnEnd      = std::function<void(void)>;
-    using OnAccept   = std::function<bool(std::intptr_t, std::string const &)>;
-    using OnClose    = std::function<void(std::intptr_t)>;
-    using OnContinue = std::function<void(std::intptr_t)>;
-    using OnSwitch   = std::function<bool(std::intptr_t, HttpRequest const &)>;
-    using OnMessage  = std::function<void(std::intptr_t, WsOpCode, Buffer const &)>;
-    using OnHttp     = std::function<HttpResponse(std::intptr_t, HttpRequest const &)>;
-    using OnError    = std::function<void(std::intptr_t, Err)>;
-
-public:
-    struct Callbacks
-    {
-        OnBegin    begin_cb;
-        OnEnd      end_cb;
-        OnAccept   accept_cb;
-        OnClose    close_cb;
-        OnContinue continue_cb;
-        OnSwitch   switch_cb;
-        OnMessage  message_cb;
-        OnHttp     http_cb;
-        OnError    error_cb;
-    };
 
 public:
     STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpReaderInterface::Buffer);
@@ -140,20 +118,15 @@ public:
     using NodeMap    = std::unordered_map<std::intptr_t, SharedNode>;
 
 public:
-    std::string const KEY;
-    bool const ENABLE_WEBSOCKET;
+    HttpServerParams const PARAMS;
 
 private:
     UniqueServer _server;
     NodeMap      _nodes;
 
-private:
-    Callbacks _callbacks;
-
 public:
-    HttpServer(std::string const & host, int ip, Callbacks const & cbs, bool use_websocket = false);
-    HttpServer(MqParams const & params, Callbacks const & cbs, bool use_websocket = false);
-    HttpServer(MqParams const & params, Callbacks const & cbs, std::string const & key, bool use_websocket = false);
+    HttpServer(std::string const & address, int port, Callbacks const & callbacks);
+    HttpServer(Params const & params);
     ~HttpServer();
 
 public:
@@ -193,9 +166,6 @@ public:
     Err writeClose  (std::intptr_t id, WsStatus const & status);
     Err writeClose  (std::intptr_t id, WsStatusCode code);
     Err writeClose  (std::intptr_t id);
-
-public:
-    static MqParams getDefaultParams(std::string const & host, int port = libtbag::http::DEFAULT_HTTP_PORT);
 };
 
 } // namespace http

@@ -15,20 +15,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace http {
 
-HttpServer::HttpServer(std::string const & host, int ip, Callbacks const & cbs, bool use_websocket)
-        : HttpServer(getDefaultParams(host, ip), cbs, use_websocket)
+HttpServer::HttpServer(std::string const & address, int port, Callbacks const & callbacks)
+        : HttpServer(Params(address, port, callbacks))
 {
     assert(static_cast<bool>(_server));
 }
 
-HttpServer::HttpServer(MqParams const & params, Callbacks const & cbs, bool use_websocket)
-        : HttpServer(params, cbs, std::string(), use_websocket)
-{
-    assert(static_cast<bool>(_server));
-}
-
-HttpServer::HttpServer(MqParams const & params, Callbacks const & cbs, std::string const & key, bool use_websocket)
-        : KEY(key), ENABLE_WEBSOCKET(use_websocket), _callbacks(cbs)
+HttpServer::HttpServer(Params const & params)
+        : PARAMS(params)
 {
     NetStreamServer::Callbacks server_cbs;
     server_cbs.begin_cb = [&](){
@@ -69,34 +63,30 @@ HttpServer::Loop const & HttpServer::loop() const
 
 void HttpServer::onBegin()
 {
-    if (_callbacks.begin_cb) {
-        _callbacks.begin_cb();
+    if (PARAMS.begin_cb) {
+        PARAMS.begin_cb();
     }
 }
 
 void HttpServer::onEnd()
 {
-    if (_callbacks.end_cb) {
-        _callbacks.end_cb();
+    if (PARAMS.end_cb) {
+        PARAMS.end_cb();
     }
 }
 
 bool HttpServer::onAccept(std::intptr_t id, std::string const & ip)
 {
-    if (_callbacks.accept_cb) {
-        auto const IS_ACCEPT = _callbacks.accept_cb(id, ip);
+    if (PARAMS.accept_cb) {
+        auto const IS_ACCEPT = PARAMS.accept_cb(id, ip);
         if (!IS_ACCEPT) {
             return false;
         }
     }
 
     SharedNode node;
-    if (ENABLE_WEBSOCKET) {
-        if (KEY.empty()) {
-            node = std::make_shared<Node>(this, id, libtbag::http::generateRandomWebSocketKey(), true);
-        } else {
-            node = std::make_shared<Node>(this, id, KEY, true);
-        }
+    if (PARAMS.enable_websocket) {
+        node = std::make_shared<Node>(this, id, PARAMS.getWebSocketKey(), true);
     } else {
         node = std::make_shared<Node>(this, id, std::string(), false);
     }
@@ -121,8 +111,8 @@ void HttpServer::onRecv(std::intptr_t id, char const * buffer, std::size_t size)
 
 void HttpServer::onClose(std::intptr_t id)
 {
-    if (_callbacks.close_cb) {
-        _callbacks.close_cb(id);
+    if (PARAMS.close_cb) {
+        PARAMS.close_cb(id);
     }
 
     auto const ERASE_RESULT = _nodes.erase(id);
@@ -132,26 +122,26 @@ void HttpServer::onClose(std::intptr_t id)
 void HttpServer::onContinue(Node * node)
 {
     assert(node != nullptr);
-    if (_callbacks.continue_cb) {
-        _callbacks.continue_cb(node->ID);
+    if (PARAMS.continue_cb) {
+        PARAMS.continue_cb(node->ID);
     }
 }
 
 bool HttpServer::onSwitchingProtocol(Node * node, HttpProperty const & property)
 {
     assert(node != nullptr);
-    if (_callbacks.switch_cb) {
-        return _callbacks.switch_cb(node->ID, static_cast<HttpRequest>(property));
+    if (PARAMS.switch_cb) {
+        return PARAMS.switch_cb(node->ID, static_cast<HttpRequest>(property));
     } else {
-        return ENABLE_WEBSOCKET;
+        return PARAMS.enable_websocket;
     }
 }
 
 void HttpServer::onWsMessage(Node * node, WsOpCode opcode, Buffer const & payload)
 {
     assert(node != nullptr);
-    if (_callbacks.message_cb) {
-        _callbacks.message_cb(node->ID, opcode, payload);
+    if (PARAMS.message_cb) {
+        PARAMS.message_cb(node->ID, opcode, payload);
     }
 }
 
@@ -160,8 +150,8 @@ void HttpServer::onRegularHttp(Node * node, HttpProperty const & property)
     assert(node != nullptr);
 
     HttpResponse response;
-    if (_callbacks.http_cb) {
-        response = _callbacks.http_cb(node->ID, static_cast<HttpRequest>(property));
+    if (PARAMS.http_cb) {
+        response = PARAMS.http_cb(node->ID, static_cast<HttpRequest>(property));
     }
     libtbag::http::updateDefaultResponse(response);
 
@@ -174,8 +164,8 @@ void HttpServer::onRegularHttp(Node * node, HttpProperty const & property)
 void HttpServer::onParseError(Node * node, Err code)
 {
     assert(node != nullptr);
-    if (_callbacks.error_cb) {
-        _callbacks.error_cb(node->ID, code);
+    if (PARAMS.error_cb) {
+        PARAMS.error_cb(node->ID, code);
     } else {
         auto const CLOSE_CODE = close(node->ID);
         tDLogE("HttpServer::onError({}) Close node({}) request: {}", code, node->ID, CLOSE_CODE);
@@ -202,7 +192,7 @@ Err HttpServer::close(std::intptr_t id)
 
 Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)
 {
-    if (!ENABLE_WEBSOCKET) {
+    if (!PARAMS.enable_websocket) {
         return Err::E_ILLSTATE;
     }
 
@@ -261,24 +251,6 @@ Err HttpServer::writeClose(std::intptr_t id, WsStatusCode code)
 Err HttpServer::writeClose(std::intptr_t id)
 {
     return writeClose(id, WsStatusCode::WSSC_NORMAL_CLOSURE);
-}
-
-HttpServer::MqParams HttpServer::getDefaultParams(std::string const & host, int port)
-{
-    MqParams params;
-    params.type = libtbag::mq::details::MqType::MT_TCP;
-    params.address = host;
-    params.port = port;
-    params.send_queue_size = 1024;
-    params.recv_queue_size = 1024;
-    params.wait_closing_millisec = 1000;
-    params.continuous_read_error_count = 4;
-    params.wait_on_activation_timeout_millisec = libtbag::mq::details::WAIT_ON_ACTIVATION_INFINITY;
-    params.wait_next_opcode_nanosec = 1000;
-    params.verbose = false;
-    params.user = nullptr;
-    params.on_create_loop = nullptr;
-    return params;
 }
 
 } // namespace http

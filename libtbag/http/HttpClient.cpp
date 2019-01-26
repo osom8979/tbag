@@ -18,7 +18,13 @@ namespace http {
 using Loop     = HttpClient::Loop;
 using MqParams = HttpClient::MqParams;
 
-HttpClient::HttpClient(HttpClientParams const & params)
+HttpClient::HttpClient(std::string const & address, int port, Callbacks const & callbacks)
+        : HttpClient(Params(address, port, callbacks))
+{
+    assert(static_cast<bool>(_client));
+}
+
+HttpClient::HttpClient(Params const & params)
         : PARAMS(params), _reader(this, params.getWebSocketKey(), params.enable_websocket),
           _state(TlsState::TS_NOT_READY)
 {
@@ -40,7 +46,6 @@ HttpClient::HttpClient(HttpClientParams const & params)
             onRecv(b, l);
         }
     };
-
     _client = std::make_unique<NetStreamClient>(params, client_cbs);
     assert(static_cast<bool>(_client));
 }
