@@ -60,6 +60,37 @@ bool MqMsgCopyTo::operator()(MqMsg * msg)
     return true;
 }
 
+// ------------------------
+// MqParams implementation.
+// ------------------------
+
+MqParams::MqParams()
+{
+    // EMPTY.
+}
+
+MqParams::~MqParams()
+{
+    // EMPTY.
+}
+
+void MqParams::update(std::string const & uri_string, MqParams const & default_params, bool auto_encode)
+{
+    (*this) = convertUriToParams(uri_string, default_params, auto_encode);
+}
+
+void MqParams::update(std::string const & uri_string, bool auto_encode)
+{
+    (*this) = convertUriToParams(uri_string, auto_encode);
+}
+
+void MqParams::updateOnlyAddresseAndPort(std::string const & uri_string, bool auto_encode)
+{
+    auto const PARAMS = convertUriToParams(uri_string, auto_encode);
+    address = PARAMS.address;
+    port = PARAMS.port;
+}
+
 // -----------------------
 // Miscellaneous utilities
 // -----------------------
@@ -162,7 +193,7 @@ MqParams convertUriToParams(std::string const & uri_string, MqParams const & def
         params.type = MqType::MT_TCP;
     }
 
-    if (params.type == MqType::MT_PIPE) {
+    if (params.type == MqType::MT_LOCAL || params.type == MqType::MT_PIPE) {
         params.address = uri.getPath();
         if (auto_encode) {
             params.address = Uri::decodePercent(params.address);
@@ -170,20 +201,9 @@ MqParams convertUriToParams(std::string const & uri_string, MqParams const & def
         params.address = params.address.substr(1); // Remove the slash('/')
         params.port = 0;
     } else {
-        if (libtbag::net::isIp(uri.getHost()) && uri.isPort()) {
-            params.address = uri.getHost();
-            params.port    = uri.getPortNumber();
-        } else {
-            std::string host;
-            int port;
-            if (isSuccess(uri.requestAddrInfo(host, port, Uri::AddrFlags::MOST_IPV4))) {
-                params.address = host;
-                params.port    = port;
-            } else {
-                params.address = uri.getHost();
-                params.port    = uri.getPortNumber();
-            }
-        }
+        auto const INFO = libtbag::net::getAddrInfo(uri);
+        params.address = INFO.address;
+        params.port = INFO.port;
     }
 
     std::map<std::string, std::string> queries;

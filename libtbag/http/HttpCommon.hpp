@@ -18,8 +18,11 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/algorithm/Swap.hpp>
 #include <libtbag/util/BufferInfo.hpp>
+#include <libtbag/net/Ip.hpp>
+#include <libtbag/mq/details/MqCommon.hpp>
 
 #include <cstdint>
+#include <functional>
 #include <regex>
 #include <string>
 #include <vector>
@@ -907,6 +910,106 @@ struct TBAG_API WsStatus
     static Err getReason(char const * payload_begin, std::size_t payload_length, std::string * result);
 
     std::string toString() const;
+};
+
+struct HttpParams : public libtbag::mq::details::MqParams
+{
+    /**
+     * Enable TLS feature.
+     */
+    bool enable_tls = false;
+
+    /**
+     * Enable WebSocket feature.
+     */
+    bool enable_websocket = false;
+
+    /**
+     * WebSocket key.
+     *
+     * If the key is empty, use the random key.
+     */
+    std::string websocket_key;
+
+    HttpParams()
+    { /* EMPTY. */ }
+
+    ~HttpParams()
+    { /* EMPTY. */ }
+
+    std::string getWebSocketKey() const
+    {
+        if (websocket_key.empty()) {
+            return generateRandomWebSocketKey();
+        } else {
+            return websocket_key;
+        }
+    }
+};
+
+struct HttpClientParams : public HttpParams
+{
+    using OnBegin   = std::function<void(void)>;
+    using OnEnd     = std::function<void(void)>;
+    using OnHttp    = std::function<void(HttpResponse const &)>;
+    using OnSwitch  = std::function<bool(HttpResponse const &)>;
+    using OnMessage = std::function<void(WsOpCode, HttpBuffer const &)>;
+    using OnError   = std::function<void(Err)>;
+
+    OnBegin   begin_cb;
+    OnEnd     end_cb;
+    OnHttp    http_cb;
+    OnSwitch  switch_cb;
+    OnMessage message_cb;
+    OnError   error_cb;
+
+    HttpClientParams()
+    {
+        address = libtbag::net::LOOPBACK_IPV4;
+        port = DEFAULT_HTTP_PORT;
+
+        send_queue_size = 2;
+        recv_queue_size = 4;
+
+        wait_closing_millisec = 0;
+        reconnect_delay_millisec = 0;
+        wait_on_activation_timeout_millisec = 0;
+    }
+
+    ~HttpClientParams()
+    { /* EMPTY. */ }
+};
+
+struct HttpServerParams : public HttpParams
+{
+    using OnBegin    = std::function<void(void)>;
+    using OnEnd      = std::function<void(void)>;
+    using OnAccept   = std::function<bool(std::intptr_t, std::string const &)>;
+    using OnClose    = std::function<void(std::intptr_t)>;
+    using OnContinue = std::function<void(std::intptr_t)>;
+    using OnSwitch   = std::function<bool(std::intptr_t, HttpRequest const &)>;
+    using OnMessage  = std::function<void(std::intptr_t, WsOpCode, HttpBuffer const &)>;
+    using OnHttp     = std::function<HttpResponse(std::intptr_t, HttpRequest const &)>;
+    using OnError    = std::function<void(std::intptr_t, Err)>;
+
+    OnBegin    begin_cb;
+    OnEnd      end_cb;
+    OnAccept   accept_cb;
+    OnClose    close_cb;
+    OnContinue continue_cb;
+    OnSwitch   switch_cb;
+    OnMessage  message_cb;
+    OnHttp     http_cb;
+    OnError    error_cb;
+
+    HttpServerParams()
+    {
+        address = libtbag::net::ANY_IPV4;
+        port = DEFAULT_HTTP_PORT;
+    }
+
+    ~HttpServerParams()
+    { /* EMPTY. */ }
 };
 
 } // namespace http

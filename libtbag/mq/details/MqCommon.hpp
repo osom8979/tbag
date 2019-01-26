@@ -504,7 +504,7 @@ using MqOnCreateLoop = void(*)(libtbag::uvpp::Loop & loop, MqParams const & para
 /**
  * User customizable option packs.
  */
-struct MqParams
+struct TBAG_API MqParams
 {
     /**
      * Type of stream. must be TCP or PIPE.
@@ -663,8 +663,13 @@ struct MqParams
      */
     MqOnCreateLoop on_create_loop = nullptr;
 
-    MqParams() { /* EMPTY. */ }
-    ~MqParams() { /* EMPTY. */ }
+    MqParams();
+    ~MqParams();
+
+    void update(std::string const & uri_string, MqParams const & default_params, bool auto_encode = true);
+    void update(std::string const & uri_string, bool auto_encode = true);
+
+    void updateOnlyAddresseAndPort(std::string const & uri_string, bool auto_encode = true);
 };
 
 TBAG_CONSTEXPR static char const * const TCP_IPV6_ONLY_NAME    = "tcp_ipv6";

@@ -436,12 +436,12 @@ std::string Uri::decodePercent(std::string const & text)
 // Miscellaneous utilities
 // -----------------------
 
-bool requestAddrInfo(std::string const & uri, std::string & address, int & port, Uri::AddrFlags flags)
+bool requestAddrInfo(std::string const & uri, std::string & address, int & port, AddrFlags flags)
 {
     return requestAddrInfo(Uri(uri), address, port, flags);
 }
 
-bool requestAddrInfo(Uri const & uri, std::string & address, int & port, Uri::AddrFlags flags)
+bool requestAddrInfo(Uri const & uri, std::string & address, int & port, AddrFlags flags)
 {
     bool update_address = false;
     bool update_port = false;
@@ -479,6 +479,18 @@ bool requestAddrInfo(Uri const & uri, std::string & address, int & port, Uri::Ad
         port = 0;
     }
     return false;
+}
+
+AddInfoResult getAddrInfo(std::string const & uri, AddrFlags flags)
+{
+    return getAddrInfo(Uri(uri), flags);
+}
+
+AddInfoResult getAddrInfo(Uri const & uri, AddrFlags flags)
+{
+    AddInfoResult result;
+    requestAddrInfo(uri, result.address, result.port, flags);
+    return result;
 }
 
 // *****************************************

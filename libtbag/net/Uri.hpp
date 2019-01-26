@@ -217,10 +217,21 @@ public:
 // Miscellaneous utilities
 // -----------------------
 
+using AddrFlags = Uri::AddrFlags;
+
 TBAG_API bool requestAddrInfo(std::string const & uri, std::string & address, int & port,
-                              Uri::AddrFlags flags = Uri::AddrFlags::MOST_IPV4);
+                              AddrFlags flags = AddrFlags::MOST_IPV4);
 TBAG_API bool requestAddrInfo(Uri const & uri, std::string & address, int & port,
-                              Uri::AddrFlags flags = Uri::AddrFlags::MOST_IPV4);
+                              AddrFlags flags = AddrFlags::MOST_IPV4);
+
+struct AddInfoResult
+{
+    std::string address;
+    int port;
+};
+
+TBAG_API AddInfoResult getAddrInfo(std::string const & uri, AddrFlags flags = AddrFlags::MOST_IPV4);
+TBAG_API AddInfoResult getAddrInfo(Uri const & uri, AddrFlags flags = AddrFlags::MOST_IPV4);
 
 /**
  * @warning

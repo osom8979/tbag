@@ -22,6 +22,7 @@
 #include <libtbag/http/HttpCommon.hpp>
 #include <libtbag/http/HttpParser.hpp>
 #include <libtbag/http/WsFrameBuffer.hpp>
+#include <libtbag/Type.hpp>
 
 #include <cstdint>
 #include <string>
@@ -42,6 +43,8 @@ namespace http {
 struct HttpReaderInterface
 {
     using Buffer = libtbag::util::Buffer;
+
+    STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpBuffer);
 
     HttpReaderInterface() { /* EMPTY. */ }
     virtual ~HttpReaderInterface() { /* EMPTY. */ }

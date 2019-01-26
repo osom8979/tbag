@@ -18,19 +18,13 @@ namespace http {
 using Loop     = HttpClient::Loop;
 using MqParams = HttpClient::MqParams;
 
-HttpClient::HttpClient(MqParams const & params, Callbacks const & cbs, bool use_websocket, bool enable_tls)
-        : HttpClient(params, cbs, libtbag::http::generateRandomWebSocketKey(), use_websocket, enable_tls)
-{
-    assert(static_cast<bool>(_client));
-}
-
-HttpClient::HttpClient(MqParams const & params, Callbacks const & cbs, std::string const & key,
-                       bool use_websocket, bool enable_tls)
-        : ENABLE_TLS(enable_tls), _reader(this, key, use_websocket), _state(TlsState::TS_NOT_READY), _callbacks(cbs)
+HttpClient::HttpClient(HttpClientParams const & params)
+        : PARAMS(params), _reader(this, params.getWebSocketKey(), params.enable_websocket),
+          _state(TlsState::TS_NOT_READY)
 {
     NetStreamClient::Callbacks client_cbs;
     client_cbs.begin_cb = [&]() {
-        if (ENABLE_TLS) {
+        if (PARAMS.enable_tls) {
             onBeginTls();
         } else {
             onBegin();
@@ -40,7 +34,7 @@ HttpClient::HttpClient(MqParams const & params, Callbacks const & cbs, std::stri
         onEnd();
     };
     client_cbs.recv_cb = [&](char const * b, std::size_t l){
-        if (ENABLE_TLS) {
+        if (PARAMS.enable_tls) {
             onRecvTls(b, l);
         } else {
             onRecv(b, l);
@@ -85,8 +79,8 @@ Err HttpClient::sendTls(std::string const & text)
 
 void HttpClient::onBegin()
 {
-    if (_callbacks.begin_cb) {
-        _callbacks.begin_cb();
+    if (PARAMS.begin_cb) {
+        PARAMS.begin_cb();
     }
 }
 
@@ -121,8 +115,8 @@ void HttpClient::onBeginTls()
 
 void HttpClient::onEnd()
 {
-    if (_callbacks.end_cb) {
-        _callbacks.end_cb();
+    if (PARAMS.end_cb) {
+        PARAMS.end_cb();
     }
 }
 
@@ -205,8 +199,8 @@ void HttpClient::onHandshakeExchangeKey(char const * buffer, std::size_t size)
     if (_tls.isFinished()) {
         tDLogD("HttpClient::onHandshakeExchangeKey() Handshake finish!");
         _state = TlsState::TS_FINISH;
-        if (_callbacks.begin_cb) {
-            _callbacks.begin_cb();
+        if (PARAMS.begin_cb) {
+            PARAMS.begin_cb();
         }
     } else {
         onError(HANDSHAKE_CODE);
@@ -247,8 +241,8 @@ void HttpClient::onApplication(char const * buffer, std::size_t size)
 
 void HttpClient::onError(Err code)
 {
-    if (_callbacks.error_cb) {
-        _callbacks.error_cb(code);
+    if (PARAMS.error_cb) {
+        PARAMS.error_cb(code);
     } else {
         auto const EXIT_CODE = exit();
         tDLogE("HttpClient::onError({}) Exit request: {}", code, EXIT_CODE);
@@ -262,8 +256,8 @@ void HttpClient::onContinue(void * arg)
 
 bool HttpClient::onSwitchingProtocol(HttpProperty const & property, void * arg)
 {
-    if (_callbacks.switch_cb) {
-        return _callbacks.switch_cb(static_cast<HttpResponse>(property));
+    if (PARAMS.switch_cb) {
+        return PARAMS.switch_cb(static_cast<HttpResponse>(property));
     } else {
         return _reader.isEnableWebsocket();
     }
@@ -271,15 +265,15 @@ bool HttpClient::onSwitchingProtocol(HttpProperty const & property, void * arg)
 
 void HttpClient::onWsMessage(WsOpCode opcode, Buffer const & payload, void * arg)
 {
-    if (_callbacks.message_cb) {
-        _callbacks.message_cb(opcode, payload);
+    if (PARAMS.message_cb) {
+        PARAMS.message_cb(opcode, payload);
     }
 }
 
 void HttpClient::onRegularHttp(HttpProperty const & property, void * arg)
 {
-    if (_callbacks.http_cb) {
-        _callbacks.http_cb(static_cast<HttpResponse>(property));
+    if (PARAMS.http_cb) {
+        PARAMS.http_cb(static_cast<HttpResponse>(property));
     }
 }
 
@@ -310,7 +304,7 @@ Err HttpClient::writeRequest(HttpRequest const & request)
     HttpRequest update_request = request;
     libtbag::http::updateDefaultRequest(update_request);
 
-    if (ENABLE_TLS) {
+    if (PARAMS.enable_tls) {
         return sendTls(libtbag::http::toRequestString(update_request));
     } else {
         return _client->send(libtbag::http::toRequestString(update_request));
@@ -338,7 +332,7 @@ Err HttpClient::writeWsRequest(HttpRequest const & request)
         tDLogW("HttpClient::writeWsRequest() Not a GET method: {}", request.method);
     }
 
-    if (ENABLE_TLS) {
+    if (PARAMS.enable_tls) {
         return sendTls(libtbag::http::toRequestString(ws_request));
     } else {
         return _client->send(libtbag::http::toRequestString(ws_request));
@@ -359,7 +353,7 @@ Err HttpClient::writeWsFrame(WsFrame const & frame)
         return Err::E_ECOPY;
     }
 
-    if (ENABLE_TLS) {
+    if (PARAMS.enable_tls) {
         return sendTls(buffer.data(), buffer.size());
     } else {
         return _client->send(buffer.data(), buffer.size());
@@ -395,46 +389,6 @@ Err HttpClient::writeClose()
     WsFrame frame;
     frame.close(_masking.gen());
     return writeWsFrame(frame);
-}
-
-MqParams HttpClient::getDefaultParams(std::string const & uri, int timeout_millisec)
-{
-    return getDefaultParams(Uri(uri), timeout_millisec);
-}
-
-MqParams HttpClient::getDefaultParams(Uri const & uri, int timeout_millisec)
-{
-    MqParams params;
-    params.type = libtbag::mq::details::MqType::MT_TCP;
-    params.send_queue_size = 2;
-    params.recv_queue_size = 8;
-    params.wait_closing_millisec = 0;
-    params.continuous_read_error_count = 4;
-    params.connect_timeout_millisec = (std::size_t)(timeout_millisec >= 1 ? timeout_millisec : 4 * 1000);
-    params.reconnect_count = 1;
-    params.reconnect_delay_millisec = 0;
-    params.wait_on_activation_timeout_millisec = 0;
-    params.wait_next_opcode_nanosec = 1000;
-    params.verbose = false;
-    params.user = nullptr;
-    params.on_create_loop = nullptr;
-
-    if (libtbag::net::isIp(uri.getHost()) && uri.isPort()) {
-        params.address = uri.getHost();
-        params.port    = uri.getPortNumber();
-    } else {
-        std::string host;
-        int port;
-        if (isSuccess(uri.requestAddrInfo(host, port, Uri::AddrFlags::MOST_IPV4))) {
-            params.address = host;
-            params.port    = port;
-        } else {
-            params.address = uri.getHost();
-            params.port    = uri.getPortNumber();
-        }
-    }
-
-    return params;
 }
 
 } // namespace http

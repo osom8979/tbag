@@ -66,32 +66,14 @@ public:
     using NetStreamClient     = libtbag::net::socket::NetStreamClient;
     using UniqueClient        = std::unique_ptr<NetStreamClient>;
 
-    using OnBegin   = std::function<void(void)>;
-    using OnEnd     = std::function<void(void)>;
-    using OnHttp    = std::function<void(HttpResponse const &)>;
-    using OnSwitch  = std::function<bool(HttpResponse const &)>;
-    using OnMessage = std::function<void(WsOpCode, Buffer const &)>;
-    using OnError   = std::function<void(Err)>;
-
 public:
     friend struct libtbag::http::HttpReaderForCallback<HttpClient>;
 
 public:
     STATIC_ASSERT_CHECK_IS_SAME(Buffer, HttpReaderInterface::Buffer);
 
-public:
-    struct Callbacks
-    {
-        OnBegin   begin_cb;
-        OnEnd     end_cb;
-        OnHttp    http_cb;
-        OnSwitch  switch_cb;
-        OnMessage message_cb;
-        OnError   error_cb;
-    };
-
 private:
-    bool const ENABLE_TLS;
+    HttpClientParams const PARAMS;
 
 private:
     UniqueClient _client;
@@ -100,14 +82,8 @@ private:
     Tls          _tls;
     TlsState     _state;
 
-private:
-    Callbacks _callbacks;
-
 public:
-    HttpClient(MqParams const & params, Callbacks const & cbs,
-               bool use_websocket = false, bool enable_tls = false);
-    HttpClient(MqParams const & params, Callbacks const & cbs, std::string const & key,
-               bool use_websocket = false, bool enable_tls = false);
+    HttpClient(HttpClientParams const & params);
     virtual ~HttpClient();
 
 public:
@@ -159,10 +135,6 @@ public:
     Err writeBinary (char const * buffer, std::size_t size, bool finish = true);
     Err writeBinary (Buffer const & buffer, bool finish = true);
     Err writeClose  ();
-
-public:
-    static MqParams getDefaultParams(std::string const & uri, int timeout_millisec);
-    static MqParams getDefaultParams(Uri const & uri, int timeout_millisec);
 };
 
 } // namespace http

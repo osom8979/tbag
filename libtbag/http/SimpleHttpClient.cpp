@@ -43,23 +43,23 @@ SimpleHttpClient::SimpleHttpClient(Uri const & uri, std::string const & method,
     _request.updateDefaultRequest();
 
     using namespace libtbag::string;
-    auto const ENABLE_TLS = (lower(trim(uri.getSchema())) == HTTPS_SCHEMA_LOWER);
-    auto const PARAMS = HttpClient::getDefaultParams(uri, timeout_millisec);
-
-    HttpClient::Callbacks cbs;
-    cbs.begin_cb = [&](){
+    HttpClientParams params;
+    params.connect_timeout_millisec = (std::size_t)timeout_millisec;
+    params.updateOnlyAddresseAndPort(uri);
+    params.enable_tls = (lower(trim(uri.getSchema())) == HTTPS_SCHEMA_LOWER);
+    params.begin_cb = [&](){
         onBegin();
     };
-    cbs.end_cb = [&](){
+    params.end_cb = [&](){
         onEnd();
     };
-    cbs.http_cb = [&](HttpResponse const & response){
+    params.http_cb = [&](HttpResponse const & response){
         onRegularHttp(response);
     };
-    cbs.error_cb = [&](Err code){
+    params.error_cb = [&](Err code){
         onError(code);
     };
-    _client = std::make_unique<HttpClient>(PARAMS, cbs, false, ENABLE_TLS);
+    _client = std::make_unique<HttpClient>(params);
     assert(static_cast<bool>(_client));
 }
 
