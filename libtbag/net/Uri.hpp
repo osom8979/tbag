@@ -213,6 +213,15 @@ public:
     static std::string decodePercent(std::string const & text);
 };
 
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
+
+TBAG_API bool requestAddrInfo(std::string const & uri, std::string & address, int & port,
+                              Uri::AddrFlags flags = Uri::AddrFlags::MOST_IPV4);
+TBAG_API bool requestAddrInfo(Uri const & uri, std::string & address, int & port,
+                              Uri::AddrFlags flags = Uri::AddrFlags::MOST_IPV4);
+
 /**
  * @warning
  *  This method checks for errors that are found.

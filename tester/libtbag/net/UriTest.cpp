@@ -164,6 +164,32 @@ TEST(UriTest, EncodeDecode)
     ASSERT_STREQ("A\\B", QUERIES.at("temp").c_str());
 }
 
+TEST(UriTest, Request)
+{
+    std::string address;
+    int port;
+
+    ASSERT_TRUE(requestAddrInfo("http://localhost", address, port));
+    ASSERT_EQ(libtbag::net::LOOPBACK_IPV4, address);
+    ASSERT_EQ(80, port);
+
+    ASSERT_TRUE(requestAddrInfo("https://127.0.0.1/", address, port));
+    ASSERT_EQ(libtbag::net::LOOPBACK_IPV4, address);
+    ASSERT_EQ(443, port);
+
+    ASSERT_TRUE(requestAddrInfo("ws://localhost", address, port));
+    ASSERT_EQ(libtbag::net::LOOPBACK_IPV4, address);
+    ASSERT_EQ(80, port);
+
+    ASSERT_TRUE(requestAddrInfo("wss://127.0.0.1/", address, port));
+    ASSERT_EQ(libtbag::net::LOOPBACK_IPV4, address);
+    ASSERT_EQ(443, port);
+
+    ASSERT_TRUE(requestAddrInfo("wss://127.0.0.1:9999/", address, port));
+    ASSERT_EQ(libtbag::net::LOOPBACK_IPV4, address);
+    ASSERT_EQ(9999, port);
+}
+
 TEST(UriTest, DISABLE_HTTP_PARSER_URL_FIELDS)
 {
     __check_error__http_parser_url_fields();

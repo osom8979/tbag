@@ -13,6 +13,7 @@
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Dns.hpp>
+#include <libtbag/net/Ip.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <http_parser.h>
@@ -329,12 +330,12 @@ bool Uri::encodeParse(std::string const & uri, bool is_connect)
 
 Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
 {
-    if (isHost() == false) {
+    if (!isHost()) {
         tDLogE("Uri::requestAddrInfo() Unknown host: {}", _uri);
         return Err::E_ILLSTATE;
     }
 
-    if (isPort() == false && isSchema() == false) {
+    if (!isPort() && !isSchema()) {
         tDLogE("Uri::requestAddrInfo() Unknown schema or port: {}", _uri);
         return Err::E_ILLSTATE;
     }
@@ -342,21 +343,21 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
     std::string const HOST    = getHost();
     std::string const SERVICE = isSchema() ? getSchema() : std::string();
 
-    assert(HOST.empty() == false);
+    assert(!HOST.empty());
 
-    uvpp::Loop loop;
-    uvpp::DnsAddrInfo addr;
+    libtbag::uvpp::Loop loop;
+    libtbag::uvpp::DnsAddrInfo addr;
 
     Err const REQUEST_RESULT = addr.requestAddrInfoWithSync(loop, HOST, SERVICE);
     if (REQUEST_RESULT != Err::E_SUCCESS) {
         return REQUEST_RESULT;
     }
 
-    uvpp::DnsAddrInfo::FindFlag find_flag;
+    libtbag::uvpp::DnsAddrInfo::FindFlag find_flag;
     if (flags == AddrFlags::MOST_IPV6) {
-        find_flag = uvpp::DnsAddrInfo::FindFlag::MOST_IPV6;
+        find_flag = libtbag::uvpp::DnsAddrInfo::FindFlag::MOST_IPV6;
     } else {
-        find_flag = uvpp::DnsAddrInfo::FindFlag::MOST_IPV4;
+        find_flag = libtbag::uvpp::DnsAddrInfo::FindFlag::MOST_IPV4;
     }
 
     auto * info = addr.findSockAddr(find_flag);
@@ -367,12 +368,12 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
         }
     }
 
-    host = uvpp::getIpName(info);
+    host = libtbag::uvpp::getIpName(info);
     if (isPort()) {
         port = getPortNumber();
     } else {
-        assert(SERVICE.empty() == false);
-        port = uvpp::getPortNumber(info);
+        assert(!SERVICE.empty());
+        port = libtbag::uvpp::getPortNumber(info);
     }
 
     return Err::E_SUCCESS;
@@ -429,6 +430,55 @@ std::string Uri::encodePercent(std::string const & text)
 std::string Uri::decodePercent(std::string const & text)
 {
     return libtbag::codec::decodePercent(text);
+}
+
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
+
+bool requestAddrInfo(std::string const & uri, std::string & address, int & port, Uri::AddrFlags flags)
+{
+    return requestAddrInfo(Uri(uri), address, port, flags);
+}
+
+bool requestAddrInfo(Uri const & uri, std::string & address, int & port, Uri::AddrFlags flags)
+{
+    bool update_address = false;
+    bool update_port = false;
+
+    if (libtbag::net::isIp(uri.getHost())) {
+        address = uri.getHost();
+        update_address = true;
+    }
+
+    if (uri.isPort()) {
+        port = uri.getPortNumber();
+        update_port = true;
+    }
+
+    if (update_address && update_port) {
+        return true;
+    }
+
+    std::string temp_address;
+    int temp_port;
+    if (isSuccess(uri.requestAddrInfo(temp_address, temp_port, flags))) {
+        if (!update_address) {
+            address = std::move(temp_address);
+        }
+        if (!update_port) {
+            port = temp_port;
+        }
+        return true;
+    }
+
+    if (!update_address) {
+        address = libtbag::net::ANY_IPV4;
+    }
+    if (!update_port) {
+        port = 0;
+    }
+    return false;
 }
 
 // *****************************************

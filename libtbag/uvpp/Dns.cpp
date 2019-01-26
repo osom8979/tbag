@@ -8,6 +8,7 @@
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <uv.h>
@@ -58,6 +59,17 @@ static void __global_uv_getnameinfo_cb__(uv_getnameinfo_t * req, int status, cha
         }
         r->onGetNameInfo(convertUvErrorToErr(status), hostname_str, service_str);
     }
+}
+
+static std::string __exchange_service_name_cb__(std::string const & service)
+{
+    auto const LOWER_SERVICE_NAME = libtbag::string::lower(service);
+    if (LOWER_SERVICE_NAME == "ws") {
+        return "http";
+    } else if (LOWER_SERVICE_NAME == "wss") {
+        return "https";
+    }
+    return service;
 }
 
 // ---------------------------
@@ -175,8 +187,9 @@ Err DnsAddrInfo::requestAddrInfo(Loop & loop,
     // Changed in version 1.3.0:
     // the callback parameter is now allowed to be NULL, in which case the request will run synchronously.
 
+    auto const CHANGED_SERVICE_NAME = __exchange_service_name_cb__(service);
     char const * real_hostname = hostname.c_str();
-    char const * real_service  = service.empty() ? nullptr : service.c_str();
+    char const * real_service  = CHANGED_SERVICE_NAME.empty() ? nullptr : CHANGED_SERVICE_NAME.c_str();
 
     int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
                                       __global_uv_getaddrinfo_cb__, real_hostname, real_service, hints);
@@ -188,8 +201,9 @@ Err DnsAddrInfo::requestAddrInfoWithSync(Loop & loop,
                                          std::string const & service,
                                          struct addrinfo const * hints)
 {
+    auto const CHANGED_SERVICE_NAME = __exchange_service_name_cb__(service);
     char const * real_hostname = hostname.c_str();
-    char const * real_service  = service.empty() ? nullptr : service.c_str();
+    char const * real_service  = CHANGED_SERVICE_NAME.empty() ? nullptr : CHANGED_SERVICE_NAME.c_str();
 
     int const CODE = ::uv_getaddrinfo(loop.cast<uv_loop_t>(), Parent::cast<uv_getaddrinfo_t>(),
                                       nullptr, real_hostname, real_service, hints);
