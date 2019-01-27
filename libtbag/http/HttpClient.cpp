@@ -120,7 +120,7 @@ void HttpClient::onBeginTls()
 
     tDLogD("HttpClient::onBeginTls() Update state: Not ready -> Hello");
     assert(_state == TlsState::TS_NOT_READY);
-    _state = TlsState::TS_HELLO;
+    _state = TlsState::TS_HANDSHAKE;
 }
 
 void HttpClient::onEnd()
@@ -142,7 +142,7 @@ void HttpClient::onRecvTls(char const * buffer, std::size_t size)
         onError(Err::E_ILLSTATE);
         return;
 
-    case TlsState::TS_HELLO:
+    case TlsState::TS_HANDSHAKE:
         onHandshakeHello(buffer, size);
         return;
 
@@ -162,7 +162,7 @@ void HttpClient::onRecvTls(char const * buffer, std::size_t size)
 
 void HttpClient::onHandshakeHello(char const * buffer, std::size_t size)
 {
-    assert(_state == TlsState::TS_HELLO);
+    assert(_state == TlsState::TS_HANDSHAKE);
 
     Err const READ_BUFFER_CODE = _tls.writeToReadBuffer(buffer, size);
     if (isFailure(READ_BUFFER_CODE)) {

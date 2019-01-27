@@ -120,6 +120,17 @@ TBAG_API std::string getPrintbleInformationFromPemX509(
         std::string const & request_options);
 TBAG_API std::string getPrintbleInformationFromPemX509(std::string const & pem_x509);
 
+struct X509Pem
+{
+    std::string private_key;
+    std::string certificate;
+
+    X509Pem() { /* EMPTY. */ }
+    ~X509Pem() { /* EMPTY. */ }
+};
+
+TBAG_API X509Pem genX509Pem();
+
 } // namespace crypto
 
 // --------------------

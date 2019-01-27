@@ -154,16 +154,6 @@ struct Tls::Impl : private Noncopyable
         }
     }
 
-    Impl(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len)
-    {
-        if (!initPem(cert_buffer, cert_len, key_buffer, key_len)) {
-            throw std::bad_alloc();
-        }
-        if (!initBio()) {
-            throw std::bad_alloc();
-        }
-    }
-
     Impl(std::shared_ptr<SSL_CTX> const & ctx) : context(ctx)
     {
         if (!initBio(ctx.get())) {
@@ -214,12 +204,10 @@ struct Tls::Impl : private Noncopyable
      * @remarks
      *  X.509 base64
      */
-    bool initPem(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len)
+    bool initPem(std::string const & cert_pem, std::string const & key_pem)
     {
-        assert(cert_buffer != nullptr);
-        assert(cert_len >= 1);
-        assert(key_buffer != nullptr);
-        assert(key_len >= 1);
+        assert(!cert_pem.empty());
+        assert(!key_pem.empty());
 
         context.reset(SSL_CTX_new(SSLv23_server_method()), [](SSL_CTX * ctx){
             SSL_CTX_free(ctx);
@@ -232,13 +220,13 @@ struct Tls::Impl : private Noncopyable
 
         SSL_CTX_set_ecdh_auto(context.get(), 1);
 
-        auto const CERT_CODE = SSL_CTX_use_certificate_memory(context.get(), cert_buffer, cert_len, SSL_FILETYPE_PEM);
+        auto const CERT_CODE = SSL_CTX_use_certificate_memory(context.get(), cert_pem.data(), (int)cert_pem.size(), SSL_FILETYPE_PEM);
         if (CERT_CODE <= 0) {
             tDLogE("Tls::Impl::initPem() Certificate memory error: {}", CERT_CODE);
             return false;
         }
 
-        auto const KEY_CODE = SSL_CTX_use_PrivateKey_memory(context.get(), key_buffer, key_len, SSL_FILETYPE_PEM);
+        auto const KEY_CODE = SSL_CTX_use_PrivateKey_memory(context.get(), key_pem.data(), (int)key_pem.size(), SSL_FILETYPE_PEM);
         if (KEY_CODE <= 0) {
             tDLogE("Tls::Impl::initPem() Private key memory error: {}", KEY_CODE);
             return false;
@@ -251,33 +239,6 @@ struct Tls::Impl : private Noncopyable
         }
 
         return true;
-    }
-
-    bool initPem(std::string const & cert_pem, std::string const & key_pem)
-    {
-        return initPem(cert_pem.data(), (int)cert_pem.size(), key_pem.data(), (int)key_pem.size());
-    }
-
-    bool initPemPath(std::string const & cert_pem, std::string const & key_pem)
-    {
-        using namespace libtbag::util;
-        using namespace libtbag::filesystem;
-
-        Buffer cert_buffer;
-        auto const CERT_CODE = readFile(cert_pem, cert_buffer);
-        if (isFailure(CERT_CODE)) {
-            tDLogE("Tls::Impl::initPemPath() Read error({}) of certificate file: {}", CERT_CODE, cert_pem);
-            return false;
-        }
-
-        Buffer key_buffer;
-        auto const KEY_CODE = readFile(key_pem, key_buffer);
-        if (isFailure(KEY_CODE)) {
-            tDLogE("Tls::Impl::initPemPath() Read error({}) of private key file: {}", KEY_CODE, key_pem);
-            return false;
-        }
-
-        return initPem(cert_buffer.data(), (int)cert_buffer.size(), key_buffer.data(), (int)key_buffer.size());
     }
 
     bool initBio()
@@ -545,8 +506,14 @@ Tls::Tls(std::string const & cert_pem, std::string const & key_pem)
     assert(static_cast<bool>(_impl));
 }
 
-Tls::Tls(char const * cert_buffer, int cert_len, char const * key_buffer, int key_len)
-        : _impl(std::make_unique<Impl>(cert_buffer, cert_len, key_buffer, key_len))
+Tls::Tls(X509Pem const & x509)
+        : _impl(std::make_unique<Impl>(x509.certificate, x509.private_key))
+{
+    assert(static_cast<bool>(_impl));
+}
+
+Tls::Tls(create_memory_cert const & UNUSED_PARAM(init))
+        : Tls(genX509Pem())
 {
     assert(static_cast<bool>(_impl));
 }
@@ -647,6 +614,135 @@ std::vector<char> Tls::decode(Err * code)
         *code = ENCODE_CODE;
     }
     return result;
+}
+
+// ------------------------
+// TlsReader implementation
+// ------------------------
+
+TlsReader::TlsReader(TlsReaderInterface * cb)
+        : _tls(), _callback(cb), _state(TlsState::TS_NOT_READY)
+{
+    // EMPTY.
+}
+
+TlsReader::TlsReader(TlsReaderInterface * cb, std::string const & cert_pem, std::string const & key_pem)
+        : _tls(cert_pem, key_pem), _callback(cb), _state(TlsState::TS_NOT_READY)
+{
+    // EMPTY.
+}
+
+TlsReader::TlsReader(TlsReaderInterface * cb, mem_crt const & UNUSED_PARAM(init))
+        : _tls(mem_crt{}), _callback(cb), _state(TlsState::TS_NOT_READY)
+{
+    // EMPTY.
+}
+
+TlsReader::TlsReader(TlsReaderInterface * cb, ref_ssl const & UNUSED_PARAM(init), Tls const & tls)
+        : _tls(ref_ssl{}, tls), _callback(cb), _state(TlsState::TS_NOT_READY)
+{
+    // EMPTY.
+}
+
+TlsReader::~TlsReader()
+{
+    // EMPTY.
+}
+
+Err TlsReader::connect()
+{
+    _tls.connect();
+    Err const HANDSHAKE_CODE = _tls.handshake();
+    // Handshake is not finished, we can ignore it.
+    assert(HANDSHAKE_CODE == Err::E_SSLWREAD);
+
+    Buffer buffer;
+    Err const WRITE_BUFFER_CODE = _tls.readFromWriteBuffer(buffer);
+    if (isFailure(WRITE_BUFFER_CODE)) {
+        return WRITE_BUFFER_CODE;
+    }
+
+    // [CLIENT HELLO]
+    Err const WRITE_CODE = _callback->onWrite(buffer.data(), buffer.size());
+    if (isFailure(WRITE_CODE)) {
+        return WRITE_CODE;
+    }
+
+    tDLogD("TlsReader::connect() Update state: Not ready -> Connect & Handshaking");
+    assert(_state == TlsState::TS_NOT_READY);
+    _state = TlsState::TS_HANDSHAKE;
+    return Err::E_SUCCESS;
+}
+
+Err TlsReader::accept()
+{
+    _tls.accept();
+
+    tDLogD("TlsReader::accept() Update state: Not ready -> Accept & Handshaking");
+    assert(_state == TlsState::TS_NOT_READY);
+    _state = TlsState::TS_HANDSHAKE;
+    return Err::E_SUCCESS;
+}
+
+Err TlsReader::parse(char const * buffer, std::size_t size)
+{
+    switch (_state) {
+    case TlsState::TS_NOT_READY: return Err::E_ILLSTATE;
+    case TlsState::TS_HANDSHAKE: return onHandshaking(buffer, size);
+    case TlsState::TS_FINISH:    return onApplication(buffer, size);
+    default:                     return Err::E_UNKNOWN;
+    }
+}
+
+Err TlsReader::onHandshaking(char const * buffer, std::size_t size)
+{
+    assert(_state == TlsState::TS_HANDSHAKE);
+
+    Err const READ_BUFFER_CODE = _tls.writeToReadBuffer(buffer, size);
+    if (isFailure(READ_BUFFER_CODE)) {
+        return READ_BUFFER_CODE;
+    }
+
+    Err const HANDSHAKE_CODE = _tls.handshake();
+    if (HANDSHAKE_CODE != Err::E_SSL_NONE) {
+        if (HANDSHAKE_CODE == Err::E_SSLWREAD) {
+            Buffer write_buffer;
+            _tls.readFromWriteBuffer(write_buffer); // Skip error code check.
+
+            if (!write_buffer.empty()) {
+                auto const WRITE_CODE = _callback->onWrite(write_buffer.data(), write_buffer.size());
+                if (isFailure(WRITE_CODE)) {
+                    return WRITE_CODE;
+                }
+            }
+        } else {
+            return HANDSHAKE_CODE;
+        }
+    }
+
+    if (_tls.isFinished()) {
+        tDLogD("TlsReader::onHandshaking() Update state: Handshaking -> Finish");
+        _state = TlsState::TS_FINISH;
+    }
+    return Err::E_SUCCESS;
+}
+
+Err TlsReader::onApplication(char const * buffer, std::size_t size)
+{
+    assert(_state == TlsState::TS_FINISH);
+
+    Err decode_code;
+    auto const BUFFER = _tls.decode(buffer, size, &decode_code);
+    if (isFailure(decode_code)) {
+        return decode_code;
+    }
+
+    auto const READ_CODE = _callback->onRead(BUFFER.data(), BUFFER.size());
+    if (isFailure(READ_CODE)) {
+        return READ_CODE;
+    }
+
+    return Err::E_SUCCESS;
 }
 
 } // namespace crypto

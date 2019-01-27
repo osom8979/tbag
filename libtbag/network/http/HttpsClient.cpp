@@ -95,7 +95,7 @@ void HttpsClient::onConnect(Err code)
 
     tDLogD("HttpsClient::onConnect() Update state: Not ready -> Hello");
     assert(_state == TlsState::TS_NOT_READY);
-    _state = TlsState::TS_HELLO;
+    _state = TlsState::TS_HANDSHAKE;
 }
 
 void HttpsClient::onRead(Err code, ReadPacket const & packet)
@@ -113,7 +113,7 @@ void HttpsClient::onRead(Err code, ReadPacket const & packet)
         onError(EventType::ET_READ, Err::E_ILLSTATE);
         return;
 
-    case TlsState::TS_HELLO:
+    case TlsState::TS_HANDSHAKE:
         onHandshakeHello(packet);
         return;
 
@@ -138,7 +138,7 @@ void HttpsClient::onParseError(Err code, void * arg)
 
 void HttpsClient::onHandshakeHello(ReadPacket const & packet)
 {
-    assert(_state == TlsState::TS_HELLO);
+    assert(_state == TlsState::TS_HANDSHAKE);
 
     Err const READ_BUFFER_CODE = _tls.writeToReadBuffer(packet.buffer, packet.size);
     if (isFailure(READ_BUFFER_CODE)) {

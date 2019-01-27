@@ -7,6 +7,7 @@
 
 #include <libtbag/crypto/X509.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/crypto/Rsa.hpp>
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -488,6 +489,14 @@ std::string getPrintbleInformationFromPemX509(std::string const & pem_x509,
 std::string getPrintbleInformationFromPemX509(std::string const & pem_x509)
 {
     return getPrintbleInformationFromPemX509(pem_x509, std::string(), std::string());
+}
+
+X509Pem genX509Pem()
+{
+    X509Pem result;
+    result.private_key = Rsa::generatePemPrivateKey();
+    result.certificate = generateSelfSignedCertificate(result.private_key, generateCsrVersion1(result.private_key));
+    return result;
 }
 
 } // namespace crypto
