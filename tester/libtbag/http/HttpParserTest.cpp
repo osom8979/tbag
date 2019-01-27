@@ -85,3 +85,39 @@ TEST(HttpParserTest, Response)
     ASSERT_LT(0, http.property().body.size());
 }
 
+TEST(HttpParserTest, DefaultRequest)
+{
+    std::string buffer;
+    buffer += "GET / HTTP/1.1\r\n";
+    buffer += "Accept:*/*\r\n";
+    buffer += "Host:localhost\r\n";
+    buffer += "User-Agent:libtbag/0.9.0\r\n";
+    buffer += "\r\n";
+
+    HttpParser http;
+    ASSERT_EQ(Err::E_SUCCESS, http.execute(buffer.data(), buffer.size()));
+    ASSERT_TRUE(http.isFinish());
+
+    ASSERT_EQ(1, http.property().http_major);
+    ASSERT_EQ(1, http.property().http_minor);
+    ASSERT_EQ(0, http.property().body.size());
+}
+
+TEST(HttpParserTest, DefaultResponse)
+{
+    std::string buffer;
+    buffer += "HTTP/1.1 200 OK\r\n";
+    buffer += "Content-Type:text/html; charset=utf-8\r\n";
+    buffer += "Content-Length:0\r\n";
+    buffer += "Server:libtbag/0.9.0\r\n";
+    buffer += "\r\n";
+
+    HttpParser http;
+    ASSERT_EQ(Err::E_SUCCESS, http.execute(buffer.data(), buffer.size()));
+    ASSERT_TRUE(http.isFinish());
+
+    ASSERT_EQ(1, http.property().http_major);
+    ASSERT_EQ(1, http.property().http_minor);
+    ASSERT_EQ(0, http.property().body.size());
+}
+

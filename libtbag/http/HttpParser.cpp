@@ -278,7 +278,7 @@ int __global_http_on_chunk_complete__(http_parser * parser)
 // HttpParser implementation.
 // --------------------------
 
-HttpParser::HttpParser(ParserType type) : _impl(new ParserImpl(this, type))
+HttpParser::HttpParser(ParserType type) : _impl(std::make_unique<ParserImpl>(this, type))
 {
     assert(static_cast<bool>(_impl));
 }

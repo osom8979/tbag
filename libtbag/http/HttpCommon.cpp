@@ -612,10 +612,7 @@ void updateDefaultResponse(HttpCommon & common, HttpBaseResponse & response)
 {
     insertIfNotExists(common.header, HEADER_SERVER, DEFAULT_VALUE_OF_SERVER);
     insertIfNotExists(common.header, HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
-
-    if (!common.body.empty()) {
-        insertIfNotExists(common.header, HEADER_CONTENT_LENGTH, std::to_string(common.body.size()));
-    }
+    insertIfNotExists(common.header, HEADER_CONTENT_LENGTH, std::to_string(common.body.size()));
 
     // @formatter:off
     if (response.code == 0) { setHttpStatus(response, HttpStatus::SC_OK); }

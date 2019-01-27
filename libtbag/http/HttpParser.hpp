@@ -53,7 +53,7 @@ public:
     friend struct ParserImpl;
 
 public:
-    using UniqueParserImpl = std::shared_ptr<ParserImpl>;
+    using UniqueParserImpl = std::unique_ptr<ParserImpl>;
 
 private:
     UniqueParserImpl _impl;
