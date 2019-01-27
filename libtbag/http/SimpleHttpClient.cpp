@@ -43,22 +43,14 @@ SimpleHttpClient::SimpleHttpClient(Uri const & uri, std::string const & method,
     _request.updateDefaultRequest();
 
     using namespace libtbag::string;
-    HttpClientParams params;
+    using namespace std::placeholders;
+    HttpClient::Callbacks cbs;
+    cbs.begin_cb = std::bind(&SimpleHttpClient::onBegin, this);
+    cbs.end_cb   = std::bind(&SimpleHttpClient::onEnd, this);
+    cbs.http_cb  = std::bind(&SimpleHttpClient::onRegularHttp, this, _1);
+    cbs.error_cb = std::bind(&SimpleHttpClient::onError, this, _1);
+    HttpClientParams params(uri, cbs);
     params.connect_timeout_millisec = (std::size_t)timeout_millisec;
-    params.updateOnlyAddresseAndPort(uri);
-    params.enable_tls = (lower(trim(uri.getSchema())) == HTTPS_SCHEMA_LOWER);
-    params.begin_cb = [&](){
-        onBegin();
-    };
-    params.end_cb = [&](){
-        onEnd();
-    };
-    params.http_cb = [&](HttpResponse const & response){
-        onRegularHttp(response);
-    };
-    params.error_cb = [&](Err code){
-        onError(code);
-    };
     _client = std::make_unique<HttpClient>(params);
     assert(static_cast<bool>(_client));
 }

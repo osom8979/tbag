@@ -34,6 +34,7 @@ HttpClient::HttpClient(Params const & params)
         : PARAMS(params), _reader(this, params.getWebSocketKey(), params.enable_websocket),
           _state(TlsState::TS_NOT_READY)
 {
+    using namespace std::placeholders;
     NetStreamClient::Callbacks client_cbs;
     client_cbs.begin_cb = [&]() {
         if (PARAMS.enable_tls) {
@@ -42,9 +43,7 @@ HttpClient::HttpClient(Params const & params)
             onBegin();
         }
     };
-    client_cbs.end_cb = [&]() {
-        onEnd();
-    };
+    client_cbs.end_cb = std::bind(&HttpClient::onEnd, this);
     client_cbs.recv_cb = [&](char const * b, std::size_t l){
         if (PARAMS.enable_tls) {
             onRecvTls(b, l);

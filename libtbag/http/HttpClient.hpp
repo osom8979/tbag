@@ -103,6 +103,7 @@ private:
 private:
     void onBegin();
     void onBeginTls();
+
     void onEnd();
     void onRecv(char const * buffer, std::size_t size);
     void onRecvTls(char const * buffer, std::size_t size);
