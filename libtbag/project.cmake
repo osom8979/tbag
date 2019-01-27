@@ -57,11 +57,6 @@ if (USE_GUI)
     tbag_modules__apply_openal ()
 endif ()
 
-set (TPOT_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot.fbs")
-set (TPOT_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/tpot_t2s.h")
-tbag_modules__build_dep_flatc_cpp (tpot_fbs "${TPOT_FBS_SRC}")
-tbag_modules__text_to_cpp11string (tpot_t2s "${TPOT_T2S_PATH}" tpot __tpot__ "${TPOT_FBS_SRC}")
-
 set (BOX_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/box.fbs")
 set (BOX_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/box_t2s.h")
 tbag_modules__build_dep_flatc_cpp (box_fbs "${BOX_FBS_SRC}")
