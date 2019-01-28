@@ -167,10 +167,10 @@ void tbRelease()
 // Tpot entry-point.
 // -----------------
 
-//#include <libtbag/tpot/TpotMain.hpp>
+#include <libtbag/tpot/TpotMain.hpp>
 
 int tbPotMain(int argc, char ** argv, char ** envs)
 {
-//    return libtbag::tpot::runTpotMain(argc, argv, envs);
+    return libtbag::tpot::TpotMain(argc, argv, envs).run();
 }
 

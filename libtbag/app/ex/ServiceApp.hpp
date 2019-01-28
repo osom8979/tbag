@@ -66,12 +66,14 @@ protected:
     Version       _version;
     SharedModel   _config;
     std::string   _config_path;
+    std::string   _service_name;
 
 protected:
     bool _enable_help;
     bool _enable_verbose;
     bool _enable_version;
     bool _enable_create_config;
+    bool _enable_service;
 
 public:
     ServiceApp(std::string const & config_name, int argc, char ** argv, char ** envs, bool init_tbag = false);
@@ -122,6 +124,8 @@ protected:
     void installVersionOptions(int major, int minor = 0, int patch = 0);
 
     void installCreateConfig();
+
+    void installServiceOptions(std::string const & service_name);
 
     /**
      * @}

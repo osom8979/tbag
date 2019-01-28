@@ -225,6 +225,10 @@ public:
             installCreateConfig();
         }
 
+        if (_params.install_service) {
+            installServiceOptions(_params.service_name);
+        }
+
         if (_params.options_cb) {
             _params.options_cb(atOptions());
         }
@@ -276,19 +280,6 @@ public:
 
     virtual int onRunning(std::vector<std::string> const & args) override
     {
-        if (!_params.service_name.empty()) {
-            createService(_params.service_name);
-            std::cout << "Enable service mode: " << _params.service_name << std::endl;
-
-            libtbag::Err const START_CODE = start();
-            if (isFailure(START_CODE)) {
-                std::cerr << "Service start " << START_CODE << " error" << std::endl;
-                return EXIT_FAILURE;
-            }
-            using namespace libtbag::signal;
-            registerTerminateHandler();
-        }
-
         assert(static_cast<bool>(_values));
         RunnerParams params;
         params.envs    = envs();

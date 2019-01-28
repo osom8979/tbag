@@ -26,6 +26,7 @@
 #define SERVICE_APP_OPTIONS_VERBOSE        "verbose"
 #define SERVICE_APP_OPTIONS_VERSION        "version"
 #define SERVICE_APP_OPTIONS_CREATE_CONFIG  "create_config"
+#define SERVICE_APP_OPTIONS_SERVICE        "service"
 
 #define SERVICE_APP_ENVIRONMENT_TITLE      "TITLE"
 
@@ -56,7 +57,8 @@ ServiceApp::ServiceApp(std::string const & config_name, int argc, char ** argv, 
         : libtbag::app::Application(argc, argv, envs, init_tbag),
           _options(SERVICE_APP_OPTIONS_PREFIX, SERVICE_APP_OPTIONS_DELIMITER),
           _envs(envs), _version(), _config(), _config_path(),
-          _enable_help(false), _enable_verbose(false), _enable_version(false), _enable_create_config(false)
+          _enable_help(false), _enable_verbose(false), _enable_version(false),
+          _enable_create_config(false), _enable_service(false)
 {
     using namespace libtbag::container;
     _config = newGlobalObject<DefaultXmlModel>(GLOBAL_MODEL_OBJECT_KEY, config_name);
@@ -170,6 +172,13 @@ void ServiceApp::installCreateConfig()
                            "If the config file does not exist, create it.");
 }
 
+void ServiceApp::installServiceOptions(std::string const & service_name)
+{
+    _service_name = service_name;
+    _options.insertDefault(SERVICE_APP_OPTIONS_SERVICE, &_enable_service, true,
+                           "Start program on service mode.");
+}
+
 bool ServiceApp::updateConfig()
 {
     using namespace libtbag::filesystem;
@@ -258,6 +267,23 @@ int ServiceApp::run()
             std::cerr << "onLoad event failed.\n";
             return EXIT_FAILURE;
         }
+    }
+
+    if (_enable_service) {
+        if (_service_name.empty()) {
+            std::cerr << "Undefined service name.\n";
+            return EXIT_FAILURE;
+        }
+
+        createService(_service_name);
+        std::cout << "Enable service mode: " << _service_name << std::endl;
+
+        auto const START_CODE = start();
+        if (isFailure(START_CODE)) {
+            std::cerr << "Service start " << START_CODE << " error" << std::endl;
+            return EXIT_FAILURE;
+        }
+        registerTerminateHandler();
     }
 
     return onRunning(cmds);

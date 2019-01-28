@@ -170,7 +170,15 @@ public:
         std::string config_name;
 
         /**
-         * Start program on service(daemon) mode.
+         * Install service options.
+         *
+         * @remarks
+         *  <code>service_name</code> is required to install service options.
+         */
+        bool install_service = false;
+
+        /**
+         * Service(daemon) name.
          */
         std::string service_name;
 

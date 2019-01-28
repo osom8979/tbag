@@ -67,8 +67,6 @@ public:
     /**
      * Server-side constructor.
      *
-     * @param[in] cb
-     *      TLS callback interface.
      * @param[in] cert_pem
      *      Certificated PEM text.
      * @param[in] key_pem
@@ -79,21 +77,16 @@ public:
 
     /**
      * Server-side constructor that creates an in-memory certificate.
-     *
-     * @param[in] init
-     *      Unused reference.
      */
-    Tls(create_memory_cert const & UNUSED_PARAM(init));
+    Tls(create_memory_cert);
 
     /**
      * Server-side node constructor.
      *
-     * @param[in] init
-     *      Unused reference.
      * @param[in] tls
      *      Original Tls context.
      */
-    Tls(reference_ssl_context const & UNUSED_PARAM(init), Tls const & tls);
+    Tls(reference_ssl_context, Tls const & tls);
 
     ~Tls();
 

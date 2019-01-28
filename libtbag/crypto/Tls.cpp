@@ -512,13 +512,13 @@ Tls::Tls(X509Pem const & x509)
     assert(static_cast<bool>(_impl));
 }
 
-Tls::Tls(create_memory_cert const & UNUSED_PARAM(init))
+Tls::Tls(create_memory_cert)
         : Tls(genX509Pem())
 {
     assert(static_cast<bool>(_impl));
 }
 
-Tls::Tls(reference_ssl_context const & UNUSED_PARAM(init), Tls const & tls)
+Tls::Tls(reference_ssl_context, Tls const & tls)
         : _impl(std::make_unique<Impl>(tls._impl->context))
 {
     assert(static_cast<bool>(_impl));
