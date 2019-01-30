@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -qq update
 RUN apt-get install -y g++ cmake
-RUN apt-get install -y software-properties-common git curl ccache
+RUN apt-get install -y software-properties-common git curl ccache doxygen
 
 RUN add-apt-repository ppa:jonathonf/ffmpeg-4
 RUN apt-get -qq update
