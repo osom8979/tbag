@@ -3,7 +3,7 @@
 [![](https://travis-ci.org/osom8979/tbag.svg?branch=master)](https://travis-ci.org/osom8979/tbag "TravisCI Build Status")
 [![](https://ci.appveyor.com/api/projects/status/github/osom8979/tbag?branch=master&svg=true)](https://ci.appveyor.com/project/osom8979/tbag "AppVeyor Build Status")
 [![](https://codecov.io/gh/osom8979/tbag/branch/master/graph/badge.svg)](https://codecov.io/gh/osom8979/tbag "Codecov Coverage Status")
-[![](https://images.microbadger.com/badges/version/osom8979/tbag.svg)](https://microbadger.com/images/osom8979/tbag "DockerHub Container Version")
+[![](https://images.microbadger.com/badges/version/osom8979/tbag.svg)](https://hub.docker.com/r/osom8979/tbag "DockerHub Container Version")
 [![](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE "MIT License")
 
 ## Introduction
