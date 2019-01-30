@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/app/ex/DefaultApp.hpp>
+#include <libtbag/tpot/apps/PotManager.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,10 +38,12 @@ public:
     using HelpCommander = DefaultApp::HelpCommander;
     using Element       = DefaultApp::Element;
     using Params        = DefaultApp::Params;
+    using PotManager    = libtbag::tpot::apps::PotManager;
 
 private:
-    DefaultApp _app;
-    Params _params;
+    DefaultApp  _app;
+    Params      _params;
+    PotManager  _manager;
 
 public:
     TpotMain();

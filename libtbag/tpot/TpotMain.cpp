@@ -7,6 +7,7 @@
 
 #include <libtbag/tpot/TpotMain.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/app/ex/ServiceApp.hpp>
 #include <libtbag/string/Format.hpp>
 #include <libtbag/util/Version.hpp>
 
@@ -21,19 +22,9 @@ namespace tpot {
 
 TBAG_CONSTEXPR static char const * const SYNOPSIS_TEXT =
         "TpoT is a command-line utility for the tbag library.\n"
-        "Usage: tpot [options] [command] [args] ...\n";
+        "Usage: tpot [options] [application] [args] ...\n";
 TBAG_CONSTEXPR static char const * const CONFIG_NAME = "config.xml";
 TBAG_CONSTEXPR static char const * const SERVICE_NAME = "tpot";
-
-static std::string __get_default_remarks_text__()
-{
-    using namespace libtbag::string;
-    std::stringstream ss;
-    ss << std::endl
-       << "List of Commands:" << std::endl << std::endl
-       << " pm  Process Manager" << std::endl;
-    return ss.str();
-}
 
 TpotMain::TpotMain() : TpotMain(0, nullptr)
 {
@@ -58,7 +49,6 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
     _params.install_synopsis = true;
     _params.synopsis = SYNOPSIS_TEXT;
     _params.install_remarks = true;
-    _params.remarks = __get_default_remarks_text__();
     _params.install_create_config = false;
     _params.config_name = CONFIG_NAME;
     _params.install_service = true;
@@ -68,6 +58,15 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
     _params.options_cb = std::bind(&TpotMain::onOptions, this, _1);
     _params.properties_cb = std::bind(&TpotMain::onInfo, this, _1);
     _params.std_signal = std::bind(&TpotMain::onTerminateSignal, this, _1);
+
+    _manager.registerDefaultPots();
+
+    COMMENT("Update Remarks") {
+        std::stringstream ss;
+        ss << std::endl << _manager.getRemarks()
+           << libtbag::app::ex::ServiceApp::getDefaultRemarks();
+        _params.remarks = ss.str();
+    }
 }
 
 TpotMain::~TpotMain()
@@ -87,9 +86,9 @@ void TpotMain::onTerminateSignal(int signum)
 
 void TpotMain::onOptions(HelpCommander & commander)
 {
-    using namespace libtbag::string;
-    commander.insert("pm", [&](Arguments const & args){
-    }, "Process Manager");
+    //using namespace libtbag::string;
+    //commander.insert("pm", [&](Arguments const & args){
+    //}, "Process Manager");
 }
 
 void TpotMain::onInfo(Element const & element)
@@ -98,7 +97,7 @@ void TpotMain::onInfo(Element const & element)
 
 int TpotMain::onRun(RunnerParams const & params)
 {
-    return EXIT_SUCCESS;
+    return _manager.run(params);
 }
 
 } // namespace tpot

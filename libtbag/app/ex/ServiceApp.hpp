@@ -98,6 +98,10 @@ public:
     inline bool isEnableVerbose() const TBAG_NOEXCEPT { return _enable_verbose; }
     inline bool isEnableVersion() const TBAG_NOEXCEPT { return _enable_version; }
 
+public:
+    static std::string getDefaultSynopsis();
+    static std::string getDefaultRemarks();
+
 protected:
 
     /**
@@ -106,9 +110,6 @@ protected:
      *  This protected groups can be called from the onCreate() function.
      * @{
      */
-
-    static std::string getDefaultSynopsis();
-    static std::string getDefaultRemarks();
 
     void installDefaultSynopsis();
     void installDefaultSynopsis(std::string const & synopsis);
