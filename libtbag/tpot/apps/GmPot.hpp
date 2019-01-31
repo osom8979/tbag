@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/tpot/apps/BasePot.hpp>
+#include <libtbag/gui/Window.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,7 +31,7 @@ namespace apps {
  * @author zer0
  * @date   2019-01-30
  */
-class TBAG_API GmPot : public BasePot
+class TBAG_API GmPot : public BasePot, public libtbag::gui::Window
 {
 public:
     GmPot();
