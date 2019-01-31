@@ -10,6 +10,7 @@
 #include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/string/Format.hpp>
 
+#include <libtbag/tpot/apps/GamePot.hpp>
 #include <libtbag/tpot/apps/GmPot.hpp>
 #include <libtbag/tpot/apps/LuaPot.hpp>
 
@@ -49,6 +50,7 @@ std::size_t PotManager::registerDefaultPots()
 #ifndef __INSERT_NEW_POT
 #define __INSERT_NEW_POT(t) if (insertPot<t>()) { count++; }
 #endif
+    __INSERT_NEW_POT(GamePot);
     __INSERT_NEW_POT(GmPot);
     __INSERT_NEW_POT(LuaPot);
 #undef __INSERT_NEW_POT
