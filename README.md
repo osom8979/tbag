@@ -33,6 +33,7 @@ Tea-bag is Third party extension utility project.
 - lemon 1.3.1 (Boost Software License, Version 1.0)
 - nanosvg master-2b08dee (zlib license)
 - lfds 7.1.1 (Public domain)
+- termbox 1.1.2 (MIT license)
 
 ## Dependencies (TBUI)
 
