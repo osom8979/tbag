@@ -423,47 +423,47 @@ if (NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL)
 endif ()
 
 if (NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
-  # Generate the pkg-config file
-  if (UNIX)
-    file(READ ${PROJECT_SOURCE_DIR}/builds/unix/freetype2.in FREETYPE2_PC_IN)
-
-    string(REPLACE ";" ", " PKG_CONFIG_REQUIRED_PRIVATE "${PKG_CONFIG_REQUIRED_PRIVATE}")
-
-    string(REPLACE "%prefix%" ${CMAKE_INSTALL_PREFIX}
-           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
-    string(REPLACE "%exec_prefix%" "\${prefix}"
-           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
-    string(REPLACE "%libdir%" "\${prefix}/${CMAKE_INSTALL_LIBDIR}"
-           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
-    string(REPLACE "%includedir%" "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}"
-           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
-    string(REPLACE "%ft_version%" "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
-           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
-    string(REPLACE "%REQUIRES_PRIVATE%" "${PKG_CONFIG_REQUIRED_PRIVATE}"
-           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
-    string(REPLACE "%LIBS_PRIVATE%" ""  # All libs support pkg-config
-           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
-
-    file(WRITE ${PROJECT_BINARY_DIR}/freetype2.pc ${FREETYPE2_PC_IN})
-
-    install(
-      FILES ${PROJECT_BINARY_DIR}/freetype2.pc
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-      COMPONENT pkgconfig)
-  endif ()
+#  # Generate the pkg-config file
+#  if (UNIX)
+#    file(READ ${PROJECT_SOURCE_DIR}/builds/unix/freetype2.in FREETYPE2_PC_IN)
+#
+#    string(REPLACE ";" ", " PKG_CONFIG_REQUIRED_PRIVATE "${PKG_CONFIG_REQUIRED_PRIVATE}")
+#
+#    string(REPLACE "%prefix%" ${CMAKE_INSTALL_PREFIX}
+#           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+#    string(REPLACE "%exec_prefix%" "\${prefix}"
+#           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+#    string(REPLACE "%libdir%" "\${prefix}/${CMAKE_INSTALL_LIBDIR}"
+#           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+#    string(REPLACE "%includedir%" "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}"
+#           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+#    string(REPLACE "%ft_version%" "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}"
+#           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+#    string(REPLACE "%REQUIRES_PRIVATE%" "${PKG_CONFIG_REQUIRED_PRIVATE}"
+#           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+#    string(REPLACE "%LIBS_PRIVATE%" ""  # All libs support pkg-config
+#           FREETYPE2_PC_IN ${FREETYPE2_PC_IN})
+#
+#    file(WRITE ${PROJECT_BINARY_DIR}/freetype2.pc ${FREETYPE2_PC_IN})
+#
+#    install(
+#      FILES ${PROJECT_BINARY_DIR}/freetype2.pc
+#      DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+#      COMPONENT pkgconfig)
+#  endif ()
 
   install(
     TARGETS freetype
       EXPORT freetype-targets
-      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      LIBRARY DESTINATION lib
+      ARCHIVE DESTINATION lib
       FRAMEWORK DESTINATION Library/Frameworks
       COMPONENT libraries)
-  install(
-    EXPORT freetype-targets
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freetype
-      FILE freetype-config.cmake
-      COMPONENT headers)
+#  install(
+#    EXPORT freetype-targets
+#      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/freetype
+#      FILE freetype-config.cmake
+#      COMPONENT headers)
 endif ()
 
 
