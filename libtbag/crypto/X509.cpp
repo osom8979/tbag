@@ -28,6 +28,10 @@
 #define X509_FLAG_CA (X509_FLAG_NO_ISSUER | X509_FLAG_NO_PUBKEY | X509_FLAG_NO_HEADER | X509_FLAG_NO_VERSION)
 #endif
 
+#if defined(TBAG_PLATFORM_WINDOWS)
+#define strcasecmp _stricmp
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
