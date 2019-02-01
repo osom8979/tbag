@@ -626,7 +626,7 @@ macro (tbag_modules__apply_ext_sfml_ignore_gl_al)
     tbag_modules__add_whole_archive (${sfml_graphics_EXT_STATIC_LIB})
 
     if (WIN32)
-        # TODO: Windows
+        list (APPEND TBAG_PROJECT_LDFLAGS winmm.lib, gdi32.lib)
     elseif (UNIX)
         if (APPLE)
             list (APPEND TBAG_PROJECT_LDFLAGS -ObjC
