@@ -23,7 +23,8 @@ tbag_modules__append_definitions (
     JSON_DLL_BUILD
     TINYXML2_EXPORT
     LMDB_EXPORT_API
-    SQLITE_EXPORT_API)
+    SQLITE_EXPORT_API
+    SFML_STATIC)
 
 ## Thread settings.
 tbag_modules__apply_thread ()
