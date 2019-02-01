@@ -624,7 +624,6 @@ macro (tbag_modules__apply_ext_sfml_ignore_gl_al)
     tbag_modules__add_whole_archive (${sfml_system_EXT_STATIC_LIB})
     tbag_modules__add_whole_archive (${sfml_window_EXT_STATIC_LIB})
     tbag_modules__add_whole_archive (${sfml_graphics_EXT_STATIC_LIB})
-    tbag_modules__add_whole_archive (${sfml_audio_EXT_STATIC_LIB})
 
     if (WIN32)
         # TODO: Windows

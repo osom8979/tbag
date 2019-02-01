@@ -362,18 +362,15 @@ if (USE_GUI)
     set (sfml_system_EXT_STATIC_LIB     "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-system-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
     set (sfml_window_EXT_STATIC_LIB     "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-window-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
     set (sfml_graphics_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-graphics-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-    set (sfml_audio_EXT_STATIC_LIB      "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sfml-audio-s${sfml_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
     set (sfml_EXT_LIBRARIES             "${sfml_system_EXT_STATIC_LIB}"
-            "${sfml_window_EXT_STATIC_LIB}"
-            "${sfml_graphics_EXT_STATIC_LIB}"
-            "${sfml_audio_EXT_STATIC_LIB}")
+                                        "${sfml_window_EXT_STATIC_LIB}"
+                                        "${sfml_graphics_EXT_STATIC_LIB}")
     exists_files (sfml_EXT_EXISTS ${sfml_EXT_LIBRARIES})
 
     if (sfml_EXT_EXISTS)
         message (STATUS "Skip external/sfml_system (Exists: ${sfml_system_EXT_STATIC_LIB})")
         message (STATUS "Skip external/sfml_window (Exists: ${sfml_window_EXT_STATIC_LIB})")
         message (STATUS "Skip external/sfml_graphics (Exists: ${sfml_graphics_EXT_STATIC_LIB})")
-        message (STATUS "Skip external/sfml_audio (Exists: ${sfml_audio_EXT_STATIC_LIB})")
     else ()
         message (STATUS "Add external/sfml")
         ExternalProject_Add (sfml_ext
@@ -395,7 +392,7 @@ if (USE_GUI)
                            "-DCMAKE_FIND_ROOT_PATH=${EXT_INSTALL_DIR}"
                            "-DSFML_BUILD_WINDOW=ON"
                            "-DSFML_BUILD_GRAPHICS=ON"
-                           "-DSFML_BUILD_AUDIO=ON"
+                           "-DSFML_BUILD_AUDIO=OFF"
                            "-DSFML_BUILD_NETWORK=OFF"
                            "-DSFML_BUILD_DOC=OFF"
                 #--Output logging-------------
@@ -406,7 +403,7 @@ if (USE_GUI)
                 LOG_TEST      1
                 LOG_INSTALL   1
                 #--Dependencies---------------
-                DEPENDS ogg vorbis flac freetype)
+                DEPENDS freetype)
         fake_output_library (sfml_ext_output sfml_ext ${sfml_EXT_LIBRARIES})
     endif ()
     add_custom_target (sfml DEPENDS ${sfml_EXT_LIBRARIES})

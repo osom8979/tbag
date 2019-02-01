@@ -74,18 +74,15 @@ tbag_config__find_thread ()
 tbag_config__default_generate_c_header ()
 
 tbag_config__set_library_option (USE_OPENGL   OpenGL    OPENGL_FOUND)
-tbag_config__set_library_option (USE_OPENAL   OpenAL    OPENAL_FOUND)
 tbag_config__set_library_option (USE_CUDA     TbagCUDA  CUDA_FOUND)
 tbag_config__set_library_option (USE_DOXYGEN  Doxygen   DOXYGEN_FOUND)
 
-if (OPENGL_FOUND AND OPENAL_FOUND)
+tbag_config__set_option (USE_GUI ${OPENGL_FOUND})
+if (USE_GUI)
     message (STATUS "Enable GUI library")
-    set (ENABLE_GLAL ON)
 else ()
     message (STATUS "Disable GUI library")
-    set (ENABLE_GLAL OFF)
 endif ()
-tbag_config__set_option (USE_GUI ${ENABLE_GLAL})
 
 ## External project.
 include (${CMAKE_SOURCE_DIR}/external/External.cmake)

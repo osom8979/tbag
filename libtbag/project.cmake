@@ -53,8 +53,6 @@ if (USE_GUI)
     tbag_modules__apply_ext_sfml_ignore_gl_al ()
     tbag_modules__check_opengl ()
     tbag_modules__apply_opengl ()
-    tbag_modules__check_openal ()
-    tbag_modules__apply_openal ()
 endif ()
 
 set (BOX_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/box.fbs")

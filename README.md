@@ -57,17 +57,16 @@ Tea-bag is Third party extension utility project.
 
 ### SFML Dependencies
 
-- freetype (embedded)
 - x11
 - xrandr
 - udev
 - opengl
+- freetype (embedded)
 - flac (embedded)
 - ogg (embedded)
 - vorbis (embedded)
 - vorbisenc (embedded)
 - vorbisfile (embedded)
-- openal (On Windows platforms, it is embedded)
 - pthread (os/compiler supported)
 
 ```bash
