@@ -37,7 +37,7 @@ Commander::Commander(Commander const & obj)
     (*this) = obj;
 }
 
-Commander::Commander(Commander && obj)
+Commander::Commander(Commander && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }
@@ -59,7 +59,7 @@ Commander & Commander::operator =(Commander const & obj)
     return *this;
 }
 
-Commander & Commander::operator =(Commander && obj)
+Commander & Commander::operator =(Commander && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _prefix.swap(obj._prefix);

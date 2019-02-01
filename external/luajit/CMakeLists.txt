@@ -303,7 +303,9 @@ set ( LJCORE_C
   ${LJLIB_C}
 )
 
-add_library ( liblua ${LJCORE_C} ${DEPS} )
+set (LUA_C src/luajit.c)
+
+add_library ( liblua ${LJCORE_C} ${LUA_C} ${DEPS})
 target_link_libraries ( liblua ${LIBS} )
 set_target_properties ( liblua PROPERTIES OUTPUT_NAME lua CLEAN_DIRECT_OUTPUT 1 )
 

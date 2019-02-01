@@ -67,4 +67,6 @@ LUA_API int luaJIT_setmode(lua_State *L, int idx, int mode);
 /* Enforce (dynamic) linker error for version mismatches. Call from main. */
 LUA_API void LUAJIT_VERSION_SYM(void);
 
+LUA_API int __lua_cmd_main__(int argc, char **argv);
+
 #endif

@@ -76,12 +76,12 @@ public:
     Commander(std::string const & prefix, std::string const & delimiter);
     Commander(Callback const & default_callback);
     Commander(Commander const & obj);
-    Commander(Commander && obj);
+    Commander(Commander && obj) TBAG_NOEXCEPT;
     virtual ~Commander();
 
 public:
     Commander & operator =(Commander const & obj);
-    Commander & operator =(Commander && obj);
+    Commander & operator =(Commander && obj) TBAG_NOEXCEPT;
 
 public:
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(_commands.empty())

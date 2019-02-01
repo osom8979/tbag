@@ -7,8 +7,12 @@
 
 #include <libtbag/tpot/apps/LuaPot.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/script/LuaBypass.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
+#include <cassert>
 #include <iostream>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,8 +43,22 @@ char const * const LuaPot::getRemarks() const TBAG_NOEXCEPT
 
 int LuaPot::onMain()
 {
-    std::cout << "lua\n";
-    return 0;
+    auto arg0 = libtbag::filesystem::Path::getExePath().toString();
+    auto original_args = args();
+    auto const ORIGINAL_ARGS_SIZE = original_args.size();
+
+    assert(!arg0.empty());
+    assert(ORIGINAL_ARGS_SIZE >= 1);
+
+    std::vector<char*> argv;
+    argv.push_back(&(arg0[0]));
+    for (std::size_t i = 1; i < ORIGINAL_ARGS_SIZE; ++i) {
+        argv.push_back(&(original_args[i][0]));
+    }
+    argv.push_back(nullptr);
+    assert(argv.size() >= 2);
+
+    return libtbag::script::luac(static_cast<int>(argv.size()), argv.data());
 }
 
 } // namespace apps
