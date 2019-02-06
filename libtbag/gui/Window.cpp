@@ -32,27 +32,23 @@ Window::~Window()
     // EMPTY.
 }
 
-int Window::run()
+int Window::run(unsigned int width, unsigned int height, unsigned int bpp)
 {
 #if defined(USE_GUI)
     sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Green);
-
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
         }
-
         window.clear();
         window.draw(shape);
         window.display();
     }
-
     return 0;
 #else
     std::cerr << "Unsupported features." << std::endl;
