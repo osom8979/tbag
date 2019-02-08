@@ -186,8 +186,6 @@ macro (tbag_modules__append_ldflags)
     list (APPEND TBAG_PROJECT_LDFLAGS ${ARGN})
 endmacro ()
 
-list (APPEND TBAG_PROJECT_DEFINITIONS SQLITE_EXPORT_API)
-
 macro (tbag_modules__apply_window_subsystem)
     if (WIN32)
         if (MSVC)

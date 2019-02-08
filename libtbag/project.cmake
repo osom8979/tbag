@@ -23,8 +23,7 @@ tbag_modules__append_definitions (
     JSON_DLL_BUILD
     TINYXML2_EXPORT
     LMDB_EXPORT_API
-    SQLITE_EXPORT_API
-    SFML_STATIC)
+    SQLITE_EXPORT_API)
 
 ## Thread settings.
 tbag_modules__apply_thread ()
@@ -50,6 +49,7 @@ tbag_modules__apply_dep_lemon       ()
 tbag_modules__apply_dep_lfds        ()
 
 if (USE_GUI)
+    tbag_modules__append_definitions (SFML_STATIC GL_SILENCE_DEPRECATION)
     tbag_modules__update_c_family_subdir_objects (3rd/imgui)
     tbag_modules__apply_ext_sfml_ignore_gl_al ()
     tbag_modules__check_opengl ()
