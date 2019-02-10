@@ -74,6 +74,16 @@ TpotMain::~TpotMain()
     // EMPTY.
 }
 
+void TpotMain::createDefaultLogger()
+{
+    if (isWindowsPlatform()) {
+        libtbag::log::createDefaultStdoutLogger();
+    } else {
+        libtbag::log::createDefaultColorStdoutLogger();
+    }
+    libtbag::log::setDefaultSeverity(libtbag::log::DEBUG_SEVERITY);
+}
+
 int TpotMain::run()
 {
     using namespace std::placeholders;
@@ -86,9 +96,10 @@ void TpotMain::onTerminateSignal(int signum)
 
 void TpotMain::onOptions(HelpCommander & commander)
 {
-    //using namespace libtbag::string;
-    //commander.insert("pm", [&](Arguments const & args){
-    //}, "Process Manager");
+    using namespace libtbag::string;
+    commander.insert("tlog", [&](Arguments const & args){
+        createDefaultLogger();
+    }, "Enable tbag log");
 }
 
 void TpotMain::onInfo(Element const & element)

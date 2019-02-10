@@ -31,7 +31,7 @@ namespace apps {
  * @author zer0
  * @date   2019-01-30
  */
-class TBAG_API GmPot : public BasePot, public libtbag::gui::Window
+class TBAG_API GmPot : public BasePot
 {
 public:
     GmPot();

@@ -37,6 +37,7 @@ class TBAG_API Window : private Noncopyable
 {
 public:
     using Channel = libtbag::graphic::Channel;
+    using Rgb24   = libtbag::graphic::Rgb24;
     using Rgb32   = libtbag::graphic::Rgb32;
 
 public:
@@ -217,6 +218,7 @@ public:
             unsigned int width = DEFAULT_WINDOW_WIDTH,
             unsigned int height = DEFAULT_WINDOW_HEIGHT,
             unsigned int bpp = DEFAULT_WINDOW_BPP);
+    int run();
 
 public:
     bool isOpen() const;
@@ -225,6 +227,7 @@ public:
     void display();
 
 public:
+    void  setClearColor(Rgb24 const & color);
     void  setClearColor(Rgb32 const & color);
     void  setClearColor(Channel r, Channel g, Channel b, Channel a = libtbag::graphic::channel_max());
     Rgb32 getClearColor() const;

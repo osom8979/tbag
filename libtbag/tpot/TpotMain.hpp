@@ -51,6 +51,9 @@ public:
     TpotMain(int argc, char ** argv, char ** envs);
     virtual ~TpotMain();
 
+private:
+    void createDefaultLogger();
+
 public:
     int run();
 

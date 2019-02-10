@@ -182,6 +182,11 @@ int Window::run(std::string const & title, unsigned int width, unsigned int heig
 #endif
 }
 
+int Window::run()
+{
+    return run(LIBTBAG_MAIN_TITLE);
+}
+
 bool Window::isOpen() const
 {
     assert(static_cast<bool>(_impl));
@@ -219,10 +224,14 @@ void Window::display()
     }
 }
 
+void Window::setClearColor(Rgb24 const & color)
+{
+    setClearColor(color.r, color.g, color.b);
+}
+
 void Window::setClearColor(Rgb32 const & color)
 {
-    assert(static_cast<bool>(_impl));
-    _impl->clear_color = sf::Color(color.r, color.g, color.b, color.a);
+    setClearColor(color.r, color.g, color.b, color.a);
 }
 
 void Window::setClearColor(Channel r, Channel g, Channel b, Channel a)

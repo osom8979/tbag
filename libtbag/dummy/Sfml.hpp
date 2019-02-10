@@ -160,6 +160,30 @@ struct SFML_GRAPHICS_API Color
     Color(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 255){}
 };
 
+struct SFML_GRAPHICS_API Drawable
+{
+};
+
+struct SFML_GRAPHICS_API Transformable
+{
+};
+
+struct SFML_GRAPHICS_API Shape : public Drawable, public Transformable
+{
+};
+
+struct SFML_GRAPHICS_API CircleShape : public Shape
+{
+};
+
+struct SFML_GRAPHICS_API ConvexShape : public Shape
+{
+};
+
+struct SFML_GRAPHICS_API RectangleShape : public Shape
+{
+};
+
 struct SFML_GRAPHICS_API RenderTarget : NonCopyable
 {
     void clear(Color const & color = Color(0, 0, 0, 255)){}
