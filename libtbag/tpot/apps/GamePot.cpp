@@ -39,7 +39,7 @@ char const * const GamePot::getRemarks() const TBAG_NOEXCEPT
 
 int GamePot::onMain()
 {
-    return run();
+    return run("");
 }
 
 } // namespace apps

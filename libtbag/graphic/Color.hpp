@@ -85,13 +85,21 @@ TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
  */
 struct Rgb24
 {
-    Channel r, g, b;
+    Channel r = channel_min();
+    Channel g = channel_min();
+    Channel b = channel_min();
+};
+
+struct Rgb32
+{
+    Channel r = channel_min();
+    Channel g = channel_min();
+    Channel b = channel_min();
+    Channel a = channel_max();
 };
 
 /** General color structure. */
 using Color = Rgb24;
-
-static_assert(std::is_trivial<Color>::value, "Color is not trivial type.");
 
 /**
  * @defgroup __DOXYGEN_GROUP__PREDEFINED_COLORS__ Predefined colors

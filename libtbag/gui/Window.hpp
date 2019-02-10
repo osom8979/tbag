@@ -16,6 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/graphic/Color.hpp>
+
+#include <string>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,6 +35,10 @@ namespace gui {
  */
 class TBAG_API Window : private Noncopyable
 {
+public:
+    using Channel = libtbag::graphic::Channel;
+    using Rgb32   = libtbag::graphic::Rgb32;
+
 public:
     enum class Key
     {
@@ -176,6 +184,16 @@ public:
     };
 
 public:
+    struct Impl;
+    friend struct Impl;
+
+public:
+    using UniqueImpl = std::unique_ptr<Impl>;
+
+private:
+    UniqueImpl _impl;
+
+public:
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_WIDTH  = 600;
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_HEIGHT = 480;
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_BPP    = 32;
@@ -186,6 +204,8 @@ public:
 
 public:
     /**
+     * @param[in] title
+     *      Window title.
      * @param[in] width
      *      Window width.
      * @param[in] height
@@ -193,20 +213,57 @@ public:
      * @param[in] bpp
      *      Bits Per Pixel.
      */
-    int run(unsigned int width = DEFAULT_WINDOW_WIDTH,
+    int run(std::string const & title,
+            unsigned int width = DEFAULT_WINDOW_WIDTH,
             unsigned int height = DEFAULT_WINDOW_HEIGHT,
             unsigned int bpp = DEFAULT_WINDOW_BPP);
 
 public:
+    bool isOpen() const;
+    void close();
+    void clear();
+    void display();
+
+public:
+    void  setClearColor(Rgb32 const & color);
+    void  setClearColor(Channel r, Channel g, Channel b, Channel a = libtbag::graphic::channel_max());
+    Rgb32 getClearColor() const;
+
+public:
+    virtual void onBegin();
+    virtual void onEnd();
+
+    virtual void onPollEventBegin();
+    virtual void onPollEventEnd();
+
     /**
+     * The window requested to be closed (no data)
+     */
+    virtual void onClosed();
+
+    /**
+     * The window was resized (data in event.size)
+     *
      * @param[in] width
      *      New width, in pixels.
      * @param[in] height
      *      New height, in pixels.
      */
-    void onSize(unsigned int width, unsigned int height);
+    virtual void onResized(unsigned int width, unsigned int height);
 
     /**
+     * The window lost the focus (no data)
+     */
+    virtual void onLostFocus();
+
+    /**
+     * The window gained the focus (no data)
+     */
+    virtual void onGainedFocus();
+
+    /**
+     * A key was pressed (data in event.key)
+     *
      * @param[in] code
      *      Key code.
      * @param[in] alt
@@ -218,24 +275,44 @@ public:
      * @param[in] system
      *      Is the System key pressed?
      */
-    void onKeyPressed(int code, bool alt, bool control, bool shift, bool system);
-    void onKeyReleased(int code, bool alt, bool control, bool shift, bool system);
+    virtual void onKeyPressed(Key code, bool alt, bool control, bool shift, bool system);
 
     /**
+     * A key was released (data in event.key)
+     */
+    virtual void onKeyReleased(Key code, bool alt, bool control, bool shift, bool system);
+
+    /**
+     * A character was entered (data in event.text)
+     *
      * @param[in] unicode
      *      UTF-32 Unicode value of the character.
      */
-    void onTextEntered(unsigned int unicode);
+    virtual void onTextEntered(unsigned int unicode);
 
     /**
+     * The mouse cursor moved (data in event.mouseMove)
+     *
      * @param[in] x
      *      X position of the mouse pointer, relative to the left of the owner window.
      * @param[in] y
      *      Y position of the mouse pointer, relative to the top of the owner window.
      */
-    void onMouseMoved(int x, int y);
+    virtual void onMouseMoved(int x, int y);
 
     /**
+     * The mouse cursor entered the area of the window (no data)
+     */
+    virtual void onMouseEntered();
+
+    /**
+     * The mouse cursor left the area of the window (no data)
+     */
+    virtual void onMouseLeft();
+
+    /**
+     * A mouse button was pressed (data in event.mouseButton)
+     *
      * @param[in] button
      *      Code of the button that has been pressed.
      * @param[in] x
@@ -243,10 +320,16 @@ public:
      * @param[in] y
      *      Y position of the mouse pointer, relative to the top of the owner window.
      */
-    void onMouseButtonPressed(Button button, int x, int y);
-    void onMouseButtonReleased(Button button, int x, int y);
+    virtual void onMouseButtonPressed(Button button, int x, int y);
 
     /**
+     * A mouse button was released (data in event.mouseButton)
+     */
+    virtual void onMouseButtonReleased(Button button, int x, int y);
+
+    /**
+     * The mouse wheel was scrolled (data in event.mouseWheelScroll)
+     *
      * @param[in] wheel
      *      Which wheel (for mice with multiple ones)
      * @param[in] delta
@@ -257,16 +340,24 @@ public:
      * @param[in] y
      *      Y position of the mouse pointer, relative to the top of the owner window.
      */
-    void onMouseWheelScrolled(Wheel wheel, float delta, int x, int y);
+    virtual void onMouseWheelScrolled(Wheel wheel, float delta, int x, int y);
 
     /**
+     * A joystick was connected (data in event.joystickConnect)
+     *
      * @param[in] joystick_id
      *      Index of the joystick (in range [0 .. Joystick::Count - 1])
      */
-    void onJoystickConnected(unsigned int joystick_id);
-    void onJoystickDisconnected(unsigned int joystick_id);
+    virtual void onJoystickConnected(unsigned int joystick_id);
 
     /**
+     * A joystick was disconnected (data in event.joystickConnect)
+     */
+    virtual void onJoystickDisconnected(unsigned int joystick_id);
+
+    /**
+     * The joystick moved along an axis (data in event.joystickMove)
+     *
      * @param[in] joystick_id
      *      Index of the joystick (in range [0 .. Joystick::Count - 1])
      * @param[in] axis
@@ -274,18 +365,26 @@ public:
      * @param[in] position
      *      New position on the axis (in range [-100 .. 100])
      */
-    void onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position);
+    virtual void onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position);
 
     /**
+     * A joystick button was pressed (data in event.joystickButton)
+     *
      * @param[in] joystick_id
      *      Index of the joystick (in range [0 .. Joystick::Count - 1])
      * @param[in] button
      *      Index of the button that has been pressed (in range [0 .. Joystick::ButtonCount - 1])
      */
-    void onJoystickButtonPressed(unsigned int joystick_id, unsigned int button);
-    void onJoystickButtonReleased(unsigned int joystick_id, unsigned int button);
+    virtual void onJoystickButtonPressed(unsigned int joystick_id, unsigned int button);
 
     /**
+     * A joystick button was released (data in event.joystickButton)
+     */
+    virtual void onJoystickButtonReleased(unsigned int joystick_id, unsigned int button);
+
+    /**
+     * A touch event began (data in event.touch)
+     *
      * @param[in] finger
      *      Index of the finger in case of multi-touch events
      * @param[in] x
@@ -293,11 +392,21 @@ public:
      * @param[in] y
      *      Y position of the touch, relative to the top of the owner window
      */
-    void onTouchBegan(unsigned int finger, int x, int y);
-    void onTouchMoved(unsigned int finger, int x, int y);
-    void onTouchEnded(unsigned int finger, int x, int y);
+    virtual void onTouchBegan(unsigned int finger, int x, int y);
 
     /**
+     * A touch moved (data in event.touch)
+     */
+    virtual void onTouchMoved(unsigned int finger, int x, int y);
+
+    /**
+     * A touch event ended (data in event.touch)
+     */
+    virtual void onTouchEnded(unsigned int finger, int x, int y);
+
+    /**
+     * A sensor value changed (data in event.sensor)
+     *
      * @param[in] type
      *      Type of the sensor.
      * @param[in] x
@@ -307,7 +416,12 @@ public:
      * @param[in] z
      *      Current value of the sensor on Z axis.
      */
-    void onSensorChanged(SensorType type, float x, float y, float z);
+    virtual void onSensorChanged(SensorType type, float x, float y, float z);
+
+    /**
+     * Event not detected.
+     */
+    virtual void onIdle();
 };
 
 } // namespace gui

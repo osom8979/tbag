@@ -39,7 +39,7 @@ char const * const GmPot::getRemarks() const TBAG_NOEXCEPT
 
 int GmPot::onMain()
 {
-    return run();
+    return run("");
 }
 
 } // namespace apps
