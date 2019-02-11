@@ -26,12 +26,22 @@ namespace apps {
  */
 struct GmPotImpl : public libtbag::gui::Window
 {
+    enum class SceneMode
+    {
+        SM_NORMAL,
+        SM_TEST,
+    };
+
+    SceneMode mode = SceneMode::SM_NORMAL;
+
     GmPotImpl()
     {
+        // EMPTY.
     }
 
     ~GmPotImpl()
     {
+        // EMPTY.
     }
 
     virtual void onBegin() override
@@ -46,15 +56,37 @@ struct GmPotImpl : public libtbag::gui::Window
 
     virtual void onKeyPressed(Key code, bool alt, bool control, bool shift, bool system) override
     {
-        tDLogD("onKeyPressed() Key: {}", (int)code);
+        // EMPTY.
     }
 
     virtual void onKeyReleased(Key code, bool alt, bool control, bool shift, bool system) override
     {
-        tDLogD("onKeyReleased() Key: {}", (int)code);
+        if (control && code == Key::F1) {
+            if (mode == SceneMode::SM_NORMAL) {
+                mode = SceneMode::SM_TEST;
+            } else {
+                mode = SceneMode::SM_NORMAL;
+            }
+        }
     }
 
     virtual void onIdle() override
+    {
+        if (mode == SceneMode::SM_NORMAL) {
+            onNormalIdle();
+        } else {
+            assert(mode == SceneMode::SM_TEST);
+            onTestIdle();
+        }
+    }
+
+    void onNormalIdle()
+    {
+        clear();
+        display();
+    }
+
+    void onTestIdle()
     {
         clear();
         display();
