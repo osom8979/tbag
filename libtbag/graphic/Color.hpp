@@ -73,6 +73,9 @@ TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
     return static_cast<Channel>((channel_min() + channel_max()) / 2);
 }
 
+struct Rgb24;
+struct Rgb32;
+
 /**
  * RGB Color structure.
  *
@@ -85,21 +88,137 @@ TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
  */
 struct Rgb24
 {
-    Channel r = channel_min();
-    Channel g = channel_min();
-    Channel b = channel_min();
+    Channel r;
+    Channel g;
+    Channel b;
+
+    Rgb24() TBAG_NOEXCEPT : r(channel_min()), g(channel_min()), b(channel_min())
+    { /* EMPTY. */ }
+
+    Rgb24(Channel r_, Channel g_, Channel b_) TBAG_NOEXCEPT : r(r_), g(g_), b(b_)
+    { /* EMPTY. */ }
+
+    Rgb24(Rgb24 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b)
+    { /* EMPTY. */ }
+
+    ~Rgb24()
+    { /* EMPTY. */ }
+
+    Rgb24 & operator =(Rgb24 const & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            r = obj.r;
+            g = obj.g;
+            b = obj.b;
+        }
+        return *this;
+    }
+
+    void swap(Rgb24 & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            std::swap(r, obj.r);
+            std::swap(g, obj.g);
+            std::swap(b, obj.b);
+        }
+    }
+
+    friend void swap(Rgb24 & lh, Rgb24 & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
+
+    inline bool operator ==(Rgb24 const & obj) const TBAG_NOEXCEPT
+    {
+        return r == obj.r && g == obj.g && b == obj.b;
+    }
+
+    inline bool operator !=(Rgb24 const & obj) const TBAG_NOEXCEPT
+    {
+        return !((*this) == obj);
+    }
+
+    inline Rgb24 inverse() const TBAG_NOEXCEPT
+    {
+        return Rgb24(static_cast<Channel>(channel_max() ^ r),
+                     static_cast<Channel>(channel_max() ^ g),
+                     static_cast<Channel>(channel_max() ^ b));
+    }
 };
 
+/**
+ * RGBA Color structure.
+ *
+ * @author zer0
+ * @date   2019-02-10
+ */
 struct Rgb32
 {
-    Channel r = channel_min();
-    Channel g = channel_min();
-    Channel b = channel_min();
-    Channel a = channel_max();
+    Channel r;
+    Channel g;
+    Channel b;
+    Channel a;
+
+    Rgb32() TBAG_NOEXCEPT : r(channel_min()), g(channel_min()), b(channel_min()), a(channel_max())
+    { /* EMPTY. */ }
+
+    Rgb32(Channel r_, Channel g_, Channel b_, Channel a_ = channel_max()) TBAG_NOEXCEPT : r(r_), g(g_), b(b_), a(a_)
+    { /* EMPTY. */ }
+
+    Rgb32(Rgb32 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b), a(obj.a)
+    { /* EMPTY. */ }
+
+    ~Rgb32()
+    { /* EMPTY. */ }
+
+    Rgb32 & operator =(Rgb32 const & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            r = obj.r;
+            g = obj.g;
+            b = obj.b;
+            a = obj.a;
+        }
+        return *this;
+    }
+
+    void swap(Rgb32 & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            std::swap(r, obj.r);
+            std::swap(g, obj.g);
+            std::swap(b, obj.b);
+            std::swap(a, obj.a);
+        }
+    }
+
+    friend void swap(Rgb32 & lh, Rgb32 & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
+
+    bool operator ==(Rgb32 const & obj) const TBAG_NOEXCEPT
+    {
+        return r == obj.r && g == obj.g && b == obj.b && a == obj.a;
+    }
+
+    bool operator !=(Rgb32 const & obj) const TBAG_NOEXCEPT
+    {
+        return !((*this) == obj);
+    }
+
+    inline Rgb32 inverse() const TBAG_NOEXCEPT
+    {
+        return Rgb32(static_cast<Channel>(channel_max() ^ r),
+                     static_cast<Channel>(channel_max() ^ g),
+                     static_cast<Channel>(channel_max() ^ b));
+    }
 };
 
 /** General color structure. */
 using Color = Rgb24;
+using Rgb   = Rgb24;
+using Rgba  = Rgb32;
 
 /**
  * @defgroup __DOXYGEN_GROUP__PREDEFINED_COLORS__ Predefined colors
@@ -147,116 +266,6 @@ Color const ASBESTOS_COLOR      = {127, 140, 141};
 /**
  * @}
  */
-
-// --------
-// Utility.
-// --------
-
-/** The Color are equal? */
-inline bool operator ==(Color const & c1, Color const & c2) TBAG_NOEXCEPT
-{
-    return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b;
-}
-
-inline bool operator !=(Color const & c1, Color const & c2) TBAG_NOEXCEPT
-{
-    return !(c1 == c2);
-}
-
-inline Color & operator +=(Color & c1, Color const & c2) TBAG_NOEXCEPT
-{
-    c1.r += c2.r;
-    c1.g += c2.g;
-    c1.b += c2.b;
-    return c1;
-}
-
-inline Color & operator +=(Color & c1, Channel c) TBAG_NOEXCEPT
-{
-    c1.r += c;
-    c1.g += c;
-    c1.b += c;
-    return c1;
-}
-
-inline Color operator +(Color const & c1, Color const & c2) TBAG_NOEXCEPT
-{
-    Color color = c1;
-    color += c2;
-    return color;
-}
-
-inline Color operator +(Color const & c1, Channel c) TBAG_NOEXCEPT
-{
-    Color color = c1;
-    color += c;
-    return color;
-}
-
-inline Color & operator -=(Color & c1, Color const & c2) TBAG_NOEXCEPT
-{
-    c1.r -= c2.r;
-    c1.g -= c2.g;
-    c1.b -= c2.b;
-    return c1;
-}
-
-inline Color & operator -=(Color & c1, Channel c) TBAG_NOEXCEPT
-{
-    c1.r -= c;
-    c1.g -= c;
-    c1.b -= c;
-    return c1;
-}
-
-inline Color operator -(Color const & c1, Color const & c2) TBAG_NOEXCEPT
-{
-    Color color = c1;
-    color -= c2;
-    return color;
-}
-
-inline Color operator -(Color const & c1, Channel c) TBAG_NOEXCEPT
-{
-    Color color = c1;
-    color -= c;
-    return color;
-}
-
-/** Create color instance. */
-TBAG_CONSTEXPR Color makeColor(Channel r = channel_max(),
-                               Channel g = channel_max(),
-                               Channel b = channel_max()) TBAG_NOEXCEPT
-{
-    return Color{r, g, b};
-}
-
-/** Inverse color. */
-inline Color inverse(Color const & c) TBAG_NOEXCEPT
-{
-    return Color{static_cast<Channel>(channel_max() ^ c.r),
-                 static_cast<Channel>(channel_max() ^ c.g),
-                 static_cast<Channel>(channel_max() ^ c.b)};
-}
-
-// -------------------
-// Stream overloading.
-// -------------------
-
-TBAG_CONSTEXPR char const __COLOR_PREFIX_CHAR             = 'C';
-TBAG_CONSTEXPR char const __COLOR_STREAM_BRACE_OPEN       = '{';
-TBAG_CONSTEXPR char const __COLOR_STREAM_VALUE_SEPARATOR  = ',';
-TBAG_CONSTEXPR char const __COLOR_STREAM_BRACE_CLOSE      = '}';
-
-inline std::string toString(Color const & color)
-{
-    std::stringstream ss;
-    ss << __COLOR_PREFIX_CHAR << __COLOR_STREAM_BRACE_OPEN
-       << color.r << __COLOR_STREAM_VALUE_SEPARATOR
-       << color.g << __COLOR_STREAM_VALUE_SEPARATOR
-       << color.b << __COLOR_STREAM_BRACE_CLOSE;
-    return ss.str();
-}
 
 } // namespace graphic
 
