@@ -8,8 +8,7 @@ language: cpp
 cache:
   apt: true
   directories:
-    - $HOME/tparty
-    - $TRAVIS_BUILD_DIR/cmake_build
+    - $TRAVIS_BUILD_DIR/cmake_build/external
 
 compiler: g++
 
