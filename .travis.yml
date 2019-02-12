@@ -49,6 +49,9 @@ after_success:
   - chmod +x codecov.sh
   - ./codecov.sh -t 6ec0cfc8-a00f-43c8-aab0-2754b9fba046
 
+after_failure:
+  - cat /home/travis/build/osom8979/tbag/cmake_build/external/prefix/src/sfml_ext-stamp/sfml_ext-configure-*.log
+
 notifications:
   email:
     on_success: always
