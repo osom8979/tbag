@@ -34,9 +34,6 @@ Tea-bag is Third party extension utility project.
 - nanosvg master-2b08dee (zlib license)
 - lfds 7.1.1 (Public domain)
 - termbox 1.1.2 (MIT license)
-
-## Dependencies (TBUI)
-
 - imgui 1.6.5 (MIT license)
 - imgui-sfml master-995b873 (MIT license)
 
