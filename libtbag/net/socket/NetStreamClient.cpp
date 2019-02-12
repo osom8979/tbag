@@ -88,7 +88,7 @@ NetStreamClient::NetStreamClient(MqParams const & params, Callbacks const & cbs)
     internal.default_read  = &onReadCb;
     internal.parent        = this;
 
-    if (!init(internal)) {
+    if (!create(internal)) {
         throw std::bad_alloc();
     }
 }
@@ -101,7 +101,10 @@ NetStreamClient::NetStreamClient(std::string const & uri, Callbacks const & cbs)
 
 NetStreamClient::~NetStreamClient()
 {
-    // EMPTY.
+    // [IMPORTANT]
+    // The callback member of the derived class is called after the destructor call of the base class.
+    // At this time, you must call destroy() to prevent callback members from being destroyed before the Base class.
+    destroy();
 }
 
 } // namespace socket

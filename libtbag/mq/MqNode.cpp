@@ -82,7 +82,7 @@ MqNode::MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs)
     internal.recv_cb   = &onRecvCb;
     internal.parent    = this;
 
-    if (!init(internal)) {
+    if (!create(internal)) {
         throw std::bad_alloc();
     }
 }
@@ -119,23 +119,10 @@ MqNode::MqNode(MqConnectMode, std::string const & uri, Callbacks const & cbs)
 
 MqNode::~MqNode()
 {
-    assert(static_cast<bool>(_mq));
-    auto const CODE = _mq->exit();
-    if (isSuccess(CODE)) {
-        tDLogIfD(PARAMS.verbose, "MqNode::~MqNode({}/{}) Send a close message.",
-                 getTypeName(), getModeName());
-    } else {
-        tDLogIfW(PARAMS.verbose, "MqNode::~MqNode({}/{}) Failed to send close-message: {}",
-                 getTypeName(), getModeName(), CODE);
-    }
-
-    _pool.join();
-    tDLogIfN(PARAMS.verbose, "MqNode::~MqNode({}/{}) Done.", getTypeName(), getModeName());
-
-    _mq.reset();
+    destroy();
 }
 
-bool MqNode::init(MqInternal const & internal)
+bool MqNode::create(MqInternal const & internal)
 {
     using MqLocalQueue   = libtbag::mq::node::MqLocalQueue;
     using MqStreamClient = libtbag::mq::node::MqStreamClient;
@@ -168,6 +155,28 @@ bool MqNode::init(MqInternal const & internal)
     assert(static_cast<bool>(_mq));
 
     libtbag::mq::details::waitOnActivation(PARAMS, _mq.get());
+    return true;
+}
+
+bool MqNode::destroy()
+{
+    if (!_mq) {
+        return false;
+    }
+
+    auto const CODE = _mq->exit();
+    if (isSuccess(CODE)) {
+        tDLogIfD(PARAMS.verbose, "MqNode::~MqNode({}/{}) Send a close message.",
+                 getTypeName(), getModeName());
+    } else {
+        tDLogIfW(PARAMS.verbose, "MqNode::~MqNode({}/{}) Failed to send close-message: {}",
+                 getTypeName(), getModeName(), CODE);
+    }
+
+    _pool.join();
+    tDLogIfN(PARAMS.verbose, "MqNode::~MqNode({}/{}) Done.", getTypeName(), getModeName());
+
+    _mq.reset();
     return true;
 }
 

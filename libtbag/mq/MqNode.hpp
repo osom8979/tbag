@@ -134,7 +134,8 @@ private:
     friend MqIsConsume onRecvCb(MqMsg const & msg, void * parent);
 
 protected:
-    bool init(MqInternal const & internal);
+    bool create(MqInternal const & internal);
+    bool destroy();
 
 private:
     void runner();

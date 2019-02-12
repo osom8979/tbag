@@ -109,7 +109,7 @@ NetStreamServer::NetStreamServer(MqParams const & params, Callbacks const & cbs)
     internal.close_node    = &onCloseNodeCb;
     internal.parent        = this;
 
-    if (!init(internal)) {
+    if (!create(internal)) {
         throw std::bad_alloc();
     }
 }
@@ -122,7 +122,10 @@ NetStreamServer::NetStreamServer(std::string const & uri, Callbacks const & cbs)
 
 NetStreamServer::~NetStreamServer()
 {
-    // EMPTY.
+    // [IMPORTANT]
+    // The callback member of the derived class is called after the destructor call of the base class.
+    // At this time, you must call destroy() to prevent callback members from being destroyed before the Base class.
+    destroy();
 }
 
 } // namespace socket
