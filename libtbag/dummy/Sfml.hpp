@@ -149,6 +149,10 @@ struct SFML_WINDOW_API Window : GlResource, NonCopyable
 // Graphics API
 // ------------
 
+struct RenderStates;
+struct RenderTarget;
+struct RenderWindow;
+
 struct SFML_GRAPHICS_API Color
 {
     Uint8 r;
@@ -162,6 +166,7 @@ struct SFML_GRAPHICS_API Color
 
 struct SFML_GRAPHICS_API Drawable
 {
+    virtual void draw(RenderTarget & target, RenderStates states) const = 0;
 };
 
 struct SFML_GRAPHICS_API Transformable
@@ -201,6 +206,10 @@ struct SFML_GRAPHICS_API ConvexShape : public Shape
 };
 
 struct SFML_GRAPHICS_API RectangleShape : public Shape
+{
+};
+
+struct SFML_GRAPHICS_API RenderStates
 {
 };
 
