@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
+#include <libtbag/gui/SfNative.hpp>
 #include <libtbag/graphic/Color.hpp>
 
 #include <string>
@@ -33,7 +33,7 @@ namespace gui {
  * @author zer0
  * @date   2019-01-31
  */
-class TBAG_API Window : private Noncopyable
+class TBAG_API Window : public SfNative
 {
 public:
     using Channel = libtbag::graphic::Channel;
@@ -200,24 +200,30 @@ public:
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_BPP    = 32;
 
 public:
+    struct Params
+    {
+        /** Window title. */
+        std::string title = LIBTBAG_MAIN_TITLE;
+
+        /** Window width. */
+        unsigned int width = DEFAULT_WINDOW_WIDTH;
+
+        /** Window height. */
+        unsigned int height = DEFAULT_WINDOW_HEIGHT;
+
+        /** Bits Per Pixel. */
+        unsigned int bpp = DEFAULT_WINDOW_BPP;
+
+        Params() { /* EMPTY. */ }
+        ~Params() { /* EMPTY. */ }
+    };
+
+public:
+    Window(Params const & params);
     Window();
     virtual ~Window();
 
 public:
-    /**
-     * @param[in] title
-     *      Window title.
-     * @param[in] width
-     *      Window width.
-     * @param[in] height
-     *      Window height.
-     * @param[in] bpp
-     *      Bits Per Pixel.
-     */
-    int run(std::string const & title,
-            unsigned int width = DEFAULT_WINDOW_WIDTH,
-            unsigned int height = DEFAULT_WINDOW_HEIGHT,
-            unsigned int bpp = DEFAULT_WINDOW_BPP);
     int run();
 
 public:

@@ -55,23 +55,33 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-struct Window::Impl : private Noncopyable
+struct Window::Impl
 {
-    using Color = sf::Color;
-    using RenderWindow = sf::RenderWindow;
-    using UniqueWindow = std::unique_ptr<RenderWindow>;
-
-    UniqueWindow window;
-    Color clear_color;
+    sf::Color clear_color;
 };
 
 // ---------------------
 // Window implementation
 // ---------------------
 
-Window::Window() : _impl(std::make_unique<Impl>())
+Window::Window(Params const & params)
+        : SfNative(SfType::RENDER_WINDOW, no_init),
+          _impl(std::make_unique<Impl>())
 {
     assert(static_cast<bool>(_impl));
+    assert(ptr == nullptr);
+
+    auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
+    auto const STYLE = sf::Style::Default;
+    auto const CONTEXT = sf::ContextSettings();
+
+    ptr = new sf::RenderWindow(MODE, params.title, STYLE, CONTEXT);
+    assert(ptr != nullptr);
+}
+
+Window::Window() : Window(Params())
+{
+    // EMPTY.
 }
 
 Window::~Window()
@@ -79,16 +89,11 @@ Window::~Window()
     // EMPTY.
 }
 
-int Window::run(std::string const & title, unsigned int width, unsigned int height, unsigned int bpp)
+int Window::run()
 {
-    sf::Uint32 const STYLE = sf::Style::Default;
-    sf::ContextSettings const CONTEXT = sf::ContextSettings();
-
-    assert(static_cast<bool>(_impl));
-    _impl->window = std::make_unique<Impl::RenderWindow>(sf::VideoMode(width, height, bpp), title, STYLE, CONTEXT);
-
-    auto * window = _impl->window.get();
+    auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
+    assert(static_cast<bool>(_impl));
 
 #if defined(USE_GUI)
     sf::Event e = sf::Event{};
@@ -182,46 +187,33 @@ int Window::run(std::string const & title, unsigned int width, unsigned int heig
 #endif
 }
 
-int Window::run()
-{
-    return run(LIBTBAG_MAIN_TITLE);
-}
-
 bool Window::isOpen() const
 {
-    assert(static_cast<bool>(_impl));
-    auto * window = _impl->window.get();
-    if (window != nullptr) {
-        return window->isOpen();
-    }
-    return false;
+    auto * window = cast<sf::RenderWindow>();
+    assert(window != nullptr);
+    return window->isOpen();
 }
 
 void Window::close()
 {
-    assert(static_cast<bool>(_impl));
-    auto * window = _impl->window.get();
-    if (window != nullptr) {
-        window->close();
-    }
+    auto * window = cast<sf::RenderWindow>();
+    assert(window != nullptr);
+    window->close();
 }
 
 void Window::clear()
 {
+    auto * window = cast<sf::RenderWindow>();
+    assert(window != nullptr);
     assert(static_cast<bool>(_impl));
-    auto * window = _impl->window.get();
-    if (window != nullptr) {
-        window->clear(_impl->clear_color);
-    }
+    window->clear(_impl->clear_color);
 }
 
 void Window::display()
 {
-    assert(static_cast<bool>(_impl));
-    auto * window = _impl->window.get();
-    if (window != nullptr) {
-        window->display();
-    }
+    auto * window = cast<sf::RenderWindow>();
+    assert(window != nullptr);
+    window->display();
 }
 
 void Window::setClearColor(Rgb24 const & color)
