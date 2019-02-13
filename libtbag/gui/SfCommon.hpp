@@ -24,7 +24,6 @@ namespace gui {
 
 #ifndef TBAG_SF_HANDLE_MAP
 #define TBAG_SF_HANDLE_MAP(_TBAG_XX)          \
-    _TBAG_XX(SHAPE          , Shape         ) \
     _TBAG_XX(CIRCLE_SHAPE   , CircleShape   ) \
     _TBAG_XX(CONVEX_SHAPE   , ConvexShape   ) \
     _TBAG_XX(RECTANGLE_SHAPE, RectangleShape) \
@@ -51,6 +50,7 @@ enum class SfType : int
 };
 
 TBAG_API SfType getSfType(int type) TBAG_NOEXCEPT;
+TBAG_API char const * const getSfTypeName(SfType type) TBAG_NOEXCEPT;
 
 } // namespace gui
 

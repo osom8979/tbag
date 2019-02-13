@@ -23,6 +23,19 @@ SfType getSfType(int type) TBAG_NOEXCEPT
     return static_cast<SfType>(type);
 }
 
+char const * const getSfTypeName(SfType type) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (type) {
+#define _TBAG_XX(name, type) \
+        case SfType::name: return #name;
+    TBAG_SF_HANDLE_MAP(_TBAG_XX)
+#undef _TBAG_XX
+    default: return "UNKNOWN";
+    }
+    // @formatter:on
+}
+
 } // namespace gui
 
 // --------------------

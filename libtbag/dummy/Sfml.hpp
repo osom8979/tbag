@@ -168,6 +168,26 @@ struct SFML_GRAPHICS_API Transformable
 {
 };
 
+struct SFML_WINDOW_API GlResource
+{
+};
+
+struct SFML_GRAPHICS_API VertexArray : public Drawable
+{
+};
+
+struct SFML_GRAPHICS_API VertexBuffer : public Drawable, private GlResource
+{
+};
+
+struct SFML_GRAPHICS_API Sprite : public Drawable, public Transformable
+{
+};
+
+struct SFML_GRAPHICS_API Text : public Drawable, public Transformable
+{
+};
+
 struct SFML_GRAPHICS_API Shape : public Drawable, public Transformable
 {
 };
