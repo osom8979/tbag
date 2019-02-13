@@ -1,8 +1,9 @@
 /**
- * @file   Window.hpp
- * @brief  Window class prototype.
+ * @file   SfWindow.hpp
+ * @brief  SfWindow class prototype.
  * @author zer0
  * @date   2019-01-31
+ * @date   2019-02-13 (Rename: Window -> SfWindow)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOW_HPP__
@@ -28,12 +29,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 /**
- * Window class prototype.
+ * SfWindow class prototype.
  *
  * @author zer0
  * @date   2019-01-31
+ * @date   2019-02-13 (Rename: Window -> SfWindow)
  */
-class TBAG_API Window : public SfNative
+class TBAG_API SfWindow : public SfNative
 {
 public:
     using Channel = libtbag::graphic::Channel;
@@ -219,9 +221,9 @@ public:
     };
 
 public:
-    Window(Params const & params);
-    Window();
-    virtual ~Window();
+    SfWindow(Params const & params);
+    SfWindow();
+    virtual ~SfWindow();
 
 public:
     int run();

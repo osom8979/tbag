@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/tpot/apps/BasePot.hpp>
-#include <libtbag/gui/Window.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
