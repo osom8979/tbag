@@ -22,13 +22,18 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+SfNative::SfNative(SfType type, no_init_t) : TYPE(type), _user(nullptr)
+{
+    // EMPTY.
+}
+
 SfNative::SfNative(SfType type) : TYPE(type), _user(nullptr)
 {
     // @formatter:off
     switch (TYPE) {
 #define _TBAG_XX(name, type) \
         case SfType::name: ptr = new sf::type(); break;
-    TBAG_SF_HANDLE_MAP(_TBAG_XX)
+    TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     default:
         tDLogE("SfNative::SfNative({}) Unknown sf type error.", static_cast<int>(TYPE));
@@ -49,7 +54,7 @@ SfNative::~SfNative()
         switch (TYPE) {
 #define _TBAG_XX(name, type) \
             case SfType::name: delete ((sf::type*)ptr); break;
-        TBAG_SF_HANDLE_MAP(_TBAG_XX)
+        TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
         default:
             TBAG_INACCESSIBLE_BLOCK_ASSERT();

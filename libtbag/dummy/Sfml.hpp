@@ -173,10 +173,6 @@ struct SFML_GRAPHICS_API Transformable
 {
 };
 
-struct SFML_WINDOW_API GlResource
-{
-};
-
 struct SFML_GRAPHICS_API VertexArray : public Drawable
 {
 };

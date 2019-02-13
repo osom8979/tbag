@@ -23,15 +23,23 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 #ifndef TBAG_SF_HANDLE_MAP
-#define TBAG_SF_HANDLE_MAP(_TBAG_XX)          \
-    _TBAG_XX(CIRCLE_SHAPE   , CircleShape   ) \
-    _TBAG_XX(CONVEX_SHAPE   , ConvexShape   ) \
-    _TBAG_XX(RECTANGLE_SHAPE, RectangleShape) \
-    _TBAG_XX(SPRITE         , Sprite        ) \
-    _TBAG_XX(TEXT           , Text          ) \
-    _TBAG_XX(VERTEX_ARRAY   , VertexArray   ) \
-    _TBAG_XX(VERTEX_BUFFER  , VertexBuffer  ) \
+#define TBAG_SF_HANDLE_MAP(_TBAG_WINDOW_XX, _TBAG_DRAWABLE_XX) \
+    /* Window */                                 \
+    _TBAG_WINDOW_XX(RENDER_WINDOW, RenderWindow) \
+    /* Drawable */                                     \
+    _TBAG_DRAWABLE_XX(CIRCLE_SHAPE   , CircleShape   ) \
+    _TBAG_DRAWABLE_XX(CONVEX_SHAPE   , ConvexShape   ) \
+    _TBAG_DRAWABLE_XX(RECTANGLE_SHAPE, RectangleShape) \
+    _TBAG_DRAWABLE_XX(SPRITE         , Sprite        ) \
+    _TBAG_DRAWABLE_XX(TEXT           , Text          ) \
+    _TBAG_DRAWABLE_XX(VERTEX_ARRAY   , VertexArray   ) \
+    _TBAG_DRAWABLE_XX(VERTEX_BUFFER  , VertexBuffer  ) \
     /* -- END -- */
+#endif
+
+#ifndef TBAG_SF_HANDLE_MAP_ALL
+#define TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX) \
+    TBAG_SF_HANDLE_MAP(_TBAG_XX, _TBAG_XX)
 #endif
 
 /**
@@ -44,7 +52,7 @@ enum class SfType : int
 {
     __START_NUMBER__ = -1,
 #define _TBAG_XX(name, type) name,
-    TBAG_SF_HANDLE_MAP(_TBAG_XX)
+    TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     __SIZE__
 };

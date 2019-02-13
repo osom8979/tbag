@@ -36,11 +36,18 @@ class TBAG_API SfNative : public libtbag::container::Pointer<void>, private Nonc
 public:
     using Parent = libtbag::container::Pointer<void>;
 
+public:
+    struct no_init_t { /* EMPTY. */ };
+
+public:
+    TBAG_CONSTEXPR static no_init_t const no_init = no_init_t{};
+
 private:
     SfType const TYPE;
     void * _user;
 
 public:
+    explicit SfNative(SfType type, no_init_t);
     explicit SfNative(SfType type);
     explicit SfNative(int type);
     virtual ~SfNative();
@@ -51,6 +58,12 @@ public:
     inline void       * getUserData()            TBAG_NOEXCEPT { return _user; }
     inline void const * getUserData()      const TBAG_NOEXCEPT { return _user; }
     // @formatter:on
+
+public:
+    inline char const * const getTypeName() TBAG_NOEXCEPT
+    {
+        return libtbag::gui::getSfTypeName(TYPE);
+    }
 };
 
 } // namespace gui
