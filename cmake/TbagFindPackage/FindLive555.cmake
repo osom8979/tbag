@@ -46,6 +46,8 @@ if (LiveMedia_FOUND)
     list (APPEND Live555_LIBRARIES ${LiveMedia_LIBRARIES})
 endif ()
 
+list (REMOVE_DUPLICATES Live555_INCLUDE_DIRS)
+
 mark_as_advanced (Live555_FOUND
                   Live555_LIBRARIES
                   Live555_INCLUDE_DIRS)
