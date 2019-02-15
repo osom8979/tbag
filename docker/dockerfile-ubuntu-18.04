@@ -18,13 +18,11 @@ WORKDIR $BUILD_DIR
 
 # tbag build.
 RUN cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release $WORKING_DIR
-RUN make
 RUN make install
 
 # remove build files.
 WORKDIR /
-RUN rm -rf $WORKING_DIR
-RUN rm -rf $BUILD_DIR
+RUN rm -rf $BUILD_DIR $WORKING_DIR
 
 # run tpot.
 CMD /usr/local/bin/tpot
