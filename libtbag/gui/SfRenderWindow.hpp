@@ -17,7 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gui/SfNative.hpp>
+#include <libtbag/gui/SfRenderTarget.hpp>
 #include <libtbag/graphic/Color.hpp>
 
 #include <string>
@@ -37,7 +37,7 @@ namespace gui {
  * @date   2019-02-13 (Rename: Window -> SfWindow)
  * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
  */
-class TBAG_API SfRenderWindow : public SfNative
+class TBAG_API SfRenderWindow : public SfRenderTarget
 {
 public:
     using Channel = libtbag::graphic::Channel;

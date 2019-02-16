@@ -62,12 +62,12 @@ struct SfRenderWindow::Impl
     sf::Color clear_color;
 };
 
-// -----------------------
+// -----------------------------
 // SfRenderWindow implementation
-// -----------------------
+// -----------------------------
 
 SfRenderWindow::SfRenderWindow(Params const & params)
-        : SfNative(SfType::RENDER_WINDOW, no_init),
+        : SfRenderTarget(SfType::RENDER_WINDOW, no_init),
           _impl(std::make_unique<Impl>())
 {
     assert(static_cast<bool>(_impl));

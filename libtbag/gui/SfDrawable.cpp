@@ -19,7 +19,7 @@ SfDrawable::SfDrawable(SfType type) : SfNative(type)
     // EMPTY.
 }
 
-SfDrawable::SfDrawable(int type) : SfNative(type)
+SfDrawable::SfDrawable(SfType type, no_init_t) : SfNative(type, no_init)
 {
     // EMPTY.
 }
