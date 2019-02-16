@@ -47,7 +47,7 @@ struct GmPotImpl : public libtbag::gui::SfRenderWindow
 
     virtual void onBegin() override
     {
-        setClearColor(libtbag::graphic::MIDNIGHT_BLUE_COLOR);
+        // EMPTY.
     }
 
     virtual void onEnd() override
@@ -83,13 +83,13 @@ struct GmPotImpl : public libtbag::gui::SfRenderWindow
 
     void onNormalIdle()
     {
-        clear();
+        clear(libtbag::graphic::MIDNIGHT_BLUE_COLOR);
         display();
     }
 
     void onTestIdle()
     {
-        clear();
+        clear(libtbag::graphic::MIDNIGHT_BLUE_COLOR);
         display();
     }
 };

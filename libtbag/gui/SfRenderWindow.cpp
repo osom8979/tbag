@@ -1,6 +1,6 @@
 /**
- * @file   SfWindow.cpp
- * @brief  SfWindow class implementation.
+ * @file   SfRenderWindow.cpp
+ * @brief  SfRenderWindow class implementation.
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
@@ -57,26 +57,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-struct SfRenderWindow::Impl
-{
-    sf::Color clear_color;
-};
-
-// -----------------------------
-// SfRenderWindow implementation
-// -----------------------------
-
 SfRenderWindow::SfRenderWindow(Params const & params)
-        : SfRenderTarget(SfType::RENDER_WINDOW, no_init),
-          _impl(std::make_unique<Impl>())
+        : SfRenderTarget(SfType::RENDER_WINDOW, no_init)
 {
-    assert(static_cast<bool>(_impl));
-    assert(ptr == nullptr);
-
     auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
     auto const STYLE = sf::Style::Default;
     auto const CONTEXT = sf::ContextSettings();
 
+    assert(ptr == nullptr);
     ptr = new sf::RenderWindow(MODE, params.title, STYLE, CONTEXT);
     assert(ptr != nullptr);
 }
@@ -95,7 +83,6 @@ int SfRenderWindow::run()
 {
     auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
-    assert(static_cast<bool>(_impl));
 
 #if defined(USE_GUI)
     sf::Event e = sf::Event{};
@@ -191,54 +178,17 @@ int SfRenderWindow::run()
 
 bool SfRenderWindow::isOpen() const
 {
-    auto * window = cast<sf::RenderWindow>();
-    assert(window != nullptr);
-    return window->isOpen();
+    return cast<sf::RenderWindow>()->isOpen();
 }
 
 void SfRenderWindow::close()
 {
-    auto * window = cast<sf::RenderWindow>();
-    assert(window != nullptr);
-    window->close();
-}
-
-void SfRenderWindow::clear()
-{
-    auto * window = cast<sf::RenderWindow>();
-    assert(window != nullptr);
-    assert(static_cast<bool>(_impl));
-    window->clear(_impl->clear_color);
+    cast<sf::RenderWindow>()->close();
 }
 
 void SfRenderWindow::display()
 {
-    auto * window = cast<sf::RenderWindow>();
-    assert(window != nullptr);
-    window->display();
-}
-
-void SfRenderWindow::setClearColor(Rgb24 const & color)
-{
-    setClearColor(color.r, color.g, color.b);
-}
-
-void SfRenderWindow::setClearColor(Rgb32 const & color)
-{
-    setClearColor(color.r, color.g, color.b, color.a);
-}
-
-void SfRenderWindow::setClearColor(Channel r, Channel g, Channel b, Channel a)
-{
-    assert(static_cast<bool>(_impl));
-    _impl->clear_color = sf::Color(r, g, b, a);
-}
-
-SfRenderWindow::Rgb32 SfRenderWindow::getClearColor() const
-{
-    assert(static_cast<bool>(_impl));
-    auto const & COLOR = _impl->clear_color;
-    return Rgb32{COLOR.r, COLOR.g, COLOR.b, COLOR.a};
+    cast<sf::RenderWindow>()->display();
 }
 
 void SfRenderWindow::onBegin()

@@ -1,6 +1,6 @@
 /**
- * @file   SfWindow.hpp
- * @brief  SfWindow class prototype.
+ * @file   SfRenderWindow.hpp
+ * @brief  SfRenderWindow class prototype.
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
@@ -21,7 +21,6 @@
 #include <libtbag/graphic/Color.hpp>
 
 #include <string>
-#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -189,16 +188,6 @@ public:
     };
 
 public:
-    struct Impl;
-    friend struct Impl;
-
-public:
-    using UniqueImpl = std::unique_ptr<Impl>;
-
-private:
-    UniqueImpl _impl;
-
-public:
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_WIDTH  = 600;
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_HEIGHT = 480;
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_BPP    = 32;
@@ -233,7 +222,6 @@ public:
 public:
     bool isOpen() const;
     void close();
-    void clear();
     void display();
 
 public:

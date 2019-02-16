@@ -515,12 +515,14 @@ BaseSize<T> operator -(BaseSize<T> const & s, BasePoint<T> const & p)
 // ------------
 
 using Pointi = BasePoint<int>;
+using Pointu = BasePoint<unsigned>;
 using Pointl = BasePoint<int64_t>;
 using Pointf = BasePoint<float>;
 using Pointd = BasePoint<double>;
 using Point  = Pointi;
 
 using Sizei = BaseSize<int>;
+using Sizeu = BaseSize<unsigned>;
 using Sizel = BaseSize<int64_t>;
 using Sizef = BaseSize<float>;
 using Sized = BaseSize<double>;

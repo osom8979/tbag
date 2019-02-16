@@ -61,6 +61,18 @@ typedef signed   long long Int64;
 typedef unsigned long long Uint64;
 #endif
 
+template <typename T>
+struct Vector2
+{
+    T x, y;
+
+    Vector2(){}
+};
+
+typedef Vector2<int>          Vector2i;
+typedef Vector2<unsigned int> Vector2u;
+typedef Vector2<float>        Vector2f;
+
 // ----------
 // System API
 // ----------
@@ -71,6 +83,7 @@ struct SFML_SYSTEM_API NonCopyable
 
 struct SFML_SYSTEM_API String
 {
+    String(){}
 };
 
 // ----------
@@ -79,6 +92,7 @@ struct SFML_SYSTEM_API String
 
 struct SFML_WINDOW_API GlResource
 {
+    GlResource(){}
 };
 
 struct SFML_WINDOW_API VideoMode
@@ -135,10 +149,13 @@ enum
 
 struct Event
 {
+    Event(){}
 };
 
 struct SFML_WINDOW_API Window : GlResource, NonCopyable
 {
+    Window(){}
+
     void close(){}
     bool isOpen() const { return false; }
     bool pollEvent(Event & event) { return false; }
@@ -149,73 +166,90 @@ struct SFML_WINDOW_API Window : GlResource, NonCopyable
 // Graphics API
 // ------------
 
-struct RenderStates;
 struct RenderTarget;
-struct RenderWindow;
 
 struct SFML_GRAPHICS_API Color
 {
-    Uint8 r;
-    Uint8 g;
-    Uint8 b;
-    Uint8 a;
+    Uint8 r, g, b, a;
 
     Color(){}
     Color(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 255){}
 };
 
+struct SFML_GRAPHICS_API RenderStates
+{
+    RenderStates(){}
+};
+
 struct SFML_GRAPHICS_API Drawable
 {
-    virtual void draw(RenderTarget & target, RenderStates states) const = 0;
+    Drawable(){}
+
+    virtual void draw(RenderTarget & target, RenderStates states) const {};
 };
 
 struct SFML_GRAPHICS_API Transformable
 {
+    Transformable(){}
 };
 
 struct SFML_GRAPHICS_API VertexArray : public Drawable
 {
+    VertexArray(){}
 };
 
 struct SFML_GRAPHICS_API VertexBuffer : public Drawable, private GlResource
 {
+    VertexBuffer(){}
 };
 
 struct SFML_GRAPHICS_API Sprite : public Drawable, public Transformable
 {
+    Sprite(){}
 };
 
 struct SFML_GRAPHICS_API Text : public Drawable, public Transformable
 {
+    Text(){}
 };
 
 struct SFML_GRAPHICS_API Shape : public Drawable, public Transformable
 {
+    Shape(){}
 };
 
 struct SFML_GRAPHICS_API CircleShape : public Shape
 {
+    CircleShape(){}
 };
 
 struct SFML_GRAPHICS_API ConvexShape : public Shape
 {
+    ConvexShape(){}
 };
 
 struct SFML_GRAPHICS_API RectangleShape : public Shape
 {
-};
-
-struct SFML_GRAPHICS_API RenderStates
-{
+    RectangleShape(){}
 };
 
 struct SFML_GRAPHICS_API RenderTarget : NonCopyable
 {
+    RenderTarget(){}
+
     void clear(Color const & color = Color(0, 0, 0, 255)){}
+
+    Vector2u getSize() const { return Vector2u(); };
+    bool setActive(bool active = true){ return false; }
+
+    void pushGLStates(){}
+    void popGLStates(){}
+    void resetGLStates(){}
 };
 
 struct SFML_GRAPHICS_API RenderWindow : public Window, public RenderTarget
 {
+    RenderWindow(){}
     RenderWindow(VideoMode mode, String const & title, Uint32 style, ContextSettings const & settings){}
     RenderWindow(VideoMode mode, std::string const & title, Uint32 style, ContextSettings const & settings){}
 };

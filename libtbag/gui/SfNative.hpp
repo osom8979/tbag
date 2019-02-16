@@ -17,6 +17,9 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Pointer.hpp>
+#include <libtbag/graphic/Color.hpp>
+#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Rect.hpp>
 #include <libtbag/gui/SfCommon.hpp>
 
 // -------------------
@@ -34,7 +37,30 @@ namespace gui {
 class TBAG_API SfNative : public libtbag::container::Pointer<void>, private Noncopyable
 {
 public:
-    using Parent = libtbag::container::Pointer<void>;
+    using Parent  = libtbag::container::Pointer<void>;
+
+    using Channel = libtbag::graphic::Channel;
+    using Rgb24   = libtbag::graphic::Rgb24;
+    using Rgb32   = libtbag::graphic::Rgb32;
+    using Color   = libtbag::graphic::Color;
+
+    using Pointi = libtbag::geometry::Pointi;
+    using Pointu = libtbag::geometry::Pointu;
+    using Pointl = libtbag::geometry::Pointl;
+    using Pointf = libtbag::geometry::Pointf;
+    using Pointd = libtbag::geometry::Pointd;
+    using Point  = libtbag::geometry::Point;
+
+    using Sizei = libtbag::geometry::Sizei;
+    using Sizeu = libtbag::geometry::Sizeu;
+    using Sizel = libtbag::geometry::Sizel;
+    using Sizef = libtbag::geometry::Sizef;
+    using Sized = libtbag::geometry::Sized;
+    using Size  = libtbag::geometry::Size;
+
+public:
+    TBAG_CONSTEXPR static Channel const CHANNEL_MIN = libtbag::graphic::channel_min();
+    TBAG_CONSTEXPR static Channel const CHANNEL_MAX = libtbag::graphic::channel_max();
 
 public:
     struct no_init_t { /* EMPTY. */ };
