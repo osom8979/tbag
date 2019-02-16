@@ -8,8 +8,6 @@
 #include <libtbag/tpot/apps/GamePot.hpp>
 #include <libtbag/log/Log.hpp>
 
-#include <iostream>
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -39,7 +37,7 @@ char const * const GamePot::getRemarks() const TBAG_NOEXCEPT
 
 int GamePot::onMain()
 {
-    return run();
+    return 0;
 }
 
 } // namespace apps

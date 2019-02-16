@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/tpot/apps/BasePot.hpp>
-#include <libtbag/gui/SfWindow.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,7 +30,7 @@ namespace apps {
  * @author zer0
  * @date   2019-01-31
  */
-class TBAG_API GamePot : public BasePot, public libtbag::gui::SfWindow
+class TBAG_API GamePot : public BasePot
 {
 public:
     GamePot();

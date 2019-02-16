@@ -4,9 +4,10 @@
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
+ * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
  */
 
-#include <libtbag/gui/SfWindow.hpp>
+#include <libtbag/gui/SfRenderWindow.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
@@ -17,30 +18,30 @@
 #if defined(USE_GUI)
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Unknown,         libtbag::gui::SfWindow::Key::Unknown);
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::A,               libtbag::gui::SfWindow::Key::A);
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Pause,           libtbag::gui::SfWindow::Key::Pause);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Left,            libtbag::gui::SfWindow::Button::Left);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Right,           libtbag::gui::SfWindow::Button::Right);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Middle,          libtbag::gui::SfWindow::Button::Middle);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton1,        libtbag::gui::SfWindow::Button::XButton1);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton2,        libtbag::gui::SfWindow::Button::XButton2);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::VerticalWheel,    libtbag::gui::SfWindow::Wheel::VerticalWheel);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::HorizontalWheel,  libtbag::gui::SfWindow::Wheel::HorizontalWheel);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::X,              libtbag::gui::SfWindow::JoystickAxis::X);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Y,              libtbag::gui::SfWindow::JoystickAxis::Y);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Z,              libtbag::gui::SfWindow::JoystickAxis::Z);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::R,              libtbag::gui::SfWindow::JoystickAxis::R);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::U,              libtbag::gui::SfWindow::JoystickAxis::U);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::V,              libtbag::gui::SfWindow::JoystickAxis::V);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovX,           libtbag::gui::SfWindow::JoystickAxis::PovX);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovY,           libtbag::gui::SfWindow::JoystickAxis::PovY);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Accelerometer,    libtbag::gui::SfWindow::SensorType::Accelerometer);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gyroscope,        libtbag::gui::SfWindow::SensorType::Gyroscope);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Magnetometer,     libtbag::gui::SfWindow::SensorType::Magnetometer);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gravity,          libtbag::gui::SfWindow::SensorType::Gravity);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::UserAcceleration, libtbag::gui::SfWindow::SensorType::UserAcceleration);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Orientation,      libtbag::gui::SfWindow::SensorType::Orientation);
+_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Unknown,         libtbag::gui::SfRenderWindow::Key::Unknown);
+_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::A,               libtbag::gui::SfRenderWindow::Key::A);
+_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Pause,           libtbag::gui::SfRenderWindow::Key::Pause);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Left,            libtbag::gui::SfRenderWindow::Button::Left);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Right,           libtbag::gui::SfRenderWindow::Button::Right);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Middle,          libtbag::gui::SfRenderWindow::Button::Middle);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton1,        libtbag::gui::SfRenderWindow::Button::XButton1);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton2,        libtbag::gui::SfRenderWindow::Button::XButton2);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::VerticalWheel,    libtbag::gui::SfRenderWindow::Wheel::VerticalWheel);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::HorizontalWheel,  libtbag::gui::SfRenderWindow::Wheel::HorizontalWheel);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::X,              libtbag::gui::SfRenderWindow::JoystickAxis::X);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Y,              libtbag::gui::SfRenderWindow::JoystickAxis::Y);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Z,              libtbag::gui::SfRenderWindow::JoystickAxis::Z);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::R,              libtbag::gui::SfRenderWindow::JoystickAxis::R);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::U,              libtbag::gui::SfRenderWindow::JoystickAxis::U);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::V,              libtbag::gui::SfRenderWindow::JoystickAxis::V);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovX,           libtbag::gui::SfRenderWindow::JoystickAxis::PovX);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovY,           libtbag::gui::SfRenderWindow::JoystickAxis::PovY);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Accelerometer,    libtbag::gui::SfRenderWindow::SensorType::Accelerometer);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gyroscope,        libtbag::gui::SfRenderWindow::SensorType::Gyroscope);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Magnetometer,     libtbag::gui::SfRenderWindow::SensorType::Magnetometer);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gravity,          libtbag::gui::SfRenderWindow::SensorType::Gravity);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::UserAcceleration, libtbag::gui::SfRenderWindow::SensorType::UserAcceleration);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Orientation,      libtbag::gui::SfRenderWindow::SensorType::Orientation);
 #else
 #include <libtbag/dummy/Sfml.hpp>
 using namespace libtbag::dummy;
@@ -56,16 +57,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-struct SfWindow::Impl
+struct SfRenderWindow::Impl
 {
     sf::Color clear_color;
 };
 
 // -----------------------
-// SfWindow implementation
+// SfRenderWindow implementation
 // -----------------------
 
-SfWindow::SfWindow(Params const & params)
+SfRenderWindow::SfRenderWindow(Params const & params)
         : SfNative(SfType::RENDER_WINDOW, no_init),
           _impl(std::make_unique<Impl>())
 {
@@ -80,17 +81,17 @@ SfWindow::SfWindow(Params const & params)
     assert(ptr != nullptr);
 }
 
-SfWindow::SfWindow() : SfWindow(Params())
+SfRenderWindow::SfRenderWindow() : SfRenderWindow(Params())
 {
     // EMPTY.
 }
 
-SfWindow::~SfWindow()
+SfRenderWindow::~SfRenderWindow()
 {
     // EMPTY.
 }
 
-int SfWindow::run()
+int SfRenderWindow::run()
 {
     auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
@@ -188,21 +189,21 @@ int SfWindow::run()
 #endif
 }
 
-bool SfWindow::isOpen() const
+bool SfRenderWindow::isOpen() const
 {
     auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
     return window->isOpen();
 }
 
-void SfWindow::close()
+void SfRenderWindow::close()
 {
     auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
     window->close();
 }
 
-void SfWindow::clear()
+void SfRenderWindow::clear()
 {
     auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
@@ -210,167 +211,167 @@ void SfWindow::clear()
     window->clear(_impl->clear_color);
 }
 
-void SfWindow::display()
+void SfRenderWindow::display()
 {
     auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
     window->display();
 }
 
-void SfWindow::setClearColor(Rgb24 const & color)
+void SfRenderWindow::setClearColor(Rgb24 const & color)
 {
     setClearColor(color.r, color.g, color.b);
 }
 
-void SfWindow::setClearColor(Rgb32 const & color)
+void SfRenderWindow::setClearColor(Rgb32 const & color)
 {
     setClearColor(color.r, color.g, color.b, color.a);
 }
 
-void SfWindow::setClearColor(Channel r, Channel g, Channel b, Channel a)
+void SfRenderWindow::setClearColor(Channel r, Channel g, Channel b, Channel a)
 {
     assert(static_cast<bool>(_impl));
     _impl->clear_color = sf::Color(r, g, b, a);
 }
 
-SfWindow::Rgb32 SfWindow::getClearColor() const
+SfRenderWindow::Rgb32 SfRenderWindow::getClearColor() const
 {
     assert(static_cast<bool>(_impl));
     auto const & COLOR = _impl->clear_color;
     return Rgb32{COLOR.r, COLOR.g, COLOR.b, COLOR.a};
 }
 
-void SfWindow::onBegin()
+void SfRenderWindow::onBegin()
 {
     // EMPTY.
 }
 
-void SfWindow::onEnd()
+void SfRenderWindow::onEnd()
 {
     // EMPTY.
 }
 
-void SfWindow::onPollEventBegin()
+void SfRenderWindow::onPollEventBegin()
 {
     // EMPTY.
 }
 
-void SfWindow::onPollEventEnd()
+void SfRenderWindow::onPollEventEnd()
 {
     // EMPTY.
 }
 
-void SfWindow::onClosed()
+void SfRenderWindow::onClosed()
 {
     close();
 }
 
-void SfWindow::onResized(unsigned int width, unsigned int height)
+void SfRenderWindow::onResized(unsigned int width, unsigned int height)
 {
     // EMPTY.
 }
 
-void SfWindow::onLostFocus()
+void SfRenderWindow::onLostFocus()
 {
     // EMPTY.
 }
 
-void SfWindow::onGainedFocus()
+void SfRenderWindow::onGainedFocus()
 {
     // EMPTY.
 }
 
-void SfWindow::onKeyPressed(Key code, bool alt, bool control, bool shift, bool system)
+void SfRenderWindow::onKeyPressed(Key code, bool alt, bool control, bool shift, bool system)
 {
     // EMPTY.
 }
 
-void SfWindow::onKeyReleased(Key code, bool alt, bool control, bool shift, bool system)
+void SfRenderWindow::onKeyReleased(Key code, bool alt, bool control, bool shift, bool system)
 {
     // EMPTY.
 }
 
-void SfWindow::onTextEntered(unsigned int unicode)
+void SfRenderWindow::onTextEntered(unsigned int unicode)
 {
     // EMPTY.
 }
 
-void SfWindow::onMouseMoved(int x, int y)
+void SfRenderWindow::onMouseMoved(int x, int y)
 {
     // EMPTY.
 }
 
-void SfWindow::onMouseEntered()
+void SfRenderWindow::onMouseEntered()
 {
     // EMPTY.
 }
 
-void SfWindow::onMouseLeft()
+void SfRenderWindow::onMouseLeft()
 {
     // EMPTY.
 }
 
-void SfWindow::onMouseButtonPressed(Button button, int x, int y)
+void SfRenderWindow::onMouseButtonPressed(Button button, int x, int y)
 {
     // EMPTY.
 }
 
-void SfWindow::onMouseButtonReleased(Button button, int x, int y)
+void SfRenderWindow::onMouseButtonReleased(Button button, int x, int y)
 {
     // EMPTY.
 }
 
-void SfWindow::onMouseWheelScrolled(Wheel wheel, float delta, int x, int y)
+void SfRenderWindow::onMouseWheelScrolled(Wheel wheel, float delta, int x, int y)
 {
     // EMPTY.
 }
 
-void SfWindow::onJoystickConnected(unsigned int joystick_id)
+void SfRenderWindow::onJoystickConnected(unsigned int joystick_id)
 {
     // EMPTY.
 }
 
-void SfWindow::onJoystickDisconnected(unsigned int joystick_id)
+void SfRenderWindow::onJoystickDisconnected(unsigned int joystick_id)
 {
     // EMPTY.
 }
 
-void SfWindow::onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position)
+void SfRenderWindow::onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position)
 {
     // EMPTY.
 }
 
-void SfWindow::onJoystickButtonPressed(unsigned int joystick_id, unsigned int button)
+void SfRenderWindow::onJoystickButtonPressed(unsigned int joystick_id, unsigned int button)
 {
     // EMPTY.
 }
 
-void SfWindow::onJoystickButtonReleased(unsigned int joystick_id, unsigned int button)
+void SfRenderWindow::onJoystickButtonReleased(unsigned int joystick_id, unsigned int button)
 {
     // EMPTY.
 }
 
-void SfWindow::onTouchBegan(unsigned int finger, int x, int y)
+void SfRenderWindow::onTouchBegan(unsigned int finger, int x, int y)
 {
     // EMPTY.
 }
 
-void SfWindow::onTouchMoved(unsigned int finger, int x, int y)
+void SfRenderWindow::onTouchMoved(unsigned int finger, int x, int y)
 {
     // EMPTY.
 }
 
-void SfWindow::onTouchEnded(unsigned int finger, int x, int y)
+void SfRenderWindow::onTouchEnded(unsigned int finger, int x, int y)
 {
     // EMPTY.
 }
 
-void SfWindow::onSensorChanged(SensorType type, float x, float y, float z)
+void SfRenderWindow::onSensorChanged(SensorType type, float x, float y, float z)
 {
     // EMPTY.
 }
 
-void SfWindow::onIdle()
+void SfRenderWindow::onIdle()
 {
     // EMPTY.
 }

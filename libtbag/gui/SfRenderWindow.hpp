@@ -4,10 +4,11 @@
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
+ * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFRENDERWINDOW_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFRENDERWINDOW_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -29,13 +30,14 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 /**
- * SfWindow class prototype.
+ * SfRenderWindow class prototype.
  *
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
+ * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
  */
-class TBAG_API SfWindow : public SfNative
+class TBAG_API SfRenderWindow : public SfNative
 {
 public:
     using Channel = libtbag::graphic::Channel;
@@ -221,9 +223,9 @@ public:
     };
 
 public:
-    SfWindow(Params const & params);
-    SfWindow();
-    virtual ~SfWindow();
+    SfRenderWindow(Params const & params);
+    SfRenderWindow();
+    virtual ~SfRenderWindow();
 
 public:
     int run();
@@ -441,5 +443,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFRENDERWINDOW_HPP__
 

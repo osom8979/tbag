@@ -7,7 +7,7 @@
 
 #include <libtbag/tpot/apps/GmPot.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/gui/SfWindow.hpp>
+#include <libtbag/gui/SfRenderWindow.hpp>
 #include <libtbag/graphic/Color.hpp>
 
 #include <iostream>
@@ -25,7 +25,7 @@ namespace apps {
  * @author zer0
  * @date   2019-02-10
  */
-struct GmPotImpl : public libtbag::gui::SfWindow
+struct GmPotImpl : public libtbag::gui::SfRenderWindow
 {
     enum class SceneMode
     {
