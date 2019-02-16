@@ -13,6 +13,7 @@ tbag_modules__apply_dep_lua_import_macros ()
 tbag_modules__append_dependencies (tbag tbshare tbproc)
 tbag_modules__append_ldflags (tbag)
 tbag_modules__append_definitions ("DEMO_ASSET_DIR=\"${TBAG_PROJECT_CONST_DIR_PATH}/asset\"")
+tbag_modules__append_definitions ("DEMO_TCP_PORT=8080")
 
 if (NOT BUILD_SHARED_LIBS)
     tbag_modules__apply_tbag_static_api ()

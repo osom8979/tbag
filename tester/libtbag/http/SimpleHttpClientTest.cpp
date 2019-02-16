@@ -27,10 +27,23 @@ TEST(SimpleHttpClientTest, HttpRequest)
 #endif
 }
 
-TEST(SimpleHttpClientTest, HttpsRequest)
+TEST(SimpleHttpClientTest, HttpsRequest_01)
 {
     libtbag::log::SeverityGuard guard;
     auto const RESPONSE = requestGet("https://osom8979.github.io");
+    ASSERT_EQ(200, RESPONSE.code);
+
+#if defined(__PRINT_RESPONSE_STRING)
+    std::cout << RESPONSE.toDebugResponseString() << std::endl
+              << "[Body]" << std::endl
+              << RESPONSE.getBodyString() << std::endl;
+#endif
+}
+
+TEST(SimpleHttpClientTest, HttpsRequest_02)
+{
+    libtbag::log::SeverityGuard guard;
+    auto const RESPONSE = requestGet("https://raw.githubusercontent.com/osom8979/tbag/master/INFORMATION");
     ASSERT_EQ(200, RESPONSE.code);
 
 #if defined(__PRINT_RESPONSE_STRING)
