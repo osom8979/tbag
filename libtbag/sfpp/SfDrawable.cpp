@@ -17,13 +17,13 @@ namespace sfpp {
 SfDrawable::SfDrawable(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
 {
-    // EMPTY.
+    assert(isDrawable(type));
 }
 
 SfDrawable::SfDrawable(SfType type, bool ref)
         : SfNative(type, ref)
 {
-    // EMPTY.
+    assert(isDrawable(type));
 }
 
 SfDrawable::~SfDrawable()

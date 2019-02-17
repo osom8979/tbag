@@ -65,6 +65,8 @@ enum class SfType : int
 TBAG_API SfType getSfType(int type) TBAG_NOEXCEPT;
 TBAG_API char const * const getSfTypeName(SfType type) TBAG_NOEXCEPT;
 
+TBAG_API bool isDrawable(SfType type) TBAG_NOEXCEPT;
+
 TBAG_API void * newSfType(SfType type);
 TBAG_API void deleteSfType(SfType type, void * ptr);
 

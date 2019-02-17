@@ -30,6 +30,8 @@ namespace sfpp {
 
 // Forward declaration.
 class SfView;
+class SfCursor;
+class SfDrawable;
 
 /**
  * SfRenderWindow class prototype.
@@ -445,7 +447,7 @@ public:
     Pointi mapCoordsToPixel(Pointf const & point) const;
     Pointi mapCoordsToPixel(Pointf const & point, SfView const & view) const;
 
-//    void draw(const Drawable& drawable, const RenderStates& states = RenderStates::Default);
+//    void draw(SfDrawable const & drawable, RenderStates const & states = RenderStates::Default);
 //    void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates::Default);
 //    void draw(const VertexBuffer& vertexBuffer, const RenderStates& states = RenderStates::Default);
 //    void draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states = RenderStates::Default);
@@ -477,7 +479,7 @@ public:
     void setVerticalSyncEnabled(bool enabled);
     void setMouseCursorVisible(bool visible);
     void setMouseCursorGrabbed(bool grabbed);
-    //void setMouseCursor(Cursor const & cursor);
+    void setMouseCursor(SfCursor const & cursor);
     void setKeyRepeatEnabled(bool enabled);
     void setFramerateLimit(unsigned int limit);
     void setJoystickThreshold(float threshold);

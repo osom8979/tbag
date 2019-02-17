@@ -43,6 +43,24 @@ char const * const getSfTypeName(SfType type) TBAG_NOEXCEPT
     // @formatter:on
 }
 
+bool isDrawable(SfType type) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (type) {
+    case SfType::ST_CIRCLE_SHAPE:
+    case SfType::ST_CONVEX_SHAPE:
+    case SfType::ST_RECTANGLE_SHAPE:
+    case SfType::ST_SPRITE:
+    case SfType::ST_TEXT:
+    case SfType::ST_VERTEX_ARRAY:
+    case SfType::ST_VERTEX_BUFFER:
+        return true;
+    default:
+        return false;
+    }
+    // @formatter:on
+}
+
 void * newSfType(SfType type)
 {
     // @formatter:off

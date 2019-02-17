@@ -9,6 +9,8 @@
 
 #include <libtbag/sfpp/SfRenderWindow.hpp>
 #include <libtbag/sfpp/SfView.hpp>
+#include <libtbag/sfpp/SfCursor.hpp>
+#include <libtbag/sfpp/SfDrawable.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
@@ -366,7 +368,7 @@ void SfRenderWindow::clear()
 
 void SfRenderWindow::setView(SfView const & view)
 {
-    _self_sf()->setView(*((sf::View*)view.get()));
+    _self_sf()->setView(*view.cast<sf::View>());
 }
 
 SfView SfRenderWindow::getView() const
@@ -381,7 +383,7 @@ SfView SfRenderWindow::getDefaultView() const
 
 Recti SfRenderWindow::getViewport(SfView const & view) const
 {
-    auto const RECT = _self_sf()->getViewport(*((sf::View*)view.get()));
+    auto const RECT = _self_sf()->getViewport(*view.cast<sf::View>());
     return Recti(RECT.left, RECT.top, RECT.width, RECT.height);
 }
 
@@ -393,7 +395,7 @@ Pointf SfRenderWindow::mapPixelToCoords(Pointi const & point) const
 
 Pointf SfRenderWindow::mapPixelToCoords(Pointi const & point, SfView const & view) const
 {
-    auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y), *((sf::View*)view.get()));
+    auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y), *view.cast<sf::View>());
     return Pointf(COORDS.x, COORDS.y);
 }
 
@@ -405,9 +407,14 @@ Pointi SfRenderWindow::mapCoordsToPixel(Pointf const & point) const
 
 Pointi SfRenderWindow::mapCoordsToPixel(Pointf const & point, SfView const & view) const
 {
-    auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y), *((sf::View*)view.get()));
+    auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y), *view.cast<sf::View>());
     return Pointi(PIXEL.x, PIXEL.y);
 }
+
+//void SfRenderWindow::draw(SfDrawable const & drawable, RenderStates const & states = RenderStates::Default)
+//{
+//    _self_sf()->draw(*drawable.cast<sf::Drawable>(), sf::RenderStates);
+//}
 
 Pointi SfRenderWindow::getPosition() const
 {
@@ -491,9 +498,10 @@ void SfRenderWindow::setMouseCursorGrabbed(bool grabbed)
     _self_sf()->setMouseCursorGrabbed(grabbed);
 }
 
-//void SfRenderWindow::setMouseCursor(Cursor const & cursor)
-//{
-//}
+void SfRenderWindow::setMouseCursor(SfCursor const & cursor)
+{
+    _self_sf()->setMouseCursor(*cursor.cast<sf::Cursor>());
+}
 
 void SfRenderWindow::setKeyRepeatEnabled(bool enabled)
 {
