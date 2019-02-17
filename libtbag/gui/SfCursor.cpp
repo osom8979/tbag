@@ -23,6 +23,9 @@ _STATIC_ASSERT_EQUAL(sf::Cursor::NotAllowed, libtbag::gui::SfCursor::CursorType:
 using namespace libtbag::dummy;
 #endif
 
+#include <algorithm>
+#include <utility>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -34,9 +37,28 @@ SfCursor::SfCursor() : SfNative(SfType::ST_CURSOR)
     // EMPTY.
 }
 
+SfCursor::SfCursor(SfCursor && obj) TBAG_NOEXCEPT
+        : SfNative(SfType::ST_CURSOR, no_init)
+{
+    *this = std::move(obj);
+}
+
 SfCursor::~SfCursor()
 {
     // EMPTY.
+}
+
+SfCursor & SfCursor::operator =(SfCursor && obj) TBAG_NOEXCEPT
+{
+    swap(obj);
+    return *this;
+}
+
+void SfCursor::swap(SfCursor & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        SfNative::swap(obj);
+    }
 }
 
 #ifndef _self_sf

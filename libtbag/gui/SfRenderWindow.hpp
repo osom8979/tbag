@@ -28,6 +28,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+// Forward declaration.
+class SfView;
+
 /**
  * SfRenderWindow class prototype.
  *
@@ -212,9 +215,20 @@ public:
     };
 
 public:
-    SfRenderWindow(Params const & params);
     SfRenderWindow();
+    SfRenderWindow(Params const & params);
+    SfRenderWindow(SfRenderWindow && obj) TBAG_NOEXCEPT;
     virtual ~SfRenderWindow();
+
+public:
+    SfRenderWindow & operator =(SfRenderWindow && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(SfRenderWindow & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(SfRenderWindow & lh, SfRenderWindow & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     int run();
@@ -419,16 +433,17 @@ public:
     void clear(Rgb32 const & color);
     void clear();
 
-//    void setView(const View& view);
-//    const View& getView() const;
-//    const View& getDefaultView() const;
-//    IntRect getViewport(const View& view) const;
+public:
+    void setView(SfView const & view);
+    SfView getView() const;
+    SfView getDefaultView() const;
+    Recti getViewport(SfView const & view) const;
 
-//    Vector2f mapPixelToCoords(const Vector2i& point) const;
-//    Vector2f mapPixelToCoords(const Vector2i& point, const View& view) const;
+    Pointf mapPixelToCoords(Pointi const & point) const;
+    Pointf mapPixelToCoords(Pointi const & point, SfView const & view) const;
 
-//    Vector2i mapCoordsToPixel(const Vector2f& point) const;
-//    Vector2i mapCoordsToPixel(const Vector2f& point, const View& view) const;
+    Pointi mapCoordsToPixel(Pointf const & point) const;
+    Pointi mapCoordsToPixel(Pointf const & point, SfView const & view) const;
 
 //    void draw(const Drawable& drawable, const RenderStates& states = RenderStates::Default);
 //    void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates::Default);
@@ -440,8 +455,8 @@ public:
     void setPosition(Pointi const & position);
 
 public:
-    Pointu getSize() const;
-    void setSize(Pointu const & size);
+    Sizeu getSize() const;
+    void setSize(Sizeu const & size);
 
 public:
     bool setActive(bool active = true);

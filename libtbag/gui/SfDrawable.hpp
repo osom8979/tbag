@@ -32,8 +32,8 @@ namespace gui {
 class TBAG_API SfDrawable : public SfNative
 {
 public:
-    SfDrawable(SfType type);
-    SfDrawable(SfType type, no_init_t);
+    explicit SfDrawable(SfType type, no_init_t, bool ref = true);
+    explicit SfDrawable(SfType type, bool ref = true);
     virtual ~SfDrawable();
 };
 

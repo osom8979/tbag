@@ -8,6 +8,7 @@
  */
 
 #include <libtbag/gui/SfRenderWindow.hpp>
+#include <libtbag/gui/SfView.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
@@ -51,11 +52,19 @@ using namespace libtbag::dummy;
 #include <cstdlib>
 #include <cassert>
 
+#include <algorithm>
+#include <utility>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace gui {
+
+SfRenderWindow::SfRenderWindow() : SfRenderWindow(Params())
+{
+    // EMPTY.
+}
 
 SfRenderWindow::SfRenderWindow(Params const & params)
         : SfRenderTarget(SfType::ST_RENDER_WINDOW, no_init)
@@ -69,14 +78,28 @@ SfRenderWindow::SfRenderWindow(Params const & params)
     assert(ptr != nullptr);
 }
 
-SfRenderWindow::SfRenderWindow() : SfRenderWindow(Params())
+SfRenderWindow::SfRenderWindow(SfRenderWindow && obj) TBAG_NOEXCEPT
+        : SfRenderTarget(SfType::ST_RENDER_WINDOW, no_init)
 {
-    // EMPTY.
+    *this = std::move(obj);
 }
 
 SfRenderWindow::~SfRenderWindow()
 {
     // EMPTY.
+}
+
+SfRenderWindow & SfRenderWindow::operator =(SfRenderWindow && obj) TBAG_NOEXCEPT
+{
+    swap(obj);
+    return *this;
+}
+
+void SfRenderWindow::swap(SfRenderWindow & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        SfNative::swap(obj);
+    }
 }
 
 int SfRenderWindow::run()
@@ -317,6 +340,9 @@ void SfRenderWindow::onIdle()
 
 using Pointi = SfRenderWindow::Pointi;
 using Pointu = SfRenderWindow::Pointu;
+using Pointf = SfRenderWindow::Pointf;
+using Sizeu  = SfRenderWindow::Sizeu;
+using Recti  = SfRenderWindow::Recti;
 
 void SfRenderWindow::clear(Channel r, Channel g, Channel b, Channel a)
 {
@@ -338,6 +364,51 @@ void SfRenderWindow::clear()
     clear(CHANNEL_MIN, CHANNEL_MIN, CHANNEL_MIN);
 }
 
+void SfRenderWindow::setView(SfView const & view)
+{
+    _self_sf()->setView(*((sf::View*)view.get()));
+}
+
+SfView SfRenderWindow::getView() const
+{
+    return SfView((void*)&(_self_sf()->getView()), no_init, false);
+}
+
+SfView SfRenderWindow::getDefaultView() const
+{
+    return SfView((void*)&(_self_sf()->getDefaultView()), no_init, false);
+}
+
+Recti SfRenderWindow::getViewport(SfView const & view) const
+{
+    auto const RECT = _self_sf()->getViewport(*((sf::View*)view.get()));
+    return Recti(RECT.left, RECT.top, RECT.width, RECT.height);
+}
+
+Pointf SfRenderWindow::mapPixelToCoords(Pointi const & point) const
+{
+    auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y));
+    return Pointf(COORDS.x, COORDS.y);
+}
+
+Pointf SfRenderWindow::mapPixelToCoords(Pointi const & point, SfView const & view) const
+{
+    auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y), *((sf::View*)view.get()));
+    return Pointf(COORDS.x, COORDS.y);
+}
+
+Pointi SfRenderWindow::mapCoordsToPixel(Pointf const & point) const
+{
+    auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y));
+    return Pointi(PIXEL.x, PIXEL.y);
+}
+
+Pointi SfRenderWindow::mapCoordsToPixel(Pointf const & point, SfView const & view) const
+{
+    auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y), *((sf::View*)view.get()));
+    return Pointi(PIXEL.x, PIXEL.y);
+}
+
 Pointi SfRenderWindow::getPosition() const
 {
     auto const POS = _self_sf()->getPosition();
@@ -349,15 +420,15 @@ void SfRenderWindow::setPosition(Pointi const & position)
     _self_sf()->setPosition(sf::Vector2i(position.x, position.y));
 }
 
-Pointu SfRenderWindow::getSize() const
+Sizeu SfRenderWindow::getSize() const
 {
     auto const SIZE = _self_sf()->getSize();
-    return Pointu(SIZE.x, SIZE.y);
+    return Sizeu(SIZE.x, SIZE.y);
 }
 
-void SfRenderWindow::setSize(Pointu const & size)
+void SfRenderWindow::setSize(Sizeu const & size)
 {
-    _self_sf()->setSize(sf::Vector2u(size.x, size.y));
+    _self_sf()->setSize(sf::Vector2u(size.width, size.height));
 }
 
 bool SfRenderWindow::setActive(bool active)

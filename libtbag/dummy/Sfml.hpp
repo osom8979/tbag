@@ -351,10 +351,28 @@ struct SFML_GRAPHICS_API RectangleShape : public Shape
 
 struct SFML_GRAPHICS_API RenderTarget : NonCopyable
 {
+    View __view;
+
     RenderTarget() {}
     ~RenderTarget() {}
 
     void clear(Color const & color = Color(0, 0, 0, 255)) {}
+
+    void setView(View const & view) {}
+    View const & getView() const { return __view; }
+    View const & getDefaultView() const { return __view; }
+    IntRect getViewport(View const & view) const { return IntRect(); }
+
+    Vector2f mapPixelToCoords(Vector2i const & point) const { return Vector2f(); }
+    Vector2f mapPixelToCoords(Vector2i const & point, View const & view) const { return Vector2f(); }
+
+    Vector2i mapCoordsToPixel(Vector2f const & point) const { return Vector2i(); }
+    Vector2i mapCoordsToPixel(Vector2f const & point, View const & view) const { return Vector2i(); }
+
+    //void draw(const Drawable& drawable, const RenderStates& states = RenderStates::Default);
+    //void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates::Default);
+    //void draw(const VertexBuffer& vertexBuffer, const RenderStates& states = RenderStates::Default);
+    //void draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states = RenderStates::Default);
 
     Vector2u getSize() const { return Vector2u(); };
     bool setActive(bool active = true) { return false; }

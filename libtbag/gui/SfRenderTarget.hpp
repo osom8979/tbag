@@ -32,8 +32,8 @@ namespace gui {
 class TBAG_API SfRenderTarget : public SfNative
 {
 public:
-    SfRenderTarget(SfType type);
-    SfRenderTarget(SfType type, no_init_t);
+    explicit SfRenderTarget(SfType type, no_init_t, bool ref = true);
+    explicit SfRenderTarget(SfType type, bool ref = true);
     virtual ~SfRenderTarget();
 };
 

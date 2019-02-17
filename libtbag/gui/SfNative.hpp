@@ -76,27 +76,39 @@ public:
     TBAG_CONSTEXPR static no_init_t const no_init = no_init_t{};
 
 private:
-    SfType const TYPE;
-    void * _user;
+    SfType _type;
+    bool _ref;
 
 public:
-    explicit SfNative(SfType type, no_init_t);
-    explicit SfNative(SfType type);
-    explicit SfNative(int type);
+    explicit SfNative(SfType type, no_init_t, bool ref = true);
+    explicit SfNative(SfType type, bool ref = true);
+    SfNative(SfNative && obj) TBAG_NOEXCEPT;
     virtual ~SfNative();
 
 public:
-    // @formatter:off
-    inline void         setUserData(void * data) TBAG_NOEXCEPT { _user = data; }
-    inline void       * getUserData()            TBAG_NOEXCEPT { return _user; }
-    inline void const * getUserData()      const TBAG_NOEXCEPT { return _user; }
-    // @formatter:on
+    SfNative & operator =(SfNative && obj) TBAG_NOEXCEPT;
 
 public:
-    inline char const * const getTypeName() TBAG_NOEXCEPT
-    {
-        return libtbag::gui::getSfTypeName(TYPE);
-    }
+    void swap(SfNative & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(SfNative & lh, SfNative & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
+
+protected:
+    void setHandle(void * handle) TBAG_NOEXCEPT { ptr = handle; }
+
+public:
+    inline bool isRef() const TBAG_NOEXCEPT { return _ref; }
+    inline void   ref() TBAG_NOEXCEPT { _ref = true; }
+    inline void unref() TBAG_NOEXCEPT { _ref = false; }
+
+public:
+    inline SfType getType() const TBAG_NOEXCEPT
+    { return _type; }
+
+    inline char const * const getTypeName() const TBAG_NOEXCEPT
+    { return libtbag::gui::getSfTypeName(_type); }
 };
 
 } // namespace gui

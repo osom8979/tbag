@@ -8,6 +8,14 @@
 #include <libtbag/gui/SfCommon.hpp>
 #include <libtbag/log/Log.hpp>
 
+#if defined(USE_GUI)
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#else
+#include <libtbag/dummy/Sfml.hpp>
+using namespace libtbag::dummy;
+#endif
+
 #include <cassert>
 
 // -------------------
@@ -31,6 +39,30 @@ char const * const getSfTypeName(SfType type) TBAG_NOEXCEPT
     TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     default: return "UNKNOWN";
+    }
+    // @formatter:on
+}
+
+void * newSfType(SfType type)
+{
+    // @formatter:off
+    switch (type) {
+#define _TBAG_XX(name, type) case SfType::ST_##name: return new (std::nothrow) sf::type();
+    TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
+#undef _TBAG_XX
+    default: return nullptr;
+    }
+    // @formatter:on
+}
+
+void deleteSfType(SfType type, void * ptr)
+{
+    // @formatter:off
+    switch (type) {
+#define _TBAG_XX(name, type) case SfType::ST_##name: delete ((sf::type*)ptr); break;
+    TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
+#undef _TBAG_XX
+    default: break;
     }
     // @formatter:on
 }

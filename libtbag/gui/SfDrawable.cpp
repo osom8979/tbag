@@ -14,12 +14,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-SfDrawable::SfDrawable(SfType type) : SfNative(type)
+SfDrawable::SfDrawable(SfType type, no_init_t, bool ref)
+        : SfNative(type, no_init, ref)
 {
     // EMPTY.
 }
 
-SfDrawable::SfDrawable(SfType type, no_init_t) : SfNative(type, no_init)
+SfDrawable::SfDrawable(SfType type, bool ref)
+        : SfNative(type, ref)
 {
     // EMPTY.
 }

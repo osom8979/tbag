@@ -14,12 +14,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-SfRenderTarget::SfRenderTarget(SfType type) : SfNative(type)
+SfRenderTarget::SfRenderTarget(SfType type, no_init_t, bool ref)
+        : SfNative(type, no_init, ref)
 {
     // EMPTY.
 }
 
-SfRenderTarget::SfRenderTarget(SfType type, no_init_t) : SfNative(type, no_init)
+SfRenderTarget::SfRenderTarget(SfType type, bool ref)
+        : SfNative(type, ref)
 {
     // EMPTY.
 }

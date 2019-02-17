@@ -16,52 +16,54 @@
 using namespace libtbag::dummy;
 #endif
 
+#include <cassert>
+#include <algorithm>
+#include <utility>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace gui {
 
-SfNative::SfNative(SfType type, no_init_t) : TYPE(type), _user(nullptr)
+SfNative::SfNative(SfType type, no_init_t, bool ref)
+        : Parent(nullptr), _type(type), _ref(ref)
 {
-    // EMPTY.
+    assert(ptr == nullptr);
 }
 
-SfNative::SfNative(SfType type) : TYPE(type), _user(nullptr)
+SfNative::SfNative(SfType type, bool ref)
+        : Parent(newSfType(type)), _type(type), _ref(ref)
 {
-    // @formatter:off
-    switch (TYPE) {
-#define _TBAG_XX(name, type) \
-        case SfType::ST_##name: ptr = new sf::type(); break;
-    TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
-#undef _TBAG_XX
-    default:
-        tDLogE("SfNative::SfNative({}) Unknown sf type error.", static_cast<int>(TYPE));
-        throw std::bad_alloc();
-    }
-    // @formatter:on
+    assert(ptr != nullptr);
 }
 
-SfNative::SfNative(int type) : SfNative(getSfType(type))
+SfNative::SfNative(SfNative && obj) TBAG_NOEXCEPT
+        : Parent(nullptr), _type(obj._type), _ref(false)
 {
-    // EMPTY.
+    *this = std::move(obj);
 }
 
 SfNative::~SfNative()
 {
-    if (ptr != nullptr) {
-        // @formatter:off
-        switch (TYPE) {
-#define _TBAG_XX(name, type) \
-            case SfType::ST_##name: delete ((sf::type*)ptr); break;
-        TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
-#undef _TBAG_XX
-        default:
-            TBAG_INACCESSIBLE_BLOCK_ASSERT();
-            break;
-        }
-        // @formatter:on
+    if (_ref && ptr != nullptr) {
+        deleteSfType(_type, ptr);
         ptr = nullptr;
+    }
+}
+
+SfNative & SfNative::operator =(SfNative && obj) TBAG_NOEXCEPT
+{
+    swap(obj);
+    return *this;
+}
+
+void SfNative::swap(SfNative & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        std::swap(ptr, obj.ptr);
+        std::swap(_type, obj._type);
+        std::swap(_ref, obj._ref);
     }
 }
 

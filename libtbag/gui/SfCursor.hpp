@@ -51,7 +51,18 @@ public:
 
 public:
     SfCursor();
+    SfCursor(SfCursor && obj) TBAG_NOEXCEPT;
     virtual ~SfCursor();
+
+public:
+    SfCursor & operator =(SfCursor && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(SfCursor & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(SfCursor & lh, SfCursor & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     bool loadFromPixels(std::uint8_t const * pixels, Sizeu const & size, Pointu const & hotspot);

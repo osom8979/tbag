@@ -18,6 +18,8 @@ using namespace libtbag::dummy;
 #endif
 
 #include <cassert>
+#include <algorithm>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,6 +34,13 @@ using Rectf  = SfView::Rectf;
 SfView::SfView() : SfNative(SfType::ST_VIEW)
 {
     // EMPTY.
+}
+
+SfView::SfView(void * handle, no_init_t, bool ref)
+        : SfNative(SfType::ST_VIEW, no_init)
+{
+    ptr = handle;
+    assert(ptr != nullptr);
 }
 
 SfView::SfView(Rectf const & r)
@@ -50,9 +59,28 @@ SfView::SfView(Pointf const & center, Sizef const & size)
     assert(ptr != nullptr);
 }
 
+SfView::SfView(SfView && obj) TBAG_NOEXCEPT
+        : SfNative(SfType::ST_VIEW, no_init)
+{
+    *this = std::move(obj);
+}
+
 SfView::~SfView()
 {
     // EMPTY.
+}
+
+SfView & SfView::operator =(SfView && obj) TBAG_NOEXCEPT
+{
+    swap(obj);
+    return *this;
+}
+
+void SfView::swap(SfView & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        SfNative::swap(obj);
+    }
 }
 
 #ifndef _self_sf

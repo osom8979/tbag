@@ -51,7 +51,8 @@ public:
     void swap(SfTransform & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(SfTransform & lh, SfTransform & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(SfTransform & lh, SfTransform & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 private:
     float * getMutableMatrix();

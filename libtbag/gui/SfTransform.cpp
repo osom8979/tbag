@@ -19,6 +19,9 @@ using namespace libtbag::dummy;
 #include <cassert>
 #include <cstring>
 
+#include <algorithm>
+#include <utility>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -40,7 +43,8 @@ SfTransform::SfTransform(float a00, float a01, float a02,
     assert(ptr != nullptr);
 }
 
-SfTransform::SfTransform(float const * matrix) : SfTransform()
+SfTransform::SfTransform(float const * matrix)
+        : SfNative(SfType::ST_TRANSFORM)
 {
     assert(matrix != nullptr);
     memcpy(getMutableMatrix(), matrix, MATRIX_BYTE_SIZE);
@@ -50,23 +54,19 @@ SfTransform::SfTransform(float const * matrix) : SfTransform()
 SfTransform::SfTransform(SfTransform && obj) TBAG_NOEXCEPT
         : SfNative(SfType::ST_TRANSFORM, no_init)
 {
-    if (this != &obj) {
-        std::swap(ptr, obj.ptr);
-    }
+    *this = std::move(obj);
 }
 
 SfTransform & SfTransform::operator =(SfTransform && obj) TBAG_NOEXCEPT
 {
-    if (this != &obj) {
-        std::swap(ptr, obj.ptr);
-    }
+    swap(obj);
     return *this;
 }
 
 void SfTransform::swap(SfTransform & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        std::swap(ptr, obj.ptr);
+        SfNative::swap(obj);
     }
 }
 

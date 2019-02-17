@@ -36,9 +36,21 @@ class TBAG_API SfView : public SfNative
 {
 public:
     SfView();
+    explicit SfView(void * handle, no_init_t, bool ref = true);
     SfView(Rectf const & rectangle);
     SfView(Pointf const & center, Sizef const & size);
+    SfView(SfView && obj) TBAG_NOEXCEPT;
     virtual ~SfView();
+
+public:
+    SfView & operator =(SfView && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(SfView & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(SfView & lh, SfView & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     void setCenter(float x, float y);
