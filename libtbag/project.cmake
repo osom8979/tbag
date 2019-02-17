@@ -9,11 +9,11 @@ tbag_modules__update_c_family_subdir_objects (
         3rd/lmdbxx 3rd/sol2 3rd/sqlite3 3rd/sqlite_orm 3rd/tinyxml2
         algorithm animation app archive bitwise codec common container
         crypto database debug dom dummy filesystem flow functional
-        geometry gpu graph graphic gui http id io iterator lib locale
-        lock lockfree log loop macro math memory mq net network pattern
+        geometry gpu graph graphic http id io iterator lib locale lock
+        lockfree log loop macro math memory mq net network pattern
         preprocessor process proto random res rstl science script
-        security signal string system thread time tmp tpot tty type
-        typography util uvpp uvxx)
+        security sfpp signal string system thread time tmp tpot tty
+        type typography util uvpp uvxx)
 tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
 
 ## TBAG EXPORT API.

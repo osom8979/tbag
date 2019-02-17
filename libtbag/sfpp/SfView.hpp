@@ -5,8 +5,8 @@
  * @date   2019-02-17
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFVIEW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFVIEW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFVIEW_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFVIEW_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,13 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gui/SfNative.hpp>
+#include <libtbag/sfpp/SfNative.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace sfpp {
 
 // Forward declaration.
 class SfTransform;
@@ -82,11 +82,11 @@ public:
     SfTransform getInverseTransform() const;
 };
 
-} // namespace gui
+} // namespace sfpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFVIEW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFVIEW_HPP__
 

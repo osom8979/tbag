@@ -7,8 +7,8 @@
  * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFRENDERWINDOW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFRENDERWINDOW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFRENDERWINDOW_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFRENDERWINDOW_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,7 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gui/SfRenderTarget.hpp>
+#include <libtbag/sfpp/SfRenderTarget.hpp>
 #include <libtbag/graphic/Color.hpp>
 
 #include <string>
@@ -26,7 +26,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace sfpp {
 
 // Forward declaration.
 class SfView;
@@ -490,11 +490,11 @@ public:
     void display();
 };
 
-} // namespace gui
+} // namespace sfpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFRENDERWINDOW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFRENDERWINDOW_HPP__
 

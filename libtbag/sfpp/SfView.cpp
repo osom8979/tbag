@@ -5,8 +5,8 @@
  * @date   2019-02-17
  */
 
-#include <libtbag/gui/SfView.hpp>
-#include <libtbag/gui/SfTransform.hpp>
+#include <libtbag/sfpp/SfView.hpp>
+#include <libtbag/sfpp/SfTransform.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_GUI)
@@ -25,7 +25,7 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace sfpp {
 
 using Pointf = SfView::Pointf;
 using Sizef  = SfView::Sizef;
@@ -177,7 +177,7 @@ SfTransform SfView::getInverseTransform() const
 
 #undef _self_sf
 
-} // namespace gui
+} // namespace sfpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

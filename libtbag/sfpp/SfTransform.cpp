@@ -5,7 +5,7 @@
  * @date   2019-02-17
  */
 
-#include <libtbag/gui/SfTransform.hpp>
+#include <libtbag/sfpp/SfTransform.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_GUI)
@@ -26,7 +26,7 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace sfpp {
 
 SfTransform::SfTransform() : SfNative(SfType::ST_TRANSFORM)
 {
@@ -179,7 +179,7 @@ SfTransform & SfTransform::scale(Pointf const & factors, Pointf const & center)
 
 #undef _self_sf
 
-} // namespace gui
+} // namespace sfpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

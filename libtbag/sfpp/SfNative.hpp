@@ -5,8 +5,8 @@
  * @date   2019-02-12
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFNATIVE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFNATIVE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFNATIVE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFNATIVE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -20,13 +20,13 @@
 #include <libtbag/graphic/Color.hpp>
 #include <libtbag/geometry/Point.hpp>
 #include <libtbag/geometry/Rect.hpp>
-#include <libtbag/gui/SfCommon.hpp>
+#include <libtbag/sfpp/SfCommon.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace sfpp {
 
 /**
  * SfNative class prototype.
@@ -108,14 +108,14 @@ public:
     { return _type; }
 
     inline char const * const getTypeName() const TBAG_NOEXCEPT
-    { return libtbag::gui::getSfTypeName(_type); }
+    { return libtbag::sfpp::getSfTypeName(_type); }
 };
 
-} // namespace gui
+} // namespace sfpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_SFNATIVE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFNATIVE_HPP__
 

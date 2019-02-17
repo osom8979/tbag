@@ -5,14 +5,14 @@
  * @date   2019-02-16
  */
 
-#include <libtbag/gui/SfRenderTarget.hpp>
+#include <libtbag/sfpp/SfRenderTarget.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace sfpp {
 
 SfRenderTarget::SfRenderTarget(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
@@ -31,7 +31,7 @@ SfRenderTarget::~SfRenderTarget()
     // EMPTY.
 }
 
-} // namespace gui
+} // namespace sfpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

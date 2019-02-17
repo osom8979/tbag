@@ -5,7 +5,7 @@
  * @date   2019-02-17
  */
 
-#include <libtbag/gui/SfCursor.hpp>
+#include <libtbag/sfpp/SfCursor.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
@@ -16,8 +16,8 @@
 #if defined(USE_GUI)
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-_STATIC_ASSERT_EQUAL(sf::Cursor::Arrow,      libtbag::gui::SfCursor::CursorType::CT_ARROW);
-_STATIC_ASSERT_EQUAL(sf::Cursor::NotAllowed, libtbag::gui::SfCursor::CursorType::CT_NOT_ALLOWED);
+_STATIC_ASSERT_EQUAL(sf::Cursor::Arrow,      libtbag::sfpp::SfCursor::CursorType::CT_ARROW);
+_STATIC_ASSERT_EQUAL(sf::Cursor::NotAllowed, libtbag::sfpp::SfCursor::CursorType::CT_NOT_ALLOWED);
 #else
 #include <libtbag/dummy/Sfml.hpp>
 using namespace libtbag::dummy;
@@ -30,7 +30,7 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace sfpp {
 
 SfCursor::SfCursor() : SfNative(SfType::ST_CURSOR)
 {
@@ -79,7 +79,7 @@ bool SfCursor::loadFromSystem(CursorType type)
 
 #undef _self_sf
 
-} // namespace gui
+} // namespace sfpp
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
