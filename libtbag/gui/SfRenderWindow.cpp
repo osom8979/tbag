@@ -58,7 +58,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 SfRenderWindow::SfRenderWindow(Params const & params)
-        : SfRenderTarget(SfType::RENDER_WINDOW, no_init)
+        : SfRenderTarget(SfType::ST_RENDER_WINDOW, no_init)
 {
     auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
     auto const STYLE = sf::Style::Default;

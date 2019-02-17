@@ -74,6 +74,19 @@ typedef Vector2<int>          Vector2i;
 typedef Vector2<unsigned int> Vector2u;
 typedef Vector2<float>        Vector2f;
 
+template <typename T>
+struct Rect
+{
+    T left, top, width, height;
+
+    Rect() {}
+    Rect(T l, T t, T w, T h) {}
+    ~Rect() {}
+};
+
+typedef Rect<int>   IntRect;
+typedef Rect<float> FloatRect;
+
 // ----------
 // System API
 // ----------
@@ -208,6 +221,57 @@ struct SFML_GRAPHICS_API Color
     Color() {}
     Color(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 255) {}
     ~Color() {}
+};
+
+struct SFML_GRAPHICS_API Transform
+{
+    Transform() {}
+    Transform(float a00, float a01, float a02,
+              float a10, float a11, float a12,
+              float a20, float a21, float a22) {}
+    ~Transform() {}
+
+    float const * getMatrix() const { return nullptr; }
+    Transform getInverse() const { return Transform(); }
+    Vector2f transformPoint(float x, float y) const { return Vector2f(); }
+    Vector2f transformPoint(Vector2f const & point) const { return Vector2f(); }
+    FloatRect transformRect(FloatRect const & rectangle) const { return FloatRect(); }
+    Transform & combine(Transform const & transform) { return *this; }
+    Transform & translate(float x, float y) { return *this; }
+    Transform & translate(Vector2f const & offset) { return *this; }
+    Transform & rotate(float angle) { return *this; }
+    Transform & rotate(float angle, float centerX, float centerY) { return *this; }
+    Transform & rotate(float angle, Vector2f const & center) { return *this; }
+    Transform & scale(float scaleX, float scaleY) { return *this; }
+    Transform & scale(float scaleX, float scaleY, float centerX, float centerY) { return *this; }
+    Transform & scale(Vector2f const & factors) { return *this; }
+    Transform & scale(Vector2f const & factors, Vector2f const & center) { return *this; }
+};
+
+struct SFML_GRAPHICS_API View
+{
+    View() {}
+    View(FloatRect const & rectangle) {}
+    View(Vector2f const & center, Vector2f const & size) {}
+    ~View() {}
+
+    void setCenter(float x, float y);
+    void setCenter(Vector2f const & center);
+    void setSize(float width, float height);
+    void setSize(Vector2f const & size);
+    void setRotation(float angle);
+    void setViewport(FloatRect const & viewport);
+    void reset(FloatRect const & rectangle);
+    Vector2f const & getCenter() const;
+    Vector2f const & getSize() const;
+    float getRotation() const;
+    FloatRect const & getViewport() const;
+    void move(float offsetX, float offsetY);
+    void move(Vector2f const & offset);
+    void rotate(float angle);
+    void zoom(float factor);
+    Transform const & getTransform() const;
+    Transform const & getInverseTransform() const;
 };
 
 struct SFML_GRAPHICS_API RenderStates

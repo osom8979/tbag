@@ -58,6 +58,13 @@ public:
     using Sized = libtbag::geometry::Sized;
     using Size  = libtbag::geometry::Size;
 
+    using Recti = libtbag::geometry::Recti;
+    using Rectu = libtbag::geometry::Rectu;
+    using Rectl = libtbag::geometry::Rectl;
+    using Rectf = libtbag::geometry::Rectf;
+    using Rectd = libtbag::geometry::Rectd;
+    using Rect  = libtbag::geometry::Rect;
+
 public:
     TBAG_CONSTEXPR static Channel const CHANNEL_MIN = libtbag::graphic::channel_min();
     TBAG_CONSTEXPR static Channel const CHANNEL_MAX = libtbag::graphic::channel_max();

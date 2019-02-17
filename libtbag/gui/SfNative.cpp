@@ -32,7 +32,7 @@ SfNative::SfNative(SfType type) : TYPE(type), _user(nullptr)
     // @formatter:off
     switch (TYPE) {
 #define _TBAG_XX(name, type) \
-        case SfType::name: ptr = new sf::type(); break;
+        case SfType::ST_##name: ptr = new sf::type(); break;
     TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     default:
@@ -53,7 +53,7 @@ SfNative::~SfNative()
         // @formatter:off
         switch (TYPE) {
 #define _TBAG_XX(name, type) \
-            case SfType::name: delete ((sf::type*)ptr); break;
+            case SfType::ST_##name: delete ((sf::type*)ptr); break;
         TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
         default:

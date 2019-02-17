@@ -350,6 +350,7 @@ BaseRect<T> operator |(BaseRect<T> const & r1, BaseRect<T> const & r2)
 // ------------
 
 using Recti = BaseRect<int>;
+using Rectu = BaseRect<unsigned>;
 using Rectl = BaseRect<int64_t>;
 using Rectf = BaseRect<float>;
 using Rectd = BaseRect<double>;

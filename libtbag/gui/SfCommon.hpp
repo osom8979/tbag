@@ -23,17 +23,20 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 #ifndef TBAG_SF_HANDLE_MAP
-#define TBAG_SF_HANDLE_MAP(_TBAG_WINDOW_XX, _TBAG_DRAWABLE_XX) \
-    /* Window */                                 \
+#define TBAG_SF_HANDLE_MAP(_TBAG_WINDOW_XX, _TBAG_GRAPHIC_XX) \
+    /* Window API */                             \
+    _TBAG_WINDOW_XX(CURSOR       , Cursor      ) \
     _TBAG_WINDOW_XX(RENDER_WINDOW, RenderWindow) \
-    /* Drawable */                                     \
-    _TBAG_DRAWABLE_XX(CIRCLE_SHAPE   , CircleShape   ) \
-    _TBAG_DRAWABLE_XX(CONVEX_SHAPE   , ConvexShape   ) \
-    _TBAG_DRAWABLE_XX(RECTANGLE_SHAPE, RectangleShape) \
-    _TBAG_DRAWABLE_XX(SPRITE         , Sprite        ) \
-    _TBAG_DRAWABLE_XX(TEXT           , Text          ) \
-    _TBAG_DRAWABLE_XX(VERTEX_ARRAY   , VertexArray   ) \
-    _TBAG_DRAWABLE_XX(VERTEX_BUFFER  , VertexBuffer  ) \
+    /* Graphic API */                                 \
+    _TBAG_GRAPHIC_XX(VIEW           , View          ) \
+    _TBAG_GRAPHIC_XX(TRANSFORM      , Transform     ) \
+    _TBAG_GRAPHIC_XX(CIRCLE_SHAPE   , CircleShape   ) \
+    _TBAG_GRAPHIC_XX(CONVEX_SHAPE   , ConvexShape   ) \
+    _TBAG_GRAPHIC_XX(RECTANGLE_SHAPE, RectangleShape) \
+    _TBAG_GRAPHIC_XX(SPRITE         , Sprite        ) \
+    _TBAG_GRAPHIC_XX(TEXT           , Text          ) \
+    _TBAG_GRAPHIC_XX(VERTEX_ARRAY   , VertexArray   ) \
+    _TBAG_GRAPHIC_XX(VERTEX_BUFFER  , VertexBuffer  ) \
     /* -- END -- */
 #endif
 
@@ -51,7 +54,7 @@ namespace gui {
 enum class SfType : int
 {
     __START_NUMBER__ = -1,
-#define _TBAG_XX(name, type) name,
+#define _TBAG_XX(name, type) ST_##name,
     TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX)
 #undef _TBAG_XX
     __SIZE__
