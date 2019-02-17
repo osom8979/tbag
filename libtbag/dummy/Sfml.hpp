@@ -182,12 +182,14 @@ struct Event
 
 struct SFML_WINDOW_API Window : GlResource, NonCopyable
 {
+    ContextSettings __context_settings;
+
     Window() {}
     ~Window() {}
 
     void close() {}
     bool isOpen() const { return false; }
-    ContextSettings const & getSettings() const { static ContextSettings const c; return c; }
+    ContextSettings const & getSettings() const { return __context_settings; }
     bool pollEvent(Event & event) { return false; }
     bool waitEvent(Event & event) { return false; }
     Vector2i getPosition() const { return Vector2i(); }
@@ -250,28 +252,33 @@ struct SFML_GRAPHICS_API Transform
 
 struct SFML_GRAPHICS_API View
 {
+    Vector2f  __center;
+    Vector2f  __size;
+    FloatRect __viewport;
+    Transform __transform;
+
     View() {}
     View(FloatRect const & rectangle) {}
     View(Vector2f const & center, Vector2f const & size) {}
     ~View() {}
 
-    void setCenter(float x, float y);
-    void setCenter(Vector2f const & center);
-    void setSize(float width, float height);
-    void setSize(Vector2f const & size);
-    void setRotation(float angle);
-    void setViewport(FloatRect const & viewport);
-    void reset(FloatRect const & rectangle);
-    Vector2f const & getCenter() const;
-    Vector2f const & getSize() const;
-    float getRotation() const;
-    FloatRect const & getViewport() const;
-    void move(float offsetX, float offsetY);
-    void move(Vector2f const & offset);
-    void rotate(float angle);
-    void zoom(float factor);
-    Transform const & getTransform() const;
-    Transform const & getInverseTransform() const;
+    void setCenter(float x, float y) {}
+    void setCenter(Vector2f const & center) {}
+    void setSize(float width, float height) {}
+    void setSize(Vector2f const & size) {}
+    void setRotation(float angle) {}
+    void setViewport(FloatRect const & viewport) {}
+    void reset(FloatRect const & rectangle) {}
+    Vector2f const & getCenter() const { return __center; }
+    Vector2f const & getSize() const { return __size; }
+    float getRotation() const { return 0.f; }
+    FloatRect const & getViewport() const { return __viewport; }
+    void move(float offsetX, float offsetY) {}
+    void move(Vector2f const & offset) {}
+    void rotate(float angle) {}
+    void zoom(float factor) {}
+    Transform const & getTransform() const { return __transform; }
+    Transform const & getInverseTransform() const { return __transform; }
 };
 
 struct SFML_GRAPHICS_API RenderStates
