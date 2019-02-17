@@ -176,21 +176,6 @@ int SfRenderWindow::run()
 #endif
 }
 
-bool SfRenderWindow::isOpen() const
-{
-    return cast<sf::RenderWindow>()->isOpen();
-}
-
-void SfRenderWindow::close()
-{
-    cast<sf::RenderWindow>()->close();
-}
-
-void SfRenderWindow::display()
-{
-    cast<sf::RenderWindow>()->display();
-}
-
 void SfRenderWindow::onBegin()
 {
     // EMPTY.
@@ -325,6 +310,151 @@ void SfRenderWindow::onIdle()
 {
     // EMPTY.
 }
+
+#ifndef _self_sf
+#define _self_sf() Parent::cast<sf::RenderWindow>()
+#endif
+
+using Pointi = SfRenderWindow::Pointi;
+using Pointu = SfRenderWindow::Pointu;
+
+void SfRenderWindow::clear(Channel r, Channel g, Channel b, Channel a)
+{
+    _self_sf()->clear(sf::Color(r, g, b, a));
+}
+
+void SfRenderWindow::clear(Rgb24 const & color)
+{
+    clear(color.r, color.g, color.b);
+}
+
+void SfRenderWindow::clear(Rgb32 const & color)
+{
+    clear(color.r, color.g, color.b, color.a);
+}
+
+void SfRenderWindow::clear()
+{
+    clear(CHANNEL_MIN, CHANNEL_MIN, CHANNEL_MIN);
+}
+
+Pointi SfRenderWindow::getPosition() const
+{
+    auto const POS = _self_sf()->getPosition();
+    return Pointi(POS.x, POS.y);
+}
+
+void SfRenderWindow::setPosition(Pointi const & position)
+{
+    _self_sf()->setPosition(sf::Vector2i(position.x, position.y));
+}
+
+Pointu SfRenderWindow::getSize() const
+{
+    auto const SIZE = _self_sf()->getSize();
+    return Pointu(SIZE.x, SIZE.y);
+}
+
+void SfRenderWindow::setSize(Pointu const & size)
+{
+    _self_sf()->setSize(sf::Vector2u(size.x, size.y));
+}
+
+bool SfRenderWindow::setActive(bool active)
+{
+    return _self_sf()->setActive(active);
+}
+
+void SfRenderWindow::pushGLStates()
+{
+    _self_sf()->pushGLStates();
+}
+
+void SfRenderWindow::popGLStates()
+{
+    _self_sf()->popGLStates();
+}
+
+void SfRenderWindow::resetGLStates()
+{
+    _self_sf()->resetGLStates();
+}
+
+void SfRenderWindow::close()
+{
+    _self_sf()->close();
+}
+
+bool SfRenderWindow::isOpen() const
+{
+    return _self_sf()->isOpen();
+}
+
+void SfRenderWindow::setTitle(std::string const & title)
+{
+    _self_sf()->setTitle(sf::String(title));
+}
+
+void SfRenderWindow::setIcon(unsigned int width, unsigned int height, std::uint8_t const * pixels)
+{
+    _self_sf()->setIcon(width, height, pixels);
+}
+
+void SfRenderWindow::setVisible(bool visible)
+{
+    _self_sf()->setVisible(visible);
+}
+
+void SfRenderWindow::setVerticalSyncEnabled(bool enabled)
+{
+    _self_sf()->setVerticalSyncEnabled(enabled);
+}
+
+void SfRenderWindow::setMouseCursorVisible(bool visible)
+{
+    _self_sf()->setMouseCursorVisible(visible);
+}
+
+void SfRenderWindow::setMouseCursorGrabbed(bool grabbed)
+{
+    _self_sf()->setMouseCursorGrabbed(grabbed);
+}
+
+//void SfRenderWindow::setMouseCursor(Cursor const & cursor)
+//{
+//}
+
+void SfRenderWindow::setKeyRepeatEnabled(bool enabled)
+{
+    _self_sf()->setKeyRepeatEnabled(enabled);
+}
+
+void SfRenderWindow::setFramerateLimit(unsigned int limit)
+{
+    _self_sf()->setFramerateLimit(limit);
+}
+
+void SfRenderWindow::setJoystickThreshold(float threshold)
+{
+    _self_sf()->setJoystickThreshold(threshold);
+}
+
+void SfRenderWindow::requestFocus()
+{
+    _self_sf()->requestFocus();
+}
+
+bool SfRenderWindow::hasFocus() const
+{
+    return _self_sf()->hasFocus();
+}
+
+void SfRenderWindow::display()
+{
+    _self_sf()->display();
+}
+
+#undef _self_sf
 
 } // namespace gui
 

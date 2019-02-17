@@ -220,17 +220,6 @@ public:
     int run();
 
 public:
-    bool isOpen() const;
-    void close();
-    void display();
-
-public:
-    void  setClearColor(Rgb24 const & color);
-    void  setClearColor(Rgb32 const & color);
-    void  setClearColor(Channel r, Channel g, Channel b, Channel a = libtbag::graphic::channel_max());
-    Rgb32 getClearColor() const;
-
-public:
     virtual void onBegin();
     virtual void onEnd();
 
@@ -423,6 +412,67 @@ public:
      * Event not detected.
      */
     virtual void onIdle();
+
+public:
+    void clear(Channel r, Channel g, Channel b, Channel a = CHANNEL_MAX);
+    void clear(Rgb24 const & color);
+    void clear(Rgb32 const & color);
+    void clear();
+
+//    void setView(const View& view);
+//    const View& getView() const;
+//    const View& getDefaultView() const;
+//    IntRect getViewport(const View& view) const;
+
+//    Vector2f mapPixelToCoords(const Vector2i& point) const;
+//    Vector2f mapPixelToCoords(const Vector2i& point, const View& view) const;
+
+//    Vector2i mapCoordsToPixel(const Vector2f& point) const;
+//    Vector2i mapCoordsToPixel(const Vector2f& point, const View& view) const;
+
+//    void draw(const Drawable& drawable, const RenderStates& states = RenderStates::Default);
+//    void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates::Default);
+//    void draw(const VertexBuffer& vertexBuffer, const RenderStates& states = RenderStates::Default);
+//    void draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states = RenderStates::Default);
+
+public:
+    Pointi getPosition() const;
+    void setPosition(Pointi const & position);
+
+public:
+    Pointu getSize() const;
+    void setSize(Pointu const & size);
+
+public:
+    bool setActive(bool active = true);
+
+public:
+    void pushGLStates();
+    void popGLStates();
+    void resetGLStates();
+
+public:
+    void close();
+    bool isOpen() const;
+
+public:
+    void setTitle(std::string const & title);
+    void setIcon(unsigned int width, unsigned int height, std::uint8_t const * pixels);
+    void setVisible(bool visible);
+    void setVerticalSyncEnabled(bool enabled);
+    void setMouseCursorVisible(bool visible);
+    void setMouseCursorGrabbed(bool grabbed);
+    //void setMouseCursor(Cursor const & cursor);
+    void setKeyRepeatEnabled(bool enabled);
+    void setFramerateLimit(unsigned int limit);
+    void setJoystickThreshold(float threshold);
+
+public:
+    void requestFocus();
+    bool hasFocus() const;
+
+public:
+    void display();
 };
 
 } // namespace gui

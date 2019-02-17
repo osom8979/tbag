@@ -66,7 +66,8 @@ struct Vector2
 {
     T x, y;
 
-    Vector2(){}
+    Vector2() {}
+    Vector2(T x_, T y_) {}
 };
 
 typedef Vector2<int>          Vector2i;
@@ -79,11 +80,15 @@ typedef Vector2<float>        Vector2f;
 
 struct SFML_SYSTEM_API NonCopyable
 {
+    NonCopyable() {}
+    ~NonCopyable() {}
 };
 
 struct SFML_SYSTEM_API String
 {
-    String(){}
+    String() {}
+    String(std::string const & text) {}
+    ~String() {}
 };
 
 // ----------
@@ -92,13 +97,15 @@ struct SFML_SYSTEM_API String
 
 struct SFML_WINDOW_API GlResource
 {
-    GlResource(){}
+    GlResource() {}
+    ~GlResource() {}
 };
 
 struct SFML_WINDOW_API VideoMode
 {
-    VideoMode(){}
-    VideoMode(unsigned int modeWidth, unsigned int modeHeight, unsigned int modeBitsPerPixel = 32){}
+    VideoMode() {}
+    VideoMode(unsigned int modeWidth, unsigned int modeHeight, unsigned int modeBitsPerPixel = 32) {}
+    ~VideoMode() {}
 };
 
 struct ContextSettings
@@ -124,15 +131,8 @@ struct ContextSettings
                     unsigned int major = 1,
                     unsigned int minor = 1,
                     unsigned int attributes = Default,
-                    bool sRgb = false)
-                    : depthBits        (depth),
-                      stencilBits      (stencil),
-                      antialiasingLevel(antialiasing),
-                      majorVersion     (major),
-                      minorVersion     (minor),
-                      attributeFlags   (attributes),
-                      sRgbCapable      (sRgb)
-    { }
+                    bool rgb = false) {}
+    ~ContextSettings() {}
 };
 
 namespace Style {
@@ -147,19 +147,52 @@ enum
 };
 } // namespace Style
 
+struct SFML_WINDOW_API Cursor : NonCopyable
+{
+    Cursor() {}
+    ~Cursor() {}
+
+    enum Type {
+        Arrow, ArrowWait, Wait, Text, Hand, SizeHorizontal, SizeVertical,
+        SizeTopLeftBottomRight, SizeBottomLeftTopRight, SizeAll, Cross, Help, NotAllowed
+    };
+
+    bool loadFromPixels(Uint8 const * pixels, Vector2u size, Vector2u hotspot) { return false; }
+    bool loadFromSystem(Type type) { return false; }
+};
+
 struct Event
 {
-    Event(){}
+    Event() {}
+    ~Event() {}
 };
 
 struct SFML_WINDOW_API Window : GlResource, NonCopyable
 {
-    Window(){}
+    Window() {}
+    ~Window() {}
 
-    void close(){}
+    void close() {}
     bool isOpen() const { return false; }
+    ContextSettings const & getSettings() const { static ContextSettings const c; return c; }
     bool pollEvent(Event & event) { return false; }
-    void display(){}
+    bool waitEvent(Event & event) { return false; }
+    Vector2i getPosition() const { return Vector2i(); }
+    void setPosition(Vector2i const & position) {}
+    void setSize(Vector2u const & size) {}
+    void setTitle(String const & title) {}
+    void setIcon(unsigned int width, unsigned int height, Uint8 const * pixels) {}
+    void setVisible(bool visible) {}
+    void setVerticalSyncEnabled(bool enabled) {}
+    void setMouseCursorVisible(bool visible) {}
+    void setMouseCursorGrabbed(bool grabbed) {}
+    void setMouseCursor(Cursor const & cursor) {}
+    void setKeyRepeatEnabled(bool enabled) {}
+    void setFramerateLimit(unsigned int limit) {}
+    void setJoystickThreshold(float threshold) {}
+    void requestFocus() {}
+    bool hasFocus() const { return false; }
+    void display() {}
 };
 
 // ------------
@@ -172,86 +205,100 @@ struct SFML_GRAPHICS_API Color
 {
     Uint8 r, g, b, a;
 
-    Color(){}
-    Color(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 255){}
+    Color() {}
+    Color(Uint8 red, Uint8 green, Uint8 blue, Uint8 alpha = 255) {}
+    ~Color() {}
 };
 
 struct SFML_GRAPHICS_API RenderStates
 {
-    RenderStates(){}
+    RenderStates() {}
+    ~RenderStates() {}
 };
 
 struct SFML_GRAPHICS_API Drawable
 {
-    Drawable(){}
+    Drawable() {}
+    ~Drawable() {}
 
     virtual void draw(RenderTarget & target, RenderStates states) const {};
 };
 
 struct SFML_GRAPHICS_API Transformable
 {
-    Transformable(){}
+    Transformable() {}
+    ~Transformable() {}
 };
 
 struct SFML_GRAPHICS_API VertexArray : public Drawable
 {
-    VertexArray(){}
+    VertexArray() {}
+    ~VertexArray() {}
 };
 
 struct SFML_GRAPHICS_API VertexBuffer : public Drawable, private GlResource
 {
-    VertexBuffer(){}
+    VertexBuffer() {}
+    ~VertexBuffer() {}
 };
 
 struct SFML_GRAPHICS_API Sprite : public Drawable, public Transformable
 {
-    Sprite(){}
+    Sprite() {}
+    ~Sprite() {}
 };
 
 struct SFML_GRAPHICS_API Text : public Drawable, public Transformable
 {
-    Text(){}
+    Text() {}
+    ~Text() {}
 };
 
 struct SFML_GRAPHICS_API Shape : public Drawable, public Transformable
 {
-    Shape(){}
+    Shape() {}
+    ~Shape() {}
 };
 
 struct SFML_GRAPHICS_API CircleShape : public Shape
 {
-    CircleShape(){}
+    CircleShape() {}
+    ~CircleShape() {}
 };
 
 struct SFML_GRAPHICS_API ConvexShape : public Shape
 {
-    ConvexShape(){}
+    ConvexShape() {}
+    ~ConvexShape() {}
 };
 
 struct SFML_GRAPHICS_API RectangleShape : public Shape
 {
-    RectangleShape(){}
+    RectangleShape() {}
+    ~RectangleShape() {}
 };
 
 struct SFML_GRAPHICS_API RenderTarget : NonCopyable
 {
-    RenderTarget(){}
+    RenderTarget() {}
+    ~RenderTarget() {}
 
-    void clear(Color const & color = Color(0, 0, 0, 255)){}
+    void clear(Color const & color = Color(0, 0, 0, 255)) {}
 
     Vector2u getSize() const { return Vector2u(); };
-    bool setActive(bool active = true){ return false; }
+    bool setActive(bool active = true) { return false; }
 
-    void pushGLStates(){}
-    void popGLStates(){}
-    void resetGLStates(){}
+    void pushGLStates() {}
+    void popGLStates() {}
+    void resetGLStates() {}
 };
 
 struct SFML_GRAPHICS_API RenderWindow : public Window, public RenderTarget
 {
-    RenderWindow(){}
-    RenderWindow(VideoMode mode, String const & title, Uint32 style, ContextSettings const & settings){}
-    RenderWindow(VideoMode mode, std::string const & title, Uint32 style, ContextSettings const & settings){}
+    RenderWindow() {}
+    RenderWindow(VideoMode mode, String const & title, Uint32 style, ContextSettings const & settings) {}
+    RenderWindow(VideoMode mode, std::string const & title, Uint32 style, ContextSettings const & settings) {}
+    ~RenderWindow() {}
 };
 
 } // namespace sf

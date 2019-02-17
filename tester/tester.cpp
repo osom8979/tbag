@@ -16,7 +16,7 @@
 #include <iostream>
 #include <string>
 
-static char const * const DEFAULT_GTEST_FILTER = "-Network*Test.*";
+TBAG_CONSTEXPR static char const * const DEFAULT_GTEST_FILTER = "*";
 
 int main(int argc, char **argv)
 {
