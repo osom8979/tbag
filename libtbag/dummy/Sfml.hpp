@@ -20,6 +20,7 @@
 #include <cstdint>
 
 #include <string>
+#include <map>
 
 #ifndef SFML_SYSTEM_API
 #define SFML_SYSTEM_API
@@ -68,11 +69,25 @@ struct Vector2
 
     Vector2() {}
     Vector2(T x_, T y_) {}
+    ~Vector2() {}
 };
 
 typedef Vector2<int>          Vector2i;
 typedef Vector2<unsigned int> Vector2u;
 typedef Vector2<float>        Vector2f;
+
+template <typename T>
+struct Vector3
+{
+    T x, y z;
+
+    Vector3() {}
+    Vector3(T x_, T y_, T z_) {}
+    ~Vector3() {}
+};
+
+typedef Vector3<int>   Vector3i;
+typedef Vector3<float> Vector3f;
 
 template <typename T>
 struct Rect
@@ -102,6 +117,17 @@ struct SFML_SYSTEM_API String
     String() {}
     String(std::string const & text) {}
     ~String() {}
+};
+
+struct SFML_SYSTEM_API InputStream
+{
+    InputStream() {}
+    ~InputStream() {}
+
+    Int64 read(void * data, Int64 size) { return 0; }
+    Int64 seek(Int64 position) { return 0; }
+    Int64 tell() { return 0; }
+    Int64 getSize() { return 0; }
 };
 
 // ----------
@@ -149,8 +175,7 @@ struct ContextSettings
 };
 
 namespace Style {
-enum
-{
+enum {
     None       = 0,
     Titlebar   = 1 << 0,
     Resize     = 1 << 1,
@@ -250,6 +275,44 @@ struct SFML_GRAPHICS_API Transform
     Transform & scale(Vector2f const & factors, Vector2f const & center) { return *this; }
 };
 
+template <std::size_t Columns, std::size_t Rows>
+struct Matrix
+{
+    float array[Columns*Rows];
+
+    Matrix() {}
+    Matrix(float const * pointer) {}
+    Matrix(Transform const & transform) {}
+    ~Matrix() {}
+};
+
+template <typename T>
+struct Vector4
+{
+    T x, y, z, w;
+
+    Vector4() {}
+    Vector4(T x_, T y_, T z_, T w_) {}
+    Vector4(Color const & color) {}
+    ~Vector4() {}
+};
+
+namespace Glsl
+{
+typedef Vector2<float> Vec2;
+typedef Vector2<int>   Ivec2;
+typedef Vector2<bool>  Bvec2;
+typedef Vector3<float> Vec3;
+typedef Vector3<int>   Ivec3;
+typedef Vector3<bool>  Bvec3;
+
+typedef priv::Vector4<float> Vec4;
+typedef priv::Vector4<int>   Ivec4;
+typedef priv::Vector4<bool>  Bvec4;
+typedef priv::Matrix<3, 3>   Mat3;
+typedef priv::Matrix<4, 4>   Mat4;
+}
+
 struct SFML_GRAPHICS_API View
 {
     Vector2f  __center;
@@ -281,9 +344,170 @@ struct SFML_GRAPHICS_API View
     Transform const & getInverseTransform() const { return __transform; }
 };
 
+struct SFML_GRAPHICS_API Image
+{
+    Image();
+    ~Image();
+
+    void create(unsigned int width, unsigned int height, Color const & color = Color(0, 0, 0)) {}
+    void create(unsigned int width, unsigned int height, Uint8 const * pixels) {}
+
+    bool loadFromFile(std::string const & filename) { return false; }
+    bool loadFromMemory(void const * data, std::size_t size) { return false; }
+    bool loadFromStream(InputStream const & stream) { return false; }
+    bool saveToFile(std::string const & filename) const { return false; }
+
+    Vector2u getSize() const { return Vector2u(); }
+    void createMaskFromColor(Color const & color, Uint8 alpha = 0) {}
+    void copy(Image const & source, unsigned int destX, unsigned int destY, IntRect const & sourceRect = IntRect(0, 0, 0, 0), bool applyAlpha = false) {}
+    void setPixel(unsigned int x, unsigned int y, Color const & color) {}
+    Color getPixel(unsigned int x, unsigned int y) const { return Color(); }
+    Uint8 const * getPixelsPtr() const { return nullptr; }
+
+    void flipHorizontally() {}
+    void flipVertically() {}
+};
+
+struct SFML_GRAPHICS_API Texture : GlResource
+{
+    enum CoordinateType {
+        Normalized, Pixels
+    };
+
+    Texture();
+    Texture(Texture const & copy);
+    ~Texture();
+
+    bool create(unsigned int width, unsigned int height) { return false; }
+    bool loadFromFile(std::string const & filename, const IntRect & area = IntRect()) { return false; }
+    bool loadFromMemory(void const * data, std::size_t size, IntRect const & area = IntRect()) { return false; }
+    bool loadFromStream(InputStream & stream, IntRect const & area = IntRect()) { return false; }
+    bool loadFromImage(Image const & image, IntRect const & area = IntRect()) { return false; }
+
+    Vector2u getSize() const { return Vector2u(); }
+    Image copyToImage() const { return Image(); }
+
+    void update(Uint8 const * pixels) {}
+    void update(Uint8 const * pixels, unsigned int width, unsigned int height, unsigned int x, unsigned int y) {}
+    void update(Texture const & texture) {}
+    void update(Texture const & texture, unsigned int x, unsigned int y) {}
+    void update(Image const & image) {}
+    void update(Image const & image, unsigned int x, unsigned int y) {}
+    void update(Window const & window) {}
+    void update(Window const & window, unsigned int x, unsigned int y) {}
+
+    void setSmooth(bool smooth) {}
+    bool isSmooth() const { return false; }
+    void setSrgb(bool sRgb) {}
+    bool isSrgb() const { return false; }
+    void setRepeated(bool repeated) {}
+    bool isRepeated() const { return false; }
+    bool generateMipmap() { return false; }
+    Texture & operator =(Texture const & right) { return *this; }
+    void swap(Texture & right) {}
+    unsigned int getNativeHandle() const { return 0; }
+
+    static void bind(Texture const * texture, CoordinateType coordinateType = Normalized) {}
+    static unsigned int getMaximumSize() { return 0; }
+};
+
+struct SFML_GRAPHICS_API Shader : GlResource, NonCopyable
+{
+    enum Type {
+        Vertex, Geometry, Fragment
+    };
+
+    struct CurrentTextureType {};
+
+    Shader() {}
+    ~Shader() {}
+
+    bool loadFromFile(std::string const & filename, Type type) { return false; }
+    bool loadFromFile(std::string const & vertexShaderFilename, std::string const & fragmentShaderFilename) { return false; }
+    bool loadFromFile(std::string const & vertexShaderFilename, std::string const & geometryShaderFilename, std::string const & fragmentShaderFilename) { return false; }
+
+    bool loadFromMemory(std::string const & shader, Type type) { return false; }
+    bool loadFromMemory(std::string const & vertexShader, std::string const & fragmentShader) { return false; }
+    bool loadFromMemory(std::string const & vertexShader, std::string const & geometryShader, std::string const & fragmentShader) { return false; }
+
+    bool loadFromStream(InputStream & stream, Type type) { return false; }
+    bool loadFromStream(InputStream & vertexShaderStream, InputStream & fragmentShaderStream) { return false; }
+    bool loadFromStream(InputStream & vertexShaderStream, InputStream & geometryShaderStream, InputStream & fragmentShaderStream) { return false; }
+
+    void setUniform(std::string const & name, float x) {}
+    void setUniform(std::string const & name, Glsl::Vec2 const & vector) {}
+    void setUniform(std::string const & name, Glsl::Vec3 const & vector) {}
+    void setUniform(std::string const & name, Glsl::Vec4 const & vector) {}
+    void setUniform(std::string const & name, int x) {}
+    void setUniform(std::string const & name, Glsl::Ivec2 const & vector) {}
+    void setUniform(std::string const & name, Glsl::Ivec3 const & vector) {}
+    void setUniform(std::string const & name, Glsl::Ivec4 const & vector) {}
+    void setUniform(std::string const & name, bool x) {}
+    void setUniform(std::string const & name, Glsl::Bvec2 const & vector) {}
+    void setUniform(std::string const & name, Glsl::Bvec3 const & vector) {}
+    void setUniform(std::string const & name, Glsl::Bvec4 const & vector) {}
+    void setUniform(std::string const & name, Glsl::Mat3 const & matrix) {}
+    void setUniform(std::string const & name, Glsl::Mat4 const & matrix) {}
+    void setUniform(std::string const & name, Texture const & texture) {}
+    void setUniform(std::string const & name, CurrentTextureType) {}
+
+    void setUniformArray(std::string const & name, float const * scalarArray, std::size_t length) {}
+    void setUniformArray(std::string const & name, Glsl::Vec2 const * vectorArray, std::size_t length) {}
+    void setUniformArray(std::string const & name, Glsl::Vec3 const * vectorArray, std::size_t length) {}
+    void setUniformArray(std::string const & name, Glsl::Vec4 const * vectorArray, std::size_t length) {}
+    void setUniformArray(std::string const & name, Glsl::Mat3 const * matrixArray, std::size_t length) {}
+    void setUniformArray(std::string const & name, Glsl::Mat4 const * matrixArray, std::size_t length) {}
+
+    unsigned int getNativeHandle() const { return 0U; }
+
+    static void bind(Shader const * shader) {}
+    static bool isAvailable() { return false; }
+    static bool isGeometryAvailable() { return false; }
+};
+
+struct SFML_GRAPHICS_API BlendMode
+{
+    enum Factor {
+        Zero, One,
+        SrcColor, OneMinusSrcColor,
+        DstColor, OneMinusDstColor,
+        SrcAlpha, OneMinusSrcAlpha,
+        DstAlpha, OneMinusDstAlpha
+    };
+
+    enum Equation {
+        Add, Subtract, ReverseSubtract
+    };
+
+    Factor   colorSrcFactor;
+    Factor   colorDstFactor;
+    Equation colorEquation;
+    Factor   alphaSrcFactor;
+    Factor   alphaDstFactor;
+    Equation alphaEquation;
+
+    BlendMode() {}
+    BlendMode(Factor sourceFactor, Factor destinationFactor, Equation blendEquation = Add) {}
+    BlendMode(Factor colorSourceFactor, Factor colorDestinationFactor,
+              Equation colorBlendEquation, Factor alphaSourceFactor,
+              Factor alphaDestinationFactor, Equation alphaBlendEquation) {}
+    ~BlendMode() {}
+};
+
 struct SFML_GRAPHICS_API RenderStates
 {
+    BlendMode blendMode;
+    Transform transform;
+    Texture const * texture;
+    Shader const * shader;
+
     RenderStates() {}
+    RenderStates(BlendMode const & theBlendMode) {}
+    RenderStates(Transform const & theTransform) {}
+    RenderStates(Texture const * theTexture) {}
+    RenderStates(Shader const * theShader) {}
+    RenderStates(BlendMode const & theBlendMode, Transform const & theTransform,
+                 Texture const * theTexture, Shader const * theShader) {}
     ~RenderStates() {}
 };
 
@@ -369,10 +593,10 @@ struct SFML_GRAPHICS_API RenderTarget : NonCopyable
     Vector2i mapCoordsToPixel(Vector2f const & point) const { return Vector2i(); }
     Vector2i mapCoordsToPixel(Vector2f const & point, View const & view) const { return Vector2i(); }
 
-    //void draw(const Drawable& drawable, const RenderStates& states = RenderStates::Default);
-    //void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates::Default);
-    //void draw(const VertexBuffer& vertexBuffer, const RenderStates& states = RenderStates::Default);
-    //void draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states = RenderStates::Default);
+    //void draw(const Drawable& drawable, const RenderStates& states = RenderStates());
+    //void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates());
+    //void draw(const VertexBuffer& vertexBuffer, const RenderStates& states = RenderStates());
+    //void draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states = RenderStates());
 
     Vector2u getSize() const { return Vector2u(); };
     bool setActive(bool active = true) { return false; }
