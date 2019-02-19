@@ -21,10 +21,7 @@ endif ()
 
 if (USE_RTTI)
 else ()
-    if (WIN32)
-    else ()
-        tbag_modules__append_cxxflags (-fno-rtti)
-    endif ()
+    tbag_modules__apply_no_rtti ()
 endif ()
 
 if (WITH_COVERAGE)

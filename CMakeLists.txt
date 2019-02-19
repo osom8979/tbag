@@ -48,8 +48,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     #set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG") ## Default
     set  (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 endif ()
-set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_TBAG_LIBRARY_DEBUGGING_LOG")
-set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DDISABLE_TBAG_LOG")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_TBAG_LIBRARY_DEBUGGING_LOG")
 
 # Setup the THIRD_PREFIX variable.
 string (REPLACE "\\" "/" __tparty_home_path "$ENV{TPARTY_HOME}/local")
@@ -59,10 +58,11 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
-tbag_config__set_option (USE_CCACHE  ON) ## Enable ccache compile.
-tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compiler.
-tbag_config__set_option (USE_PCH    OFF) ## Enable PCH compile.
-tbag_config__set_option (USE_RTTI   OFF) ## Enable RTTI flag.
+tbag_config__set_option (USE_CCACHE     ON) ## Enable ccache compile.
+tbag_config__set_option (USE_GOLD       ON) ## Enable ld.gold linker if gcc compiler.
+tbag_config__set_option (USE_PCH       OFF) ## Enable PCH compile.
+tbag_config__set_option (USE_RTTI      OFF) ## Enable RTTI flag.
+tbag_config__set_option (DISABLE_TDLOG OFF) ## Disable tbag default logger.
 
 ## Configure settings.
 if (USE_CCACHE)
@@ -84,6 +84,11 @@ if (USE_GUI)
     message (STATUS "Enable GUI library")
 else ()
     message (STATUS "Disable GUI library")
+endif ()
+if (DISABLE_TDLOG)
+    message (STATUS "Disable tDLog feature")
+else ()
+    message (STATUS "Enable tDLog feature")
 endif ()
 
 ## External project.

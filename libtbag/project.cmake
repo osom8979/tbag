@@ -80,10 +80,11 @@ endif ()
 
 if (USE_RTTI)
 else ()
-    if (WIN32)
-    else ()
-        tbag_modules__append_cxxflags (-fno-rtti)
-    endif ()
+    tbag_modules__apply_no_rtti ()
+endif ()
+
+if (DISABLE_TDLOG)
+    tbag_modules__append_definitions (DISABLE_TBAG_LOG)
 endif ()
 
 if (WITH_COVERAGE)

@@ -94,6 +94,7 @@ The main build options you will want to configure are as follows:
 * `USE_DOXYGEN`: Enable `doxygen` documentation.
 * `USE_GUI`: Enable GUI module.
 * `USE_RTTI`: Enable RTTI flag.
+* `DISABLE_TDLOG`: Disable tbag default logger.
 
 ## License
 
