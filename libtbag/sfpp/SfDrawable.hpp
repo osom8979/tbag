@@ -34,7 +34,7 @@ class TBAG_API SfDrawable : public SfNative
 public:
     explicit SfDrawable(SfType type, no_init_t, bool ref = true);
     explicit SfDrawable(SfType type, bool ref = true);
-    virtual ~SfDrawable();
+    ~SfDrawable();
 };
 
 } // namespace sfpp

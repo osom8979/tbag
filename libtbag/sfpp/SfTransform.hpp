@@ -42,7 +42,7 @@ public:
                 float a20, float a21, float a22);
     SfTransform(float const * matrix);
     SfTransform(SfTransform && obj) TBAG_NOEXCEPT;
-    virtual ~SfTransform();
+    ~SfTransform();
 
 public:
     SfTransform & operator =(SfTransform && obj) TBAG_NOEXCEPT;

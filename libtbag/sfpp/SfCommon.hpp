@@ -26,10 +26,14 @@ namespace sfpp {
 
 #ifndef TBAG_SF_HANDLE_MAP
 #define TBAG_SF_HANDLE_MAP(_TBAG_WINDOW_XX, _TBAG_GRAPHIC_XX) \
-    /* Window API */                             \
-    _TBAG_WINDOW_XX(CURSOR       , Cursor      ) \
-    _TBAG_WINDOW_XX(RENDER_WINDOW, RenderWindow) \
+    /* Window API */                \
+    _TBAG_WINDOW_XX(CURSOR, Cursor) \
     /* Graphic API */                                 \
+    _TBAG_GRAPHIC_XX(BLEND_MODE     , BlendMode     ) \
+    _TBAG_GRAPHIC_XX(IMAGE          , Image         ) \
+    _TBAG_GRAPHIC_XX(RENDER_STATES  , RenderStates  ) \
+    _TBAG_GRAPHIC_XX(SHADER         , Shader        ) \
+    _TBAG_GRAPHIC_XX(TEXTURE        , Texture       ) \
     _TBAG_GRAPHIC_XX(VIEW           , View          ) \
     _TBAG_GRAPHIC_XX(TRANSFORM      , Transform     ) \
     _TBAG_GRAPHIC_XX(CIRCLE_SHAPE   , CircleShape   ) \
@@ -39,6 +43,10 @@ namespace sfpp {
     _TBAG_GRAPHIC_XX(TEXT           , Text          ) \
     _TBAG_GRAPHIC_XX(VERTEX_ARRAY   , VertexArray   ) \
     _TBAG_GRAPHIC_XX(VERTEX_BUFFER  , VertexBuffer  ) \
+    _TBAG_GRAPHIC_XX(RENDER_WINDOW  , RenderWindow  ) \
+    /* Not implementation */            \
+    /* (DRAWABLE     , Drawable    ) */ \
+    /* (RENDER_TARGET, RenderTarget) */ \
     /* -- END -- */
 #endif
 

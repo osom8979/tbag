@@ -52,7 +52,7 @@ public:
 public:
     SfCursor();
     SfCursor(SfCursor && obj) TBAG_NOEXCEPT;
-    virtual ~SfCursor();
+    ~SfCursor();
 
 public:
     SfCursor & operator =(SfCursor && obj) TBAG_NOEXCEPT;

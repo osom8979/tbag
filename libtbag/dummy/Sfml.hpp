@@ -79,7 +79,7 @@ typedef Vector2<float>        Vector2f;
 template <typename T>
 struct Vector3
 {
-    T x, y z;
+    T x, y, z;
 
     Vector3() {}
     Vector3(T x_, T y_, T z_) {}
@@ -275,6 +275,8 @@ struct SFML_GRAPHICS_API Transform
     Transform & scale(Vector2f const & factors, Vector2f const & center) { return *this; }
 };
 
+namespace priv {
+
 template <std::size_t Columns, std::size_t Rows>
 struct Matrix
 {
@@ -297,21 +299,21 @@ struct Vector4
     ~Vector4() {}
 };
 
-namespace Glsl
-{
+} // namespace priv
+
+namespace Glsl {
 typedef Vector2<float> Vec2;
 typedef Vector2<int>   Ivec2;
 typedef Vector2<bool>  Bvec2;
 typedef Vector3<float> Vec3;
 typedef Vector3<int>   Ivec3;
 typedef Vector3<bool>  Bvec3;
-
 typedef priv::Vector4<float> Vec4;
 typedef priv::Vector4<int>   Ivec4;
 typedef priv::Vector4<bool>  Bvec4;
-typedef priv::Matrix<3, 3>   Mat3;
-typedef priv::Matrix<4, 4>   Mat4;
-}
+typedef priv::Matrix<3, 3> Mat3;
+typedef priv::Matrix<4, 4> Mat4;
+} // namespace Glsl
 
 struct SFML_GRAPHICS_API View
 {
@@ -346,8 +348,8 @@ struct SFML_GRAPHICS_API View
 
 struct SFML_GRAPHICS_API Image
 {
-    Image();
-    ~Image();
+    Image() {}
+    ~Image() {}
 
     void create(unsigned int width, unsigned int height, Color const & color = Color(0, 0, 0)) {}
     void create(unsigned int width, unsigned int height, Uint8 const * pixels) {}
@@ -374,9 +376,9 @@ struct SFML_GRAPHICS_API Texture : GlResource
         Normalized, Pixels
     };
 
-    Texture();
-    Texture(Texture const & copy);
-    ~Texture();
+    Texture() {}
+    Texture(Texture const & copy) {}
+    ~Texture() {}
 
     bool create(unsigned int width, unsigned int height) { return false; }
     bool loadFromFile(std::string const & filename, const IntRect & area = IntRect()) { return false; }

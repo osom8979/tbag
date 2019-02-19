@@ -36,11 +36,11 @@ class TBAG_API SfView : public SfNative
 {
 public:
     SfView();
-    explicit SfView(void * handle, no_init_t, bool ref = true);
+    SfView(void * handle, no_init_t, bool ref = true);
     SfView(Rectf const & rectangle);
     SfView(Pointf const & center, Sizef const & size);
     SfView(SfView && obj) TBAG_NOEXCEPT;
-    virtual ~SfView();
+    ~SfView();
 
 public:
     SfView & operator =(SfView && obj) TBAG_NOEXCEPT;
