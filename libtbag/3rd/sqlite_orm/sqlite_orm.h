@@ -3035,7 +3035,11 @@ namespace sqlite_orm {
         
         template<class O>
         std::string dump(const O &, sqlite3 *, std::nullptr_t) {
+#if defined(USE_RTTI)
             throw std::runtime_error("type " + std::string(typeid(O).name()) + " is not mapped to storage in max");
+#else
+            throw std::runtime_error("type (O) is not mapped to storage in max");
+#endif
         }
         
         bool table_exists(const std::string &tableName, sqlite3 *db) {

@@ -62,6 +62,7 @@ endif ()
 tbag_config__set_option (USE_CCACHE  ON) ## Enable ccache compile.
 tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compiler.
 tbag_config__set_option (USE_PCH    OFF) ## Enable PCH compile.
+tbag_config__set_option (USE_RTTI   OFF) ## Enable RTTI flag.
 
 ## Configure settings.
 if (USE_CCACHE)

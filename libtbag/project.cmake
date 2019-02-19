@@ -66,7 +66,7 @@ set (MSG_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/msg_t2s.h")
 tbag_modules__build_dep_flatc_cpp (msg_fbs "${MSG_FBS_SRC}")
 tbag_modules__text_to_cpp11string (msg_t2s "${MSG_T2S_PATH}" msg __msg__ "${MSG_FBS_SRC}")
 
-if (CUDA_FOUND)
+if (USE_CUDA AND CUDA_FOUND)
     tbag_modules__check_cuda ()
     tbag_modules__apply_cuda ()
 
@@ -76,6 +76,14 @@ endif ()
 
 if (WIN32)
     tbag_modules__append_ldflags (shlwapi.lib) # filesystem with windows.
+endif ()
+
+if (USE_RTTI)
+else ()
+    if (WIN32)
+    else ()
+        tbag_modules__append_cxxflags (-fno-rtti)
+    endif ()
 endif ()
 
 if (WITH_COVERAGE)

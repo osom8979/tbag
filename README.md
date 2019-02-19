@@ -68,9 +68,6 @@ Tea-bag is Third party extension utility project.
 - pthread (os/compiler supported)
 
 ```bash
-## OpenAL
-sudo apt-get install libalut-dev ## or libalut-dev
-
 ## OpenGL
 sudo apt-get install libglu1-mesa-dev
 
@@ -85,20 +82,18 @@ sudo apt-get install xorg-dev
 
 - Do not use exception expressions.
  
-## How to compile
+## CMake build options.
 
-### Microsoft Visual Studio
+The main build options you will want to configure are as follows:
 
-MSVC 12 (2013) x86_64 (with Git Bash):
-```bash
-## Don't use shared library in MSVC12.
-$ cmake -G "Visual Studio 12 2013 Win64" ..
-```
-
-### Without LibReSSL
-```bash
-$ cmake -DWITH_RESSL=OFF ..
-```
+* `USE_CCACHE`: Enable `ccache` compile.
+* `USE_GOLD`: Enable `ld.gold` linker if `gcc` compiler.
+* `USE_PCH`: Enable PCH compile.
+* `USE_OPENGL`: Enable `OpenGL` library.
+* `USE_CUDA`: Enable `CUDA` compile.
+* `USE_DOXYGEN`: Enable `doxygen` documentation.
+* `USE_GUI`: Enable GUI module.
+* `USE_RTTI`: Enable RTTI flag.
 
 ## License
 
