@@ -47,14 +47,26 @@ bool isDrawable(SfType type) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (type) {
-    case SfType::ST_CIRCLE_SHAPE:
-    case SfType::ST_CONVEX_SHAPE:
-    case SfType::ST_RECTANGLE_SHAPE:
-    case SfType::ST_SPRITE:
-    case SfType::ST_TEXT:
-    case SfType::ST_VERTEX_ARRAY:
-    case SfType::ST_VERTEX_BUFFER:
-        return true;
+#define _TBAG_NO_XX(name, type)
+#define _TBAG_DRAWABLE_XX(name, type) case SfType::ST_##name: return true;
+    TBAG_SF_HANDLE_MAP(_TBAG_NO_XX, _TBAG_DRAWABLE_XX, _TBAG_NO_XX)
+#undef _TBAG_NO_XX
+#undef _TBAG_DRAWABLE_XX
+    default:
+        return false;
+    }
+    // @formatter:on
+}
+
+bool isRenderTarget(SfType type) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (type) {
+#define _TBAG_NO_XX(name, type)
+#define _TBAG_RENDER_TARGET_XX(name, type) case SfType::ST_##name: return true;
+    TBAG_SF_HANDLE_MAP(_TBAG_NO_XX, _TBAG_NO_XX, _TBAG_RENDER_TARGET_XX)
+#undef _TBAG_NO_XX
+#undef _TBAG_RENDER_TARGET_XX
     default:
         return false;
     }

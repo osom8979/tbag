@@ -8,6 +8,18 @@
 #include <libtbag/gui/RenderTarget.hpp>
 #include <libtbag/log/Log.hpp>
 
+#if defined(USE_GUI)
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
+#else
+#include <libtbag/dummy/Sfml.hpp>
+using namespace libtbag::dummy;
+#endif
+
+#include <cassert>
+#include <algorithm>
+#include <utility>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -17,19 +29,19 @@ namespace gui {
 RenderTarget::RenderTarget(SfType type, no_init_no_ref_t)
         : SfNative(type, no_init_no_ref)
 {
-    // EMPTY.
+    assert(isRenderTarget(type));
 }
 
 RenderTarget::RenderTarget(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
 {
-    // EMPTY.
+    assert(isRenderTarget(type));
 }
 
 RenderTarget::RenderTarget(SfType type, bool ref)
         : SfNative(type, ref)
 {
-    // EMPTY.
+    assert(isRenderTarget(type));
 }
 
 RenderTarget::~RenderTarget()
