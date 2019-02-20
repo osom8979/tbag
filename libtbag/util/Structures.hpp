@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <libtbag/id/generator/TimeId.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 #include <libtbag/geometry/Size.hpp>
 #include <libtbag/geometry/Rect.hpp>
 

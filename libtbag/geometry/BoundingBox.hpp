@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 #include <libtbag/geometry/Rect.hpp>
 
 // -------------------
@@ -26,15 +26,15 @@ namespace geometry {
 
 template <typename T>
 BaseRect<typename remove_cr<T>::type>
-getBoundingBox(BasePoint<T> const * points, std::size_t size) TBAG_NOEXCEPT
+getBoundingBox(BasePoint2<T> const * points, std::size_t size) TBAG_NOEXCEPT
 {
     typedef typename remove_cr<T>::type __point_tparam;
     if (points == nullptr || size <= 0) {
         return BaseRect<__point_tparam>(0, 0, 0, 0);
     }
 
-    BasePoint<__point_tparam> lt = *points;
-    BasePoint<__point_tparam> rd = *points;
+    BasePoint2<__point_tparam> lt = *points;
+    BasePoint2<__point_tparam> rd = *points;
 
     for (std::size_t i = 1; i < size; ++i) {
         // @formatter:off

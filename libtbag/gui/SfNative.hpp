@@ -18,7 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/container/Pointer.hpp>
 #include <libtbag/graphic/Color.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 #include <libtbag/geometry/Rect.hpp>
 #include <libtbag/gui/SfCommon.hpp>
 
@@ -44,26 +44,38 @@ public:
     using Rgb32   = libtbag::graphic::Rgb32;
     using Color   = libtbag::graphic::Color;
 
-    using Pointi = libtbag::geometry::Pointi;
-    using Pointu = libtbag::geometry::Pointu;
-    using Pointl = libtbag::geometry::Pointl;
-    using Pointf = libtbag::geometry::Pointf;
-    using Pointd = libtbag::geometry::Pointd;
-    using Point  = libtbag::geometry::Point;
+    using Pointb  = libtbag::geometry::Pointb;
+    using Pointc  = libtbag::geometry::Pointc;
+    using Points  = libtbag::geometry::Points;
+    using Pointi  = libtbag::geometry::Pointi;
+    using Pointu  = libtbag::geometry::Pointu;
+    using Pointl  = libtbag::geometry::Pointl;
+    using Pointll = libtbag::geometry::Pointll;
+    using Pointf  = libtbag::geometry::Pointf;
+    using Pointd  = libtbag::geometry::Pointd;
+    using Point   = libtbag::geometry::Point;
 
-    using Sizei = libtbag::geometry::Sizei;
-    using Sizeu = libtbag::geometry::Sizeu;
-    using Sizel = libtbag::geometry::Sizel;
-    using Sizef = libtbag::geometry::Sizef;
-    using Sized = libtbag::geometry::Sized;
-    using Size  = libtbag::geometry::Size;
+    using Sizeb  = libtbag::geometry::Sizeb;
+    using Sizec  = libtbag::geometry::Sizec;
+    using Sizes  = libtbag::geometry::Sizes;
+    using Sizei  = libtbag::geometry::Sizei;
+    using Sizeu  = libtbag::geometry::Sizeu;
+    using Sizel  = libtbag::geometry::Sizel;
+    using Sizell = libtbag::geometry::Sizell;
+    using Sizef  = libtbag::geometry::Sizef;
+    using Sized  = libtbag::geometry::Sized;
+    using Size   = libtbag::geometry::Size;
 
-    using Recti = libtbag::geometry::Recti;
-    using Rectu = libtbag::geometry::Rectu;
-    using Rectl = libtbag::geometry::Rectl;
-    using Rectf = libtbag::geometry::Rectf;
-    using Rectd = libtbag::geometry::Rectd;
-    using Rect  = libtbag::geometry::Rect;
+    using Rectb  = libtbag::geometry::Rectb;
+    using Rectc  = libtbag::geometry::Rectc;
+    using Rects  = libtbag::geometry::Rects;
+    using Recti  = libtbag::geometry::Recti;
+    using Rectu  = libtbag::geometry::Rectu;
+    using Rectl  = libtbag::geometry::Rectl;
+    using Rectll = libtbag::geometry::Rectll;
+    using Rectf  = libtbag::geometry::Rectf;
+    using Rectd  = libtbag::geometry::Rectd;
+    using Rect   = libtbag::geometry::Rect;
 
 public:
     TBAG_CONSTEXPR static Channel const CHANNEL_MIN = libtbag::graphic::channel_min();

@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/algorithm/Equals.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 
 #include <type_traits>
 
@@ -40,7 +40,7 @@ namespace equation {
  *   ax + by + c = 0
  *  \f]
  */
-template <typename ValueType, typename PointType = libtbag::geometry::BasePoint<ValueType> >
+template <typename ValueType, typename PointType = libtbag::geometry::BasePoint2<ValueType> >
 class LinearEquation
 {
 public:

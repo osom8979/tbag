@@ -164,8 +164,8 @@ TEST_F(ArgumentsFixture, OptPoint)
     ASSERT_FALSE(args.optIntegerRect (TEST_INDEX, &result.r1));
     ASSERT_FALSE(args.optDoubleRect  (TEST_INDEX, &result.r2));
 
-    ASSERT_EQ(libtbag::geometry::BasePoint<int   >(9  , 10  ), result.p1);
-    ASSERT_EQ(libtbag::geometry::BasePoint<double>(9.0, 10.0), result.p2);
+    ASSERT_EQ(libtbag::geometry::BasePoint2<int   >(9  , 10  ), result.p1);
+    ASSERT_EQ(libtbag::geometry::BasePoint2<double>(9.0, 10.0), result.p2);
 }
 
 TEST_F(ArgumentsFixture, OptRect)

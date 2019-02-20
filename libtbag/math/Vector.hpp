@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 #include <cmath>
 
 // -------------------
@@ -205,7 +205,7 @@ getCrossProduct(Vector3<T> const & v1, Vector3<T> const & v2)
  *  \f]
  *  외적(Cross-Product)의 오늘손 법칙을 사용하여, Vector(p1 - p0)과 Vector(p2 - p0)의 위치에 따라 음수 또는 양수로 변하는 성질을 이용한다.
  */
-template <typename T, typename Point = geometry::BasePoint<T> >
+template <typename T, typename Point = libtbag::geometry::BasePoint2<T> >
 inline T getRelativePositionOfPointToLine(Point const & p0, Point const & p1, Point const & check)
 {
     return ((p1.x - p0.x) * (check.y - p0.y)) - ((p1.y - p0.y) * (check.x - p0.x));
@@ -218,7 +218,7 @@ enum RelativePosition
     RELATIVE_POSITION_ON
 };
 
-template <typename T, typename Point = geometry::BasePoint<T> >
+template <typename T, typename Point = libtbag::geometry::BasePoint2<T> >
 inline RelativePosition getRelativePositionOfPointToLine2(Point const & p0, Point const & p1, Point const & check)
 {
     T const RESULT = getRelativePositionOfPointToLine<T, Point>(p0, p1, check);

@@ -1,13 +1,14 @@
 /**
- * @file   PointTest.cpp
- * @brief  Path class tester.
+ * @file   Point2Test.cpp
+ * @brief  Point2 class tester.
  * @author zer0
  * @date   2016-04-20
+ * @date   2019-02-20 (Rename: PointTest -> Point2Test)
  */
 
 #include <gtest/gtest.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 #include <libtbag/algorithm/Equals.hpp>
 
 #include <atomic>
@@ -16,7 +17,7 @@
 using namespace libtbag;
 using namespace libtbag::geometry;
 
-TEST(PointTest, Constructor)
+TEST(Point2Test, Constructor)
 {
     int value = 1;
 
@@ -44,7 +45,7 @@ TEST(PointTest, Constructor)
     ASSERT_EQ(p5, p6);
 }
 
-TEST(PointTest, MakePoint)
+TEST(Point2Test, MakePoint)
 {
     int       v1 =  0;
     int const v2 =  1;
@@ -80,7 +81,7 @@ TEST(PointTest, MakePoint)
     REMOVE_UNUSED_VARIABLE(p4_3 == p4_4);
 }
 
-TEST(PointTest, Operators1)
+TEST(Point2Test, Operators1)
 {
     Point       p1 = {0, 1};
     Point const p2 = {4, 5};
@@ -129,7 +130,7 @@ TEST(PointTest, Operators1)
     ASSERT_EQ(Point(1, 2), cast_point);
 }
 
-TEST(PointTest, Operators2)
+TEST(Point2Test, Operators2)
 {
     Point const p1 = {1, 2};
     Size  const s1 = {3, 4};
@@ -151,7 +152,7 @@ TEST(PointTest, Operators2)
     ASSERT_EQ(Size(0, 0), s2);
 }
 
-TEST(PointTest, Equals)
+TEST(Point2Test, Equals)
 {
     Point       p1 = {1, 2};
     Point const p2 = {1, 2};
@@ -172,7 +173,7 @@ TEST(PointTest, Equals)
     ASSERT_EQ(s1, s2);
 }
 
-TEST(PointTest, String)
+TEST(Point2Test, String)
 {
     Point p = {1, 2};
     Point s = {2, 3};
@@ -184,7 +185,7 @@ TEST(PointTest, String)
     std::cout << "Size: " << s << std::endl;
 }
 
-TEST(PointTest, Swap)
+TEST(Point2Test, Swap)
 {
     Point p1(5, 6);
     Point p2(7, 8);
@@ -202,7 +203,7 @@ TEST(PointTest, Swap)
     ASSERT_EQ(Size(3, 4), s1);
 }
 
-TEST(PointTest, Math)
+TEST(Point2Test, Math)
 {
     ASSERT_TRUE(algorithm::equals(5.0, Point(4, 3).norm(), 0.00001));
     ASSERT_EQ(11, Point(1, 2).dot(Point(3, 4)));
@@ -210,7 +211,7 @@ TEST(PointTest, Math)
     ASSERT_TRUE(algorithm::equals(2.0, Point(2, 1).cross(Point(4, 3)), 0.00001));
 }
 
-TEST(PointTest, Convert)
+TEST(Point2Test, Convert)
 {
     ASSERT_EQ(Size(1, 2), Point(1, 2).toSize());
     ASSERT_EQ(Size(1, 2), Point(1, 2).toOther<Size>());

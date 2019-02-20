@@ -15,13 +15,14 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 #include <libtbag/Type.hpp>
 
 #include <cmath>
 #include <cstdlib>
 #include <cstdint>
 
+#include <ostream>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -40,7 +41,7 @@ namespace geometry {
  * @date   2015-08-22 (Move the world library)
  * @date   2015-10-18 (Change to the trivial type)
  * @date   2015-10-21 (Bug fix: assign atomic type)
- * @date   2016-08-24 (Remove BasePoint & BaseSize)
+ * @date   2016-08-24 (Remove BasePoint2 & BaseSize2)
  * @date   2017-11-02 (Change to the class type)
  */
 template <typename BaseType>
@@ -58,11 +59,11 @@ struct BaseRect
     { /* EMPTY. */ }
 
     template <typename T>
-    BaseRect(BasePoint<T> const & p, BaseSize<T> const & s) : x(p.x), y(p.y), width(s.width), height(s.height)
+    BaseRect(BasePoint2<T> const & p, BaseSize2<T> const & s) : x(p.x), y(p.y), width(s.width), height(s.height)
     { /* EMPTY. */ }
 
     template <typename T>
-    BaseRect(BasePoint<T> const & lt, BasePoint<T> const & rb) : x(lt.x), y(lt.y), width(rb.x - lt.x), height(rb.y - lt.y)
+    BaseRect(BasePoint2<T> const & lt, BasePoint2<T> const & rb) : x(lt.x), y(lt.y), width(rb.x - lt.x), height(rb.y - lt.y)
     { /* EMPTY. */ }
 
     template <typename T>
@@ -72,13 +73,13 @@ struct BaseRect
     ~BaseRect()
     { /* EMPTY. */ }
 
-    inline BasePoint<Type> point () const { return BasePoint<Type>(x, y); }
-    inline BasePoint<Type> point1() const { return point(); }
-    inline BasePoint<Type> point2() const { return BasePoint<Type>(x + width, y + height); }
-    inline BasePoint<Type> center() const { return BasePoint<Type>(x + (width * 0.5), y + (height * 0.5)); }
+    inline BasePoint2<Type> point () const { return BasePoint2<Type>(x, y); }
+    inline BasePoint2<Type> point1() const { return point(); }
+    inline BasePoint2<Type> point2() const { return BasePoint2<Type>(x + width, y + height); }
+    inline BasePoint2<Type> center() const { return BasePoint2<Type>(x + (width * 0.5), y + (height * 0.5)); }
 
-    inline BaseSize<Type> size() const { return BaseSize<Type>(width, height); }
-    inline BaseSize<Type> half() const { return BaseSize<Type>(width * 0.5, height  * 0.5); }
+    inline BaseSize2<Type> size() const { return BaseSize2<Type>(width, height); }
+    inline BaseSize2<Type> half() const { return BaseSize2<Type>(width * 0.5, height  * 0.5); }
 
     inline Type  area() const { return width * height; }
     inline bool empty() const { return width <= 0 || height <= 0; }
@@ -130,7 +131,7 @@ struct BaseRect
     }
 
     template <typename T>
-    BaseRect & operator +=(BasePoint<T> const & p)
+    BaseRect & operator +=(BasePoint2<T> const & p)
     {
         x += p.x;
         y += p.y;
@@ -138,7 +139,7 @@ struct BaseRect
     }
 
     template <typename T>
-    BaseRect & operator -=(BasePoint<T> const & p)
+    BaseRect & operator -=(BasePoint2<T> const & p)
     {
         x -= p.x;
         y -= p.y;
@@ -146,7 +147,7 @@ struct BaseRect
     }
 
     template <typename T>
-    BaseRect & operator +=(BaseSize<T> const & s)
+    BaseRect & operator +=(BaseSize2<T> const & s)
     {
         width  += s.width;
         height += s.height;
@@ -154,7 +155,7 @@ struct BaseRect
     }
 
     template <typename T>
-    BaseRect & operator -=(BaseSize<T> const & s)
+    BaseRect & operator -=(BaseSize2<T> const & s)
     {
         width  -= s.width;
         height -= s.height;
@@ -209,15 +210,15 @@ struct BaseRect
     inline Type rbx() const { return getRightBottomX(); }
     inline Type rby() const { return getRightBottomY(); }
 
-    inline BasePoint<Type>     getLeftTop() const { return BasePoint<Type>(    getLeftTopX(),     getLeftTopY()); }
-    inline BasePoint<Type>    getRightTop() const { return BasePoint<Type>(   getRightTopX(),    getRightTopY()); }
-    inline BasePoint<Type>  getLeftBottom() const { return BasePoint<Type>( getLeftBottomX(),  getLeftBottomY()); }
-    inline BasePoint<Type> getRightBottom() const { return BasePoint<Type>(getRightBottomX(), getRightBottomY()); }
+    inline BasePoint2<Type>     getLeftTop() const { return BasePoint2<Type>(    getLeftTopX(),     getLeftTopY()); }
+    inline BasePoint2<Type>    getRightTop() const { return BasePoint2<Type>(   getRightTopX(),    getRightTopY()); }
+    inline BasePoint2<Type>  getLeftBottom() const { return BasePoint2<Type>( getLeftBottomX(),  getLeftBottomY()); }
+    inline BasePoint2<Type> getRightBottom() const { return BasePoint2<Type>(getRightBottomX(), getRightBottomY()); }
 
-    inline BasePoint<Type> lt() const {     getLeftTop(); }
-    inline BasePoint<Type> rt() const {    getRightTop(); }
-    inline BasePoint<Type> lb() const {  getLeftBottom(); }
-    inline BasePoint<Type> rb() const { getRightBottom(); }
+    inline BasePoint2<Type> lt() const {     getLeftTop(); }
+    inline BasePoint2<Type> rt() const {    getRightTop(); }
+    inline BasePoint2<Type> lb() const {  getLeftBottom(); }
+    inline BasePoint2<Type> rb() const { getRightBottom(); }
 
     // ----------------
     // Offset validate.
@@ -231,7 +232,7 @@ struct BaseRect
     }
 
     template <typename T>
-    inline bool contains(BasePoint<T> const & p) const
+    inline bool contains(BasePoint2<T> const & p) const
     {
         return contains(p.x, p.y);
     }
@@ -295,10 +296,17 @@ struct BaseRect
     {
         return OtherType{x, y, width, height};
     }
+
+    template <class CharT, class TraitsT>
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, BaseRect const & r)
+    {
+        os << r.toString();
+        return os;
+    }
 };
 
 template <typename T>
-BaseRect<T> operator +(BaseRect<T> const & r, BasePoint<T> const & p)
+BaseRect<T> operator +(BaseRect<T> const & r, BasePoint2<T> const & p)
 {
     BaseRect<T> result = r;
     result += p;
@@ -306,7 +314,7 @@ BaseRect<T> operator +(BaseRect<T> const & r, BasePoint<T> const & p)
 }
 
 template <typename T>
-BaseRect<T> operator -(BaseRect<T> const & r, BasePoint<T> const & p)
+BaseRect<T> operator -(BaseRect<T> const & r, BasePoint2<T> const & p)
 {
     BaseRect<T> result = r;
     result -= p;
@@ -314,7 +322,7 @@ BaseRect<T> operator -(BaseRect<T> const & r, BasePoint<T> const & p)
 }
 
 template <typename T>
-BaseRect<T> operator +(BaseRect<T> const & r, BaseSize<T> const & s)
+BaseRect<T> operator +(BaseRect<T> const & r, BaseSize2<T> const & s)
 {
     BaseRect<T> result = r;
     result += s;
@@ -322,7 +330,7 @@ BaseRect<T> operator +(BaseRect<T> const & r, BaseSize<T> const & s)
 }
 
 template <typename T>
-BaseRect<T> operator -(BaseRect<T> const & r, BaseSize<T> const & s)
+BaseRect<T> operator -(BaseRect<T> const & r, BaseSize2<T> const & s)
 {
     BaseRect<T> result = r;
     result -= s;
@@ -349,12 +357,16 @@ BaseRect<T> operator |(BaseRect<T> const & r1, BaseRect<T> const & r2)
 // Pre-defined.
 // ------------
 
-using Recti = BaseRect<int>;
-using Rectu = BaseRect<unsigned>;
-using Rectl = BaseRect<int64_t>;
-using Rectf = BaseRect<float>;
-using Rectd = BaseRect<double>;
-using Rect  = Recti;
+using Rectb  = BaseRect<bool>;
+using Rectc  = BaseRect<char>;
+using Rects  = BaseRect<short>;
+using Recti  = BaseRect<int>;
+using Rectu  = BaseRect<unsigned>;
+using Rectl  = BaseRect<long>;
+using Rectll = BaseRect<int64_t>;
+using Rectf  = BaseRect<float>;
+using Rectd  = BaseRect<double>;
+using Rect   = Recti;
 
 Rect const EMPTY_RECT(0, 0, 0, 0);
 
@@ -363,19 +375,6 @@ Rect const EMPTY_RECT(0, 0, 0, 0);
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
-// --------------
-// Output Stream.
-// --------------
-
-#include <ostream>
-
-template <typename T>
-inline std::ostream & operator << (std::ostream & os, libtbag::geometry::BaseRect<T> const & rect)
-{
-    os << rect.toString();
-    return os;
-}
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_RECT_HPP__
 

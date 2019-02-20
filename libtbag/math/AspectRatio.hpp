@@ -44,15 +44,15 @@ std::pair<T, T> calcAspectRatio(T a, T b)
 }
 
 template <typename T, typename ScaleType = typename std::conditional<std::is_floating_point<T>::value, T, double>::type>
-libtbag::geometry::BaseSize<T> scaleUpAspectRatio(libtbag::geometry::BaseSize<T> const & src,
-                                                  libtbag::geometry::BaseSize<T> const & scale_up)
+libtbag::geometry::BaseSize2<T> scaleUpAspectRatio(libtbag::geometry::BaseSize2<T> const & src,
+                                                   libtbag::geometry::BaseSize2<T> const & scale_up)
 {
     auto const SCALE_X = scale_up.width / static_cast<ScaleType>(src.width);
     auto const SCALE_Y = scale_up.height / static_cast<ScaleType>(src.height);
     if (SCALE_X < SCALE_Y) {
-        return libtbag::geometry::BaseSize<T>(src.width * SCALE_X, src.height * SCALE_X);
+        return libtbag::geometry::BaseSize2<T>(src.width * SCALE_X, src.height * SCALE_X);
     } else {
-        return libtbag::geometry::BaseSize<T>(src.width * SCALE_Y, src.height * SCALE_Y);
+        return libtbag::geometry::BaseSize2<T>(src.width * SCALE_Y, src.height * SCALE_Y);
     }
 }
 

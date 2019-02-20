@@ -42,9 +42,9 @@ public:
         T_FRAGMENT
     };
 
-    using Vec2  = libtbag::geometry::BasePoint<float>;
-    using IVec2 = libtbag::geometry::BasePoint<int>;
-    using BVec2 = libtbag::geometry::BasePoint<bool>;
+    using Vec2  = libtbag::geometry::Point2f;
+    using IVec2 = libtbag::geometry::Point2i;
+    using BVec2 = libtbag::geometry::Point2b;
 
 //    using Vec3  = libtbag::geometry::BasePoint3d<float>;
 //    using IVec3 = libtbag::geometry::BasePoint3d<int>;

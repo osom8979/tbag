@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/algorithm/Equals.hpp>
-#include <libtbag/geometry/Point.hpp>
+#include <libtbag/geometry/Point2.hpp>
 #include <libtbag/math/equation/LinearEquation.hpp>
 
 #include <cassert>
@@ -119,7 +119,7 @@ getLinearEquationWithTwoPoint(T x1, T y1, T x2, T y2)
  * @param p1 [in] Point 1.
  * @param p2 [in] Point 2.
  */
-template <typename T, typename PointType = geometry::BasePoint<T> >
+template <typename T, typename PointType = libtbag::geometry::BasePoint2<T> >
 inline LinearEquation<T>
 getLinearEquationWithTwoPoint(PointType const & p1, PointType const & p2)
 {
@@ -173,7 +173,7 @@ isPerpendicularWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquatio
  *   RESULT: x = \frac{b_2 - b_1}{a_1 - a_2}, y = a_1x + b_1, (a_1 \neq a_2)
  *  \f]
  */
-template <typename T, typename PointType = geometry::BasePoint<T> >
+template <typename T, typename PointType = libtbag::geometry::BasePoint2<T> >
 inline PointType getIntersectionWithTwoLinearEquation(LinearEquation<T> const & e1, LinearEquation<T> const & e2)
 {
     assert(e1.a != e2.a);
@@ -198,7 +198,7 @@ inline bool isAlmostContains(T const & v1, T const & v2, T const & check) TBAG_N
 /**
  * Check if it is included in the range.
  */
-template <typename T, typename PointType = geometry::BasePoint<T> >
+template <typename T, typename PointType = libtbag::geometry::BasePoint2<T> >
 inline bool isAlmostContains2d(PointType const & p1, PointType const & p2, PointType const & check) TBAG_NOEXCEPT
 {
     return isAlmostContains(p1.x, p2.x, check.x) && isAlmostContains(p1.y, p2.y, check.y);
@@ -210,7 +210,7 @@ inline bool isAlmostContains2d(PointType const & p1, PointType const & p2, Point
  *  Equations of the form <code>x = a</code> are impossible. @n
  *  These equations are calculated separately.
  */
-template <typename T, typename PointType = geometry::BasePoint<T> >
+template <typename T, typename PointType = libtbag::geometry::BasePoint2<T> >
 bool isCross(PointType const & p11, PointType const & p12, PointType const & p21, PointType const & p22, PointType & cross)
 {
 #if defined(_DEBUGGING_IS_CROSS)

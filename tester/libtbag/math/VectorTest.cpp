@@ -51,9 +51,9 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
      *   -+------------------
      *    |   1   3   5
      */
-    geometry::BasePoint<int> p1{1, 1};
-    geometry::BasePoint<int> p2{5, 1};
-    geometry::BasePoint<int> p3{3, 2};
+    libtbag::geometry::BasePoint2<int> p1{1, 1};
+    libtbag::geometry::BasePoint2<int> p2{5, 1};
+    libtbag::geometry::BasePoint2<int> p3{3, 2};
     ASSERT_LT(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 
     /*
@@ -65,9 +65,9 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
      *   -+------------------
      *    |   1   3   5
      */
-    p1 = geometry::Point(1, 2);
-    p2 = geometry::Point(5, 2);
-    p3 = geometry::Point(3, 1);
+    p1 = libtbag::geometry::Point(1, 2);
+    p2 = libtbag::geometry::Point(5, 2);
+    p3 = libtbag::geometry::Point(3, 1);
     ASSERT_GT(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 
     /*
@@ -77,9 +77,9 @@ TEST(VectorTest, GetRelativePositionOfPointToLine)
      *   -+------------------
      *    |   1   3   5
      */
-    p1 = geometry::Point(1, 1);
-    p2 = geometry::Point(5, 1);
-    p3 = geometry::Point(3, 1);
+    p1 = libtbag::geometry::Point(1, 1);
+    p2 = libtbag::geometry::Point(5, 1);
+    p3 = libtbag::geometry::Point(3, 1);
     ASSERT_EQ(0, getRelativePositionOfPointToLine<int>(p1, p2, p3));
 }
 
