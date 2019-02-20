@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <cstdint>
 
+#include <ostream>
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -214,6 +215,13 @@ struct BasePoint
     {
         return OtherType{x, y};
     }
+
+    template <class CharT, class TraitsT>
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, BasePoint const & p)
+    {
+        os << p.toString();
+        return os;
+    }
 };
 
 template <typename T>
@@ -323,8 +331,10 @@ struct BaseSize
 
     void swap(BaseSize & obj)
     {
-        std::swap( width, obj.width);
-        std::swap(height, obj.height);
+        if (this != &obj) {
+            std::swap( width, obj.width);
+            std::swap(height, obj.height);
+        }
     }
 
     friend void swap(BaseSize & lh, BaseSize & rh)
@@ -444,6 +454,13 @@ struct BaseSize
     {
         return OtherType{width, height};
     }
+
+    template <class CharT, class TraitsT>
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, BaseSize const & s)
+    {
+        os << s.toString();
+        return os;
+    }
 };
 
 template <typename T>
@@ -514,19 +531,27 @@ BaseSize<T> operator -(BaseSize<T> const & s, BasePoint<T> const & p)
 // Pre-defined.
 // ------------
 
-using Pointi = BasePoint<int>;
-using Pointu = BasePoint<unsigned>;
-using Pointl = BasePoint<int64_t>;
-using Pointf = BasePoint<float>;
-using Pointd = BasePoint<double>;
-using Point  = Pointi;
+using Pointb  = BasePoint<bool>;
+using Pointc  = BasePoint<char>;
+using Points  = BasePoint<short>;
+using Pointi  = BasePoint<int>;
+using Pointu  = BasePoint<unsigned>;
+using Pointl  = BasePoint<long>;
+using Pointll = BasePoint<int64_t>;
+using Pointf  = BasePoint<float>;
+using Pointd  = BasePoint<double>;
+using Point   = Pointi;
 
-using Sizei = BaseSize<int>;
-using Sizeu = BaseSize<unsigned>;
-using Sizel = BaseSize<int64_t>;
-using Sizef = BaseSize<float>;
-using Sized = BaseSize<double>;
-using Size  = Sizei;
+using Sizeb  = BaseSize<bool>;
+using Sizec  = BaseSize<char>;
+using Sizes  = BaseSize<short>;
+using Sizei  = BaseSize<int>;
+using Sizeu  = BaseSize<unsigned>;
+using Sizel  = BaseSize<long>;
+using Sizell = BaseSize<int64_t>;
+using Sizef  = BaseSize<float>;
+using Sized  = BaseSize<double>;
+using Size   = Sizei;
 
 Point const EMPTY_POINT(0, 0);
 Size  const EMPTY_SIZE (0, 0);
@@ -536,26 +561,6 @@ Size  const EMPTY_SIZE (0, 0);
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
-// --------------
-// Output Stream.
-// --------------
-
-#include <ostream>
-
-template <typename T>
-inline std::ostream & operator << (std::ostream & os, libtbag::geometry::BasePoint<T> const & point)
-{
-    os << point.toString();
-    return os;
-}
-
-template <typename T>
-inline std::ostream & operator << (std::ostream & os, libtbag::geometry::BaseSize<T> const & size)
-{
-    os << size.toString();
-    return os;
-}
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_POINT_HPP__
 
