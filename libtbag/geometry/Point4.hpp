@@ -583,9 +583,6 @@ using Size4f  = BaseSize4<float>;
 using Size4d  = BaseSize4<double>;
 using Size4   = Size3i;
 
-Point4 const EMPTY_POINT4(0, 0, 0, 0);
-Size4  const EMPTY_SIZE4 (0, 0, 0, 0);
-
 } // namespace geometry
 
 // --------------------

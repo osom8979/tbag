@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/geometry/Size.hpp>
+#include <libtbag/geometry/Size2.hpp>
 #include <libtbag/math/Euclidean.hpp>
 
 #include <utility>

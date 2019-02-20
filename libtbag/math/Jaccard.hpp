@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 
 #include <limits>
 
@@ -31,7 +31,7 @@ namespace math {
  * @see <https://en.wikipedia.org/wiki/Jaccard_index>
  */
 template <typename T>
-inline double jaccardIndex(geometry::BaseRect<T> const & a, geometry::BaseRect<T> const & b)
+inline double jaccardIndex(libtbag::geometry::BaseRect2<T> const & a, libtbag::geometry::BaseRect2<T> const & b)
 {
     double const area_a = a.area();
     double const area_b = b.area();
@@ -40,7 +40,7 @@ inline double jaccardIndex(geometry::BaseRect<T> const & a, geometry::BaseRect<T
         return 1.0;
     }
 
-    geometry::BaseRect<T> ab = a & b;
+    libtbag::geometry::BaseRect2<T> ab = a & b;
     if (ab.empty()) {
         return 0;
     }
@@ -56,7 +56,7 @@ inline double jaccardIndex(geometry::BaseRect<T> const & a, geometry::BaseRect<T
  * For rectangles this reduces to computing the intersection over the union.
  */
 template <typename T>
-inline double jaccardDistance(geometry::BaseRect<T> const & a, geometry::BaseRect<T> const & b)
+inline double jaccardDistance(libtbag::geometry::BaseRect2<T> const & a, libtbag::geometry::BaseRect2<T> const & b)
 {
     return 1.0 - jaccardIndex(a, b); // distance = 1 - jaccard_index
 }

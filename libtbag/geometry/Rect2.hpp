@@ -1,12 +1,13 @@
 /**
- * @file   Rect.hpp
- * @brief  Rect class prototype.
+ * @file   Rect2.hpp
+ * @brief  Rect2 class prototype.
  * @author zer0
  * @date   2016-04-20
+ * @date   2019-02-20 (Rename: Rect -> Rect2)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_RECT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_RECT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_RECT2_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_RECT2_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -43,34 +44,35 @@ namespace geometry {
  * @date   2015-10-21 (Bug fix: assign atomic type)
  * @date   2016-08-24 (Remove BasePoint2 & BaseSize2)
  * @date   2017-11-02 (Change to the class type)
+ * @date   2019-02-20 (Rename: BaseRect -> BaseRect2)
  */
 template <typename BaseType>
-struct BaseRect
+struct BaseRect2
 {
     using Type = BaseType;
 
     Type x, y;
     Type width, height;
 
-    BaseRect() : x(), y(), width(), height()
+    BaseRect2() : x(), y(), width(), height()
     { /* EMPTY. */ }
 
-    BaseRect(Type const & x_, Type const & y_, Type const & w_, Type const & h_) : x(x_), y(y_), width(w_), height(h_)
-    { /* EMPTY. */ }
-
-    template <typename T>
-    BaseRect(BasePoint2<T> const & p, BaseSize2<T> const & s) : x(p.x), y(p.y), width(s.width), height(s.height)
+    BaseRect2(Type const & x_, Type const & y_, Type const & w_, Type const & h_) : x(x_), y(y_), width(w_), height(h_)
     { /* EMPTY. */ }
 
     template <typename T>
-    BaseRect(BasePoint2<T> const & lt, BasePoint2<T> const & rb) : x(lt.x), y(lt.y), width(rb.x - lt.x), height(rb.y - lt.y)
+    BaseRect2(BasePoint2<T> const & p, BaseSize2<T> const & s) : x(p.x), y(p.y), width(s.width), height(s.height)
     { /* EMPTY. */ }
 
     template <typename T>
-    BaseRect(BaseRect<T> const & obj) : x(obj.x), y(obj.y), width(obj.width), height(obj.height)
+    BaseRect2(BasePoint2<T> const & lt, BasePoint2<T> const & rb) : x(lt.x), y(lt.y), width(rb.x - lt.x), height(rb.y - lt.y)
     { /* EMPTY. */ }
 
-    ~BaseRect()
+    template <typename T>
+    BaseRect2(BaseRect2<T> const & obj) : x(obj.x), y(obj.y), width(obj.width), height(obj.height)
+    { /* EMPTY. */ }
+
+    ~BaseRect2()
     { /* EMPTY. */ }
 
     inline BasePoint2<Type> point () const { return BasePoint2<Type>(x, y); }
@@ -85,7 +87,7 @@ struct BaseRect
     inline bool empty() const { return width <= 0 || height <= 0; }
 
     template <typename T>
-    BaseRect & operator =(BaseRect<T> const & obj)
+    BaseRect2 & operator =(BaseRect2<T> const & obj)
     {
         if (this != &obj) {
             x = obj.x;
@@ -96,7 +98,7 @@ struct BaseRect
         return *this;
     }
 
-    void swap(BaseRect & obj)
+    void swap(BaseRect2 & obj)
     {
         if (this != &obj) {
             std::swap(x, obj.x);
@@ -106,32 +108,32 @@ struct BaseRect
         }
     }
 
-    friend void swap(BaseRect & lh, BaseRect & rh)
+    friend void swap(BaseRect2 & lh, BaseRect2 & rh)
     {
         lh.swap(rh);
     }
 
     template <typename T>
-    operator BaseRect<T>() const
+    operator BaseRect2<T>() const
     {
-        return BaseRect<T>(static_cast<T>(x), static_cast<T>(y), static_cast<T>(width), static_cast<T>(height));
+        return BaseRect2<T>(static_cast<T>(x), static_cast<T>(y), static_cast<T>(width), static_cast<T>(height));
     }
 
     /** The Rect are equal? */
     template <typename T>
-    bool operator ==(BaseRect<T> const & obj) const
+    bool operator ==(BaseRect2<T> const & obj) const
     {
         return x == obj.x && y == obj.y && width == obj.width && height == obj.height;
     }
 
     template <typename T>
-    bool operator !=(BaseRect<T> const & obj) const
+    bool operator !=(BaseRect2<T> const & obj) const
     {
         return !((*this) == obj);
     }
 
     template <typename T>
-    BaseRect & operator +=(BasePoint2<T> const & p)
+    BaseRect2 & operator +=(BasePoint2<T> const & p)
     {
         x += p.x;
         y += p.y;
@@ -139,7 +141,7 @@ struct BaseRect
     }
 
     template <typename T>
-    BaseRect & operator -=(BasePoint2<T> const & p)
+    BaseRect2 & operator -=(BasePoint2<T> const & p)
     {
         x -= p.x;
         y -= p.y;
@@ -147,7 +149,7 @@ struct BaseRect
     }
 
     template <typename T>
-    BaseRect & operator +=(BaseSize2<T> const & s)
+    BaseRect2 & operator +=(BaseSize2<T> const & s)
     {
         width  += s.width;
         height += s.height;
@@ -155,7 +157,7 @@ struct BaseRect
     }
 
     template <typename T>
-    BaseRect & operator -=(BaseSize2<T> const & s)
+    BaseRect2 & operator -=(BaseSize2<T> const & s)
     {
         width  -= s.width;
         height -= s.height;
@@ -164,7 +166,7 @@ struct BaseRect
 
     /** obtain the intersection rect. */
     template <typename T>
-    BaseRect & operator &=(BaseRect<T> const & obj)
+    BaseRect2 & operator &=(BaseRect2<T> const & obj)
     {
         Type x1 = std::max<Type>(x, obj.x);
         Type y1 = std::max<Type>(y, obj.y);
@@ -177,7 +179,7 @@ struct BaseRect
 
     /** obtain the union rect. */
     template <typename T>
-    BaseRect & operator |=(BaseRect<T> const & obj)
+    BaseRect2 & operator |=(BaseRect2<T> const & obj)
     {
         Type x1 = std::min<Type>(x, obj.x);
         Type y1 = std::min<Type>(y, obj.y);
@@ -238,7 +240,7 @@ struct BaseRect
     }
 
     template <typename T>
-    inline bool contains(BaseRect<T> const & r) const
+    inline bool contains(BaseRect2<T> const & r) const
     {
         return contains(r.point1()) && contains(r.point2());
     }
@@ -247,9 +249,9 @@ struct BaseRect
     // Miscellaneous utilities.
     // ------------------------
 
-    BaseRect<Type> absolute() const
+    BaseRect2<Type> absolute() const
     {
-        BaseRect<Type> result;
+        BaseRect2<Type> result;
         result.x = getLeftTopX();
         result.y = getLeftTopY();
         result.width  = getRightBottomX() - result.x;
@@ -258,7 +260,7 @@ struct BaseRect
     }
 
     template <typename T>
-    bool clip(BaseRect<T> const & obj, BaseRect<T> * clip = nullptr) const
+    bool clip(BaseRect2<T> const & obj, BaseRect2<T> * clip = nullptr) const
     {
         Type lt_x = std::max(    getLeftTopX(), obj.getLeftTopX());
         Type lt_y = std::max(    getLeftTopY(), obj.getLeftTopY());
@@ -277,9 +279,9 @@ struct BaseRect
         return false;
     }
 
-    BaseRect<Type> stretchByCenter(Type const & half_size)
+    BaseRect2<Type> stretchByCenter(Type const & half_size)
     {
-        return BaseRect<Type>(x - half_size, y - half_size, width + (half_size * 2), height + (half_size * 2));
+        return BaseRect2<Type>(x - half_size, y - half_size, width + (half_size * 2), height + (half_size * 2));
     }
 
     TBAG_CONSTEXPR static char const DEFAULT_DELIMITER = 'x';
@@ -298,7 +300,7 @@ struct BaseRect
     }
 
     template <class CharT, class TraitsT>
-    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, BaseRect const & r)
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, BaseRect2 const & r)
     {
         os << r.toString();
         return os;
@@ -306,49 +308,49 @@ struct BaseRect
 };
 
 template <typename T>
-BaseRect<T> operator +(BaseRect<T> const & r, BasePoint2<T> const & p)
+BaseRect2<T> operator +(BaseRect2<T> const & r, BasePoint2<T> const & p)
 {
-    BaseRect<T> result = r;
+    BaseRect2<T> result = r;
     result += p;
     return result;
 }
 
 template <typename T>
-BaseRect<T> operator -(BaseRect<T> const & r, BasePoint2<T> const & p)
+BaseRect2<T> operator -(BaseRect2<T> const & r, BasePoint2<T> const & p)
 {
-    BaseRect<T> result = r;
+    BaseRect2<T> result = r;
     result -= p;
     return result;
 }
 
 template <typename T>
-BaseRect<T> operator +(BaseRect<T> const & r, BaseSize2<T> const & s)
+BaseRect2<T> operator +(BaseRect2<T> const & r, BaseSize2<T> const & s)
 {
-    BaseRect<T> result = r;
+    BaseRect2<T> result = r;
     result += s;
     return result;
 }
 
 template <typename T>
-BaseRect<T> operator -(BaseRect<T> const & r, BaseSize2<T> const & s)
+BaseRect2<T> operator -(BaseRect2<T> const & r, BaseSize2<T> const & s)
 {
-    BaseRect<T> result = r;
+    BaseRect2<T> result = r;
     result -= s;
     return result;
 }
 
 template <typename T>
-BaseRect<T> operator &(BaseRect<T> const & r1, BaseRect<T> const & r2)
+BaseRect2<T> operator &(BaseRect2<T> const & r1, BaseRect2<T> const & r2)
 {
-    BaseRect<T> result = r1;
+    BaseRect2<T> result = r1;
     result &= r2;
     return result;
 }
 
 template <typename T>
-BaseRect<T> operator |(BaseRect<T> const & r1, BaseRect<T> const & r2)
+BaseRect2<T> operator |(BaseRect2<T> const & r1, BaseRect2<T> const & r2)
 {
-    BaseRect<T> result = r1;
+    BaseRect2<T> result = r1;
     result |= r2;
     return result;
 }
@@ -357,18 +359,27 @@ BaseRect<T> operator |(BaseRect<T> const & r1, BaseRect<T> const & r2)
 // Pre-defined.
 // ------------
 
-using Rectb  = BaseRect<bool>;
-using Rectc  = BaseRect<char>;
-using Rects  = BaseRect<short>;
-using Recti  = BaseRect<int>;
-using Rectu  = BaseRect<unsigned>;
-using Rectl  = BaseRect<long>;
-using Rectll = BaseRect<int64_t>;
-using Rectf  = BaseRect<float>;
-using Rectd  = BaseRect<double>;
-using Rect   = Recti;
+using Rect2b  = BaseRect2<bool>;
+using Rect2c  = BaseRect2<char>;
+using Rect2s  = BaseRect2<short>;
+using Rect2i  = BaseRect2<int>;
+using Rect2u  = BaseRect2<unsigned>;
+using Rect2l  = BaseRect2<long>;
+using Rect2ll = BaseRect2<int64_t>;
+using Rect2f  = BaseRect2<float>;
+using Rect2d  = BaseRect2<double>;
+using Rect2   = Rect2i;
 
-Rect const EMPTY_RECT(0, 0, 0, 0);
+using Rectb  = Rect2b;
+using Rectc  = Rect2c;
+using Rects  = Rect2s;
+using Recti  = Rect2i;
+using Rectu  = Rect2u;
+using Rectl  = Rect2l;
+using Rectll = Rect2ll;
+using Rectf  = Rect2f;
+using Rectd  = Rect2d;
+using Rect   = Rect2;
 
 } // namespace geometry
 
@@ -376,5 +387,5 @@ Rect const EMPTY_RECT(0, 0, 0, 0);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_RECT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_RECT2_HPP__
 

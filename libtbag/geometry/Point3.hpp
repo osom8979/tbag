@@ -570,9 +570,6 @@ using Size3f  = BaseSize3<float>;
 using Size3d  = BaseSize3<double>;
 using Size3   = Size3i;
 
-Point3 const EMPTY_POINT3(0, 0, 0);
-Size3  const EMPTY_SIZE3 (0, 0, 0);
-
 } // namespace geometry
 
 // --------------------

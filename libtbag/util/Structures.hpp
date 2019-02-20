@@ -18,8 +18,8 @@
 
 #include <libtbag/id/generator/TimeId.hpp>
 #include <libtbag/geometry/Point2.hpp>
-#include <libtbag/geometry/Size.hpp>
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Size2.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -36,9 +36,9 @@ using MediumId   = id::MediumId;
 using SmallId    = id::SmallId;
 using ResultCode = uint32_t;
 
-using Point = geometry::Point;
-using Size  = geometry::Size;
-using Rect  = geometry::Rect;
+using Point = libtbag::geometry::Point;
+using Size  = libtbag::geometry::Size;
+using Rect  = libtbag::geometry::Rect;
 
 TBAG_CONSTEXPR LargeId  const UNKNOWN_LARGE_ID  = id::UNKNOWN_LARGE_ID;
 TBAG_CONSTEXPR MediumId const UNKNOWN_MEDIUM_ID = id::UNKNOWN_MEDIUM_ID;

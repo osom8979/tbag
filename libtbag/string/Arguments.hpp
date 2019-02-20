@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/geometry/Point2.hpp>
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 
 #include <vector>
 

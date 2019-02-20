@@ -578,9 +578,6 @@ using Sizef  = Size2f;
 using Sized  = Size2d;
 using Size   = Size2;
 
-Point const EMPTY_POINT(0, 0);
-Size  const EMPTY_SIZE (0, 0);
-
 } // namespace geometry
 
 // --------------------

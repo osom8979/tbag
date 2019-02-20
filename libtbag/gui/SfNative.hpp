@@ -19,7 +19,7 @@
 #include <libtbag/container/Pointer.hpp>
 #include <libtbag/graphic/Color.hpp>
 #include <libtbag/geometry/Point2.hpp>
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 #include <libtbag/gui/SfCommon.hpp>
 
 // -------------------

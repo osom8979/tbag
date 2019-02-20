@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 #include <libtbag/graphic/OverlayState.hpp>
 
 #include <cassert>
@@ -40,7 +40,7 @@ template <typename T>
 struct Overlay
 {
     using Value = T;
-    using Rect  = libtbag::geometry::BaseRect<Value>;
+    using Rect  = libtbag::geometry::BaseRect2<Value>;
 
     using State = OverlayState;
     using Event = MouseEvent;

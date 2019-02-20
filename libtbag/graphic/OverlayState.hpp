@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 
 #include <cassert>
 #include <utility>
@@ -46,7 +46,7 @@ template <typename T>
 std::pair<OverlayState, IsOnClick> calcOverlayState(T x, T y, T w, T h, T mouse_x, T mouse_y, MouseEvent mouse_event,
                                                     bool & save_inside_clicked) TBAG_NOEXCEPT
 {
-    auto const IS_CONTAINS = libtbag::geometry::BaseRect<T>(x, y, w, h).contains(mouse_x, mouse_y);
+    auto const IS_CONTAINS = libtbag::geometry::BaseRect2<T>(x, y, w, h).contains(mouse_x, mouse_y);
     auto result = std::make_pair(OverlayState::OS_NORMAL, false);
 
     // Check the OnClick event.

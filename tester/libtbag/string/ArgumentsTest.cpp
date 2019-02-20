@@ -181,8 +181,8 @@ TEST_F(ArgumentsFixture, OptRect)
     ASSERT_TRUE( args.optIntegerRect (TEST_INDEX, &result.r1));
     ASSERT_TRUE( args.optDoubleRect  (TEST_INDEX, &result.r2));
 
-    ASSERT_EQ(libtbag::geometry::BaseRect<int   >(100   , 200  , 300  , 400  ), result.r1);
-    ASSERT_EQ(libtbag::geometry::BaseRect<double>(100.10, 200.2, 300.0, 400.0), result.r2);
+    ASSERT_EQ(libtbag::geometry::BaseRect2<int   >(100   , 200  , 300  , 400  ), result.r1);
+    ASSERT_EQ(libtbag::geometry::BaseRect2<double>(100.10, 200.2, 300.0, 400.0), result.r2);
 }
 
 TEST_F(ArgumentsFixture, CheckPointDelimiter)

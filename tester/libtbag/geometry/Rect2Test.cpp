@@ -1,19 +1,20 @@
 /**
- * @file   RectTest.cpp
+ * @file   Rect2Test.cpp
  * @brief  Rect class tester.
  * @author zer0
  * @date   2016-04-20
+ * @date   2019-02-20 (Rename: RectTest -> Rect2Test)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 
 #include <atomic>
 
 using namespace libtbag;
 using namespace libtbag::geometry;
 
-TEST(RectTest, Constructor)
+TEST(Rect2Test, Constructor)
 {
     Rect r1;
     Rect r2 = {1, 2, 3, 4};
@@ -48,7 +49,7 @@ TEST(RectTest, Constructor)
     ASSERT_NE(r3, r4);
 }
 
-TEST(RectTest, Operators1)
+TEST(Rect2Test, Operators1)
 {
     Point p = {1, 2};
     Size  s = {3, 4};
@@ -70,7 +71,7 @@ TEST(RectTest, Operators1)
     ASSERT_EQ(Rect(5, 6,  4,  4), temp);
 }
 
-TEST(RectTest, Operators2)
+TEST(Rect2Test, Operators2)
 {
     /*
      * 0 |  1  2  3  4  5
@@ -93,7 +94,7 @@ TEST(RectTest, Operators2)
     ASSERT_EQ(Rect(1, 1, 3, 3), r1 | r2);
 }
 
-TEST(RectTest, Operators3)
+TEST(Rect2Test, Operators3)
 {
     /*
      * 0 |  1  2  3  4  5
@@ -122,7 +123,7 @@ TEST(RectTest, Operators3)
     ASSERT_EQ(Rect(1, 1, 3, 3), r_intersection);
 }
 
-TEST(RectTest, Utility)
+TEST(Rect2Test, Utility)
 {
     Point p = {10, 20};
     Size  s = {30, 40};
@@ -134,7 +135,7 @@ TEST(RectTest, Utility)
     ASSERT_EQ(a, r.area ());
 };
 
-TEST(RectTest, Methods)
+TEST(Rect2Test, Methods)
 {
     /*
      *  0 |  10  20
@@ -152,7 +153,7 @@ TEST(RectTest, Methods)
     ASSERT_EQ(Point(20, 20), r.getRightBottom());
 }
 
-TEST(RectTest, CheckInside)
+TEST(Rect2Test, CheckInside)
 {
     /*
      *  0 |  10  20  30
@@ -190,7 +191,7 @@ TEST(RectTest, CheckInside)
     ASSERT_FALSE(r.contains(Rect(p2, p6)));
 }
 
-TEST(RectTest, ClipRect_True)
+TEST(Rect2Test, ClipRect_True)
 {
     /*
      *  0 |  10  20  30  40  50
@@ -213,7 +214,7 @@ TEST(RectTest, ClipRect_True)
     ASSERT_EQ(predict, clip);
 }
 
-TEST(RectTest, ClipRect_False)
+TEST(Rect2Test, ClipRect_False)
 {
     /*
      *  0 |  10  20  30  40  50
@@ -230,7 +231,7 @@ TEST(RectTest, ClipRect_False)
     ASSERT_FALSE(Rect(10, 20, 10, 10).clip(Rect(30, 10, 10, 10)));
 }
 
-TEST(RectTest, AbsoluteRect)
+TEST(Rect2Test, AbsoluteRect)
 {
     /*
      *  0 |  10  20
@@ -245,7 +246,7 @@ TEST(RectTest, AbsoluteRect)
     ASSERT_EQ(Rect(10, 10, 10, 10), Rect(10, 10, 10, 10).absolute());
 }
 
-TEST(RectTest, StretchByCenter)
+TEST(Rect2Test, StretchByCenter)
 {
     /*
      *  0 |  10  20  30  40  50
@@ -265,7 +266,7 @@ TEST(RectTest, StretchByCenter)
     ASSERT_EQ(Rect(10, 10, 30, 30), r.stretchByCenter(10));
 }
 
-TEST(RectTest, String)
+TEST(Rect2Test, String)
 {
     Rect p = {1, 2, 3, 4};
     ASSERT_FALSE(p.toString().empty());
@@ -280,7 +281,7 @@ struct TestRect
 
 } // namespace __impl
 
-TEST(RectTest, Convert)
+TEST(Rect2Test, Convert)
 {
     using namespace __impl;
     TestRect const TEST_RECT = Rect(1, 2, 3, 4).toOther<TestRect>();

@@ -22,7 +22,7 @@
 #include <libtbag/graphic/ImageIO.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
-#include <libtbag/geometry/Rect.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 
 #include <array>
 #include <string>
