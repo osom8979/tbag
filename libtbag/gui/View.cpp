@@ -1,12 +1,12 @@
 /**
- * @file   SfView.cpp
- * @brief  SfView class implementation.
+ * @file   View.cpp
+ * @brief  View class implementation.
  * @author zer0
  * @date   2019-02-17
  */
 
-#include <libtbag/sfpp/SfView.hpp>
-#include <libtbag/sfpp/SfTransform.hpp>
+#include <libtbag/gui/View.hpp>
+#include <libtbag/gui/Transform.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_GUI)
@@ -25,25 +25,29 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
-using Pointf = SfView::Pointf;
-using Sizef  = SfView::Sizef;
-using Rectf  = SfView::Rectf;
+#ifndef _self_sf
+#define _self_sf() Parent::cast<sf::View>()
+#endif
 
-SfView::SfView() : SfNative(SfType::ST_VIEW)
+using Pointf = View::Pointf;
+using Sizef  = View::Sizef;
+using Rectf  = View::Rectf;
+
+View::View() : SfNative(SfType::ST_VIEW)
 {
     // EMPTY.
 }
 
-SfView::SfView(void * handle, no_init_t, bool ref)
+View::View(void * handle, no_init_t, bool ref)
         : SfNative(SfType::ST_VIEW, no_init)
 {
     ptr = handle;
     assert(ptr != nullptr);
 }
 
-SfView::SfView(Rectf const & r)
+View::View(Rectf const & r)
         : SfNative(SfType::ST_VIEW, no_init)
 {
     assert(ptr == nullptr);
@@ -51,7 +55,7 @@ SfView::SfView(Rectf const & r)
     assert(ptr != nullptr);
 }
 
-SfView::SfView(Pointf const & center, Sizef const & size)
+View::View(Pointf const & center, Sizef const & size)
         : SfNative(SfType::ST_VIEW, no_init)
 {
     assert(ptr == nullptr);
@@ -59,125 +63,119 @@ SfView::SfView(Pointf const & center, Sizef const & size)
     assert(ptr != nullptr);
 }
 
-SfView::SfView(SfView && obj) TBAG_NOEXCEPT
+View::View(View && obj) TBAG_NOEXCEPT
         : SfNative(SfType::ST_VIEW, no_init)
 {
     *this = std::move(obj);
 }
 
-SfView::~SfView()
+View::~View()
 {
     // EMPTY.
 }
 
-SfView & SfView::operator =(SfView && obj) TBAG_NOEXCEPT
+View & View::operator =(View && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void SfView::swap(SfView & obj) TBAG_NOEXCEPT
+void View::swap(View & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         SfNative::swap(obj);
     }
 }
 
-#ifndef _self_sf
-#define _self_sf() Parent::cast<sf::View>()
-#endif
-
-void SfView::setCenter(float x, float y)
+void View::setCenter(float x, float y)
 {
     _self_sf()->setCenter(x, y);
 }
 
-void SfView::setCenter(Pointf const & center)
+void View::setCenter(Pointf const & center)
 {
     _self_sf()->setCenter(center.x, center.y);
 }
 
-void SfView::setSize(float width, float height)
+void View::setSize(float width, float height)
 {
     _self_sf()->setSize(width, height);
 }
 
-void SfView::setSize(Sizef const & size)
+void View::setSize(Sizef const & size)
 {
     _self_sf()->setSize(size.width, size.height);
 }
 
-void SfView::setRotation(float angle)
+void View::setRotation(float angle)
 {
     _self_sf()->setRotation(angle);
 }
 
-void SfView::setViewport(Rectf const & viewport)
+void View::setViewport(Rectf const & viewport)
 {
     _self_sf()->setViewport(sf::FloatRect(viewport.x, viewport.y, viewport.width, viewport.height));
 }
 
-void SfView::reset(Rectf const & rectangle)
+void View::reset(Rectf const & rectangle)
 {
     _self_sf()->reset(sf::FloatRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height));
 }
 
-Pointf SfView::getCenter() const
+Pointf View::getCenter() const
 {
     auto const CENTER = _self_sf()->getCenter();
     return Pointf(CENTER.x, CENTER.y);
 }
 
-Sizef SfView::getSize() const
+Sizef View::getSize() const
 {
     auto const SIZE = _self_sf()->getSize();
     return Sizef(SIZE.x, SIZE.y);
 }
 
-float SfView::getRotation() const
+float View::getRotation() const
 {
     return _self_sf()->getRotation();
 }
 
-Rectf SfView::getViewport() const
+Rectf View::getViewport() const
 {
     auto const VIEWPORT = _self_sf()->getViewport();
     return Rectf(VIEWPORT.left, VIEWPORT.top, VIEWPORT.width, VIEWPORT.height);
 }
 
-void SfView::move(float offset_x, float offset_y)
+void View::move(float offset_x, float offset_y)
 {
     _self_sf()->move(offset_x, offset_y);
 }
 
-void SfView::move(Pointf const & offset)
+void View::move(Pointf const & offset)
 {
     _self_sf()->move(offset.x, offset.y);
 }
 
-void SfView::rotate(float angle)
+void View::rotate(float angle)
 {
     _self_sf()->rotate(angle);
 }
 
-void SfView::zoom(float factor)
+void View::zoom(float factor)
 {
     _self_sf()->zoom(factor);
 }
 
-SfTransform SfView::getTransform() const
+Transform View::getTransform() const
 {
-    return SfTransform(_self_sf()->getTransform().getMatrix());
+    return Transform(_self_sf()->getTransform().getMatrix());
 }
 
-SfTransform SfView::getInverseTransform() const
+Transform View::getInverseTransform() const
 {
-    return SfTransform(_self_sf()->getInverseTransform().getMatrix());
+    return Transform(_self_sf()->getInverseTransform().getMatrix());
 }
 
-#undef _self_sf
-
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

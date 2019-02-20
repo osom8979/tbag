@@ -1,12 +1,12 @@
 /**
- * @file   SfCursor.hpp
- * @brief  SfCursor class prototype.
+ * @file   Cursor.hpp
+ * @brief  Cursor class prototype.
  * @author zer0
  * @date   2019-02-17
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFCURSOR_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFCURSOR_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_CURSOR_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_CURSOR_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,21 +15,21 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/sfpp/SfNative.hpp>
+#include <libtbag/gui/SfNative.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
 /**
- * SfCursor class prototype.
+ * Cursor class prototype.
  *
  * @author zer0
  * @date   2019-02-17
  */
-class TBAG_API SfCursor : public SfNative
+class TBAG_API Cursor : public SfNative
 {
 public:
     enum class CursorType
@@ -50,18 +50,18 @@ public:
     };
 
 public:
-    SfCursor();
-    SfCursor(SfCursor && obj) TBAG_NOEXCEPT;
-    ~SfCursor();
+    Cursor();
+    Cursor(Cursor && obj) TBAG_NOEXCEPT;
+    ~Cursor();
 
 public:
-    SfCursor & operator =(SfCursor && obj) TBAG_NOEXCEPT;
+    Cursor & operator =(Cursor && obj) TBAG_NOEXCEPT;
 
 public:
-    void swap(SfCursor & obj) TBAG_NOEXCEPT;
+    void swap(Cursor & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(SfCursor & lh, SfCursor & rh) TBAG_NOEXCEPT
+    inline friend void swap(Cursor & lh, Cursor & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
 
 public:
@@ -69,11 +69,11 @@ public:
     bool loadFromSystem(CursorType type);
 };
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFCURSOR_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_CURSOR_HPP__
 

@@ -1,11 +1,11 @@
 /**
- * @file   SfBlendMode.cpp
- * @brief  SfBlendMode class implementation.
+ * @file   BlendMode.cpp
+ * @brief  BlendMode class implementation.
  * @author zer0
  * @date   2019-02-19
  */
 
-#include <libtbag/sfpp/SfBlendMode.hpp>
+#include <libtbag/gui/BlendMode.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_GUI)
@@ -24,31 +24,31 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
-SfBlendMode::SfBlendMode() : SfNative(SfType::ST_BLEND_MODE)
+BlendMode::BlendMode() : SfNative(SfType::ST_BLEND_MODE)
 {
     // EMPTY.
 }
 
-SfBlendMode::SfBlendMode(SfBlendMode && obj) TBAG_NOEXCEPT
+BlendMode::BlendMode(BlendMode && obj) TBAG_NOEXCEPT
         : SfNative(SfType::ST_BLEND_MODE, no_init)
 {
     *this = std::move(obj);
 }
 
-SfBlendMode::~SfBlendMode()
+BlendMode::~BlendMode()
 {
     // EMPTY.
 }
 
-SfBlendMode & SfBlendMode::operator =(SfBlendMode && obj) TBAG_NOEXCEPT
+BlendMode & BlendMode::operator =(BlendMode && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void SfBlendMode::swap(SfBlendMode & obj) TBAG_NOEXCEPT
+void BlendMode::swap(BlendMode & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         SfNative::swap(obj);
@@ -61,7 +61,7 @@ void SfBlendMode::swap(SfBlendMode & obj) TBAG_NOEXCEPT
 
 #undef _self_sf
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

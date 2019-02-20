@@ -1,37 +1,37 @@
 /**
- * @file   SfDrawable.cpp
- * @brief  SfDrawable class implementation.
+ * @file   Drawable.cpp
+ * @brief  Drawable class implementation.
  * @author zer0
  * @date   2019-02-13
  */
 
-#include <libtbag/sfpp/SfDrawable.hpp>
+#include <libtbag/gui/Drawable.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
-SfDrawable::SfDrawable(SfType type, no_init_t, bool ref)
+Drawable::Drawable(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
 {
     assert(isDrawable(type));
 }
 
-SfDrawable::SfDrawable(SfType type, bool ref)
+Drawable::Drawable(SfType type, bool ref)
         : SfNative(type, ref)
 {
     assert(isDrawable(type));
 }
 
-SfDrawable::~SfDrawable()
+Drawable::~Drawable()
 {
     // EMPTY.
 }
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

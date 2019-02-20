@@ -1,11 +1,11 @@
 /**
- * @file   SfRenderStates.cpp
- * @brief  SfRenderStates class implementation.
+ * @file   RenderStates.cpp
+ * @brief  RenderStates class implementation.
  * @author zer0
  * @date   2019-02-19
  */
 
-#include <libtbag/sfpp/SfRenderStates.hpp>
+#include <libtbag/gui/RenderStates.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_GUI)
@@ -24,31 +24,31 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
-SfRenderStates::SfRenderStates() : SfNative(SfType::ST_RENDER_STATES)
+RenderStates::RenderStates() : SfNative(SfType::ST_RENDER_STATES)
 {
     // EMPTY.
 }
 
-SfRenderStates::SfRenderStates(SfRenderStates && obj) TBAG_NOEXCEPT
+RenderStates::RenderStates(RenderStates && obj) TBAG_NOEXCEPT
         : SfNative(SfType::ST_RENDER_STATES, no_init)
 {
     *this = std::move(obj);
 }
 
-SfRenderStates::~SfRenderStates()
+RenderStates::~RenderStates()
 {
     // EMPTY.
 }
 
-SfRenderStates & SfRenderStates::operator =(SfRenderStates && obj) TBAG_NOEXCEPT
+RenderStates & RenderStates::operator =(RenderStates && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void SfRenderStates::swap(SfRenderStates & obj) TBAG_NOEXCEPT
+void RenderStates::swap(RenderStates & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         SfNative::swap(obj);
@@ -61,7 +61,7 @@ void SfRenderStates::swap(SfRenderStates & obj) TBAG_NOEXCEPT
 
 #undef _self_sf
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

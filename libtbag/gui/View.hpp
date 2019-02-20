@@ -1,12 +1,12 @@
 /**
- * @file   SfView.hpp
- * @brief  SfView class prototype.
+ * @file   View.hpp
+ * @brief  View class prototype.
  * @author zer0
  * @date   2019-02-17
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFVIEW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFVIEW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_VIEW_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_VIEW_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,41 +15,41 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/sfpp/SfNative.hpp>
+#include <libtbag/gui/SfNative.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
 // Forward declaration.
-class SfTransform;
+class Transform;
 
 /**
- * SfView class prototype.
+ * View class prototype.
  *
  * @author zer0
  * @date   2019-02-17
  */
-class TBAG_API SfView : public SfNative
+class TBAG_API View : public SfNative
 {
 public:
-    SfView();
-    SfView(void * handle, no_init_t, bool ref = true);
-    SfView(Rectf const & rectangle);
-    SfView(Pointf const & center, Sizef const & size);
-    SfView(SfView && obj) TBAG_NOEXCEPT;
-    ~SfView();
+    View();
+    View(void * handle, no_init_t, bool ref = true);
+    View(Rectf const & rectangle);
+    View(Pointf const & center, Sizef const & size);
+    View(View && obj) TBAG_NOEXCEPT;
+    ~View();
 
 public:
-    SfView & operator =(SfView && obj) TBAG_NOEXCEPT;
+    View & operator =(View && obj) TBAG_NOEXCEPT;
 
 public:
-    void swap(SfView & obj) TBAG_NOEXCEPT;
+    void swap(View & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(SfView & lh, SfView & rh) TBAG_NOEXCEPT
+    inline friend void swap(View & lh, View & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
 
 public:
@@ -78,15 +78,15 @@ public:
     void zoom(float factor);
 
 public:
-    SfTransform getTransform() const;
-    SfTransform getInverseTransform() const;
+    Transform getTransform() const;
+    Transform getInverseTransform() const;
 };
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFVIEW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_VIEW_HPP__
 

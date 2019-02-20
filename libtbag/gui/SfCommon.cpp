@@ -5,7 +5,7 @@
  * @date   2019-02-12
  */
 
-#include <libtbag/sfpp/SfCommon.hpp>
+#include <libtbag/gui/SfCommon.hpp>
 #include <libtbag/log/Log.hpp>
 
 #if defined(USE_GUI)
@@ -22,7 +22,7 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
 SfType getSfType(int type) TBAG_NOEXCEPT
 {
@@ -85,7 +85,7 @@ void deleteSfType(SfType type, void * ptr)
     // @formatter:on
 }
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

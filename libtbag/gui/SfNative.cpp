@@ -5,7 +5,7 @@
  * @date   2019-02-12
  */
 
-#include <libtbag/sfpp/SfNative.hpp>
+#include <libtbag/gui/SfNative.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
@@ -24,7 +24,7 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
 SfNative::SfNative(SfType type, no_init_t, bool ref)
         : Parent(nullptr), _type(type), _ref(ref)
@@ -67,7 +67,7 @@ void SfNative::swap(SfNative & obj) TBAG_NOEXCEPT
     }
 }
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

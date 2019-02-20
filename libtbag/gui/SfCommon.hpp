@@ -5,8 +5,8 @@
  * @date   2019-02-12
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFCOMMON_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFCOMMON_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_COMMON_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_COMMON_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -22,7 +22,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
 #ifndef TBAG_SF_HANDLE_MAP
 #define TBAG_SF_HANDLE_MAP(_TBAG_WINDOW_XX, _TBAG_GRAPHIC_XX) \
@@ -78,11 +78,11 @@ TBAG_API bool isDrawable(SfType type) TBAG_NOEXCEPT;
 TBAG_API void * newSfType(SfType type);
 TBAG_API void deleteSfType(SfType type, void * ptr);
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFCOMMON_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_COMMON_HPP__
 

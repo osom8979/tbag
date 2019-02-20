@@ -1,14 +1,14 @@
 /**
- * @file   SfRenderWindow.hpp
- * @brief  SfRenderWindow class prototype.
+ * @file   RenderWindow.hpp
+ * @brief  RenderWindow class prototype.
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
- * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
+ * @date   2019-02-16 (Rename: SfWindow -> RenderWindow)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFRENDERWINDOW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFRENDERWINDOW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_RENDERWINDOW_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_RENDERWINDOW_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,7 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/sfpp/SfRenderTarget.hpp>
+#include <libtbag/gui/RenderTarget.hpp>
 #include <libtbag/graphic/Color.hpp>
 
 #include <string>
@@ -26,22 +26,22 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
 // Forward declaration.
-class SfView;
-class SfCursor;
-class SfDrawable;
+class View;
+class Cursor;
+class Drawable;
 
 /**
- * SfRenderWindow class prototype.
+ * RenderWindow class prototype.
  *
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
- * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
+ * @date   2019-02-16 (Rename: SfWindow -> RenderWindow)
  */
-class TBAG_API SfRenderWindow : public SfRenderTarget
+class TBAG_API RenderWindow : public RenderTarget
 {
 public:
     using Channel = libtbag::graphic::Channel;
@@ -217,19 +217,19 @@ public:
     };
 
 public:
-    SfRenderWindow();
-    SfRenderWindow(Params const & params);
-    SfRenderWindow(SfRenderWindow && obj) TBAG_NOEXCEPT;
-    virtual ~SfRenderWindow();
+    RenderWindow();
+    RenderWindow(Params const & params);
+    RenderWindow(RenderWindow && obj) TBAG_NOEXCEPT;
+    virtual ~RenderWindow();
 
 public:
-    SfRenderWindow & operator =(SfRenderWindow && obj) TBAG_NOEXCEPT;
+    RenderWindow & operator =(RenderWindow && obj) TBAG_NOEXCEPT;
 
 public:
-    void swap(SfRenderWindow & obj) TBAG_NOEXCEPT;
+    void swap(RenderWindow & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(SfRenderWindow & lh, SfRenderWindow & rh) TBAG_NOEXCEPT
+    inline friend void swap(RenderWindow & lh, RenderWindow & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
 
 public:
@@ -436,18 +436,18 @@ public:
     void clear();
 
 public:
-    void setView(SfView const & view);
-    SfView getView() const;
-    SfView getDefaultView() const;
-    Recti getViewport(SfView const & view) const;
+    void setView(View const & view);
+    View getView() const;
+    View getDefaultView() const;
+    Recti getViewport(View const & view) const;
 
     Pointf mapPixelToCoords(Pointi const & point) const;
-    Pointf mapPixelToCoords(Pointi const & point, SfView const & view) const;
+    Pointf mapPixelToCoords(Pointi const & point, View const & view) const;
 
     Pointi mapCoordsToPixel(Pointf const & point) const;
-    Pointi mapCoordsToPixel(Pointf const & point, SfView const & view) const;
+    Pointi mapCoordsToPixel(Pointf const & point, View const & view) const;
 
-//    void draw(SfDrawable const & drawable, RenderStates const & states = RenderStates::Default);
+//    void draw(Drawable const & drawable, RenderStates const & states = RenderStates::Default);
 //    void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates::Default);
 //    void draw(const VertexBuffer& vertexBuffer, const RenderStates& states = RenderStates::Default);
 //    void draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states = RenderStates::Default);
@@ -479,7 +479,7 @@ public:
     void setVerticalSyncEnabled(bool enabled);
     void setMouseCursorVisible(bool visible);
     void setMouseCursorGrabbed(bool grabbed);
-    void setMouseCursor(SfCursor const & cursor);
+    void setMouseCursor(Cursor const & cursor);
     void setKeyRepeatEnabled(bool enabled);
     void setFramerateLimit(unsigned int limit);
     void setJoystickThreshold(float threshold);
@@ -492,11 +492,11 @@ public:
     void display();
 };
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_SFPP_SFRENDERWINDOW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_RENDERWINDOW_HPP__
 

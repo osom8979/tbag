@@ -1,37 +1,37 @@
 /**
- * @file   SfRenderTarget.cpp
- * @brief  SfRenderTarget class implementation.
+ * @file   RenderTarget.cpp
+ * @brief  RenderTarget class implementation.
  * @author zer0
  * @date   2019-02-16
  */
 
-#include <libtbag/sfpp/SfRenderTarget.hpp>
+#include <libtbag/gui/RenderTarget.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
-SfRenderTarget::SfRenderTarget(SfType type, no_init_t, bool ref)
+RenderTarget::RenderTarget(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
 {
     // EMPTY.
 }
 
-SfRenderTarget::SfRenderTarget(SfType type, bool ref)
+RenderTarget::RenderTarget(SfType type, bool ref)
         : SfNative(type, ref)
 {
     // EMPTY.
 }
 
-SfRenderTarget::~SfRenderTarget()
+RenderTarget::~RenderTarget()
 {
     // EMPTY.
 }
 
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

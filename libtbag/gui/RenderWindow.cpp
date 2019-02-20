@@ -1,16 +1,16 @@
 /**
- * @file   SfRenderWindow.cpp
- * @brief  SfRenderWindow class implementation.
+ * @file   RenderWindow.cpp
+ * @brief  RenderWindow class implementation.
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
- * @date   2019-02-16 (Rename: SfWindow -> SfRenderWindow)
+ * @date   2019-02-16 (Rename: SfWindow -> RenderWindow)
  */
 
-#include <libtbag/sfpp/SfRenderWindow.hpp>
-#include <libtbag/sfpp/SfView.hpp>
-#include <libtbag/sfpp/SfCursor.hpp>
-#include <libtbag/sfpp/SfDrawable.hpp>
+#include <libtbag/gui/RenderWindow.hpp>
+#include <libtbag/gui/View.hpp>
+#include <libtbag/gui/Cursor.hpp>
+#include <libtbag/gui/Drawable.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
@@ -21,39 +21,39 @@
 #if defined(USE_GUI)
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Unknown,         libtbag::sfpp::SfRenderWindow::Key::Unknown);
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::A,               libtbag::sfpp::SfRenderWindow::Key::A);
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Pause,           libtbag::sfpp::SfRenderWindow::Key::Pause);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Left,            libtbag::sfpp::SfRenderWindow::Button::Left);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Right,           libtbag::sfpp::SfRenderWindow::Button::Right);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Middle,          libtbag::sfpp::SfRenderWindow::Button::Middle);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton1,        libtbag::sfpp::SfRenderWindow::Button::XButton1);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton2,        libtbag::sfpp::SfRenderWindow::Button::XButton2);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::VerticalWheel,    libtbag::sfpp::SfRenderWindow::Wheel::VerticalWheel);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::HorizontalWheel,  libtbag::sfpp::SfRenderWindow::Wheel::HorizontalWheel);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::X,              libtbag::sfpp::SfRenderWindow::JoystickAxis::X);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Y,              libtbag::sfpp::SfRenderWindow::JoystickAxis::Y);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Z,              libtbag::sfpp::SfRenderWindow::JoystickAxis::Z);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::R,              libtbag::sfpp::SfRenderWindow::JoystickAxis::R);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::U,              libtbag::sfpp::SfRenderWindow::JoystickAxis::U);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::V,              libtbag::sfpp::SfRenderWindow::JoystickAxis::V);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovX,           libtbag::sfpp::SfRenderWindow::JoystickAxis::PovX);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovY,           libtbag::sfpp::SfRenderWindow::JoystickAxis::PovY);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Accelerometer,    libtbag::sfpp::SfRenderWindow::SensorType::Accelerometer);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gyroscope,        libtbag::sfpp::SfRenderWindow::SensorType::Gyroscope);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Magnetometer,     libtbag::sfpp::SfRenderWindow::SensorType::Magnetometer);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gravity,          libtbag::sfpp::SfRenderWindow::SensorType::Gravity);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::UserAcceleration, libtbag::sfpp::SfRenderWindow::SensorType::UserAcceleration);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Orientation,      libtbag::sfpp::SfRenderWindow::SensorType::Orientation);
+_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Unknown,         libtbag::gui::RenderWindow::Key::Unknown);
+_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::A,               libtbag::gui::RenderWindow::Key::A);
+_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Pause,           libtbag::gui::RenderWindow::Key::Pause);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Left,            libtbag::gui::RenderWindow::Button::Left);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Right,           libtbag::gui::RenderWindow::Button::Right);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Middle,          libtbag::gui::RenderWindow::Button::Middle);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton1,        libtbag::gui::RenderWindow::Button::XButton1);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton2,        libtbag::gui::RenderWindow::Button::XButton2);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::VerticalWheel,    libtbag::gui::RenderWindow::Wheel::VerticalWheel);
+_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::HorizontalWheel,  libtbag::gui::RenderWindow::Wheel::HorizontalWheel);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::X,              libtbag::gui::RenderWindow::JoystickAxis::X);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Y,              libtbag::gui::RenderWindow::JoystickAxis::Y);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Z,              libtbag::gui::RenderWindow::JoystickAxis::Z);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::R,              libtbag::gui::RenderWindow::JoystickAxis::R);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::U,              libtbag::gui::RenderWindow::JoystickAxis::U);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::V,              libtbag::gui::RenderWindow::JoystickAxis::V);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovX,           libtbag::gui::RenderWindow::JoystickAxis::PovX);
+_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovY,           libtbag::gui::RenderWindow::JoystickAxis::PovY);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Accelerometer,    libtbag::gui::RenderWindow::SensorType::Accelerometer);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gyroscope,        libtbag::gui::RenderWindow::SensorType::Gyroscope);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Magnetometer,     libtbag::gui::RenderWindow::SensorType::Magnetometer);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gravity,          libtbag::gui::RenderWindow::SensorType::Gravity);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::UserAcceleration, libtbag::gui::RenderWindow::SensorType::UserAcceleration);
+_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Orientation,      libtbag::gui::RenderWindow::SensorType::Orientation);
 #else
 #include <libtbag/dummy/Sfml.hpp>
 using namespace libtbag::dummy;
-#include <iostream>
 #endif
 
 #include <cstdlib>
 #include <cassert>
 
+#include <iostream>
 #include <algorithm>
 #include <utility>
 
@@ -61,15 +61,25 @@ using namespace libtbag::dummy;
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace sfpp {
+namespace gui {
 
-SfRenderWindow::SfRenderWindow() : SfRenderWindow(Params())
+#ifndef _self_sf
+#define _self_sf() Parent::cast<sf::RenderWindow>()
+#endif
+
+using Pointi = RenderWindow::Pointi;
+using Pointu = RenderWindow::Pointu;
+using Pointf = RenderWindow::Pointf;
+using Sizeu  = RenderWindow::Sizeu;
+using Recti  = RenderWindow::Recti;
+
+RenderWindow::RenderWindow() : RenderWindow(Params())
 {
     // EMPTY.
 }
 
-SfRenderWindow::SfRenderWindow(Params const & params)
-        : SfRenderTarget(SfType::ST_RENDER_WINDOW, no_init)
+RenderWindow::RenderWindow(Params const & params)
+        : RenderTarget(SfType::ST_RENDER_WINDOW, no_init)
 {
     auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
     auto const STYLE = sf::Style::Default;
@@ -80,31 +90,31 @@ SfRenderWindow::SfRenderWindow(Params const & params)
     assert(ptr != nullptr);
 }
 
-SfRenderWindow::SfRenderWindow(SfRenderWindow && obj) TBAG_NOEXCEPT
-        : SfRenderTarget(SfType::ST_RENDER_WINDOW, no_init)
+RenderWindow::RenderWindow(RenderWindow && obj) TBAG_NOEXCEPT
+        : RenderTarget(SfType::ST_RENDER_WINDOW, no_init)
 {
     *this = std::move(obj);
 }
 
-SfRenderWindow::~SfRenderWindow()
+RenderWindow::~RenderWindow()
 {
     // EMPTY.
 }
 
-SfRenderWindow & SfRenderWindow::operator =(SfRenderWindow && obj) TBAG_NOEXCEPT
+RenderWindow & RenderWindow::operator =(RenderWindow && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
 }
 
-void SfRenderWindow::swap(SfRenderWindow & obj) TBAG_NOEXCEPT
+void RenderWindow::swap(RenderWindow & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         SfNative::swap(obj);
     }
 }
 
-int SfRenderWindow::run()
+int RenderWindow::run()
 {
     auto * window = cast<sf::RenderWindow>();
     assert(window != nullptr);
@@ -201,341 +211,329 @@ int SfRenderWindow::run()
 #endif
 }
 
-void SfRenderWindow::onBegin()
+void RenderWindow::onBegin()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onEnd()
+void RenderWindow::onEnd()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onPollEventBegin()
+void RenderWindow::onPollEventBegin()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onPollEventEnd()
+void RenderWindow::onPollEventEnd()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onClosed()
+void RenderWindow::onClosed()
 {
     close();
 }
 
-void SfRenderWindow::onResized(unsigned int width, unsigned int height)
+void RenderWindow::onResized(unsigned int width, unsigned int height)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onLostFocus()
+void RenderWindow::onLostFocus()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onGainedFocus()
+void RenderWindow::onGainedFocus()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onKeyPressed(Key code, bool alt, bool control, bool shift, bool system)
+void RenderWindow::onKeyPressed(Key code, bool alt, bool control, bool shift, bool system)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onKeyReleased(Key code, bool alt, bool control, bool shift, bool system)
+void RenderWindow::onKeyReleased(Key code, bool alt, bool control, bool shift, bool system)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onTextEntered(unsigned int unicode)
+void RenderWindow::onTextEntered(unsigned int unicode)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onMouseMoved(int x, int y)
+void RenderWindow::onMouseMoved(int x, int y)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onMouseEntered()
+void RenderWindow::onMouseEntered()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onMouseLeft()
+void RenderWindow::onMouseLeft()
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onMouseButtonPressed(Button button, int x, int y)
+void RenderWindow::onMouseButtonPressed(Button button, int x, int y)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onMouseButtonReleased(Button button, int x, int y)
+void RenderWindow::onMouseButtonReleased(Button button, int x, int y)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onMouseWheelScrolled(Wheel wheel, float delta, int x, int y)
+void RenderWindow::onMouseWheelScrolled(Wheel wheel, float delta, int x, int y)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onJoystickConnected(unsigned int joystick_id)
+void RenderWindow::onJoystickConnected(unsigned int joystick_id)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onJoystickDisconnected(unsigned int joystick_id)
+void RenderWindow::onJoystickDisconnected(unsigned int joystick_id)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position)
+void RenderWindow::onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onJoystickButtonPressed(unsigned int joystick_id, unsigned int button)
+void RenderWindow::onJoystickButtonPressed(unsigned int joystick_id, unsigned int button)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onJoystickButtonReleased(unsigned int joystick_id, unsigned int button)
+void RenderWindow::onJoystickButtonReleased(unsigned int joystick_id, unsigned int button)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onTouchBegan(unsigned int finger, int x, int y)
+void RenderWindow::onTouchBegan(unsigned int finger, int x, int y)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onTouchMoved(unsigned int finger, int x, int y)
+void RenderWindow::onTouchMoved(unsigned int finger, int x, int y)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onTouchEnded(unsigned int finger, int x, int y)
+void RenderWindow::onTouchEnded(unsigned int finger, int x, int y)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onSensorChanged(SensorType type, float x, float y, float z)
+void RenderWindow::onSensorChanged(SensorType type, float x, float y, float z)
 {
     // EMPTY.
 }
 
-void SfRenderWindow::onIdle()
+void RenderWindow::onIdle()
 {
     // EMPTY.
 }
 
-#ifndef _self_sf
-#define _self_sf() Parent::cast<sf::RenderWindow>()
-#endif
-
-using Pointi = SfRenderWindow::Pointi;
-using Pointu = SfRenderWindow::Pointu;
-using Pointf = SfRenderWindow::Pointf;
-using Sizeu  = SfRenderWindow::Sizeu;
-using Recti  = SfRenderWindow::Recti;
-
-void SfRenderWindow::clear(Channel r, Channel g, Channel b, Channel a)
+void RenderWindow::clear(Channel r, Channel g, Channel b, Channel a)
 {
     _self_sf()->clear(sf::Color(r, g, b, a));
 }
 
-void SfRenderWindow::clear(Rgb24 const & color)
+void RenderWindow::clear(Rgb24 const & color)
 {
     clear(color.r, color.g, color.b);
 }
 
-void SfRenderWindow::clear(Rgb32 const & color)
+void RenderWindow::clear(Rgb32 const & color)
 {
     clear(color.r, color.g, color.b, color.a);
 }
 
-void SfRenderWindow::clear()
+void RenderWindow::clear()
 {
     clear(CHANNEL_MIN, CHANNEL_MIN, CHANNEL_MIN);
 }
 
-void SfRenderWindow::setView(SfView const & view)
+void RenderWindow::setView(View const & view)
 {
     _self_sf()->setView(*view.cast<sf::View>());
 }
 
-SfView SfRenderWindow::getView() const
+View RenderWindow::getView() const
 {
-    return SfView((void*)&(_self_sf()->getView()), no_init, false);
+    return View((void*)&(_self_sf()->getView()), no_init, false);
 }
 
-SfView SfRenderWindow::getDefaultView() const
+View RenderWindow::getDefaultView() const
 {
-    return SfView((void*)&(_self_sf()->getDefaultView()), no_init, false);
+    return View((void*)&(_self_sf()->getDefaultView()), no_init, false);
 }
 
-Recti SfRenderWindow::getViewport(SfView const & view) const
+Recti RenderWindow::getViewport(View const & view) const
 {
     auto const RECT = _self_sf()->getViewport(*view.cast<sf::View>());
     return Recti(RECT.left, RECT.top, RECT.width, RECT.height);
 }
 
-Pointf SfRenderWindow::mapPixelToCoords(Pointi const & point) const
+Pointf RenderWindow::mapPixelToCoords(Pointi const & point) const
 {
     auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y));
     return Pointf(COORDS.x, COORDS.y);
 }
 
-Pointf SfRenderWindow::mapPixelToCoords(Pointi const & point, SfView const & view) const
+Pointf RenderWindow::mapPixelToCoords(Pointi const & point, View const & view) const
 {
     auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y), *view.cast<sf::View>());
     return Pointf(COORDS.x, COORDS.y);
 }
 
-Pointi SfRenderWindow::mapCoordsToPixel(Pointf const & point) const
+Pointi RenderWindow::mapCoordsToPixel(Pointf const & point) const
 {
     auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y));
     return Pointi(PIXEL.x, PIXEL.y);
 }
 
-Pointi SfRenderWindow::mapCoordsToPixel(Pointf const & point, SfView const & view) const
+Pointi RenderWindow::mapCoordsToPixel(Pointf const & point, View const & view) const
 {
     auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y), *view.cast<sf::View>());
     return Pointi(PIXEL.x, PIXEL.y);
 }
 
-//void SfRenderWindow::draw(SfDrawable const & drawable, RenderStates const & states = RenderStates::Default)
+//void RenderWindow::draw(Drawable const & drawable, RenderStates const & states = RenderStates::Default)
 //{
 //    _self_sf()->draw(*drawable.cast<sf::Drawable>(), sf::RenderStates);
 //}
 
-Pointi SfRenderWindow::getPosition() const
+Pointi RenderWindow::getPosition() const
 {
     auto const POS = _self_sf()->getPosition();
     return Pointi(POS.x, POS.y);
 }
 
-void SfRenderWindow::setPosition(Pointi const & position)
+void RenderWindow::setPosition(Pointi const & position)
 {
     _self_sf()->setPosition(sf::Vector2i(position.x, position.y));
 }
 
-Sizeu SfRenderWindow::getSize() const
+Sizeu RenderWindow::getSize() const
 {
     auto const SIZE = _self_sf()->getSize();
     return Sizeu(SIZE.x, SIZE.y);
 }
 
-void SfRenderWindow::setSize(Sizeu const & size)
+void RenderWindow::setSize(Sizeu const & size)
 {
     _self_sf()->setSize(sf::Vector2u(size.width, size.height));
 }
 
-bool SfRenderWindow::setActive(bool active)
+bool RenderWindow::setActive(bool active)
 {
     return _self_sf()->setActive(active);
 }
 
-void SfRenderWindow::pushGLStates()
+void RenderWindow::pushGLStates()
 {
     _self_sf()->pushGLStates();
 }
 
-void SfRenderWindow::popGLStates()
+void RenderWindow::popGLStates()
 {
     _self_sf()->popGLStates();
 }
 
-void SfRenderWindow::resetGLStates()
+void RenderWindow::resetGLStates()
 {
     _self_sf()->resetGLStates();
 }
 
-void SfRenderWindow::close()
+void RenderWindow::close()
 {
     _self_sf()->close();
 }
 
-bool SfRenderWindow::isOpen() const
+bool RenderWindow::isOpen() const
 {
     return _self_sf()->isOpen();
 }
 
-void SfRenderWindow::setTitle(std::string const & title)
+void RenderWindow::setTitle(std::string const & title)
 {
     _self_sf()->setTitle(sf::String(title));
 }
 
-void SfRenderWindow::setIcon(unsigned int width, unsigned int height, std::uint8_t const * pixels)
+void RenderWindow::setIcon(unsigned int width, unsigned int height, std::uint8_t const * pixels)
 {
     _self_sf()->setIcon(width, height, pixels);
 }
 
-void SfRenderWindow::setVisible(bool visible)
+void RenderWindow::setVisible(bool visible)
 {
     _self_sf()->setVisible(visible);
 }
 
-void SfRenderWindow::setVerticalSyncEnabled(bool enabled)
+void RenderWindow::setVerticalSyncEnabled(bool enabled)
 {
     _self_sf()->setVerticalSyncEnabled(enabled);
 }
 
-void SfRenderWindow::setMouseCursorVisible(bool visible)
+void RenderWindow::setMouseCursorVisible(bool visible)
 {
     _self_sf()->setMouseCursorVisible(visible);
 }
 
-void SfRenderWindow::setMouseCursorGrabbed(bool grabbed)
+void RenderWindow::setMouseCursorGrabbed(bool grabbed)
 {
     _self_sf()->setMouseCursorGrabbed(grabbed);
 }
 
-void SfRenderWindow::setMouseCursor(SfCursor const & cursor)
+void RenderWindow::setMouseCursor(Cursor const & cursor)
 {
     _self_sf()->setMouseCursor(*cursor.cast<sf::Cursor>());
 }
 
-void SfRenderWindow::setKeyRepeatEnabled(bool enabled)
+void RenderWindow::setKeyRepeatEnabled(bool enabled)
 {
     _self_sf()->setKeyRepeatEnabled(enabled);
 }
 
-void SfRenderWindow::setFramerateLimit(unsigned int limit)
+void RenderWindow::setFramerateLimit(unsigned int limit)
 {
     _self_sf()->setFramerateLimit(limit);
 }
 
-void SfRenderWindow::setJoystickThreshold(float threshold)
+void RenderWindow::setJoystickThreshold(float threshold)
 {
     _self_sf()->setJoystickThreshold(threshold);
 }
 
-void SfRenderWindow::requestFocus()
+void RenderWindow::requestFocus()
 {
     _self_sf()->requestFocus();
 }
 
-bool SfRenderWindow::hasFocus() const
+bool RenderWindow::hasFocus() const
 {
     return _self_sf()->hasFocus();
 }
 
-void SfRenderWindow::display()
+void RenderWindow::display()
 {
     _self_sf()->display();
 }
 
-#undef _self_sf
-
-} // namespace sfpp
+} // namespace gui
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
