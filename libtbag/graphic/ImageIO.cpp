@@ -1,11 +1,12 @@
 /**
- * @file   Image.cpp
- * @brief  Image class implementation.
+ * @file   ImageIO.cpp
+ * @brief  Image Input/Output function implementation.
  * @author zer0
  * @date   2017-06-10
+ * @date   2019-02-20 (Rename: Image -> ImageIO)
  */
 
-#include <libtbag/graphic/Image.hpp>
+#include <libtbag/graphic/ImageIO.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/StringUtils.hpp>

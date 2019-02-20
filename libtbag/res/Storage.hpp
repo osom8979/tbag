@@ -23,7 +23,7 @@
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/lib/SharedLibrary.hpp>
 #include <libtbag/res/GetText.hpp>
-#include <libtbag/graphic/Image.hpp>
+#include <libtbag/graphic/ImageIO.hpp>
 #include <libtbag/graphic/ImageOffset.hpp>
 
 #include <string>

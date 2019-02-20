@@ -1,12 +1,13 @@
 /**
- * @file   Image.hpp
- * @brief  Image class prototype.
+ * @file   ImageIO.hpp
+ * @brief  Image Input/Output function prototype.
  * @author zer0
  * @date   2017-06-10
+ * @date   2019-02-20 (Rename: Image -> ImageIO)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEIO_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEIO_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -32,8 +33,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graphic {
 
-using ImageGray  = container::Array2d<Channel>;
-using ImageRgb24 = container::Array2d<Color>;
+using ImageGray  = libtbag::container::Array2d<Channel>;
+using ImageRgb24 = libtbag::container::Array2d<Color>;
 
 using Image = ImageRgb24;
 
@@ -106,5 +107,5 @@ TBAG_API Err convert(ImageGray const & source, ImageRgb24 & destination);
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GRAPHIC_IMAGEIO_HPP__
 

@@ -1,19 +1,20 @@
 /**
- * @file   ImageTest.cpp
- * @brief  Image class tester.
+ * @file   ImageIOTest.cpp
+ * @brief  ImageIO class tester.
  * @author zer0
  * @date   2017-06-10
+ * @date   2019-02-20 (Rename: Image -> ImageIO)
  */
 
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
-#include <libtbag/graphic/Image.hpp>
+#include <libtbag/graphic/ImageIO.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
 using namespace libtbag;
 using namespace libtbag::graphic;
 
-TEST(ImageTest, ReadImage)
+TEST(ImageIOTest, ReadImage)
 {
     auto path = DemoAsset::get_tester_dir_image() / "lena.png";
 
@@ -60,7 +61,7 @@ TEST(ImageTest, ReadImage)
     ASSERT_EQ( 81, reload[reload.size() - 1].b);
 }
 
-TEST(ImageTest, UseJpeg)
+TEST(ImageIOTest, UseJpeg)
 {
     auto path = DemoAsset::get_tester_dir_image() / "lena.png";
 

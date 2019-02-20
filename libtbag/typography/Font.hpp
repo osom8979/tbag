@@ -19,7 +19,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/graphic/Image.hpp>
+#include <libtbag/graphic/ImageIO.hpp>
 
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/geometry/Rect.hpp>
