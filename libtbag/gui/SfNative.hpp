@@ -37,7 +37,7 @@ namespace gui {
 class TBAG_API SfNative : public libtbag::container::Pointer<void>, private Noncopyable
 {
 public:
-    using Parent  = libtbag::container::Pointer<void>;
+    using Pointer = libtbag::container::Pointer<void>;
 
     using Channel = libtbag::graphic::Channel;
     using Rgb24   = libtbag::graphic::Rgb24;
@@ -71,15 +71,18 @@ public:
 
 public:
     struct no_init_t { /* EMPTY. */ };
+    struct no_init_no_ref_t { /* EMPTY. */ };
 
 public:
     TBAG_CONSTEXPR static no_init_t const no_init = no_init_t{};
+    TBAG_CONSTEXPR static no_init_no_ref_t const no_init_no_ref = no_init_no_ref_t{};
 
 private:
     SfType _type;
     bool _ref;
 
 public:
+    explicit SfNative(SfType type, no_init_no_ref_t);
     explicit SfNative(SfType type, no_init_t, bool ref = true);
     explicit SfNative(SfType type, bool ref = true);
     SfNative(SfNative && obj) TBAG_NOEXCEPT;

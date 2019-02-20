@@ -33,6 +33,7 @@ class TBAG_API Shader : public SfNative
 {
 public:
     Shader();
+    Shader(void * handle, no_init_no_ref_t);
     Shader(Shader && obj) TBAG_NOEXCEPT;
     ~Shader();
 

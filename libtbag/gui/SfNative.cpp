@@ -26,20 +26,26 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+SfNative::SfNative(SfType type, no_init_no_ref_t)
+        : Pointer(nullptr), _type(type), _ref(false)
+{
+    assert(ptr == nullptr);
+}
+
 SfNative::SfNative(SfType type, no_init_t, bool ref)
-        : Parent(nullptr), _type(type), _ref(ref)
+        : Pointer(nullptr), _type(type), _ref(ref)
 {
     assert(ptr == nullptr);
 }
 
 SfNative::SfNative(SfType type, bool ref)
-        : Parent(newSfType(type)), _type(type), _ref(ref)
+        : Pointer(newSfType(type)), _type(type), _ref(ref)
 {
     assert(ptr != nullptr);
 }
 
 SfNative::SfNative(SfNative && obj) TBAG_NOEXCEPT
-        : Parent(nullptr), _type(obj._type), _ref(false)
+        : Pointer(nullptr), _type(obj._type), _ref(false)
 {
     *this = std::move(obj);
 }

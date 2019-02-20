@@ -64,7 +64,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 #ifndef _self_sf
-#define _self_sf() Parent::cast<sf::RenderWindow>()
+#define _self_sf() Pointer::cast<sf::RenderWindow>()
 #endif
 
 using Pointi = RenderWindow::Pointi;
@@ -75,7 +75,15 @@ using Recti  = RenderWindow::Recti;
 
 RenderWindow::RenderWindow() : RenderWindow(Params())
 {
-    // EMPTY.
+    assert(ptr != nullptr);
+}
+
+RenderWindow::RenderWindow(void * handle, no_init_no_ref_t)
+        : RenderTarget(SfType::ST_RENDER_WINDOW, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
+    assert(ptr != nullptr);
 }
 
 RenderWindow::RenderWindow(Params const & params)
@@ -373,12 +381,12 @@ void RenderWindow::setView(View const & view)
 
 View RenderWindow::getView() const
 {
-    return View((void*)&(_self_sf()->getView()), no_init, false);
+    return View((void*)&(_self_sf()->getView()), no_init_no_ref);
 }
 
 View RenderWindow::getDefaultView() const
 {
-    return View((void*)&(_self_sf()->getDefaultView()), no_init, false);
+    return View((void*)&(_self_sf()->getDefaultView()), no_init_no_ref);
 }
 
 Recti RenderWindow::getViewport(View const & view) const

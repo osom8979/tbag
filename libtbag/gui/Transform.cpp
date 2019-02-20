@@ -29,7 +29,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 #ifndef _self_sf
-#define _self_sf() Parent::cast<sf::Transform>()
+#define _self_sf() Pointer::cast<sf::Transform>()
 #endif
 
 using Pointf = Transform::Pointf;
@@ -37,7 +37,15 @@ using Rectf  = Transform::Rectf;
 
 Transform::Transform() : SfNative(SfType::ST_TRANSFORM)
 {
-    // EMPTY.
+    assert(ptr != nullptr);
+}
+
+Transform::Transform(void * handle, no_init_no_ref_t)
+        : SfNative(SfType::ST_TRANSFORM, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
+    assert(ptr != nullptr);
 }
 
 Transform::Transform(float a00, float a01, float a02,

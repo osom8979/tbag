@@ -33,6 +33,7 @@ class TBAG_API Texture : public SfNative
 {
 public:
     Texture();
+    Texture(void * handle, no_init_no_ref_t);
     Texture(Texture && obj) TBAG_NOEXCEPT;
     ~Texture();
 

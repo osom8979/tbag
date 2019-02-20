@@ -33,6 +33,7 @@ class TBAG_API Image : public SfNative
 {
 public:
     Image();
+    Image(void * handle, no_init_no_ref_t);
     Image(Image && obj) TBAG_NOEXCEPT;
     ~Image();
 

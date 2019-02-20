@@ -26,9 +26,21 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+#ifndef _self_sf
+#define _self_sf() Pointer::cast<sf::BlendMode>()
+#endif
+
 BlendMode::BlendMode() : SfNative(SfType::ST_BLEND_MODE)
 {
-    // EMPTY.
+    assert(ptr != nullptr);
+}
+
+BlendMode::BlendMode(void * handle, no_init_no_ref_t)
+        : SfNative(SfType::ST_BLEND_MODE, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
+    assert(ptr != nullptr);
 }
 
 BlendMode::BlendMode(BlendMode && obj) TBAG_NOEXCEPT
@@ -54,12 +66,6 @@ void BlendMode::swap(BlendMode & obj) TBAG_NOEXCEPT
         SfNative::swap(obj);
     }
 }
-
-#ifndef _self_sf
-#define _self_sf() Parent::cast<sf::BlendMode>()
-#endif
-
-#undef _self_sf
 
 } // namespace gui
 

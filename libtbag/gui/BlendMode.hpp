@@ -33,6 +33,7 @@ class TBAG_API BlendMode : public SfNative
 {
 public:
     BlendMode();
+    BlendMode(void * handle, no_init_no_ref_t);
     BlendMode(BlendMode && obj) TBAG_NOEXCEPT;
     ~BlendMode();
 

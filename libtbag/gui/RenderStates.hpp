@@ -33,6 +33,7 @@ class TBAG_API RenderStates : public SfNative
 {
 public:
     RenderStates();
+    RenderStates(void * handle, no_init_no_ref_t);
     RenderStates(RenderStates && obj) TBAG_NOEXCEPT;
     ~RenderStates();
 

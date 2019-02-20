@@ -27,12 +27,20 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 #ifndef _self_sf
-#define _self_sf() Parent::cast<sf::Texture>()
+#define _self_sf() Pointer::cast<sf::Texture>()
 #endif
 
 Texture::Texture() : SfNative(SfType::ST_TEXTURE)
 {
-    // EMPTY.
+    assert(ptr != nullptr);
+}
+
+Texture::Texture(void * handle, no_init_no_ref_t)
+        : SfNative(SfType::ST_TEXTURE, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
+    assert(ptr != nullptr);
 }
 
 Texture::Texture(Texture && obj) TBAG_NOEXCEPT

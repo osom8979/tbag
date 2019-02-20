@@ -14,6 +14,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+RenderTarget::RenderTarget(SfType type, no_init_no_ref_t)
+        : SfNative(type, no_init_no_ref)
+{
+    // EMPTY.
+}
+
 RenderTarget::RenderTarget(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
 {

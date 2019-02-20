@@ -32,9 +32,21 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+#ifndef _self_sf
+#define _self_sf() Pointer::cast<sf::Cursor>()
+#endif
+
 Cursor::Cursor() : SfNative(SfType::ST_CURSOR)
 {
-    // EMPTY.
+    assert(ptr != nullptr);
+}
+
+Cursor::Cursor(void * handle, no_init_no_ref_t)
+        : SfNative(SfType::ST_CURSOR, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
+    assert(ptr != nullptr);
 }
 
 Cursor::Cursor(Cursor && obj) TBAG_NOEXCEPT
@@ -61,10 +73,6 @@ void Cursor::swap(Cursor & obj) TBAG_NOEXCEPT
     }
 }
 
-#ifndef _self_sf
-#define _self_sf() Parent::cast<sf::Cursor>()
-#endif
-
 bool Cursor::loadFromPixels(std::uint8_t const * pixels, Sizeu const & size, Pointu const & hot_spot)
 {
     return _self_sf()->loadFromPixels(pixels,
@@ -76,8 +84,6 @@ bool Cursor::loadFromSystem(CursorType type)
 {
     return _self_sf()->loadFromSystem((sf::Cursor::Type)type);
 }
-
-#undef _self_sf
 
 } // namespace gui
 

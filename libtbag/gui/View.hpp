@@ -36,7 +36,7 @@ class TBAG_API View : public SfNative
 {
 public:
     View();
-    View(void * handle, no_init_t, bool ref = true);
+    View(void * handle, no_init_no_ref_t);
     View(Rectf const & rectangle);
     View(Pointf const & center, Sizef const & size);
     View(View && obj) TBAG_NOEXCEPT;

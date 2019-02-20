@@ -28,7 +28,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 #ifndef _self_sf
-#define _self_sf() Parent::cast<sf::View>()
+#define _self_sf() Pointer::cast<sf::View>()
 #endif
 
 using Pointf = View::Pointf;
@@ -37,12 +37,13 @@ using Rectf  = View::Rectf;
 
 View::View() : SfNative(SfType::ST_VIEW)
 {
-    // EMPTY.
+    assert(ptr != nullptr);
 }
 
-View::View(void * handle, no_init_t, bool ref)
-        : SfNative(SfType::ST_VIEW, no_init)
+View::View(void * handle, no_init_no_ref_t)
+        : SfNative(SfType::ST_VIEW, no_init_no_ref)
 {
+    assert(ptr == nullptr);
     ptr = handle;
     assert(ptr != nullptr);
 }

@@ -218,6 +218,7 @@ public:
 
 public:
     RenderWindow();
+    RenderWindow(void * handle, no_init_no_ref_t);
     RenderWindow(Params const & params);
     RenderWindow(RenderWindow && obj) TBAG_NOEXCEPT;
     virtual ~RenderWindow();

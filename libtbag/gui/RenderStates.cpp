@@ -26,9 +26,21 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+#ifndef _self_sf
+#define _self_sf() Pointer::cast<sf::RenderStates>()
+#endif
+
 RenderStates::RenderStates() : SfNative(SfType::ST_RENDER_STATES)
 {
-    // EMPTY.
+    assert(ptr != nullptr);
+}
+
+RenderStates::RenderStates(void * handle, no_init_no_ref_t)
+        : SfNative(SfType::ST_RENDER_STATES, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
+    assert(ptr != nullptr);
 }
 
 RenderStates::RenderStates(RenderStates && obj) TBAG_NOEXCEPT
@@ -54,12 +66,6 @@ void RenderStates::swap(RenderStates & obj) TBAG_NOEXCEPT
         SfNative::swap(obj);
     }
 }
-
-#ifndef _self_sf
-#define _self_sf() Parent::cast<sf::RenderStates>()
-#endif
-
-#undef _self_sf
 
 } // namespace gui
 
