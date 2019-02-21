@@ -15,6 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/geometry/Point3.hpp>
+#include <libtbag/geometry/Point4.hpp>
+#include <libtbag/math/Matrix.hpp>
 #include <libtbag/gui/SfNative.hpp>
 
 // -------------------
@@ -43,26 +46,19 @@ public:
     };
 
     using Vec2  = libtbag::geometry::Point2f;
-    using IVec2 = libtbag::geometry::Point2i;
-    using BVec2 = libtbag::geometry::Point2b;
+    using Ivec2 = libtbag::geometry::Point2i;
+    using Bvec2 = libtbag::geometry::Point2b;
 
-//    using Vec3  = libtbag::geometry::BasePoint3d<float>;
-//    using IVec3 = libtbag::geometry::BasePoint3d<int>;
-//    using BVec3 = libtbag::geometry::BasePoint3d<bool>;
+    using Vec3  = libtbag::geometry::Point3f;
+    using Ivec3 = libtbag::geometry::Point3i;
+    using Bvec3 = libtbag::geometry::Point3b;
 
-//    using Vec4  = libtbag::geometry::BasePoint4d<float>;
-//    using IVec4 = libtbag::geometry::BasePoint4d<int>;
-//    using BVec4 = libtbag::geometry::BasePoint4d<bool>;
+    using Vec4  = libtbag::geometry::Point4f;
+    using Ivec4 = libtbag::geometry::Point4i;
+    using Bvec4 = libtbag::geometry::Point4b;
 
-//    typedef Vector3<float> Vec3;
-//    typedef Vector3<int>   Ivec3;
-//    typedef Vector3<bool>  Bvec3;
-//
-//    typedef priv::Vector4<float> Vec4;
-//    typedef priv::Vector4<int>   Ivec4;
-//    typedef priv::Vector4<bool>  Bvec4;
-//    typedef priv::Matrix<3, 3> Mat3;
-//    typedef priv::Matrix<4, 4> Mat4;
+    using Mat3 = libtbag::math::Matrix3x3f;
+    using Mat4 = libtbag::math::Matrix4x4f;
 
 public:
     struct current_texture_t {};
@@ -96,40 +92,40 @@ public:
     bool loadFromMemory(std::string const & vertex, std::string const & geometry, std::string const & fragment);
 
 public:
-//    void setUniform(std::string const & name, float x);
-//    void setUniform(std::string const & name, Vec2 const & vector);
-//    void setUniform(std::string const & name, Glsl::Vec3 const & vector);
-//    void setUniform(std::string const & name, Glsl::Vec4 const & vector);
-//
-//    void setUniform(std::string const & name, int x);
-//    void setUniform(std::string const & name, Ivec2 const & vector);
-//    void setUniform(std::string const & name, Glsl::Ivec3 const & vector);
-//    void setUniform(std::string const & name, Glsl::Ivec4 const & vector);
-//
-//    void setUniform(std::string const & name, bool x);
-//    void setUniform(std::string const & name, Bvec2 const & vector);
-//    void setUniform(std::string const & name, Glsl::Bvec3 const & vector);
-//    void setUniform(std::string const & name, Glsl::Bvec4 const & vector);
-//
-//    void setUniform(std::string const & name, Glsl::Mat3 const & matrix);
-//    void setUniform(std::string const & name, Glsl::Mat4 const & matrix);
-//
-//    void setUniform(std::string const & name, Texture const & texture);
-//    void setUniform(std::string const & name, current_texture_t);
-//
-//    void setUniformArray(std::string const & name, float const * scalarArray, std::size_t length);
-//    void setUniformArray(std::string const & name, Glsl::Vec2 const * vectorArray, std::size_t length);
-//    void setUniformArray(std::string const & name, Glsl::Vec3 const * vectorArray, std::size_t length);
-//    void setUniformArray(std::string const & name, Glsl::Vec4 const * vectorArray, std::size_t length);
-//    void setUniformArray(std::string const & name, Glsl::Mat3 const * matrixArray, std::size_t length);
-//    void setUniformArray(std::string const & name, Glsl::Mat4 const * matrixArray, std::size_t length);
-//
-//    unsigned int getNativeHandle() const;
-//
-//public:
-//    static void bind(Shader const * shader);
-//    static bool isAvailable();
-//    static bool isGeometryAvailable();
+    void setUniform(std::string const & name, float x);
+    void setUniform(std::string const & name, Vec2 const & vector);
+    void setUniform(std::string const & name, Vec3 const & vector);
+    void setUniform(std::string const & name, Vec4 const & vector);
+
+    void setUniform(std::string const & name, int x);
+    void setUniform(std::string const & name, Ivec2 const & vector);
+    void setUniform(std::string const & name, Ivec3 const & vector);
+    void setUniform(std::string const & name, Ivec4 const & vector);
+
+    void setUniform(std::string const & name, bool x);
+    void setUniform(std::string const & name, Bvec2 const & vector);
+    void setUniform(std::string const & name, Bvec3 const & vector);
+    void setUniform(std::string const & name, Bvec4 const & vector);
+
+    void setUniform(std::string const & name, Mat3 const & matrix);
+    void setUniform(std::string const & name, Mat4 const & matrix);
+
+    //void setUniform(std::string const & name, Texture const & texture);
+    void setUniform(std::string const & name, current_texture_t);
+
+    void setUniformArray(std::string const & name, float const * scalar_arr, std::size_t length);
+    void setUniformArray(std::string const & name, Vec2  const * vector_arr, std::size_t length);
+    void setUniformArray(std::string const & name, Vec3  const * vector_arr, std::size_t length);
+    void setUniformArray(std::string const & name, Vec4  const * vector_arr, std::size_t length);
+    void setUniformArray(std::string const & name, Mat3  const * matrix_arr, std::size_t length);
+    void setUniformArray(std::string const & name, Mat4  const * matrix_arr, std::size_t length);
+
+    unsigned int getNativeHandle() const;
+
+public:
+    static void bind(Shader const & shader);
+    static bool isAvailable();
+    static bool isGeometryAvailable();
 };
 
 } // namespace gui
