@@ -13,38 +13,35 @@
 #include <libtbag/gui/Drawable.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
-
-#ifndef _STATIC_ASSERT_EQUAL
-#define _STATIC_ASSERT_EQUAL(x, y) STATIC_ASSERT_CHECK_IS_EQUALS((int)(x), (int)(y))
-#endif
+#include <libtbag/Type.hpp>
 
 #if defined(USE_GUI)
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Unknown,         libtbag::gui::RenderWindow::Key::Unknown);
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::A,               libtbag::gui::RenderWindow::Key::A);
-_STATIC_ASSERT_EQUAL(sf::Keyboard::Key::Pause,           libtbag::gui::RenderWindow::Key::Pause);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Left,            libtbag::gui::RenderWindow::Button::Left);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Right,           libtbag::gui::RenderWindow::Button::Right);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::Middle,          libtbag::gui::RenderWindow::Button::Middle);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton1,        libtbag::gui::RenderWindow::Button::XButton1);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Button::XButton2,        libtbag::gui::RenderWindow::Button::XButton2);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::VerticalWheel,    libtbag::gui::RenderWindow::Wheel::VerticalWheel);
-_STATIC_ASSERT_EQUAL(sf::Mouse::Wheel::HorizontalWheel,  libtbag::gui::RenderWindow::Wheel::HorizontalWheel);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::X,              libtbag::gui::RenderWindow::JoystickAxis::X);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Y,              libtbag::gui::RenderWindow::JoystickAxis::Y);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::Z,              libtbag::gui::RenderWindow::JoystickAxis::Z);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::R,              libtbag::gui::RenderWindow::JoystickAxis::R);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::U,              libtbag::gui::RenderWindow::JoystickAxis::U);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::V,              libtbag::gui::RenderWindow::JoystickAxis::V);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovX,           libtbag::gui::RenderWindow::JoystickAxis::PovX);
-_STATIC_ASSERT_EQUAL(sf::Joystick::Axis::PovY,           libtbag::gui::RenderWindow::JoystickAxis::PovY);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Accelerometer,    libtbag::gui::RenderWindow::SensorType::Accelerometer);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gyroscope,        libtbag::gui::RenderWindow::SensorType::Gyroscope);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Magnetometer,     libtbag::gui::RenderWindow::SensorType::Magnetometer);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Gravity,          libtbag::gui::RenderWindow::SensorType::Gravity);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::UserAcceleration, libtbag::gui::RenderWindow::SensorType::UserAcceleration);
-_STATIC_ASSERT_EQUAL(sf::Sensor::Type::Orientation,      libtbag::gui::RenderWindow::SensorType::Orientation);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Unknown,         libtbag::gui::RenderWindow::Key::Unknown);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::A,               libtbag::gui::RenderWindow::Key::A);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Pause,           libtbag::gui::RenderWindow::Key::Pause);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Left,            libtbag::gui::RenderWindow::Button::Left);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Right,           libtbag::gui::RenderWindow::Button::Right);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Middle,          libtbag::gui::RenderWindow::Button::Middle);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton1,        libtbag::gui::RenderWindow::Button::XButton1);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton2,        libtbag::gui::RenderWindow::Button::XButton2);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::VerticalWheel,    libtbag::gui::RenderWindow::Wheel::VerticalWheel);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::HorizontalWheel,  libtbag::gui::RenderWindow::Wheel::HorizontalWheel);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::X,              libtbag::gui::RenderWindow::JoystickAxis::X);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Y,              libtbag::gui::RenderWindow::JoystickAxis::Y);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Z,              libtbag::gui::RenderWindow::JoystickAxis::Z);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::R,              libtbag::gui::RenderWindow::JoystickAxis::R);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::U,              libtbag::gui::RenderWindow::JoystickAxis::U);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::V,              libtbag::gui::RenderWindow::JoystickAxis::V);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovX,           libtbag::gui::RenderWindow::JoystickAxis::PovX);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovY,           libtbag::gui::RenderWindow::JoystickAxis::PovY);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Accelerometer,    libtbag::gui::RenderWindow::SensorType::Accelerometer);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gyroscope,        libtbag::gui::RenderWindow::SensorType::Gyroscope);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Magnetometer,     libtbag::gui::RenderWindow::SensorType::Magnetometer);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gravity,          libtbag::gui::RenderWindow::SensorType::Gravity);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::UserAcceleration, libtbag::gui::RenderWindow::SensorType::UserAcceleration);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Orientation,      libtbag::gui::RenderWindow::SensorType::Orientation);
 #else
 #include <libtbag/dummy/Sfml.hpp>
 using namespace libtbag::dummy;

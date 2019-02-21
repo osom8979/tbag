@@ -8,16 +8,13 @@
 #include <libtbag/gui/Cursor.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
-
-#ifndef _STATIC_ASSERT_EQUAL
-#define _STATIC_ASSERT_EQUAL(x, y) STATIC_ASSERT_CHECK_IS_EQUALS((int)(x), (int)(y))
-#endif
+#include <libtbag/Type.hpp>
 
 #if defined(USE_GUI)
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-_STATIC_ASSERT_EQUAL(sf::Cursor::Arrow,      libtbag::gui::Cursor::CursorType::CT_ARROW);
-_STATIC_ASSERT_EQUAL(sf::Cursor::NotAllowed, libtbag::gui::Cursor::CursorType::CT_NOT_ALLOWED);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Cursor::Arrow,      libtbag::gui::Cursor::CursorType::CT_ARROW);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Cursor::NotAllowed, libtbag::gui::Cursor::CursorType::CT_NOT_ALLOWED);
 #else
 #include <libtbag/dummy/Sfml.hpp>
 using namespace libtbag::dummy;

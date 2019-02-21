@@ -54,6 +54,16 @@
     static_assert(value1 == value2, #value1 " and " #value2 " should be the same.")
 #endif
 
+#ifndef STATIC_ASSERT_INTEGER_EQUAL
+#define STATIC_ASSERT_INTEGER_EQUAL(x, y) \
+    STATIC_ASSERT_CHECK_IS_EQUALS((int)(x), (int)(y))
+#endif
+
+#ifndef STATIC_ASSERT_CHECK_SIZEOF
+#define STATIC_ASSERT_CHECK_SIZEOF(type, value) \
+    static_assert(sizeof(type) == value, "The size of the " #type " must be " #value ".")
+#endif
+
 #ifndef STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE
 #define STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE(class_name)    \
     static_assert(std::is_default_constructible<class_name>::value, \

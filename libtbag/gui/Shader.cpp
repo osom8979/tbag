@@ -7,17 +7,14 @@
 
 #include <libtbag/gui/Shader.hpp>
 #include <libtbag/log/Log.hpp>
-
-#ifndef _STATIC_ASSERT_EQUAL
-#define _STATIC_ASSERT_EQUAL(x, y) STATIC_ASSERT_CHECK_IS_EQUALS((int)(x), (int)(y))
-#endif
+#include <libtbag/Type.hpp>
 
 #if defined(USE_GUI)
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-_STATIC_ASSERT_EQUAL(sf::Shader::Vertex,   libtbag::gui::Shader::Type::T_VERTEX);
-_STATIC_ASSERT_EQUAL(sf::Shader::Geometry, libtbag::gui::Shader::Type::T_GEOMETRY);
-_STATIC_ASSERT_EQUAL(sf::Shader::Fragment, libtbag::gui::Shader::Type::T_FRAGMENT);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Shader::Vertex,   libtbag::gui::Shader::Type::T_VERTEX);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Shader::Geometry, libtbag::gui::Shader::Type::T_GEOMETRY);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Shader::Fragment, libtbag::gui::Shader::Type::T_FRAGMENT);
 #else
 #include <libtbag/dummy/Sfml.hpp>
 using namespace libtbag::dummy;
