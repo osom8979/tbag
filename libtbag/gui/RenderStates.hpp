@@ -23,6 +23,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+// Forward declaration.
+class BlendMode;
+class Shader;
+class Texture;
+class Transform;
+
 /**
  * RenderStates class prototype.
  *
@@ -46,6 +52,28 @@ public:
 public:
     inline friend void swap(RenderStates & lh, RenderStates & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
+
+//    RenderStates() {}
+//    RenderStates(BlendMode const & theBlendMode) {}
+//    RenderStates(Transform const & theTransform) {}
+//    RenderStates(Texture const * theTexture) {}
+//    RenderStates(Shader const * theShader) {}
+//    RenderStates(BlendMode const & theBlendMode, Transform const & theTransform,
+//                 Texture const * theTexture, Shader const * theShader) {}
+//    ~RenderStates() {}
+
+public:
+    void setBlendMode(BlendMode const & m);
+    BlendMode getBlendMode() const;
+
+//    void setTransform(Transform const & t);
+//    Transform getTransform() const;
+//
+//    void setTexture(Texture const & t);
+//    Texture getTexture() const;
+//
+//    void setShader(Shader const & s);
+//    Shader getShader() const;
 };
 
 } // namespace gui

@@ -49,8 +49,8 @@ Transform::Transform(void * handle, no_init_no_ref_t)
 }
 
 Transform::Transform(float a00, float a01, float a02,
-                         float a10, float a11, float a12,
-                         float a20, float a21, float a22)
+                     float a10, float a11, float a12,
+                     float a20, float a21, float a22)
         : SfNative(SfType::ST_TRANSFORM, no_init)
 {
     assert(ptr == nullptr);
