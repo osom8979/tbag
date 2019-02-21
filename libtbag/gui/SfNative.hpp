@@ -22,6 +22,8 @@
 #include <libtbag/geometry/Rect2.hpp>
 #include <libtbag/gui/SfCommon.hpp>
 
+#include <cstdint>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -42,7 +44,6 @@ public:
     using Channel = libtbag::graphic::Channel;
     using Rgb24   = libtbag::graphic::Rgb24;
     using Rgb32   = libtbag::graphic::Rgb32;
-    using Color   = libtbag::graphic::Color;
 
     using Pointb  = libtbag::geometry::Pointb;
     using Pointc  = libtbag::geometry::Pointc;

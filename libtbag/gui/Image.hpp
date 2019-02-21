@@ -46,6 +46,34 @@ public:
 public:
     inline friend void swap(Image & lh, Image & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
+
+public:
+    void create(unsigned int width, unsigned int height, Rgb32 const & color = Rgb32());
+    void create(unsigned int width, unsigned int height, std::uint8_t const * pixels);
+
+public:
+    bool loadFromFile(std::string const & filename);
+    bool loadFromMemory(void const * data, std::size_t size);
+    bool saveToFile(std::string const & filename) const;
+
+public:
+    Sizeu getSize() const;
+
+public:
+    void createMaskFromColor(Rgb32 const & color, std::uint8_t alpha = 0);
+
+public:
+    void copy(Image const & source, unsigned int dest_x, unsigned int dest_y,
+              Recti const & source_rect = Recti(), bool apply_alpha = false);
+
+public:
+    void setPixel(unsigned int x, unsigned int y, Rgb32 const & color);
+    Rgb32 getPixel(unsigned int x, unsigned int y) const;
+    std::uint8_t const * getPixelsPtr() const;
+
+public:
+    void flipHorizontally();
+    void flipVertically();
 };
 
 } // namespace gui

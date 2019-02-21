@@ -421,6 +421,8 @@ struct SFML_GRAPHICS_API Shader : GlResource, NonCopyable
 
     struct CurrentTextureType {};
 
+    TBAG_CONSTEXPR static CurrentTextureType CurrentTexture = CurrentTextureType{};
+
     Shader() {}
     ~Shader() {}
 
