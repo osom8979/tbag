@@ -11,9 +11,9 @@ tbag_modules__update_c_family_subdir_objects (
         container crypto database debug dom dummy filesystem flow
         functional geometry gpu graph graphic gui http id io iterator
         lib locale lock lockfree log loop macro math memory mq net
-        network pattern preprocessor process proto random res rstl
-        science script security signal string system thread time tmp
-        tpot tty type typography util uvpp uvxx)
+        network parallel pattern preprocessor process proto random
+        res rstl science script security signal string system thread
+        time tmp tpot tty type typography util uvpp uvxx)
 tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
 
 ## TBAG EXPORT API.
