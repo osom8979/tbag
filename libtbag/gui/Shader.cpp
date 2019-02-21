@@ -172,10 +172,10 @@ void Shader::setUniform(std::string const & name, Mat4 const & matrix)
     _self_sf()->setUniform(name, sf::Glsl::Mat4(matrix.array));
 }
 
-//void Shader::setUniform(std::string const & name, Texture const & texture)
-//{
-//    _self_sf()->setUniform(name, sf::Texture());
-//}
+void Shader::setUniform(std::string const & name, Texture const & texture)
+{
+    _self_sf()->setUniform(name, *texture.cast<sf::Texture>());
+}
 
 void Shader::setUniform(std::string const & name, current_texture_t)
 {

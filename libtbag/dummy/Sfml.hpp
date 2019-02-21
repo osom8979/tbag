@@ -381,7 +381,7 @@ struct SFML_GRAPHICS_API Texture : GlResource
     ~Texture() {}
 
     bool create(unsigned int width, unsigned int height) { return false; }
-    bool loadFromFile(std::string const & filename, const IntRect & area = IntRect()) { return false; }
+    bool loadFromFile(std::string const & filename, IntRect const & area = IntRect()) { return false; }
     bool loadFromMemory(void const * data, std::size_t size, IntRect const & area = IntRect()) { return false; }
     bool loadFromStream(InputStream & stream, IntRect const & area = IntRect()) { return false; }
     bool loadFromImage(Image const & image, IntRect const & area = IntRect()) { return false; }

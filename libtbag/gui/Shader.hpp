@@ -110,7 +110,7 @@ public:
     void setUniform(std::string const & name, Mat3 const & matrix);
     void setUniform(std::string const & name, Mat4 const & matrix);
 
-    //void setUniform(std::string const & name, Texture const & texture);
+    void setUniform(std::string const & name, Texture const & texture);
     void setUniform(std::string const & name, current_texture_t);
 
     void setUniformArray(std::string const & name, float const * scalar_arr, std::size_t length);
