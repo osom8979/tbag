@@ -5,8 +5,8 @@
  * @date   2019-02-20
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_MATRIX_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_MATRIX_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MATH_MATRIX_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MATH_MATRIX_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,7 +25,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace geometry {
+namespace math {
 
 /**
  * BaseMatrix class prototype.
@@ -146,6 +146,7 @@ template <std::size_t c, std::size_t r> using Matrixll = BaseMatrix<int64_t , c,
 template <std::size_t c, std::size_t r> using Matrixf  = BaseMatrix<float   , c, r>;
 template <std::size_t c, std::size_t r> using Matrixd  = BaseMatrix<double  , c, r>;
 template <std::size_t c, std::size_t r> using Matrix   = Matrixi<c, r>;
+// @formatter:on
 
 using Matrix2x2b  = Matrixb <2, 2>;
 using Matrix2x2c  = Matrixc <2, 2>;
@@ -179,13 +180,12 @@ using Matrix4x4ll = Matrixll<4, 4>;
 using Matrix4x4f  = Matrixf <4, 4>;
 using Matrix4x4d  = Matrixd <4, 4>;
 using Matrix4x4   = Matrix4x4i;
-// @formatter:on
 
-} // namespace geometry
+} // namespace math
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GEOMETRY_MATRIX_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MATH_MATRIX_HPP__
 

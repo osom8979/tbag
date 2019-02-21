@@ -6,10 +6,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/geometry/Matrix.hpp>
+#include <libtbag/math/Matrix.hpp>
 
 using namespace libtbag;
-using namespace libtbag::geometry;
+using namespace libtbag::math;
 
 TEST(MatrixTest, Default)
 {
