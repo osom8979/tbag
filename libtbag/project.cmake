@@ -84,6 +84,12 @@ if (USE_CUDA AND CUDA_FOUND)
     tbag_modules__update_cuda_objects ()
 endif ()
 
+if (USE_OPENCL AND OpenCL_FOUND)
+    tbag_modules__append_definitions (CL_SILENCE_DEPRECATION)
+    tbag_modules__check_opencl ()
+    tbag_modules__apply_opencl ()
+endif ()
+
 if (WIN32)
     tbag_modules__append_ldflags (shlwapi.lib) # filesystem with windows.
 endif ()

@@ -76,6 +76,7 @@ tbag_config__find_thread ()
 tbag_config__default_generate_c_header ()
 
 tbag_config__set_library_option (USE_OPENGL   OpenGL    OPENGL_FOUND)
+tbag_config__set_library_option (USE_OPENCL   OpenCL    OpenCL_FOUND)
 tbag_config__set_library_option (USE_CUDA     TbagCUDA  CUDA_FOUND)
 tbag_config__set_library_option (USE_DOXYGEN  Doxygen   DOXYGEN_FOUND)
 

@@ -10,7 +10,7 @@
 
 Tea-bag is Third party extension utility project.
 
-## Dependencies (TBAG)
+## Dep target
 
 - flatbuffers 1.10.0 (Apache License, Version 2.0)
 - gtest 1.7.0 (BSD 3-clause license)
@@ -37,7 +37,7 @@ Tea-bag is Third party extension utility project.
 - imgui 1.6.5 (MIT license)
 - imgui-sfml master-995b873 (MIT license)
 
-## External projects
+## External target
 
 - libressl 2.5.1 (Dual license; OpenSSL & SSLeay)
 - zlib 1.2.11 (zlib license)
@@ -51,23 +51,14 @@ Tea-bag is Third party extension utility project.
 
 ## Resources
 
-- ProggyClean.ttf (MIT license)
+- NanumGothicCoding 2.5 (SIL Open Font License, Version 1.1)
 
-### SFML Dependencies
-
-- x11
-- xrandr
-- udev
-- opengl
-- freetype (embedded)
-- flac (embedded)
-- ogg (embedded)
-- vorbis (embedded)
-- vorbisenc (embedded)
-- vorbisfile (embedded)
-- pthread (os/compiler supported)
+## Dependencies
 
 ```bash
+## OpenCL
+sudo apt-get install ocl-icd-opencl-dev
+
 ## OpenGL
 sudo apt-get install libglu1-mesa-dev
 
@@ -90,6 +81,7 @@ The main build options you will want to configure are as follows:
 * `USE_GOLD`: Enable `ld.gold` linker if `gcc` compiler.
 * `USE_PCH`: Enable PCH compile.
 * `USE_OPENGL`: Enable `OpenGL` library.
+* `USE_OPENCL`: Enable `OpenCL` library.
 * `USE_CUDA`: Enable `CUDA` compile.
 * `USE_DOXYGEN`: Enable `doxygen` documentation.
 * `USE_GUI`: Enable GUI module.

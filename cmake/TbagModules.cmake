@@ -697,6 +697,17 @@ macro (tbag_modules__apply_opengl)
     list (APPEND TBAG_PROJECT_LDFLAGS ${OPENGL_LIBRARIES})
 endmacro ()
 
+macro (tbag_modules__check_opencl)
+    if (NOT OpenCL_FOUND)
+        message (WARNING "Not found OpenCL.")
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_opencl)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})
+    list (APPEND TBAG_PROJECT_LDFLAGS ${OpenCL_LIBRARY})
+endmacro ()
+
 macro (tbag_modules__check_openal)
     if (NOT OPENAL_FOUND)
         message (WARNING "Not found OpenAL.")

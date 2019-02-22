@@ -1,11 +1,11 @@
 /**
- * @file   PlDevice.cpp
- * @brief  PlDevice class implementation.
+ * @file   PcCommon.cpp
+ * @brief  Parallel Computing common implementation.
  * @author zer0
  * @date   2019-02-21
  */
 
-#include <libtbag/parallel/PlDevice.hpp>
+#include <libtbag/parallel/PcCommon.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -13,16 +13,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace parallel {
-
-PlDevice::PlDevice()
-{
-    // EMPTY.
-}
-
-PlDevice::~PlDevice()
-{
-    // EMPTY.
-}
 
 } // namespace parallel
 

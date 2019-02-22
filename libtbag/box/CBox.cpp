@@ -54,7 +54,7 @@ Err box_init(box_data * box) TBAG_NOEXCEPT
     box->device = BOX_DEVICE_NONE;
     box->data = nullptr;
     box->dims = nullptr;
-    box->size = 0;
+    box->total_byte = 0;
     box->rank = 0;
     box->padding = 0;
     return Err::E_UNKNOWN;
