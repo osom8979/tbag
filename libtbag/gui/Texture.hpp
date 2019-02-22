@@ -47,7 +47,7 @@ public:
     Texture(void * handle, no_init_no_ref_t);
     Texture(Texture const & obj);
     Texture(Texture && obj) TBAG_NOEXCEPT;
-    ~Texture();
+    virtual ~Texture();
 
 public:
     Texture & operator =(Texture const & obj);

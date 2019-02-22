@@ -40,7 +40,7 @@ public:
     View(Rectf const & rectangle);
     View(Pointf const & center, Sizef const & size);
     View(View && obj) TBAG_NOEXCEPT;
-    ~View();
+    virtual ~View();
 
 public:
     View & operator =(View && obj) TBAG_NOEXCEPT;

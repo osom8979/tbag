@@ -70,7 +70,7 @@ public:
     Shader();
     Shader(void * handle, no_init_no_ref_t);
     Shader(Shader && obj) TBAG_NOEXCEPT;
-    ~Shader();
+    virtual ~Shader();
 
 public:
     Shader & operator =(Shader && obj) TBAG_NOEXCEPT;

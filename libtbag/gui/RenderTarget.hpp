@@ -35,7 +35,7 @@ public:
     explicit RenderTarget(SfType type, no_init_no_ref_t);
     explicit RenderTarget(SfType type, no_init_t, bool ref = true);
     explicit RenderTarget(SfType type, bool ref = true);
-    ~RenderTarget();
+    virtual ~RenderTarget();
 };
 
 } // namespace gui

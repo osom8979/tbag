@@ -62,14 +62,34 @@ Transform::Transform(float const * matrix)
         : SfNative(SfType::ST_TRANSFORM)
 {
     assert(matrix != nullptr);
-    memcpy(getMutableMatrix(), matrix, MATRIX_BYTE_SIZE);
     assert(ptr != nullptr);
+    memcpy(getMutableMatrix(), matrix, MATRIX_BYTE_SIZE);
+}
+
+Transform::Transform(Transform const & obj)
+        : SfNative(SfType::ST_TRANSFORM)
+{
+    assert(ptr != nullptr);
+    *this = obj;
 }
 
 Transform::Transform(Transform && obj) TBAG_NOEXCEPT
         : SfNative(SfType::ST_TRANSFORM, no_init)
 {
     *this = std::move(obj);
+}
+
+Transform::~Transform()
+{
+    // EMPTY.
+}
+
+Transform & Transform::operator =(Transform const & obj)
+{
+    if (this != &obj) {
+        memcpy(getMutableMatrix(), obj.getMatrix(), MATRIX_BYTE_SIZE);
+    }
+    return *this;
 }
 
 Transform & Transform::operator =(Transform && obj) TBAG_NOEXCEPT
@@ -83,11 +103,6 @@ void Transform::swap(Transform & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         SfNative::swap(obj);
     }
-}
-
-Transform::~Transform()
-{
-    // EMPTY.
 }
 
 float * Transform::getMutableMatrix()

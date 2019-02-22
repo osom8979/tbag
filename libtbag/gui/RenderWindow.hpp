@@ -32,6 +32,7 @@ namespace gui {
 class View;
 class Cursor;
 class Drawable;
+class RenderStates;
 
 /**
  * RenderWindow class prototype.

@@ -34,10 +34,12 @@ class TBAG_API Image : public SfNative
 public:
     Image();
     Image(void * handle, no_init_no_ref_t);
+    Image(Image const & obj);
     Image(Image && obj) TBAG_NOEXCEPT;
-    ~Image();
+    virtual ~Image();
 
 public:
+    Image & operator =(Image const & obj);
     Image & operator =(Image && obj) TBAG_NOEXCEPT;
 
 public:

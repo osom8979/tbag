@@ -53,7 +53,7 @@ public:
     Cursor();
     Cursor(void * handle, no_init_no_ref_t);
     Cursor(Cursor && obj) TBAG_NOEXCEPT;
-    ~Cursor();
+    virtual ~Cursor();
 
 public:
     Cursor & operator =(Cursor && obj) TBAG_NOEXCEPT;

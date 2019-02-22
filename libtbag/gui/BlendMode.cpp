@@ -109,13 +109,13 @@ BlendMode & BlendMode::operator =(BlendMode const & obj)
 {
     if (this != &obj) {
         auto * destination = Pointer::cast<sf::BlendMode>();
-        auto const * source = Pointer::cast<sf::BlendMode>();
-        destination->colorSrcFactor = source->colorSrcFactor;
-        destination->colorDstFactor = source->colorDstFactor;
-        destination->colorEquation  = source->colorEquation;
-        destination->alphaSrcFactor = source->alphaSrcFactor;
-        destination->alphaDstFactor = source->alphaDstFactor;
-        destination->alphaEquation  = source->alphaEquation;
+        auto const * SOURCE = Pointer::cast<sf::BlendMode>();
+        destination->colorSrcFactor = SOURCE->colorSrcFactor;
+        destination->colorDstFactor = SOURCE->colorDstFactor;
+        destination->colorEquation  = SOURCE->colorEquation;
+        destination->alphaSrcFactor = SOURCE->alphaSrcFactor;
+        destination->alphaDstFactor = SOURCE->alphaDstFactor;
+        destination->alphaEquation  = SOURCE->alphaEquation;
     }
     return *this;
 }

@@ -42,10 +42,12 @@ public:
               float a10, float a11, float a12,
               float a20, float a21, float a22);
     Transform(float const * matrix);
+    Transform(Transform const & obj);
     Transform(Transform && obj) TBAG_NOEXCEPT;
-    ~Transform();
+    virtual ~Transform();
 
 public:
+    Transform & operator =(Transform const & obj);
     Transform & operator =(Transform && obj) TBAG_NOEXCEPT;
 
 public:

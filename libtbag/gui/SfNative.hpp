@@ -99,7 +99,7 @@ public:
     explicit SfNative(SfType type, no_init_t, bool ref = true);
     explicit SfNative(SfType type, bool ref = true);
     SfNative(SfNative && obj) TBAG_NOEXCEPT;
-    ~SfNative();
+    virtual ~SfNative();
 
 public:
     SfNative & operator =(SfNative && obj) TBAG_NOEXCEPT;

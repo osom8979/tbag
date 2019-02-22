@@ -46,6 +46,13 @@ Image::Image(void * handle, no_init_no_ref_t)
     assert(ptr != nullptr);
 }
 
+Image::Image(Image const & obj)
+        : SfNative(SfType::ST_IMAGE)
+{
+    assert(ptr != nullptr);
+    *this = obj;
+}
+
 Image::Image(Image && obj) TBAG_NOEXCEPT
         : SfNative(SfType::ST_IMAGE, no_init)
 {
@@ -55,6 +62,15 @@ Image::Image(Image && obj) TBAG_NOEXCEPT
 Image::~Image()
 {
     // EMPTY.
+}
+
+Image & Image::operator =(Image const & obj)
+{
+    if (this != &obj) {
+        auto const SIZE = obj.getSize();
+        create(SIZE.width, SIZE.height, obj.getPixelsPtr());
+    }
+    return *this;
 }
 
 Image & Image::operator =(Image && obj) TBAG_NOEXCEPT

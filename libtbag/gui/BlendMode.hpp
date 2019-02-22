@@ -65,7 +65,7 @@ public:
     BlendMode(void * handle, no_init_no_ref_t);
     BlendMode(BlendMode const & obj);
     BlendMode(BlendMode && obj) TBAG_NOEXCEPT;
-    ~BlendMode();
+    virtual ~BlendMode();
 
 public:
     BlendMode & operator =(BlendMode const & obj);
