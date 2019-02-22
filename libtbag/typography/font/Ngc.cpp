@@ -10,6 +10,7 @@
 #include <libtbag/typography/font/ngc/ngcb.h.inl>
 #include <libtbag/string/StringUtils.hpp>
 
+#include <cassert>
 #include <cstring>
 
 // -------------------
