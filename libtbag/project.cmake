@@ -66,6 +66,16 @@ set (MSG_T2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/msg_t2s.h")
 tbag_modules__build_dep_flatc_cpp (msg_fbs "${MSG_FBS_SRC}")
 tbag_modules__text_to_cpp11string (msg_t2s "${MSG_T2S_PATH}" msg __msg__ "${MSG_FBS_SRC}")
 
+## Nanum Gothic Coding Normal (NGCN)
+set (NGCN_SRC      "${CMAKE_SOURCE_DIR}/libtbag/typography/font/ngc/NanumGothicCoding.ttf")
+set (NGCN_B2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/typography/font/ngc/ngcn.h.inl")
+tbag_modules__binary_to_cpp11string (ngcn_b2s "${NGCN_B2S_PATH}" ngcn __ngcn__ "${NGCN_SRC}")
+
+## Nanum Gothic Coding Bold (NGCB)
+set (NGCB_SRC      "${CMAKE_SOURCE_DIR}/libtbag/typography/font/ngc/NanumGothicCoding-Bold.ttf")
+set (NGCB_B2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/typography/font/ngc/ngcb.h.inl")
+tbag_modules__binary_to_cpp11string (ngcb_b2s "${NGCB_B2S_PATH}" ngcb __ngcb__ "${NGCB_SRC}")
+
 if (USE_CUDA AND CUDA_FOUND)
     tbag_modules__check_cuda ()
     tbag_modules__apply_cuda ()

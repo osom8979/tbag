@@ -83,8 +83,10 @@ using ui64 = uint64_t;
 using fp32 = float;
 using fp64 = double;
 
+#if 0
 using cp64  = float  _Complex;
 using cp128 = double _Complex;
+#endif
 
 #define MAKE_BOX_TYPE(prefix, size) static_cast<btype>(((prefix)<<(8))|(size))
 

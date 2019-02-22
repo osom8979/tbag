@@ -20,6 +20,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <string>
 #include <sstream>
@@ -151,7 +152,8 @@ using AddressHexString = std::array<char, HEX_STRING_ADDRESS_BYTE_SIZE>;
  * HEX string to Byte array.
  */
 TBAG_API Err convertHexCharToHalfByte(char hex_char, uint8_t & result);
-TBAG_API Err convertHexStringToByte(char high_char, char low_char, uint8_t & result);
+TBAG_API Err convertHexCharToByte(char high_char, char low_char, uint8_t & result);
+TBAG_API Err convertHexStringToBuffer(char const * hex_string, std::size_t length, libtbag::util::Buffer & buffer);
 
 /**
  * Address to HEX string.

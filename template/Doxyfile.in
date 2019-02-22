@@ -12,9 +12,9 @@ ALIASES                 = translate{2}="<dl class='section remarks'><dt>Translat
 MARKDOWN_SUPPORT        = NO
 WARN_IF_UNDOCUMENTED    = NO
 INPUT                   = "${PROJECT_SOURCE_DIR}/libtbag"
-FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ *.d *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.inc *.simd
+FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ *.d *.java *.ii *.ixx *.ipp *.i++ *.h *.hh *.hxx *.hpp *.h++ *.idl *.odl *.inc *.simd
 RECURSIVE               = YES
-EXCLUDE_PATTERNS        = *libtbag/3rd/* *.capnp.c++ *.capnp.h *_generated.h
+EXCLUDE_PATTERNS        = *libtbag/3rd/* *.capnp.c++ *.capnp.h *_generated.h *.h.inl
 HTML_TIMESTAMP          = YES
 HTML_OUTPUT             = doxygen
 GENERATE_LATEX          = NO

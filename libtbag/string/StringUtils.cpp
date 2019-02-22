@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/log/Log.hpp>
 
 #include <cctype>
 #include <cassert>
@@ -232,7 +233,7 @@ Err convertHexCharToHalfByte(char hex_char, uint8_t & result)
     return Err::E_PARSING;
 }
 
-Err convertHexStringToByte(char high_char, char low_char, uint8_t & result)
+Err convertHexCharToByte(char high_char, char low_char, uint8_t & result)
 {
     uint8_t high = 0x00;
     uint8_t  low = 0x00;
@@ -243,6 +244,30 @@ Err convertHexStringToByte(char high_char, char low_char, uint8_t & result)
         return Err::E_PARSING;
     }
     result = (high << 4) | low;
+    return Err::E_SUCCESS;
+}
+
+Err convertHexStringToBuffer(char const * hex_string, std::size_t length, libtbag::util::Buffer & buffer)
+{
+    if ((length & 0x1) == 0x1) {
+        tDLogE("convertHexStringToBuffer() Odd length strings are not supported.");
+        return Err::E_ILLARGS;
+    }
+    assert(hex_string != nullptr);
+    assert(length >= 1);
+
+    auto const BUFFER_SIZE = (length / 2);
+    buffer.resize(BUFFER_SIZE);
+
+    Err code;
+    uint8_t byte;
+    for (std::size_t i = 0; i < BUFFER_SIZE; i += 2) {
+        code = convertHexCharToByte(hex_string[i], hex_string[i+1], byte);
+        if (isFailure(code)) {
+            return code;
+        }
+        buffer[i/2] = (libtbag::util::Buffer::value_type)byte;
+    }
     return Err::E_SUCCESS;
 }
 

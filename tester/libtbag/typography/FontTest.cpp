@@ -8,32 +8,30 @@
 #include <gtest/gtest.h>
 #include <libtbag/util/TestUtils.hpp>
 #include <libtbag/typography/Font.hpp>
-#include <libtbag/typography/font/ProggyClean.hpp>
+#include <libtbag/typography/font/Ngc.hpp>
 #include <libtbag/crypto/Md5.hpp>
 
 using namespace libtbag;
 using namespace libtbag::typography;
 using namespace libtbag::typography::font;
 
-TEST(FontTest, ProggyClean)
+TEST(FontTest, GetAsciiImage)
 {
-    ASSERT_EQ(getProggyCleanMd5(), crypto::getMd5(getProggyClean()));
-}
+    std::string const NORMAL = getAsciiImage(getNgcNormal(), 'T');
+    ASSERT_FALSE(NORMAL.empty());
 
-TEST(FontTest, CharToConsole)
-{
-    std::string const OUTPUT = getAsciiImage(getProggyClean(), 'T');
-    ASSERT_FALSE(OUTPUT.empty());
+    std::string const BOLD = getAsciiImage(getNgcBold(), 'T');
+    ASSERT_FALSE(BOLD.empty());
 }
 
 TEST(FontTest, TextToConsole)
 {
-    std::string const OUTPUT = getAsciiImage(getProggyClean(), "TBAG");
+    std::string const OUTPUT = getAsciiImage(getNgcBold(), "TBAG");
     ASSERT_FALSE(OUTPUT.empty());
 
-    std::cout << "---------------------------\n";
+    std::cout << "------------------------\n";
     std::cout << OUTPUT;
-    std::cout << "---------------------------\n";
+    std::cout << "------------------------\n";
 }
 
 TEST(FontTest, ExportImage)
@@ -43,7 +41,7 @@ TEST(FontTest, ExportImage)
     int  const LINE_HEIGHT = 32;
 
     TrueType tt;
-    ASSERT_EQ(Err::E_SUCCESS, tt.loadFromMemory(getProggyClean()));
+    ASSERT_EQ(Err::E_SUCCESS, tt.loadFromMemory(getNgcNormal()));
 
     std::string const DRAW_TEXT = "A";
     libtbag::graphic::ImageGray gray;

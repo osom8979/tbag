@@ -255,12 +255,12 @@ macro (tbag_modules__binary_to_cpp11string __target __output_path __name __delim
     add_custom_command (
             OUTPUT  "${__output_path}"
             COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
-            "-DNAME=${__name}"
-            "-DDELIMITER=${__delimiter}"
-            "-DBINARY_PATH=${__binary_path}"
-            -P "${TBAG_SCRIPT_DIR}/TbagBinary2Cpp11String.cmake"
+                                     "-DNAME=${__name}"
+                                     "-DDELIMITER=${__delimiter}"
+                                     "-DBINARY_PATH=${__binary_path}"
+                                     -P "${TBAG_SCRIPT_DIR}/TbagBinary2Cpp11String.cmake"
             DEPENDS ${__binary_path}
-            COMMENT "Text to Cpp11String: ${__output_path}" VERBATIM)
+            COMMENT "Binary to Cpp11String: ${__output_path}" VERBATIM)
     add_custom_target (${__target} SOURCES "${__output_path}")
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
