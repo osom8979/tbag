@@ -123,6 +123,12 @@ public:
     inline SfType getType() const TBAG_NOEXCEPT
     { return _type; }
 
+    inline bool isDrawable() const TBAG_NOEXCEPT
+    { return libtbag::gui::isDrawable(_type); }
+
+    inline bool isRenderTarget() const TBAG_NOEXCEPT
+    { return libtbag::gui::isRenderTarget(_type); }
+
     inline char const * const getTypeName() const TBAG_NOEXCEPT
     { return libtbag::gui::getSfTypeName(_type); }
 };

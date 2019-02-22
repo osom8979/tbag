@@ -29,19 +29,19 @@ namespace gui {
 RenderTarget::RenderTarget(SfType type, no_init_no_ref_t)
         : SfNative(type, no_init_no_ref)
 {
-    assert(isRenderTarget(type));
+    assert(isRenderTarget());
 }
 
 RenderTarget::RenderTarget(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
 {
-    assert(isRenderTarget(type));
+    assert(isRenderTarget());
 }
 
 RenderTarget::RenderTarget(SfType type, bool ref)
         : SfNative(type, ref)
 {
-    assert(isRenderTarget(type));
+    assert(isRenderTarget());
 }
 
 RenderTarget::~RenderTarget()

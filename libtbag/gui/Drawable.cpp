@@ -29,19 +29,19 @@ namespace gui {
 Drawable::Drawable(SfType type, no_init_no_ref_t)
         : SfNative(type, no_init_no_ref)
 {
-    assert(isDrawable(type));
+    assert(isDrawable());
 }
 
 Drawable::Drawable(SfType type, no_init_t, bool ref)
         : SfNative(type, no_init, ref)
 {
-    assert(isDrawable(type));
+    assert(isDrawable());
 }
 
 Drawable::Drawable(SfType type, bool ref)
         : SfNative(type, ref)
 {
-    assert(isDrawable(type));
+    assert(isDrawable());
 }
 
 Drawable::~Drawable()
