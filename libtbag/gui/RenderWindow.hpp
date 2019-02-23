@@ -18,7 +18,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/gui/RenderTarget.hpp>
-#include <libtbag/graphic/Color.hpp>
 
 #include <string>
 
@@ -432,47 +431,13 @@ public:
     virtual void onIdle();
 
 public:
-    void clear(Channel r, Channel g, Channel b, Channel a = CHANNEL_MAX);
-    void clear(Rgb24 const & color);
-    void clear(Rgb32 const & color);
-    void clear();
-
-public:
-    void setView(View const & view);
-    View getView() const;
-    View getDefaultView() const;
-    Recti getViewport(View const & view) const;
-
-    Pointf mapPixelToCoords(Pointi const & point) const;
-    Pointf mapPixelToCoords(Pointi const & point, View const & view) const;
-
-    Pointi mapCoordsToPixel(Pointf const & point) const;
-    Pointi mapCoordsToPixel(Pointf const & point, View const & view) const;
-
-//    void draw(Drawable const & drawable, RenderStates const & states = RenderStates::Default);
-//    void draw(const Vertex* vertices, std::size_t vertexCount, PrimitiveType type, const RenderStates& states = RenderStates::Default);
-//    void draw(const VertexBuffer& vertexBuffer, const RenderStates& states = RenderStates::Default);
-//    void draw(const VertexBuffer& vertexBuffer, std::size_t firstVertex, std::size_t vertexCount, const RenderStates& states = RenderStates::Default);
+    void close();
+    bool isOpen() const;
 
 public:
     Pointi getPosition() const;
     void setPosition(Pointi const & position);
-
-public:
-    Sizeu getSize() const;
     void setSize(Sizeu const & size);
-
-public:
-    bool setActive(bool active = true);
-
-public:
-    void pushGLStates();
-    void popGLStates();
-    void resetGLStates();
-
-public:
-    void close();
-    bool isOpen() const;
 
 public:
     void setTitle(std::string const & title);

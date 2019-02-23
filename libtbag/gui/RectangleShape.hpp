@@ -50,10 +50,6 @@ public:
 public:
     void setSize(Sizef const & size);
     Sizef getSize() const;
-
-public:
-    virtual std::size_t getPointCount() const override;
-    virtual Pointf getPoint(std::size_t index) const override;
 };
 
 } // namespace gui

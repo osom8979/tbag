@@ -51,10 +51,6 @@ public:
     void setRadius(float radius);
     float getRadius() const;
     void setPointCount(std::size_t count);
-
-public:
-    virtual std::size_t getPointCount() const override;
-    virtual Pointf getPoint(std::size_t index) const override;
 };
 
 } // namespace gui

@@ -58,8 +58,8 @@ public:
     float getOutlineThickness() const;
 
 public:
-    virtual std::size_t getPointCount() const;
-    virtual Pointf getPoint(std::size_t index) const;
+    SF_VIRTUAL std::size_t getPointCount() const;
+    SF_VIRTUAL Pointf getPoint(std::size_t index) const;
 
 public:
     Rectf getLocalBounds() const;

@@ -87,17 +87,6 @@ void CircleShape::setPointCount(std::size_t count)
     _self_sf()->setPointCount(count);
 }
 
-std::size_t CircleShape::getPointCount() const
-{
-    return _self_sf()->getPointCount();
-}
-
-Pointf CircleShape::getPoint(std::size_t index) const
-{
-    auto const POINT = _self_sf()->getPoint(index);
-    return Pointf(POINT.x, POINT.y);
-}
-
 } // namespace gui
 
 // --------------------

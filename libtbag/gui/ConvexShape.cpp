@@ -82,17 +82,6 @@ void ConvexShape::setPoint(std::size_t index, Pointf const & point)
     _self_sf()->setPoint(index, sf::Vector2f(point.x, point.y));
 }
 
-std::size_t ConvexShape::getPointCount() const
-{
-    return _self_sf()->getPointCount();
-}
-
-Pointf ConvexShape::getPoint(std::size_t index) const
-{
-    auto const POINT = _self_sf()->getPoint(index);
-    return Pointf(POINT.x, POINT.y);
-}
-
 } // namespace gui
 
 // --------------------

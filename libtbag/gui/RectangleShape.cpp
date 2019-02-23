@@ -84,17 +84,6 @@ Sizef RectangleShape::getSize() const
     return Sizef(SIZE.x, SIZE.y);
 }
 
-std::size_t RectangleShape::getPointCount() const
-{
-    return _self_sf()->getPointCount();
-}
-
-Pointf RectangleShape::getPoint(std::size_t index) const
-{
-    auto const POINT = _self_sf()->getPoint(index);
-    return Pointf(POINT.x, POINT.y);
-}
-
 } // namespace gui
 
 // --------------------

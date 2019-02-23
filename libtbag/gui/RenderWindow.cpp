@@ -351,75 +351,15 @@ void RenderWindow::onIdle()
     // EMPTY.
 }
 
-void RenderWindow::clear(Channel r, Channel g, Channel b, Channel a)
+void RenderWindow::close()
 {
-    _self_sf()->clear(sf::Color(r, g, b, a));
+    _self_sf()->close();
 }
 
-void RenderWindow::clear(Rgb24 const & color)
+bool RenderWindow::isOpen() const
 {
-    clear(color.r, color.g, color.b);
+    return _self_sf()->isOpen();
 }
-
-void RenderWindow::clear(Rgb32 const & color)
-{
-    clear(color.r, color.g, color.b, color.a);
-}
-
-void RenderWindow::clear()
-{
-    clear(CHANNEL_MIN, CHANNEL_MIN, CHANNEL_MIN);
-}
-
-void RenderWindow::setView(View const & view)
-{
-    _self_sf()->setView(*view.cast<sf::View>());
-}
-
-View RenderWindow::getView() const
-{
-    return View((void*)&(_self_sf()->getView()), no_init_no_ref);
-}
-
-View RenderWindow::getDefaultView() const
-{
-    return View((void*)&(_self_sf()->getDefaultView()), no_init_no_ref);
-}
-
-Recti RenderWindow::getViewport(View const & view) const
-{
-    auto const RECT = _self_sf()->getViewport(*view.cast<sf::View>());
-    return Recti(RECT.left, RECT.top, RECT.width, RECT.height);
-}
-
-Pointf RenderWindow::mapPixelToCoords(Pointi const & point) const
-{
-    auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y));
-    return Pointf(COORDS.x, COORDS.y);
-}
-
-Pointf RenderWindow::mapPixelToCoords(Pointi const & point, View const & view) const
-{
-    auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y), *view.cast<sf::View>());
-    return Pointf(COORDS.x, COORDS.y);
-}
-
-Pointi RenderWindow::mapCoordsToPixel(Pointf const & point) const
-{
-    auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y));
-    return Pointi(PIXEL.x, PIXEL.y);
-}
-
-Pointi RenderWindow::mapCoordsToPixel(Pointf const & point, View const & view) const
-{
-    auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y), *view.cast<sf::View>());
-    return Pointi(PIXEL.x, PIXEL.y);
-}
-
-//void RenderWindow::draw(Drawable const & drawable, RenderStates const & states = RenderStates::Default)
-//{
-//    _self_sf()->draw(*drawable.cast<sf::Drawable>(), sf::RenderStates);
-//}
 
 Pointi RenderWindow::getPosition() const
 {
@@ -432,45 +372,9 @@ void RenderWindow::setPosition(Pointi const & position)
     _self_sf()->setPosition(sf::Vector2i(position.x, position.y));
 }
 
-Sizeu RenderWindow::getSize() const
-{
-    auto const SIZE = _self_sf()->getSize();
-    return Sizeu(SIZE.x, SIZE.y);
-}
-
 void RenderWindow::setSize(Sizeu const & size)
 {
     _self_sf()->setSize(sf::Vector2u(size.width, size.height));
-}
-
-bool RenderWindow::setActive(bool active)
-{
-    return _self_sf()->setActive(active);
-}
-
-void RenderWindow::pushGLStates()
-{
-    _self_sf()->pushGLStates();
-}
-
-void RenderWindow::popGLStates()
-{
-    _self_sf()->popGLStates();
-}
-
-void RenderWindow::resetGLStates()
-{
-    _self_sf()->resetGLStates();
-}
-
-void RenderWindow::close()
-{
-    _self_sf()->close();
-}
-
-bool RenderWindow::isOpen() const
-{
-    return _self_sf()->isOpen();
 }
 
 void RenderWindow::setTitle(std::string const & title)
