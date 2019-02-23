@@ -36,6 +36,7 @@ Tea-bag is Third party extension utility project.
 - termbox 1.1.2 (MIT license)
 - imgui 1.6.5 (MIT license)
 - imgui-sfml master-995b873 (MIT license)
+- lzma sdk 19.00 (Public domain)
 
 ## External target
 
@@ -48,6 +49,7 @@ Tea-bag is Third party extension utility project.
 - vorbis 1.3.6 (BSD license)
 - sfml 2.5.1 (zlib/png license)
 - LuaDist/LuaJIT 2.0.3 (MIT license)
+- jemalloc/jemalloc-cmake (BSD 2-clause license)
 
 ## Resources
 
