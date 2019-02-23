@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gui/SfNative.hpp>
+#include <libtbag/gui/Shape.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -29,10 +29,11 @@ namespace gui {
  * @author zer0
  * @date   2019-02-23
  */
-class TBAG_API RectangleShape : public SfNative
+class TBAG_API RectangleShape : public Shape
 {
 public:
-    RectangleShape();
+    RectangleShape(Sizef const & size = Sizef());
+    RectangleShape(void * handle, no_init_no_ref_t);
     RectangleShape(RectangleShape && obj) TBAG_NOEXCEPT;
     virtual ~RectangleShape();
 
@@ -45,6 +46,14 @@ public:
 public:
     inline friend void swap(RectangleShape & lh, RectangleShape & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
+
+public:
+    void setSize(Sizef const & size);
+    Sizef getSize() const;
+
+public:
+    virtual std::size_t getPointCount() const override;
+    virtual Pointf getPoint(std::size_t index) const override;
 };
 
 } // namespace gui

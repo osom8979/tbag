@@ -606,8 +606,14 @@ struct SFML_GRAPHICS_API ConvexShape : public Shape
 
 struct SFML_GRAPHICS_API RectangleShape : public Shape
 {
-    RectangleShape() {}
+    RectangleShape(Vector2f const & size = Vector2f(0, 0)) {}
     ~RectangleShape() {}
+
+    void setSize(Vector2f const & size) {}
+    Vector2f const & getSize() const {}
+
+    virtual std::size_t getPointCount() const override { return 0; }
+    virtual Vector2f getPoint(std::size_t index) const override { return Vector2f(); }
 };
 
 struct SFML_GRAPHICS_API RenderTarget : NonCopyable
