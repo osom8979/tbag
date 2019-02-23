@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/gui/Drawable.hpp>
+#include <libtbag/gui/PrimitiveType.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

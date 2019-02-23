@@ -33,6 +33,7 @@ namespace gui {
     /* Window API */                   \
     _TBAG_PRIMITIVE_XX(CURSOR, Cursor) \
     /* Graphic API */                               \
+    _TBAG_PRIMITIVE_XX(VERTEX       , Vertex      ) \
     _TBAG_PRIMITIVE_XX(BLEND_MODE   , BlendMode   ) \
     _TBAG_PRIMITIVE_XX(IMAGE        , Image       ) \
     _TBAG_PRIMITIVE_XX(RENDER_STATES, RenderStates) \

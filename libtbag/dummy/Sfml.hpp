@@ -540,10 +540,39 @@ struct SFML_GRAPHICS_API Transformable
     ~Transformable() {}
 };
 
+struct SFML_GRAPHICS_API Vertex
+{
+    Vector2f position;
+    Color    color;
+    Vector2f texCoords;
+
+    Vertex() {}
+    Vertex(Vector2f const & thePosition) {}
+    Vertex(Vector2f const & thePosition, Color const & theColor) {}
+    Vertex(Vector2f const & thePosition, Vector2f const & theTexCoords) {}
+    Vertex(Vector2f const & thePosition, Color const & theColor, Vector2f const & theTexCoords) {}
+    ~Vertex() {}
+};
+
 struct SFML_GRAPHICS_API VertexArray : public Drawable
 {
+    Vertex __vertex;
+
     VertexArray() {}
+    VertexArray(PrimitiveType type, std::size_t vertexCount = 0) {}
     ~VertexArray() {}
+
+    Vertex & operator [](std::size_t index) { return __vertex; }
+    Vertex const & operator [](std::size_t index) const { return __vertex; }
+
+    void clear() {}
+    void resize(std::size_t vertexCount) {}
+    void append(Vertex const & vertex) {}
+    void setPrimitiveType(PrimitiveType type) {}
+
+    std::size_t getVertexCount() const { return 0; }
+    PrimitiveType getPrimitiveType() const { return Points; }
+    FloatRect getBounds() const { return FloatRect(); }
 };
 
 struct SFML_GRAPHICS_API VertexBuffer : public Drawable, private GlResource
