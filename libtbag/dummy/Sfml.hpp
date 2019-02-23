@@ -315,6 +315,17 @@ typedef priv::Matrix<3, 3> Mat3;
 typedef priv::Matrix<4, 4> Mat4;
 } // namespace Glsl
 
+enum PrimitiveType
+{
+    Points,
+    Lines,
+    LineStrip,
+    Triangles,
+    TriangleStrip,
+    TriangleFan,
+    Quads,
+};
+
 struct SFML_GRAPHICS_API View
 {
     Vector2f  __center;
