@@ -16,7 +16,11 @@
 #include <iostream>
 #include <string>
 
+#if defined(DISABLE_LUAJIT_EXE_FLAGS)
+TBAG_CONSTEXPR static char const * const DEFAULT_GTEST_FILTER = "-Sol2*";
+#else
 TBAG_CONSTEXPR static char const * const DEFAULT_GTEST_FILTER = "*";
+#endif
 
 int main(int argc, char **argv)
 {

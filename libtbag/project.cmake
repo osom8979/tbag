@@ -95,6 +95,7 @@ if (WIN32)
 endif ()
 
 if (USE_RTTI)
+    tbag_modules__apply_rtti ()
 else ()
     tbag_modules__apply_no_rtti ()
 endif ()

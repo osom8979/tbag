@@ -58,11 +58,13 @@ else ()
     message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
 endif ()
 
-tbag_config__set_option (USE_CCACHE     ON) ## Enable ccache compile.
-tbag_config__set_option (USE_GOLD       ON) ## Enable ld.gold linker if gcc compiler.
-tbag_config__set_option (USE_PCH       OFF) ## Enable PCH compile.
-tbag_config__set_option (USE_RTTI      OFF) ## Enable RTTI flag.
-tbag_config__set_option (DISABLE_TDLOG OFF) ## Disable tbag default logger.
+tbag_config__set_option (USE_CCACHE  ON) ## Enable ccache compile.
+tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compiler.
+tbag_config__set_option (USE_PCH    OFF) ## Enable PCH compile.
+tbag_config__set_option (USE_RTTI   OFF) ## Enable RTTI flag.
+
+tbag_config__set_option (DISABLE_TDLOG             OFF) ## Disable tbag default logger.
+tbag_config__set_option (DISABLE_LUAJIT_EXE_FLAGS  OFF) ## Disable LuaJIT Embedding flags if apple.
 
 ## Configure settings.
 if (USE_CCACHE)
@@ -105,9 +107,6 @@ message (STATUS "Simdpp runnable archs: ${SIMDPP_RUNNABLE_ARCHS}")
 foreach (__arch_cursor ${SIMDPP_RUNNABLE_ARCHS})
     set (SIMDPP_RUNNABLE_ARCH_${__arch_cursor} 1)
 endforeach ()
-
-# Embedding LuaJIT
-tbag_modules__luajit_embedding ()
 
 ## Library subproject.
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)

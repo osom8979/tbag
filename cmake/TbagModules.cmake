@@ -197,10 +197,24 @@ macro (tbag_modules__apply_window_subsystem)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_rtti)
+    if (WIN32)
+        if (MSVC)
+            list (APPEND TBAG_PROJECT_CXXFLAGS /GR)
+        elseif (MINGW)
+            list (APPEND TBAG_PROJECT_CXXFLAGS -frtti)
+        endif ()
+    else ()
+        list (APPEND TBAG_PROJECT_CXXFLAGS -frtti)
+    endif ()
+endmacro ()
+
 macro (tbag_modules__apply_no_rtti)
     if (WIN32)
         if (MSVC)
+            list (APPEND TBAG_PROJECT_CXXFLAGS /GR-)
         elseif (MINGW)
+            list (APPEND TBAG_PROJECT_CXXFLAGS -fno-rtti)
         endif ()
     else ()
         list (APPEND TBAG_PROJECT_CXXFLAGS -fno-rtti)
@@ -670,15 +684,14 @@ macro (tbag_modules__apply_ext_luajit_install_conf __target __output)
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
 
-macro (tbag_modules__luajit_embedding)
+macro (tbag_modules__apply_luajit_embedding_exe_flags)
     if (UNIX AND APPLE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
         # If you're building a 64 bit application on OSX which links directly or indirectly against LuaJIT,
         # you need to link your main executable with these flags:
         # Reference (Embedding LuaJIT): http://luajit.org/install.html
-        set (__update_exe_flags -Wl,-pagezero_size,10000 -Wl,-image_base,100000000 -Wl,-image_base,7fff04c4a000)
-        message (STATUS "Update EXE linker flags (Embedding LuaJIT): ${__update_exe_flags}")
-        set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${__update_exe_flags}")
-        unset (__update_exe_flags)
+        list (APPEND TBAG_PROJECT_LDFLAGS "-Wl,-pagezero_size,10000"
+                                          "-Wl,-image_base,100000000"
+                                          "-Wl,-image_base,7fff04c4a000")
     endif()
 endmacro ()
 
