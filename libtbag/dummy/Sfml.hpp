@@ -579,8 +579,15 @@ struct SFML_GRAPHICS_API Shape : public Drawable, public Transformable
 
 struct SFML_GRAPHICS_API CircleShape : public Shape
 {
-    CircleShape() {}
+    CircleShape(float radius = 0, std::size_t pointCount = 30) {}
     ~CircleShape() {}
+
+    void setRadius(float radius) {}
+    float getRadius() const { return 0; }
+    void setPointCount(std::size_t count) {}
+
+    /*virtual*/ std::size_t getPointCount() const { return 0; }
+    /*virtual*/ Vector2f getPoint(std::size_t index) const { return Vector2f(); }
 };
 
 struct SFML_GRAPHICS_API ConvexShape : public Shape

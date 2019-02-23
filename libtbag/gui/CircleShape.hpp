@@ -32,7 +32,8 @@ namespace gui {
 class TBAG_API CircleShape : public Shape
 {
 public:
-    CircleShape();
+    CircleShape(float radius = 0, std::size_t point_count = 30);
+    CircleShape(void * handle, no_init_no_ref_t);
     CircleShape(CircleShape && obj) TBAG_NOEXCEPT;
     virtual ~CircleShape();
 
@@ -45,6 +46,15 @@ public:
 public:
     inline friend void swap(CircleShape & lh, CircleShape & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
+
+public:
+    void setRadius(float radius);
+    float getRadius() const;
+    void setPointCount(std::size_t count);
+
+public:
+    virtual std::size_t getPointCount() const override;
+    virtual Pointf getPoint(std::size_t index) const override;
 };
 
 } // namespace gui

@@ -24,10 +24,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-#ifndef SF_VIRTUAL
-#define SF_VIRTUAL
-#endif
-
 #ifndef TBAG_SF_HANDLE_MAP
 #define TBAG_SF_HANDLE_MAP(_TBAG_PRIMITIVE_XX, _TBAG_DRAWABLE_XX, _TBAG_DRAWABLE_SHAPE_XX, _TBAG_RENDER_TARGET_XX) \
     /* Window API */                   \

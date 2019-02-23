@@ -26,8 +26,25 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-CircleShape::CircleShape() : Shape(SfType::ST_CIRCLE_SHAPE)
+#ifndef _self_sf
+#define _self_sf() Pointer::cast<sf::CircleShape>()
+#endif
+
+using Pointf = CircleShape::Pointf;
+
+CircleShape::CircleShape(float radius, std::size_t point_count)
+        : Shape(SfType::ST_CIRCLE_SHAPE, no_init)
 {
+    assert(ptr == nullptr);
+    ptr = new sf::CircleShape(radius, point_count);
+    assert(ptr != nullptr);
+}
+
+CircleShape::CircleShape(void * handle, no_init_no_ref_t)
+        : Shape(SfType::ST_CIRCLE_SHAPE, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
     assert(ptr != nullptr);
 }
 
@@ -53,6 +70,32 @@ void CircleShape::swap(CircleShape & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         SfNative::swap(obj);
     }
+}
+
+void CircleShape::setRadius(float radius)
+{
+    _self_sf()->setRadius(radius);
+}
+
+float CircleShape::getRadius() const
+{
+    return _self_sf()->getRadius();
+}
+
+void CircleShape::setPointCount(std::size_t count)
+{
+    _self_sf()->setPointCount(count);
+}
+
+std::size_t CircleShape::getPointCount() const
+{
+    return _self_sf()->getPointCount();
+}
+
+Pointf CircleShape::getPoint(std::size_t index) const
+{
+    auto const POINT = _self_sf()->getPoint(index);
+    return Pointf(POINT.x, POINT.y);
 }
 
 } // namespace gui
