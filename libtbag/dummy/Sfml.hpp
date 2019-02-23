@@ -571,8 +571,10 @@ struct SFML_GRAPHICS_API Shape : public Drawable, public Transformable
     Color const & getFillColor() const { return __color; }
     Color const & getOutlineColor() const { return __color; }
     float getOutlineThickness() const { return 0.f; }
-    /*virtual*/ std::size_t getPointCount() const { return 0; }
-    /*virtual*/ Vector2f getPoint(std::size_t index) const { return Vector2f(); }
+
+    virtual std::size_t getPointCount() const { return 0; }
+    virtual Vector2f getPoint(std::size_t index) const { return Vector2f(); }
+
     FloatRect getLocalBounds() const { return FloatRect(); }
     FloatRect getGlobalBounds() const { return FloatRect(); }
 };
@@ -586,14 +588,20 @@ struct SFML_GRAPHICS_API CircleShape : public Shape
     float getRadius() const { return 0; }
     void setPointCount(std::size_t count) {}
 
-    /*virtual*/ std::size_t getPointCount() const { return 0; }
-    /*virtual*/ Vector2f getPoint(std::size_t index) const { return Vector2f(); }
+    virtual std::size_t getPointCount() const override { return 0; }
+    virtual Vector2f getPoint(std::size_t index) const override { return Vector2f(); }
 };
 
 struct SFML_GRAPHICS_API ConvexShape : public Shape
 {
-    ConvexShape() {}
+    ConvexShape(std::size_t pointCount = 0) {}
     ~ConvexShape() {}
+
+    void setPointCount(std::size_t count) {}
+    void setPoint(std::size_t index, Vector2f const & point) {}
+
+    virtual std::size_t getPointCount() const override { return 0; }
+    virtual Vector2f getPoint(std::size_t index) const override { return Vector2f(); }
 };
 
 struct SFML_GRAPHICS_API RectangleShape : public Shape

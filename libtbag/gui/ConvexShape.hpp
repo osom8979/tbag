@@ -32,7 +32,8 @@ namespace gui {
 class TBAG_API ConvexShape : public Shape
 {
 public:
-    ConvexShape();
+    ConvexShape(std::size_t pointCount = 0);
+    ConvexShape(void * handle, no_init_no_ref_t);
     ConvexShape(ConvexShape && obj) TBAG_NOEXCEPT;
     virtual ~ConvexShape();
 
@@ -45,6 +46,14 @@ public:
 public:
     inline friend void swap(ConvexShape & lh, ConvexShape & rh) TBAG_NOEXCEPT
     { lh.swap(rh); }
+
+public:
+    void setPointCount(std::size_t count);
+    void setPoint(std::size_t index, Pointf const & point);
+
+public:
+    virtual std::size_t getPointCount() const override;
+    virtual Pointf getPoint(std::size_t index) const override;
 };
 
 } // namespace gui

@@ -26,8 +26,25 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-ConvexShape::ConvexShape() : Shape(SfType::ST_CONVEX_SHAPE)
+#ifndef _self_sf
+#define _self_sf() Pointer::cast<sf::ConvexShape>()
+#endif
+
+using Pointf = ConvexShape::Pointf;
+
+ConvexShape::ConvexShape(std::size_t point_count)
+        : Shape(SfType::ST_CONVEX_SHAPE, no_init)
 {
+    assert(ptr == nullptr);
+    ptr = new sf::ConvexShape(point_count);
+    assert(ptr != nullptr);
+}
+
+ConvexShape::ConvexShape(void * handle, no_init_no_ref_t)
+        : Shape(SfType::ST_CONVEX_SHAPE, no_init_no_ref)
+{
+    assert(ptr == nullptr);
+    ptr = handle;
     assert(ptr != nullptr);
 }
 
@@ -53,6 +70,27 @@ void ConvexShape::swap(ConvexShape & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         SfNative::swap(obj);
     }
+}
+
+void ConvexShape::setPointCount(std::size_t count)
+{
+    _self_sf()->setPointCount(count);
+}
+
+void ConvexShape::setPoint(std::size_t index, Pointf const & point)
+{
+    _self_sf()->setPoint(index, sf::Vector2f(point.x, point.y));
+}
+
+std::size_t ConvexShape::getPointCount() const
+{
+    return _self_sf()->getPointCount();
+}
+
+Pointf ConvexShape::getPoint(std::size_t index) const
+{
+    auto const POINT = _self_sf()->getPoint(index);
+    return Pointf(POINT.x, POINT.y);
 }
 
 } // namespace gui
