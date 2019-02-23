@@ -43,17 +43,25 @@ char const * const getSfTypeName(SfType type) TBAG_NOEXCEPT
     // @formatter:on
 }
 
+#define _TBAG_NO_XX(name, type)
+#define _TBAG_IS_XX(name, type) case SfType::ST_##name: return true;
+
 bool isDrawable(SfType type) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (type) {
-#define _TBAG_NO_XX(name, type)
-#define _TBAG_DRAWABLE_XX(name, type) case SfType::ST_##name: return true;
-    TBAG_SF_HANDLE_MAP(_TBAG_NO_XX, _TBAG_DRAWABLE_XX, _TBAG_NO_XX)
-#undef _TBAG_NO_XX
-#undef _TBAG_DRAWABLE_XX
-    default:
-        return false;
+    TBAG_SF_HANDLE_MAP(_TBAG_NO_XX, _TBAG_IS_XX, _TBAG_IS_XX, _TBAG_NO_XX)
+    default: return false;
+    }
+    // @formatter:on
+}
+
+bool isDrawableShape(SfType type) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (type) {
+    TBAG_SF_HANDLE_MAP(_TBAG_NO_XX, _TBAG_NO_XX, _TBAG_IS_XX, _TBAG_NO_XX)
+    default: return false;
     }
     // @formatter:on
 }
@@ -62,16 +70,14 @@ bool isRenderTarget(SfType type) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (type) {
-#define _TBAG_NO_XX(name, type)
-#define _TBAG_RENDER_TARGET_XX(name, type) case SfType::ST_##name: return true;
-    TBAG_SF_HANDLE_MAP(_TBAG_NO_XX, _TBAG_NO_XX, _TBAG_RENDER_TARGET_XX)
-#undef _TBAG_NO_XX
-#undef _TBAG_RENDER_TARGET_XX
-    default:
-        return false;
+    TBAG_SF_HANDLE_MAP(_TBAG_NO_XX, _TBAG_NO_XX, _TBAG_NO_XX, _TBAG_IS_XX)
+    default: return false;
     }
     // @formatter:on
 }
+
+#undef _TBAG_NO_XX
+#undef _TBAG_IS_XX
 
 void * newSfType(SfType type)
 {

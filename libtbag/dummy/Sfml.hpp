@@ -555,8 +555,26 @@ struct SFML_GRAPHICS_API Text : public Drawable, public Transformable
 
 struct SFML_GRAPHICS_API Shape : public Drawable, public Transformable
 {
+    IntRect __rect;
+    Color __color;
+
     Shape() {}
     ~Shape() {}
+
+    void setTexture(Texture const * texture, bool resetRect = false) {}
+    void setTextureRect(IntRect const & rect) {}
+    void setFillColor(Color const & color) {}
+    void setOutlineColor(Color const & color) {}
+    void setOutlineThickness(float thickness) {}
+    Texture const * getTexture() const { return nullptr; }
+    IntRect const & getTextureRect() const { return __rect; }
+    Color const & getFillColor() const { return __color; }
+    Color const & getOutlineColor() const { return __color; }
+    float getOutlineThickness() const { return 0.f; }
+    /*virtual*/ std::size_t getPointCount() const { return 0; }
+    /*virtual*/ Vector2f getPoint(std::size_t index) const { return Vector2f(); }
+    FloatRect getLocalBounds() const { return FloatRect(); }
+    FloatRect getGlobalBounds() const { return FloatRect(); }
 };
 
 struct SFML_GRAPHICS_API CircleShape : public Shape

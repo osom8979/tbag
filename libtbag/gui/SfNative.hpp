@@ -126,6 +126,9 @@ public:
     inline bool isDrawable() const TBAG_NOEXCEPT
     { return libtbag::gui::isDrawable(_type); }
 
+    inline bool isDrawableShape() const TBAG_NOEXCEPT
+    { return libtbag::gui::isDrawableShape(_type); }
+
     inline bool isRenderTarget() const TBAG_NOEXCEPT
     { return libtbag::gui::isRenderTarget(_type); }
 

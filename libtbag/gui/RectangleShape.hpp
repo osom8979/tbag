@@ -15,8 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/gui/SfNative.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,22 +23,28 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-// Forward declaration.
-
 /**
  * RectangleShape class prototype.
  *
  * @author zer0
  * @date   2019-02-23
  */
-class TBAG_API RectangleShape : private Noncopyable
+class TBAG_API RectangleShape : public SfNative
 {
-private:
-    // Insert member variables.
-
 public:
     RectangleShape();
+    RectangleShape(RectangleShape && obj) TBAG_NOEXCEPT;
     virtual ~RectangleShape();
+
+public:
+    RectangleShape & operator =(RectangleShape && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(RectangleShape & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(RectangleShape & lh, RectangleShape & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 };
 
 } // namespace gui

@@ -24,8 +24,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+#ifndef SF_VIRTUAL
+#define SF_VIRTUAL
+#endif
+
 #ifndef TBAG_SF_HANDLE_MAP
-#define TBAG_SF_HANDLE_MAP(_TBAG_PRIMITIVE_XX, _TBAG_DRAWABLE_XX, _TBAG_RENDER_TARGET_XX) \
+#define TBAG_SF_HANDLE_MAP(_TBAG_PRIMITIVE_XX, _TBAG_DRAWABLE_XX, _TBAG_DRAWABLE_SHAPE_XX, _TBAG_RENDER_TARGET_XX) \
     /* Window API */                   \
     _TBAG_PRIMITIVE_XX(CURSOR, Cursor) \
     /* Graphic API */                               \
@@ -36,14 +40,15 @@ namespace gui {
     _TBAG_PRIMITIVE_XX(TEXTURE      , Texture     ) \
     _TBAG_PRIMITIVE_XX(VIEW         , View        ) \
     _TBAG_PRIMITIVE_XX(TRANSFORM    , Transform   ) \
-    /* Drawable API */                                 \
-    _TBAG_DRAWABLE_XX(CIRCLE_SHAPE   , CircleShape   ) \
-    _TBAG_DRAWABLE_XX(CONVEX_SHAPE   , ConvexShape   ) \
-    _TBAG_DRAWABLE_XX(RECTANGLE_SHAPE, RectangleShape) \
-    _TBAG_DRAWABLE_XX(SPRITE         , Sprite        ) \
-    _TBAG_DRAWABLE_XX(TEXT           , Text          ) \
-    _TBAG_DRAWABLE_XX(VERTEX_ARRAY   , VertexArray   ) \
-    _TBAG_DRAWABLE_XX(VERTEX_BUFFER  , VertexBuffer  ) \
+    /* Drawable API */                             \
+    _TBAG_DRAWABLE_XX(VERTEX_ARRAY , VertexArray ) \
+    _TBAG_DRAWABLE_XX(VERTEX_BUFFER, VertexBuffer) \
+    _TBAG_DRAWABLE_XX(SPRITE       , Sprite      ) \
+    _TBAG_DRAWABLE_XX(TEXT         , Text        ) \
+    /* Drawable/Shape API */                                 \
+    _TBAG_DRAWABLE_SHAPE_XX(CIRCLE_SHAPE   , CircleShape   ) \
+    _TBAG_DRAWABLE_SHAPE_XX(CONVEX_SHAPE   , ConvexShape   ) \
+    _TBAG_DRAWABLE_SHAPE_XX(RECTANGLE_SHAPE, RectangleShape) \
     /* RenderTarget API */                              \
     _TBAG_RENDER_TARGET_XX(RENDER_WINDOW, RenderWindow) \
     /* -- END -- */
@@ -51,7 +56,7 @@ namespace gui {
 
 #ifndef TBAG_SF_HANDLE_MAP_ALL
 #define TBAG_SF_HANDLE_MAP_ALL(_TBAG_XX) \
-    TBAG_SF_HANDLE_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX)
+    TBAG_SF_HANDLE_MAP(_TBAG_XX, _TBAG_XX, _TBAG_XX, _TBAG_XX)
 #endif
 
 /**
@@ -73,6 +78,7 @@ TBAG_API SfType getSfType(int type) TBAG_NOEXCEPT;
 TBAG_API char const * const getSfTypeName(SfType type) TBAG_NOEXCEPT;
 
 TBAG_API bool isDrawable(SfType type) TBAG_NOEXCEPT;
+TBAG_API bool isDrawableShape(SfType type) TBAG_NOEXCEPT;
 TBAG_API bool isRenderTarget(SfType type) TBAG_NOEXCEPT;
 
 TBAG_API void * newSfType(SfType type);

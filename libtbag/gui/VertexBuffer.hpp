@@ -15,8 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/gui/Drawable.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,22 +23,28 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-// Forward declaration.
-
 /**
  * VertexBuffer class prototype.
  *
  * @author zer0
  * @date   2019-02-23
  */
-class TBAG_API VertexBuffer : private Noncopyable
+class TBAG_API VertexBuffer : public Drawable
 {
-private:
-    // Insert member variables.
-
 public:
     VertexBuffer();
+    VertexBuffer(VertexBuffer && obj) TBAG_NOEXCEPT;
     virtual ~VertexBuffer();
+
+public:
+    VertexBuffer & operator =(VertexBuffer && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(VertexBuffer & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(VertexBuffer & lh, VertexBuffer & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 };
 
 } // namespace gui

@@ -15,8 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/gui/Drawable.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,6 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 // Forward declaration.
+class Texture;
 
 /**
  * Shape class prototype.
@@ -32,14 +32,38 @@ namespace gui {
  * @author zer0
  * @date   2019-02-23
  */
-class TBAG_API Shape : private Noncopyable
+class TBAG_API Shape : public Drawable
 {
-private:
-    // Insert member variables.
+public:
+    explicit Shape(SfType type, no_init_no_ref_t);
+    explicit Shape(SfType type, no_init_t, bool ref = true);
+    explicit Shape(SfType type, bool ref = true);
+    virtual ~Shape();
 
 public:
-    Shape();
-    virtual ~Shape();
+    void setTexture(Texture const * texture, bool resetRect = false);
+    void setTextureRect(Recti const & rect);
+    void setFillColor(Rgb32 const & color);
+    void setOutlineColor(Rgb32 const & color);
+    void setOutlineThickness(float thickness);
+
+public:
+    void * getTexturePtr() const;
+    Texture getTexture() const;
+
+public:
+    Recti getTextureRect() const;
+    Rgb32 getFillColor() const;
+    Rgb32 getOutlineColor() const;
+    float getOutlineThickness() const;
+
+public:
+    SF_VIRTUAL std::size_t getPointCount() const;
+    SF_VIRTUAL Pointf getPoint(std::size_t index) const;
+
+public:
+    Rectf getLocalBounds() const;
+    Rectf getGlobalBounds() const;
 };
 
 } // namespace gui

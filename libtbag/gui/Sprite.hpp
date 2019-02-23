@@ -15,8 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/gui/Drawable.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,22 +23,28 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-// Forward declaration.
-
 /**
  * Sprite class prototype.
  *
  * @author zer0
  * @date   2019-02-23
  */
-class TBAG_API Sprite : private Noncopyable
+class TBAG_API Sprite : public Drawable
 {
-private:
-    // Insert member variables.
-
 public:
     Sprite();
+    Sprite(Sprite && obj) TBAG_NOEXCEPT;
     virtual ~Sprite();
+
+public:
+    Sprite & operator =(Sprite && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(Sprite & obj) TBAG_NOEXCEPT;
+
+public:
+    inline friend void swap(Sprite & lh, Sprite & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 };
 
 } // namespace gui
