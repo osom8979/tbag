@@ -8,9 +8,6 @@
  */
 
 #include <libtbag/gui/RenderWindow.hpp>
-#include <libtbag/gui/View.hpp>
-#include <libtbag/gui/Cursor.hpp>
-#include <libtbag/gui/Drawable.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/Type.hpp>
@@ -75,14 +72,6 @@ RenderWindow::RenderWindow() : RenderWindow(Params())
     assert(ptr != nullptr);
 }
 
-RenderWindow::RenderWindow(void * handle, no_init_no_ref_t)
-        : RenderTarget(SfType::ST_RENDER_WINDOW, no_init_no_ref)
-{
-    assert(ptr == nullptr);
-    ptr = handle;
-    assert(ptr != nullptr);
-}
-
 RenderWindow::RenderWindow(Params const & params)
         : RenderTarget(SfType::ST_RENDER_WINDOW, no_init)
 {
@@ -95,28 +84,9 @@ RenderWindow::RenderWindow(Params const & params)
     assert(ptr != nullptr);
 }
 
-RenderWindow::RenderWindow(RenderWindow && obj) TBAG_NOEXCEPT
-        : RenderTarget(SfType::ST_RENDER_WINDOW, no_init)
-{
-    *this = std::move(obj);
-}
-
 RenderWindow::~RenderWindow()
 {
     // EMPTY.
-}
-
-RenderWindow & RenderWindow::operator =(RenderWindow && obj) TBAG_NOEXCEPT
-{
-    swap(obj);
-    return *this;
-}
-
-void RenderWindow::swap(RenderWindow & obj) TBAG_NOEXCEPT
-{
-    if (this != &obj) {
-        SfNative::swap(obj);
-    }
 }
 
 int RenderWindow::run()
@@ -407,10 +377,10 @@ void RenderWindow::setMouseCursorGrabbed(bool grabbed)
     _self_sf()->setMouseCursorGrabbed(grabbed);
 }
 
-void RenderWindow::setMouseCursor(Cursor const & cursor)
-{
-    _self_sf()->setMouseCursor(*cursor.cast<sf::Cursor>());
-}
+//void RenderWindow::setMouseCursor(Cursor const & cursor)
+//{
+//    _self_sf()->setMouseCursor(*cursor.cast<sf::Cursor>());
+//}
 
 void RenderWindow::setKeyRepeatEnabled(bool enabled)
 {

@@ -27,12 +27,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-// Forward declaration.
-class View;
-class Cursor;
-class Drawable;
-class RenderStates;
-
 /**
  * RenderWindow class prototype.
  *
@@ -218,20 +212,8 @@ public:
 
 public:
     RenderWindow();
-    RenderWindow(void * handle, no_init_no_ref_t);
     RenderWindow(Params const & params);
-    RenderWindow(RenderWindow && obj) TBAG_NOEXCEPT;
     virtual ~RenderWindow();
-
-public:
-    RenderWindow & operator =(RenderWindow && obj) TBAG_NOEXCEPT;
-
-public:
-    void swap(RenderWindow & obj) TBAG_NOEXCEPT;
-
-public:
-    inline friend void swap(RenderWindow & lh, RenderWindow & rh) TBAG_NOEXCEPT
-    { lh.swap(rh); }
 
 public:
     int run();
@@ -446,7 +428,7 @@ public:
     void setVerticalSyncEnabled(bool enabled);
     void setMouseCursorVisible(bool visible);
     void setMouseCursorGrabbed(bool grabbed);
-    void setMouseCursor(Cursor const & cursor);
+    //void setMouseCursor(Cursor const & cursor);
     void setKeyRepeatEnabled(bool enabled);
     void setFramerateLimit(unsigned int limit);
     void setJoystickThreshold(float threshold);
