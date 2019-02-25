@@ -186,14 +186,10 @@ INCLUDE_DIRECTORIES(
 # Disable warnings to avoid changing 3rd party code.
 IF(CMAKE_C_COMPILER_ID MATCHES
     "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -w")
 ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
 ENDIF()
-
-IF(CMAKE_C_COMPILER_ID MATCHES "GNU")
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Drestrict=__restrict")
-ENDIF ()
 
 ADD_LIBRARY(cmliblzma STATIC ${LZMA_SRCS})
 
