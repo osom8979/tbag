@@ -89,5 +89,17 @@
 # endif
 #endif
 
+#ifndef TBAG_RESTRICT
+# if defined(__cplusplus)
+#  define TBAG_RESTRICT __restrict
+# else // defined(__cplusplus)
+#  if __STDC_VERSION__ >= 199901L // Since restrict is new in C99.
+#   define TBAG_RESTRICT restrict
+#  else
+#   define TBAG_RESTRICT
+#  endif
+# endif // defined(__cplusplus)
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_FEATURES_HPP__
 
