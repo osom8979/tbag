@@ -6,9 +6,8 @@
  */
 
 #include <libtbag/typography/font/Ngc.hpp>
-#include <libtbag/typography/font/ngc/ngcn.h.inl>
-#include <libtbag/typography/font/ngc/ngcb.h.inl>
-#include <libtbag/string/StringUtils.hpp>
+//#include <libtbag/typography/font/ngc/ngcn.h.inl>
+//#include <libtbag/typography/font/ngc/ngcb.h.inl>
 
 #include <cassert>
 #include <cstring>
@@ -22,22 +21,16 @@ namespace font       {
 
 libtbag::util::Buffer getNgcNormal() TBAG_NOEXCEPT
 {
-    auto const * const HEX_STRING = __get_binary_to_cpp11_string__ngcn__();
-    auto const HEX_STRING_LENGTH = strlen(HEX_STRING);
-    libtbag::util::Buffer result;
-    auto const CODE = libtbag::string::convertHexStringToBuffer(HEX_STRING, HEX_STRING_LENGTH, result);
-    assert(isSuccess(CODE));
-    return result;
+//    auto const * const HEX_STRING = (char const * const)__get_binary_to_cpp_array__ngcn__();
+//    return libtbag::util::Buffer(HEX_STRING, HEX_STRING + __get_binary_to_cpp_array_size__ngcn__());
+    return libtbag::util::Buffer();
 }
 
 libtbag::util::Buffer getNgcBold() TBAG_NOEXCEPT
 {
-    auto const * const HEX_STRING = __get_binary_to_cpp11_string__ngcb__();
-    auto const HEX_STRING_LENGTH = strlen(HEX_STRING);
-    libtbag::util::Buffer result;
-    auto const CODE = libtbag::string::convertHexStringToBuffer(HEX_STRING, HEX_STRING_LENGTH, result);
-    assert(isSuccess(CODE));
-    return result;
+//    auto const * const HEX_STRING = (char const * const)__get_binary_to_cpp_array__ngcb__();
+//    return libtbag::util::Buffer(HEX_STRING, HEX_STRING + __get_binary_to_cpp_array_size__ngcb__());
+    return libtbag::util::Buffer();
 }
 
 } // namespace font
