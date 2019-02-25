@@ -17,11 +17,16 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 
+#include <string>
+#include <vector>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace archive {
+
+TBAG_API std::size_t write7zip(std::string const & output_filename, std::vector<std::string> const & input_filenames);
 
 /**
  * Archive class prototype.

@@ -6,14 +6,21 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/archive/Archive.hpp>
 
 using namespace libtbag;
 using namespace libtbag::archive;
 
-TEST(ArchiveTest, Default)
+TEST(ArchiveTest, Write7zip)
 {
-    Archive object;
-    ASSERT_TRUE(true);
+    auto const IMAGE_PATH = DemoAsset::get_tester_dir_image() / "lena.png";
+
+    // Save & Load.
+    //tttDir_Automatic();
+    tttDir(true, false);
+    auto const OUTPUT_PATH = tttDir_Get() / "save.7z";
+
+    ASSERT_EQ(1, write7zip(OUTPUT_PATH, {IMAGE_PATH.toString()}));
 }
 
