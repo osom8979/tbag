@@ -107,6 +107,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     endif ()
 endif ()
 
+set (zlib_EXT_VERSION_STR  "1.2.11")
 set (zlib_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/zlib")
 set (zlib_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (zlib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${zlib_EXT_STATIC_LIB_NAME}${zlib_EXT_DEBUG_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -145,6 +146,7 @@ add_custom_target (zlib DEPENDS ${zlib_EXT_LIBRARIES})
 ## LIBRESSL ##
 ##############
 
+set (ressl_EXT_VERSION_STR       "2.5.1")
 set (ressl_EXT_SOURCE_DIR        "${CMAKE_SOURCE_DIR}/external/ressl")
 set (ressl_EXT_INCLUDE_DIR       "${EXT_INSTALL_DIR}/include")
 set (ressl_crypto_EXT_STATIC_LIB "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}crypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -447,4 +449,148 @@ else ()
     fake_output_library (luajit_ext_output luajit_ext ${luajit_EXT_LIBRARIES})
 endif ()
 add_custom_target (luajit DEPENDS ${luajit_EXT_LIBRARIES})
+
+###########
+## BZIP2 ##
+###########
+
+set (bzip2_EXT_VERSION_STR  "1.0.5")
+set (bzip2_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/bzip2")
+set (bzip2_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (bzip2_EXT_HEADER       "${bzip2_EXT_INCLUDE_DIR}/bzlib.h")
+set (bzip2_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmbzip2${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (bzip2_EXT_LIBRARIES    "${bzip2_EXT_STATIC_LIB}"
+                            "${bzip2_EXT_HEADER}")
+exists_files (bzip2_EXT_EXISTS ${bzip2_EXT_LIBRARIES})
+
+if (bzip2_EXT_EXISTS)
+    message (STATUS "Skip external/bzip2 (Exists: ${bzip2_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/bzip2")
+    ExternalProject_Add (bzip2_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${bzip2_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output lbzip2ing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (bzip2_ext_output bzip2_ext ${bzip2_EXT_LIBRARIES})
+endif ()
+add_custom_target (bzip2 DEPENDS ${bzip2_EXT_LIBRARIES})
+
+##########
+## LZMA ##
+##########
+
+set (lzma_EXT_VERSION_STR  "5.2.4")
+set (lzma_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/lzma")
+set (lzma_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (lzma_EXT_HEADER       "${lzma_EXT_INCLUDE_DIR}/lzma.h")
+set (lzma_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmliblzma${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (lzma_EXT_LIBRARIES    "${lzma_EXT_STATIC_LIB}"
+                           "${lzma_EXT_HEADER}")
+exists_files (lzma_EXT_EXISTS ${lzma_EXT_LIBRARIES})
+
+if (lzma_EXT_EXISTS)
+    message (STATUS "Skip external/lzma (Exists: ${lzma_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/lzma")
+    ExternalProject_Add (lzma_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${lzma_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output llzmaing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (lzma_ext_output lzma_ext ${lzma_EXT_LIBRARIES})
+endif ()
+add_custom_target (lzma DEPENDS ${lzma_EXT_LIBRARIES})
+
+#############
+## ARCHIVE ##
+#############
+
+set (archive_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/archive")
+set (archive_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (archive_EXT_HEADER       "${archive_EXT_INCLUDE_DIR}/archive.h")
+set (archive_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmlibarchive${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (archive_EXT_LIBRARIES    "${archive_EXT_STATIC_LIB}"
+                              "${archive_EXT_HEADER}")
+exists_files (archive_EXT_EXISTS ${archive_EXT_LIBRARIES})
+
+if (archive_EXT_EXISTS)
+    message (STATUS "Skip external/archive (Exists: ${archive_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/archive")
+    ExternalProject_Add (archive_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${archive_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DENABLE_NETTLE=OFF"
+                       "-DENABLE_OPENSSL=ON"
+                       "-DENABLE_LZ4=OFF"
+                       "-DENABLE_LZO=OFF"
+                       "-DENABLE_LZMA=ON"
+                       "-DENABLE_ZLIB=ON"
+                       "-DENABLE_BZip2=ON"
+                       "-DENABLE_LIBXML2=OFF"
+                       "-DENABLE_EXPAT=OFF"
+                       "-DENABLE_CNG=OFF"
+                       "-DENABLE_XATTR=OFF"
+                       "-DENABLE_ACL=OFF"
+                       "-DENABLE_ICONV=OFF"
+                       "-DBZIP2_FOUND=ON"
+                       "-DBZIP2_INCLUDE_DIR=${bzip2_EXT_INCLUDE_DIR}"
+                       "-DBZIP2_LIBRARIES=${bzip2_EXT_STATIC_LIB}"
+                       "-DBZIP2_VERSION_STRING=${bzip2_EXT_VERSION_STR}"
+                       "-DZLIB_FOUND=ON"
+                       "-DZLIB_INCLUDE_DIRS=${zlib_EXT_INCLUDE_DIR}"
+                       "-DZLIB_LIBRARIES=${zlib_EXT_STATIC_LIB}"
+                       "-DZLIB_VERSION_STRING=${zlib_EXT_VERSION_STR}"
+                       "-DLIBLZMA_FOUND=ON"
+                       "-DLIBLZMA_INCLUDE_DIRS=${lzma_EXT_INCLUDE_DIR}"
+                       "-DLIBLZMA_LIBRARIES=${lzma_EXT_STATIC_LIB}"
+                       "-DLIBLZMA_VERSION_STRING=${lzma_EXT_VERSION_STR}"
+                       "-DOPENSSL_FOUND=ON"
+                       "-DOPENSSL_INCLUDE_DIR=${ressl_EXT_INCLUDE_DIR}"
+                       "-DOPENSSL_CRYPTO_LIBRARY=${ressl_crypto_EXT_STATIC_LIB}"
+                       "-DOPENSSL_SSL_LIBRARY=${ressl_ssl_EXT_STATIC_LIB}"
+                       "-DOPENSSL_LIBRARIES=${ressl_EXT_LIBRARIES}"
+                       "-DOPENSSL_VERSION=${ressl_EXT_VERSION_STR}"
+            #--Output larchiveing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1
+            DEPENDS zlib bzip2 lzma ressl)
+    fake_output_library (archive_ext_output archive_ext ${archive_EXT_LIBRARIES})
+endif ()
+add_custom_target (archive DEPENDS ${archive_EXT_LIBRARIES})
+
+
 

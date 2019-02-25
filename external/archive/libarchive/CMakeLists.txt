@@ -197,14 +197,7 @@ SET(libarchive_MANS
   archive_write_open.3
   archive_write_set_options.3
   archive_write_set_passphrase.3
-  cpio.5
-  libarchive.3
-  libarchive_changes.3
-  libarchive_internals.3
-  libarchive-formats.5
-  mtree.5
-  tar.5
-)
+        )
 
 IF(WIN32 AND NOT CYGWIN)
   LIST(APPEND libarchive_SOURCES archive_entry_copy_bhfi.c)
@@ -228,3 +221,11 @@ ENDIF()
 # CMake needs just one static "cmlibarchive" library.
 ADD_LIBRARY(cmlibarchive STATIC ${libarchive_SOURCES} ${include_HEADERS})
 TARGET_LINK_LIBRARIES(cmlibarchive ${ADDITIONAL_LIBS})
+
+install (TARGETS cmlibarchive
+         RUNTIME DESTINATION bin
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib)
+install (FILES ${include_HEADERS}
+         DESTINATION include)
+

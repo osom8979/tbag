@@ -1,3 +1,5 @@
+cmake_minimum_required (VERSION 2.8.8)
+
 PROJECT(CMLIBLZMA C)
 
 include(CheckCSourceCompiles)
@@ -201,4 +203,12 @@ ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
   SET_PROPERTY(TARGET cmliblzma PROPERTY COMPILE_FLAGS "-O0")
 ENDIF()
 
-INSTALL(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmliblzma)
+install (TARGETS cmliblzma
+         RUNTIME DESTINATION bin
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib)
+install (DIRECTORY "${CMLIBLZMA_SOURCE_DIR}/liblzma/api/lzma"
+         DESTINATION include)
+install (FILES "${CMLIBLZMA_SOURCE_DIR}/liblzma/api/lzma.h"
+         DESTINATION include)
+

@@ -693,6 +693,24 @@ macro (tbag_modules__apply_luajit_embedding_exe_flags)
     endif()
 endmacro ()
 
+macro (tbag_modules__apply_ext_bzip2)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES bzip2)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${bzip2_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${bzip2_EXT_STATIC_LIB})
+endmacro ()
+
+macro (tbag_modules__apply_ext_lzma)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lzma)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${lzma_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${lzma_EXT_STATIC_LIB})
+endmacro ()
+
+macro (tbag_modules__apply_ext_archive)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES archive)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${archive_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${archive_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

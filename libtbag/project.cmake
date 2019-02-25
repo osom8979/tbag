@@ -38,6 +38,9 @@ tbag_modules__apply_ext_ogg      ()
 tbag_modules__apply_ext_flac     ()
 tbag_modules__apply_ext_vorbis   ()
 tbag_modules__apply_ext_freetype ()
+tbag_modules__apply_ext_bzip2    ()
+tbag_modules__apply_ext_lzma     ()
+tbag_modules__apply_ext_archive  ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
