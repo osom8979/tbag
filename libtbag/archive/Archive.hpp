@@ -66,10 +66,11 @@ TBAG_CONSTEXPR char const * const COMPRESS_FORMAT_WARC          = "warc";
 TBAG_CONSTEXPR char const * const COMPRESS_FORMAT_XAR           = "xar";
 TBAG_CONSTEXPR char const * const COMPRESS_FORMAT_ZIP           = "zip";
 
-TBAG_API std::size_t writeArchive(std::string const & output_filename,
-                                  std::vector<std::string> const & input_filenames,
-                                  std::string const & format = COMPRESS_FORMAT_PAXR,
-                                  CompressType compress = CompressType::CT_NONE);
+TBAG_API std::size_t compressArchive(std::string const & output_filename,
+                                     std::vector<std::string> const & input_filenames,
+                                     std::string const & format = COMPRESS_FORMAT_PAXR,
+                                     CompressType compress = CompressType::CT_NONE);
+TBAG_API std::vector<std::string> decompressArchive(std::string const & input_filename);
 
 /**
  * Archive class prototype.
