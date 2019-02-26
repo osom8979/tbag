@@ -12,15 +12,15 @@
 using namespace libtbag;
 using namespace libtbag::archive;
 
-TEST(ArchiveTest, Write7zip)
+TEST(ArchiveTest, WriteArchive)
 {
     auto const IMAGE_PATH = DemoAsset::get_tester_dir_image() / "lena.png";
 
     // Save & Load.
-    //tttDir_Automatic();
-    tttDir(true, false);
+    tttDir_Automatic();
     auto const OUTPUT_PATH = tttDir_Get() / "save.7z";
 
-    ASSERT_EQ(1, write7zip(OUTPUT_PATH, {IMAGE_PATH.toString()}));
+    ASSERT_EQ(1, writeArchive(OUTPUT_PATH, {IMAGE_PATH.toString()}, COMPRESS_FORMAT_7ZIP));
+    ASSERT_TRUE(OUTPUT_PATH.exists());
 }
 
