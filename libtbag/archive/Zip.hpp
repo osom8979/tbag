@@ -28,13 +28,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace archive {
 
-TBAG_CONSTEXPR int const TBAG_ZIP_DECODE_LEVEL          = 0;
 TBAG_CONSTEXPR int const TBAG_ZIP_MIN_ENCODE_LEVEL      = 1;
 TBAG_CONSTEXPR int const TBAG_ZIP_DEFAULT_ENCODE_LEVEL  = 6;
 TBAG_CONSTEXPR int const TBAG_ZIP_MAX_ENCODE_LEVEL      = 9;
 
-TBAG_API Err coding(char const * input, std::size_t size, util::Buffer & output, int level = TBAG_ZIP_DECODE_LEVEL);
-TBAG_API Err encode(char const * input, std::size_t size, util::Buffer & output, int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL);
+TBAG_API Err encode(char const * input, std::size_t size, util::Buffer & output,
+                    int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL);
 TBAG_API Err decode(char const * input, std::size_t size, util::Buffer & output);
 
 TBAG_API Err zip(std::vector<std::string> const & files,

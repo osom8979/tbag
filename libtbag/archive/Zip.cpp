@@ -24,17 +24,23 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace archive {
 
-Err coding(char const * input, std::size_t size, util::Buffer & output, int level)
+enum class CodingDirection
 {
-    bool const ENCODE = (level != TBAG_ZIP_DECODE_LEVEL);
+    CD_ENCODE,
+    CD_DECODE,
+};
 
+template <CodingDirection direction>
+static Err coding(char const * input, std::size_t size, util::Buffer & output,
+                  int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL)
+{
     z_stream stream = {0,};
     stream.zalloc   = Z_NULL;
     stream.zfree    = Z_NULL;
     stream.opaque   = Z_NULL;
 
     int result = Z_OK;
-    if (ENCODE) {
+    if (direction == CodingDirection::CD_ENCODE) {
         result = deflateInit(&stream, level);
     } else {
         result = inflateInit(&stream);
@@ -73,7 +79,7 @@ Err coding(char const * input, std::size_t size, util::Buffer & output, int leve
             stream.avail_out = static_cast<uInt>(out.size());
             stream.next_out  = out.data();
 
-            if (ENCODE) {
+            if (direction == CodingDirection::CD_ENCODE) {
                 result = ::deflate(&stream, flush);
             } else {
                 result = ::inflate(&stream, flush);
@@ -95,7 +101,7 @@ Err coding(char const * input, std::size_t size, util::Buffer & output, int leve
         result_code = Err::E_UNKNOWN;
     }
 
-    if (ENCODE) {
+    if (direction == CodingDirection::CD_ENCODE) {
         ::deflateEnd(&stream);
     } else {
         ::inflateEnd(&stream);
@@ -109,12 +115,12 @@ Err encode(char const * input, std::size_t size, util::Buffer & output, int leve
     if (level < TBAG_ZIP_MIN_ENCODE_LEVEL || level > TBAG_ZIP_MAX_ENCODE_LEVEL) {
         level = Z_DEFAULT_COMPRESSION;
     }
-    return coding(input, size, output, level);
+    return coding<CodingDirection::CD_ENCODE>(input, size, output, level);
 }
 
 Err decode(char const * input, std::size_t size, util::Buffer & output)
 {
-    return coding(input, size, output, TBAG_ZIP_DECODE_LEVEL);
+    return coding<CodingDirection::CD_DECODE>(input, size, output);
 }
 
 Err zip(std::vector<std::string> const & files,
