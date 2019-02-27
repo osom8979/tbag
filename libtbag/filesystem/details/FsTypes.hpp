@@ -105,6 +105,7 @@ static char const * const LAST_TEMP_VALUE = LAST_ANDROID_TEMP_VALUE;
 static char const * const LAST_TEMP_VALUE = LAST_POSIX_TEMP_VALUE;
 #endif
 
+/** Format of directory entries. */
 using DirentType = int;
 
 TBAG_CONSTEXPR DirentType const DIRENT_UNKNOWN = 0x01;

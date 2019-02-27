@@ -29,6 +29,7 @@ NAMESPACE_LIBTBAG_OPEN
     /* Common error codes (Success Anyway). */ \
     _TBAG_XX(_SUCCESS  , "No error"                ) \
     _TBAG_XX(_WARNING  , "Success, but warning"    ) \
+    _TBAG_XX(_RETRY    , "Retry might succeed"     ) \
     _TBAG_XX(_CONTINUE , "Wait for the next"       ) \
     _TBAG_XX(_ASYNCREQ , "Async request"           ) \
     _TBAG_XX(_ENQASYNC , "Enqueue and async"       ) \
@@ -302,6 +303,7 @@ inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
     // @formatter:off
     return err == Err::E_SUCCESS  ||
            err == Err::E_WARNING  ||
+           err == Err::E_RETRY    ||
            err == Err::E_CONTINUE ||
            err == Err::E_ASYNCREQ ||
            err == Err::E_ENQASYNC;
