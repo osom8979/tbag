@@ -22,7 +22,7 @@ File::File() : _file(0), _offset(0)
 
 File::File(std::string const & path, Flags flags, int mode) : File()
 {
-    if (open(path, flags, mode) == false) {
+    if (!File::open(path, flags, mode)) {
         throw std::bad_alloc();
     }
 }
