@@ -13,7 +13,7 @@ if (NOT BUILD_SHARED_LIBS)
     tbag_modules__apply_tbag_static_api ()
 endif ()
 
-if (USE_LUAJIT_EXE_FLAGS AND APPLE)
+if (NOT DISABLE_LUAJIT_EXE_FLAGS)
     tbag_modules__apply_luajit_embedding_exe_flags ()
 endif ()
 
