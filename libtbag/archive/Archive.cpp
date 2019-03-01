@@ -208,7 +208,7 @@ static void read_for_each(struct archive * a, Predicated predicated)
             break;
         }
         if (code < ARCHIVE_WARN) {
-            tDLogI("read_for_each() next header error: {}", get_error_string(a));
+            tDLogE("read_for_each() next header error: {}", get_error_string(a));
             break;
         }
         assert(code >= ARCHIVE_WARN);
