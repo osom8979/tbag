@@ -12,7 +12,7 @@ if (__content_length LESS 2)
     return ()
 endif ()
 
-math (EXPR __is_odd_number "${__content_length} & 0x1")
+math (EXPR __is_odd_number "${__content_length} % 2")
 if (__is_odd_number EQUAL 1)
     message (ERROR "The result must be an even number: (${__content_length})")
     return ()
