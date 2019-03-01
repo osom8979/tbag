@@ -261,7 +261,7 @@ Err convertHexStringToBuffer(char const * hex_string, std::size_t length, libtba
 
     Err code;
     uint8_t byte;
-    for (std::size_t i = 0; i < BUFFER_SIZE; i += 2) {
+    for (std::size_t i = 0; i < length; i += 2) {
         code = convertHexCharToByte(hex_string[i], hex_string[i+1], byte);
         if (isFailure(code)) {
             return code;
