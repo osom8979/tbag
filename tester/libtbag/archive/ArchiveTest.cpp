@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
+#include <libtbag/filesystem/File.hpp>
 #include <libtbag/archive/Archive.hpp>
 #include <libtbag/crypto/Md5.hpp>
 
@@ -43,5 +44,28 @@ TEST(ArchiveTest, WriteArchive)
     auto const ORIGINAL_MD5 = libtbag::crypto::getMd5FromFile(IMAGE_PATH.getString());
     auto const EXTRACT_MD5 = libtbag::crypto::getMd5FromFile((EXTRACT_PATH / IMAGE_FILE_NAME).toString());
     ASSERT_EQ(ORIGINAL_MD5, EXTRACT_MD5);
+}
+
+TEST(ArchiveTest, MemoryArchive)
+{
+    auto const IMAGE_FILE_NAME = "lena.png";
+    auto const IMAGE_PATH = DemoAsset::get_tester_dir_image() / IMAGE_FILE_NAME;
+
+    libtbag::util::Buffer image_buffer;
+    ASSERT_EQ(Err::E_SUCCESS, libtbag::filesystem::readFile(IMAGE_PATH.toString(), image_buffer));
+
+    MemoryArchiveWriter writer;//(COMPRESS_FORMAT_7ZIP);
+    ASSERT_EQ(Err::E_SUCCESS, writer.writeFromFile(IMAGE_PATH.toString()));
+    ASSERT_EQ(Err::E_SUCCESS, writer.close());
+    ASSERT_LT(0, writer.used());
+
+    MemoryArchiveReader reader(writer.data(), writer.used());
+    MemoryArchiveReader::MemoryEntries entries;
+    ASSERT_EQ(1, reader.readToMemory(entries));
+    ASSERT_EQ(1, entries.size());
+
+    ASSERT_EQ(image_buffer.size(), entries[0].data.size());
+    ASSERT_TRUE(std::equal(entries[0].data.begin(), entries[0].data.end(),
+                           image_buffer.begin(), image_buffer.end()));
 }
 

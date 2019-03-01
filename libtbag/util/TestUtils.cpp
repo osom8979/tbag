@@ -32,6 +32,7 @@ TBAG_CONSTEXPR static char const * const MESSAGE_THEN_FORMAT     = "[@BEHAVIOUR]
 
 Scenario::Scenario(std::string const & name) : Scenario(name, std::string())
 {
+    // EMPTY.
 }
 
 Scenario::Scenario(std::string const & name, std::string const & tag)

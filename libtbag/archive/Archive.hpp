@@ -21,6 +21,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/util/BufferInfo.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <cstdint>
 #include <string>
@@ -47,13 +48,6 @@ TBAG_CONSTEXPR char const * const COMPRESS_FORMAT_7ZIP = "7zip";
 TBAG_CONSTEXPR char const * const COMPRESS_FORMAT_PAX  = "pax";
 TBAG_CONSTEXPR char const * const COMPRESS_FORMAT_PAXR = "paxr";
 TBAG_CONSTEXPR char const * const COMPRESS_FORMAT_ZIP  = "zip";
-
-TBAG_API std::size_t compressArchive(std::string const & output_filename,
-                                     std::vector<std::string> const & input_filenames,
-                                     std::string const & format = COMPRESS_FORMAT_PAXR,
-                                     CompressType compress = CompressType::CT_NONE);
-TBAG_API std::size_t decompressArchive(std::string const & filename, std::string const & output_prefix);
-TBAG_API std::vector<std::string> getArchiveFileList(std::string const & filename);
 
 /**
  * ArchiveEntry class prototype.
@@ -119,31 +113,40 @@ struct ArchiveMemoryEntry : public ArchiveEntry
 class TBAG_API BaseArchive : private Noncopyable
 {
 public:
-    struct Impl;
-    friend struct Impl;
-
-public:
-    using UniqueImpl = std::unique_ptr<Impl>;
     using Entries = std::vector<ArchiveEntry>;
     using MemoryEntries = std::vector<ArchiveMemoryEntry>;
     using Buffer = libtbag::util::Buffer;
 
 protected:
-    UniqueImpl _impl;
+    void * _archive;
+    bool _verbose;
 
 public:
-    BaseArchive();
+    BaseArchive(bool verbose = false);
     virtual ~BaseArchive();
 
 public:
-    bool exists() const;
+    inline bool exists() const TBAG_NOEXCEPT
+    { return _archive != nullptr; }
+
+public:
+    static std::size_t getBlockSize() TBAG_NOEXCEPT;
+    static Err getErrFromArchiveCode(int code) TBAG_NOEXCEPT;
+
+public:
+    char const * getErrorString() const TBAG_NOEXCEPT;
+
+public:
+    Err getErrAndPrintDefaultLog(char const * name, int code) const TBAG_NOEXCEPT;
+    Err prefix(char const * name, int code) const TBAG_NOEXCEPT;
 };
 
 class TBAG_API ArchiveWriter : public BaseArchive
 {
-protected:
-    std::string  _format;
+private:
+    std::string _format;
     CompressType _compress;
+    bool _open;
 
 public:
     ArchiveWriter(std::string const & format = COMPRESS_FORMAT_PAXR,
@@ -151,21 +154,41 @@ public:
     virtual ~ArchiveWriter();
 
 public:
+    Err openFile(std::string const & path);
+    Err openMemory(char * buffer, std::size_t size, std::size_t * used);
+
+public:
+    Err close();
+
+public:
     Err writeFromFile(std::string const & path);
-    Err writeFromMemory(ArchiveEntry const & enrty, char const * buffer, std::size_t buffer_size);
+    Err writeFromMemory(ArchiveEntry const & entry, char const * buffer, std::size_t buffer_size);
+    Err writeFromMemory(ArchiveEntry const & entry, Buffer const & buffer);
+    Err writeFromMemory(ArchiveMemoryEntry const & entry);
 };
 
 class TBAG_API ArchiveReader : public BaseArchive
 {
+private:
+    bool _open;
+
 public:
     ArchiveReader();
     virtual ~ArchiveReader();
 
 public:
-    int readToFile(std::string const & prefix);
-    int readToMemory(MemoryEntries & entries);
-    int readHeader(Entries & entries);
-    int readName(std::vector<std::string> & names);
+    Err openFile(std::string const & path);
+    Err openFile(std::string const & path, std::size_t block_size);
+    Err openMemory(char const * buffer, std::size_t size);
+
+public:
+    Err close();
+
+public:
+    std::size_t readToFile(std::string const & prefix);
+    std::size_t readToMemory(MemoryEntries & entries);
+    std::size_t readHeader(Entries & entries);
+    std::size_t readName(std::vector<std::string> & names);
 };
 
 class TBAG_API FileArchiveWriter : public ArchiveWriter
@@ -179,21 +202,48 @@ public:
 
 class TBAG_API MemoryArchiveWriter : public ArchiveWriter
 {
+public:
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_CAPACITY = 10 * libtbag::MEGA_BYTE_TO_BYTE;
+
 private:
     Buffer _archive_memory;
     std::size_t _used;
 
 public:
-    MemoryArchiveWriter(std::size_t max_memory_size,
+    MemoryArchiveWriter(std::size_t capacity,
                         std::string const & format = COMPRESS_FORMAT_PAXR,
                         CompressType compress = CompressType::CT_NONE);
+    MemoryArchiveWriter(std::string const & format = COMPRESS_FORMAT_PAXR,
+                        CompressType compress = CompressType::CT_NONE);
     virtual ~MemoryArchiveWriter();
+
+public:
+    inline char * data() TBAG_NOEXCEPT_SP_OP(_archive_memory.data())
+    {
+        return _archive_memory.data();
+    }
+
+    inline char const * data() const TBAG_NOEXCEPT_SP_OP(_archive_memory.data())
+    {
+        return _archive_memory.data();
+    }
+
+    inline std::size_t capacity() const TBAG_NOEXCEPT_SP_OP(_archive_memory.size())
+    {
+        return _archive_memory.size();
+    }
+
+    inline std::size_t used() const TBAG_NOEXCEPT
+    {
+        return _used;
+    }
 };
 
 class TBAG_API FileArchiveReader : public ArchiveReader
 {
 public:
     FileArchiveReader(std::string const & path);
+    FileArchiveReader(std::string const & path, std::size_t block_size);
     virtual ~FileArchiveReader();
 };
 
@@ -204,8 +254,34 @@ private:
 
 public:
     MemoryArchiveReader(char const * buffer, std::size_t buffer_size);
+    MemoryArchiveReader(Buffer const & buffer);
     virtual ~MemoryArchiveReader();
 };
+
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
+
+TBAG_API std::size_t compressArchive(std::string const & output_filename,
+                                     std::vector<std::string> const & input_filenames,
+                                     std::string const & format = COMPRESS_FORMAT_PAXR,
+                                     CompressType compress = CompressType::CT_NONE);
+TBAG_API std::size_t compressArchive(std::string const & output_filename,
+                                     BaseArchive::MemoryEntries & entries,
+                                     std::string const & format = COMPRESS_FORMAT_PAXR,
+                                     CompressType compress = CompressType::CT_NONE);
+
+TBAG_API std::size_t decompressArchive(std::string const & filename,
+                                       std::string const & output_prefix);
+TBAG_API std::size_t decompressArchive(std::string const & filename,
+                                       BaseArchive::MemoryEntries & entries);
+
+TBAG_API std::size_t decompressMemoryArchive(char const * buffer, std::size_t size,
+                                             std::string const & output_prefix);
+TBAG_API std::size_t decompressMemoryArchive(char const * buffer, std::size_t size,
+                                             BaseArchive::MemoryEntries & entries);
+
+TBAG_API std::vector<std::string> getArchiveFileList(std::string const & filename);
 
 } // namespace archive
 
