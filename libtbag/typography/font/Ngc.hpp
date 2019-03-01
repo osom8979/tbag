@@ -24,8 +24,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace typography {
 namespace font       {
 
-TBAG_API libtbag::util::Buffer getNgcNormal() TBAG_NOEXCEPT;
-TBAG_API libtbag::util::Buffer getNgcBold() TBAG_NOEXCEPT;
+TBAG_API libtbag::util::Buffer getNgcNormal();
+TBAG_API libtbag::util::Buffer getNgcBold();
 
 } // namespace font
 } // namespace typography
