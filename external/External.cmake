@@ -411,6 +411,61 @@ if (USE_GUI)
     add_custom_target (sfml DEPENDS ${sfml_EXT_LIBRARIES})
 endif ()
 
+##########
+## TGUI ##
+##########
+
+if (USE_GUI)
+    if ("${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "" OR "${CMAKE_BUILD_TYPE_LOWER}" STREQUAL "debug")
+        set (tgui_POSTFIX -d)
+    else ()
+        set (tgui_POSTFIX)
+    endif ()
+
+    set (tgui_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/tgui")
+    set (tgui_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
+    set (tgui_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}tgui-s${tgui_POSTFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}")
+    set (tgui_EXT_LIBRARIES   "${tgui_EXT_STATIC_LIB}")
+    exists_files (tgui_EXT_EXISTS ${tgui_EXT_LIBRARIES})
+
+    if (tgui_EXT_EXISTS)
+        message (STATUS "Skip external/tgui (Exists: ${tgui_EXT_STATIC_LIB})")
+    else ()
+        message (STATUS "Add external/tgui")
+        ExternalProject_Add (tgui_ext
+                PREFIX "${EXT_PREFIX_DIR}"
+                #--Configure step-------------
+                SOURCE_DIR "${tgui_EXT_SOURCE_DIR}"
+                CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                           "-DBUILD_SHARED_LIBS=OFF"
+                           "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                           "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                           "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                           "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                           "-DTGUI_SHARED_LIBS=OFF"
+                           "-DTGUI_BUILD_FRAMEWORK=OFF"
+                           "-DTGUI_BUILD_TESTS=OFF"
+                           "-DTGUI_BUILD_GUI_BUILDER=OFF"
+                           "-DTGUI_BUILD_DOC=OFF"
+                           "-DTGUI_INSTALL_PKGCONFIG_FILES=OFF"
+                           "-DTGUI_USE_CPP17=OFF"
+                           "-DTGUI_USE_STATIC_STD_LIBS=OFF"
+                           "-DSFML_STATIC_LIBRARIES=ON"
+                           "-DSFML_ROOT=${EXT_INSTALL_DIR}"
+                #--Output logging-------------
+                LOG_DOWNLOAD  1
+                LOG_UPDATE    1
+                LOG_CONFIGURE 1
+                LOG_BUILD     0
+                LOG_TEST      1
+                LOG_INSTALL   1
+                #--Dependencies---------------
+                DEPENDS sfml)
+        fake_output_library (tgui_ext_output tgui_ext ${tgui_EXT_LIBRARIES})
+    endif ()
+    add_custom_target (tgui DEPENDS ${tgui_EXT_LIBRARIES})
+endif ()
+
 ############
 ## LUAJIT ##
 ############

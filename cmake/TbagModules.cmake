@@ -654,9 +654,7 @@ endmacro ()
 macro (tbag_modules__apply_ext_sfml_ignore_gl_al)
     list (APPEND TBAG_PROJECT_DEPENDENCIES sfml)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${sfml_EXT_INCLUDE_DIR})
-
-    list (APPEND TBAG_PROJECT_DEFINITIONS OV_EXCLUDE_STATIC_CALLBACKS) ## Vorbis flag
-    list (APPEND TBAG_PROJECT_DEFINITIONS FLAC__NO_DLL) ## Flac flag
+    list (APPEND TBAG_PROJECT_DEFINITIONS SFML_STATIC OV_EXCLUDE_STATIC_CALLBACKS FLAC__NO_DLL)
 
     tbag_modules__add_whole_archive (${sfml_system_EXT_STATIC_LIB})
     tbag_modules__add_whole_archive (${sfml_window_EXT_STATIC_LIB})
@@ -679,6 +677,13 @@ macro (tbag_modules__apply_ext_sfml_ignore_gl_al)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
     endif ()
+endmacro ()
+
+macro (tbag_modules__apply_ext_tgui)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES tgui)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${tgui_EXT_INCLUDE_DIR})
+    list (APPEND TBAG_PROJECT_DEFINITIONS TGUI_STATIC)
+    tbag_modules__add_whole_archive (${tgui_EXT_STATIC_LIB})
 endmacro ()
 
 macro (tbag_modules__apply_ext_luajit)
