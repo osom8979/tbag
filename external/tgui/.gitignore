@@ -1,0 +1,14 @@
+/build*
+/gui-builder/themes
+/gui-builder/gui-builder
+/gui-builder/gui-builder.exe
+/gui-builder/form.txt
+/gui-builder/GuiBuilderState.txt
+/_site
+/examples/Android/libs
+/examples/Android/obj
+/.vs
+CmakeSettings.json
+CombinedSources*.cpp
+.DS_Store
+*~

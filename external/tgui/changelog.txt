@@ -1,0 +1,77 @@
+TGUI 0.8.4  (23 February 2019)
+------------------------------
+
+- Added Changed signal to CheckBox and RadioButton (to more easily combine Checked and Unchecked)
+- Added EscapeKeyPressed signal to ChildWindow
+- ExpandDirection of ComboBox can now be set to Automatic
+- Added min and max functions to layouts again
+- Added horizontal grid lines to ListView
+- Added option to ListView to expand the last column to fill the remaining space
+- Allow a separator between the header and contents in a ListView
+- Split separator in ListView into separator and vertical grid line
+- Fixed corrupted white theme when DefaultTheme was initialized before Color constants
+
+
+TGUI 0.8.3  (27 January 2019)
+-----------------------------
+
+- ListView widget added
+- EditBox can now have a suffix
+- TextBox can now have a horizontal scrollbar
+- Label can now have a vertical scrollbar
+- Default scrollbar width wasn't always taken from texture size in widgets containing scrollbars
+- Scrollbar wasn't drawn correctly when Maximum equaled ViewportSize with AutoHide disabled
+- Default icons in TreeView didn't change color when item was selected
+- Rounded icon position in TreeView to avoid bad icon alignment
+- TreeView didn't handle opacity and font changes
+- Sprites didn't keep their transparency when resized
+- Texture filenames can now contain UTF8 characters on linux
+- Added propery to widget renderer to set an opacity for the disabled state
+- Fixed some bugs in saving and loading widget files (#90)
+
+
+TGUI 0.8.2  (16 December 2018)
+------------------------------
+
+- TreeView widget added
+- Text styles of lines in ChatBox can now be changed
+- Clipping was broken when using multiple windows
+- ScrollbablePanel didn't fully scroll to the right with both scrollbars visible
+
+
+TGUI 0.8.1  (15 October 2018)
+-----------------------------
+
+- Submenus are now supported in MenuBar
+- Menus can now be disabled in MenuBar and given a different text color
+- You can now connect a signal handler to a single menu item in MenuBar
+- ChildWindow position can be locked to disable dragging it
+- Scrollbar thumb should not become smaller than the scrollbar width
+- Percentage in layout no longer includes the outline of the parent
+- MenuBar didn't work when moved and inverted menu direction was broken
+- Text size in MenuBar was reset when changing font
+- Handle delete button on android correctly when using SFML >= 2.5
+- ChildWindow callback with unbound parameter caused crash
+
+
+TGUI 0.8.0  (5 August 2018)
+---------------------------
+
+- Global default text size for more consistent texts in widgets
+- Gui Builder was added
+- A theme can be made the default to use it for all new widgets
+- Renderers are decoupled from widgets, making them truly shared
+- BitmapButton widget to have an icon next to the button caption
+- RangeSlider widget to have two thumbs on a slider
+- ScrollablePanel widget to have a Panel with automatic scrollbars
+- Panel widget was split in Group, RadioButtonGroup and Panel widgets
+- HorizontalLayout, VerticalLayout and HorizontalWrap to arrange widgets
+- Relative layouts were improved
+- Many other improvements
+
+
+Older Releases
+--------------
+
+See the website for changelogs of older releases: https://tgui.eu/changelog/
+
