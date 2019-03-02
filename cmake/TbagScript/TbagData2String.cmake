@@ -11,9 +11,13 @@ else ()
     file (READ "${SOURCE_PATH}" __content)
 endif ()
 
-string (LENGTH "${__content}" __content_length)
+# MSVC Specific:
+# The maximum length of a string literal is 16,384 (16K) bytes.
+# http://msdn.microsoft.com/en-us/library/69ze775t%28v=vs.110%29.aspx
+set (__substring_size 16384)
 set (__index 0)
-set (__substring_size 16384) # MSVC Specific: The maximum length of a string literal is 16,384 (16K) bytes.
+
+string (LENGTH "${__content}" __content_length)
 
 set (__header_prefix
         "\n#ifndef __INCLUDE__DATA_TO_STRING__${NAME}_H__"
