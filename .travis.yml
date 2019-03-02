@@ -27,9 +27,11 @@ addons:
       - curl
       - unzip
       - g++-5
+      - ocl-icd-opencl-dev
       - libglu1-mesa-dev
       - libudev-dev
       - xorg-dev
+      - libxcb-image0-dev
 
 before_install:
   #- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test

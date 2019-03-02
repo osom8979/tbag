@@ -74,6 +74,9 @@ sudo apt-get install libudev-dev
 
 ## x11, xRandr
 sudo apt-get install xorg-dev
+
+## xcb-image
+sudo apt-get install libxcb-image0-dev
 ```
 
 ## Programming rules.
