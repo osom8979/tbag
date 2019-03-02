@@ -44,11 +44,11 @@ set (EXT_PREFIX_DIR  "${CMAKE_BINARY_DIR}/external/prefix"  CACHE STRING "Extern
 set (EXT_INSTALL_DIR "${CMAKE_BINARY_DIR}/external/local"   CACHE STRING "External install prefix.")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-    set (EXT_CXX_FLAGS "/w")
-    set (EXT_C_FLAGS   "/w")
+    set (EXT_CXX_FLAGS)
+    set (EXT_C_FLAGS)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set (EXT_CXX_FLAGS "-w -fPIC")
-    set (EXT_C_FLAGS   "-w -fPIC")
+    set (EXT_CXX_FLAGS -fPIC)
+    set (EXT_C_FLAGS   -fPIC)
 endif ()
 
 ###########

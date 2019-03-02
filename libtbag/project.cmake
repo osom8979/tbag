@@ -95,6 +95,9 @@ endif ()
 
 if (WIN32)
     tbag_modules__append_ldflags (shlwapi.lib) # filesystem with windows.
+    if (MSVC)
+        tbag_modules__apply_disable_warnings ()
+    endif ()
 endif ()
 
 if (USE_RTTI)

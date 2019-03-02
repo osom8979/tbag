@@ -6,12 +6,10 @@
  */
 
 #include <libtbag/archive/Archive.hpp>
+#include <libtbag/archive/details/archive_frontend.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/system/SysInfo.hpp>
-
-#include <archive.h>
-#include <archive_entry.h>
 
 #include <cassert>
 #include <cstring>
@@ -54,111 +52,99 @@ TBAG_CONSTEXPR char const * const ARCHIVE_COMPRESS_FORMAT_ZIP           = COMPRE
 
 TBAG_CONSTEXPR static char const * const EMPTY_ERROR = "Empty error message";
 
-template <typename T>
-inline struct archive * cast_archive(T * v) TBAG_NOEXCEPT
-{
-    return static_cast<struct archive *>(v);
-}
-
-static char const * get_error_string(struct archive * a) TBAG_NOEXCEPT
-{
-    auto const * e = archive_error_string(a);
-    return e ? e : EMPTY_ERROR;
-}
-
-static void entry_internal_to_external(struct archive_entry /*const*/ * in, ArchiveEntry * out) TBAG_NOEXCEPT
+static void entry_internal_to_external(void * e, ArchiveEntry * out) TBAG_NOEXCEPT
 {
     // @formatter:off
-    switch (archive_entry_filetype(in)) {
-    case AE_IFREG:  out->type = ArchiveEntry::TYPE_FILE;    break;
-    case AE_IFDIR:  out->type = ArchiveEntry::TYPE_DIR;     break;
-    case AE_IFLNK:  out->type = ArchiveEntry::TYPE_LINK;    break;
-    case AE_IFIFO:  out->type = ArchiveEntry::TYPE_FIFO;    break;
-    case AE_IFSOCK: out->type = ArchiveEntry::TYPE_SOCKET;  break;
-    case AE_IFCHR:  out->type = ArchiveEntry::TYPE_CHAR;    break;
-    case AE_IFBLK:  out->type = ArchiveEntry::TYPE_BLOCK;   break;
-    default:        out->type = ArchiveEntry::TYPE_UNKNOWN; break;
+    switch (_archive_entry_filetype(e)) {
+    case _archive_entry_ifreg:  out->type = ArchiveEntry::TYPE_FILE;    break;
+    case _archive_entry_ifdir:  out->type = ArchiveEntry::TYPE_DIR;     break;
+    case _archive_entry_iflnk:  out->type = ArchiveEntry::TYPE_LINK;    break;
+    case _archive_entry_ififo:  out->type = ArchiveEntry::TYPE_FIFO;    break;
+    case _archive_entry_ifsock: out->type = ArchiveEntry::TYPE_SOCKET;  break;
+    case _archive_entry_ifchr:  out->type = ArchiveEntry::TYPE_CHAR;    break;
+    case _archive_entry_ifblk:  out->type = ArchiveEntry::TYPE_BLOCK;   break;
+    default:                    out->type = ArchiveEntry::TYPE_UNKNOWN; break;
     }
     // @formatter:on
 
-    char const * source = archive_entry_sourcepath(in);
+    char const * source = _archive_entry_sourcepath(e);
     if (source != nullptr) {
         out->source_path = source;
     } else {
         out->source_path.clear();
     }
 
-    char const * name = archive_entry_pathname(in);
+    char const * name = _archive_entry_pathname(e);
     if (name != nullptr) {
         out->path_name = name;
     } else {
         out->path_name.clear();
     }
 
-    out->size = static_cast<std::size_t>(archive_entry_size(in));
-    out->uid = static_cast<uint64_t>(archive_entry_uid(in));
-    out->gid = static_cast<uint64_t>(archive_entry_gid(in));
-    //archive_entry_uname(in);
-    //archive_entry_gname(in);
-    out->permission = archive_entry_perm(in);
+    out->size = static_cast<std::size_t>(_archive_entry_size(e));
+    out->uid = static_cast<uint64_t>(_archive_entry_uid(e));
+    out->gid = static_cast<uint64_t>(_archive_entry_gid(e));
+    //_archive_entry_uname(in);
+    //_archive_entry_gname(in);
+    out->permission = _archive_entry_perm(e);
 }
 
-static void entry_external_to_internal(ArchiveEntry const * in, struct archive_entry * out) TBAG_NOEXCEPT
+static void entry_external_to_internal(ArchiveEntry const * in, void * e) TBAG_NOEXCEPT
 {
     unsigned int file_type;
     // @formatter:off
     switch (in->type) {
-    case ArchiveEntry::TYPE_FILE:   file_type = AE_IFREG;  break;
-    case ArchiveEntry::TYPE_DIR:    file_type = AE_IFDIR;  break;
-    case ArchiveEntry::TYPE_LINK:   file_type = AE_IFLNK;  break;
-    case ArchiveEntry::TYPE_FIFO:   file_type = AE_IFIFO;  break;
-    case ArchiveEntry::TYPE_SOCKET: file_type = AE_IFSOCK; break;
-    case ArchiveEntry::TYPE_CHAR:   file_type = AE_IFCHR;  break;
-    case ArchiveEntry::TYPE_BLOCK:  file_type = AE_IFBLK;  break;
+    case ArchiveEntry::TYPE_FILE:   file_type = _archive_entry_ifreg;  break;
+    case ArchiveEntry::TYPE_DIR:    file_type = _archive_entry_ifdir;  break;
+    case ArchiveEntry::TYPE_LINK:   file_type = _archive_entry_iflnk;  break;
+    case ArchiveEntry::TYPE_FIFO:   file_type = _archive_entry_ififo;  break;
+    case ArchiveEntry::TYPE_SOCKET: file_type = _archive_entry_ifsock; break;
+    case ArchiveEntry::TYPE_CHAR:   file_type = _archive_entry_ifchr;  break;
+    case ArchiveEntry::TYPE_BLOCK:  file_type = _archive_entry_ifblk;  break;
     case ArchiveEntry::TYPE_UNKNOWN:
     default: return;
     }
     // @formatter:on
 
-    archive_entry_copy_sourcepath(out, in->source_path.c_str());
-    archive_entry_copy_pathname(out, in->path_name.c_str());
+    _archive_entry_copy_sourcepath(e, in->source_path.c_str());
+    _archive_entry_copy_pathname(e, in->path_name.c_str());
 
-    archive_entry_set_size(out, static_cast<la_int64_t>(in->size));
-    archive_entry_set_filetype(out, file_type);
+    _archive_entry_set_size(e, in->size);
+    _archive_entry_set_filetype(e, file_type);
 
-    archive_entry_set_uid(out, in->uid);
-    archive_entry_set_gid(out, in->gid);
+    _archive_entry_set_uid(e, in->uid);
+    _archive_entry_set_gid(e, in->gid);
 
-    //archive_entry_set_uname(out, uname);
-    //archive_entry_set_gname(out, gname);
+    //_archive_entry_set_uname(e, uname);
+    //_archive_entry_set_gname(e, gname);
 
-    archive_entry_set_perm(out, (__LA_MODE_T)in->permission);
+    _archive_entry_set_perm(e, in->permission);
 }
 
 template <typename ReaderCb>
-static Err write_single(struct archive * a, ArchiveEntry const & info, std::string const & format, ReaderCb reader)
+static Err write_single(void * a, ArchiveEntry const & info, std::string const & format, ReaderCb reader)
 {
     auto const BLOCK_SIZE = BaseArchive::getBlockSize();
     libtbag::util::Buffer buffer(BLOCK_SIZE);
 
-    struct archive_entry * entry = archive_entry_new();
+    void * entry = _archive_entry_new();
     assert(entry != nullptr);
 
     entry_external_to_internal(&info, entry);
 
-    archive_entry_acl_clear(entry);
-    archive_entry_xattr_clear(entry);
-    archive_entry_set_fflags(entry, 0, 0);
+    _archive_entry_acl_clear(entry);
+    _archive_entry_xattr_clear(entry);
+    _archive_entry_set_fflags(entry, 0, 0);
 
     if (format == COMPRESS_FORMAT_PAX || format == COMPRESS_FORMAT_PAXR) {
         // Sparse files are a GNU tar extension.
         // Do not use them in standard tar files.
-        archive_entry_sparse_clear(entry);
+        _archive_entry_sparse_clear(entry);
     }
 
     Err last_err = Err::E_UNKNOWN;
-    int code = archive_write_header(a, entry);
-    if (code == ARCHIVE_OK) {
+    int code = _archive_write_header(a, entry);
+    if (code == _archive_ok) {
         auto left = info.size;
 
         while (left > 0) {
@@ -170,7 +156,7 @@ static Err write_single(struct archive * a, ArchiveEntry const & info, std::stri
                 break;
             }
 
-            auto written = archive_write_data(a, buffer.data(), next);
+            auto written = _archive_write_data(a, buffer.data(), next);
             if (written != next) {
                 tDLogE("write() written size mismatch: {}/{}", written, next);
                 last_err = Err::E_WRERR;
@@ -180,47 +166,47 @@ static Err write_single(struct archive * a, ArchiveEntry const & info, std::stri
         }
 
         if (left == 0) {
-            code = archive_write_finish_entry(a);
-            if (code != ARCHIVE_OK) {
-                tDLogE("write() entry finish error: {}", get_error_string(a));
+            code = _archive_write_finish_entry(a);
+            if (code != _archive_ok) {
+                tDLogE("write() entry finish error: {}", _archive_error_string(a));
             }
             last_err = BaseArchive::getErrFromArchiveCode(code);
         }
     } else {
-        tDLogE("write() header write error: {}", get_error_string(a));
+        tDLogE("write() header write error: {}", _archive_error_string(a));
         last_err = BaseArchive::getErrFromArchiveCode(code);
     }
 
-    archive_entry_free(entry);
+    _archive_entry_free(entry);
     return last_err;
 }
 
 template <typename Predicated>
-static void read_for_each(struct archive * a, Predicated predicated)
+static void read_for_each(void * a, Predicated predicated)
 {
-    struct archive_entry * entry = nullptr;
+    void * entry = nullptr;
     int code = 0;
 
     while (true) {
-        code = archive_read_next_header(a, &entry);
-        if (code == ARCHIVE_EOF) {
+        code = _archive_read_next_header(a, &entry);
+        if (code == _archive_eof) {
             //tDLogI("read_for_each() End Of File");
             break;
         }
-        if (code < ARCHIVE_WARN) {
-            tDLogE("read_for_each() next header error: {}", get_error_string(a));
+        if (code < _archive_warn) {
+            tDLogE("read_for_each() next header error: {}", _archive_error_string(a));
             break;
         }
-        assert(code >= ARCHIVE_WARN);
-        if (code < ARCHIVE_OK) {
-            tDLogW("read_for_each() next header warning: {}", get_error_string(a));
+        assert(code >= _archive_warn);
+        if (code < _archive_ok) {
+            tDLogW("read_for_each() next header warning: {}", _archive_error_string(a));
         }
 
         bool const CONSUMED_DATA = predicated(a, entry);
         if (!CONSUMED_DATA) {
-            code = archive_read_data_skip(a);
-            if (code != ARCHIVE_OK) {
-                tDLogE("read_for_each() skip data error: {}", get_error_string(a));
+            code = _archive_read_data_skip(a);
+            if (code != _archive_ok) {
+                tDLogE("read_for_each() skip data error: {}", _archive_error_string(a));
             }
         }
     }
@@ -247,37 +233,37 @@ std::size_t BaseArchive::getBlockSize() TBAG_NOEXCEPT
 
 Err BaseArchive::getErrFromArchiveCode(int code) TBAG_NOEXCEPT
 {
-    if (code == ARCHIVE_OK) {
+    if (code == _archive_ok) {
         return Err::E_SUCCESS;
-    } else if (code == ARCHIVE_EOF) {
+    } else if (code == _archive_eof) {
         return Err::E_EOF;
-    } else if (code == ARCHIVE_RETRY) {
+    } else if (code == _archive_retry) {
         return Err::E_RETRY;
-    } else if (code >= ARCHIVE_WARN) {
+    } else if (code >= _archive_warn) {
         return Err::E_WARNING;
     }
-    assert(code < ARCHIVE_WARN);
+    assert(code < _archive_warn);
     return Err::E_UNKNOWN;
 }
 
 char const * BaseArchive::getErrorString() const TBAG_NOEXCEPT
 {
-    return get_error_string(cast_archive(_archive));
+    return _archive_error_string(_archive);
 }
 
 Err BaseArchive::getErrAndPrintDefaultLog(char const * name, int code) const TBAG_NOEXCEPT
 {
     assert(name != nullptr);
-    if (code == ARCHIVE_OK) {
+    if (code == _archive_ok) {
         // SKIP.
-    } else if (code == ARCHIVE_EOF) {
+    } else if (code == _archive_eof) {
         tDLogIfN(_verbose, "{} EOF: {}", name, getErrorString());
-    } else if (code == ARCHIVE_RETRY) {
+    } else if (code == _archive_retry) {
         tDLogIfW(_verbose, "{} Retry: {}", name, getErrorString());
-    } else if (code >= ARCHIVE_WARN) {
+    } else if (code >= _archive_warn) {
         tDLogIfW(_verbose, "{} Unknown warning: {}", name, getErrorString());
     } else {
-        assert(code < ARCHIVE_WARN);
+        assert(code < _archive_warn);
         tDLogE("{} Error: {}", name, getErrorString());
     }
     return getErrFromArchiveCode(code);
@@ -295,60 +281,60 @@ Err BaseArchive::prefix(char const * name, int code) const TBAG_NOEXCEPT
 ArchiveWriter::ArchiveWriter(std::string const & format, CompressType compress)
         : BaseArchive(), _format(format), _compress(compress), _open(false)
 {
-    _archive = archive_write_new();
+    _archive = _archive_write_new();
     assert(_archive != nullptr);
 
-    int code = ARCHIVE_FATAL;
+    int code = _archive_fatal;
     switch (compress) {
     case CompressType::CT_NONE:
-        code = archive_write_add_filter_none(cast_archive(_archive));
+        code = _archive_write_add_filter_none(_archive);
         break;
     case CompressType::CT_GZIP:
-        code = archive_write_add_filter_gzip(cast_archive(_archive));
+        code = _archive_write_add_filter_gzip(_archive);
         break;
     case CompressType::CT_BZIP2:
-        code = archive_write_add_filter_bzip2(cast_archive(_archive));
+        code = _archive_write_add_filter_bzip2(_archive);
         break;
     case CompressType::CT_LZMA:
-        code = archive_write_add_filter_lzma(cast_archive(_archive));
+        code = _archive_write_add_filter_lzma(_archive);
         break;
     case CompressType::CT_XZ:
-        code = archive_write_add_filter_xz(cast_archive(_archive));
+        code = _archive_write_add_filter_xz(_archive);
         break;
     default:
         tDLogE("ArchiveWriter::ArchiveWriter() Unknown compress type: {}", (int)compress);
         throw ErrException(Err::E_ILLARGS);
     }
 
-    if (code != ARCHIVE_OK) {
+    if (code != _archive_ok) {
         throw ErrException(prefix("ArchiveWriter::ArchiveWriter()", code));
     }
 
     if (compress == CompressType::CT_GZIP) {
         // We're not able to specify an arbitrary timestamp for gzip.
         // The next best thing is to omit the timestamp entirely.
-        code = archive_write_set_filter_option(cast_archive(_archive), "gzip", "timestamp", nullptr);
-        if (code != ARCHIVE_OK) {
+        code = _archive_write_set_filter_option(_archive, "gzip", "timestamp", nullptr);
+        if (code != _archive_ok) {
             tDLogE("ArchiveWriter::ArchiveWriter() filter option(gzip/timestamp) error: {}", getErrorString());
             throw ErrException(getErrFromArchiveCode(code));
         }
     }
 
-    code = archive_write_set_format_by_name(cast_archive(_archive), format.c_str());
-    if (code != ARCHIVE_OK) {
+    code = _archive_write_set_format_by_name(_archive, format.c_str());
+    if (code != _archive_ok) {
         throw ErrException(prefix("ArchiveWriter::ArchiveWriter()", code));
     }
 
     // do not pad the last block!!
-    code = archive_write_set_bytes_in_last_block(cast_archive(_archive), 1);
-    if (code != ARCHIVE_OK) {
+    code = _archive_write_set_bytes_in_last_block(_archive, 1);
+    if (code != _archive_ok) {
         throw ErrException(prefix("ArchiveWriter::ArchiveWriter()", code));
     }
 }
 
 ArchiveWriter::~ArchiveWriter()
 {
-    auto const CODE = archive_write_free(cast_archive(_archive));
+    auto const CODE = _archive_write_free(_archive);
     prefix("ArchiveWriter::~ArchiveWriter()", CODE);
 }
 
@@ -357,8 +343,8 @@ Err ArchiveWriter::openFile(std::string const & path)
     if (_open) {
         return Err::E_ALREADY;
     }
-    auto const CODE = archive_write_open_filename(cast_archive(_archive), path.c_str());
-    _open = (CODE == ARCHIVE_OK);
+    auto const CODE = _archive_write_open_filename(_archive, path.c_str());
+    _open = (CODE == _archive_ok);
     return prefix("ArchiveWriter::openFile()", CODE);
 }
 
@@ -367,8 +353,8 @@ Err ArchiveWriter::openMemory(char * buffer, std::size_t size, std::size_t * use
     if (_open) {
         return Err::E_ALREADY;
     }
-    auto const CODE = archive_write_open_memory(cast_archive(_archive), buffer, size, used);
-    _open = (CODE == ARCHIVE_OK);
+    auto const CODE = _archive_write_open_memory(_archive, buffer, size, used);
+    _open = (CODE == _archive_ok);
     return prefix("ArchiveWriter::openFile()", CODE);
 }
 
@@ -377,7 +363,7 @@ Err ArchiveWriter::close()
     if (!_open) {
         return Err::E_ALREADY;
     }
-    auto const CODE = archive_write_close(cast_archive(_archive));
+    auto const CODE = _archive_write_close(_archive);
     _open = false;
     return prefix("ArchiveWriter::close()", CODE);
 }
@@ -407,7 +393,7 @@ Err ArchiveWriter::writeFromFile(std::string const & path)
     info.gid = STATE.gid;
     info.permission = FIXED_PERMISSION;
 
-    return write_single(cast_archive(_archive), info, _format, [&](char * data, std::size_t size) -> std::size_t {
+    return write_single(_archive, info, _format, [&](char * data, std::size_t size) -> std::size_t {
         return static_cast<std::size_t>(file.read(data, size));
     });
 }
@@ -415,7 +401,7 @@ Err ArchiveWriter::writeFromFile(std::string const & path)
 Err ArchiveWriter::writeFromMemory(ArchiveEntry const & entry, char const * buffer, std::size_t buffer_size)
 {
     std::size_t offset = 0;
-    return write_single(cast_archive(_archive), entry, _format, [&](char * data, std::size_t size) -> std::size_t {
+    return write_single(_archive, entry, _format, [&](char * data, std::size_t size) -> std::size_t {
         if (offset >= buffer_size) {
             return 0;
         }
@@ -452,28 +438,28 @@ Err ArchiveWriter::writeFromMemory(ArchiveMemoryEntry const & entry)
 
 ArchiveReader::ArchiveReader() : BaseArchive(), _open(false)
 {
-    _archive = archive_read_new();
+    _archive = _archive_read_new();
     assert(_archive != nullptr);
 
-    int code = archive_read_support_filter_all(cast_archive(_archive));
-    if (code != ARCHIVE_OK) {
+    int code = _archive_read_support_filter_all(_archive);
+    if (code != _archive_ok) {
         throw ErrException(prefix("ArchiveReader::ArchiveReader()", code));
     }
 
-    code = archive_read_support_format_all(cast_archive(_archive));
-    if (code != ARCHIVE_OK) {
+    code = _archive_read_support_format_all(_archive);
+    if (code != _archive_ok) {
         throw ErrException(prefix("ArchiveReader::ArchiveReader()", code));
     }
 
-    code = archive_read_support_compression_all(cast_archive(_archive));
-    if (code != ARCHIVE_OK) {
+    code = _archive_read_support_compression_all(_archive);
+    if (code != _archive_ok) {
         throw ErrException(prefix("ArchiveReader::ArchiveReader()", code));
     }
 }
 
 ArchiveReader::~ArchiveReader()
 {
-    auto const CODE = archive_read_free(cast_archive(_archive));
+    auto const CODE = _archive_read_free(_archive);
     prefix("ArchiveReader::~ArchiveReader()", CODE);
 }
 
@@ -487,8 +473,8 @@ Err ArchiveReader::openFile(std::string const & path, std::size_t block_size)
     if (_open) {
         return Err::E_ALREADY;
     }
-    auto const CODE = archive_read_open_filename(cast_archive(_archive), path.c_str(), block_size);
-    _open = (CODE == ARCHIVE_OK);
+    auto const CODE = _archive_read_open_filename(_archive, path.c_str(), block_size);
+    _open = (CODE == _archive_ok);
     return prefix("ArchiveReader::openFile()", CODE);
 }
 
@@ -497,8 +483,8 @@ Err ArchiveReader::openMemory(char const * buffer, std::size_t size)
     if (_open) {
         return Err::E_ALREADY;
     }
-    auto const CODE = archive_read_open_memory(cast_archive(_archive), buffer, size);
-    _open = (CODE == ARCHIVE_OK);
+    auto const CODE = _archive_read_open_memory(_archive, buffer, size);
+    _open = (CODE == _archive_ok);
     return prefix("ArchiveReader::openFile()", CODE);
 }
 
@@ -507,7 +493,7 @@ Err ArchiveReader::close()
     if (!_open) {
         return Err::E_ALREADY;
     }
-    auto const CODE = archive_read_close(cast_archive(_archive));
+    auto const CODE = _archive_read_close(_archive);
     _open = false;
     return prefix("ArchiveReader::close()", CODE);
 }
@@ -515,8 +501,8 @@ Err ArchiveReader::close()
 std::size_t ArchiveReader::readToFile(std::string const & prefix)
 {
     std::size_t success_count = 0;
-    read_for_each(cast_archive(_archive), [&](struct archive * a, struct archive_entry * entry) -> bool {
-        char const * name = archive_entry_pathname(entry);
+    read_for_each(_archive, [&](void * a, void * entry) -> bool {
+        char const * name = _archive_entry_pathname(entry);
         if (name == nullptr) {
             tDLogW("ArchiveReader::readToFile() empty path name.");
             return false;
@@ -527,23 +513,23 @@ std::size_t ArchiveReader::readToFile(std::string const & prefix)
 
         void const * buffer;
         size_t size;
-        la_int64_t offset;
+        int64_t offset;
         int code;
 
         while (true) {
-            code = archive_read_data_block(a, &buffer, &size, &offset);
-            if (code == ARCHIVE_EOF) {
+            code = _archive_read_data_block(a, &buffer, &size, &offset);
+            if (code == _archive_eof) {
                 tDLogIfI(_verbose, "ArchiveReader::readToFile() current({}) data block EOF.", name);
                 ++success_count;
                 break;
             }
-            if (code < ARCHIVE_WARN) {
+            if (code < _archive_warn) {
                 tDLogE("ArchiveReader::readToFile() current({}) data block error: {}",
                        name, getErrorString());
                 break;
             }
-            // assert(code >= ARCHIVE_WARN);
-            if (code < ARCHIVE_OK) {
+            // assert(code >= _archive_warn);
+            if (code < _archive_ok) {
                 tDLogW("ArchiveReader::readToFile() current({}) data block warning: {}",
                        name, getErrorString());
             }
@@ -564,8 +550,8 @@ std::size_t ArchiveReader::readToFile(std::string const & prefix)
 std::size_t ArchiveReader::readToMemory(MemoryEntries & entries)
 {
     entries.clear();
-    read_for_each(cast_archive(_archive), [&](struct archive * a, struct archive_entry * entry) -> bool {
-        char const * name = archive_entry_pathname(entry);
+    read_for_each(_archive, [&](void * a, void * entry) -> bool {
+        char const * name = _archive_entry_pathname(entry);
         if (name == nullptr) {
             tDLogW("ArchiveReader::readToMemory() empty path name.");
             return false;
@@ -578,22 +564,22 @@ std::size_t ArchiveReader::readToMemory(MemoryEntries & entries)
 
             void const * buffer;
             size_t size;
-            la_int64_t offset;
+            int64_t offset;
             int code;
 
             while (true) {
-                code = archive_read_data_block(a, &buffer, &size, &offset);
-                if (code == ARCHIVE_EOF) {
+                code = _archive_read_data_block(a, &buffer, &size, &offset);
+                if (code == _archive_eof) {
                     tDLogIfI(_verbose, "ArchiveReader::readToMemory() current({}) data block EOF.", name);
                     break;
                 }
-                if (code < ARCHIVE_WARN) {
+                if (code < _archive_warn) {
                     tDLogE("ArchiveReader::readToMemory() current({}) data block error, {}",
                            name, getErrorString());
                     break;
                 }
-                // assert(code >= ARCHIVE_WARN);
-                if (code < ARCHIVE_OK) {
+                // assert(code >= _archive_warn);
+                if (code < _archive_ok) {
                     tDLogW("ArchiveReader::readToMemory() current({}) data block warning: {}",
                            name, getErrorString());
                 }
@@ -610,7 +596,7 @@ std::size_t ArchiveReader::readToMemory(MemoryEntries & entries)
 std::size_t ArchiveReader::readHeader(Entries & entries)
 {
     entries.clear();
-    read_for_each(cast_archive(_archive), [&](struct archive * a, struct archive_entry * entry) -> bool {
+    read_for_each(_archive, [&](void * a, void * entry) -> bool {
         ArchiveEntry info;
         entry_internal_to_external(entry, &info);
         entries.push_back(info);
@@ -622,8 +608,8 @@ std::size_t ArchiveReader::readHeader(Entries & entries)
 std::size_t ArchiveReader::readName(std::vector<std::string> & names)
 {
     names.clear();
-    read_for_each(cast_archive(_archive), [&](struct archive * a, struct archive_entry * entry) -> bool {
-        char const * name = archive_entry_pathname(entry);
+    read_for_each(_archive, [&](void * a, void * entry) -> bool {
+        char const * name = _archive_entry_pathname(entry);
         if (name != nullptr) {
             names.emplace_back(name);
         } else {

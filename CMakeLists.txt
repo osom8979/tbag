@@ -39,7 +39,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4595") ## non-member operator new or delete functions may not be declared inline.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4819") ## code page warning.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") ## declared deprecated warning.
-    set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")      ## Disables all compiler warnings.
+    #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")      ## Disables all compiler warnings.
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
     add_definitions (-D_SCL_SECURE_NO_WARNINGS)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
