@@ -245,60 +245,37 @@ endmacro ()
 ## Generators
 ## ----------
 
-#/// Write Text to String C++11 header file.
+#/// Write Data to String header file.
 #///
 #/// @param __target      [in] Target name.
 #/// @param __output_path [in] Output header file path.
 #/// @param __name        [in] Variable name.
-#/// @param __delimiter   [in] Delimiter of C++11 string literal.
-#/// @param __text_path   [in] Text file path.
-macro (tbag_modules__text_to_cpp11string __target __output_path __name __delimiter __text_path)
+#/// @param __source_path [in] Source file path.
+#/// @param __hex_mode    [in] Hex mode (ON/OFF)
+macro (tbag_modules__data_to_string __target __output_path __name __source_path __hex_mode)
     add_custom_command (
             OUTPUT  "${__output_path}"
             COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
                                      "-DNAME=${__name}"
-                                     "-DDELIMITER=${__delimiter}"
-                                     "-DTEXT_PATH=${__text_path}"
-                                     -P "${TBAG_SCRIPT_DIR}/TbagText2Cpp11String.cmake"
+                                     "-DSOURCE_PATH=${__source_path}"
+                                     "-DHEX_MODE=${__hex_mode}"
+                                     -P "${TBAG_SCRIPT_DIR}/TbagData2String.cmake"
             DEPENDS ${__text_path}
-            COMMENT "Text to Cpp11String: ${__output_path}" VERBATIM)
+            COMMENT "Data to String: ${__output_path}" VERBATIM)
     add_custom_target (${__target} SOURCES "${__output_path}")
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
 
-#/// Write Text to Hex String C++11 header file.
+#/// Write Data to 7zip to String header file.
 #///
 #/// @param __target      [in] Target name.
 #/// @param __output_path [in] Output header file path.
 #/// @param __name        [in] Variable name.
-#/// @param __delimiter   [in] Delimiter of C++11 string literal.
-#/// @param __text_path   [in] Text file path.
-macro (tbag_modules__text_to_cpp11hexstring __target __output_path __name __delimiter __text_path)
-    add_custom_command (
-            OUTPUT  "${__output_path}"
-            COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
-                                     "-DNAME=${__name}"
-                                     "-DDELIMITER=${__delimiter}"
-                                     "-DTEXT_PATH=${__text_path}"
-                                     "-DHEX_MODE=ON"
-                                     -P "${TBAG_SCRIPT_DIR}/TbagText2Cpp11String.cmake"
-            DEPENDS ${__text_path}
-            COMMENT "Text to Cpp11HexString: ${__output_path}" VERBATIM)
-    add_custom_target (${__target} SOURCES "${__output_path}")
-    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
-endmacro ()
-
-#/// Write Text to 7zip to Hex String C++11 header file.
-#///
-#/// @param __target      [in] Target name.
-#/// @param __output_path [in] Output header file path.
-#/// @param __name        [in] Variable name.
-#/// @param __delimiter   [in] Delimiter of C++11 string literal.
-#/// @param __text_path   [in] Text file path.
-macro (tbag_modules__text_to_7z_to_cpp11hexstring __target __output_path __name __delimiter __text_path)
+#/// @param __source_path [in] Source file path.
+macro (tbag_modules__data_to_7z_to_string __target __output_path __name __source_path)
     set (__7zip_output_temp_path "${CMAKE_BINARY_DIR}/${__target}.7z")
-    get_filename_component (__text_path_dir ${__text_path} DIRECTORY)
-    get_filename_component (__text_path_name ${__text_path} NAME)
+    get_filename_component (__text_path_dir ${__source_path} DIRECTORY)
+    get_filename_component (__text_path_name ${__source_path} NAME)
     add_custom_command (
             OUTPUT  "${__7zip_output_temp_path}" "${__output_path}"
             COMMAND ${CMAKE_COMMAND} -E tar cf
@@ -307,32 +284,12 @@ macro (tbag_modules__text_to_7z_to_cpp11hexstring __target __output_path __name 
                                      "${__text_path_name}"
             COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
                                      "-DNAME=${__name}"
-                                     "-DDELIMITER=${__delimiter}"
-                                     "-DTEXT_PATH=${__7zip_output_temp_path}"
+                                     "-DSOURCE_PATH=${__7zip_output_temp_path}"
                                      "-DHEX_MODE=ON"
-                                     -P "${TBAG_SCRIPT_DIR}/TbagText2Cpp11String.cmake"
+                                     -P "${TBAG_SCRIPT_DIR}/TbagData2String.cmake"
             DEPENDS ${__text_path}
             WORKING_DIRECTORY "${__text_path_dir}"
-            COMMENT "Text to 7zip to Cpp11HexString: ${__output_path}" VERBATIM)
-    add_custom_target (${__target} SOURCES "${__output_path}")
-    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
-endmacro ()
-
-#/// Write Binary to Array C++ header file.
-#///
-#/// @param __target      [in] Target name.
-#/// @param __output_path [in] Output header file path.
-#/// @param __name        [in] Variable name.
-#/// @param __binary_path [in] Binary file path.
-macro (tbag_modules__binary_to_cpp_array __target __output_path __name __binary_path)
-    add_custom_command (
-            OUTPUT  "${__output_path}"
-            COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
-                                     "-DNAME=${__name}"
-                                     "-DBINARY_PATH=${__binary_path}"
-                                     -P "${TBAG_SCRIPT_DIR}/TbagBinary2CppArray.cmake"
-            DEPENDS ${__binary_path}
-            COMMENT "Binary to CppArray: ${__output_path}" VERBATIM)
+            COMMENT "Data to 7zip to String: ${__output_path}" VERBATIM)
     add_custom_target (${__target} SOURCES "${__output_path}")
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()

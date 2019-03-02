@@ -118,6 +118,16 @@ std::string mergeTokens(std::vector<std::string> const & tokens, std::string con
     return ss.str();
 }
 
+std::string mergeArgv(char ** argv)
+{
+    std::string result;
+    while (argv != nullptr && (*argv) != nullptr) {
+        result += (*argv);
+        ++argv;
+    }
+    return result;
+}
+
 std::string convertStringWithThreadId(std::thread::id const & id)
 {
     std::stringstream ss;

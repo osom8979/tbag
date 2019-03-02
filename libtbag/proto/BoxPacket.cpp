@@ -30,7 +30,7 @@ TBAG_PUSH_MACRO(max);
 #include <flatbuffers/flatbuffers.h>
 #include <flatbuffers/idl.h>
 #include <libtbag/proto/fbs/box_generated.h>
-#include <libtbag/proto/fbs/box_t2s.h>
+#include <libtbag/proto/fbs/box_d2s.h>
 
 #if defined(TBAG_COMP_MSVC)
 # if defined(__RESTORE_MIN__)
@@ -48,6 +48,7 @@ TBAG_POP_MACRO(max);
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -110,7 +111,8 @@ public:
 public:
     Impl(std::size_t capacity) : builder(capacity, nullptr)
     {
-        if (parser.Parse(__get_text_to_cpp11_string__box__()) == false) {
+        auto const PROTOCOL_TEXT = libtbag::string::mergeArgv((char**)__data_to_string__box__);
+        if (!parser.Parse(PROTOCOL_TEXT.c_str())) {
             tDLogA("BoxPacketBuilder::Impl() Parse fail.");
             throw std::bad_alloc();
         }

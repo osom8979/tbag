@@ -51,12 +51,14 @@ static libtbag::util::Buffer __get_decompressed_7z_font(char const * hex_text)
 
 libtbag::util::Buffer getNgcNormal()
 {
-    return __get_decompressed_7z_font(__get_text_to_cpp11_string__ngcn__());
+    auto const FONT_7Z_HEX_TEXT = libtbag::string::mergeArgv((char**)__data_to_string__ngcn__);
+    return __get_decompressed_7z_font(FONT_7Z_HEX_TEXT.c_str());
 }
 
 libtbag::util::Buffer getNgcBold()
 {
-    return __get_decompressed_7z_font(__get_text_to_cpp11_string__ngcb__());
+    auto const FONT_7Z_HEX_TEXT = libtbag::string::mergeArgv((char**)__data_to_string__ngcb__);
+    return __get_decompressed_7z_font(FONT_7Z_HEX_TEXT.c_str());
 }
 
 } // namespace font

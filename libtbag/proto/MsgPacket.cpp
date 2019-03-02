@@ -29,7 +29,7 @@ TBAG_PUSH_MACRO(max);
 #include <flatbuffers/flatbuffers.h>
 #include <flatbuffers/idl.h>
 #include <libtbag/proto/fbs/msg_generated.h>
-#include <libtbag/proto/fbs/msg_t2s.h>
+#include <libtbag/proto/fbs/msg_d2s.h>
 
 #if defined(TBAG_COMP_MSVC)
 # if defined(__RESTORE_MIN__)
@@ -43,6 +43,7 @@ TBAG_POP_MACRO(max);
 #endif // defined(TBAG_COMP_MSVC)
 
 #include <libtbag/proto/MsgPacket.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -78,7 +79,8 @@ public:
 public:
     Impl(std::size_t capacity) : builder(capacity, nullptr)
     {
-        if (parser.Parse(__get_text_to_cpp11_string__msg__()) == false) {
+        auto const PROTOCOL_TEXT = libtbag::string::mergeArgv((char**)__data_to_string__msg__);
+        if (!parser.Parse(PROTOCOL_TEXT.c_str())) {
             tDLogA("MsgPacketBuilder::Impl() Parse fail.");
             throw std::bad_alloc();
         }

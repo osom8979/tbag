@@ -101,6 +101,7 @@ TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::s
 TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter, bool remove_empty = true);
 
 TBAG_API std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter);
+TBAG_API std::string mergeArgv(char ** argv);
 
 /**
  * Thread ID to string.
