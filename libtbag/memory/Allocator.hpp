@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/memory/alloc/TraceNew.hpp>
+#include <libtbag/memory/Memory.hpp>
 
 #include <cassert>
 #include <memory>
@@ -79,21 +79,21 @@ struct Allocator
     /** obtains the address of an object. */
     const_pointer address(const_reference val) const TBAG_NOEXCEPT
     {
-        return ::libtbag::memory::alloc::addressof(val);
+        return (const_pointer)(&(reinterpret_cast<const volatile char &>(val)));
     }
 
     /** allocates uninitialized storage. */
     pointer allocate(size_type size, void const * hint = 0)
     {
         assert(size > 0);
-        return static_cast<pointer>(::libtbag::memory::alloc::allocate(size * sizeof(value_type)));
+        return static_cast<pointer>(malloc(size * sizeof(value_type)));
     }
 
     /** deallocates storage. */
     void deallocate(pointer ptr, size_type allocated_size)
     {
         assert(ptr != nullptr);
-        ::libtbag::memory::alloc::deallocate((void*)ptr);
+        free((void*)ptr);
     }
 
     /** constructs an object in allocated storage. */

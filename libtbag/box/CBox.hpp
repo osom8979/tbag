@@ -129,13 +129,16 @@ struct box_data
     /** The size of the first dimension padding. (Not a byte size!) */
     ui32 padding;
 
+    /** Memory alignment byte size. */
+    ui32 align;
+
     /** User's data pointer. */
     void * opaque;
 };
 
 TBAG_API Err box_init(box_data * box) TBAG_NOEXCEPT;
 
-TBAG_API Err box_malloc(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank, ui32 padding) TBAG_NOEXCEPT;
+TBAG_API Err box_malloc(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank, ui32 padding, ui32 align) TBAG_NOEXCEPT;
 TBAG_API Err box_free(box_data * box) TBAG_NOEXCEPT;
 
 using box_memcpy_async_cb = void(*)(Err, void*, box_data const*, box_data*);

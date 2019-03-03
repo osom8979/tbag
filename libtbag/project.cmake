@@ -111,6 +111,10 @@ if (DISABLE_TDLOG)
     tbag_modules__append_definitions (DISABLE_TBAG_LOG)
 endif ()
 
+if (REDEFINE_MEMORY_FUNCTIONS)
+    tbag_modules__append_definitions (TBAG_REDEFINE_MEMORY_FUNCTIONS)
+endif ()
+
 if (WITH_COVERAGE)
     tbag_modules__apply_gcov ()
 endif ()

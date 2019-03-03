@@ -1,74 +1,54 @@
 /**
- * @file   TraceDyMem.hpp
- * @brief  TraceDyMem class prototype.
+ * @file   Memory.cpp
+ * @brief  Memory class implementation.
  * @author zer0
- * @date   2017-06-10
+ * @date   2019-03-03
  */
-
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOC_TRACEDYMEM_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOC_TRACEDYMEM_HPP__
-
-// MS compatible compilers support #pragma once
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
-#pragma once
-#endif
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/memory/details/AlignedMemory.hpp>
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstdio>
-
-#ifndef TBAG_MEMORY_TRACE_LEVEL
-#define TBAG_MEMORY_TRACE_LEVEL 0
-#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace memory {
-namespace alloc  {
 
 TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL0 = 0;
 TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL1 = 1;
 TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL2 = 2;
-TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL3 = 3;
-TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL4 = 4;
 
 TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL_MIN = TBAG_MEMORY_LEVEL0;
-TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL_MAX = TBAG_MEMORY_LEVEL4;
+TBAG_CONSTEXPR int const TBAG_MEMORY_LEVEL_MAX = TBAG_MEMORY_LEVEL2;
 
 TBAG_CONSTEXPR int const TBAG_MEMORY_NO_TRACE     = TBAG_MEMORY_LEVEL0;
 TBAG_CONSTEXPR int const TBAG_MEMORY_STDERR_TRACE = TBAG_MEMORY_LEVEL1;
-TBAG_CONSTEXPR int const TBAG_MEMORY_LOG_TRACE    = TBAG_MEMORY_LEVEL2;
-TBAG_CONSTEXPR int const TBAG_MEMORY_SIMPLE_TRACE = TBAG_MEMORY_LEVEL3;
-TBAG_CONSTEXPR int const TBAG_MEMORY_STACK_TRACE  = TBAG_MEMORY_LEVEL4;
+TBAG_CONSTEXPR int const TBAG_MEMORY_FILE_TRACE   = TBAG_MEMORY_LEVEL2;
 
 /** Memory trace level. */
 TBAG_CONSTEXPR int getTraceLevel() TBAG_NOEXCEPT
 {
+#if defined(TBAG_MEMORY_TRACE_LEVEL)
     return TBAG_MEMORY_TRACE_LEVEL;
+#else
+    return TBAG_MEMORY_NO_TRACE;
+#endif
 }
 
 static_assert(TBAG_MEMORY_LEVEL_MIN <= COMPARE_AND(getTraceLevel()) <= TBAG_MEMORY_LEVEL_MAX,
               "Invalid TBAG_MEMORY_TRACE_LEVEL macro value.");
-
-enum class TraceLevel : int
-{
-    TL_NO     = TBAG_MEMORY_NO_TRACE,
-    TL_STDERR = TBAG_MEMORY_STDERR_TRACE,
-    TL_LOG    = TBAG_MEMORY_LOG_TRACE,
-    TL_SIMPLE = TBAG_MEMORY_SIMPLE_TRACE,
-    TL_STACK  = TBAG_MEMORY_STACK_TRACE,
-};
 
 /**
  * TraceDyMem class prototype.
  *
  * @author zer0
  * @date   2017-06-10
+ * @date   2019-03-03 (Change namespace: libtbag::memory::alloc -> libtbag::memory)
  */
 template <int Level>
 struct TraceDyMem;
@@ -77,7 +57,6 @@ template <>
 struct TraceDyMem<TBAG_MEMORY_NO_TRACE>
 {
     TBAG_CONSTEXPR static int const value = TBAG_MEMORY_NO_TRACE;
-    TBAG_CONSTEXPR static TraceLevel const trace = TraceLevel::TL_NO;
 
     /** Allocate and zero-initialize array. */
     static void * _calloc(std::size_t num, std::size_t size)
@@ -102,13 +81,24 @@ struct TraceDyMem<TBAG_MEMORY_NO_TRACE>
     {
         return ::realloc(ptr, size);
     }
+
+    /** Deallocate aligned memory block. */
+    static void _aligned_free(void * ptr)
+    {
+        libtbag::memory::details::alignedMemoryFree(ptr);
+    }
+
+    /** Allocate aligned memory block. */
+    static void * _aligned_malloc(std::size_t size, std::size_t align)
+    {
+        return libtbag::memory::details::alignedMemoryAlloc(size, align);
+    }
 };
 
 template <>
 struct TraceDyMem<TBAG_MEMORY_STDERR_TRACE>
 {
     TBAG_CONSTEXPR static int const value = TBAG_MEMORY_STDERR_TRACE;
-    TBAG_CONSTEXPR static TraceLevel const trace = TraceLevel::TL_STDERR;
 
     /** Allocate and zero-initialize array. */
     static void * _calloc(std::size_t num, std::size_t size)
@@ -140,59 +130,70 @@ struct TraceDyMem<TBAG_MEMORY_STDERR_TRACE>
         fprintf(stderr, "_realloc(%p, %zu) -> %p\n", ptr, size, result);
         return result;
     }
+
+    /** Deallocate aligned memory block. */
+    static void _aligned_free(void * ptr)
+    {
+        fprintf(stderr, "_aligned_free(%p)\n", ptr);
+        libtbag::memory::details::alignedMemoryFree(ptr);
+    }
+
+    /** Allocate aligned memory block. */
+    static void * _aligned_malloc(std::size_t size, std::size_t align)
+    {
+        void * result = libtbag::memory::details::alignedMemoryAlloc(size, align);
+        fprintf(stderr, "_aligned_malloc(%zu, %zu) -> %p\n", size, align, result);
+        return result;
+    }
 };
 
-template <>
-struct TraceDyMem<TBAG_MEMORY_LOG_TRACE>
+template <typename T>
+inline T * addressof(T & val) TBAG_NOEXCEPT
 {
-    TBAG_CONSTEXPR static int const value = TBAG_MEMORY_LOG_TRACE;
-    TBAG_CONSTEXPR static TraceLevel const trace = TraceLevel::TL_LOG;
+    return (T*)&reinterpret_cast<const volatile char&>(val);
+}
 
-    /** Allocate and zero-initialize array. */
-    static void * _calloc(std::size_t num, std::size_t size)
-    {
-        void * result = ::calloc(num, size);
-        tDLogI("_calloc({}, {}) -> {}", num, size, result);
-        return result;
-    }
-
-    /** Deallocate memory block. */
-    static void _free(void * ptr)
-    {
-        tDLogI("_free({})", ptr);
-        ::free(ptr);
-    }
-
-    /** Allocate memory block. */
-    static void * _malloc(std::size_t size)
-    {
-        void * result = ::malloc(size);
-        tDLogI("_malloc({}) -> {}", size, result);
-        return result;
-    }
-
-    /** Reallocate memory block. */
-    static void * _realloc(void * ptr, std::size_t size)
-    {
-        void * result = ::realloc(ptr, size);
-        tDLogI("_realloc({}, {}) -> {}", ptr, size, result);
-        return result;
-    }
-};
-
-} // namespace alloc
 } // namespace memory
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#if !defined(TBAG_NO_REDEFINE_MEMORY_FUNCTIONS)
-# define calloc(num, size)   libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_calloc(num, size)
-# define free(ptr)           libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_free(ptr)
-# define malloc(size)        libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_malloc(size)
-# define realloc(ptr, size)  libtbag::memory::alloc::TraceDyMem<TBAG_MEMORY_TRACE_LEVEL>::_realloc(ptr, size)
-#endif
+#include <libtbag/memory/Memory.hpp>
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALLOC_TRACEDYMEM_HPP__
+void * tbCalloc(std::size_t num, std::size_t size)
+{
+    using namespace libtbag::memory;
+    return TraceDyMem<getTraceLevel()>::_calloc(num, size);
+}
+
+void tbFree(void * ptr)
+{
+    using namespace libtbag::memory;
+    TraceDyMem<getTraceLevel()>::_free(ptr);
+}
+
+void * tbMalloc(std::size_t size)
+{
+    using namespace libtbag::memory;
+    return TraceDyMem<getTraceLevel()>::_malloc(size);
+}
+
+void * tbRealloc(void * ptr, std::size_t size)
+{
+    using namespace libtbag::memory;
+    return TraceDyMem<getTraceLevel()>::_realloc(ptr, size);
+}
+
+void tbAlignedFree(void * ptr)
+{
+    using namespace libtbag::memory;
+    TraceDyMem<getTraceLevel()>::_aligned_free(ptr);
+}
+
+void * tbAlignedMalloc(std::size_t size, std::size_t align)
+{
+    using namespace libtbag::memory;
+    return TraceDyMem<getTraceLevel()>::_aligned_malloc(size, align);
+}
 

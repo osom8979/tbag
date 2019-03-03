@@ -1,13 +1,15 @@
 /**
  * @file   AlignedMemory.cpp
- * @brief  AlignedMemory class implementation.
+ * @brief  Method implementations that support memory alignment.
  * @author zer0
  * @date   2018-01-08
+ * @date   2019-03-03 (Change namespace: libtbag::memory -> libtbag::memory::details)
  */
 
-#include <libtbag/memory/AlignedMemory.hpp>
+#include <libtbag/memory/details/AlignedMemory.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/math/Number.hpp>
+#include <libtbag/config-ex.h>
 
 #include <cstdlib>
 
@@ -22,11 +24,21 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace memory {
+namespace memory  {
+namespace details {
 
-TBAG_CONSTEXPR bool isThrowMemoryError() TBAG_NOEXCEPT
+TBAG_CONSTEXPR static bool isThrowMemoryError() TBAG_NOEXCEPT
 {
 #if defined(_THROW_MEMORY_ERROR)
+    return true;
+#else
+    return false;
+#endif
+}
+
+TBAG_CONSTEXPR static bool isPowerAltivec() TBAG_NOEXCEPT
+{
+#if defined(SIMDPP_RUNNABLE_ARCH_POWER_ALTIVEC)
     return true;
 #else
     return false;
@@ -37,8 +49,7 @@ std::size_t getDefaultAlignedSize() TBAG_NOEXCEPT
 {
     // [WARNING] On certain architectures, e.g. armv7 NEON,
     // 128 bit vectors are not necessarily aligned to 16 bytes on the stack.
-    static bool USE_POWER_ALTIVEC = false;
-    return (USE_POWER_ALTIVEC ? TBAG_ALIGNMENT_SIZE_16BYTE : TBAG_ALIGNMENT_SIZE_64BYTE);
+    return (isPowerAltivec() ? TBAG_ALIGNMENT_SIZE_16BYTE : TBAG_ALIGNMENT_SIZE_64BYTE);
 }
 
 void * alignedMemoryAlloc(std::size_t size, std::size_t align)
@@ -73,6 +84,7 @@ void alignedMemoryFree(void * ptr)
 #endif
 }
 
+} // namespace details
 } // namespace memory
 
 // --------------------

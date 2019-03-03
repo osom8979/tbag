@@ -3,13 +3,15 @@
  * @brief  AlignedMemory class tester.
  * @author zer0
  * @date   2018-01-08
+ * @date   2019-03-03 (Change namespace: libtbag::memory -> libtbag::memory::details)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/memory/AlignedMemory.hpp>
+#include <libtbag/memory/details/AlignedMemory.hpp>
 
 using namespace libtbag;
 using namespace libtbag::memory;
+using namespace libtbag::memory::details;
 
 TEST(AlignedMemoryTest, Size)
 {

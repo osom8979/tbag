@@ -1,12 +1,13 @@
 /**
  * @file   AlignedMemory.hpp
- * @brief  AlignedMemory class prototype.
+ * @brief  Method prototype that support memory alignment.
  * @author zer0
  * @date   2018-01-08
+ * @date   2019-03-03 (Change namespace: libtbag::memory -> libtbag::memory::details)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALIGNEDMEMORY_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALIGNEDMEMORY_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_DETAILS_ALIGNEDMEMORY_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_DETAILS_ALIGNEDMEMORY_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,14 +17,14 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#include <cstdlib>
-#include <type_traits>
+#include <cstddef>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace memory {
+namespace memory  {
+namespace details {
 
 /**
  * @remarks
@@ -40,11 +41,12 @@ TBAG_API void * alignedMemoryAlloc(std::size_t size, std::size_t align);
 
 TBAG_API void alignedMemoryFree(void * ptr);
 
+} // namespace details
 } // namespace memory
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_ALIGNEDMEMORY_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_DETAILS_ALIGNEDMEMORY_HPP__
 

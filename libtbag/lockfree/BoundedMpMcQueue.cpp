@@ -7,7 +7,7 @@
 
 #include <libtbag/lockfree/BoundedMpMcQueue.hpp>
 #include <libtbag/bitwise/BitHacks.hpp>
-#include <libtbag/memory/AlignedMemory.hpp>
+#include <libtbag/memory/Memory.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Err.hpp>
@@ -66,8 +66,7 @@ public:
             throw std::bad_alloc();
         }
 
-        using namespace libtbag::memory;
-        _state = (State*) alignedMemoryAlloc(sizeof(State), LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
+        _state = (State*) aligned_malloc(sizeof(State), LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
         assert(_state != nullptr);
         assert(size == _elements.size());
         lfds711_queue_bmm_init_valid_on_current_logical_core(_state, _elements.data(), size, this);
@@ -78,9 +77,8 @@ public:
         lfds711_queue_bmm_cleanup(_state, &__element_cleanup_cb__);
         _elements.clear();
 
-        using namespace libtbag::memory;
         assert(_state != nullptr);
-        alignedMemoryFree(_state);
+        aligned_free(_state);
     }
 
 public:

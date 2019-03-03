@@ -168,5 +168,13 @@
 # define TBAG_DESTRUCTOR
 #endif // defined(TBAG_EXPORT_API)
 
+#ifndef TBAG_FALLTHROUGH
+# if defined(TBAG_LANG_STDCPP_17)
+#  define TBAG_FALLTHROUGH [[fallthrough]]
+# else
+#  define TBAG_FALLTHROUGH
+# endif
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_ATTRIBUTES_HPP__
 

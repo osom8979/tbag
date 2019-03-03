@@ -7,6 +7,8 @@
 
 #include <libtbag/box/CBox.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/debug/Assert.hpp>
+#include <libtbag/memory/Memory.hpp>
 
 #include <cassert>
 
@@ -60,26 +62,30 @@ Err box_init(box_data * box) TBAG_NOEXCEPT
     return Err::E_UNKNOWN;
 }
 
-Err box_malloc(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank, ui32 padding) TBAG_NOEXCEPT
+Err box_malloc(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank, ui32 padding, ui32 align) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(dims != nullptr);
 
-//    switch (type) {
-//    case BOX_TYPE_NONE:       break;
-//    case BOX_TYPE_STRING:     break;
-//    case BOX_TYPE_INT8:       break;
-//    case BOX_TYPE_INT16:      break;
-//    case BOX_TYPE_INT32:      break;
-//    case BOX_TYPE_INT64:      break;
-//    case BOX_TYPE_UINT8:      break;
-//    case BOX_TYPE_UINT16:     break;
-//    case BOX_TYPE_UINT32:     break;
-//    case BOX_TYPE_UINT64:     break;
-//    case BOX_TYPE_FLOAT32:    break;
-//    case BOX_TYPE_FLOAT64:    break;
-//    default:                  break;
-//    }
+    switch (type) {
+    case BOX_TYPE_STRING: break;
+    case BOX_TYPE_INT8:   break;
+    case BOX_TYPE_INT16:  break;
+    case BOX_TYPE_INT32:  break;
+    case BOX_TYPE_INT64:  break;
+    case BOX_TYPE_UINT8:  break;
+    case BOX_TYPE_UINT16: break;
+    case BOX_TYPE_UINT32: break;
+    case BOX_TYPE_UINT64: break;
+    case BOX_TYPE_FLOAT32:break;
+    case BOX_TYPE_FLOAT64:break;
+
+    case BOX_TYPE_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+    }
 
     return Err::E_UNKNOWN;
 }
