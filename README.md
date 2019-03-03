@@ -48,7 +48,6 @@ Tea-bag is Third party extension utility project.
 - vorbis 1.3.6 (BSD license)
 - sfml 2.5.1 (zlib/png license)
 - LuaDist/LuaJIT 2.0.3 (MIT license)
-- jemalloc/jemalloc-cmake (BSD 2-clause license)
 - bzip2 1.0.5 (BSD-like license)
 - xz/liblzma 5.2.4 (Public domain)
 - libarchive 3.3.3 (New BSD license)
