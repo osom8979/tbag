@@ -117,34 +117,48 @@ struct box_data
     /** Real data. */
     void * data;
 
-    /** Dimension data. */
-    ui32 * dims;
-
     /** Real data byte. */
     ui32 total_byte;
 
+    /** Dimension data. */
+    ui32 * dims;
+
     /** Dimension data length. */
     ui32 rank;
-
-    /** The size of the first dimension padding. (Not a byte size!) */
-    ui32 padding;
-
-    /** Memory alignment byte size. */
-    ui32 align;
 
     /** User's data pointer. */
     void * opaque;
 };
 
-TBAG_API Err box_init(box_data * box) TBAG_NOEXCEPT;
+TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
+TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;
 
-TBAG_API Err box_malloc(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank, ui32 padding, ui32 align) TBAG_NOEXCEPT;
-TBAG_API Err box_free(box_data * box) TBAG_NOEXCEPT;
+TBAG_API char const * const box_get_type_name(btype type) TBAG_NOEXCEPT;
+TBAG_API char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT;
+
+TBAG_API ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT;
+TBAG_API ui32 box_get_total_length(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 box_get_align_byte(btype type, bdev device) TBAG_NOEXCEPT;
+
+TBAG_API Err box_clear(box_data * box) TBAG_NOEXCEPT;
+
+TBAG_API ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT;
+TBAG_API void   box_dim_free(ui32 * dims) TBAG_NOEXCEPT;
+TBAG_API void   box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_malloc_copy(ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API bool   box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT;
+
+TBAG_API Err  box_malloc(box_data * box, btype type, bdev device, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API Err  box_free(box_data * box) TBAG_NOEXCEPT;
+TBAG_API bool box_exists_data(box_data const * box) TBAG_NOEXCEPT;
+TBAG_API Err  box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
+TBAG_API Err  box_checked_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
 using box_memcpy_async_cb = void(*)(Err, void*, box_data const*, box_data*);
 
-TBAG_API Err box_memcpy(box_data const * source, box_data * destination) TBAG_NOEXCEPT;
-TBAG_API Err box_memcpy_async(box_data const * source, box_data * destination, void * user, box_memcpy_async_cb cb) TBAG_NOEXCEPT;
+TBAG_API Err box_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
+TBAG_API Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
+TBAG_API Err box_memcpy_async(box_data * dest, box_data const * src, void * user, box_memcpy_async_cb cb) TBAG_NOEXCEPT;
 
 TBAG_API Err box_get_index(box_data const * box, std::size_t * index) TBAG_NOEXCEPT;
 

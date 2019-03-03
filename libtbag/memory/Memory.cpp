@@ -197,3 +197,9 @@ void * tbAlignedMalloc(std::size_t size, std::size_t align)
     return TraceDyMem<getTraceLevel()>::_aligned_malloc(size, align);
 }
 
+int tbDefaultAlignSize()
+{
+    using namespace libtbag::memory::details;
+    return static_cast<int>(getDefaultAlignedSize());
+}
+

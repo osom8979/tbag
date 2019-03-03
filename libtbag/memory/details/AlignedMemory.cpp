@@ -45,11 +45,20 @@ TBAG_CONSTEXPR static bool isPowerAltivec() TBAG_NOEXCEPT
 #endif
 }
 
-std::size_t getDefaultAlignedSize() TBAG_NOEXCEPT
+TBAG_CONSTEXPR static std::size_t _default_aligned_size() TBAG_NOEXCEPT
 {
     // [WARNING] On certain architectures, e.g. armv7 NEON,
     // 128 bit vectors are not necessarily aligned to 16 bytes on the stack.
-    return (isPowerAltivec() ? TBAG_ALIGNMENT_SIZE_16BYTE : TBAG_ALIGNMENT_SIZE_64BYTE);
+    if (isPowerAltivec()) {
+        return TBAG_ALIGNMENT_SIZE_16BYTE;
+    } else {
+        return TBAG_ALIGNMENT_SIZE_64BYTE;
+    }
+}
+
+std::size_t getDefaultAlignedSize() TBAG_NOEXCEPT
+{
+    return _default_aligned_size();
 }
 
 void * alignedMemoryAlloc(std::size_t size, std::size_t align)

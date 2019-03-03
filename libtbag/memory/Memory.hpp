@@ -28,6 +28,7 @@ TBAG_API void * tbMalloc(std::size_t size);
 TBAG_API void * tbRealloc(void * ptr, std::size_t size);
 TBAG_API void   tbAlignedFree(void * ptr);
 TBAG_API void * tbAlignedMalloc(std::size_t size, std::size_t align);
+TBAG_API int    tbDefaultAlignSize();
 
 #if defined(__cplusplus)
 } /* extern "C" */
