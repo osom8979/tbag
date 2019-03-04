@@ -299,14 +299,16 @@ inline bool isFailure(libtbag::Err err) TBAG_NOEXCEPT
 
 inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
 {
-    using namespace libtbag;
     // @formatter:off
-    return err == Err::E_SUCCESS  ||
-           err == Err::E_WARNING  ||
-           err == Err::E_RETRY    ||
-           err == Err::E_CONTINUE ||
-           err == Err::E_ASYNCREQ ||
-           err == Err::E_ENQASYNC;
+    switch (err) {
+    case libtbag::Err::E_SUCCESS:  return true;
+    case libtbag::Err::E_WARNING:  return true;
+    case libtbag::Err::E_RETRY:    return true;
+    case libtbag::Err::E_CONTINUE: return true;
+    case libtbag::Err::E_ASYNCREQ: return true;
+    case libtbag::Err::E_ENQASYNC: return true;
+    default:                       return false;
+    }
     // @formatter:on
 }
 
