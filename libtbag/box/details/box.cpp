@@ -21,14 +21,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
-static void * _box_malloc_backend(btype type, bdev device, ui32 total_byte) TBAG_NOEXCEPT
-{
-}
-
-static void _box_free_backend(btype type, bdev device, void * ptr) TBAG_NOEXCEPT
-{
-}
-
 Err box_malloc(box_data * box, btype type, bdev device, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
@@ -43,16 +35,16 @@ Err box_malloc(box_data * box, btype type, bdev device, ui32 const * dims, ui32 
     void * data;
     // @formatter:off
     switch (device) {
-    case BOX_DEVICE_CPU:  data = box_cpu_malloc(TOTAL_BYTE);
-    case BOX_DEVICE_CUDA: data = nullptr;
-    case BOX_DEVICE_CL:   data = nullptr;
-    case BOX_DEVICE_GLSL: data = nullptr;
-    case BOX_DEVICE_FBS:  data = nullptr;
+    case BOX_DEVICE_CPU:  data = box_cpu_malloc(TOTAL_BYTE); break;
+    case BOX_DEVICE_CUDA: data = nullptr; break;
+    case BOX_DEVICE_CL:   data = nullptr; break;
+    case BOX_DEVICE_GLSL: data = nullptr; break;
+    case BOX_DEVICE_FBS:  data = nullptr; break;
     case BOX_DEVICE_NONE:
         TBAG_FALLTHROUGH
     default:
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        break;
+        return Err::E_ILLARGS;
     }
     // @formatter:on
 
