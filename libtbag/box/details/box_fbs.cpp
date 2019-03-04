@@ -1,6 +1,6 @@
 /**
  * @file   box_fbs.cpp
- * @brief  box_fbs class implementation.
+ * @brief  box fbs class implementation.
  * @author zer0
  * @date   2019-03-04
  */

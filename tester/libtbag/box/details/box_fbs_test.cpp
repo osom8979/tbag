@@ -1,6 +1,6 @@
 /**
  * @file   box_fbs_test.cpp
- * @brief  box_fbs class tester.
+ * @brief  box fbs tester.
  * @author zer0
  * @date   2019-03-04
  */

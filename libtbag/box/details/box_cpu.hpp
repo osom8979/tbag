@@ -1,6 +1,6 @@
 /**
  * @file   box_cpu.hpp
- * @brief  box_cpu class prototype.
+ * @brief  box cpu prototype.
  * @author zer0
  * @date   2019-03-04
  */
@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/box/details/box_common.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,6 +24,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
+void * box_cpu_malloc(ui32 byte_size) TBAG_NOEXCEPT;
+void   box_cpu_free(void * ptr) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

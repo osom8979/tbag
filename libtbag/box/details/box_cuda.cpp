@@ -1,6 +1,6 @@
 /**
  * @file   box_cuda.cpp
- * @brief  box_cuda class implementation.
+ * @brief  box cuda implementation.
  * @author zer0
  * @date   2019-03-04
  */

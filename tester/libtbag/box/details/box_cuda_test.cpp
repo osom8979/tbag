@@ -1,6 +1,6 @@
 /**
  * @file   box_cuda_test.cpp
- * @brief  box_cuda class tester.
+ * @brief  box cuda tester.
  * @author zer0
  * @date   2019-03-04
  */

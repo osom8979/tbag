@@ -1,6 +1,6 @@
 /**
  * @file   box_fbs.hpp
- * @brief  box_fbs class prototype.
+ * @brief  box fbs class prototype.
  * @author zer0
  * @date   2019-03-04
  */
@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/box/details/box_common.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
