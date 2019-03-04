@@ -66,7 +66,7 @@ public:
             throw std::bad_alloc();
         }
 
-        _state = (State*) aligned_malloc(sizeof(State), LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
+        _state = (State*)tbAlignedMalloc(sizeof(State), LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
         assert(_state != nullptr);
         assert(size == _elements.size());
         lfds711_queue_bmm_init_valid_on_current_logical_core(_state, _elements.data(), size, this);
@@ -78,15 +78,14 @@ public:
         _elements.clear();
 
         assert(_state != nullptr);
-        aligned_free(_state);
+        tbAlignedFree(_state);
     }
 
 public:
     std::size_t potentially_inaccurate_count()
     {
         lfds711_pal_uint_t result = 0;
-        lfds711_queue_bmm_query(_state, LFDS711_QUEUE_BMM_QUERY_GET_POTENTIALLY_INACCURATE_COUNT,
-                                nullptr, &result);
+        lfds711_queue_bmm_query(_state, LFDS711_QUEUE_BMM_QUERY_GET_POTENTIALLY_INACCURATE_COUNT, nullptr, &result);
         return static_cast<std::size_t>(result);
     }
 

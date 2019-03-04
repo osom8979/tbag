@@ -50,8 +50,8 @@ private:
 public:
     Impl(std::size_t size) : SIZE(size)
     {
-        _state = (State   *) aligned_malloc(sizeof(State)  , LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
-        _dummy = (Element *) aligned_malloc(sizeof(Element), LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
+        _state = (State   *)tbAlignedMalloc(sizeof(State)  , LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
+        _dummy = (Element *)tbAlignedMalloc(sizeof(Element), LFDS711_PAL_ATOMIC_ISOLATION_IN_BYTES);
         assert(_state != nullptr);
         assert(_dummy != nullptr);
         lfds711_queue_umm_init_valid_on_current_logical_core(_state, _dummy, this);
@@ -62,8 +62,8 @@ public:
         lfds711_queue_umm_cleanup(_state, &__element_cleanup_cb__);
         assert(_dummy != nullptr);
         assert(_state != nullptr);
-        aligned_free(_dummy);
-        aligned_free(_state);
+        tbAlignedFree(_dummy);
+        tbAlignedFree(_state);
     }
 
 private:
