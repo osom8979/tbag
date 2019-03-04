@@ -1,12 +1,13 @@
 /**
- * @file   CBox.hpp
+ * @file   box.hpp
  * @brief  C-based box method prototype.
  * @author zer0
  * @date   2019-02-21
+ * @date   2019-03-04 (Rename: libtbag/box/CBox -> libtbag/box/details/box)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_BOX_CBOX_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_BOX_CBOX_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_BOX_DETAILS_BOX_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_BOX_DETAILS_BOX_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -18,13 +19,13 @@
 #include <libtbag/Err.hpp>
 
 #include <cstdint>
-#include <ccomplex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace box {
+namespace box     {
+namespace details {
 
 #define BOX_TYPE_PREFIX_BIT  0xFF00
 #define BOX_TYPE_SUFFIX_BIT  0x00FF
@@ -67,10 +68,7 @@ namespace box {
 #define BOX_DEVICE_CL    3
 #define BOX_DEVICE_GLSL  4
 
-using btype = uint16_t;
-using bdev  = uint16_t;
-
-using si8  = int8_t ;
+using si8  = int8_t;
 using si16 = int16_t;
 using si32 = int32_t;
 using si64 = int64_t;
@@ -82,6 +80,9 @@ using ui64 = uint64_t;
 
 using fp32 = float;
 using fp64 = double;
+
+using btype = ui16;
+using bdev  = ui16;
 
 #if 0
 using cp64  = float  _Complex;
@@ -162,11 +163,12 @@ TBAG_API Err box_memcpy_async(box_data * dest, box_data const * src, void * user
 
 TBAG_API Err box_get_index(box_data const * box, std::size_t * index) TBAG_NOEXCEPT;
 
+} // namespace details
 } // namespace box
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_BOX_CBOX_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_BOX_DETAILS_BOX_HPP__
 

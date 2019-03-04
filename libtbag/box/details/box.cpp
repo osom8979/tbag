@@ -1,22 +1,22 @@
 /**
- * @file   CBox.cpp
+ * @file   box.cpp
  * @brief  C-based box method implementation.
  * @author zer0
  * @date   2019-02-21
+ * @date   2019-03-04 (Rename: libtbag/box/CBox -> libtbag/box/details/box)
  */
 
-#include <libtbag/box/CBox.hpp>
+#include <libtbag/box/details/box.hpp>
 #include <libtbag/Type.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/memory/Memory.hpp>
-
-#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace box {
+namespace box     {
+namespace details {
 
 STATIC_ASSERT_CHECK_SIZEOF(btype,  2);
 STATIC_ASSERT_CHECK_SIZEOF(bdev ,  2);
@@ -372,6 +372,7 @@ Err box_get_index(box_data const * box, std::size_t * index) TBAG_NOEXCEPT
     return Err::E_UNKNOWN;
 }
 
+} // namespace details
 } // namespace box
 
 // --------------------
