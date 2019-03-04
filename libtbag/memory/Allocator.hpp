@@ -86,14 +86,14 @@ struct Allocator
     pointer allocate(size_type size, void const * hint = 0)
     {
         assert(size > 0);
-        return static_cast<pointer>(malloc(size * sizeof(value_type)));
+        return static_cast<pointer>(tbMalloc(size * sizeof(value_type)));
     }
 
     /** deallocates storage. */
     void deallocate(pointer ptr, size_type allocated_size)
     {
         assert(ptr != nullptr);
-        free((void*)ptr);
+        tbFree((void*)ptr);
     }
 
     /** constructs an object in allocated storage. */

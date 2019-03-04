@@ -65,7 +65,6 @@ tbag_config__set_option (USE_RTTI   OFF) ## Enable RTTI flag.
 
 tbag_config__set_option (DISABLE_TDLOG             OFF) ## Disable tbag default logger.
 tbag_config__set_option (DISABLE_LUAJIT_EXE_FLAGS  OFF) ## Disable LuaJIT Embedding flags if apple.
-tbag_config__set_option (REDEFINE_MEMORY_FUNCTIONS OFF) ## Enable redefined default memory functions.
 
 ## Configure settings.
 if (USE_CCACHE)

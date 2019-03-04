@@ -34,16 +34,5 @@ TBAG_API int    tbDefaultAlignSize();
 } /* extern "C" */
 #endif
 
-#if defined(TBAG_REDEFINE_MEMORY_FUNCTIONS)
-# define calloc(num, size)           tbCalloc(num, size)
-# define free(ptr)                   tbFree(ptr)
-# define malloc(size)                tbMalloc(size)
-# define realloc(ptr, size)          tbRealloc(ptr, size)
-# define aligned_free(ptr)           tbAlignedFree(ptr)
-# define aligned_malloc(size, align) tbAlignedMalloc(size, align)
-#else
-# include <cstdlib>
-#endif
-
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MEMORY_MEMORY_HPP__
 
