@@ -23,11 +23,6 @@ using namespace libtbag::uvxx;
 
 TEST(UxFsPollTest, Default)
 {
-#if defined(SKIP_FSPOLL_TESTER)
-    std::cout << "Skip this test. (The SKIP_FSPOLL_TESTER macro has been defined)\n";
-    return;
-#endif
-
     char const * const TEST_FILENAME = "test.file";
     tttDir_Automatic();
     auto const PATH = tttDir_Get() / TEST_FILENAME;

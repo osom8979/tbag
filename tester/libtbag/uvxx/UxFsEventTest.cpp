@@ -9,7 +9,10 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/uvxx/UxLoop.hpp>
 #include <libtbag/uvxx/UxFsEvent.hpp>
+#include <libtbag/uvxx/UxIdle.hpp>
 
+#include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
 #include <libtbag/filesystem/File.hpp>
 
 #include <thread>
@@ -40,6 +43,25 @@ TEST(UxFsEventTest, Default)
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
 
+    UxIdle idle;
+    ASSERT_EQ(Err::E_SUCCESS, idle.init(loop));
+    ASSERT_TRUE(idle.isInit());
+    ASSERT_FALSE(loop.empty());
+    ASSERT_EQ(3, loop.size());
+
+    libtbag::lock::UvLock lock;
+    libtbag::lock::UvCondition cond;
+    bool on_idle = false;
+
+    idle.setOnIdle([&](){
+        lock.lock();
+        on_idle = true;
+        cond.broadcast();
+        lock.unlock();
+        idle.close();
+    });
+    ASSERT_EQ(Err::E_SUCCESS, idle.start());
+
     libtbag::filesystem::File f;
     ASSERT_TRUE(f.open(PATH));
     ASSERT_TRUE(f.isOpen());
@@ -65,9 +87,15 @@ TEST(UxFsEventTest, Default)
     ASSERT_EQ(Err::E_SUCCESS, fs.start(PATH.c_str()));
 
     Err loop_result = Err::E_UNKNOWN;
-    std::thread thread = std::thread([&](){
+    auto thread = std::thread([&](){
         loop_result = loop.run();
     });
+
+    lock.lock();
+    while (!on_idle) {
+        cond.wait(lock);
+    }
+    lock.unlock();
 
     int const WRITE_SIZE = 4;
     ASSERT_EQ(WRITE_SIZE, f.write("TEMP", WRITE_SIZE, 0));
