@@ -20,7 +20,7 @@ namespace details {
 ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
 {
     assert(rank >= 1);
-    return (ui32*)tbMalloc(rank);
+    return (ui32*)tbMalloc(sizeof(ui32) * rank);
 }
 
 ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT
