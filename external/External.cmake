@@ -613,7 +613,7 @@ else ()
                        "-DENABLE_BZip2=ON"
                        "-DENABLE_LIBXML2=OFF"
                        "-DENABLE_EXPAT=OFF"
-                       #"-DENABLE_CNG=ON"
+                       "-DENABLE_CNG=OFF" ## [IMPORTANT] Don't use the CNG(Crypto Next Generation) features.
                        #"-DENABLE_XATTR=ON"
                        #"-DENABLE_ACL=ON"
                        "-DENABLE_ICONV=OFF"
@@ -635,6 +635,8 @@ else ()
                        "-DOPENSSL_SSL_LIBRARY=${ressl_ssl_EXT_STATIC_LIB}"
                        "-DOPENSSL_LIBRARIES=${ressl_EXT_LIBRARIES}"
                        "-DOPENSSL_VERSION=${ressl_EXT_VERSION_STR}"
+                       "-DHAVE_LIBCRYPTO=1"
+                       "-DHAVE_PKCS5_PBKDF2_HMAC_SHA1=1"
             #--Output larchiveing-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
