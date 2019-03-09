@@ -10,6 +10,7 @@
 #include <libtbag/uvxx/UxLoop.hpp>
 #include <libtbag/uvxx/UxFsEvent.hpp>
 #include <libtbag/uvxx/UxIdle.hpp>
+#include <libtbag/uvxx/UxCheck.hpp>
 
 #include <libtbag/lock/UvLock.hpp>
 #include <libtbag/lock/UvCondition.hpp>
@@ -49,9 +50,16 @@ TEST(UxFsEventTest, Default)
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(3, loop.size());
 
+    UxCheck check;
+    ASSERT_EQ(Err::E_SUCCESS, check.init(loop));
+    ASSERT_TRUE(check.isInit());
+    ASSERT_FALSE(loop.empty());
+    ASSERT_EQ(4, loop.size());
+
     libtbag::lock::UvLock lock;
     libtbag::lock::UvCondition cond;
     bool on_idle = false;
+    bool on_check = false;
 
     idle.setOnIdle([&](){
         lock.lock();
@@ -61,6 +69,15 @@ TEST(UxFsEventTest, Default)
         idle.close();
     });
     ASSERT_EQ(Err::E_SUCCESS, idle.start());
+
+    check.setOnCheck([&](){
+        lock.lock();
+        on_check = true;
+        cond.broadcast();
+        lock.unlock();
+        check.close();
+    });
+    ASSERT_EQ(Err::E_SUCCESS, check.start());
 
     libtbag::filesystem::File f;
     ASSERT_TRUE(f.open(PATH));
@@ -92,11 +109,15 @@ TEST(UxFsEventTest, Default)
     });
 
     lock.lock();
-    while (!on_idle) {
+    while (true) {
+        if (on_idle && on_check) {
+            break;
+        }
         cond.wait(lock);
     }
     lock.unlock();
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     int const WRITE_SIZE = 4;
     ASSERT_EQ(WRITE_SIZE, f.write("TEMP", WRITE_SIZE, 0));
     ASSERT_TRUE(f.close());
