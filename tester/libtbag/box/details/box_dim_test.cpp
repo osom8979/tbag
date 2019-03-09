@@ -25,7 +25,7 @@ TEST(box_dim_test, Default)
     ASSERT_EQ(20, dims2[1]);
     ASSERT_TRUE(box_dim_is_equals(dims1, 2, dims2, 2));
 
-    auto * dims3 = box_dim_malloc_copy(dims2, 2);
+    auto * dims3 = box_dim_clone(dims2, 2);
     ASSERT_EQ(10, dims3[0]);
     ASSERT_EQ(20, dims3[1]);
     ASSERT_TRUE(box_dim_is_equals(dims2, 2, dims3, 2));

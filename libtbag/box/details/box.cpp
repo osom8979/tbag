@@ -21,15 +21,28 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
-Err box_malloc(box_data * box, btype type, bdev device, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
+Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(dims != nullptr);
     assert(rank >= 1);
     assert(box_support_type(type));
-    assert(box_support_type(device));
+    assert(box_support_device(device));
 
-    auto const TOTAL_BYTE = box_get_type_byte(type) * box_get_total_length(dims, rank);
+    auto * cloned_box_dims = box_dim_clone(dims, rank);
+    assert(cloned_box_dims != nullptr);
+    return box_malloc_move_dims(box, type, device, cloned_box_dims, rank);
+}
+
+Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(dims != nullptr);
+    assert(rank >= 1);
+    assert(box_support_type(type));
+    assert(box_support_device(device));
+
+    auto const TOTAL_BYTE = box_get_type_byte(type) * box_dim_get_size(dims, rank);
     assert(TOTAL_BYTE >= 1);
 
     void * data;
@@ -52,9 +65,30 @@ Err box_malloc(box_data * box, btype type, bdev device, ui32 const * dims, ui32 
     box->device = device;
     box->data = data;
     box->total_byte = TOTAL_BYTE;
-    box->dims = box_dim_malloc_copy(dims, rank);
+    box->dims = dims;
     box->rank = rank;
     return Err::E_SUCCESS;
+}
+
+Err box_malloc_args(box_data * box, btype type, bdev device, ui32 rank, ...) TBAG_NOEXCEPT
+{
+    va_list ap;
+    va_start(ap, rank);
+    auto const CODE = box_malloc_vargs(box, type, device, rank, ap);
+    va_end(ap);
+    return CODE;
+}
+
+Err box_malloc_vargs(box_data * box, btype type, bdev device, ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(rank >= 1);
+    assert(box_support_type(type));
+    assert(box_support_device(device));
+
+    auto * dims = box_dim_malloc_vargs(rank, ap);
+    assert(dims != nullptr);
+    return box_malloc_move_dims(box, type, device, dims, rank);
 }
 
 Err box_free(box_data * box) TBAG_NOEXCEPT
@@ -87,7 +121,7 @@ bool box_exists_data(box_data const * box) TBAG_NOEXCEPT
 
 Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
-    auto const CODE = box_malloc(dest, src->type, src->device, src->dims, src->rank);
+    auto const CODE = box_malloc_copy_dims(dest, src->type, src->device, src->dims, src->rank);
     if (isFailure(CODE)) {
         return CODE;
     }
@@ -102,33 +136,16 @@ Err box_checked_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     return box_clone(dest, src);
 }
 
-//Err _box_memcpy_cpu_backend(box_data * dest, box_data const * src) TBAG_NOEXCEPT
-//{
-//    auto const SIZE = (src->total_byte / box_get_type_byte(src->type));
-//    for (ui32 i = 0; i < SIZE; ++i) {
-//    }
-//}
-
 Err box_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
-//    switch (dest->type) {
-//    case BOX_TYPE_STRING:   return sizeof(char);
-//    case BOX_TYPE_INT8:     return sizeof(si8);
-//    case BOX_TYPE_INT16:    return sizeof(si16);
-//    case BOX_TYPE_INT32:    return sizeof(si32);
-//    case BOX_TYPE_INT64:    return sizeof(si64);
-//    case BOX_TYPE_UINT8:    return sizeof(ui8);
-//    case BOX_TYPE_UINT16:   return sizeof(ui16);
-//    case BOX_TYPE_UINT32:   return sizeof(ui32);
-//    case BOX_TYPE_UINT64:   return sizeof(ui64);
-//    case BOX_TYPE_FLOAT32:  return sizeof(fp32);
-//    case BOX_TYPE_FLOAT64:  return sizeof(fp64);
-//    case BOX_TYPE_NONE:
-//        TBAG_FALLTHROUGH
-//    default:
-//        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-//        break;
-//    }
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    assert(dest != src);
+    assert(dest->total_byte == src->total_byte);
+    if (dest->device == BOX_DEVICE_CPU && src->device == BOX_DEVICE_CPU) {
+        box_cpu_memcpy(dest->data, src->data, src->total_byte);
+        return Err::E_SUCCESS;
+    }
     return Err::E_ENOSYS;
 }
 
@@ -136,6 +153,7 @@ Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     assert(src != nullptr);
+    assert(dest != src);
     if (!box_dim_is_equals(dest->dims, dest->rank, src->dims, src->rank)) {
         return Err::E_ILLARGS;
     }
@@ -150,12 +168,6 @@ Err box_memcpy_async(box_data * dest, box_data const * src, void * user, box_mem
     assert(dest != nullptr);
     assert(src != nullptr);
     return Err::E_ENOSYS;
-}
-
-Err box_get_index(box_data const * box, std::size_t * index) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    return Err::E_UNKNOWN;
 }
 
 } // namespace details

@@ -19,6 +19,8 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/box/details/box_common.hpp>
 
+#include <cstdarg>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -26,8 +28,12 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
-TBAG_API Err  box_malloc(box_data * box, btype type, bdev device, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API Err  box_free(box_data * box) TBAG_NOEXCEPT;
+TBAG_API Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API Err box_malloc_args(box_data * box, btype type, bdev device, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API Err box_malloc_vargs(box_data * box, btype type, bdev device, ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API Err box_free(box_data * box) TBAG_NOEXCEPT;
+
 TBAG_API bool box_exists_data(box_data const * box) TBAG_NOEXCEPT;
 TBAG_API Err  box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err  box_checked_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
@@ -37,8 +43,6 @@ using box_memcpy_async_cb = void(*)(Err, void*, box_data const*, box_data*);
 TBAG_API Err box_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err box_memcpy_async(box_data * dest, box_data const * src, void * user, box_memcpy_async_cb cb) TBAG_NOEXCEPT;
-
-TBAG_API Err box_get_index(box_data const * box, std::size_t * index) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

@@ -3,6 +3,13 @@
  * @brief  box dim prototype.
  * @author zer0
  * @date   2019-03-04
+ *
+ * @remarks
+ *  High dimension <- * -> Low dimension @n
+ *  Low index <- * -> High index @n
+ *  0, 1, 2, ..., 5, 6, 7, ... @n
+ *  Example: @n
+ *   - Image matrix: depth(0), height(1), width(2), channels(3)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_BOX_DETAILS_BOX_DIM_HPP__
@@ -33,8 +40,11 @@ TBAG_API void   box_dim_free(ui32 * dims) TBAG_NOEXCEPT;
 TBAG_API void   box_dim_set_args(ui32 * TBAG_RESTRICT dims, ui32 args_count, ...) TBAG_NOEXCEPT;
 TBAG_API void   box_dim_set_vargs(ui32 * TBAG_RESTRICT dims, ui32 args_count, va_list ap) TBAG_NOEXCEPT;
 TBAG_API void   box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API ui32 * box_dim_malloc_copy(ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
 TBAG_API bool   box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT;
+TBAG_API ui32   box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32   box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API ui32   box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box
