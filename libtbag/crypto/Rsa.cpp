@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/crypto/Rsa.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <openssl/bio.h>
@@ -17,6 +18,7 @@
 #include <openssl/rand.h>
 
 #include <cassert>
+#include <cstring>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -59,6 +61,21 @@ static EVP_CIPHER const * __get_evp_cipher_by_name(std::string const & name) TBA
         return nullptr;
     }
     return EVP_get_cipherbyname(name.c_str());
+}
+
+int __get_rsa_padding(Rsa::Padding p) TBAG_NOEXCEPT
+{
+    // @formatter:off
+    switch (p) {
+    case Rsa::Padding::P_PKCS1:      return RSA_PKCS1_PADDING;
+    case Rsa::Padding::P_PKCS1_OAEP: return RSA_PKCS1_OAEP_PADDING;
+    case Rsa::Padding::P_SSLV23:     return RSA_SSLV23_PADDING;
+    case Rsa::Padding::P_NO:         return RSA_NO_PADDING;
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return RSA_NO_PADDING;
+    }
+    // @formatter:on
 }
 
 // -------------------
@@ -115,6 +132,46 @@ bool Rsa::gen(int key_length, unsigned long e)
     return true;
 }
 
+bool Rsa::readPemPublicKey(std::string const & key)
+{
+    std::shared_ptr<BIO> bio(BIO_new_mem_buf((void*)key.data(), (int)key.size()), [](BIO * bio){
+        BIO_free_all(bio);
+    });
+    assert(static_cast<bool>(bio));
+
+    RSA * rsa = nullptr;
+    rsa = PEM_read_bio_RSA_PUBKEY(bio.get(), &rsa, nullptr, nullptr);
+    if (rsa == nullptr) {
+        return false;
+    }
+
+    _rsa.reset((FakeRsa*)rsa, [](FakeRsa * rsa){
+        RSA_free((RSA*)rsa);
+    });
+    assert(static_cast<bool>(_rsa));
+    return true;
+}
+
+bool Rsa::readPemPrivateKey(std::string const & key)
+{
+    std::shared_ptr<BIO> bio(BIO_new_mem_buf((void*)key.data(), (int)key.size()), [](BIO * bio){
+        BIO_free_all(bio);
+    });
+    assert(static_cast<bool>(bio));
+
+    RSA * rsa = nullptr;
+    rsa = PEM_read_bio_RSAPrivateKey(bio.get(), &rsa, nullptr, nullptr);
+    if (rsa == nullptr) {
+        return false;
+    }
+
+    _rsa.reset((FakeRsa*)rsa, [](FakeRsa * rsa){
+        RSA_free((RSA*)rsa);
+    });
+    assert(static_cast<bool>(_rsa));
+    return true;
+}
+
 std::string Rsa::getPemPublicKey() const
 {
     std::shared_ptr<BIO> bio(BIO_new(BIO_s_mem()), [](BIO * bio){
@@ -146,6 +203,91 @@ std::string Rsa::getPemPrivateKey(CipherAlgorithm cipher) const
     key.resize(static_cast<std::size_t>(BIO_pending(bio.get())));
     BIO_read(bio.get(), (void*)key.data(), (int)key.size());
     return key;
+}
+
+int Rsa::getMaxDataSize(Padding p) const
+{
+    auto const RSA_SIZE = RSA_size((RSA*)_rsa.get());
+    switch (p) {
+    case Padding::P_PKCS1:      return RSA_SIZE - 11;
+    case Padding::P_PKCS1_OAEP: return RSA_SIZE - 41;
+    case Padding::P_SSLV23:     return 0;
+    case Padding::P_NO:         return RSA_SIZE;
+    default:                    return 0;
+    }
+}
+
+std::string Rsa::encryptPublic(std::string const & data, Padding p) const
+{
+    if (data.size() >= getMaxDataSize(p)) {
+        return std::string();
+    }
+
+    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
+
+    auto const RESULT = RSA_public_encrypt((int)data.size(), (unsigned char const *)data.data(),
+                                           &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
+    if (RESULT == -1) {
+        return std::string();
+    }
+    assert(RESULT <= ENCRYPT_SIZE);
+    return std::string(buffer.data(), buffer.data() + RESULT);
+}
+
+std::string Rsa::decryptPublic(std::string const & data, Padding p) const
+{
+    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
+    if (data.size() > ENCRYPT_SIZE) {
+        return std::string();
+    }
+
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
+    auto const RESULT = RSA_public_decrypt((int)data.size(), (unsigned char const *)data.data(),
+                                           &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
+    if (RESULT == -1) {
+        return std::string();
+    }
+    assert(RESULT <= ENCRYPT_SIZE);
+    return std::string(buffer.data(), buffer.data() + RESULT);
+}
+
+std::string Rsa::encryptPrivate(std::string const & data, Padding p) const
+{
+    if (!isPrivateKeyEncryptionSupports(p)) {
+        return std::string();
+    }
+    if (data.size() >= getMaxDataSize(p)) {
+        return std::string();
+    }
+
+    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
+
+    auto const RESULT = RSA_private_encrypt((int)data.size(), (unsigned char const *)data.data(),
+                                            &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
+    if (RESULT == -1) {
+        return std::string();
+    }
+    assert(RESULT <= ENCRYPT_SIZE);
+    return std::string(buffer.data(), buffer.data() + RESULT);
+}
+
+std::string Rsa::decryptPrivate(std::string const & data, Padding p) const
+{
+    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
+    if (data.size() > ENCRYPT_SIZE) {
+        return std::string();
+    }
+
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
+    auto const RESULT = RSA_private_decrypt((int)data.size(), (unsigned char const *)data.data(),
+                                          &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
+    if (RESULT == -1) {
+        return std::string();
+    }
+    assert(RESULT <= ENCRYPT_SIZE);
+    return std::string(buffer.data(), buffer.data() + RESULT);
 }
 
 bool Rsa::generatePem(std::string & public_key, std::string & private_key, CipherAlgorithm cipher, int key_length)

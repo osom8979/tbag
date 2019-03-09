@@ -54,6 +54,39 @@ public:
         CA_CAMELLIA256, ///< Encrypt PEM output with cbc camellia256.
     };
 
+    enum class Padding
+    {
+        /**
+         * PKCS #1 v1.5 padding.
+         * This currently is the most widely used mode.
+         */
+        P_PKCS1,
+
+        /**
+         * EME-OAEP as defined in PKCS #1 v2.0 with SHA-1, MGF1 and an empty encoding parameter.
+         * This mode is recommended for all new applications.
+         */
+        P_PKCS1_OAEP,
+
+        /**
+         * PKCS #1 v1.5 padding with an SSL-specific modification that denotes that the server is SSL3 capable.
+         */
+        P_SSLV23,
+
+        /**
+         * Raw RSA encryption.
+         * This mode should only be used to implement cryptographically sound padding modes in the application code.
+         * Encrypting user data directly with RSA is insecure.
+         */
+        P_NO,
+    };
+
+public:
+    static bool isPrivateKeyEncryptionSupports(Padding p) TBAG_NOEXCEPT
+    {
+        return (p == Padding::P_PKCS1) || (p == Padding::P_NO);
+    }
+
 public:
     TBAG_CONSTEXPR static int const DEFAULT_KEY_LENGTH = 2048;
 
@@ -73,8 +106,22 @@ public:
     bool gen(int key_length, unsigned long e);
 
 public:
+    bool readPemPublicKey(std::string const & key);
+    bool readPemPrivateKey(std::string const & key);
+
+public:
     std::string getPemPublicKey() const;
     std::string getPemPrivateKey(CipherAlgorithm cipher = CipherAlgorithm::CA_NONE) const;
+
+public:
+    int getMaxDataSize(Padding p) const;
+
+public:
+    std::string encryptPublic(std::string const & data, Padding p = Padding::P_PKCS1) const;
+    std::string decryptPublic(std::string const & data, Padding p = Padding::P_PKCS1) const;
+
+    std::string encryptPrivate(std::string const & data, Padding p = Padding::P_PKCS1) const;
+    std::string decryptPrivate(std::string const & data, Padding p = Padding::P_PKCS1) const;
 
 public:
     /** Generate PEM(Privacy Enhanced Mail) format string. */
