@@ -106,55 +106,25 @@ void StorageNode::setup()
     Property prop;
 
     // @formatter:off
-    prop.env      .text = TAG_ENV      ;
-    prop.config   .text = TAG_CONFIG   ;
-    prop.module   .text = TAG_MODULE   ;
-    prop.text     .text = TAG_TEXT     ;
-    prop.image    .text = TAG_IMAGE    ;
-    prop.drawable .text = TAG_DRAWABLE ;
-    prop.animation.text = TAG_ANIMATION;
-    prop.sprite   .text = TAG_SPRITE   ;
-    prop.lmdb     .text = TAG_LMDB     ;
-    prop.sqlite   .text = TAG_SQLITE   ;
-    prop.temp     .text = TAG_TEMP     ;
-    prop.keystore .text = TAG_KEYSTORE ;
-    prop.lua      .text = TAG_LUA      ;
-    prop.raw      .text = TAG_RAW      ;
-    prop.bagex    .text = TAG_BAGEX    ;
-    prop.exe      .text = TAG_EXE      ;
-    prop.font     .text = TAG_FONT     ;
-    prop.music    .text = TAG_MUSIC    ;
-    prop.sound    .text = TAG_SOUND    ;
-    prop.shader   .text = TAG_SHADER   ;
-    prop.layout   .text = TAG_LAYOUT   ;
-    prop.style    .text = TAG_STYLE    ;
-    prop.color    .text = TAG_COLOR    ;
+    prop.env     .text = TAG_ENV     ;
+    prop.config  .text = TAG_CONFIG  ;
+    prop.module  .text = TAG_MODULE  ;
+    prop.text    .text = TAG_TEXT    ;
+    prop.sqlite  .text = TAG_SQLITE  ;
+    prop.temp    .text = TAG_TEMP    ;
+    prop.keystore.text = TAG_KEYSTORE;
+    prop.lua     .text = TAG_LUA     ;
     // @formatter:on
 
     // @formatter:off
-    prop.env      .exists = true;
-    prop.config   .exists = true;
-    prop.module   .exists = true;
-    prop.text     .exists = true;
-    prop.image    .exists = true;
-    prop.drawable .exists = true;
-    prop.animation.exists = true;
-    prop.sprite   .exists = true;
-    prop.lmdb     .exists = true;
-    prop.sqlite   .exists = true;
-    prop.temp     .exists = true;
-    prop.keystore .exists = true;
-    prop.lua      .exists = true;
-    prop.raw      .exists = true;
-    prop.bagex    .exists = true;
-    prop.exe      .exists = true;
-    prop.font     .exists = true;
-    prop.music    .exists = true;
-    prop.sound    .exists = true;
-    prop.shader   .exists = true;
-    prop.layout   .exists = true;
-    prop.style    .exists = true;
-    prop.color    .exists = true;
+    prop.env     .exists = true;
+    prop.config  .exists = true;
+    prop.module  .exists = true;
+    prop.text    .exists = true;
+    prop.sqlite  .exists = true;
+    prop.temp    .exists = true;
+    prop.keystore.exists = true;
+    prop.lua     .exists = true;
     // @formatter:on
 
     update(libtbag::filesystem::Path::getWorkDir(), prop);
@@ -178,25 +148,10 @@ void StorageNode::load(Element const & element)
     readElement(element, TAG_CONFIG   , prop.config);
     readElement(element, TAG_MODULE   , prop.module);
     readElement(element, TAG_TEXT     , prop.text);
-    readElement(element, TAG_IMAGE    , prop.image);
-    readElement(element, TAG_DRAWABLE , prop.drawable);
-    readElement(element, TAG_ANIMATION, prop.animation);
-    readElement(element, TAG_SPRITE   , prop.sprite);
-    readElement(element, TAG_LMDB     , prop.lmdb);
     readElement(element, TAG_SQLITE   , prop.sqlite);
     readElement(element, TAG_TEMP     , prop.temp);
     readElement(element, TAG_KEYSTORE , prop.keystore);
     readElement(element, TAG_LUA      , prop.lua);
-    readElement(element, TAG_RAW      , prop.raw);
-    readElement(element, TAG_BAGEX    , prop.bagex);
-    readElement(element, TAG_EXE      , prop.exe);
-    readElement(element, TAG_FONT     , prop.font);
-    readElement(element, TAG_MUSIC    , prop.music);
-    readElement(element, TAG_SOUND    , prop.sound);
-    readElement(element, TAG_SHADER   , prop.shader);
-    readElement(element, TAG_LAYOUT   , prop.layout);
-    readElement(element, TAG_STYLE    , prop.style);
-    readElement(element, TAG_COLOR    , prop.color);
     // @formatter:on
 
     foreachElement(element, TAG_USER, [&](Element const & node){
@@ -217,25 +172,10 @@ void StorageNode::save(Element & element) const
     addNewElement(element, TAG_CONFIG   , _prop.config);
     addNewElement(element, TAG_MODULE   , _prop.module);
     addNewElement(element, TAG_TEXT     , _prop.text);
-    addNewElement(element, TAG_IMAGE    , _prop.image);
-    addNewElement(element, TAG_DRAWABLE , _prop.drawable);
-    addNewElement(element, TAG_ANIMATION, _prop.animation);
-    addNewElement(element, TAG_SPRITE   , _prop.sprite);
-    addNewElement(element, TAG_LMDB     , _prop.lmdb);
     addNewElement(element, TAG_SQLITE   , _prop.sqlite);
     addNewElement(element, TAG_TEMP     , _prop.temp);
     addNewElement(element, TAG_KEYSTORE , _prop.keystore);
     addNewElement(element, TAG_LUA      , _prop.lua);
-    addNewElement(element, TAG_RAW      , _prop.raw);
-    addNewElement(element, TAG_BAGEX    , _prop.bagex);
-    addNewElement(element, TAG_EXE      , _prop.exe);
-    addNewElement(element, TAG_FONT     , _prop.font);
-    addNewElement(element, TAG_MUSIC    , _prop.music);
-    addNewElement(element, TAG_SOUND    , _prop.sound);
-    addNewElement(element, TAG_SHADER   , _prop.shader);
-    addNewElement(element, TAG_LAYOUT   , _prop.layout);
-    addNewElement(element, TAG_STYLE    , _prop.style);
-    addNewElement(element, TAG_COLOR    , _prop.color);
     // @formatter:on
 
     for (auto & user : _prop.users) {
@@ -497,25 +437,10 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     if (prop.config   .exists) { storage.setLayoutConfig   (getPath(updated_root, TAG_CONFIG   , prop.config   , ENVIRONMENTS)); }
     if (prop.module   .exists) { storage.setLayoutModule   (getPath(updated_root, TAG_MODULE   , prop.module   , ENVIRONMENTS)); }
     if (prop.text     .exists) { storage.setLayoutText     (getPath(updated_root, TAG_TEXT     , prop.text     , ENVIRONMENTS)); }
-    if (prop.image    .exists) { storage.setLayoutImage    (getPath(updated_root, TAG_IMAGE    , prop.image    , ENVIRONMENTS)); }
-    if (prop.drawable .exists) { storage.setLayoutDrawable (getPath(updated_root, TAG_DRAWABLE , prop.drawable , ENVIRONMENTS)); }
-    if (prop.animation.exists) { storage.setLayoutAnimation(getPath(updated_root, TAG_ANIMATION, prop.animation, ENVIRONMENTS)); }
-    if (prop.sprite   .exists) { storage.setLayoutSprite   (getPath(updated_root, TAG_SPRITE   , prop.sprite   , ENVIRONMENTS)); }
-    if (prop.lmdb     .exists) { storage.setLayoutLmdb     (getPath(updated_root, TAG_LMDB     , prop.lmdb     , ENVIRONMENTS)); }
     if (prop.sqlite   .exists) { storage.setLayoutSqlite   (getPath(updated_root, TAG_SQLITE   , prop.sqlite   , ENVIRONMENTS)); }
     if (prop.temp     .exists) { storage.setLayoutTemp     (getPath(updated_root, TAG_TEMP     , prop.temp     , ENVIRONMENTS)); }
     if (prop.keystore .exists) { storage.setLayoutKeystore (getPath(updated_root, TAG_KEYSTORE , prop.keystore , ENVIRONMENTS)); }
     if (prop.lua      .exists) { storage.setLayoutLua      (getPath(updated_root, TAG_LUA      , prop.lua      , ENVIRONMENTS)); }
-    if (prop.raw      .exists) { storage.setLayoutRaw      (getPath(updated_root, TAG_RAW      , prop.raw      , ENVIRONMENTS)); }
-    if (prop.bagex    .exists) { storage.setLayoutBagex    (getPath(updated_root, TAG_BAGEX    , prop.bagex    , ENVIRONMENTS)); }
-    if (prop.exe      .exists) { storage.setLayoutExe      (getPath(updated_root, TAG_EXE      , prop.exe      , ENVIRONMENTS)); }
-    if (prop.font     .exists) { storage.setLayoutFont     (getPath(updated_root, TAG_FONT     , prop.font     , ENVIRONMENTS)); }
-    if (prop.music    .exists) { storage.setLayoutMusic    (getPath(updated_root, TAG_MUSIC    , prop.music    , ENVIRONMENTS)); }
-    if (prop.sound    .exists) { storage.setLayoutSound    (getPath(updated_root, TAG_SOUND    , prop.sound    , ENVIRONMENTS)); }
-    if (prop.shader   .exists) { storage.setLayoutShader   (getPath(updated_root, TAG_SHADER   , prop.shader   , ENVIRONMENTS)); }
-    if (prop.layout   .exists) { storage.setLayoutLayout   (getPath(updated_root, TAG_LAYOUT   , prop.layout   , ENVIRONMENTS)); }
-    if (prop.style    .exists) { storage.setLayoutStyle    (getPath(updated_root, TAG_STYLE    , prop.style    , ENVIRONMENTS)); }
-    if (prop.color    .exists) { storage.setLayoutColor    (getPath(updated_root, TAG_COLOR    , prop.color    , ENVIRONMENTS)); }
     // @formatter:on
 
     if (prop.module.exists) {
@@ -525,26 +450,12 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.setTextLanguage(prop.text.name);
         storage.loadText();
     }
-
-    // drawable
-    // animation
-    // sprite
-
-    // lmdb
-    // sqlite
-    // temp
-    // keystore
-    // lua
-    // raw
-    // bagex
-    // exe
-    // font
-    // music
-    // sound
-    // shader
-    // layout
-    // style
-    // color
+    if (prop.sqlite.exists) {
+        storage.openSqlite(prop.sqlite.name);
+    }
+    if (prop.temp.exists && prop.temp.auto_clear) {
+        storage.setAutoClearTempFiles();
+    }
 
     return storage;
 }

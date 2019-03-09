@@ -19,6 +19,44 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace res {
 
+static void _remove_child_files(std::string const & dir)
+{
+    if (dir.empty()) {
+        return;
+    }
+
+    auto const TEMP_PATH = libtbag::filesystem::Path(dir);
+    if (!TEMP_PATH.isDirectory()) {
+        return;
+    }
+
+    for (auto & path : TEMP_PATH.scanDir()) {
+        if (!path.removeAll()) {
+            tDLogW("_remove_child_files() Delete failed: {}", path);
+        }
+    }
+}
+
+// ----------------------------------
+// Storage::Impl class implementation
+// ----------------------------------
+
+Storage::Impl::Impl()
+{
+    // EMPTY.
+}
+
+Storage::Impl::~Impl()
+{
+    if (clear_tempdir.empty()) {
+        _remove_child_files(clear_tempdir);
+    }
+}
+
+// ----------------------------
+// Storage class implementation
+// ----------------------------
+
 Storage::Storage() : _impl(std::make_shared<Impl>())
 {
     assert(static_cast<bool>(_impl));
@@ -160,6 +198,11 @@ void Storage::setEnv(std::string const & key, std::string const & value)
 bool Storage::getEnv(std::string const & key, std::string & value) const
 {
     return _impl->envs.get(key, value);
+}
+
+std::vector<std::string> Storage::getEnvFilenames() const
+{
+    return getFilenames(LAYOUT_ENV);
 }
 
 std::string Storage::convert(std::string const & value) const
@@ -313,19 +356,62 @@ bool Storage::saveText()
     return _impl->text.save(asset().get(LAYOUT_TEXT));
 }
 
-std::vector<std::string> Storage::getImageFilenames() const
+bool Storage::openSqlite(std::string const & filename, bool auto_close)
 {
-    return getFilenames(LAYOUT_IMAGE);
+    if (auto_close && _impl->sqlite.isOpen()) {
+        _impl->sqlite.close();
+    }
+    return _impl->sqlite.open(asset().get(LAYOUT_SQLITE) / filename);
 }
 
-bool Storage::loadImage(std::string const & filename, Image & image)
+void Storage::closeSqlite()
 {
-    return libtbag::graphic::readImage(asset().get(LAYOUT_IMAGE) / filename, image) == Err::E_SUCCESS;
+    _impl->sqlite.close();
 }
 
-bool Storage::saveImage(std::string const & filename, Image const & image)
+bool Storage::isOpen() const
 {
-    return libtbag::graphic::writeImage(asset().get(LAYOUT_IMAGE) / filename, image) == Err::E_SUCCESS;
+    return _impl->sqlite.isOpen();
+}
+
+std::vector<std::string> Storage::getSqliteFilenames() const
+{
+    return getFilenames(LAYOUT_SQLITE);
+}
+
+void Storage::setAutoClearTempFiles(bool enable)
+{
+    if (enable) {
+        _impl->clear_tempdir = asset().get(LAYOUT_TEMP);
+    } else {
+        _impl->clear_tempdir.clear();
+    }
+}
+
+bool Storage::isAutoClearTempFiles() const
+{
+    return !_impl->clear_tempdir.empty();
+}
+
+void Storage::clearTempDir()
+{
+    _remove_child_files(asset().get(LAYOUT_TEMP).getString());
+}
+
+std::string Storage::generateTempPath(std::size_t name_size) const
+{
+    std::string name;
+    name.resize(name_size);
+    auto const TEMP_PREFIX = asset().get(LAYOUT_TEMP);
+    for (std::size_t i = 0; i < RETRY_COUNT_OF_TEMP_NAME; ++i) {
+        if (libtbag::string::createRandomString(&name[0], name_size)) {
+            auto const TEMP_PATH = TEMP_PREFIX / name;
+            if (!TEMP_PATH.exists()) {
+                return TEMP_PATH.toString();
+            }
+        }
+    }
+    return std::string();
 }
 
 } // namespace res

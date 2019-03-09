@@ -84,28 +84,13 @@ namespace node {
  *     <!-- If 'name' attribute is exists, Apply only those files. -->
  *     <text name='en.xml'>dir</text>
  *
- *     <!-- PNG/JPG/BMP image storage. -->
- *     <image>dir</image>
- *
- *     <!-- Obtain individual images referring to <image>. -->
- *     <drawable>dir</drawable>
- *
- *     <!-- A set of animation definition files. -->
- *     <animation>dir</animation>
- *
- *     <!-- A set of sprite definition files. -->
- *     <sprite>dir</sprite>
- *
- *     <!-- Single LMDB storage. -->
- *     <lmdb>dir</lmdb>
- *
  *     <!-- sqlite database storages. -->
  *     <!-- If 'name' attribute is exists, Apply only those files. -->
  *     <sqlite name='file.sqlite'>dir</sqlite>
  *
  *     <!-- Temporary directory. -->
  *     <!-- If 'autoclear' attribute is 'true', All files are removed when the object is deleted. -->
- *     <temp autoclear='true'>dir</sqlite>
+ *     <temp autoclear='true'>dir</temp>
  *
  *     <!-- The file to which the encryption applies. A password is required. -->
  *     <!-- If 'name' attribute is exists, Apply only those files.            -->
@@ -115,40 +100,10 @@ namespace node {
  *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
  *     <lua dynasm='true'>dir</lua>
  *
- *     <!-- A set of data from which raw buffers can be obtained. -->
- *     <raw>dir</raw>
- *
- *     <!-- BagEx 'key(filename)'/'value(BagEx)' serialization. -->
- *     <bagex>dir</bagex>
- *
- *     <!-- Executable/Libraries files. -->
- *     <exe>dir</exe>
- *
- *     <!-- Font files. -->
- *     <font>dir</font>
- *
- *     <!-- Music files. -->
- *     <music>dir</music>
- *
- *     <!-- Sound (effect) files. -->
- *     <sound>dir</sound>
- *
- *     <!-- OpenGL Shader files. -->
- *     <shader>dir</shader>
- *
- *     <!-- Layout(Widgets) files. -->
- *     <layout>dir</layout>
- *
- *     <!-- Style/Theme files. -->
- *     <style>dir</style>
- *
- *     <!-- List color names and values. -->
- *     <color>dir</color>
- *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
  *     <user name='name2' absolute='false'>dir2</user>
- *     <user name='name3'>dir3</layout>
+ *     <user name='name3'>dir3</user>
  *     <!-- ... -->
  *   </storage>
  *  @endcode
@@ -165,30 +120,15 @@ public:
 
 public:
     // @formatter:off
-    TBAG_CONSTEXPR static char const * const TAG_ENV       = Storage::LAYOUT_ENV      ;
-    TBAG_CONSTEXPR static char const * const TAG_CONFIG    = Storage::LAYOUT_CONFIG   ;
-    TBAG_CONSTEXPR static char const * const TAG_MODULE    = Storage::LAYOUT_MODULE   ;
-    TBAG_CONSTEXPR static char const * const TAG_TEXT      = Storage::LAYOUT_TEXT     ;
-    TBAG_CONSTEXPR static char const * const TAG_IMAGE     = Storage::LAYOUT_IMAGE    ;
-    TBAG_CONSTEXPR static char const * const TAG_DRAWABLE  = Storage::LAYOUT_DRAWABLE ;
-    TBAG_CONSTEXPR static char const * const TAG_ANIMATION = Storage::LAYOUT_ANIMATION;
-    TBAG_CONSTEXPR static char const * const TAG_SPRITE    = Storage::LAYOUT_SPRITE   ;
-    TBAG_CONSTEXPR static char const * const TAG_LMDB      = Storage::LAYOUT_LMDB     ;
-    TBAG_CONSTEXPR static char const * const TAG_SQLITE    = Storage::LAYOUT_SQLITE   ;
-    TBAG_CONSTEXPR static char const * const TAG_TEMP      = Storage::LAYOUT_TEMP     ;
-    TBAG_CONSTEXPR static char const * const TAG_KEYSTORE  = Storage::LAYOUT_KEYSTORE ;
-    TBAG_CONSTEXPR static char const * const TAG_LUA       = Storage::LAYOUT_LUA      ;
-    TBAG_CONSTEXPR static char const * const TAG_RAW       = Storage::LAYOUT_RAW      ;
-    TBAG_CONSTEXPR static char const * const TAG_BAGEX     = Storage::LAYOUT_BAGEX    ;
-    TBAG_CONSTEXPR static char const * const TAG_EXE       = Storage::LAYOUT_EXE      ;
-    TBAG_CONSTEXPR static char const * const TAG_FONT      = Storage::LAYOUT_FONT     ;
-    TBAG_CONSTEXPR static char const * const TAG_MUSIC     = Storage::LAYOUT_MUSIC    ;
-    TBAG_CONSTEXPR static char const * const TAG_SOUND     = Storage::LAYOUT_SOUND    ;
-    TBAG_CONSTEXPR static char const * const TAG_SHADER    = Storage::LAYOUT_SHADER   ;
-    TBAG_CONSTEXPR static char const * const TAG_LAYOUT    = Storage::LAYOUT_LAYOUT   ;
-    TBAG_CONSTEXPR static char const * const TAG_STYLE     = Storage::LAYOUT_STYLE    ;
-    TBAG_CONSTEXPR static char const * const TAG_COLOR     = Storage::LAYOUT_COLOR    ;
-    TBAG_CONSTEXPR static char const * const TAG_USER      = Storage::LAYOUT_USER     ;
+    TBAG_CONSTEXPR static char const * const TAG_ENV      = Storage::LAYOUT_ENV     ;
+    TBAG_CONSTEXPR static char const * const TAG_CONFIG   = Storage::LAYOUT_CONFIG  ;
+    TBAG_CONSTEXPR static char const * const TAG_MODULE   = Storage::LAYOUT_MODULE  ;
+    TBAG_CONSTEXPR static char const * const TAG_TEXT     = Storage::LAYOUT_TEXT    ;
+    TBAG_CONSTEXPR static char const * const TAG_SQLITE   = Storage::LAYOUT_SQLITE  ;
+    TBAG_CONSTEXPR static char const * const TAG_TEMP     = Storage::LAYOUT_TEMP    ;
+    TBAG_CONSTEXPR static char const * const TAG_KEYSTORE = Storage::LAYOUT_KEYSTORE;
+    TBAG_CONSTEXPR static char const * const TAG_LUA      = Storage::LAYOUT_LUA     ;
+    TBAG_CONSTEXPR static char const * const TAG_USER     = Storage::LAYOUT_USER    ;
     // @formatter:on
 
     TBAG_CONSTEXPR static char const * const ATT_ROOT       = "root";
@@ -266,25 +206,10 @@ public:
         def_layout config;
         mod_layout module;
         txt_layout text;
-        def_layout image;
-        def_layout drawable;
-        def_layout animation;
-        def_layout sprite;
-        def_layout lmdb;
         sql_layout sqlite;
         tmp_layout temp;
         key_layout keystore;
         lua_layout lua;
-        def_layout raw;
-        def_layout bagex;
-        def_layout exe;
-        def_layout font;
-        def_layout music;
-        def_layout sound;
-        def_layout shader;
-        def_layout layout;
-        def_layout style;
-        def_layout color;
 
         using usr_layouts = std::vector<usr_layout>;
 

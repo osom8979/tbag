@@ -23,8 +23,7 @@
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/lib/SharedLibrary.hpp>
 #include <libtbag/res/GetText.hpp>
-#include <libtbag/graphic/ImageIO.hpp>
-#include <libtbag/graphic/ImageOffset.hpp>
+#include <libtbag/database/Sqlite.hpp>
 
 #include <string>
 #include <vector>
@@ -51,8 +50,12 @@ public:
     using Path          = libtbag::filesystem::Path;
     using SharedLibrary = libtbag::lib::SharedLibrary;
     using GetText       = libtbag::res::GetText;
-    using Image         = libtbag::graphic::Image;
-    using ImageOffset   = libtbag::graphic::ImageOffset;
+    using Sqlite        = libtbag::database::Sqlite;
+
+public:
+    /** Number of retries for temporary name generation. */
+    TBAG_CONSTEXPR static std::size_t const RETRY_COUNT_OF_TEMP_NAME = 16;
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_RANDOM_STRING_SIZE = 16;
 
 public:
     /**
@@ -61,7 +64,7 @@ public:
      * @author zer0
      * @date   2018-11-03
      */
-    struct Impl
+    struct TBAG_API Impl TBAG_FINAL
     {
         DynamicAsset  asset;
         Environments  envs;
@@ -69,6 +72,11 @@ public:
         Resource      config;
         std::string   module_extension;
         GetText       text;
+        Sqlite        sqlite;
+        std::string   clear_tempdir;
+
+        Impl();
+        ~Impl();
     };
 
 public:
@@ -148,57 +156,27 @@ public:
 
 public:
     // @formatter:off
-    TBAG_CONSTEXPR static char const * const LAYOUT_ENV       = "env";
-    TBAG_CONSTEXPR static char const * const LAYOUT_CONFIG    = "config";
-    TBAG_CONSTEXPR static char const * const LAYOUT_MODULE    = "module";
-    TBAG_CONSTEXPR static char const * const LAYOUT_TEXT      = "text";
-    TBAG_CONSTEXPR static char const * const LAYOUT_IMAGE     = "image";
-    TBAG_CONSTEXPR static char const * const LAYOUT_DRAWABLE  = "drawable";
-    TBAG_CONSTEXPR static char const * const LAYOUT_ANIMATION = "animation";
-    TBAG_CONSTEXPR static char const * const LAYOUT_SPRITE    = "sprite";
-    TBAG_CONSTEXPR static char const * const LAYOUT_LMDB      = "lmdb";
-    TBAG_CONSTEXPR static char const * const LAYOUT_SQLITE    = "sqlite";
-    TBAG_CONSTEXPR static char const * const LAYOUT_TEMP      = "temp";
-    TBAG_CONSTEXPR static char const * const LAYOUT_KEYSTORE  = "keystore";
-    TBAG_CONSTEXPR static char const * const LAYOUT_LUA       = "lua";
-    TBAG_CONSTEXPR static char const * const LAYOUT_RAW       = "raw";
-    TBAG_CONSTEXPR static char const * const LAYOUT_BAGEX     = "bagex";
-    TBAG_CONSTEXPR static char const * const LAYOUT_EXE       = "exe";
-    TBAG_CONSTEXPR static char const * const LAYOUT_FONT      = "font";
-    TBAG_CONSTEXPR static char const * const LAYOUT_MUSIC     = "music";
-    TBAG_CONSTEXPR static char const * const LAYOUT_SOUND     = "sound";
-    TBAG_CONSTEXPR static char const * const LAYOUT_SHADER    = "shader";
-    TBAG_CONSTEXPR static char const * const LAYOUT_LAYOUT    = "layout";
-    TBAG_CONSTEXPR static char const * const LAYOUT_STYLE     = "style";
-    TBAG_CONSTEXPR static char const * const LAYOUT_COLOR     = "color";
-    TBAG_CONSTEXPR static char const * const LAYOUT_USER      = "user";
+    TBAG_CONSTEXPR static char const * const LAYOUT_ENV      = "env";
+    TBAG_CONSTEXPR static char const * const LAYOUT_CONFIG   = "config";
+    TBAG_CONSTEXPR static char const * const LAYOUT_MODULE   = "module";
+    TBAG_CONSTEXPR static char const * const LAYOUT_TEXT     = "text";
+    TBAG_CONSTEXPR static char const * const LAYOUT_SQLITE   = "sqlite";
+    TBAG_CONSTEXPR static char const * const LAYOUT_TEMP     = "temp";
+    TBAG_CONSTEXPR static char const * const LAYOUT_KEYSTORE = "keystore";
+    TBAG_CONSTEXPR static char const * const LAYOUT_LUA      = "lua";
+    TBAG_CONSTEXPR static char const * const LAYOUT_USER     = "user";
     // @formatter:on
 
 public:
     // @formatter:off
-    void setLayoutEnv      (std::string const & dir) { asset().set(LAYOUT_ENV      , Path(dir)); }
-    void setLayoutConfig   (std::string const & dir) { asset().set(LAYOUT_CONFIG   , Path(dir)); }
-    void setLayoutModule   (std::string const & dir) { asset().set(LAYOUT_MODULE   , Path(dir)); }
-    void setLayoutText     (std::string const & dir) { asset().set(LAYOUT_TEXT     , Path(dir)); }
-    void setLayoutImage    (std::string const & dir) { asset().set(LAYOUT_IMAGE    , Path(dir)); }
-    void setLayoutDrawable (std::string const & dir) { asset().set(LAYOUT_DRAWABLE , Path(dir)); }
-    void setLayoutAnimation(std::string const & dir) { asset().set(LAYOUT_ANIMATION, Path(dir)); }
-    void setLayoutSprite   (std::string const & dir) { asset().set(LAYOUT_SPRITE   , Path(dir)); }
-    void setLayoutLmdb     (std::string const & dir) { asset().set(LAYOUT_LMDB     , Path(dir)); }
-    void setLayoutSqlite   (std::string const & dir) { asset().set(LAYOUT_SQLITE   , Path(dir)); }
-    void setLayoutTemp     (std::string const & dir) { asset().set(LAYOUT_TEMP     , Path(dir)); }
-    void setLayoutKeystore (std::string const & dir) { asset().set(LAYOUT_KEYSTORE , Path(dir)); }
-    void setLayoutLua      (std::string const & dir) { asset().set(LAYOUT_LUA      , Path(dir)); }
-    void setLayoutRaw      (std::string const & dir) { asset().set(LAYOUT_RAW      , Path(dir)); }
-    void setLayoutBagex    (std::string const & dir) { asset().set(LAYOUT_BAGEX    , Path(dir)); }
-    void setLayoutExe      (std::string const & dir) { asset().set(LAYOUT_EXE      , Path(dir)); }
-    void setLayoutFont     (std::string const & dir) { asset().set(LAYOUT_FONT     , Path(dir)); }
-    void setLayoutMusic    (std::string const & dir) { asset().set(LAYOUT_MUSIC    , Path(dir)); }
-    void setLayoutSound    (std::string const & dir) { asset().set(LAYOUT_SOUND    , Path(dir)); }
-    void setLayoutShader   (std::string const & dir) { asset().set(LAYOUT_SHADER   , Path(dir)); }
-    void setLayoutLayout   (std::string const & dir) { asset().set(LAYOUT_LAYOUT   , Path(dir)); }
-    void setLayoutStyle    (std::string const & dir) { asset().set(LAYOUT_STYLE    , Path(dir)); }
-    void setLayoutColor    (std::string const & dir) { asset().set(LAYOUT_COLOR    , Path(dir)); }
+    void setLayoutEnv     (std::string const & dir) { asset().set(LAYOUT_ENV     , Path(dir)); }
+    void setLayoutConfig  (std::string const & dir) { asset().set(LAYOUT_CONFIG  , Path(dir)); }
+    void setLayoutModule  (std::string const & dir) { asset().set(LAYOUT_MODULE  , Path(dir)); }
+    void setLayoutText    (std::string const & dir) { asset().set(LAYOUT_TEXT    , Path(dir)); }
+    void setLayoutSqlite  (std::string const & dir) { asset().set(LAYOUT_SQLITE  , Path(dir)); }
+    void setLayoutTemp    (std::string const & dir) { asset().set(LAYOUT_TEMP    , Path(dir)); }
+    void setLayoutKeystore(std::string const & dir) { asset().set(LAYOUT_KEYSTORE, Path(dir)); }
+    void setLayoutLua     (std::string const & dir) { asset().set(LAYOUT_LUA     , Path(dir)); }
     // @formatter:on
 
 public:
@@ -221,6 +199,7 @@ public:
     void setEnv(std::string const & key, std::string const & value);
     bool getEnv(std::string const & key, std::string & value) const;
 
+    std::vector<std::string> getEnvFilenames() const;
     std::string convert(std::string const & value) const;
 
 public:
@@ -257,10 +236,21 @@ public:
     bool saveText();
 
 public:
-    std::vector<std::string> getImageFilenames() const;
+    Sqlite       & sqlite()       TBAG_NOEXCEPT { return _impl->sqlite; }
+    Sqlite const & sqlite() const TBAG_NOEXCEPT { return _impl->sqlite; }
 
-    bool loadImage(std::string const & filename, Image & image);
-    bool saveImage(std::string const & filename, Image const & image);
+    bool openSqlite(std::string const & filename, bool auto_close = true);
+    void closeSqlite();
+    bool isOpen() const;
+
+    std::vector<std::string> getSqliteFilenames() const;
+
+public:
+    void setAutoClearTempFiles(bool enable = true);
+    bool isAutoClearTempFiles() const;
+    void clearTempDir();
+
+    std::string generateTempPath(std::size_t name_size = DEFAULT_RANDOM_STRING_SIZE) const;
 };
 
 } // namespace res
