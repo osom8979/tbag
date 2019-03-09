@@ -39,7 +39,7 @@ class TBAG_API Rsa : private Noncopyable
 public:
     enum class CipherAlgorithm
     {
-        CA_UNKNOWN = 0,
+        CA_NONE = 0,
 
         CA_DES,  ///< Encrypt the generated key with DES in cbc mode.
         CA_DES3, ///< Encrypt the generated key with DES in ede cbc mode (168 bit key).
@@ -55,56 +55,35 @@ public:
     };
 
 public:
-    struct Impl;
-    friend struct Impl;
-
-public:
-    using UniqueImpl = std::unique_ptr<Impl>;
-
-public:
     TBAG_CONSTEXPR static int const DEFAULT_KEY_LENGTH = 2048;
 
-private:
-    UniqueImpl _impl;
+public:
+    using FakeRsa = std::shared_ptr<void>;
 
 private:
-    std::string _public_key;
-    std::string _private_key;
+    FakeRsa _rsa;
 
 public:
     Rsa();
-    virtual ~Rsa();
+    ~Rsa();
 
 public:
-    std::string getPublicKey() { return _public_key; }
-    std::string getPrivateKey() { return _private_key; }
+    bool gen();
+    bool gen(int key_length);
+    bool gen(int key_length, unsigned long e);
 
 public:
-    /**
-     * @remarks
-     *  The exponent is an odd number, typically 3, 17 or 65537
-     *
-     * @see <https://www.openssl.org/docs/man1.1.0/crypto/RSA_generate_key.html>
-     */
-    bool setBigNumber(unsigned long e);
-
-public:
-    bool gen(int key_length = DEFAULT_KEY_LENGTH);
-    bool gen(CipherAlgorithm algorithm, int key_length = DEFAULT_KEY_LENGTH);
-    bool gen(std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
+    std::string getPemPublicKey() const;
+    std::string getPemPrivateKey(CipherAlgorithm cipher = CipherAlgorithm::CA_NONE) const;
 
 public:
     /** Generate PEM(Privacy Enhanced Mail) format string. */
-    static bool generatePem(std::string & public_key, std::string & private_key,
+    static bool generatePem(std::string & public_key,
+                            std::string & private_key,
+                            CipherAlgorithm cipher = CipherAlgorithm::CA_NONE,
                             int key_length = DEFAULT_KEY_LENGTH);
-    static bool generatePem(std::string & public_key, std::string & private_key,
-                            CipherAlgorithm algorithm, int key_length = DEFAULT_KEY_LENGTH);
-    static bool generatePem(std::string & public_key, std::string & private_key,
-                            std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
-
     static std::string generatePemPrivateKey(int key_length = DEFAULT_KEY_LENGTH);
-    static std::string generatePemPrivateKey(CipherAlgorithm algorithm, int key_length = DEFAULT_KEY_LENGTH);
-    static std::string generatePemPrivateKey(std::string const & name, int key_length = DEFAULT_KEY_LENGTH);
+    static std::string generatePemPrivateKey(CipherAlgorithm cipher, int key_length = DEFAULT_KEY_LENGTH);
 };
 
 } // namespace crypto

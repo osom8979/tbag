@@ -24,11 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace crypto {
 
-// ---------------
-namespace __impl {
-// ---------------
-
-static EVP_CIPHER const * getEvpCipher(Rsa::CipherAlgorithm algorithm)
+static EVP_CIPHER const * __get_evp_cipher(Rsa::CipherAlgorithm algorithm) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (algorithm) {
@@ -49,7 +45,7 @@ static EVP_CIPHER const * getEvpCipher(Rsa::CipherAlgorithm algorithm)
     case Rsa::CipherAlgorithm::CA_CAMELLIA192: return EVP_camellia_192_cbc();
     case Rsa::CipherAlgorithm::CA_CAMELLIA256: return EVP_camellia_256_cbc();
 #endif
-    case Rsa::CipherAlgorithm::CA_UNKNOWN:
+    case Rsa::CipherAlgorithm::CA_NONE:
     default:
         break;
     }
@@ -57,7 +53,7 @@ static EVP_CIPHER const * getEvpCipher(Rsa::CipherAlgorithm algorithm)
     return nullptr;
 }
 
-static EVP_CIPHER const * getEvpCipherByName(std::string const & name)
+static EVP_CIPHER const * __get_evp_cipher_by_name(std::string const & name) TBAG_NOEXCEPT
 {
     if (name.empty()) {
         return nullptr;
@@ -65,110 +61,13 @@ static EVP_CIPHER const * getEvpCipherByName(std::string const & name)
     return EVP_get_cipherbyname(name.c_str());
 }
 
-// ------------------
-} // namespace __impl
-// ------------------
-
-/**
- * Rsa implementation.
- *
- * @author zer0
- * @date   2017-11-12
- */
-struct Rsa::Impl : private Noncopyable
-{
-    Rsa * parent;
-
-    BIO * public_out;
-    BIO * private_out;
-
-    BIGNUM * bn;
-    RSA * rsa;
-
-    Impl(Rsa * p) : parent(p)
-    {
-        public_out = BIO_new(BIO_s_mem());
-        private_out = BIO_new(BIO_s_mem());
-        bn = BN_new();
-        rsa = RSA_new();
-
-        assert(public_out != nullptr);
-        assert(private_out != nullptr);
-        assert(bn != nullptr);
-        assert(rsa != nullptr);
-
-        if (BN_set_word(bn, RSA_F4) != 1) {
-            throw std::bad_alloc();
-        }
-    }
-
-    ~Impl()
-    {
-        if (rsa != nullptr) {
-            RSA_free(rsa);
-        }
-        if (bn != nullptr) {
-            BN_free(bn);
-        }
-        if (public_out != nullptr) {
-            BIO_free_all(public_out);
-        }
-        if (private_out != nullptr) {
-            BIO_free_all(private_out);
-        }
-    }
-
-    bool setBigNumber(unsigned long e = RSA_F4)
-    {
-        return BN_set_word(bn, e) == 1;
-    }
-
-    bool generate(int key_length, EVP_CIPHER const * enc,
-                  std::vector<char> & public_key, std::vector<char> & private_key)
-    {
-        if (RSA_generate_key_ex(rsa, key_length, bn, nullptr) != 1) {
-            return false;
-        }
-        if (PEM_write_bio_RSA_PUBKEY(public_out, rsa) != 1) {
-            return false;
-        }
-        if (PEM_write_bio_RSAPrivateKey(private_out, rsa, enc, nullptr, 0, nullptr, nullptr) != 1) {
-            return false;
-        }
-
-        int const PUBLIC_LENGTH = BIO_pending(public_out);
-        int const PRIVATE_LENGTH = BIO_pending(private_out);
-
-        public_key.resize(static_cast<std::size_t>(PUBLIC_LENGTH));
-        private_key.resize(static_cast<std::size_t>(PRIVATE_LENGTH));
-
-        BIO_read( public_out, public_key.data(), PUBLIC_LENGTH);
-        BIO_read(private_out, private_key.data(), PRIVATE_LENGTH);
-
-        return true;
-    }
-
-    bool generate(int key_length, EVP_CIPHER const * enc,
-                  std::string & public_key, std::string & private_key)
-    {
-        std::vector<char> public_temp;
-        std::vector<char> private_temp;
-        bool const RESULT = generate(key_length, enc, public_temp, private_temp);
-        if (RESULT) {
-            public_key.assign(public_temp.begin(), public_temp.end());
-            private_key.assign(private_temp.begin(), private_temp.end());
-        }
-        return RESULT;
-    }
-};
-
 // -------------------
 // Rsa implementation.
 // -------------------
 
-Rsa::Rsa() : _impl(new Impl(this))
+Rsa::Rsa()
 {
-    assert(_impl != nullptr);
+    // EMPTY.
 }
 
 Rsa::~Rsa()
@@ -176,88 +75,106 @@ Rsa::~Rsa()
     // EMPTY.
 }
 
-bool Rsa::setBigNumber(unsigned long e)
+bool Rsa::gen()
 {
-    return _impl->setBigNumber(e);
+    return gen(DEFAULT_KEY_LENGTH);
 }
 
 bool Rsa::gen(int key_length)
 {
-    return _impl->generate(key_length, nullptr, _public_key, _private_key);
+    return gen(key_length, RSA_F4);
 }
 
-bool Rsa::gen(CipherAlgorithm algorithm, int key_length)
+bool Rsa::gen(int key_length, unsigned long e)
 {
-    return _impl->generate(key_length, __impl::getEvpCipher(algorithm), _public_key, _private_key);
+    assert(key_length > 0);
+
+    std::shared_ptr<BIGNUM> shared_bn;
+    if (e > 0) {
+        shared_bn.reset(BN_new(), [](BIGNUM * bn){
+            BN_free(bn);
+        });
+        assert(static_cast<bool>(shared_bn));
+
+        // The exponent is an odd number, typically 3, 17 or 65537
+        // https://www.openssl.org/docs/man1.1.0/crypto/RSA_generate_key.html
+        if (BN_set_word(shared_bn.get(), e) != 1) {
+            shared_bn.reset();
+        }
+    }
+
+    _rsa.reset((FakeRsa*)RSA_new(), [](FakeRsa * rsa){
+        RSA_free((RSA*)rsa);
+    });
+    assert(static_cast<bool>(_rsa));
+
+    if (RSA_generate_key_ex((RSA*)_rsa.get(), key_length, shared_bn.get(), nullptr) != 1) {
+        _rsa.reset();
+        return false;
+    }
+    return true;
 }
 
-bool Rsa::gen(std::string const & name, int key_length)
+std::string Rsa::getPemPublicKey() const
 {
-    return _impl->generate(key_length, __impl::getEvpCipherByName(name), _public_key, _private_key);
+    std::shared_ptr<BIO> bio(BIO_new(BIO_s_mem()), [](BIO * bio){
+        BIO_free_all(bio);
+    });
+    assert(static_cast<bool>(bio));
+    if (PEM_write_bio_RSA_PUBKEY(bio.get(), (RSA*)_rsa.get()) != 1) {
+        return std::string();
+    }
+
+    std::string key;
+    key.resize(static_cast<std::size_t>(BIO_pending(bio.get())));
+    BIO_read(bio.get(), (void*)key.data(), (int)key.size());
+    return key;
 }
 
-// ---------------
-// Static methods.
-// ---------------
+std::string Rsa::getPemPrivateKey(CipherAlgorithm cipher) const
+{
+    std::shared_ptr<BIO> bio(BIO_new(BIO_s_mem()), [](BIO * bio){
+        BIO_free_all(bio);
+    });
+    assert(static_cast<bool>(bio));
+    auto const * evp_cipher = __get_evp_cipher(cipher);
+    if (PEM_write_bio_RSAPrivateKey(bio.get(), (RSA*)_rsa.get(), evp_cipher, nullptr, 0, nullptr, nullptr) != 1) {
+        return std::string();
+    }
 
-bool Rsa::generatePem(std::string & public_key, std::string & private_key, int key_length)
+    std::string key;
+    key.resize(static_cast<std::size_t>(BIO_pending(bio.get())));
+    BIO_read(bio.get(), (void*)key.data(), (int)key.size());
+    return key;
+}
+
+bool Rsa::generatePem(std::string & public_key, std::string & private_key, CipherAlgorithm cipher, int key_length)
 {
     Rsa rsa;
-    if (rsa.gen(key_length)) {
-        public_key = rsa.getPublicKey();
-        private_key = rsa.getPrivateKey();
-        return true;
+    if (!rsa.gen(key_length)) {
+        return false;
     }
-    return false;
-}
-
-bool Rsa::generatePem(std::string & public_key, std::string & private_key, CipherAlgorithm algorithm, int key_length)
-{
-    Rsa rsa;
-    if (rsa.gen(algorithm, key_length)) {
-        public_key = rsa.getPublicKey();
-        private_key = rsa.getPrivateKey();
-        return true;
-    }
-    return false;
-}
-
-bool Rsa::generatePem(std::string & public_key, std::string & private_key, std::string const & name, int key_length)
-{
-    Rsa rsa;
-    if (rsa.gen(name, key_length)) {
-        public_key = rsa.getPublicKey();
-        private_key = rsa.getPrivateKey();
-        return true;
-    }
-    return false;
+    public_key = rsa.getPemPublicKey();
+    private_key = rsa.getPemPrivateKey(cipher);
+    return true;
 }
 
 std::string Rsa::generatePemPrivateKey(int key_length)
 {
     Rsa rsa;
-    if (rsa.gen(key_length)) {
-        return rsa.getPrivateKey();
+    if (!rsa.gen(key_length)) {
+        return std::string();
     }
-    return std::string();
+    return rsa.getPemPrivateKey();
 }
 
-std::string Rsa::generatePemPrivateKey(CipherAlgorithm algorithm, int key_length)
+std::string Rsa::generatePemPrivateKey(CipherAlgorithm cipher, int key_length)
 {
     Rsa rsa;
-    if (rsa.gen(algorithm, key_length)) {
-        return rsa.getPrivateKey();
+    if (!rsa.gen(key_length)) {
+        return std::string();
     }
-    return std::string();
-}
-
-std::string Rsa::generatePemPrivateKey(std::string const & name, int key_length)
-{
-    Rsa rsa;
-    if (rsa.gen(name, key_length)) {
-        return rsa.getPrivateKey();
-    }
-    return std::string();
+    return rsa.getPemPrivateKey(cipher);
 }
 
 } // namespace crypto
