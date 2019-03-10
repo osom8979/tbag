@@ -73,7 +73,7 @@ RenderWindow::RenderWindow() : RenderWindow(Params())
 }
 
 RenderWindow::RenderWindow(Params const & params)
-        : RenderTarget(SfType::ST_RENDER_WINDOW, no_init)
+        : SfNative(SfType::ST_RENDER_WINDOW, no_init)
 {
     auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
     auto const STYLE = sf::Style::Default;
@@ -410,6 +410,64 @@ bool RenderWindow::hasFocus() const
 void RenderWindow::display()
 {
     _self_sf()->display();
+}
+
+void RenderWindow::clear(Channel r, Channel g, Channel b, Channel a)
+{
+    _self_sf()->clear(sf::Color(r, g, b, a));
+}
+
+void RenderWindow::clear(Rgb24 const & color)
+{
+    clear(color.r, color.g, color.b);
+}
+
+void RenderWindow::clear(Rgb32 const & color)
+{
+    clear(color.r, color.g, color.b, color.a);
+}
+
+void RenderWindow::clear()
+{
+    clear(CHANNEL_MIN, CHANNEL_MIN, CHANNEL_MIN);
+}
+
+Pointf RenderWindow::mapPixelToCoords(Pointi const & point) const
+{
+    auto const COORDS = _self_sf()->mapPixelToCoords(sf::Vector2i(point.x, point.y));
+    return Pointf(COORDS.x, COORDS.y);
+}
+
+Pointi RenderWindow::mapCoordsToPixel(Pointf const & point) const
+{
+    auto const PIXEL = _self_sf()->mapCoordsToPixel(sf::Vector2f(point.x, point.y));
+    return Pointi(PIXEL.x, PIXEL.y);
+}
+
+Sizeu RenderWindow::getSize() const
+{
+    auto const SIZE = _self_sf()->getSize();
+    return Sizeu(SIZE.x, SIZE.y);
+}
+
+bool RenderWindow::setActive(bool active)
+{
+    return _self_sf()->setActive(active);
+}
+
+void RenderWindow::pushGLStates()
+{
+    _self_sf()->pushGLStates();
+}
+
+void RenderWindow::popGLStates()
+{
+    _self_sf()->popGLStates();
+}
+
+void RenderWindow::resetGLStates()
+{
+    _self_sf()->resetGLStates();
 }
 
 } // namespace gui

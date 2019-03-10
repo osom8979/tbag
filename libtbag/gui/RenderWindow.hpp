@@ -17,7 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gui/RenderTarget.hpp>
+#include <libtbag/gui/SfNative.hpp>
 
 #include <string>
 
@@ -35,7 +35,7 @@ namespace gui {
  * @date   2019-02-13 (Rename: Window -> SfWindow)
  * @date   2019-02-16 (Rename: SfWindow -> RenderWindow)
  */
-class TBAG_API RenderWindow : public RenderTarget
+class TBAG_API RenderWindow : public SfNative
 {
 public:
     using Channel = libtbag::graphic::Channel;
@@ -439,6 +439,25 @@ public:
 
 public:
     void display();
+
+public:
+    void clear(Channel r, Channel g, Channel b, Channel a = CHANNEL_MAX);
+    void clear(Rgb24 const & color);
+    void clear(Rgb32 const & color);
+    void clear();
+
+public:
+    Pointf mapPixelToCoords(Pointi const & point) const;
+    Pointi mapCoordsToPixel(Pointf const & point) const;
+
+public:
+    Sizeu getSize() const;
+    bool  setActive(bool active = true);
+
+public:
+    void pushGLStates();
+    void popGLStates();
+    void resetGLStates();
 };
 
 } // namespace gui
