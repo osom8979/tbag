@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -96,6 +97,12 @@ std::string SolState::getLuaPath() const
     }
 }
 
+std::vector<std::string> SolState::getLuaPaths() const
+{
+    using namespace libtbag::filesystem::details;
+    return libtbag::string::splitTokens(getLuaPath(), std::string(1, PATH_SPLITTER));
+}
+
 bool SolState::appendLuaPath(std::string const & path)
 {
     if (!libtbag::filesystem::Path(path).isDirectory()) {
@@ -138,6 +145,26 @@ bool SolState::runScript(std::string const & code)
         return false;
     }
     return true;
+}
+
+std::string SolState::findScriptPath(std::string const & filename, bool include_working) const
+{
+    for (auto & path : getLuaPaths()) {
+        using namespace libtbag::filesystem;
+        auto const FILE_PATH = Path(path) / filename;
+        if (FILE_PATH.isRegularFile()) {
+            return FILE_PATH;
+        }
+    }
+
+    if (include_working) {
+        auto const FILE_PATH = libtbag::filesystem::Path::getWorkDir() / filename;
+        if (FILE_PATH.isRegularFile()) {
+            return FILE_PATH;
+        }
+    }
+
+    return std::string();
 }
 
 } // namespace script

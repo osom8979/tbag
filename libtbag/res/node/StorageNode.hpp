@@ -98,7 +98,7 @@ namespace node {
  *
  *     <!-- Directory containing the lua script package. -->
  *     <!-- If 'name' attribute is exists, Apply only those files.           -->
- *     <!-- If 'libs' attribute is exists, Apply default lua libraries.      -->
+ *     <!-- If 'libs' attribute is 'true', Apply default lua libraries.      -->
  *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
  *     <lua name='file.lua' libs='true' dynasm='true'>dir</lua>
  *
@@ -216,8 +216,7 @@ public:
         lua_layout lua;
 
         using usr_layouts = std::vector<usr_layout>;
-
-        usr_layouts  users;
+        usr_layouts users;
     };
 
 private:

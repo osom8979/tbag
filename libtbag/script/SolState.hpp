@@ -99,11 +99,15 @@ public:
 
 public:
     std::string getLuaPath() const;
+    std::vector<std::string> getLuaPaths() const;
     bool appendLuaPath(std::string const & path);
 
 public:
     bool runScriptFile(std::string const & path);
     bool runScript(std::string const & code);
+
+public:
+    std::string findScriptPath(std::string const & filename, bool include_working = true) const;
 };
 
 } // namespace script

@@ -471,9 +471,21 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         if (prop.lua.dynasm) {
             storage.loadDynAsm();
         }
-        if (prop.lua.name.empty()) {
+        if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.text);
         }
+    }
+
+    auto & asset = storage.asset();
+    for (auto & user : prop.users) {
+        if (user.name.empty()) {
+            continue;
+        }
+        if (asset.exists(user.name)) {
+            continue;
+        }
+        using namespace libtbag::filesystem;
+        storage.asset().set(user.name, Path(getPath(updated_root, user.name, user, ENVIRONMENTS)));
     }
 
     return storage;
