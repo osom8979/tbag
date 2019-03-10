@@ -464,9 +464,9 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.openKeyStore(prop.keystore.name);
     }
     if (prop.lua.exists) {
-        storage.appendLuaPath();
         if (prop.lua.libs) {
             storage.loadLibraries();
+            storage.appendLuaPath();
         }
         if (prop.lua.dynasm) {
             storage.loadDynAsm();

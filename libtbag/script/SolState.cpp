@@ -99,9 +99,12 @@ std::string SolState::getLuaPath() const
 {
     try {
         return (*_state)["package"]["path"];
+    } catch (std::exception const & e) {
+        tDLogW("SolState::getLuaPath() Lua exception catch: {}", e.what());
     } catch (...) {
-        return std::string();
+        tDLogW("SolState::getLuaPath() Unknown exception");
     }
+    return std::string();
 }
 
 std::vector<std::string> SolState::getLuaPaths() const
@@ -123,10 +126,13 @@ bool SolState::appendLuaPath(std::string const & path)
         }
         lua_path += path;
         (*_state)["package"]["path"] = lua_path;
+        return true;
+    } catch (std::exception const & e) {
+        tDLogW("SolState::appendLuaPath() Lua exception catch: {}", e.what());
     } catch (...) {
-        return false;
+        tDLogW("SolState::appendLuaPath() Unknown exception");
     }
-    return true;
+    return false;
 }
 
 bool SolState::runScriptFile(std::string const & path)
@@ -136,10 +142,13 @@ bool SolState::runScriptFile(std::string const & path)
     }
     try {
         _state->script_file(path);
+        return true;
+    } catch (std::exception const & e) {
+        tDLogW("SolState::runScriptFile() Lua exception catch: {}", e.what());
     } catch (...) {
-        return false;
+        tDLogW("SolState::runScriptFile() Unknown exception");
     }
-    return true;
+    return false;
 }
 
 bool SolState::runScript(std::string const & code)
@@ -149,10 +158,13 @@ bool SolState::runScript(std::string const & code)
     }
     try {
         _state->script(code);
+        return true;
+    } catch (std::exception const & e) {
+        tDLogW("SolState::runScript() Lua exception catch: {}", e.what());
     } catch (...) {
-        return false;
+        tDLogW("SolState::runScript() Unknown exception");
     }
-    return true;
+    return false;
 }
 
 std::string SolState::findScriptPath(std::string const & filename, bool include_working) const
