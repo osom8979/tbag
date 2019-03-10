@@ -55,7 +55,7 @@ Tea-bag is Third party extension utility project.
 - TGUI 0.8.4 (zlib license)
 - gperftools 2.7 (BSD 3-Clause license)
 - Box2D master-ef96a4f (zlib license)
-- SoLoud
+- SoLoud master-f2ec233 (zlib license)
 
 ## Resources
 
