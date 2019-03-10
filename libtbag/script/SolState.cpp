@@ -134,11 +134,12 @@ bool SolState::runScriptFile(std::string const & path)
     if (!libtbag::filesystem::Path(path).isRegularFile()) {
         return false;
     }
-    std::string code;
-    if (isFailure(libtbag::filesystem::readFile(path, code))) {
+    try {
+        _state->script_file(path);
+    } catch (...) {
         return false;
     }
-    return runScript(code);
+    return true;
 }
 
 bool SolState::runScript(std::string const & code)

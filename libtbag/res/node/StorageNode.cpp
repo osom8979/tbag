@@ -472,7 +472,7 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
             storage.loadDynAsm();
         }
         if (!prop.lua.name.empty()) {
-            storage.runLuaScriptFile(prop.lua.text);
+            storage.runLuaScriptFile(prop.lua.name);
         }
     }
 
