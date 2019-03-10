@@ -465,14 +465,29 @@ std::vector<std::string> Storage::getKeyStoreFilenames() const
     return getFilenames(LAYOUT_KEYSTORE);
 }
 
-bool Storage::appendLuaPath(std::string const & filename)
+bool Storage::appendLuaPath()
 {
-    return _impl->lua.appendLuaPath(asset().get(LAYOUT_LUA) / filename);
+    return _impl->lua.appendLuaPath(asset().get(LAYOUT_LUA));
 }
 
 bool Storage::loadDynAsm()
 {
     return _impl->lua.loadDynAsm();
+}
+
+bool Storage::loadLibraries()
+{
+    return _impl->lua.loadLibraries();
+}
+
+bool Storage::runLuaScriptFile(std::string const & filename)
+{
+    return _impl->lua.runScriptFile(asset().get(LAYOUT_LUA) / filename);
+}
+
+bool Storage::runLuaScript(std::string const & code)
+{
+    return _impl->lua.runScript(code);
 }
 
 std::vector<std::string> Storage::getLuaFilenames() const

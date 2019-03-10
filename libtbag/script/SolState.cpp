@@ -8,6 +8,7 @@
 #include <libtbag/script/SolState.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/File.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -80,6 +81,12 @@ bool SolState::loadDynAsm()
     return false;
 }
 
+bool SolState::loadLibraries()
+{
+    luaL_openlibs(_state->lua_state());
+    return true;
+}
+
 std::string SolState::getLuaPath() const
 {
     try {
@@ -102,6 +109,31 @@ bool SolState::appendLuaPath(std::string const & path)
         }
         lua_path += path;
         (*_state)["package"]["path"] = lua_path;
+    } catch (...) {
+        return false;
+    }
+    return true;
+}
+
+bool SolState::runScriptFile(std::string const & path)
+{
+    if (!libtbag::filesystem::Path(path).isRegularFile()) {
+        return false;
+    }
+    std::string code;
+    if (isFailure(libtbag::filesystem::readFile(path, code))) {
+        return false;
+    }
+    return runScript(code);
+}
+
+bool SolState::runScript(std::string const & code)
+{
+    if (code.empty()) {
+        return false;
+    }
+    try {
+        _state->script(code);
     } catch (...) {
         return false;
     }

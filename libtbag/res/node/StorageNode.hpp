@@ -98,8 +98,9 @@ namespace node {
  *
  *     <!-- Directory containing the lua script package. -->
  *     <!-- If 'name' attribute is exists, Apply only those files.           -->
+ *     <!-- If 'libs' attribute is exists, Apply default lua libraries.      -->
  *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
- *     <lua name='file.lua' dynasm='true'>dir</lua>
+ *     <lua name='file.lua' libs='true' dynasm='true'>dir</lua>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
@@ -140,6 +141,7 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT    = "default";
     TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
     TBAG_CONSTEXPR static char const * const ATT_AUTO_CLEAR = "autoclear";
+    TBAG_CONSTEXPR static char const * const ATT_LIBS       = "libs";
     TBAG_CONSTEXPR static char const * const ATT_DYNASM     = "dynasm";
 
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
@@ -155,8 +157,8 @@ public:
             str  text;
             str  name;
             bool exists = false;
-            bool def    = false;
-            bool sys    = false;
+            bool def    = true;
+            bool sys    = true;
             bool abs    = false;
         };
 
@@ -185,7 +187,7 @@ public:
 
         struct tmp_layout : public def_layout
         {
-            bool auto_clear = false;
+            bool auto_clear = true;
         };
 
         struct key_layout : public txt_layout
@@ -195,6 +197,7 @@ public:
 
         struct lua_layout : public txt_layout
         {
+            bool libs   = true;
             bool dynasm = false;
         };
 

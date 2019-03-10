@@ -95,10 +95,15 @@ public:
 
 public:
     bool loadDynAsm();
+    bool loadLibraries();
 
 public:
     std::string getLuaPath() const;
     bool appendLuaPath(std::string const & path);
+
+public:
+    bool runScriptFile(std::string const & path);
+    bool runScript(std::string const & code);
 };
 
 } // namespace script
