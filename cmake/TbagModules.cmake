@@ -564,6 +564,12 @@ macro (tbag_modules__apply_dep_lfds)
     tbag_modules__add_whole_archive ($<TARGET_FILE:lfds>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_luasfml)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES luasfml)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/luasfml/src)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:luasfml>)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------

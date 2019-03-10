@@ -116,6 +116,9 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/minizip)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lemon)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lfds)
+if (USE_GUI)
+    add_subdirectory (${CMAKE_SOURCE_DIR}/dep/luasfml)
+endif ()
 
 ## CI Preset.
 if (RUN_TRAVIS)

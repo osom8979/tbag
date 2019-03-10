@@ -10,6 +10,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/script/lua/luasfml.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -85,6 +86,12 @@ bool SolState::loadDynAsm()
 bool SolState::loadLibraries()
 {
     luaL_openlibs(_state->lua_state());
+    Err code = libtbag::script::lua::luaopen_sfml(_state->lua_state());
+    if (isFailure(code)) {
+        if (code != Err::E_ENOSYS) {
+            tDLogW("SolState::loadLibraries() Failed to register lua-sfml library: {}", code);
+        }
+    }
     return true;
 }
 
