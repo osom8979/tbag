@@ -145,6 +145,17 @@ bool Flags::existsWithValue(std::string const & value) const
     return !findWithValue(value).value.empty();
 }
 
+std::vector<std::string> Flags::getNamedKeys() const
+{
+    std::vector<std::string> result;
+    for (auto & flag : _flags) {
+        if (!flag.key.empty()) {
+            result.push_back(flag.key);
+        }
+    }
+    return result;
+}
+
 std::vector<std::string> Flags::getUnnamedValues() const
 {
     std::vector<std::string> result;

@@ -49,7 +49,7 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
     _params.install_synopsis = true;
     _params.synopsis = SYNOPSIS_TEXT;
     _params.install_remarks = true;
-    _params.install_create_config = false;
+    _params.install_create_config = true;
     _params.config_name = CONFIG_NAME;
     _params.install_service = true;
     _params.service_name = SERVICE_NAME;
@@ -92,6 +92,7 @@ int TpotMain::run()
 
 void TpotMain::onTerminateSignal(int signum)
 {
+    // EMPTY.
 }
 
 void TpotMain::onOptions(HelpCommander & commander)
@@ -104,10 +105,19 @@ void TpotMain::onOptions(HelpCommander & commander)
 
 void TpotMain::onInfo(Element const & element)
 {
+    // EMPTY.
+}
+
+void TpotMain::printParamsInfo(RunnerParams const & params) const
+{
+    tDLogD("TpotMain::printParamsInfo() {}", params.storage.getInfo());
 }
 
 int TpotMain::onRun(RunnerParams const & params)
 {
+    if (params.verbose) {
+        printParamsInfo(params);
+    }
     return _manager.run(params);
 }
 

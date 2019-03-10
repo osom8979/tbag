@@ -436,13 +436,13 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     // ----------------------------------------
 
     // @formatter:off
-    if (prop.config   .exists) { storage.setLayoutConfig   (getPath(updated_root, TAG_CONFIG   , prop.config   , ENVIRONMENTS)); }
-    if (prop.module   .exists) { storage.setLayoutModule   (getPath(updated_root, TAG_MODULE   , prop.module   , ENVIRONMENTS)); }
-    if (prop.text     .exists) { storage.setLayoutText     (getPath(updated_root, TAG_TEXT     , prop.text     , ENVIRONMENTS)); }
-    if (prop.sqlite   .exists) { storage.setLayoutSqlite   (getPath(updated_root, TAG_SQLITE   , prop.sqlite   , ENVIRONMENTS)); }
-    if (prop.temp     .exists) { storage.setLayoutTemp     (getPath(updated_root, TAG_TEMP     , prop.temp     , ENVIRONMENTS)); }
-    if (prop.keystore .exists) { storage.setLayoutKeystore (getPath(updated_root, TAG_KEYSTORE , prop.keystore , ENVIRONMENTS)); }
-    if (prop.lua      .exists) { storage.setLayoutLua      (getPath(updated_root, TAG_LUA      , prop.lua      , ENVIRONMENTS)); }
+    if (prop.config  .exists) { storage.setLayoutConfig  (getPath(updated_root, TAG_CONFIG  , prop.config  , ENVIRONMENTS)); }
+    if (prop.module  .exists) { storage.setLayoutModule  (getPath(updated_root, TAG_MODULE  , prop.module  , ENVIRONMENTS)); }
+    if (prop.text    .exists) { storage.setLayoutText    (getPath(updated_root, TAG_TEXT    , prop.text    , ENVIRONMENTS)); }
+    if (prop.sqlite  .exists) { storage.setLayoutSqlite  (getPath(updated_root, TAG_SQLITE  , prop.sqlite  , ENVIRONMENTS)); }
+    if (prop.temp    .exists) { storage.setLayoutTemp    (getPath(updated_root, TAG_TEMP    , prop.temp    , ENVIRONMENTS)); }
+    if (prop.keystore.exists) { storage.setLayoutKeystore(getPath(updated_root, TAG_KEYSTORE, prop.keystore, ENVIRONMENTS)); }
+    if (prop.lua     .exists) { storage.setLayoutLua     (getPath(updated_root, TAG_LUA     , prop.lua     , ENVIRONMENTS)); }
     // @formatter:on
 
     if (prop.module.exists) {

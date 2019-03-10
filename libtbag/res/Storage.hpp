@@ -284,6 +284,9 @@ public:
     bool loadDynAsm();
 
     std::vector<std::string> getLuaFilenames() const;
+
+public:
+    std::string getInfo() const;
 };
 
 } // namespace res

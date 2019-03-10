@@ -82,8 +82,15 @@ public:
     inline Flag const & at(std::size_t index) const { return _flags.at(index); }
 
 public:
+    std::vector<std::string> keys() const;
+
+public:
     bool get(std::string const & key, std::string & val) const;
     void set(std::string const & key, std::string const & val);
+
+public:
+    std::string opt(std::string const & key) const;
+    std::string opt(std::string const & key, std::string const & default_val) const;
 
 public:
     void assign(Flags const & flags);

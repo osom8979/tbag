@@ -64,6 +64,9 @@ public:
     void onOptions(HelpCommander & commander);
     void onInfo(Element const & element);
 
+private:
+    void printParamsInfo(RunnerParams const & params) const;
+
 public:
     int onRun(RunnerParams const & params);
 };

@@ -33,6 +33,9 @@ namespace apps {
 class TBAG_API GamePot : public BasePot
 {
 public:
+    TBAG_CONSTEXPR static char const * const GAME_POT_MAIN_LUA = "GamePotMain.lua";
+
+public:
     GamePot();
     virtual ~GamePot();
 

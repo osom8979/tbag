@@ -12,6 +12,7 @@
 #include <cassert>
 #include <algorithm>
 #include <utility>
+#include <sstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -477,6 +478,33 @@ bool Storage::loadDynAsm()
 std::vector<std::string> Storage::getLuaFilenames() const
 {
     return getFilenames(LAYOUT_LUA);
+}
+
+std::string Storage::getInfo() const
+{
+    std::stringstream ss;
+    auto const ENV_KEYS = envs().keys();
+    if (!ENV_KEYS.empty()) {
+        ss << "Environments:\n";
+        for (auto & env_key : ENV_KEYS) {
+            ss << " " << env_key << "=" << envs().opt(env_key) << "\n";
+        }
+    }
+
+    auto const ASSET_KEYS = asset().getKeys();
+    if (!ASSET_KEYS.empty()) {
+        ss << "Dynamic asset:\n";
+        for (auto & asset_key : ASSET_KEYS) {
+            ss << " " << asset_key << "=" << asset().get(asset_key) << "\n";
+        }
+    }
+
+    auto const LUA_PATH_STRING = lua().getLuaPath();
+    if (!LUA_PATH_STRING.empty()) {
+        ss << "LUA_PATH: " << LUA_PATH_STRING << "\n";
+    }
+
+    return ss.str();
 }
 
 } // namespace res

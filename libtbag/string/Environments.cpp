@@ -115,6 +115,11 @@ Environments & Environments::operator =(Flags && flags) TBAG_NOEXCEPT
     return *this;
 }
 
+std::vector<std::string> Environments::keys() const
+{
+    return _flags.getNamedKeys();
+}
+
 bool Environments::get(std::string const & key, std::string & val) const
 {
     return _flags.get(key, val);
@@ -123,6 +128,20 @@ bool Environments::get(std::string const & key, std::string & val) const
 void Environments::set(std::string const & key, std::string const & val)
 {
     _flags.set(key, val);
+}
+
+std::string Environments::opt(std::string const & key) const
+{
+    return opt(key, std::string());
+}
+
+std::string Environments::opt(std::string const & key, std::string const & default_val) const
+{
+    std::string result;
+    if (get(key, result)) {
+        return result;
+    }
+    return default_val;
 }
 
 void Environments::assign(Flags const & flags)

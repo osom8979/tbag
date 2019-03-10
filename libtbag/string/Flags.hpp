@@ -145,6 +145,7 @@ public:
     bool existsWithValue(std::string const & value) const;
 
 public:
+    std::vector<std::string> getNamedKeys() const;
     std::vector<std::string> getUnnamedValues() const;
 
 public:
