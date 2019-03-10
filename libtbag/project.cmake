@@ -53,7 +53,6 @@ tbag_modules__apply_dep_lfds        ()
 
 if (USE_GUI)
     tbag_modules__append_definitions (GL_SILENCE_DEPRECATION)
-    tbag_modules__update_c_family_subdir_objects (3rd/imgui)
     tbag_modules__apply_ext_sfml_ignore_gl_al ()
     tbag_modules__apply_ext_tgui ()
     tbag_modules__apply_dep_luasfml ()

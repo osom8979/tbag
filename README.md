@@ -34,8 +34,6 @@ Tea-bag is Third party extension utility project.
 - nanosvg master-2b08dee (zlib license)
 - lfds 7.1.1 (Public domain)
 - termbox 1.1.2 (MIT license)
-- imgui 1.6.5 (MIT license)
-- imgui-sfml master-995b873 (MIT license)
 - Canadadry/luaSFML master-f55fdd4 (MIT license)
 
 ## External target
@@ -55,6 +53,12 @@ Tea-bag is Third party extension utility project.
 - CMake 3.13.4 (BSD 3-Clause license)
   - external/archive/build/Modules/CMakePushCheckState.cmake
 - TGUI 0.8.4 (zlib license)
+
+## TODO
+
+- TCMalloc
+- Box2D
+- SoLoud
 
 ## Resources
 
