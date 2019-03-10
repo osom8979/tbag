@@ -7,6 +7,7 @@
 
 #include <libtbag/script/SolState.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -72,6 +73,39 @@ void SolState::swap(SolState & obj) TBAG_NOEXCEPT
 void SolState::reset()
 {
     _state.reset();
+}
+
+bool SolState::loadDynAsm()
+{
+    return false;
+}
+
+std::string SolState::getLuaPath() const
+{
+    try {
+        return (*_state)["package"]["path"];
+    } catch (...) {
+        return std::string();
+    }
+}
+
+bool SolState::appendLuaPath(std::string const & path)
+{
+    if (!libtbag::filesystem::Path(path).isDirectory()) {
+        return false;
+    }
+
+    std::string lua_path = getLuaPath();
+    try {
+        if (!lua_path.empty()) {
+            lua_path += libtbag::filesystem::details::PATH_SPLITTER;
+        }
+        lua_path += path;
+        (*_state)["package"]["path"] = lua_path;
+    } catch (...) {
+        return false;
+    }
+    return true;
 }
 
 } // namespace script

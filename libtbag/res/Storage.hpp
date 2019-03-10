@@ -25,6 +25,7 @@
 #include <libtbag/res/GetText.hpp>
 #include <libtbag/database/Sqlite.hpp>
 #include <libtbag/security/KeyStore.hpp>
+#include <libtbag/script/SolState.hpp>
 
 #include <string>
 #include <vector>
@@ -53,6 +54,7 @@ public:
     using GetText       = libtbag::res::GetText;
     using Sqlite        = libtbag::database::Sqlite;
     using KeyStore      = libtbag::security::KeyStore;
+    using SolState      = libtbag::script::SolState;
 
 public:
     /** Number of retries for temporary name generation. */
@@ -77,6 +79,7 @@ public:
         Sqlite        sqlite;
         std::string   clear_tempdir;
         KeyStore      keystore;
+        SolState      lua;
 
         Impl();
         ~Impl();
@@ -272,6 +275,15 @@ public:
 
     std::vector<std::string> listKey();
     std::vector<std::string> getKeyStoreFilenames() const;
+
+public:
+    SolState       & lua()       TBAG_NOEXCEPT { return _impl->lua; }
+    SolState const & lua() const TBAG_NOEXCEPT { return _impl->lua; }
+
+    bool appendLuaPath(std::string const & filename);
+    bool loadDynAsm();
+
+    std::vector<std::string> getLuaFilenames() const;
 };
 
 } // namespace res

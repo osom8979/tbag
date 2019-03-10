@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/script/Sol2Bypass.hpp>
 
+#include <string>
 #include <memory>
 
 // -------------------
@@ -70,6 +71,10 @@ public:
     inline State const * get() const TBAG_NOEXCEPT { return _state.get(); }
 
 public:
+    inline State       & operator *()       TBAG_NOEXCEPT { return *_state; }
+    inline State const & operator *() const TBAG_NOEXCEPT { return *_state; }
+
+public:
     friend inline bool operator <(SolState const & x, SolState const & y) TBAG_NOEXCEPT
     {
         return x.get() < y.get();
@@ -87,6 +92,13 @@ public:
 
 public:
     void reset();
+
+public:
+    bool loadDynAsm();
+
+public:
+    std::string getLuaPath() const;
+    bool appendLuaPath(std::string const & path);
 };
 
 } // namespace script

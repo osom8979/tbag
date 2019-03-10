@@ -97,8 +97,9 @@ namespace node {
  *     <keystore name='file.key'>dir</keystore>
  *
  *     <!-- Directory containing the lua script package. -->
+ *     <!-- If 'name' attribute is exists, Apply only those files.           -->
  *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
- *     <lua dynasm='true'>dir</lua>
+ *     <lua name='file.lua' dynasm='true'>dir</lua>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
@@ -192,7 +193,7 @@ public:
             // EMPTY.
         };
 
-        struct lua_layout : public def_layout
+        struct lua_layout : public txt_layout
         {
             bool dynasm = false;
         };

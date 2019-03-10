@@ -464,6 +464,21 @@ std::vector<std::string> Storage::getKeyStoreFilenames() const
     return getFilenames(LAYOUT_KEYSTORE);
 }
 
+bool Storage::appendLuaPath(std::string const & filename)
+{
+    return _impl->lua.appendLuaPath(asset().get(LAYOUT_LUA) / filename);
+}
+
+bool Storage::loadDynAsm()
+{
+    return _impl->lua.loadDynAsm();
+}
+
+std::vector<std::string> Storage::getLuaFilenames() const
+{
+    return getFilenames(LAYOUT_LUA);
+}
+
 } // namespace res
 
 // --------------------
