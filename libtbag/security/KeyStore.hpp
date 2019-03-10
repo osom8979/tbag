@@ -16,6 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/security/store/KeyStoreInterface.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -31,11 +34,40 @@ namespace security {
  */
 class TBAG_API KeyStore : private Noncopyable
 {
-private:
+public:
+    using KeyStoreInterface = libtbag::security::store::KeyStoreInterface;
+    using SharedKeyStore = std::shared_ptr<KeyStoreInterface>;
+
+public:
+    enum class Type
+    {
+        T_FILE,
+        T_GNOME,
+        T_MAC,
+        T_WINDOWS,
+    };
+
+public:
+    SharedKeyStore _store;
 
 public:
     KeyStore();
     virtual ~KeyStore();
+
+public:
+    bool open(Type type, std::string const & params);
+    void close();
+    bool isOpen() const;
+
+public:
+    bool create(std::string const & key);
+    bool remove(std::string const & key);
+
+    bool get(std::string const & key, std::string & result);
+    bool set(std::string const & key, std::string const & value, bool encrypt = false);
+    bool cmp(std::string const & key, std::string const & value, bool encrypt = false);
+
+    std::vector<std::string> list();
 };
 
 } // namespace security

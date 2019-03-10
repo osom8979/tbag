@@ -34,7 +34,7 @@ namespace store    {
 class TBAG_API GnomeKeyStore : private Noncopyable, public KeyStoreInterface
 {
 public:
-    GnomeKeyStore();
+    GnomeKeyStore(std::string const & params);
     virtual ~GnomeKeyStore();
 
 public:

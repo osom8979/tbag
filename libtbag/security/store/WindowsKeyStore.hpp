@@ -34,7 +34,7 @@ namespace store    {
 class TBAG_API WindowsKeyStore : private Noncopyable, public KeyStoreInterface
 {
 public:
-    WindowsKeyStore();
+    WindowsKeyStore(std::string const & params);
     virtual ~WindowsKeyStore();
 
 public:

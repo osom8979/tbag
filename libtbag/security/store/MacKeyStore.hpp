@@ -34,7 +34,7 @@ namespace store    {
 class TBAG_API MacKeyStore : private Noncopyable, public KeyStoreInterface
 {
 public:
-    MacKeyStore();
+    MacKeyStore(std::string const & params);
     virtual ~MacKeyStore();
 
 public:

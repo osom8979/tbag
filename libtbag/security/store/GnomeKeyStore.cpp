@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace security {
 namespace store    {
 
-GnomeKeyStore::GnomeKeyStore()
+GnomeKeyStore::GnomeKeyStore(std::string const & params)
 {
     // EMPTY.
 }

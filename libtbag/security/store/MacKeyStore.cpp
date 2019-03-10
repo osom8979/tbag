@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace security {
 namespace store    {
 
-MacKeyStore::MacKeyStore()
+MacKeyStore::MacKeyStore(std::string const & params)
 {
     // EMPTY.
 }

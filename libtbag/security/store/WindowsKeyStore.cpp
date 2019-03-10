@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace security {
 namespace store    {
 
-WindowsKeyStore::WindowsKeyStore()
+WindowsKeyStore::WindowsKeyStore(std::string const & params)
 {
     // EMPTY.
 }
