@@ -456,6 +456,9 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     if (prop.temp.exists && prop.temp.auto_clear) {
         storage.setAutoClearTempFiles();
     }
+    if (prop.keystore.exists) {
+        storage.openKeyStore(prop.keystore.name);
+    }
 
     return storage;
 }

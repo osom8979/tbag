@@ -24,6 +24,7 @@
 #include <libtbag/lib/SharedLibrary.hpp>
 #include <libtbag/res/GetText.hpp>
 #include <libtbag/database/Sqlite.hpp>
+#include <libtbag/security/KeyStore.hpp>
 
 #include <string>
 #include <vector>
@@ -51,6 +52,7 @@ public:
     using SharedLibrary = libtbag::lib::SharedLibrary;
     using GetText       = libtbag::res::GetText;
     using Sqlite        = libtbag::database::Sqlite;
+    using KeyStore      = libtbag::security::KeyStore;
 
 public:
     /** Number of retries for temporary name generation. */
@@ -74,6 +76,7 @@ public:
         GetText       text;
         Sqlite        sqlite;
         std::string   clear_tempdir;
+        KeyStore      keystore;
 
         Impl();
         ~Impl();
@@ -241,7 +244,7 @@ public:
 
     bool openSqlite(std::string const & filename, bool auto_close = true);
     void closeSqlite();
-    bool isOpen() const;
+    bool isOpenSqlite() const;
 
     std::vector<std::string> getSqliteFilenames() const;
 
@@ -251,6 +254,24 @@ public:
     void clearTempDir();
 
     std::string generateTempPath(std::size_t name_size = DEFAULT_RANDOM_STRING_SIZE) const;
+
+public:
+    KeyStore       & keystore()       TBAG_NOEXCEPT { return _impl->keystore; }
+    KeyStore const & keystore() const TBAG_NOEXCEPT { return _impl->keystore; }
+
+    bool openKeyStore(std::string const & filename);
+    void closeKeyStore();
+    bool isOpenKeyStore() const;
+
+    bool createKey(std::string const & key);
+    bool removeKey(std::string const & key);
+
+    bool getKey(std::string const & key, std::string & result);
+    bool setKey(std::string const & key, std::string const & value, bool encrypt = false);
+    bool cmpKey(std::string const & key, std::string const & value, bool encrypt = false);
+
+    std::vector<std::string> listKey();
+    std::vector<std::string> getKeyStoreFilenames() const;
 };
 
 } // namespace res

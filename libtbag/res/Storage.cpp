@@ -369,7 +369,7 @@ void Storage::closeSqlite()
     _impl->sqlite.close();
 }
 
-bool Storage::isOpen() const
+bool Storage::isOpenSqlite() const
 {
     return _impl->sqlite.isOpen();
 }
@@ -412,6 +412,56 @@ std::string Storage::generateTempPath(std::size_t name_size) const
         }
     }
     return std::string();
+}
+
+bool Storage::openKeyStore(std::string const & filename)
+{
+    return _impl->keystore.open(KeyStore::Type::T_FILE, asset().get(LAYOUT_KEYSTORE) / filename);
+}
+
+void Storage::closeKeyStore()
+{
+    return _impl->keystore.close();
+}
+
+bool Storage::isOpenKeyStore() const
+{
+    return _impl->keystore.isOpen();
+}
+
+bool Storage::createKey(std::string const & key)
+{
+    return _impl->keystore.create(key);
+}
+
+bool Storage::removeKey(std::string const & key)
+{
+    return _impl->keystore.remove(key);
+}
+
+bool Storage::getKey(std::string const & key, std::string & result)
+{
+    return _impl->keystore.get(key, result);
+}
+
+bool Storage::setKey(std::string const & key, std::string const & value, bool encrypt)
+{
+    return _impl->keystore.set(key, value, encrypt);
+}
+
+bool Storage::cmpKey(std::string const & key, std::string const & value, bool encrypt)
+{
+    return _impl->keystore.cmp(key, value, encrypt);
+}
+
+std::vector<std::string> Storage::listKey()
+{
+    return _impl->keystore.list();
+}
+
+std::vector<std::string> Storage::getKeyStoreFilenames() const
+{
+    return getFilenames(LAYOUT_KEYSTORE);
 }
 
 } // namespace res
