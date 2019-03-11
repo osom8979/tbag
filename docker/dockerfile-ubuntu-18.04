@@ -3,28 +3,23 @@ MAINTAINER zer0 <osom8979@gmail.com>
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get -qq update
-RUN apt-get install -y g++ cmake
-RUN apt-get install -y ocl-icd-opencl-dev libglu1-mesa-dev libudev-dev xorg-dev libxcb-image0-dev
+RUN apt-get update && apt-get install -y --fix-missing \
+    g++ cmake software-properties-common git curl ccache doxygen graphviz \
+    ocl-icd-opencl-dev libglu1-mesa-dev libudev-dev xorg-dev libxcb-image0-dev
 
 ENV WORKING_DIR /tbag/working
 ENV BUILD_DIR   /tbag/build
 
-RUN mkdir -p $WORKING_DIR
-RUN mkdir -p $BUILD_DIR
+RUN mkdir -p $WORKING_DIR && \
+    mkdir -p $BUILD_DIR
 
-# tbag update.
 COPY . $WORKING_DIR
 WORKDIR $BUILD_DIR
 
-# tbag build.
-RUN cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release $WORKING_DIR
-RUN make install
-
-# remove build files.
+RUN cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release $WORKING_DIR && \
+    make install
 WORKDIR /
 RUN rm -rf $BUILD_DIR $WORKING_DIR
 
-# run tpot.
 CMD /usr/local/bin/tpot
 
