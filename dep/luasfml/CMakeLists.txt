@@ -19,6 +19,7 @@ endif ()
 file (GLOB_RECURSE SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${sfml_EXT_INCLUDE_DIR})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${luajit_EXT_INCLUDE_DIR})
+add_definitions (-DSFML_STATIC -DOV_EXCLUDE_STATIC_CALLBACKS -DFLAC__NO_DLL)
 add_library (luasfml STATIC ${SRCS})
 add_dependencies (luasfml luajit sfml)
 
