@@ -192,6 +192,18 @@ public:
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_BPP    = 32;
 
 public:
+    using ContextAttributeFlagType = unsigned int;
+
+    /** Non-debug, compatibility context (this and the core attribute are mutually exclusive) */
+    TBAG_CONSTEXPR static unsigned int const ATTRIBUTE_DEFAULT_FLAG = 0;
+
+    /** Core attribute. */
+    TBAG_CONSTEXPR static unsigned int const ATTRIBUTE_CORE_FLAG = (1<<0);
+
+    /** Debug attribute. */
+    TBAG_CONSTEXPR static unsigned int const ATTRIBUTE_DEBUG_FLAG = (1<<2);
+
+public:
     struct Params
     {
         /** Window title. */
@@ -206,6 +218,27 @@ public:
         /** Bits Per Pixel. */
         unsigned int bpp = DEFAULT_WINDOW_BPP;
 
+        /** Bits of the depth buffer. */
+        unsigned int depth_bits = 0;
+
+        /** Bits of the stencil buffer. */
+        unsigned int stencil_bits = 0;
+
+        /** Level of antialiasing. */
+        unsigned int antialiasing_level = 0;
+
+        /** Major number of the context version to create. */
+        unsigned int major_version = 1;
+
+        /** Minor number of the context version to create. */
+        unsigned int minor_version = 1;
+
+        /** The attribute flags to create the context with. */
+        ContextAttributeFlagType attribute_flags = ATTRIBUTE_DEFAULT_FLAG;
+
+        /** Whether the context framebuffer is sRGB capable. */
+        bool srgb_capable = false;
+
         Params() { /* EMPTY. */ }
         ~Params() { /* EMPTY. */ }
     };
@@ -216,15 +249,10 @@ public:
     virtual ~RenderWindow();
 
 public:
-    int run();
+    bool pollEvent();
+    bool waitEvent();
 
 public:
-    virtual void onBegin();
-    virtual void onEnd();
-
-    virtual void onPollEventBegin();
-    virtual void onPollEventEnd();
-
     /**
      * The window requested to be closed (no data)
      */
@@ -407,11 +435,6 @@ public:
      */
     virtual void onSensorChanged(SensorType type, float x, float y, float z);
 
-    /**
-     * Event not detected.
-     */
-    virtual void onIdle();
-
 public:
     void close();
     bool isOpen() const;
@@ -428,10 +451,12 @@ public:
     void setVerticalSyncEnabled(bool enabled);
     void setMouseCursorVisible(bool visible);
     void setMouseCursorGrabbed(bool grabbed);
-    //void setMouseCursor(Cursor const & cursor);
     void setKeyRepeatEnabled(bool enabled);
     void setFramerateLimit(unsigned int limit);
     void setJoystickThreshold(float threshold);
+
+public:
+    //void setMouseCursor(Cursor const & cursor);
 
 public:
     void requestFocus();

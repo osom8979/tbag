@@ -89,121 +89,106 @@ RenderWindow::~RenderWindow()
     // EMPTY.
 }
 
-int RenderWindow::run()
+static void __process_sf_event__(RenderWindow * window, sf::Event & e)
 {
-    auto * window = cast<sf::RenderWindow>();
-    assert(window != nullptr);
-
 #if defined(USE_GUI)
-    sf::Event e = sf::Event{};
-    onBegin();
-    while (window->isOpen()) {
-        onPollEventBegin();
-        while (window->pollEvent(e)) {
-            switch (e.type) {
-            case sf::Event::Closed:
-                onClosed();
-                break;
-            case sf::Event::Resized:
-                onResized(e.size.width, e.size.height);
-                break;
-            case sf::Event::LostFocus:
-                onLostFocus();
-                break;
-            case sf::Event::GainedFocus:
-                onGainedFocus();
-                break;
-            case sf::Event::TextEntered:
-                onTextEntered(e.text.unicode);
-                break;
-            case sf::Event::KeyPressed:
-                onKeyPressed((Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
-                break;
-            case sf::Event::KeyReleased:
-                onKeyReleased((Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
-                break;
-            case sf::Event::MouseWheelMoved:
-                // DEPRECATED!
-                break;
-            case sf::Event::MouseWheelScrolled:
-                onMouseWheelScrolled((Wheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
-                break;
-            case sf::Event::MouseButtonPressed:
-                onMouseButtonPressed((Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-                break;
-            case sf::Event::MouseButtonReleased:
-                onMouseButtonReleased((Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-                break;
-            case sf::Event::MouseMoved:
-                onMouseMoved(e.mouseMove.x, e.mouseMove.y);
-                break;
-            case sf::Event::MouseEntered:
-                onMouseEntered();
-                break;
-            case sf::Event::MouseLeft:
-                onMouseLeft();
-                break;
-            case sf::Event::JoystickButtonPressed:
-                onJoystickButtonPressed(e.joystickButton.joystickId, e.joystickButton.button);
-                break;
-            case sf::Event::JoystickButtonReleased:
-                onJoystickButtonReleased(e.joystickButton.joystickId, e.joystickButton.button);
-                break;
-            case sf::Event::JoystickMoved:
-                onJoystickMoved(e.joystickMove.joystickId, (JoystickAxis)e.joystickMove.axis, e.joystickMove.position);
-                break;
-            case sf::Event::JoystickConnected:
-                onJoystickConnected(e.joystickConnect.joystickId);
-                break;
-            case sf::Event::JoystickDisconnected:
-                onJoystickDisconnected(e.joystickConnect.joystickId);
-                break;
-            case sf::Event::TouchBegan:
-                onTouchBegan(e.touch.finger, e.touch.x, e.touch.y);
-                break;
-            case sf::Event::TouchMoved:
-                onTouchMoved(e.touch.finger, e.touch.x, e.touch.y);
-                break;
-            case sf::Event::TouchEnded:
-                onTouchEnded(e.touch.finger, e.touch.x, e.touch.y);
-                break;
-            case sf::Event::SensorChanged:
-                onSensorChanged((SensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
-                break;
-            default:
-                TBAG_INACCESSIBLE_BLOCK_ASSERT();
-                break;
-            }
-        }
-        onPollEventEnd();
-        onIdle();
+    // @formatter:off
+    switch (e.type) {
+    case sf::Event::Closed:
+        window->onClosed();
+        break;
+    case sf::Event::Resized:
+        window->onResized(e.size.width, e.size.height);
+        break;
+    case sf::Event::LostFocus:
+        window->onLostFocus();
+        break;
+    case sf::Event::GainedFocus:
+        window->onGainedFocus();
+        break;
+    case sf::Event::TextEntered:
+        window->onTextEntered(e.text.unicode);
+        break;
+    case sf::Event::KeyPressed:
+        window->onKeyPressed((RenderWindow::Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+        break;
+    case sf::Event::KeyReleased:
+        window->onKeyReleased((RenderWindow::Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+        break;
+    case sf::Event::MouseWheelMoved:
+        // DEPRECATED!
+        break;
+    case sf::Event::MouseWheelScrolled:
+        window->onMouseWheelScrolled((RenderWindow::Wheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
+        break;
+    case sf::Event::MouseButtonPressed:
+        window->onMouseButtonPressed((RenderWindow::Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+        break;
+    case sf::Event::MouseButtonReleased:
+        window->onMouseButtonReleased((RenderWindow::Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+        break;
+    case sf::Event::MouseMoved:
+        window->onMouseMoved(e.mouseMove.x, e.mouseMove.y);
+        break;
+    case sf::Event::MouseEntered:
+        window->onMouseEntered();
+        break;
+    case sf::Event::MouseLeft:
+        window->onMouseLeft();
+        break;
+    case sf::Event::JoystickButtonPressed:
+        window->onJoystickButtonPressed(e.joystickButton.joystickId, e.joystickButton.button);
+        break;
+    case sf::Event::JoystickButtonReleased:
+        window->onJoystickButtonReleased(e.joystickButton.joystickId, e.joystickButton.button);
+        break;
+    case sf::Event::JoystickMoved:
+        window->onJoystickMoved(e.joystickMove.joystickId, (RenderWindow::JoystickAxis)e.joystickMove.axis, e.joystickMove.position);
+        break;
+    case sf::Event::JoystickConnected:
+        window->onJoystickConnected(e.joystickConnect.joystickId);
+        break;
+    case sf::Event::JoystickDisconnected:
+        window->onJoystickDisconnected(e.joystickConnect.joystickId);
+        break;
+    case sf::Event::TouchBegan:
+        window->onTouchBegan(e.touch.finger, e.touch.x, e.touch.y);
+        break;
+    case sf::Event::TouchMoved:
+        window->onTouchMoved(e.touch.finger, e.touch.x, e.touch.y);
+        break;
+    case sf::Event::TouchEnded:
+        window->onTouchEnded(e.touch.finger, e.touch.x, e.touch.y);
+        break;
+    case sf::Event::SensorChanged:
+        window->onSensorChanged((RenderWindow::SensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
+        break;
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
     }
-    onEnd();
-    return 0;
-#else
-    std::cerr << "Unsupported features." << std::endl;
-    return EXIT_FAILURE;
+    // @formatter:on
 #endif
 }
 
-void RenderWindow::onBegin()
+bool RenderWindow::pollEvent()
 {
-    // EMPTY.
+    sf::Event e;
+    if (_self_sf()->pollEvent(e)) {
+        __process_sf_event__(this, e);
+        return true;
+    }
+    return false;
 }
 
-void RenderWindow::onEnd()
+bool RenderWindow::waitEvent()
 {
-    // EMPTY.
-}
-
-void RenderWindow::onPollEventBegin()
-{
-    // EMPTY.
-}
-
-void RenderWindow::onPollEventEnd()
-{
-    // EMPTY.
+    sf::Event e;
+    if (_self_sf()->waitEvent(e)) {
+        __process_sf_event__(this, e);
+        return true;
+    }
+    return false;
 }
 
 void RenderWindow::onClosed()
@@ -316,11 +301,6 @@ void RenderWindow::onSensorChanged(SensorType type, float x, float y, float z)
     // EMPTY.
 }
 
-void RenderWindow::onIdle()
-{
-    // EMPTY.
-}
-
 void RenderWindow::close()
 {
     _self_sf()->close();
@@ -377,11 +357,6 @@ void RenderWindow::setMouseCursorGrabbed(bool grabbed)
     _self_sf()->setMouseCursorGrabbed(grabbed);
 }
 
-//void RenderWindow::setMouseCursor(Cursor const & cursor)
-//{
-//    _self_sf()->setMouseCursor(*cursor.cast<sf::Cursor>());
-//}
-
 void RenderWindow::setKeyRepeatEnabled(bool enabled)
 {
     _self_sf()->setKeyRepeatEnabled(enabled);
@@ -396,6 +371,11 @@ void RenderWindow::setJoystickThreshold(float threshold)
 {
     _self_sf()->setJoystickThreshold(threshold);
 }
+
+//void RenderWindow::setMouseCursor(Cursor const & cursor)
+//{
+//    _self_sf()->setMouseCursor(*cursor.cast<sf::Cursor>());
+//}
 
 void RenderWindow::requestFocus()
 {
