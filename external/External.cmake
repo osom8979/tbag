@@ -47,8 +47,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set (EXT_CXX_FLAGS)
     set (EXT_C_FLAGS)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set (EXT_CXX_FLAGS -w -fPIC)
-    set (EXT_C_FLAGS   -w -fPIC)
+    set (EXT_CXX_FLAGS "-fPIC -w")
+    set (EXT_C_FLAGS   "-fPIC -w")
 endif ()
 
 ###########
