@@ -130,26 +130,26 @@ static int docall(lua_State *L, int narg, int clear)
 
 static void print_version(void)
 {
-  //fputs(LUAJIT_VERSION " -- " LUAJIT_COPYRIGHT ". " LUAJIT_URL "\n", stdout);
+  fputs(LUAJIT_VERSION "\n", stdout);
 }
 
 static void print_jit_status(lua_State *L)
 {
-//  int n;
-//  const char *s;
-//  lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
-//  lua_getfield(L, -1, "jit");  /* Get jit.* module table. */
-//  lua_remove(L, -2);
-//  lua_getfield(L, -1, "status");
-//  lua_remove(L, -2);
-//  n = lua_gettop(L);
-//  lua_call(L, 0, LUA_MULTRET);
-//  fputs(lua_toboolean(L, n) ? "JIT: ON" : "JIT: OFF", stdout);
-//  for (n++; (s = lua_tostring(L, n)); n++) {
-//    putc(' ', stdout);
-//    fputs(s, stdout);
-//  }
-//  putc('\n', stdout);
+  int n;
+  const char *s;
+  lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+  lua_getfield(L, -1, "jit");  /* Get jit.* module table. */
+  lua_remove(L, -2);
+  lua_getfield(L, -1, "status");
+  lua_remove(L, -2);
+  n = lua_gettop(L);
+  lua_call(L, 0, LUA_MULTRET);
+  fputs(lua_toboolean(L, n) ? "JIT: ON" : "JIT: OFF", stdout);
+  for (n++; (s = lua_tostring(L, n)); n++) {
+    putc(' ', stdout);
+    fputs(s, stdout);
+  }
+  putc('\n', stdout);
 }
 
 static int getargs(lua_State *L, char **argv, int n)

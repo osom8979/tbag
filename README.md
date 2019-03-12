@@ -100,6 +100,12 @@ The main build options you will want to configure are as follows:
 * `DISABLE_TDLOG`: Disable tbag default logger.
 * `DISABLE_LUAJIT_EXE_FLAGS`: Disable LuaJIT Embedding flags if apple.
 
+## Tpot
+
+### Environment variables.
+
+* `TPOT_MODE`: If this value is `lua`, run on the luac mode.
+
 ## License
 
 See the `LICENSE` file for details. In summary, tbag is licensed under the MIT license.
