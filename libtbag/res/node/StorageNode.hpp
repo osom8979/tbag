@@ -99,8 +99,7 @@ namespace node {
  *     <!-- Directory containing the lua script package. -->
  *     <!-- If 'name' attribute is exists, Apply only those files.           -->
  *     <!-- If 'libs' attribute is 'true', Apply default lua libraries.      -->
- *     <!-- If 'dynasm' attribute is 'true', Install DynASM(LuaJIT) package. -->
- *     <lua name='file.lua' libs='true' dynasm='true'>dir</lua>
+ *     <lua name='file.lua' libs='true'>dir</lua>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
@@ -118,7 +117,10 @@ public:
     using Storage      = libtbag::res::Storage;
 
 public:
-    TBAG_CONSTEXPR static char const * const TAG_STORAGE   = "storage";
+    TBAG_CONSTEXPR static char const * const DEFAULT_STORAGE_ROOT = "${HOME_DIR}/${EXE_NAME}";
+
+public:
+    TBAG_CONSTEXPR static char const * const TAG_STORAGE = "storage";
 
 public:
     // @formatter:off
@@ -142,7 +144,6 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
     TBAG_CONSTEXPR static char const * const ATT_AUTO_CLEAR = "autoclear";
     TBAG_CONSTEXPR static char const * const ATT_LIBS       = "libs";
-    TBAG_CONSTEXPR static char const * const ATT_DYNASM     = "dynasm";
 
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
@@ -197,8 +198,7 @@ public:
 
         struct lua_layout : public txt_layout
         {
-            bool libs   = true;
-            bool dynasm = false;
+            bool libs = true;
         };
 
         struct usr_layout : public txt_layout
@@ -229,6 +229,7 @@ private:
 
 public:
     StorageNode(char ** envs = nullptr);
+    StorageNode(std::string const & root, char ** envs = nullptr);
     StorageNode(StorageNode const & obj);
     StorageNode(StorageNode && obj) TBAG_NOEXCEPT;
     ~StorageNode();

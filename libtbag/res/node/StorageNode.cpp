@@ -20,7 +20,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace res  {
 namespace node {
 
-StorageNode::StorageNode(char ** envs) : _envs(envs)
+StorageNode::StorageNode(char ** envs) : _root(DEFAULT_STORAGE_ROOT), _envs(envs)
+{
+    // EMPTY.
+}
+
+StorageNode::StorageNode(std::string const & root, char ** envs)
+        : _root(root), _envs(envs)
 {
     // EMPTY.
 }
@@ -127,7 +133,7 @@ void StorageNode::setup()
     prop.lua     .exists = true;
     // @formatter:on
 
-    update(libtbag::filesystem::Path::getWorkDir(), prop);
+    update(DEFAULT_STORAGE_ROOT, prop);
 }
 
 void StorageNode::teardown()
@@ -265,7 +271,6 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
         layout.text = text(*child);
         optAttr(*child, ATT_NAME    , layout.name);
         optAttr(*child, ATT_LIBS    , layout.libs);
-        optAttr(*child, ATT_DYNASM  , layout.dynasm);
         optAttr(*child, ATT_ABSOLUTE, layout.abs);
         optAttr(*child, ATT_RAW     , layout.raw);
     } else {
@@ -359,7 +364,6 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
             text(child, layout.text);
             setAttr(child, ATT_NAME    , layout.name);
             setAttr(child, ATT_LIBS    , layout.libs);
-            setAttr(child, ATT_DYNASM  , layout.dynasm);
             setAttr(child, ATT_ABSOLUTE, layout.abs);
             setAttr(child, ATT_RAW     , layout.raw);
         });
@@ -467,9 +471,6 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         if (prop.lua.libs) {
             storage.loadLibraries();
             storage.appendLuaPath();
-        }
-        if (prop.lua.dynasm) {
-            storage.loadDynAsm();
         }
         if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.name);
