@@ -1,12 +1,13 @@
 /**
- * @file   box.cpp
+ * @file   box_api.cpp
  * @brief  C-based box method implementation.
  * @author zer0
  * @date   2019-02-21
  * @date   2019-03-04 (Rename: libtbag/box/CBox -> libtbag/box/details/box)
+ * @date   2019-03-14 (Rename: libtbag/box/details/box -> libtbag/box/details/box_api)
  */
 
-#include <libtbag/box/details/box.hpp>
+#include <libtbag/box/details/box_api.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/memory/Memory.hpp>
 #include <libtbag/box/details/box_dim.hpp>

@@ -1,9 +1,10 @@
 /**
- * @file   box.hpp
+ * @file   box_api.hpp
  * @brief  C-based box method prototype.
  * @author zer0
  * @date   2019-02-21
  * @date   2019-03-04 (Rename: libtbag/box/CBox -> libtbag/box/details/box)
+ * @date   2019-03-14 (Rename: libtbag/box/details/box -> libtbag/box/details/box_api)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_BOX_DETAILS_BOX_HPP__
