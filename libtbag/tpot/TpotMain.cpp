@@ -54,7 +54,7 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
     _params.install_service = true;
     _params.service_name = SERVICE_NAME;
     _params.version = libtbag::util::getTbagVersion();
-    _params.scope = DefaultApp::ConfigScope::HOME;
+    _params.scope = DefaultApp::ConfigScope::EXE;
     _params.options_cb = std::bind(&TpotMain::onOptions, this, _1);
     _params.properties_cb = std::bind(&TpotMain::onInfo, this, _1);
     _params.std_signal = std::bind(&TpotMain::onTerminateSignal, this, _1);

@@ -20,7 +20,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace res  {
 namespace node {
 
-StorageNode::StorageNode(char ** envs) : _root(DEFAULT_STORAGE_ROOT), _envs(envs)
+StorageNode::StorageNode(char ** envs)
+        : _root(DEFAULT_STORAGE_ROOT), _envs(envs)
 {
     // EMPTY.
 }

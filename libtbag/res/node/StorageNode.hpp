@@ -117,7 +117,7 @@ public:
     using Storage      = libtbag::res::Storage;
 
 public:
-    TBAG_CONSTEXPR static char const * const DEFAULT_STORAGE_ROOT = "${HOME_DIR}/${EXE_NAME}";
+    TBAG_CONSTEXPR static char const * const DEFAULT_STORAGE_ROOT = "${WORK_DIR}/storage";
 
 public:
     TBAG_CONSTEXPR static char const * const TAG_STORAGE = "storage";
