@@ -41,3 +41,18 @@ TEST(CommanderTest, Default)
     ASSERT_STREQ(   "temp", test2_result.c_str());
 }
 
+TEST(CommanderTest, OnlyPrefix)
+{
+    std::vector<std::string> args_result;
+
+    Commander commander([&](Arguments const & args){
+        if (!args.empty()) {
+            args_result.push_back(args.get(0));
+        }
+    });
+
+    commander.request("-- --t");
+    ASSERT_EQ(1, args_result.size());
+    ASSERT_STREQ("--", args_result[0].c_str());
+}
+

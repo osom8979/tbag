@@ -228,7 +228,7 @@ Flags::Argv Flags::getArgv(bool last_null) const
 
 Flags::Flag Flags::convertFlag(std::string const & str, std::string const & prefix, std::string const & delimiter)
 {
-    if (str.substr(0, prefix.size()) == prefix) {
+    if (str != prefix && str.substr(0, prefix.size()) == prefix) {
         // ENABLE KEY.
         std::size_t delimiter_pos = str.find(delimiter);
         std::string key = str.substr(prefix.size(), delimiter_pos - prefix.size());
