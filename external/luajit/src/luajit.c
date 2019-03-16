@@ -1,6 +1,6 @@
 /*
 ** LuaJIT frontend. Runs commands, scripts, read-eval-print (REPL) etc.
-** Copyright (C) 2005-2014 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2017 Mike Pall. See Copyright Notice in luajit.h
 **
 ** Major portions taken verbatim or adapted from the Lua interpreter.
 ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
@@ -62,7 +62,7 @@ static void laction(int i)
 static void print_usage(void)
 {
   fprintf(stderr,
-  "usage: %s lua [options]... [script [args]...].\n"
+  "usage: %s [options]... [script [args]...].\n"
   "Available options are:\n"
   "  -e chunk  Execute string " LUA_QL("chunk") ".\n"
   "  -l name   Require library " LUA_QL("name") ".\n"
@@ -131,7 +131,7 @@ static int docall(lua_State *L, int narg, int clear)
 
 static void print_version(void)
 {
-  fputs(LUAJIT_VERSION "\n", stdout);
+  fputs(LUAJIT_VERSION " -- " LUAJIT_COPYRIGHT ". " LUAJIT_URL "\n", stdout);
 }
 
 static void print_jit_status(lua_State *L)
@@ -301,17 +301,17 @@ static int loadjitmodule(lua_State *L)
   lua_concat(L, 2);
   if (lua_pcall(L, 1, 1, 0)) {
     const char *msg = lua_tostring(L, -1);
-    if (msg && !strncmp(msg, "module ", 7)) {
-    err:
-      l_message(progname,
-		"unknown luaJIT command or jit.* modules not installed");
-      return 1;
-    } else {
-      return report(L, 1);
-    }
+    if (msg && !strncmp(msg, "module ", 7))
+      goto nomodule;
+    return report(L, 1);
   }
   lua_getfield(L, -1, "start");
-  if (lua_isnil(L, -1)) goto err;
+  if (lua_isnil(L, -1)) {
+  nomodule:
+    l_message(progname,
+	      "unknown luaJIT command or jit.* modules not installed");
+    return 1;
+  }
   lua_remove(L, -2);  /* Drop module table. */
   return 0;
 }
@@ -553,7 +553,7 @@ static int pmain(lua_State *L)
   return 0;
 }
 
-int __lua_cmd_main__(int argc, char **argv, lua_main_prefix_cb cb)
+int main(int argc, char **argv)
 {
   int status;
   lua_State *L = lua_open();  /* create state */
@@ -563,9 +563,6 @@ int __lua_cmd_main__(int argc, char **argv, lua_main_prefix_cb cb)
   }
   smain.argc = argc;
   smain.argv = argv;
-  if (cb != NULL) {
-    cb(L);
-  }
   status = lua_cpcall(L, pmain, NULL);
   report(L, status);
   lua_close(L);

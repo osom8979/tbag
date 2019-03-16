@@ -1,7 +1,7 @@
 /*
 ** LuaJIT -- a Just-In-Time Compiler for Lua. http://luajit.org/
 **
-** Copyright (C) 2005-2014 Mike Pall. All rights reserved.
+** Copyright (C) 2005-2017 Mike Pall. All rights reserved.
 **
 ** Permission is hereby granted, free of charge, to any person obtaining
 ** a copy of this software and associated documentation files (the
@@ -30,10 +30,10 @@
 
 #include "lua.h"
 
-#define LUAJIT_VERSION		"LuaJIT 2.0.3"
-#define LUAJIT_VERSION_NUM	20003  /* Version 2.0.3 = 02.00.03. */
-#define LUAJIT_VERSION_SYM	luaJIT_version_2_0_3
-#define LUAJIT_COPYRIGHT	"Copyright (C) 2005-2014 Mike Pall"
+#define LUAJIT_VERSION		"LuaJIT 2.0.5"
+#define LUAJIT_VERSION_NUM	20005  /* Version 2.0.5 = 02.00.05. */
+#define LUAJIT_VERSION_SYM	luaJIT_version_2_0_5
+#define LUAJIT_COPYRIGHT	"Copyright (C) 2005-2017 Mike Pall"
 #define LUAJIT_URL		"http://luajit.org/"
 
 /* Modes for luaJIT_setmode. */
@@ -66,9 +66,5 @@ LUA_API int luaJIT_setmode(lua_State *L, int idx, int mode);
 
 /* Enforce (dynamic) linker error for version mismatches. Call from main. */
 LUA_API void LUAJIT_VERSION_SYM(void);
-
-typedef void(*lua_main_prefix_cb)(lua_State*L);
-
-LUA_API int __lua_cmd_main__(int argc, char **argv, lua_main_prefix_cb cb);
 
 #endif
