@@ -3,12 +3,12 @@
 #ifndef _LUAJIT_H
 #define _LUAJIT_H
 
-#include <libtbag/script/luajit-2.0.3/lua.h>
+#include <libtbag/script/luajit-2.0.5/lua.h>
 
-#define LUAJIT_VERSION      "LuaJIT 2.0.3"
-#define LUAJIT_VERSION_NUM  20003  // Version 2.0.3 = 02.00.03.
-#define LUAJIT_VERSION_SYM  luaJIT_version_2_0_3
-#define LUAJIT_COPYRIGHT    "Copyright (C) 2005-2014 Mike Pall"
+#define LUAJIT_VERSION      "LuaJIT 2.0.5"
+#define LUAJIT_VERSION_NUM  20005  /* Version 2.0.5 = 02.00.05. */
+#define LUAJIT_VERSION_SYM  luaJIT_version_2_0_5
+#define LUAJIT_COPYRIGHT    "Copyright (C) 2005-2017 Mike Pall"
 #define LUAJIT_URL          "http://luajit.org/"
 
 // Modes for luaJIT_setmode.

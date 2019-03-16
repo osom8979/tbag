@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/script/luajit-2.0.3/lua.hpp>
+#include <libtbag/script/luajit-2.0.5/lua.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include <libtbag/script/luajit-2.0.3/lua.h>
+#include <libtbag/script/luajit-2.0.5/lua.h>
 
 #define luaL_getn(L,i)          ((int)lua_objlen(L, i))
 #define luaL_setn(L,i,j)        ((void)0)  /* no op! */

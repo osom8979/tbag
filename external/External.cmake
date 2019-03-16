@@ -494,6 +494,11 @@ else ()
                        "-DLUA_USE_READLINE=OFF"
                        "-DLUA_USE_CURSES=OFF"
                        "-DLUA_BUILD_WLUA=OFF"
+                       "-DLUA_PATH=TPOT_LUA_PATH"
+                       "-DLUA_CPATH=TPOT_LUA_CPATH"
+                       "-DLUA_INIT=TPOT_LUA_INIT"
+                       "-DLUA_USE_RELATIVE_LOADLIB=OFF"
+                       "-DLUA_DIR="
             #--Output lluajiting-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1

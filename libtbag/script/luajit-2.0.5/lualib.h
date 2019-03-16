@@ -3,7 +3,7 @@
 #ifndef _LUALIB_H
 #define _LUALIB_H
 
-#include <libtbag/script/luajit-2.0.3/lua.h>
+#include <libtbag/script/luajit-2.0.5/lua.h>
 
 #define LUA_FILEHANDLE   "FILE*"
 #define LUA_COLIBNAME    "coroutine"

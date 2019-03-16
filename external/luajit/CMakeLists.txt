@@ -27,7 +27,7 @@ set ( LUA_MAXINPUT 512 CACHE NUMBER "Is the maximum length for an input line in 
 # Version
 set ( MAJVER 2 )
 set ( MINVER 0 )
-set ( RELVER 2 )
+set ( RELVER 5 )
 set ( ABIVER 5.1 )
 set ( NODOTABIVER 51 )
 
@@ -67,8 +67,8 @@ else ()
   set ( LUA_DIR ${CMAKE_INSTALL_PREFIX} CACHE STRING "Destination from which modules will be resolved. See INSTALL_LMOD and INSTALL_CMOD.")
 endif ()
 
-set ( LUA_PATH_DEFAULT "./?.lua;${LUA_DIR}${LUA_LDIR}/?.lua;${LUA_DIR}${LUA_LDIR}/?/init.lua;./?/init.lua" )
-set ( LUA_CPATH_DEFAULT "./?${LUA_MODULE_SUFFIX};${LUA_DIR}${LUA_CDIR}/?${LUA_MODULE_SUFFIX};${LUA_DIR}${LUA_CDIR}/loadall${LUA_MODULE_SUFFIX}" )
+set ( LUA_PATH_DEFAULT "" )
+set ( LUA_CPATH_DEFAULT "" )
 
 if ( WIN32 AND NOT CYGWIN )
   # Windows systems
