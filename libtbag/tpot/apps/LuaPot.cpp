@@ -39,6 +39,21 @@ char const * const LuaPot::getName() const TBAG_NOEXCEPT
 char const * const LuaPot::getRemarks() const TBAG_NOEXCEPT
 {
     return "Lua Interpreter";
+
+
+
+//    "usage: %s lua [options]... [script [args]...].\n"
+//    "Available options are:\n"
+//    "  -e chunk  Execute string " LUA_QL("chunk") ".\n"
+//    "  -l name   Require library " LUA_QL("name") ".\n"
+//    "  -b ...    Save or list bytecode.\n"
+//    "  -j cmd    Perform LuaJIT control command.\n"
+//    "  -O[opt]   Control LuaJIT optimizations.\n"
+//    "  -i        Enter interactive mode after executing " LUA_QL("script") ".\n"
+//    "  -v        Show version information.\n"
+//    "  -E        Ignore environment variables.\n"
+//    "  --        Stop handling options.\n"
+//    "  -         Execute stdin and stop handling options.\n"
 }
 
 int LuaPot::onMain()

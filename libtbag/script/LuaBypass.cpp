@@ -736,7 +736,7 @@ void luaL_openlibs(lua_State * L)
 
 int luac(int argc, char ** argv)
 {
-    return __lua_cmd_main__(argc, argv);
+    return __lua_cmd_main__(argc, argv, [](lua_State * L){});
 }
 
 } // namespace script

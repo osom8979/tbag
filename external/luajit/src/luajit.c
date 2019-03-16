@@ -72,6 +72,7 @@ static void print_usage(void)
   "  -i        Enter interactive mode after executing " LUA_QL("script") ".\n"
   "  -v        Show version information.\n"
   "  -E        Ignore environment variables.\n"
+  "  --        Stop handling options.\n"
   "  -         Execute stdin and stop handling options.\n"
   ,
   progname);
@@ -552,7 +553,7 @@ static int pmain(lua_State *L)
   return 0;
 }
 
-int __lua_cmd_main__(int argc, char **argv)
+int __lua_cmd_main__(int argc, char **argv, lua_main_prefix_cb cb)
 {
   int status;
   lua_State *L = lua_open();  /* create state */
@@ -562,6 +563,9 @@ int __lua_cmd_main__(int argc, char **argv)
   }
   smain.argc = argc;
   smain.argv = argv;
+  if (cb != NULL) {
+    cb(L);
+  }
   status = lua_cpcall(L, pmain, NULL);
   report(L, status);
   lua_close(L);

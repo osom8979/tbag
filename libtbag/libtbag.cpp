@@ -168,20 +168,9 @@ void tbRelease()
 // -----------------
 
 #include <libtbag/tpot/TpotMain.hpp>
-#include <libtbag/script/LuaBypass.hpp>
-#include <libtbag/uvpp/UvUtils.hpp>
-
-TBAG_CONSTEXPR static char const * const TPOT_MODE_ENV_KEY = "TPOT_MODE";
-TBAG_CONSTEXPR static char const * const TPOT_MODE_LUA_ENV_VAL = "LUA";
 
 int tbPotMain(int argc, char ** argv, char ** envs)
 {
-    std::string value;
-    if (isSuccess(libtbag::uvpp::getEnv(TPOT_MODE_ENV_KEY, value))) {
-        if (libtbag::string::upper(value) == TPOT_MODE_LUA_ENV_VAL) {
-            return libtbag::script::luac(argc, argv);
-        }
-    }
     return libtbag::tpot::TpotMain(argc, argv, envs).run();
 }
 
