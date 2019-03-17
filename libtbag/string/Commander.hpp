@@ -70,6 +70,7 @@ private:
     CommandMap _commands;
 
     bool _call_once;
+    bool _skip_commands;
 
 public:
     Commander();
@@ -104,12 +105,20 @@ public:
     inline void setCallOnce(bool flag = true) { _call_once = flag; }
     inline bool isCallOnce() const TBAG_NOEXCEPT { return _call_once; }
 
+    inline void setSkipCommands(bool flag = true) { _skip_commands = flag; }
+    inline bool isSkipCommands() const TBAG_NOEXCEPT { return _skip_commands; }
+
 public:
     void clear();
     bool insert(std::string const & command, Callback const & callback);
 
 public:
     static ArgsVector parseArguments(Flags const & flags);
+    static ArgsVector parseArguments(Flags const & flags,
+                                     std::string const & prefix,
+                                     std::string const & delimiter);
+    static ArgsVector parseArguments(Flags const & flags,
+                                     std::vector<std::string> const & originals);
     static ArgsVector parseArguments(std::string const & arguments,
                                      std::string const & prefix = DEFAULT_PREFIX,
                                      std::string const & delimiter = DEFAULT_DELIMITER);

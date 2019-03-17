@@ -22,7 +22,7 @@ namespace tpot {
 
 TBAG_CONSTEXPR static char const * const SYNOPSIS_TEXT =
         "TpoT is a command-line utility for the tbag library.\n"
-        "Usage: tpot [options] [application] [args] ...\n";
+        "Usage: tpot [options] [command] [command_sub_args] ...\n";
 TBAG_CONSTEXPR static char const * const CONFIG_NAME = "tpot.xml";
 TBAG_CONSTEXPR static char const * const SERVICE_NAME = "tpot";
 

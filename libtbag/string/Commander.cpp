@@ -15,19 +15,23 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-Commander::Commander() : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(nullptr), _call_once(false)
+Commander::Commander()
+        : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(nullptr),
+          _call_once(false), _skip_commands(false)
 {
     // EMPTY.
 }
 
 Commander::Commander(std::string const & prefix, std::string const & delimiter)
-        : _prefix(prefix), _delimiter(delimiter), _default(nullptr), _call_once(false)
+        : _prefix(prefix), _delimiter(delimiter), _default(nullptr),
+          _call_once(false), _skip_commands(false)
 {
     // EMPTY.
 }
 
 Commander::Commander(Callback const & default_callback)
-        : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(default_callback), _call_once(false)
+        : _prefix(DEFAULT_PREFIX), _delimiter(DEFAULT_DELIMITER), _default(default_callback),
+          _call_once(false), _skip_commands(false)
 {
     // EMPTY.
 }
@@ -95,25 +99,57 @@ Commander::ArgsVector Commander::parseArguments(Flags const & flags)
     return result;
 }
 
+Commander::ArgsVector Commander::parseArguments(Flags const & flags,
+                                                std::string const & prefix,
+                                                std::string const & delimiter)
+{
+    std::size_t const SIZE = flags.size();
+    ArgsVector result;
+    for (std::size_t index = 0; index < SIZE; ++index) {
+        auto & flag = flags.at(index);
+        Arguments arguments;
+        arguments.setName(flag.key);
+        arguments.setFull(Flags::convertString(flag, prefix, delimiter));
+        arguments.parse(flag.value);
+        result.push_back(std::move(arguments));
+    }
+    return result;
+}
+
+Commander::ArgsVector Commander::parseArguments(Flags const & flags, std::vector<std::string> const & originals)
+{
+    std::size_t const SIZE = flags.size();
+    ArgsVector result;
+    for (std::size_t index = 0; index < SIZE; ++index) {
+        auto & flag = flags.at(index);
+        Arguments arguments;
+        arguments.setName(flag.key);
+        arguments.setFull(originals.at(index));
+        arguments.parse(flag.value);
+        result.push_back(std::move(arguments));
+    }
+    return result;
+}
+
 Commander::ArgsVector Commander::parseArguments(std::string const & arguments,
                                                 std::string const & prefix,
                                                 std::string const & delimiter)
 {
-    return parseArguments(Flags(arguments, prefix, delimiter));
+    return parseArguments(Flags(arguments, prefix, delimiter), prefix, delimiter);
 }
 
 Commander::ArgsVector Commander::parseArguments(std::vector<std::string> const & arguments,
                                                 std::string const & prefix,
                                                 std::string const & delimiter)
 {
-    return parseArguments(Flags(arguments, prefix, delimiter));
+    return parseArguments(Flags(arguments, prefix, delimiter), arguments);
 }
 
 void Commander::setDefaultCallbackForLeftArguments(std::vector<std::string> * left_arguments,
                                                    std::vector<std::string> * unknown_flags)
 {
     _default = [left_arguments, unknown_flags](Arguments const & args){
-        if (args.getName().empty() == false) {
+        if (!args.getName().empty()) {
             // This block comes when an unknown option is hit.
             if (unknown_flags != nullptr) {
                 unknown_flags->push_back(args.getName());
@@ -121,10 +157,13 @@ void Commander::setDefaultCallbackForLeftArguments(std::vector<std::string> * le
             return;
         }
 
-        if (args.empty() == false) {
-            // Non flag arguments.
-            if (left_arguments != nullptr) {
+        if (left_arguments != nullptr) {
+            if (!args.getFull().empty()) {
+                left_arguments->push_back(args.getFull());
+            } else if (!args.getOriginalArgumentString().empty()) {
                 left_arguments->push_back(args.getOriginalArgumentString());
+            } else if (!args.getName().empty()) {
+                left_arguments->push_back(args.getName());
             }
         }
     };
@@ -144,7 +183,7 @@ std::size_t Commander::request(ArgsVector const & args_vector)
         }
 
         auto itr = _commands.find(arguments.getName());
-        if (itr == _commands.end()) {
+        if (_skip_commands || itr == _commands.end()) {
             if (static_cast<bool>(_default)) {
                 _default(arguments);
             }

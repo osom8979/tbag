@@ -48,38 +48,41 @@ public:
     TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE3 = "FALSE";
 
 private:
-    std::string _original; ///< The original string that was last parsed.
-
     std::string _name;
+    std::string _original; ///< The original string that was last parsed.
     std::vector<std::string> _args;
 
     std::string _delimiter;
     std::string _point_delimiter;
 
+private:
+    std::string _full;
+
 public:
     Arguments();
-    Arguments(std::string const & name
-            , std::string const & arguments
-            , std::string const & delimiter       = DEFAULT_ARGUMENTS_DELIMITER
-            , std::string const & point_delimiter = DEFAULT_ARGUMENTS_POINT_DELIMITER);
-
+    Arguments(std::string const & name,
+              std::string const & arguments,
+              std::string const & delimiter = DEFAULT_ARGUMENTS_DELIMITER,
+              std::string const & point_delimiter = DEFAULT_ARGUMENTS_POINT_DELIMITER);
     Arguments(Arguments const & obj);
-    Arguments(Arguments && obj);
+    Arguments(Arguments && obj) TBAG_NOEXCEPT;
     ~Arguments();
 
 public:
     Arguments & operator =(Arguments const & obj);
-    Arguments & operator =(Arguments && obj);
+    Arguments & operator =(Arguments && obj) TBAG_NOEXCEPT;
 
 public:
-    inline std::string getOriginalArgumentString() const
-    { return _original; }
     inline std::string getName() const
     { return _name; }
     inline std::string getDelimiter() const
     { return _delimiter; }
     inline std::string getPointDelimiter() const
     { return _point_delimiter; }
+    inline std::string getOriginalArgumentString() const
+    { return _original; }
+    inline std::string getFull() const
+    { return _full; }
 
     inline void setName(std::string const & name)
     { _name = name; }
@@ -87,6 +90,8 @@ public:
     { _delimiter = delimiter; }
     inline void setPointDelimiter(std::string const & point_delimiter)
     { _point_delimiter = point_delimiter; }
+    inline void setFull(std::string const & full)
+    { _full = full; }
 
     inline void clear() TBAG_NOEXCEPT
     { _args.clear(); }

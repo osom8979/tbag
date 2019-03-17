@@ -69,9 +69,13 @@ bool SimpleApp::onCreate()
             print_unknown = true;
             return;
         }
-        if (!args.empty()) {
-            // Command arguments.
+
+        if (!args.getFull().empty()) {
+            commands.push_back(args.getFull());
+        } else if (!args.getOriginalArgumentString().empty()) {
             commands.push_back(args.getOriginalArgumentString());
+        } else if (!args.getName().empty()) {
+            commands.push_back(args.getName());
         }
     });
 

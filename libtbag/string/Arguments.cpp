@@ -19,7 +19,8 @@ namespace string {
 Arguments::Arguments()
         : _original(), _name(), _args(),
           _delimiter(DEFAULT_ARGUMENTS_DELIMITER),
-          _point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
+          _point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER),
+          _full()
 {
     // EMPTY.
 }
@@ -29,7 +30,8 @@ Arguments::Arguments(std::string const & name
                    , std::string const & delimiter
                    , std::string const & point_delimiter)
         : _original(), _name(name), _args(),
-          _delimiter(delimiter), _point_delimiter(point_delimiter)
+          _delimiter(delimiter), _point_delimiter(point_delimiter),
+          _full()
 {
     if (parse(arguments) == false) {
         tDLogE("Arguments::Arguments() parse error.");
@@ -41,7 +43,7 @@ Arguments::Arguments(Arguments const & obj)
     (*this) = obj;
 }
 
-Arguments::Arguments(Arguments && obj)
+Arguments::Arguments(Arguments && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }
@@ -59,11 +61,12 @@ Arguments & Arguments::operator =(Arguments const & obj)
         _args = obj._args;
         _delimiter = obj._delimiter;
         _point_delimiter = obj._point_delimiter;
+        _full = obj._full;
     }
     return *this;
 }
 
-Arguments & Arguments::operator =(Arguments && obj)
+Arguments & Arguments::operator =(Arguments && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
         _original.swap(obj._original);
@@ -71,6 +74,7 @@ Arguments & Arguments::operator =(Arguments && obj)
         _args.swap(obj._args);
         _delimiter.swap(obj._delimiter);
         _point_delimiter.swap(obj._point_delimiter);
+        _full.swap(obj._full);
     }
     return *this;
 }
@@ -82,7 +86,6 @@ void Arguments::insert(std::size_t index, std::string const & argument)
 
 bool Arguments::parse(std::string const & arguments)
 {
-    _original = arguments;
     for (auto & cursor : libtbag::string::splitTokens(arguments, _delimiter)) {
         push(cursor);
     }
