@@ -99,6 +99,8 @@ public:
     explicit Flags(int argc, char ** argv);
     explicit Flags(std::string const & args, std::string const & prefix, std::string const & delimiter);
     explicit Flags(std::string const & args);
+    explicit Flags(std::vector<std::string> const & args, std::string const & prefix, std::string const & delimiter);
+    explicit Flags(std::vector<std::string> const & args);
 
     Flags(Flags const & obj);
     Flags(Flags && obj) TBAG_NOEXCEPT;
@@ -153,6 +155,7 @@ public:
     bool parse(int argc, char ** argv, std::string const & prefix, std::string const & delimiter);
     bool parse(std::string const & args);
     bool parse(std::string const & args, std::string const & prefix, std::string const & delimiter);
+    bool parse(std::vector<std::string> const & args);
     bool parse(std::vector<std::string> const & args, std::string const & prefix, std::string const & delimiter);
 
 public:

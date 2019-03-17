@@ -113,6 +113,9 @@ public:
     static ArgsVector parseArguments(std::string const & arguments,
                                      std::string const & prefix = DEFAULT_PREFIX,
                                      std::string const & delimiter = DEFAULT_DELIMITER);
+    static ArgsVector parseArguments(std::vector<std::string> const & arguments,
+                                     std::string const & prefix = DEFAULT_PREFIX,
+                                     std::string const & delimiter = DEFAULT_DELIMITER);
 
 public:
     void setDefaultCallbackForLeftArguments(std::vector<std::string> * left_arguments,

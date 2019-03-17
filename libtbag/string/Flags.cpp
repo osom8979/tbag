@@ -21,17 +21,37 @@ Flags::Flags()
 
 Flags::Flags(int argc, char ** argv)
 {
-    parse(argc, argv);
+    if (!parse(argc, argv)) {
+        throw std::bad_alloc();
+    }
 }
 
 Flags::Flags(std::string const & args, std::string const & prefix, std::string const & delimiter)
 {
-    parse(args, prefix, delimiter);
+    if (!parse(args, prefix, delimiter)) {
+        throw std::bad_alloc();
+    }
 }
 
 Flags::Flags(std::string const & args)
 {
-    parse(args);
+    if (!parse(args)) {
+        throw std::bad_alloc();
+    }
+}
+
+Flags::Flags(std::vector<std::string> const & args, std::string const & prefix, std::string const & delimiter)
+{
+    if (!parse(args, prefix, delimiter)) {
+        throw std::bad_alloc();
+    }
+}
+
+Flags::Flags(std::vector<std::string> const & args)
+{
+    if (!parse(args)) {
+        throw std::bad_alloc();
+    }
 }
 
 Flags::Flags(Flags const & obj)
@@ -188,6 +208,11 @@ bool Flags::parse(std::string const & args)
 bool Flags::parse(std::string const & args, std::string const & prefix, std::string const & delimiter)
 {
     return parse(splitTokens(args), prefix, delimiter);
+}
+
+bool Flags::parse(std::vector<std::string> const & args)
+{
+    return parse(args, DEFAULT_PREFIX, DEFAULT_DELIMITER);
 }
 
 bool Flags::parse(std::vector<std::string> const & args, std::string const & prefix, std::string const & delimiter)

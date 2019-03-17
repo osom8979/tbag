@@ -102,6 +102,13 @@ Commander::ArgsVector Commander::parseArguments(std::string const & arguments,
     return parseArguments(Flags(arguments, prefix, delimiter));
 }
 
+Commander::ArgsVector Commander::parseArguments(std::vector<std::string> const & arguments,
+                                                std::string const & prefix,
+                                                std::string const & delimiter)
+{
+    return parseArguments(Flags(arguments, prefix, delimiter));
+}
+
 void Commander::setDefaultCallbackForLeftArguments(std::vector<std::string> * left_arguments,
                                                    std::vector<std::string> * unknown_flags)
 {
@@ -174,12 +181,11 @@ std::size_t Commander::request(std::string const & arguments)
 
 std::size_t Commander::request(int argc, char ** argv, std::string const & prefix, std::string const & delimiter, bool ignore_first)
 {
-    char const SP = ' ';
-    std::stringstream ss;
+    std::vector<std::string> arguments;
     for (int i = (ignore_first ? 1 : 0); i < argc; ++i) {
-        ss << argv[i] << SP;
+        arguments.push_back(argv[i]);
     }
-    return request(ss.str(), prefix, delimiter);
+    return request(parseArguments(arguments, prefix, delimiter));
 }
 
 std::size_t Commander::request(int argc, char ** argv, bool ignore_first)
