@@ -131,7 +131,7 @@ static int docall(lua_State *L, int narg, int clear)
 
 static void print_version(void)
 {
-  fputs(LUAJIT_VERSION "\n", stdout);
+  fputs(LUAJIT_VERSION " -- " LUAJIT_COPYRIGHT ". " LUAJIT_URL "\n", stdout);
 }
 
 static void print_jit_status(lua_State *L)
@@ -553,7 +553,7 @@ static int pmain(lua_State *L)
   return 0;
 }
 
-int __lua_cmd_main__(int argc, char **argv, lua_main_prefix_cb cb)
+int main(int argc, char **argv)
 {
   int status;
   lua_State *L = lua_open();  /* create state */
@@ -563,9 +563,6 @@ int __lua_cmd_main__(int argc, char **argv, lua_main_prefix_cb cb)
   }
   smain.argc = argc;
   smain.argv = argv;
-  if (cb != NULL) {
-    cb(L);
-  }
   status = lua_cpcall(L, pmain, NULL);
   report(L, status);
   lua_close(L);

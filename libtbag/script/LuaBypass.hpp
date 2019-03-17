@@ -223,12 +223,6 @@ TBAG_API int  luaopen_jit    (lua_State * L);
 TBAG_API int  luaopen_ffi    (lua_State * L);
 TBAG_API void luaL_openlibs  (lua_State * L);
 
-// ----------------------------
-// Lua command-line entry-point
-// ----------------------------
-
-TBAG_API int luac(int argc, char ** argv);
-
 } // namespace script
 
 // --------------------

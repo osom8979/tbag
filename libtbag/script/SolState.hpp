@@ -76,6 +76,9 @@ public:
     inline State       & operator *()       TBAG_NOEXCEPT { return *_state; }
     inline State const & operator *() const TBAG_NOEXCEPT { return *_state; }
 
+    inline State       * operator ->()       TBAG_NOEXCEPT { return get(); }
+    inline State const * operator ->() const TBAG_NOEXCEPT { return get(); }
+
 public:
     friend inline bool operator <(SolState const & x, SolState const & y) TBAG_NOEXCEPT
     {
