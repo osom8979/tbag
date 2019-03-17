@@ -22,9 +22,34 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 
+static char const * const __get_lug_pathsep()
+{
+#if defined(LUA_PATHSEP)
+    return LUA_PATHSEP;
+#else
+    return ";";
+#endif
+}
+
+static int __sol_state_exception_cb(lua_State * L,
+                                    sol::optional<std::exception const &> exception,
+                                    sol::string_view description)
+{
+    if (exception) {
+        if (exception->what() != nullptr) {
+            tDLogE("__sol_state_exception_cb() Catch exception: {}", exception->what());
+        } else {
+            tDLogE("__sol_state_exception_cb() Catch unknown exception.");
+        }
+        tDLogD("__sol_state_exception_cb() Details information: {}", std::string(description.data(), description.size()));
+    }
+    return sol::stack::push(L, description);
+}
+
 SolState::SolState() : _state(std::make_shared<State>())
 {
     assert(static_cast<bool>(_state));
+    _state->set_exception_handler(&__sol_state_exception_cb);
 }
 
 SolState::SolState(std::nullptr_t) TBAG_NOEXCEPT : _state(nullptr)
@@ -99,40 +124,60 @@ std::string SolState::getLuaPath() const
 {
     try {
         return (*_state)["package"]["path"];
-    } catch (std::exception const & e) {
-        tDLogW("SolState::getLuaPath() Lua exception catch: {}", e.what());
     } catch (...) {
-        tDLogW("SolState::getLuaPath() Unknown exception");
+        return std::string();
     }
-    return std::string();
 }
 
 std::vector<std::string> SolState::getLuaPaths() const
 {
-    using namespace libtbag::filesystem::details;
-    return libtbag::string::splitTokens(getLuaPath(), std::string(1, PATH_SPLITTER));
+    return libtbag::string::splitTokens(getLuaPath(), __get_lug_pathsep());
 }
 
 bool SolState::appendLuaPath(std::string const & path)
 {
-    if (!libtbag::filesystem::Path(path).isDirectory()) {
-        return false;
-    }
-
     std::string lua_path = getLuaPath();
+    if (!lua_path.empty()) {
+        lua_path += __get_lug_pathsep();
+    }
+    lua_path += path;
+
     try {
-        if (!lua_path.empty()) {
-            lua_path += libtbag::filesystem::details::PATH_SPLITTER;
-        }
-        lua_path += path;
         (*_state)["package"]["path"] = lua_path;
         return true;
-    } catch (std::exception const & e) {
-        tDLogW("SolState::appendLuaPath() Lua exception catch: {}", e.what());
     } catch (...) {
-        tDLogW("SolState::appendLuaPath() Unknown exception");
+        return false;
     }
-    return false;
+}
+
+std::string SolState::getLuaCPath() const
+{
+    try {
+        return (*_state)["package"]["cpath"];
+    } catch (...) {
+        return std::string();
+    }
+}
+
+std::vector<std::string> SolState::getLuaCPaths() const
+{
+    return libtbag::string::splitTokens(getLuaCPath(), __get_lug_pathsep());
+}
+
+bool SolState::appendLuaCPath(std::string const & path)
+{
+    std::string lua_cpath = getLuaCPath();
+    if (!lua_cpath.empty()) {
+        lua_cpath += __get_lug_pathsep();
+    }
+    lua_cpath += path;
+
+    try {
+        (*_state)["package"]["cpath"] = lua_cpath;
+        return true;
+    } catch (...) {
+        return false;
+    }
 }
 
 bool SolState::runScriptFile(std::string const & path)
@@ -140,15 +185,13 @@ bool SolState::runScriptFile(std::string const & path)
     if (!libtbag::filesystem::Path(path).isRegularFile()) {
         return false;
     }
+
     try {
         _state->script_file(path);
         return true;
-    } catch (std::exception const & e) {
-        tDLogW("SolState::runScriptFile() Lua exception catch: {}", e.what());
     } catch (...) {
-        tDLogW("SolState::runScriptFile() Unknown exception");
+        return false;
     }
-    return false;
 }
 
 bool SolState::runScript(std::string const & code)
@@ -156,15 +199,13 @@ bool SolState::runScript(std::string const & code)
     if (code.empty()) {
         return false;
     }
+
     try {
         _state->script(code);
         return true;
-    } catch (std::exception const & e) {
-        tDLogW("SolState::runScript() Lua exception catch: {}", e.what());
     } catch (...) {
-        tDLogW("SolState::runScript() Unknown exception");
+        return false;
     }
-    return false;
 }
 
 std::string SolState::findScriptPath(std::string const & filename, bool include_working) const
@@ -185,6 +226,19 @@ std::string SolState::findScriptPath(std::string const & filename, bool include_
     }
 
     return std::string();
+}
+
+SolState::Version SolState::getLuaVersion() const
+{
+    return Version((LUA_VERSION_NUM/100), (LUA_VERSION_NUM%100));
+}
+
+SolState::Version SolState::getLuaJITVersion() const
+{
+    auto const MAJOR = static_cast<unsigned>(LUAJIT_VERSION_NUM/10000);
+    auto const MINOR = static_cast<unsigned>((LUAJIT_VERSION_NUM-(MAJOR*10000))/100);
+    auto const PATCH = static_cast<unsigned>(LUAJIT_VERSION_NUM%100);
+    return Version(MAJOR, MINOR, PATCH);
 }
 
 } // namespace script

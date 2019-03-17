@@ -170,6 +170,7 @@ public:
     TBAG_CONSTEXPR static char const * const LAYOUT_TEMP     = "temp";
     TBAG_CONSTEXPR static char const * const LAYOUT_KEYSTORE = "keystore";
     TBAG_CONSTEXPR static char const * const LAYOUT_LUA      = "lua";
+    TBAG_CONSTEXPR static char const * const LAYOUT_LUAROCKS = "luarocks";
     TBAG_CONSTEXPR static char const * const LAYOUT_USER     = "user";
     // @formatter:on
 
@@ -183,6 +184,7 @@ public:
     void setLayoutTemp    (std::string const & dir) { asset().set(LAYOUT_TEMP    , Path(dir)); }
     void setLayoutKeystore(std::string const & dir) { asset().set(LAYOUT_KEYSTORE, Path(dir)); }
     void setLayoutLua     (std::string const & dir) { asset().set(LAYOUT_LUA     , Path(dir)); }
+    void setLayoutLuaRocks(std::string const & dir) { asset().set(LAYOUT_LUAROCKS, Path(dir)); }
     // @formatter:on
 
 public:
@@ -287,6 +289,10 @@ public:
     bool runLuaScript(std::string const & code);
 
     std::vector<std::string> getLuaFilenames() const;
+
+public:
+    bool appendLuaRocksCPath();
+    bool appendLuaRocksPath();
 
 public:
     std::string getInfo() const;

@@ -96,9 +96,12 @@ namespace node {
  *     <!-- If 'name' attribute is exists, Apply only those files.            -->
  *     <keystore name='file.key'>dir</keystore>
  *
- *     <!-- Directory containing the lua script package. -->
- *     <!-- If 'name' attribute is exists, Apply only those files.           -->
- *     <!-- If 'libs' attribute is 'true', Apply default lua libraries.      -->
+ *     <!-- Directory containing the LuaRosks root directory. -->
+ *     <luarocks>dir</luarocks>
+ *
+ *     <!-- Directory containing the lua script package.                -->
+ *     <!-- If 'name' attribute is exists, Apply only those files.      -->
+ *     <!-- If 'libs' attribute is 'true', Apply default lua libraries. -->
  *     <lua name='file.lua' libs='true'>dir</lua>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
@@ -132,6 +135,7 @@ public:
     TBAG_CONSTEXPR static char const * const TAG_TEMP     = Storage::LAYOUT_TEMP    ;
     TBAG_CONSTEXPR static char const * const TAG_KEYSTORE = Storage::LAYOUT_KEYSTORE;
     TBAG_CONSTEXPR static char const * const TAG_LUA      = Storage::LAYOUT_LUA     ;
+    TBAG_CONSTEXPR static char const * const TAG_LUAROCKS = Storage::LAYOUT_LUAROCKS;
     TBAG_CONSTEXPR static char const * const TAG_USER     = Storage::LAYOUT_USER    ;
     // @formatter:on
 
@@ -214,6 +218,7 @@ public:
         tmp_layout temp;
         key_layout keystore;
         lua_layout lua;
+        def_layout luarocks;
 
         using usr_layouts = std::vector<usr_layout>;
         usr_layouts users;

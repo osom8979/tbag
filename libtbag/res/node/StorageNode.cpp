@@ -121,6 +121,7 @@ void StorageNode::setup()
     prop.temp    .text = TAG_TEMP    ;
     prop.keystore.text = TAG_KEYSTORE;
     prop.lua     .text = TAG_LUA     ;
+    prop.luarocks.text = TAG_LUAROCKS;
     // @formatter:on
 
     // @formatter:off
@@ -159,6 +160,7 @@ void StorageNode::load(Element const & element)
     readElement(element, TAG_TEMP     , prop.temp);
     readElement(element, TAG_KEYSTORE , prop.keystore);
     readElement(element, TAG_LUA      , prop.lua);
+    readElement(element, TAG_LUA      , prop.luarocks);
     // @formatter:on
 
     foreachElement(element, TAG_USER, [&](Element const & node){
@@ -183,6 +185,7 @@ void StorageNode::save(Element & element) const
     addNewElement(element, TAG_TEMP     , _prop.temp);
     addNewElement(element, TAG_KEYSTORE , _prop.keystore);
     addNewElement(element, TAG_LUA      , _prop.lua);
+    addNewElement(element, TAG_LUA      , _prop.luarocks);
     // @formatter:on
 
     for (auto & user : _prop.users) {
@@ -450,6 +453,7 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     if (prop.temp    .exists) { storage.setLayoutTemp    (getPath(updated_root, TAG_TEMP    , prop.temp    , ENVIRONMENTS)); }
     if (prop.keystore.exists) { storage.setLayoutKeystore(getPath(updated_root, TAG_KEYSTORE, prop.keystore, ENVIRONMENTS)); }
     if (prop.lua     .exists) { storage.setLayoutLua     (getPath(updated_root, TAG_LUA     , prop.lua     , ENVIRONMENTS)); }
+    if (prop.luarocks.exists) { storage.setLayoutLuaRocks(getPath(updated_root, TAG_LUAROCKS, prop.luarocks, ENVIRONMENTS)); }
     // @formatter:on
 
     if (prop.module.exists) {
@@ -476,6 +480,9 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.name);
         }
+    }
+    if (prop.luarocks.exists) {
+        storage.appendLuaPath();
     }
 
     auto & asset = storage.asset();

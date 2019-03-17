@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/script/Sol2Bypass.hpp>
+#include <libtbag/util/Version.hpp>
 
 #include <string>
 #include <memory>
@@ -37,6 +38,7 @@ class TBAG_API SolState
 public:
     using State = sol::state;
     using SharedState = std::shared_ptr<State>;
+    using Version = libtbag::util::Version;
 
 private:
     SharedState _state;
@@ -102,12 +104,20 @@ public:
     std::vector<std::string> getLuaPaths() const;
     bool appendLuaPath(std::string const & path);
 
+    std::string getLuaCPath() const;
+    std::vector<std::string> getLuaCPaths() const;
+    bool appendLuaCPath(std::string const & path);
+
 public:
     bool runScriptFile(std::string const & path);
     bool runScript(std::string const & code);
 
 public:
     std::string findScriptPath(std::string const & filename, bool include_working = true) const;
+
+public:
+    Version getLuaVersion() const;
+    Version getLuaJITVersion() const;
 };
 
 } // namespace script

@@ -25,6 +25,10 @@
 #define SOL_EXCEPTIONS_SAFE_PROPAGATION 1
 #endif
 
+#ifndef SOL_CHECK_ARGUMENTS
+#define SOL_CHECK_ARGUMENTS 1
+#endif
+
 #include <libtbag/script/LuaBypass.hpp>
 using namespace libtbag::script;
 
