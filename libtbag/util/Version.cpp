@@ -10,6 +10,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cassert>
 #include <utility>
 #include <sstream>
 
@@ -135,15 +136,25 @@ Err Version::fromString(std::string const & version, Version & result)
 
 std::string Version::toShortString(Version const & version)
 {
-    std::stringstream ss;
-    ss << version.getMajor();
-    if (version.getMinor() != 0) {
-        ss << POINT_STR << version.getMinor();
+    auto const MAJOR = version.getMajor();
+    auto const MINOR = version.getMinor();
+    auto const PATCH = version.getPatch();
+
+    if (PATCH) {
+        std::stringstream ss;
+        ss << MAJOR << POINT_STR << MINOR << POINT_STR << PATCH;
+        return ss.str();
     }
-    if (version.getPatch() != 0) {
-        ss << POINT_STR << version.getPatch();
+
+    assert(PATCH == 0);
+    if (MINOR) {
+        std::stringstream ss;
+        ss << MAJOR << POINT_STR << MINOR;
+        return ss.str();
     }
-    return ss.str();
+
+    assert(PATCH == 0);
+    return std::to_string(MAJOR);
 }
 
 std::string Version::toLongString(Version const & version)
