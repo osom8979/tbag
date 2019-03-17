@@ -235,10 +235,7 @@ SolState::Version SolState::getLuaVersion() const
 
 SolState::Version SolState::getLuaJITVersion() const
 {
-    auto const MAJOR = static_cast<unsigned>(LUAJIT_VERSION_NUM/10000);
-    auto const MINOR = static_cast<unsigned>((LUAJIT_VERSION_NUM-(MAJOR*10000))/100);
-    auto const PATCH = static_cast<unsigned>(LUAJIT_VERSION_NUM%100);
-    return Version(MAJOR, MINOR, PATCH);
+    return Version(LUAJIT_VERSION_NUM, 10000, 100, 1);
 }
 
 } // namespace script

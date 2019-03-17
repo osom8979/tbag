@@ -80,6 +80,15 @@ TEST(VersionTest, StringConstructor)
     ASSERT_EQ( 50, ver.getPatch());
 }
 
+TEST(VersionTest, Numeric)
+{
+    Version ver;
+    ASSERT_EQ(Err::E_SUCCESS, ver.fromNumeric(20005, 10000, 100, 1));
+    ASSERT_EQ(ver.getMajor(), 2);
+    ASSERT_EQ(ver.getMinor(), 0);
+    ASSERT_EQ(ver.getPatch(), 5);
+}
+
 TEST(VersionTest, TbagVersion)
 {
     auto ver = getTbagVersion();

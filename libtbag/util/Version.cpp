@@ -36,6 +36,11 @@ Version::Version(std::string const & ver) : _major(0), _minor(0), _patch(0), _tw
     fromString(ver, *this);
 }
 
+Version::Version(uint32_t version, uint32_t major_unit, uint32_t minor_unit, uint32_t patch_unit)
+{
+    fromNumeric(version, major_unit, minor_unit, patch_unit);
+}
+
 Version::Version(Version const & obj)
 {
     (*this) = obj;
@@ -89,6 +94,16 @@ void Version::swap(Version & obj)
 Err Version::fromString(std::string const & version)
 {
     return fromString(version, *this);
+}
+
+Err Version::fromNumeric(uint32_t version, uint32_t major_unit, uint32_t minor_unit, uint32_t patch_unit)
+{
+    assert(major_unit > minor_unit);
+    assert(minor_unit > patch_unit);
+    _major = static_cast<uint32_t>(version/major_unit);
+    _minor = static_cast<uint32_t>((version-(_major*major_unit))/minor_unit);
+    _patch = static_cast<uint32_t>((version-(_major*major_unit)-(_minor*minor_unit))/patch_unit);
+    return Err::E_SUCCESS;
 }
 
 std::string Version::toString() const

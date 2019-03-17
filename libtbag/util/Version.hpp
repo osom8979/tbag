@@ -49,6 +49,7 @@ public:
     Version();
     Version(uint32_t major, uint32_t minor = 0, uint32_t patch = 0, std::string const & tweak = std::string());
     Version(std::string const & ver);
+    Version(uint32_t version, uint32_t major_unit, uint32_t minor_unit, uint32_t patch_unit);
     Version(Version const & obj);
     Version(Version && obj);
     ~Version();
@@ -111,6 +112,7 @@ public:
 
 public:
     Err fromString(std::string const & version);
+    Err fromNumeric(uint32_t version, uint32_t major_unit = 10000, uint32_t minor_unit = 100, uint32_t patch_unit = 1);
 
     std::string      toString() const;
     std::string toShortString() const;
