@@ -133,6 +133,7 @@ void StorageNode::setup()
     prop.temp    .exists = true;
     prop.keystore.exists = true;
     prop.lua     .exists = true;
+    prop.luarocks.exists = true;
     // @formatter:on
 
     update(DEFAULT_STORAGE_ROOT, prop);
@@ -160,7 +161,7 @@ void StorageNode::load(Element const & element)
     readElement(element, TAG_TEMP     , prop.temp);
     readElement(element, TAG_KEYSTORE , prop.keystore);
     readElement(element, TAG_LUA      , prop.lua);
-    readElement(element, TAG_LUA      , prop.luarocks);
+    readElement(element, TAG_LUAROCKS , prop.luarocks);
     // @formatter:on
 
     foreachElement(element, TAG_USER, [&](Element const & node){
@@ -185,7 +186,7 @@ void StorageNode::save(Element & element) const
     addNewElement(element, TAG_TEMP     , _prop.temp);
     addNewElement(element, TAG_KEYSTORE , _prop.keystore);
     addNewElement(element, TAG_LUA      , _prop.lua);
-    addNewElement(element, TAG_LUA      , _prop.luarocks);
+    addNewElement(element, TAG_LUAROCKS , _prop.luarocks);
     // @formatter:on
 
     for (auto & user : _prop.users) {
