@@ -100,12 +100,13 @@ The main build options you will want to configure are as follows:
 * `USE_RTTI`: Enable RTTI flag.
 * `DISABLE_TDLOG`: Disable tbag default logger.
 * `DISABLE_LUAJIT_EXE_FLAGS`: Disable LuaJIT Embedding flags if apple.
+* `DISABLE_DEFAULT_TPOT_LUAJIT`: Do not use the default TpoT mode as LuaJIT.
 
 ## Tpot
 
 ### Environment variables.
 
-* `TPOT_MODE`: If this value is `lua`, run on the luac mode.
+* EMPTY.
 
 ## License
 

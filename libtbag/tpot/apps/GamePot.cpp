@@ -35,6 +35,11 @@ char const * const GamePot::getRemarks() const TBAG_NOEXCEPT
     return "Play Game";
 }
 
+char const * const GamePot::getHelp() const TBAG_NOEXCEPT
+{
+    return "";
+}
+
 int GamePot::onMain()
 {
     return 0;

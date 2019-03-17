@@ -108,6 +108,11 @@ char const * const GmPot::getRemarks() const TBAG_NOEXCEPT
     return "Game Maker";
 }
 
+char const * const GmPot::getHelp() const TBAG_NOEXCEPT
+{
+    return "";
+}
+
 int GmPot::onMain()
 {
     return 0;

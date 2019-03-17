@@ -63,8 +63,9 @@ tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compile
 tbag_config__set_option (USE_PCH    OFF) ## Enable PCH compile.
 tbag_config__set_option (USE_RTTI   OFF) ## Enable RTTI flag.
 
-tbag_config__set_option (DISABLE_TDLOG             OFF) ## Disable tbag default logger.
-tbag_config__set_option (DISABLE_LUAJIT_EXE_FLAGS  OFF) ## Disable LuaJIT Embedding flags if apple.
+tbag_config__set_option (DISABLE_TDLOG                OFF) ## Disable tbag default logger.
+tbag_config__set_option (DISABLE_LUAJIT_EXE_FLAGS     OFF) ## Disable LuaJIT Embedding flags if apple.
+tbag_config__set_option (DISABLE_DEFAULT_TPOT_LUAJIT  OFF) ## Do not use the default TpoT mode as LuaJIT.
 
 ## Configure settings.
 if (USE_CCACHE)

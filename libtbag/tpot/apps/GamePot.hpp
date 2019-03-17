@@ -42,6 +42,7 @@ public:
 public:
     virtual char const * const getName() const TBAG_NOEXCEPT override;
     virtual char const * const getRemarks() const TBAG_NOEXCEPT override;
+    virtual char const * const getHelp() const TBAG_NOEXCEPT override;
 
 public:
     virtual int onMain() override;

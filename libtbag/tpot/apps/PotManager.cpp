@@ -82,17 +82,36 @@ std::string PotManager::getRemarks() const
     return ss.str();
 }
 
+int PotManager::runOrLutjit(RunnerParams const & params)
+{
+    return run(params, LuaPot().getName());
+}
+
 int PotManager::run(RunnerParams const & params)
 {
-    if (params.args.empty()) {
-        std::cerr << "Empty argument." << std::endl;
-        return EXIT_FAILURE;
-    }
+    return run(params, std::string());
+}
 
-    auto itr = _pots.find(params.args[0]);
-    if (itr == _pots.end()) {
-        std::cerr << "Unknown application name: " << params.args[0] << std::endl;
-        return EXIT_FAILURE;
+int PotManager::run(RunnerParams const & params, std::string const & default_mode)
+{
+    Pots::iterator itr;
+    if (default_mode.empty()) {
+        if (params.args.empty()) {
+            std::cerr << "Empty argument." << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        itr = _pots.find(params.args[0]);
+        if (itr == _pots.end()) {
+            std::cerr << "Unknown application name: " << params.args[0] << std::endl;
+            return EXIT_FAILURE;
+        }
+    } else {
+        itr = _pots.find(default_mode);
+        if (itr == _pots.end()) {
+            std::cerr << "Unknown default application name: " << default_mode << std::endl;
+            return EXIT_FAILURE;
+        }
     }
 
     assert(static_cast<bool>(itr->second));

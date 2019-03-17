@@ -26,6 +26,15 @@ TBAG_CONSTEXPR static char const * const SYNOPSIS_TEXT =
 TBAG_CONSTEXPR static char const * const CONFIG_NAME = "tpot.xml";
 TBAG_CONSTEXPR static char const * const SERVICE_NAME = "tpot";
 
+TBAG_CONSTEXPR static bool __is_default_tpot_mode_is_luajit() TBAG_NOEXCEPT
+{
+#if defined(DISABLE_DEFAULT_TPOT_LUAJIT)
+    return false;
+#else
+    return true;
+#endif
+}
+
 TpotMain::TpotMain() : TpotMain(0, nullptr)
 {
     // EMPTY.
@@ -110,7 +119,8 @@ void TpotMain::onInfo(Element const & element)
 
 void TpotMain::printParamsInfo(RunnerParams const & params) const
 {
-    tDLogD("TpotMain::printParamsInfo() {}", params.storage.getInfo());
+    auto const & STORAGE_INFO = params.storage.getInfo();
+    tDLogIfD(params.verbose && !STORAGE_INFO.empty(), "TpotMain::printParamsInfo() {}", STORAGE_INFO);
 }
 
 int TpotMain::onRun(RunnerParams const & params)
@@ -118,7 +128,12 @@ int TpotMain::onRun(RunnerParams const & params)
     if (params.verbose) {
         printParamsInfo(params);
     }
-    return _manager.run(params);
+
+    if (__is_default_tpot_mode_is_luajit()) {
+        return _manager.runOrLutjit(params);
+    } else {
+        return _manager.run(params);
+    }
 }
 
 } // namespace tpot

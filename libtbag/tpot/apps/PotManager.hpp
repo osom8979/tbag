@@ -70,7 +70,9 @@ public:
     std::string getRemarks() const;
 
 public:
+    int runOrLutjit(RunnerParams const & params);
     int run(RunnerParams const & params);
+    int run(RunnerParams const & params, std::string const & default_mode);
 };
 
 } // namespace apps

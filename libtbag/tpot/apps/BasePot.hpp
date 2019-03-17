@@ -73,6 +73,7 @@ public:
 public:
     virtual char const * const getName() const TBAG_NOEXCEPT = 0;
     virtual char const * const getRemarks() const TBAG_NOEXCEPT = 0;
+    virtual char const * const getHelp() const TBAG_NOEXCEPT = 0;
 
 public:
     virtual int onMain() = 0;
