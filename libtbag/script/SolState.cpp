@@ -13,6 +13,7 @@
 #include <libtbag/script/lua/luasfml.hpp>
 
 #include <cassert>
+#include <sstream>
 #include <algorithm>
 #include <utility>
 
@@ -21,15 +22,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace script {
-
-static char const * const __get_lug_pathsep()
-{
-#if defined(LUA_PATHSEP)
-    return LUA_PATHSEP;
-#else
-    return ";";
-#endif
-}
 
 static int __sol_state_exception_cb(lua_State * L,
                                     sol::optional<std::exception const &> exception,
@@ -50,6 +42,25 @@ SolState::SolState() : _state(std::make_shared<State>())
 {
     assert(static_cast<bool>(_state));
     _state->set_exception_handler(&__sol_state_exception_cb);
+
+    lua_gc(_state->lua_state(), LUA_GCSTOP, 0);
+    COMMENT("Load all libraries.") {
+        luaL_openlibs(_state->lua_state());
+        auto const CODE = libtbag::script::lua::luaopen_sfml(_state->lua_state());
+        if (isFailure(CODE)) {
+            tDLogW("SolState::SolState() Failed to register lua-sfml library: {}", CODE);
+        }
+    }
+    lua_gc(_state->lua_state(), LUA_GCRESTART, -1);
+
+    std::stringstream ss_path;
+    ss_path << "." LUA_DIRSEP LUA_PATH_MARK ".lua" << LUA_PATHSEP
+            << "." LUA_DIRSEP LUA_PATH_MARK LUA_DIRSEP "init.lua";
+    (*_state)["package"]["path"] = ss_path.str();
+
+    std::stringstream ss_cpath;
+    ss_cpath << "." LUA_DIRSEP LUA_PATH_MARK LUA_MODULE_SUFFIX;
+    (*_state)["package"]["cpath"] = ss_cpath.str();
 }
 
 SolState::SolState(std::nullptr_t) TBAG_NOEXCEPT : _state(nullptr)
@@ -103,23 +114,6 @@ void SolState::reset()
     _state.reset();
 }
 
-bool SolState::loadDynAsm()
-{
-    return false;
-}
-
-bool SolState::loadLibraries()
-{
-    luaL_openlibs(_state->lua_state());
-    Err code = libtbag::script::lua::luaopen_sfml(_state->lua_state());
-    if (isFailure(code)) {
-        if (code != Err::E_ENOSYS) {
-            tDLogW("SolState::loadLibraries() Failed to register lua-sfml library: {}", code);
-        }
-    }
-    return true;
-}
-
 std::string SolState::getLuaPath() const
 {
     try {
@@ -131,14 +125,14 @@ std::string SolState::getLuaPath() const
 
 std::vector<std::string> SolState::getLuaPaths() const
 {
-    return libtbag::string::splitTokens(getLuaPath(), __get_lug_pathsep());
+    return libtbag::string::splitTokens(getLuaPath(), LUA_PATHSEP);
 }
 
 bool SolState::appendLuaPath(std::string const & path)
 {
     std::string lua_path = getLuaPath();
     if (!lua_path.empty()) {
-        lua_path += __get_lug_pathsep();
+        lua_path += LUA_PATHSEP;
     }
     lua_path += path;
 
@@ -161,14 +155,14 @@ std::string SolState::getLuaCPath() const
 
 std::vector<std::string> SolState::getLuaCPaths() const
 {
-    return libtbag::string::splitTokens(getLuaCPath(), __get_lug_pathsep());
+    return libtbag::string::splitTokens(getLuaCPath(), LUA_PATHSEP);
 }
 
 bool SolState::appendLuaCPath(std::string const & path)
 {
     std::string lua_cpath = getLuaCPath();
     if (!lua_cpath.empty()) {
-        lua_cpath += __get_lug_pathsep();
+        lua_cpath += LUA_PATHSEP;
     }
     lua_cpath += path;
 

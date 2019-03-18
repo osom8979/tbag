@@ -101,8 +101,7 @@ namespace node {
  *
  *     <!-- Directory containing the lua script package.                -->
  *     <!-- If 'name' attribute is exists, Apply only those files.      -->
- *     <!-- If 'libs' attribute is 'true', Apply default lua libraries. -->
- *     <lua name='file.lua' libs='true'>dir</lua>
+ *     <lua name='file.lua'>dir</lua>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
@@ -147,7 +146,6 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT    = "default";
     TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
     TBAG_CONSTEXPR static char const * const ATT_AUTO_CLEAR = "autoclear";
-    TBAG_CONSTEXPR static char const * const ATT_LIBS       = "libs";
 
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
@@ -202,7 +200,7 @@ public:
 
         struct lua_layout : public txt_layout
         {
-            bool libs = true;
+            // EMPTY.
         };
 
         struct usr_layout : public txt_layout

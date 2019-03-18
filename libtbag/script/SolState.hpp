@@ -99,10 +99,6 @@ public:
     void reset();
 
 public:
-    bool loadDynAsm();
-    bool loadLibraries();
-
-public:
     std::string getLuaPath() const;
     std::vector<std::string> getLuaPaths() const;
     bool appendLuaPath(std::string const & path);

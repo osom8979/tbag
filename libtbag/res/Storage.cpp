@@ -472,16 +472,6 @@ bool Storage::appendLuaPath()
     return _impl->lua.appendLuaPath(CANONICAL_PATH);
 }
 
-bool Storage::loadDynAsm()
-{
-    return _impl->lua.loadDynAsm();
-}
-
-bool Storage::loadLibraries()
-{
-    return _impl->lua.loadLibraries();
-}
-
 bool Storage::runLuaScriptFile(std::string const & filename)
 {
     return _impl->lua.runScriptFile(asset().get(LAYOUT_LUA) / filename);
@@ -497,19 +487,19 @@ std::vector<std::string> Storage::getLuaFilenames() const
     return getFilenames(LAYOUT_LUA);
 }
 
-bool Storage::appendLuaRocksCPath()
-{
-    auto const LUA_SHORT_VERSION = _impl->lua.getLuaVersion().toShortString();
-    auto const PATH = asset().get(LAYOUT_LUAROCKS) / "lib" / "lua" / LUA_SHORT_VERSION;
-    auto const CANONICAL_PATH = (PATH / (std::string("?")+LUA_MODULE_SUFFIX)).getCanonicalString();
-    return _impl->lua.appendLuaCPath(CANONICAL_PATH);
-}
-
 bool Storage::appendLuaRocksPath()
 {
     auto const LUA_SHORT_VERSION = _impl->lua.getLuaVersion().toShortString();
     auto const PATH = asset().get(LAYOUT_LUAROCKS) / "share" / "lua" / LUA_SHORT_VERSION;
-    auto const CANONICAL_PATH = (PATH / "?.lua").getCanonicalString();
+    auto const CANONICAL_PATH = (PATH / LUA_PATH_MARK ".lua").getCanonicalString();
+    return _impl->lua.appendLuaPath(CANONICAL_PATH);
+}
+
+bool Storage::appendLuaRocksCPath()
+{
+    auto const LUA_SHORT_VERSION = _impl->lua.getLuaVersion().toShortString();
+    auto const PATH = asset().get(LAYOUT_LUAROCKS) / "lib" / "lua" / LUA_SHORT_VERSION;
+    auto const CANONICAL_PATH = (PATH / (std::string(LUA_PATH_MARK)+LUA_MODULE_SUFFIX)).getCanonicalString();
     return _impl->lua.appendLuaCPath(CANONICAL_PATH);
 }
 

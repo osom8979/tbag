@@ -283,16 +283,14 @@ public:
     SolState const & lua() const TBAG_NOEXCEPT { return _impl->lua; }
 
     bool appendLuaPath();
-    bool loadDynAsm();
-    bool loadLibraries();
     bool runLuaScriptFile(std::string const & filename);
     bool runLuaScript(std::string const & code);
 
     std::vector<std::string> getLuaFilenames() const;
 
 public:
-    bool appendLuaRocksCPath();
     bool appendLuaRocksPath();
+    bool appendLuaRocksCPath();
 
 public:
     std::string getInfo() const;

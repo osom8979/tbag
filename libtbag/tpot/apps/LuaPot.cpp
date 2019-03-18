@@ -619,12 +619,11 @@ public:
 
     int luac_pmain(lua_State * L)
     {
-        LUAJIT_VERSION_SYM();  // linker-enforced version check.
-
         int flags = 0;
         int script = collectargs(_argv, &flags);
-        if (script < 0) {  /* invalid args? */
-            std::cout << getUsageString() << std::endl;
+        if (script < 0) {
+            // invalid args?
+            std::cerr << getUsageString() << std::endl;
             _result = 1;
             return 0;
         }
@@ -634,9 +633,10 @@ public:
             lua_setfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
         }
 
-        lua_gc(L, LUA_GCSTOP, 0); // stop collector during initialization.
-        luaL_openlibs(L); // open libraries
-        lua_gc(L, LUA_GCRESTART, -1);
+        // lua_gc(L, LUA_GCSTOP, 0); // stop collector during initialization.
+        // luaL_openlibs(L); // open libraries
+        // lua_gc(L, LUA_GCRESTART, -1);
+
         if (!(flags & FLAGS_NOENV)) {
             _result = handle_luainit(L);
             if (_result != 0) {

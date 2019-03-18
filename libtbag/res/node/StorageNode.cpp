@@ -275,7 +275,6 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
         layout.exists = true;
         layout.text = text(*child);
         optAttr(*child, ATT_NAME    , layout.name);
-        optAttr(*child, ATT_LIBS    , layout.libs);
         optAttr(*child, ATT_ABSOLUTE, layout.abs);
         optAttr(*child, ATT_RAW     , layout.raw);
     } else {
@@ -368,7 +367,6 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
         newElement(element, tag.c_str(), [&](Element & child){
             text(child, layout.text);
             setAttr(child, ATT_NAME    , layout.name);
-            setAttr(child, ATT_LIBS    , layout.libs);
             setAttr(child, ATT_ABSOLUTE, layout.abs);
             setAttr(child, ATT_RAW     , layout.raw);
         });
@@ -474,16 +472,14 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.openKeyStore(prop.keystore.name);
     }
     if (prop.lua.exists) {
-        if (prop.lua.libs) {
-            storage.loadLibraries();
-            storage.appendLuaPath();
-        }
+        storage.appendLuaPath();
         if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.name);
         }
     }
     if (prop.luarocks.exists) {
-        storage.appendLuaPath();
+        storage.appendLuaRocksPath();
+        storage.appendLuaRocksCPath();
     }
 
     auto & asset = storage.asset();
