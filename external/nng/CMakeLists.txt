@@ -381,7 +381,7 @@ if (NNG_ENABLE_NNGCAT)
     add_subdirectory (tools/nngcat)
 endif ()
 
-add_subdirectory (docs/man)
+#add_subdirectory (docs/man)
 
 set (CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set (CPACK_PACKAGE_VERSION ${NNG_PACKAGE_VERSION})

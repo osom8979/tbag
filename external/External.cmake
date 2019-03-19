@@ -474,9 +474,8 @@ set (luajit_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/luajit")
 set (luajit_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (luajit_EXT_CONF_HEADER  "${luajit_EXT_INCLUDE_DIR}/luaconf.h")
 set (luajit_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}lua${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (luajit_EXT_LIBRARIES    "${luajit_EXT_STATIC_LIB}"
-                             "${luajit_EXT_CONF_HEADER}")
-exists_files (luajit_EXT_EXISTS ${luajit_EXT_LIBRARIES})
+set (luajit_EXT_LIBRARIES    "${luajit_EXT_STATIC_LIB}")
+exists_files (luajit_EXT_EXISTS ${luajit_EXT_LIBRARIES} ${luajit_EXT_CONF_HEADER})
 
 if (luajit_EXT_EXISTS)
     message (STATUS "Skip external/luajit (Exists: ${luajit_EXT_STATIC_LIB})")
@@ -519,9 +518,8 @@ set (bzip2_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/bzip2")
 set (bzip2_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (bzip2_EXT_HEADER       "${bzip2_EXT_INCLUDE_DIR}/bzlib.h")
 set (bzip2_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}cmbzip2${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (bzip2_EXT_LIBRARIES    "${bzip2_EXT_STATIC_LIB}"
-                            "${bzip2_EXT_HEADER}")
-exists_files (bzip2_EXT_EXISTS ${bzip2_EXT_LIBRARIES})
+set (bzip2_EXT_LIBRARIES    "${bzip2_EXT_STATIC_LIB}")
+exists_files (bzip2_EXT_EXISTS ${bzip2_EXT_LIBRARIES} ${bzip2_EXT_HEADER})
 
 if (bzip2_EXT_EXISTS)
     message (STATUS "Skip external/bzip2 (Exists: ${bzip2_EXT_STATIC_LIB})")
@@ -654,5 +652,44 @@ else ()
 endif ()
 add_custom_target (archive DEPENDS ${archive_EXT_LIBRARIES})
 
+#########
+## NNG ##
+#########
 
+set (nng_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/nng")
+set (nng_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (nng_EXT_HEADER       "${nng_EXT_INCLUDE_DIR}/nng/nng.h")
+set (nng_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}nng${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (nng_EXT_LIBRARIES    "${nng_EXT_STATIC_LIB}")
+exists_files (nng_EXT_EXISTS ${nng_EXT_LIBRARIES} ${nng_EXT_HEADER})
+
+if (nng_EXT_EXISTS)
+    message (STATUS "Skip external/nng (Exists: ${nng_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/nng")
+    ExternalProject_Add (nng_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${nng_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DNNG_ENABLE_TLS=OFF"
+                       "-DNNG_TESTS=OFF"
+                       "-DNNG_TOOLS=OFF"
+                       "-DNNG_ENABLE_STATS=ON"
+                       "-DNNG_ENABLE_NNGCAT=OFF"
+                       "-DNNG_ENABLE_COVERAGE=OFF"
+            #--Output lnnging-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (nng_ext_output nng_ext ${nng_EXT_LIBRARIES})
+endif ()
+add_custom_target (nng DEPENDS ${nng_EXT_LIBRARIES})
 
