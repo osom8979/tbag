@@ -33,6 +33,8 @@ namespace math {
  *
  * @see <https://en.wikipedia.org/wiki/Euclidean_algorithm>
  * @see <https://en.wikipedia.org/wiki/Greatest_common_divisor>
+ *
+ * @translate{ko, 최대공약수를 계산한다.}
  */
 template <typename T>
 T gcd(T a, T b)
@@ -63,6 +65,8 @@ T gcd(T a, T b)
  *  <code>lcm(a,b)gcd(a,b) = ab</code>
  *
  * @see <https://en.wikipedia.org/wiki/Least_common_multiple>
+ *
+ * @translate{ko, 최소공배수를 계산한다.}
  */
 template <typename T>
 T lcm(T a, T b)
