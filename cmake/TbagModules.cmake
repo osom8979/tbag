@@ -731,6 +731,7 @@ endmacro ()
 macro (tbag_modules__apply_ext_nng)
     list (APPEND TBAG_PROJECT_DEPENDENCIES nng)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${nng_EXT_INCLUDE_DIR})
+    list (APPEND TBAG_PROJECT_DEFINITIONS NNG_STATIC_LIB)
     tbag_modules__add_whole_archive (${nng_EXT_STATIC_LIB})
 endmacro ()
 
