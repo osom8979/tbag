@@ -37,6 +37,7 @@ Tea-bag is Third party extension utility project.
 - Canadadry/luaSFML master-f55fdd4 (MIT license)
 - miniz 2.0.8 (MIT license)
 - pugixml 1.9 (MIT license)
+- tmxlite master-591dd03 (zlib license)
 
 ## External target
 
