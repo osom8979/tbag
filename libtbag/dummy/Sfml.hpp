@@ -142,9 +142,16 @@ struct SFML_WINDOW_API GlResource
 
 struct SFML_WINDOW_API VideoMode
 {
+    static std::vector<VideoMode> __full_screen_modes;
+
     VideoMode() {}
     VideoMode(unsigned int modeWidth, unsigned int modeHeight, unsigned int modeBitsPerPixel = 32) {}
     ~VideoMode() {}
+
+    bool isValid() const { return false; }
+
+    static VideoMode getDesktopMode() { return VideoMode(); }
+    static std::vector<VideoMode> const & getFullscreenModes() { return __full_screen_modes; }
 };
 
 struct ContextSettings
