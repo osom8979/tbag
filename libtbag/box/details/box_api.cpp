@@ -22,7 +22,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
-Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
+Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(dims != nullptr);
@@ -32,10 +32,10 @@ Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui32 const * d
 
     auto * cloned_box_dims = box_dim_clone(dims, rank);
     assert(cloned_box_dims != nullptr);
-    return box_malloc_move_dims(box, type, device, cloned_box_dims, rank);
+    return box_malloc_move_dims(box, type, device, ext, cloned_box_dims, rank);
 }
 
-Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui32 * dims, ui32 rank) TBAG_NOEXCEPT
+Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 * dims, ui32 rank) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(dims != nullptr);
@@ -64,6 +64,10 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui32 * dims, u
 
     box->type = type;
     box->device = device;
+    box->ext[0] = ext[0];
+    box->ext[1] = ext[1];
+    box->ext[2] = ext[2];
+    box->ext[3] = ext[3];
     box->data = data;
     box->total_byte = TOTAL_BYTE;
     box->dims = dims;
@@ -71,16 +75,16 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui32 * dims, u
     return Err::E_SUCCESS;
 }
 
-Err box_malloc_args(box_data * box, btype type, bdev device, ui32 rank, ...) TBAG_NOEXCEPT
+Err box_malloc_args(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT
 {
     va_list ap;
     va_start(ap, rank);
-    auto const CODE = box_malloc_vargs(box, type, device, rank, ap);
+    auto const CODE = box_malloc_vargs(box, type, device, ext, rank, ap);
     va_end(ap);
     return CODE;
 }
 
-Err box_malloc_vargs(box_data * box, btype type, bdev device, ui32 rank, va_list ap) TBAG_NOEXCEPT
+Err box_malloc_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(rank >= 1);
@@ -89,7 +93,7 @@ Err box_malloc_vargs(box_data * box, btype type, bdev device, ui32 rank, va_list
 
     auto * dims = box_dim_malloc_vargs(rank, ap);
     assert(dims != nullptr);
-    return box_malloc_move_dims(box, type, device, dims, rank);
+    return box_malloc_move_dims(box, type, device, ext, dims, rank);
 }
 
 Err box_free(box_data * box) TBAG_NOEXCEPT
@@ -122,7 +126,7 @@ bool box_exists_data(box_data const * box) TBAG_NOEXCEPT
 
 Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
-    auto const CODE = box_malloc_copy_dims(dest, src->type, src->device, src->dims, src->rank);
+    auto const CODE = box_malloc_copy_dims(dest, src->type, src->device, src->ext, src->dims, src->rank);
     if (isFailure(CODE)) {
         return CODE;
     }

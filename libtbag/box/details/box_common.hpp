@@ -102,6 +102,10 @@ struct box_data
     /** Device type. */
     bdev device;
 
+    /** Device extension information. */
+    /** [PARALLEL] 0:Platform, 1:Device, 2:Context 3:Unused*/
+    ui64 ext[4];
+
     /** Real data. */
     void * data;
 
