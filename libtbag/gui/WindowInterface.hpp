@@ -1,14 +1,12 @@
 /**
- * @file   RenderWindow.hpp
- * @brief  RenderWindow class prototype.
+ * @file   WindowInterface.hpp
+ * @brief  WindowInterface class prototype.
  * @author zer0
- * @date   2019-01-31
- * @date   2019-02-13 (Rename: Window -> SfWindow)
- * @date   2019-02-16 (Rename: SfWindow -> RenderWindow)
+ * @date   2019-03-23
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_RENDERWINDOW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_RENDERWINDOW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWINTERFACE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWINTERFACE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -17,9 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gui/SfNative.hpp>
-
-#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,21 +23,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace gui {
 
 /**
- * RenderWindow class prototype.
+ * WindowInterface class prototype.
  *
  * @author zer0
- * @date   2019-01-31
- * @date   2019-02-13 (Rename: Window -> SfWindow)
- * @date   2019-02-16 (Rename: SfWindow -> RenderWindow)
+ * @date   2019-03-23
  */
-class TBAG_API RenderWindow : public SfNative
+struct WindowInterface
 {
-public:
-    using Channel = libtbag::graphic::Channel;
-    using Rgb24   = libtbag::graphic::Rgb24;
-    using Rgb32   = libtbag::graphic::Rgb32;
-
-public:
     enum class Key
     {
         Unknown = -1, ///< Unhandled key
@@ -186,77 +173,17 @@ public:
         Orientation,      ///< Measures the absolute 3D orientation (degrees)
     };
 
-public:
-    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_WIDTH  = 600;
-    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_HEIGHT = 480;
-    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_BPP    = 32;
+    WindowInterface()
+    { /* EMPTY. */ }
 
-public:
-    using ContextAttributeFlagType = unsigned int;
+    virtual ~WindowInterface()
+    { /* EMPTY. */ }
 
-    /** Non-debug, compatibility context (this and the core attribute are mutually exclusive) */
-    TBAG_CONSTEXPR static unsigned int const ATTRIBUTE_DEFAULT_FLAG = 0;
-
-    /** Core attribute. */
-    TBAG_CONSTEXPR static unsigned int const ATTRIBUTE_CORE_FLAG = (1<<0);
-
-    /** Debug attribute. */
-    TBAG_CONSTEXPR static unsigned int const ATTRIBUTE_DEBUG_FLAG = (1<<2);
-
-public:
-    struct Params
-    {
-        /** Window title. */
-        std::string title = LIBTBAG_MAIN_TITLE;
-
-        /** Window width. */
-        unsigned int width = DEFAULT_WINDOW_WIDTH;
-
-        /** Window height. */
-        unsigned int height = DEFAULT_WINDOW_HEIGHT;
-
-        /** Bits Per Pixel. */
-        unsigned int bpp = DEFAULT_WINDOW_BPP;
-
-        /** Bits of the depth buffer. */
-        unsigned int depth_bits = 0;
-
-        /** Bits of the stencil buffer. */
-        unsigned int stencil_bits = 0;
-
-        /** Level of antialiasing. */
-        unsigned int antialiasing_level = 0;
-
-        /** Major number of the context version to create. */
-        unsigned int major_version = 1;
-
-        /** Minor number of the context version to create. */
-        unsigned int minor_version = 1;
-
-        /** The attribute flags to create the context with. */
-        ContextAttributeFlagType attribute_flags = ATTRIBUTE_DEFAULT_FLAG;
-
-        /** Whether the context framebuffer is sRGB capable. */
-        bool srgb_capable = false;
-
-        Params() { /* EMPTY. */ }
-        ~Params() { /* EMPTY. */ }
-    };
-
-public:
-    RenderWindow();
-    RenderWindow(Params const & params);
-    virtual ~RenderWindow();
-
-public:
-    bool pollEvent();
-    bool waitEvent();
-
-public:
     /**
      * The window requested to be closed (no data)
      */
-    virtual void onClosed();
+    virtual void onClosed()
+    { /* EMPTY. */ }
 
     /**
      * The window was resized (data in event.size)
@@ -266,17 +193,20 @@ public:
      * @param[in] height
      *      New height, in pixels.
      */
-    virtual void onResized(unsigned int width, unsigned int height);
+    virtual void onResized(unsigned int width, unsigned int height)
+    { /* EMPTY. */ }
 
     /**
      * The window lost the focus (no data)
      */
-    virtual void onLostFocus();
+    virtual void onLostFocus()
+    { /* EMPTY. */ }
 
     /**
      * The window gained the focus (no data)
      */
-    virtual void onGainedFocus();
+    virtual void onGainedFocus()
+    { /* EMPTY. */ }
 
     /**
      * A key was pressed (data in event.key)
@@ -292,12 +222,14 @@ public:
      * @param[in] system
      *      Is the System key pressed?
      */
-    virtual void onKeyPressed(Key code, bool alt, bool control, bool shift, bool system);
+    virtual void onKeyPressed(Key code, bool alt, bool control, bool shift, bool system)
+    { /* EMPTY. */ }
 
     /**
      * A key was released (data in event.key)
      */
-    virtual void onKeyReleased(Key code, bool alt, bool control, bool shift, bool system);
+    virtual void onKeyReleased(Key code, bool alt, bool control, bool shift, bool system)
+    { /* EMPTY. */ }
 
     /**
      * A character was entered (data in event.text)
@@ -305,7 +237,8 @@ public:
      * @param[in] unicode
      *      UTF-32 Unicode value of the character.
      */
-    virtual void onTextEntered(unsigned int unicode);
+    virtual void onTextEntered(unsigned int unicode)
+    { /* EMPTY. */ }
 
     /**
      * The mouse cursor moved (data in event.mouseMove)
@@ -315,17 +248,20 @@ public:
      * @param[in] y
      *      Y position of the mouse pointer, relative to the top of the owner window.
      */
-    virtual void onMouseMoved(int x, int y);
+    virtual void onMouseMoved(int x, int y)
+    { /* EMPTY. */ }
 
     /**
      * The mouse cursor entered the area of the window (no data)
      */
-    virtual void onMouseEntered();
+    virtual void onMouseEntered()
+    { /* EMPTY. */ }
 
     /**
      * The mouse cursor left the area of the window (no data)
      */
-    virtual void onMouseLeft();
+    virtual void onMouseLeft()
+    { /* EMPTY. */ }
 
     /**
      * A mouse button was pressed (data in event.mouseButton)
@@ -337,12 +273,14 @@ public:
      * @param[in] y
      *      Y position of the mouse pointer, relative to the top of the owner window.
      */
-    virtual void onMouseButtonPressed(Button button, int x, int y);
+    virtual void onMouseButtonPressed(Button button, int x, int y)
+    { /* EMPTY. */ }
 
     /**
      * A mouse button was released (data in event.mouseButton)
      */
-    virtual void onMouseButtonReleased(Button button, int x, int y);
+    virtual void onMouseButtonReleased(Button button, int x, int y)
+    { /* EMPTY. */ }
 
     /**
      * The mouse wheel was scrolled (data in event.mouseWheelScroll)
@@ -357,7 +295,8 @@ public:
      * @param[in] y
      *      Y position of the mouse pointer, relative to the top of the owner window.
      */
-    virtual void onMouseWheelScrolled(Wheel wheel, float delta, int x, int y);
+    virtual void onMouseWheelScrolled(Wheel wheel, float delta, int x, int y)
+    { /* EMPTY. */ }
 
     /**
      * A joystick was connected (data in event.joystickConnect)
@@ -365,12 +304,14 @@ public:
      * @param[in] joystick_id
      *      Index of the joystick (in range [0 .. Joystick::Count - 1])
      */
-    virtual void onJoystickConnected(unsigned int joystick_id);
+    virtual void onJoystickConnected(unsigned int joystick_id)
+    { /* EMPTY. */ }
 
     /**
      * A joystick was disconnected (data in event.joystickConnect)
      */
-    virtual void onJoystickDisconnected(unsigned int joystick_id);
+    virtual void onJoystickDisconnected(unsigned int joystick_id)
+    { /* EMPTY. */ }
 
     /**
      * The joystick moved along an axis (data in event.joystickMove)
@@ -382,7 +323,8 @@ public:
      * @param[in] position
      *      New position on the axis (in range [-100 .. 100])
      */
-    virtual void onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position);
+    virtual void onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position)
+    { /* EMPTY. */ }
 
     /**
      * A joystick button was pressed (data in event.joystickButton)
@@ -392,12 +334,14 @@ public:
      * @param[in] button
      *      Index of the button that has been pressed (in range [0 .. Joystick::ButtonCount - 1])
      */
-    virtual void onJoystickButtonPressed(unsigned int joystick_id, unsigned int button);
+    virtual void onJoystickButtonPressed(unsigned int joystick_id, unsigned int button)
+    { /* EMPTY. */ }
 
     /**
      * A joystick button was released (data in event.joystickButton)
      */
-    virtual void onJoystickButtonReleased(unsigned int joystick_id, unsigned int button);
+    virtual void onJoystickButtonReleased(unsigned int joystick_id, unsigned int button)
+    { /* EMPTY. */ }
 
     /**
      * A touch event began (data in event.touch)
@@ -409,17 +353,20 @@ public:
      * @param[in] y
      *      Y position of the touch, relative to the top of the owner window
      */
-    virtual void onTouchBegan(unsigned int finger, int x, int y);
+    virtual void onTouchBegan(unsigned int finger, int x, int y)
+    { /* EMPTY. */ }
 
     /**
      * A touch moved (data in event.touch)
      */
-    virtual void onTouchMoved(unsigned int finger, int x, int y);
+    virtual void onTouchMoved(unsigned int finger, int x, int y)
+    { /* EMPTY. */ }
 
     /**
      * A touch event ended (data in event.touch)
      */
-    virtual void onTouchEnded(unsigned int finger, int x, int y);
+    virtual void onTouchEnded(unsigned int finger, int x, int y)
+    { /* EMPTY. */ }
 
     /**
      * A sensor value changed (data in event.sensor)
@@ -433,56 +380,8 @@ public:
      * @param[in] z
      *      Current value of the sensor on Z axis.
      */
-    virtual void onSensorChanged(SensorType type, float x, float y, float z);
-
-public:
-    void close();
-    bool isOpen() const;
-
-public:
-    Pointi getPosition() const;
-    void setPosition(Pointi const & position);
-    void setSize(Sizeu const & size);
-
-public:
-    void setTitle(std::string const & title);
-    void setIcon(unsigned int width, unsigned int height, std::uint8_t const * pixels);
-    void setVisible(bool visible);
-    void setVerticalSyncEnabled(bool enabled);
-    void setMouseCursorVisible(bool visible);
-    void setMouseCursorGrabbed(bool grabbed);
-    void setKeyRepeatEnabled(bool enabled);
-    void setFramerateLimit(unsigned int limit);
-    void setJoystickThreshold(float threshold);
-
-public:
-    //void setMouseCursor(Cursor const & cursor);
-
-public:
-    void requestFocus();
-    bool hasFocus() const;
-
-public:
-    void display();
-
-public:
-    void clear(Channel r, Channel g, Channel b, Channel a = CHANNEL_MAX);
-    void clear(Rgb24 const & color);
-    void clear(Rgb32 const & color);
-    void clear();
-
-public:
-    Pointf mapPixelToCoords(Pointi const & point) const;
-    Pointi mapCoordsToPixel(Pointf const & point) const;
-
-public:
-    Sizeu getSize() const;
-    bool  setActive(bool active = true);
-
-public:
-    void pushGLStates();
-    void popGLStates();
-    void resetGLStates();
+    virtual void onSensorChanged(SensorType type, float x, float y, float z)
+    { /* EMPTY. */ }
 };
 
 } // namespace gui
@@ -491,5 +390,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_RENDERWINDOW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWINTERFACE_HPP__
 

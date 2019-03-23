@@ -7,7 +7,7 @@
 
 #include <libtbag/tpot/apps/GmPot.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/gui/RenderWindow.hpp>
+#include <libtbag/gui/Window.hpp>
 #include <libtbag/graphic/Color.hpp>
 
 #include <iostream>

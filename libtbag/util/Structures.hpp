@@ -18,7 +18,6 @@
 
 #include <libtbag/id/generator/TimeId.hpp>
 #include <libtbag/geometry/Point2.hpp>
-#include <libtbag/geometry/Size2.hpp>
 #include <libtbag/geometry/Rect2.hpp>
 
 #include <cstdint>
