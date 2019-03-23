@@ -27,7 +27,7 @@ source distribution.
 
 #include <tmxlite/FreeFuncs.hpp>
 #include <tmxlite/ObjectGroup.hpp>
-#include "detail/pugixml.hpp"
+#include "pugixml.hpp"
 #include <tmxlite/detail/Log.hpp>
 
 using namespace tmx;

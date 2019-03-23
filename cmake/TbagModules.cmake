@@ -558,6 +558,25 @@ macro (tbag_modules__apply_dep_luasfml)
     tbag_modules__add_whole_archive ($<TARGET_FILE:luasfml>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_miniz)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES miniz)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/miniz)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:miniz>)
+endmacro ()
+
+macro (tbag_modules__apply_dep_pugixml)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES pugixml)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/pugixml/src)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:pugixml>)
+endmacro ()
+
+macro (tbag_modules__apply_dep_tmxlite)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES tmxlite)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/tmxlite/include)
+    list (APPEND TBAG_PROJECT_DEFINITIONS TMXLITE_STATIC_LIB)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:tmxlite>)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------

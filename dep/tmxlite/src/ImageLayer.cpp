@@ -27,7 +27,7 @@ source distribution.
 
 #include <tmxlite/ImageLayer.hpp>
 #include <tmxlite/FreeFuncs.hpp>
-#include "detail/pugixml.hpp"
+#include "pugixml.hpp"
 #include <tmxlite/detail/Log.hpp>
 
 using namespace tmx;

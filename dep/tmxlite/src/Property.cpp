@@ -26,7 +26,7 @@ source distribution.
 *********************************************************************/
 
 #include <tmxlite/Property.hpp>
-#include "detail/pugixml.hpp"
+#include "pugixml.hpp"
 #include <tmxlite/detail/Log.hpp>
 #include <tmxlite/FreeFuncs.hpp>
 

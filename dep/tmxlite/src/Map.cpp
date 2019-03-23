@@ -26,7 +26,7 @@ source distribution.
 *********************************************************************/
 
 
-#include "detail/pugixml.hpp"
+#include "pugixml.hpp"
 #include <tmxlite/Map.hpp>
 #include <tmxlite/FreeFuncs.hpp>
 #include <tmxlite/ObjectGroup.hpp>
