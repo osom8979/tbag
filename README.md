@@ -36,6 +36,7 @@ Tea-bag is Third party extension utility project.
 - termbox 1.1.2 (MIT license)
 - Canadadry/luaSFML master-f55fdd4 (MIT license)
 - miniz 2.0.8 (MIT license)
+- pugixml 1.9 (MIT license)
 
 ## External target
 
