@@ -388,6 +388,29 @@ void Window::resetGLStates()
     _self_sf().resetGLStates();
 }
 
+VideoMode getDesktopMode()
+{
+    auto const item = sf::VideoMode::getDesktopMode();
+    VideoMode mode;
+    mode.width  = item.width;
+    mode.height = item.height;
+    mode.bpp    = item.bitsPerPixel;
+    return mode;
+}
+
+std::vector<VideoMode> getFullscreenModes()
+{
+    std::vector<VideoMode> result;
+    for (auto const & item : sf::VideoMode::getFullscreenModes()) {
+        VideoMode mode;
+        mode.width  = item.width;
+        mode.height = item.height;
+        mode.bpp    = item.bitsPerPixel;
+        result.push_back(mode);
+    }
+    return result;
+}
+
 } // namespace gui
 
 // --------------------

@@ -25,18 +25,36 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
+struct VideoMode
+{
+    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_WIDTH  = 600;
+    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_HEIGHT = 480;
+    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_BPP    = 32;
+
+    /** Window width. */
+    unsigned int width = DEFAULT_WINDOW_WIDTH;
+
+    /** Window height. */
+    unsigned int height = DEFAULT_WINDOW_HEIGHT;
+
+    /** Bits Per Pixel. */
+    unsigned int bpp = DEFAULT_WINDOW_BPP;
+
+    VideoMode()
+    { /* EMPTY. */ }
+
+    ~VideoMode()
+    { /* EMPTY. */ }
+};
+
 /**
  * Window parameters.
  *
  * @author zer0
  * @date   2019-03-23
  */
-struct WindowParams
+struct WindowParams : public VideoMode
 {
-    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_WIDTH  = 600;
-    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_HEIGHT = 480;
-    TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_BPP    = 32;
-
     using ContextAttributeFlagType = unsigned int;
 
     /** Non-debug, compatibility context (this and the core attribute are mutually exclusive) */
@@ -69,15 +87,6 @@ struct WindowParams
     /** Window title. */
     std::string title = LIBTBAG_MAIN_TITLE;
 
-    /** Window width. */
-    unsigned int width = DEFAULT_WINDOW_WIDTH;
-
-    /** Window height. */
-    unsigned int height = DEFAULT_WINDOW_HEIGHT;
-
-    /** Bits Per Pixel. */
-    unsigned int bpp = DEFAULT_WINDOW_BPP;
-
     /** Window style. */
     std::uint32_t style = STYLE_DEFAULT;
 
@@ -103,14 +112,10 @@ struct WindowParams
     bool srgb_capable = false;
 
     WindowParams()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 
     ~WindowParams()
-    {
-        // EMPTY.
-    }
+    { /* EMPTY. */ }
 };
 
 } // namespace gui
