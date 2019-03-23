@@ -22,14 +22,14 @@ namespace cpu      {
  * @author zer0
  * @date   2019-02-22
  */
-struct _PcCpuContext
+struct _ParallelCpuContext
 {
-    _PcCpuContext()
+    _ParallelCpuContext()
     {
         // EMPTY.
     }
 
-    ~_PcCpuContext()
+    ~_ParallelCpuContext()
     {
         // EMPTY.
     }
@@ -49,49 +49,49 @@ int getPlatformCount()
     return 1;
 }
 
-PcPlatformIds getPlatformList()
+ParallelPlatformIds getPlatformList()
 {
     return {0};
 }
 
-PcPlatformInfo getPlatformInfo(PcPlatformId platform)
+ParallelPlatformInfo getPlatformInfo(ParallelPlatformId platform)
 {
-    PcPlatformInfo info;
+    ParallelPlatformInfo info;
     info.name    = "CPU";
     info.vendor  = "TBAG";
     info.version = libtbag::util::getTbagVersion().toLongString();
     return info;
 }
 
-int getDeviceCount(PcPlatformId platform)
+int getDeviceCount(ParallelPlatformId platform)
 {
     return 1;
 }
 
-PcDeviceIds getDeviceList(PcPlatformId platform)
+ParallelDeviceIds getDeviceList(ParallelPlatformId platform)
 {
     return {0};
 }
 
-PcDeviceInfo getDeviceInfo(PcDeviceId device)
+ParallelDeviceInfo getDeviceInfo(ParallelDeviceId device)
 {
-    PcDeviceInfo info;
+    ParallelDeviceInfo info;
     info.name = "CPU";
     return info;
 }
 
-PcContextId createContext(PcDeviceId device)
+ParallelContextId createContext(ParallelDeviceId device)
 {
-    auto * context = new (std::nothrow) _PcCpuContext();
+    auto * context = new (std::nothrow) _ParallelCpuContext();
     if (context == nullptr) {
         return UNKNOWN_ID;
     }
-    return (PcContextId)context;
+    return (ParallelContextId)context;
 }
 
-bool deleteContext(PcContextId context)
+bool deleteContext(ParallelContextId context)
 {
-    delete ((_PcCpuContext*)context);
+    delete ((_ParallelCpuContext*)context);
     return true;
 }
 

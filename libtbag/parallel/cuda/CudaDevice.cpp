@@ -30,14 +30,14 @@ namespace cuda     {
  * @author zer0
  * @date   2019-02-22
  */
-struct _PcCudaContext
+struct _ParallelCudaContext
 {
-    _PcCudaContext()
+    _ParallelCudaContext()
     {
         // EMPTY.
     }
 
-    ~_PcCudaContext()
+    ~_ParallelCudaContext()
     {
         // EMPTY.
     }
@@ -61,14 +61,14 @@ int getPlatformCount()
     return 1;
 }
 
-PcPlatformIds getPlatformList()
+ParallelPlatformIds getPlatformList()
 {
     return {0};
 }
 
-PcPlatformInfo getPlatformInfo(PcPlatformId platform)
+ParallelPlatformInfo getPlatformInfo(ParallelPlatformId platform)
 {
-    PcPlatformInfo info;
+    ParallelPlatformInfo info;
     info.name   = "CUDA";
     info.vendor = "NVIDIA";
     int driver_version = 0;
@@ -93,7 +93,7 @@ PcPlatformInfo getPlatformInfo(PcPlatformId platform)
     return info;
 }
 
-int getDeviceCount(PcPlatformId platform)
+int getDeviceCount(ParallelPlatformId platform)
 {
     int result = 0;
     cudaError_t code = cudaGetDeviceCount(&result);
@@ -104,18 +104,18 @@ int getDeviceCount(PcPlatformId platform)
     return result;
 }
 
-PcDeviceIds getDeviceList(PcPlatformId platform)
+ParallelDeviceIds getDeviceList(ParallelPlatformId platform)
 {
-    PcDeviceIds result;
+    ParallelDeviceIds result;
     for (int i = 0; i < getDeviceCount(platform); ++i) {
         result.emplace_back(i);
     }
     return result;
 }
 
-PcDeviceInfo getDeviceInfo(PcDeviceId device)
+ParallelDeviceInfo getDeviceInfo(ParallelDeviceId device)
 {
-    PcDeviceInfo info;
+    ParallelDeviceInfo info;
     cudaDeviceProp prop;
     cudaError_t code = cudaGetDeviceProperties(&prop, device);
     if (code != cudaSuccess) {
@@ -170,18 +170,18 @@ PcDeviceInfo getDeviceInfo(PcDeviceId device)
     return info;
 }
 
-PcContextId createContext(PcDeviceId device)
+ParallelContextId createContext(ParallelDeviceId device)
 {
-    auto * context = new (std::nothrow) _PcCudaContext();
+    auto * context = new (std::nothrow) _ParallelCudaContext();
     if (context == nullptr) {
         return UNKNOWN_ID;
     }
-    return (PcContextId)context;
+    return (ParallelContextId)context;
 }
 
-bool deleteContext(PcContextId context)
+bool deleteContext(ParallelContextId context)
 {
-    delete ((_PcCudaContext*)context);
+    delete ((_ParallelCudaContext*)context);
     return true;
 }
 

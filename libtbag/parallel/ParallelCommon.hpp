@@ -1,12 +1,13 @@
 /**
- * @file   PcCommon.hpp
+ * @file   ParallelCommon.hpp
  * @brief  Parallel Computing common prototype.
  * @author zer0
  * @date   2019-02-21
+ * @date   2019-03-23 (Rename: PcCommon -> ParallelCommon)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PARALLEL_PCCOMMON_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_PARALLEL_PCCOMMON_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_PARALLEL_PARALLELCOMMON_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_PARALLEL_PARALLELCOMMON_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -31,52 +32,52 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace parallel {
 
-using PcId = libtbag::id::Id;
+using ParallelId = libtbag::id::Id;
 
-TBAG_CONSTEXPR PcId const UNKNOWN_ID = libtbag::id::UNKNOWN_ID;
+TBAG_CONSTEXPR ParallelId const UNKNOWN_ID = libtbag::id::UNKNOWN_ID;
 
-using PcTypeId     = PcId;
-using PcPlatformId = PcId;
-using PcDeviceId   = PcId;
-using PcContextId  = PcId;
+using ParallelTypeId     = ParallelId;
+using ParallelPlatformId = ParallelId;
+using ParallelDeviceId   = ParallelId;
+using ParallelContextId  = ParallelId;
 
-TBAG_CONSTEXPR PcTypeId const PC_TYPE_NONE = 0;
-TBAG_CONSTEXPR PcTypeId const PC_TYPE_CPU  = 1;
-TBAG_CONSTEXPR PcTypeId const PC_TYPE_CUDA = 2;
-TBAG_CONSTEXPR PcTypeId const PC_TYPE_CL   = 3;
+TBAG_CONSTEXPR ParallelTypeId const PC_TYPE_NONE = 0;
+TBAG_CONSTEXPR ParallelTypeId const PC_TYPE_CPU  = 1;
+TBAG_CONSTEXPR ParallelTypeId const PC_TYPE_CUDA = 2;
+TBAG_CONSTEXPR ParallelTypeId const PC_TYPE_CL   = 3;
 
-struct PcType
+struct ParallelType
 {
-    PcTypeId type;
+    ParallelTypeId type;
 };
 
-struct PcPlatform : public PcType
+struct ParallelPlatform : public ParallelType
 {
-    PcPlatformId platform;
+    ParallelPlatformId platform;
 };
 
-struct PcDevice : public PcPlatform
+struct ParallelDevice : public ParallelPlatform
 {
-    PcDeviceId device;
+    ParallelDeviceId device;
 };
 
-struct PcContext : public PcDevice
+struct ParallelContext : public ParallelDevice
 {
-    PcContextId context;
+    ParallelContextId context;
 };
 
-using PcPlatformIds = std::vector<PcPlatformId>;
-using PcDeviceIds   = std::vector<PcDeviceId>;
-using PcContextIds  = std::vector<PcContextId>;
+using ParallelPlatformIds = std::vector<ParallelPlatformId>;
+using ParallelDeviceIds   = std::vector<ParallelDeviceId>;
+using ParallelContextIds  = std::vector<ParallelContextId>;
 
 // @formatter:off
-static_assert(sizeof(PcType)     == sizeof(PcTypeId)   /* ---------------- */, "size checker.");
-static_assert(sizeof(PcPlatform) == sizeof(PcType)     + sizeof(PcPlatformId), "size checker.");
-static_assert(sizeof(PcDevice)   == sizeof(PcPlatform) + sizeof(PcDeviceId)  , "size checker.");
-static_assert(sizeof(PcContext)  == sizeof(PcDevice)   + sizeof(PcContextId) , "size checker.");
+static_assert(sizeof(ParallelType)     == sizeof(ParallelTypeId)   /* ---------------------- */, "size checker.");
+static_assert(sizeof(ParallelPlatform) == sizeof(ParallelType)     + sizeof(ParallelPlatformId), "size checker.");
+static_assert(sizeof(ParallelDevice)   == sizeof(ParallelPlatform) + sizeof(ParallelDeviceId)  , "size checker.");
+static_assert(sizeof(ParallelContext)  == sizeof(ParallelDevice)   + sizeof(ParallelContextId) , "size checker.");
 // @formatter:on
 
-struct PcPlatformInfo
+struct ParallelPlatformInfo
 {
     std::string  profile;
     std::string  name;
@@ -84,11 +85,11 @@ struct PcPlatformInfo
     std::string  version;
     std::string  extensions;
 
-    PcPlatformInfo() { /* EMPTY. */ }
-    ~PcPlatformInfo() { /* EMPTY. */ }
+    ParallelPlatformInfo() { /* EMPTY. */ }
+    ~ParallelPlatformInfo() { /* EMPTY. */ }
 };
 
-struct PcDeviceInfo
+struct ParallelDeviceInfo
 {
     using Properties = std::map<std::string, std::string>;
 
@@ -98,8 +99,8 @@ struct PcDeviceInfo
     Properties   properties;     ///< Extension properties.
     std::size_t  global_memory;  ///< Size of global device memory in bytes.
 
-    PcDeviceInfo() : global_memory(0) { /* EMPTY. */ }
-    ~PcDeviceInfo() { /* EMPTY. */ }
+    ParallelDeviceInfo() : global_memory(0) { /* EMPTY. */ }
+    ~ParallelDeviceInfo() { /* EMPTY. */ }
 
     template <typename ValueType>
     bool insert(std::string const & name, ValueType const & prop)
@@ -130,5 +131,5 @@ struct PcDeviceInfo
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_PARALLEL_PCCOMMON_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_PARALLEL_PARALLELCOMMON_HPP__
 

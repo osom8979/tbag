@@ -1,11 +1,12 @@
 /**
- * @file   PcDevice.cpp
+ * @file   ParallelDevice.cpp
  * @brief  Parallel Computing Device class implementation.
  * @author zer0
  * @date   2019-02-21
+ * @date   2019-03-23 (Rename: PcDevice -> ParallelDevice)
  */
 
-#include <libtbag/parallel/PcDevice.hpp>
+#include <libtbag/parallel/ParallelDevice.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 
@@ -19,7 +20,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace parallel {
 
-bool isSupport(PcTypeId type) TBAG_NOEXCEPT
+bool isSupport(ParallelTypeId type) TBAG_NOEXCEPT
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::isSupport();
@@ -31,7 +32,7 @@ bool isSupport(PcTypeId type) TBAG_NOEXCEPT
     return false;
 }
 
-int getPlatformCount(PcTypeId type)
+int getPlatformCount(ParallelTypeId type)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::getPlatformCount();
@@ -43,7 +44,7 @@ int getPlatformCount(PcTypeId type)
     return 0;
 }
 
-PcPlatformIds getPlatformList(PcTypeId type)
+ParallelPlatformIds getPlatformList(ParallelTypeId type)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::getPlatformList();
@@ -52,10 +53,10 @@ PcPlatformIds getPlatformList(PcTypeId type)
     default: break;
     }
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return PcPlatformIds();
+    return ParallelPlatformIds();
 }
 
-PcPlatformInfo getPlatformInfo(PcTypeId type, PcPlatformId platform)
+ParallelPlatformInfo getPlatformInfo(ParallelTypeId type, ParallelPlatformId platform)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::getPlatformInfo(platform);
@@ -64,10 +65,10 @@ PcPlatformInfo getPlatformInfo(PcTypeId type, PcPlatformId platform)
     default: break;
     }
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return PcPlatformInfo();
+    return ParallelPlatformInfo();
 }
 
-int getDeviceCount(PcTypeId type, PcPlatformId platform)
+int getDeviceCount(ParallelTypeId type, ParallelPlatformId platform)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::getDeviceCount(platform);
@@ -79,7 +80,7 @@ int getDeviceCount(PcTypeId type, PcPlatformId platform)
     return 0;
 }
 
-PcDeviceIds getDeviceList(PcTypeId type, PcPlatformId platform)
+ParallelDeviceIds getDeviceList(ParallelTypeId type, ParallelPlatformId platform)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::getDeviceList(platform);
@@ -88,10 +89,10 @@ PcDeviceIds getDeviceList(PcTypeId type, PcPlatformId platform)
     default: break;
     }
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return PcDeviceIds();
+    return ParallelDeviceIds();
 }
 
-PcDeviceInfo getDeviceInfo(PcTypeId type, PcDeviceId device)
+ParallelDeviceInfo getDeviceInfo(ParallelTypeId type, ParallelDeviceId device)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::getDeviceInfo(device);
@@ -100,10 +101,10 @@ PcDeviceInfo getDeviceInfo(PcTypeId type, PcDeviceId device)
     default: break;
     }
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
-    return PcDeviceInfo();
+    return ParallelDeviceInfo();
 }
 
-PcContextId createContext(PcTypeId type, PcDeviceId device)
+ParallelContextId createContext(ParallelTypeId type, ParallelDeviceId device)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::createContext(device);
@@ -115,7 +116,7 @@ PcContextId createContext(PcTypeId type, PcDeviceId device)
     return UNKNOWN_ID;
 }
 
-bool deleteContext(PcTypeId type, PcContextId context)
+bool deleteContext(ParallelTypeId type, ParallelContextId context)
 {
     switch (type) {
     case PC_TYPE_CPU:  return libtbag::parallel::cpu::deleteContext(context);
@@ -127,33 +128,33 @@ bool deleteContext(PcTypeId type, PcContextId context)
     return false;
 }
 
-PcType getPcType(PcTypeId type)
+ParallelType getParallelType(ParallelTypeId type)
 {
-    PcType result;
+    ParallelType result;
     result.type = type;
     return result;
 }
 
-PcPlatform getPcPlatform(PcType type, PcPlatformId platform)
+ParallelPlatform getParallelPlatform(ParallelType type, ParallelPlatformId platform)
 {
-    PcPlatform result;
+    ParallelPlatform result;
     result.type = type.type;
     result.platform = platform;
     return result;
 }
 
-PcDevice getPcDevice(PcPlatform platform, PcDeviceId device)
+ParallelDevice getParallelDevice(ParallelPlatform platform, ParallelDeviceId device)
 {
-    PcDevice result;
+    ParallelDevice result;
     result.type = platform.type;
     result.platform = platform.platform;
     result.device = device;
     return result;
 }
 
-PcContext getPcContext(PcDevice device, PcContextId context)
+ParallelContext getParallelContext(ParallelDevice device, ParallelContextId context)
 {
-    PcContext result;
+    ParallelContext result;
     result.type = device.type;
     result.platform = device.platform;
     result.device = device.device;

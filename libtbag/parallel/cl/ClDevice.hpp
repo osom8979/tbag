@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/parallel/PcCommon.hpp>
+#include <libtbag/parallel/ParallelCommon.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -28,15 +28,15 @@ namespace cl       {
 TBAG_API bool isSupport() TBAG_NOEXCEPT;
 
 TBAG_API int getPlatformCount();
-TBAG_API PcPlatformIds getPlatformList();
-TBAG_API PcPlatformInfo getPlatformInfo(PcPlatformId platform);
+TBAG_API ParallelPlatformIds getPlatformList();
+TBAG_API ParallelPlatformInfo getPlatformInfo(ParallelPlatformId platform);
 
-TBAG_API int getDeviceCount(PcPlatformId platform);
-TBAG_API PcDeviceIds getDeviceList(PcPlatformId platform);
-TBAG_API PcDeviceInfo getDeviceInfo(PcDeviceId device);
+TBAG_API int getDeviceCount(ParallelPlatformId platform);
+TBAG_API ParallelDeviceIds getDeviceList(ParallelPlatformId platform);
+TBAG_API ParallelDeviceInfo getDeviceInfo(ParallelDeviceId device);
 
-TBAG_API PcContextId createContext(PcDeviceId device);
-TBAG_API bool deleteContext(PcContextId context);
+TBAG_API ParallelContextId createContext(ParallelDeviceId device);
+TBAG_API bool deleteContext(ParallelContextId context);
 
 } // namespace cl
 } // namespace parallel

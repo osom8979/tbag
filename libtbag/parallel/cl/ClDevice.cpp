@@ -59,9 +59,9 @@ int getPlatformCount()
     return result;
 }
 
-PcPlatformIds getPlatformList()
+ParallelPlatformIds getPlatformList()
 {
-    PcPlatformIds result;
+    ParallelPlatformIds result;
     std::vector<cl_platform_id> platforms((std::size_t)getPlatformCount());
     cl_int code = clGetPlatformIDs((cl_uint)platforms.size(), platforms.data(), nullptr);
     if (code != CL_SUCCESS) {
@@ -69,14 +69,14 @@ PcPlatformIds getPlatformList()
         return result;
     }
     for (auto & id : platforms) {
-        result.emplace_back((PcPlatformId)id);
+        result.emplace_back((ParallelPlatformId)id);
     }
     return result;
 }
 
-PcPlatformInfo getPlatformInfo(PcPlatformId platform)
+ParallelPlatformInfo getPlatformInfo(ParallelPlatformId platform)
 {
-    PcPlatformInfo info;
+    ParallelPlatformInfo info;
     auto get_platform_info = [](cl_platform_id id, cl_platform_info info) -> std::string {
         size_t value_size = 0;
         if (clGetPlatformInfo(id, info, 0, nullptr, &value_size) == CL_SUCCESS) {
@@ -96,7 +96,7 @@ PcPlatformInfo getPlatformInfo(PcPlatformId platform)
     return info;
 }
 
-int getDeviceCount(PcPlatformId platform)
+int getDeviceCount(ParallelPlatformId platform)
 {
     int result = 0;
     cl_uint num_devices;
@@ -109,9 +109,9 @@ int getDeviceCount(PcPlatformId platform)
     return result;
 }
 
-PcDeviceIds getDeviceList(PcPlatformId platform)
+ParallelDeviceIds getDeviceList(ParallelPlatformId platform)
 {
-    PcDeviceIds result;
+    ParallelDeviceIds result;
     std::vector<cl_device_id> devices((std::size_t)getDeviceCount(platform));
     cl_int code = clGetDeviceIDs((cl_platform_id)platform, CL_DEVICE_TYPE_ALL,
                                  (cl_uint)devices.size(), devices.data(), nullptr);
@@ -120,14 +120,14 @@ PcDeviceIds getDeviceList(PcPlatformId platform)
         return result;
     }
     for (auto & id : devices) {
-        result.emplace_back((PcDeviceId)id);
+        result.emplace_back((ParallelDeviceId)id);
     }
     return result;
 }
 
-PcDeviceInfo getDeviceInfo(PcDeviceId device)
+ParallelDeviceInfo getDeviceInfo(ParallelDeviceId device)
 {
-    PcDeviceInfo info;
+    ParallelDeviceInfo info;
     auto get_device_info_str = [](cl_device_id id, cl_device_info info) -> std::string {
         size_t value_size = 0;
         if (clGetDeviceInfo(id, info, 0, nullptr, &value_size) == CL_SUCCESS) {
@@ -154,7 +154,7 @@ PcDeviceInfo getDeviceInfo(PcDeviceId device)
     return info;
 }
 
-PcContextId createContext(PcDeviceId device)
+ParallelContextId createContext(ParallelDeviceId device)
 {
     cl_int code;
     cl_context context = clCreateContext(nullptr, 1, (cl_device_id const *)&device, nullptr, nullptr, &code);
@@ -162,10 +162,10 @@ PcContextId createContext(PcDeviceId device)
         tDLogE("createContext() OpenCL clCreateContext() error code: {}", code);
         return UNKNOWN_ID;
     }
-    return (PcContextId)context;
+    return (ParallelContextId)context;
 }
 
-bool deleteContext(PcContextId context)
+bool deleteContext(ParallelContextId context)
 {
     cl_int code = clReleaseContext((cl_context)context);
     if (code != CL_SUCCESS) {
