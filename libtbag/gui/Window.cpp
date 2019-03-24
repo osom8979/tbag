@@ -14,9 +14,16 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Type.hpp>
 
-#if defined(USE_GUI)
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+
+#include <cstdlib>
+#include <cassert>
+
+#include <iostream>
+#include <algorithm>
+#include <utility>
+
 STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Unknown, libtbag::gui::Window::Key::Unknown);
 STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::A,       libtbag::gui::Window::Key::A);
 STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Pause,   libtbag::gui::Window::Key::Pause);
@@ -47,17 +54,6 @@ STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Resize,     libtbag::gui::WindowParams::S
 STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Close,      libtbag::gui::WindowParams::STYLE_CLOSE);
 STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Fullscreen, libtbag::gui::WindowParams::STYLE_FULL_SCREEN);
 STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Default,    libtbag::gui::WindowParams::STYLE_DEFAULT);
-#else
-#include <libtbag/dummy/Sfml.hpp>
-using namespace libtbag::dummy;
-#endif
-
-#include <cstdlib>
-#include <cassert>
-
-#include <iostream>
-#include <algorithm>
-#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -134,7 +130,6 @@ Window::~Window()
 
 static void __process_sf_event__(Window * window, sf::Event & e)
 {
-#if defined(USE_GUI)
     // @formatter:off
     switch (e.type) {
     case sf::Event::Closed:
@@ -211,7 +206,6 @@ static void __process_sf_event__(Window * window, sf::Event & e)
         break;
     }
     // @formatter:on
-#endif
 }
 
 bool Window::pollEvent()

@@ -46,10 +46,7 @@ SolState::SolState() : _state(std::make_shared<State>())
     lua_gc(_state->lua_state(), LUA_GCSTOP, 0);
     COMMENT("Load all libraries.") {
         luaL_openlibs(_state->lua_state());
-        auto const CODE = libtbag::script::lua::luaopen_sfml(_state->lua_state());
-        if (isFailure(CODE)) {
-            tDLogW("SolState::SolState() Failed to register lua-sfml library: {}", CODE);
-        }
+        libtbag::script::lua::luaopen_sfml(_state->lua_state());
     }
     lua_gc(_state->lua_state(), LUA_GCRESTART, -1);
 

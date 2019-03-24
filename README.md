@@ -101,7 +101,6 @@ The main build options you will want to configure are as follows:
 * `USE_OPENCL`: Enable `OpenCL` library.
 * `USE_CUDA`: Enable `CUDA` compile.
 * `USE_DOXYGEN`: Enable `doxygen` documentation.
-* `USE_GUI`: Enable GUI module.
 * `USE_RTTI`: Enable RTTI flag.
 * `DISABLE_TDLOG`: Disable tbag default logger.
 * `DISABLE_LUAJIT_EXE_FLAGS`: Disable LuaJIT Embedding flags if apple.

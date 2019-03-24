@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/script/LuaBypass.hpp>
-#include <libtbag/Err.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,7 +24,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace script {
 namespace lua    {
 
-TBAG_API Err luaopen_sfml(lua_State * L);
+TBAG_API void luaopen_sfml(lua_State * L);
 
 } // namespace lua
 } // namespace script

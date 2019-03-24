@@ -18,12 +18,13 @@ tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
 
 ## TBAG EXPORT API.
 tbag_modules__append_definitions (
-    TBAG_EXPORT_API
-    U_COMBINED_IMPLEMENTATION
-    JSON_DLL_BUILD
-    TINYXML2_EXPORT
-    LMDB_EXPORT_API
-    SQLITE_EXPORT_API)
+        TBAG_EXPORT_API
+        U_COMBINED_IMPLEMENTATION
+        JSON_DLL_BUILD
+        TINYXML2_EXPORT
+        LMDB_EXPORT_API
+        SQLITE_EXPORT_API
+        GL_SILENCE_DEPRECATION)
 
 ## Thread settings.
 tbag_modules__apply_thread ()
@@ -42,6 +43,7 @@ tbag_modules__apply_ext_bzip2    ()
 tbag_modules__apply_ext_lzma     ()
 tbag_modules__apply_ext_archive  ()
 tbag_modules__apply_ext_nng      ()
+tbag_modules__apply_ext_sfml_ignore_gl_al ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
@@ -54,14 +56,10 @@ tbag_modules__apply_dep_lfds        ()
 tbag_modules__apply_dep_miniz       ()
 tbag_modules__apply_dep_pugixml     ()
 tbag_modules__apply_dep_tmxlite     ()
+tbag_modules__apply_dep_luasfml     ()
 
-if (USE_GUI)
-    tbag_modules__append_definitions (GL_SILENCE_DEPRECATION)
-    tbag_modules__apply_ext_sfml_ignore_gl_al ()
-    tbag_modules__apply_dep_luasfml ()
-    tbag_modules__check_opengl ()
-    tbag_modules__apply_opengl ()
-endif ()
+tbag_modules__check_opengl ()
+tbag_modules__apply_opengl ()
 
 set (BOX_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/box.fbs")
 set (BOX_D2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/box_d2s.h")
