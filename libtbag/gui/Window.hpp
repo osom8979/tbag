@@ -27,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-TBAG_API int runGame(libtbag::res::Storage & storage);
+TBAG_API int runWindow(libtbag::res::Storage & storage);
 
 } // namespace gui
 

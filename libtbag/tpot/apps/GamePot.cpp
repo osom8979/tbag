@@ -43,7 +43,7 @@ char const * const GamePot::getHelp() const TBAG_NOEXCEPT
 
 int GamePot::onMain()
 {
-    return libtbag::gui::runGame(params().storage);
+    return libtbag::gui::runWindow(params().storage);
 }
 
 } // namespace apps

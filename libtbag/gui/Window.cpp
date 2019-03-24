@@ -435,7 +435,7 @@ static WindowExitCode runGameMain(libtbag::res::Storage & storage, WindowParams 
     return Window(storage, MODE, LIBTBAG_MAIN_TITLE, STYLE, CONTEXT, CLEAR).run();
 }
 
-int runGame(libtbag::res::Storage & storage)
+int runWindow(libtbag::res::Storage & storage)
 {
     bool exit_game = false;
     int  exit_code = EXIT_FAILURE;
