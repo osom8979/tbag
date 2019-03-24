@@ -72,8 +72,7 @@ public:
     virtual ~Window();
 
 public:
-    bool pollEvent();
-    bool waitEvent();
+    bool runDefault();
 
 public:
     virtual void onClosed() override;

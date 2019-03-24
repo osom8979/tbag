@@ -179,6 +179,27 @@ struct WindowInterface
     virtual ~WindowInterface()
     { /* EMPTY. */ }
 
+    virtual bool onCreate()
+    { return true; }
+
+    virtual void onDestroy()
+    { /* EMPTY. */ }
+
+    virtual void onPreEvent()
+    { /* EMPTY. */ }
+
+    virtual void onPostEvent()
+    { /* EMPTY. */ }
+
+    virtual void onUpdate()
+    { /* EMPTY. */ }
+
+    virtual void onPreDraw()
+    { /* EMPTY. */ }
+
+    virtual void onPostDraw()
+    { /* EMPTY. */ }
+
     /**
      * The window requested to be closed (no data)
      */

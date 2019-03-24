@@ -14,7 +14,11 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/3rd/imgui/imgui.h>
+#include <libtbag/3rd/imgui/imgui-SFML.h>
+
 #include <SFML/Window.hpp>
+#include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <cstdlib>
@@ -130,6 +134,8 @@ Window::~Window()
 
 static void __process_sf_event__(Window * window, sf::Event & e)
 {
+    window->onPreEvent();
+
     // @formatter:off
     switch (e.type) {
     case sf::Event::Closed:
@@ -206,26 +212,40 @@ static void __process_sf_event__(Window * window, sf::Event & e)
         break;
     }
     // @formatter:on
+
+    window->onPostEvent();
 }
 
-bool Window::pollEvent()
+bool Window::runDefault()
 {
-    sf::Event e;
-    if (_self_sf().pollEvent(e)) {
-        __process_sf_event__(this, e);
-        return true;
+    auto & window = _self_sf();
+    if (!onCreate()) {
+        return false;
     }
-    return false;
-}
 
-bool Window::waitEvent()
-{
-    sf::Event e;
-    if (_self_sf().waitEvent(e)) {
-        __process_sf_event__(this, e);
-        return true;
+    sf::Clock delta;
+    sf::Event event;
+
+    ImGui::SFML::Init(window);
+
+    while (isOpen()) {
+        while (window.pollEvent(event)) {
+            ImGui::SFML::ProcessEvent(event);
+            __process_sf_event__(this, event);
+        }
+
+        ImGui::SFML::Update(window, delta.restart());
+        onUpdate();
+
+        onPreDraw();
+        ImGui::SFML::Render(window);
+        onPostDraw();
+
+        window.display();
     }
-    return false;
+
+    onDestroy();
+    return true;
 }
 
 void Window::onClosed()
