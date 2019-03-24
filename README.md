@@ -58,7 +58,6 @@ Tea-bag is Third party extension utility project.
 - libarchive 3.3.3 (New BSD license)
 - CMake 3.13.4 (BSD 3-Clause license)
   - external/archive/build/Modules/CMakePushCheckState.cmake
-- TGUI 0.8.4 (zlib license)
 - gperftools 2.7 (BSD 3-Clause license)
 - Box2D master-ef96a4f (zlib license)
 - SoLoud master-f2ec233 (zlib license)
