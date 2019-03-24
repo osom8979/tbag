@@ -40,6 +40,7 @@ Tea-bag is Third party extension utility project.
 - tmxlite master-591dd03 (zlib license)
 - imgui 1.6.5 (MIT license)
 - imgui-sfml master-995b873 (MIT license)
+- SelbaWard master-3e86c0b (zlib license)
 
 ## External target
 
