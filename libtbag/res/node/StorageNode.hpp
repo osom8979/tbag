@@ -73,7 +73,8 @@ namespace node {
  *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *
  *     <!-- Contains simple 'group(filename)'/'key'/'value' information for configuration. -->
- *     <config>dir</config>
+ *     <!-- If 'gui' attribute is exists, Configuration file to use in GUI mode.           -->
+ *     <config gui='gui.xml'>dir</config>
  *
  *     <!-- A set of dynamic modules. (e.g. '*.dll' files)          -->
  *     <!-- If 'ext' attribute is exists, File extension filtering. -->
@@ -99,9 +100,10 @@ namespace node {
  *     <!-- Directory containing the LuaRosks root directory. -->
  *     <luarocks>dir</luarocks>
  *
- *     <!-- Directory containing the lua script package.                -->
- *     <!-- If 'name' attribute is exists, Apply only those files.      -->
- *     <lua name='file.lua'>dir</lua>
+ *     <!-- Directory containing the lua script package.                            -->
+ *     <!-- If 'name' attribute is exists, Apply only those files.                  -->
+ *     <!-- If 'gui' attribute is exists, The first script file to run in GUI mode. -->
+ *     <lua name='file.lua' gui='entry.lua'>dir</lua>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
@@ -146,6 +148,7 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT    = "default";
     TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
     TBAG_CONSTEXPR static char const * const ATT_AUTO_CLEAR = "autoclear";
+    TBAG_CONSTEXPR static char const * const ATT_GUI        = "gui";
 
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
@@ -171,6 +174,11 @@ public:
             bool exists = false;
             bool abs    = false;
             bool raw    = false;
+        };
+
+        struct cfg_layout : public def_layout
+        {
+            str gui;
         };
 
         struct mod_layout : public def_layout
@@ -200,7 +208,7 @@ public:
 
         struct lua_layout : public txt_layout
         {
-            // EMPTY.
+            str gui;
         };
 
         struct usr_layout : public txt_layout
@@ -209,7 +217,7 @@ public:
         };
 
         env_layout env;
-        def_layout config;
+        cfg_layout config;
         mod_layout module;
         txt_layout text;
         sql_layout sqlite;
@@ -280,6 +288,7 @@ public:
 public:
     static void readElement(Element const & element, std::string const & tag, Property::env_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::def_layout & layout);
+    static void readElement(Element const & element, std::string const & tag, Property::cfg_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::mod_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::txt_layout & layout);
     static void readElement(Element const & element, std::string const & tag, Property::sql_layout & layout);
@@ -291,6 +300,7 @@ public:
 public:
     static void addNewElement(Element & element, std::string const & tag, Property::env_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::def_layout const & layout);
+    static void addNewElement(Element & element, std::string const & tag, Property::cfg_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::mod_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::txt_layout const & layout);
     static void addNewElement(Element & element, std::string const & tag, Property::sql_layout const & layout);

@@ -220,6 +220,19 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
     }
 }
 
+void StorageNode::readElement(Element const & element, std::string const & tag, Property::cfg_layout & layout)
+{
+    if (auto * child = element.FirstChildElement(tag.c_str())) {
+        layout.exists = true;
+        layout.text = text(*child);
+        optAttr(*child, ATT_ABSOLUTE, layout.abs);
+        optAttr(*child, ATT_RAW     , layout.raw);
+        optAttr(*child, ATT_GUI     , layout.gui);
+    } else {
+        layout.exists = false;
+    }
+}
+
 void StorageNode::readElement(Element const & element, std::string const & tag, Property::mod_layout & layout)
 {
     if (auto * child = element.FirstChildElement(tag.c_str())) {
@@ -277,6 +290,7 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
         optAttr(*child, ATT_NAME    , layout.name);
         optAttr(*child, ATT_ABSOLUTE, layout.abs);
         optAttr(*child, ATT_RAW     , layout.raw);
+        optAttr(*child, ATT_GUI     , layout.gui);
     } else {
         layout.exists = false;
     }
@@ -311,6 +325,18 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
             text(child, layout.text);
             setAttr(child, ATT_ABSOLUTE, layout.abs);
             setAttr(child, ATT_RAW     , layout.raw);
+        });
+    }
+}
+
+void StorageNode::addNewElement(Element & element, std::string const & tag, Property::cfg_layout const & layout)
+{
+    if (layout.exists) {
+        newElement(element, tag.c_str(), [&](Element & child){
+            text(child, layout.text);
+            setAttr(child, ATT_ABSOLUTE, layout.abs);
+            setAttr(child, ATT_RAW     , layout.raw);
+            setAttr(child, ATT_GUI     , layout.gui);
         });
     }
 }
@@ -369,6 +395,7 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
             setAttr(child, ATT_NAME    , layout.name);
             setAttr(child, ATT_ABSOLUTE, layout.abs);
             setAttr(child, ATT_RAW     , layout.raw);
+            setAttr(child, ATT_GUI     , layout.gui);
         });
     }
 }
@@ -455,6 +482,11 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     if (prop.luarocks.exists) { storage.setLayoutLuaRocks(getPath(updated_root, TAG_LUAROCKS, prop.luarocks, ENVIRONMENTS)); }
     // @formatter:on
 
+    if (prop.config.exists) {
+        if (!prop.config.gui.empty()) {
+            storage->config_gui = prop.config.gui;
+        }
+    }
     if (prop.module.exists) {
         storage.setModuleExtension(prop.module.ext);
     }
@@ -475,6 +507,9 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.appendLuaPath();
         if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.name);
+        }
+        if (!prop.lua.gui.empty()) {
+            storage->lua_gui = prop.lua.gui;
         }
     }
     if (prop.luarocks.exists) {

@@ -74,12 +74,14 @@ public:
         Environments  envs;
         std::string   envs_filename;
         Resource      config;
+        std::string   config_gui;
         std::string   module_extension;
         GetText       text;
         Sqlite        sqlite;
         std::string   clear_tempdir;
         KeyStore      keystore;
         SolState      lua;
+        std::string   lua_gui;
 
         Impl();
         ~Impl();
