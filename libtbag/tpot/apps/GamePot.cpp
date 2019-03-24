@@ -7,6 +7,7 @@
 
 #include <libtbag/tpot/apps/GamePot.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/gui/Window.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -42,7 +43,7 @@ char const * const GamePot::getHelp() const TBAG_NOEXCEPT
 
 int GamePot::onMain()
 {
-    return 0;
+    return libtbag::gui::runGame(params().storage);
 }
 
 } // namespace apps

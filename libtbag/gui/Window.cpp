@@ -11,8 +11,15 @@
 #include <libtbag/gui/Window.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/Type.hpp>
+
+#include <libtbag/gui/WindowInterface.hpp>
+#include <libtbag/gui/WindowParams.hpp>
+
+#include <libtbag/graphic/Color.hpp>
+#include <libtbag/geometry/GeometryTypes.hpp>
+#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/res/Storage.hpp>
 
 #include <libtbag/3rd/imgui/imgui.h>
 #include <libtbag/3rd/imgui/imgui-SFML.h>
@@ -27,37 +34,8 @@
 #include <iostream>
 #include <algorithm>
 #include <utility>
-
-STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Unknown, libtbag::gui::Window::Key::Unknown);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::A,       libtbag::gui::Window::Key::A);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Pause,   libtbag::gui::Window::Key::Pause);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Left,     libtbag::gui::Window::Button::Left);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Right,    libtbag::gui::Window::Button::Right);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Middle,   libtbag::gui::Window::Button::Middle);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton1, libtbag::gui::Window::Button::XButton1);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton2, libtbag::gui::Window::Button::XButton2);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::VerticalWheel,   libtbag::gui::Window::Wheel::VerticalWheel);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::HorizontalWheel, libtbag::gui::Window::Wheel::HorizontalWheel);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::X,    libtbag::gui::Window::JoystickAxis::X);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Y,    libtbag::gui::Window::JoystickAxis::Y);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Z,    libtbag::gui::Window::JoystickAxis::Z);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::R,    libtbag::gui::Window::JoystickAxis::R);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::U,    libtbag::gui::Window::JoystickAxis::U);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::V,    libtbag::gui::Window::JoystickAxis::V);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovX, libtbag::gui::Window::JoystickAxis::PovX);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovY, libtbag::gui::Window::JoystickAxis::PovY);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Accelerometer,    libtbag::gui::Window::SensorType::Accelerometer);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gyroscope,        libtbag::gui::Window::SensorType::Gyroscope);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Magnetometer,     libtbag::gui::Window::SensorType::Magnetometer);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gravity,          libtbag::gui::Window::SensorType::Gravity);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::UserAcceleration, libtbag::gui::Window::SensorType::UserAcceleration);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Orientation,      libtbag::gui::Window::SensorType::Orientation);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::None,       libtbag::gui::WindowParams::STYLE_NONE);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Titlebar,   libtbag::gui::WindowParams::STYLE_TITLEBAR);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Resize,     libtbag::gui::WindowParams::STYLE_RESIZE);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Close,      libtbag::gui::WindowParams::STYLE_CLOSE);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Fullscreen, libtbag::gui::WindowParams::STYLE_FULL_SCREEN);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Default,    libtbag::gui::WindowParams::STYLE_DEFAULT);
+#include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -65,11 +43,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-using Pointi = Window::Pointi;
-using Pointu = Window::Pointu;
-using Pointf = Window::Pointf;
-using Sizeu  = Window::Sizeu;
-using Recti  = Window::Recti;
+enum class WindowExitCode
+{
+    WEC_RESTART = 0,
+    WEC_EXIT_SUCCESS,
+    WEC_EXIT_FAILURE,
+};
 
 /**
  * Window backend implementation.
@@ -77,37 +56,197 @@ using Recti  = Window::Recti;
  * @author zer0
  * @date   2019-03-23
  */
-struct Window::Backend : private Noncopyable
+struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
 {
-    sf::RenderWindow window;
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Unknown, Key::Unknown);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::A,       Key::A);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Pause,   Key::Pause);
 
-    Backend()
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Left,     Button::Left);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Right,    Button::Right);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Middle,   Button::Middle);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton1, Button::XButton1);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton2, Button::XButton2);
+
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::VerticalWheel,   Wheel::VerticalWheel);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::HorizontalWheel, Wheel::HorizontalWheel);
+
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::X,    JoystickAxis::X);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Y,    JoystickAxis::Y);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Z,    JoystickAxis::Z);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::R,    JoystickAxis::R);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::U,    JoystickAxis::U);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::V,    JoystickAxis::V);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovX, JoystickAxis::PovX);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovY, JoystickAxis::PovY);
+
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Accelerometer,    SensorType::Accelerometer);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gyroscope,        SensorType::Gyroscope);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Magnetometer,     SensorType::Magnetometer);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gravity,          SensorType::Gravity);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::UserAcceleration, SensorType::UserAcceleration);
+    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Orientation,      SensorType::Orientation);
+
+    using Channel = libtbag::graphic::Channel;
+    using Rgb24   = libtbag::graphic::Rgb24;
+    using Rgb32   = libtbag::graphic::Rgb32;
+
+    TBAG_CONSTEXPR static Channel const CHANNEL_MAX  = libtbag::graphic::channel_max();
+    TBAG_CONSTEXPR static Channel const CHANNEL_MIN  = libtbag::graphic::channel_min();
+    TBAG_CONSTEXPR static Channel const CHANNEL_HALF = libtbag::graphic::channel_half();
+
+    using Storage = libtbag::res::Storage;
+
+    Storage          _storage;
+    sf::RenderWindow _window;
+    sf::Color        _clear;
+
+    Window(Storage const & storage,
+           sf::VideoMode const mode,
+           std::string const & title,
+           sf::Uint32 style,
+           sf::ContextSettings const context,
+           sf::Color const & clear)
+            : _storage(storage), _window(mode, title, style, context), _clear(clear)
     {
         // EMPTY.
     }
 
-    Backend(sf::VideoMode const mode, std::string const & title, sf::Uint32 style, sf::ContextSettings const context)
-            : window(mode, title, style, context)
+    ~Window()
     {
         // EMPTY.
     }
 
-    ~Backend()
+    void runEvent(sf::Event & e)
     {
-        // EMPTY.
+        // @formatter:off
+        switch (e.type) {
+        case sf::Event::Closed:
+            onClosed();
+            break;
+        case sf::Event::Resized:
+            onResized(e.size.width, e.size.height);
+            break;
+        case sf::Event::LostFocus:
+            onLostFocus();
+            break;
+        case sf::Event::GainedFocus:
+            onGainedFocus();
+            break;
+        case sf::Event::TextEntered:
+            onTextEntered(e.text.unicode);
+            break;
+        case sf::Event::KeyPressed:
+            onKeyPressed((Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+            break;
+        case sf::Event::KeyReleased:
+            onKeyReleased((Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+            break;
+        case sf::Event::MouseWheelMoved:
+            // DEPRECATED!
+            break;
+        case sf::Event::MouseWheelScrolled:
+            onMouseWheelScrolled((Wheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
+            break;
+        case sf::Event::MouseButtonPressed:
+            onMouseButtonPressed((Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+            break;
+        case sf::Event::MouseButtonReleased:
+            onMouseButtonReleased((Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+            break;
+        case sf::Event::MouseMoved:
+            onMouseMoved(e.mouseMove.x, e.mouseMove.y);
+            break;
+        case sf::Event::MouseEntered:
+            onMouseEntered();
+            break;
+        case sf::Event::MouseLeft:
+            onMouseLeft();
+            break;
+        case sf::Event::JoystickButtonPressed:
+            onJoystickButtonPressed(e.joystickButton.joystickId, e.joystickButton.button);
+            break;
+        case sf::Event::JoystickButtonReleased:
+            onJoystickButtonReleased(e.joystickButton.joystickId, e.joystickButton.button);
+            break;
+        case sf::Event::JoystickMoved:
+            onJoystickMoved(e.joystickMove.joystickId, (JoystickAxis)e.joystickMove.axis, e.joystickMove.position);
+            break;
+        case sf::Event::JoystickConnected:
+            onJoystickConnected(e.joystickConnect.joystickId);
+            break;
+        case sf::Event::JoystickDisconnected:
+            onJoystickDisconnected(e.joystickConnect.joystickId);
+            break;
+        case sf::Event::TouchBegan:
+            onTouchBegan(e.touch.finger, e.touch.x, e.touch.y);
+            break;
+        case sf::Event::TouchMoved:
+            onTouchMoved(e.touch.finger, e.touch.x, e.touch.y);
+            break;
+        case sf::Event::TouchEnded:
+            onTouchEnded(e.touch.finger, e.touch.x, e.touch.y);
+            break;
+        case sf::Event::SensorChanged:
+            onSensorChanged((SensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
+            break;
+        default:
+            TBAG_INACCESSIBLE_BLOCK_ASSERT();
+            break;
+        }
+        // @formatter:on
+    }
+
+    virtual void onClosed() override
+    {
+        _window.close();
+    }
+
+    WindowExitCode run()
+    {
+        if (!onCreate()) {
+            return WindowExitCode::WEC_EXIT_FAILURE;
+        }
+
+        WindowState state;
+        sf::Clock   clock;
+        sf::Event   event;
+        sf::Time    delta;
+
+        ImGui::SFML::Init(_window);
+
+        while (_window.isOpen()) {
+            delta = clock.restart();
+            state.delta = delta.asMicroseconds();
+
+            onCheck(state);
+
+            while (_window.pollEvent(event)) {
+                ImGui::SFML::ProcessEvent(event);
+                onPreEvent(state);
+                runEvent(event);
+                onPostEvent(state);
+            }
+
+            ImGui::SFML::Update(_window, delta);
+            onUpdate(state);
+
+            _window.clear(_clear);
+
+            onPreDraw(state);
+            ImGui::SFML::Render(_window);
+            onPostDraw(state);
+
+            _window.display();
+        }
+
+        onDestroy();
+
+        return WindowExitCode::WEC_EXIT_SUCCESS;
     }
 };
 
-// ---------------------
-// Window implementation
-// ---------------------
-
-Window::Window()
-{
-    // EMPTY.
-}
-
-Window::Window(WindowParams const & params)
+static WindowExitCode runGameMain(libtbag::res::Storage & storage, WindowParams const & params)
 {
     auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
     auto const STYLE = static_cast<sf::Uint32>(params.style);
@@ -119,292 +258,33 @@ Window::Window(WindowParams const & params)
             params.minor_version,
             params.attribute_flags,
             params.srgb_capable);
-    _impl = std::make_unique<Backend>(MODE, params.title, STYLE, CONTEXT);
-    assert(static_cast<bool>(_impl));
+    auto const CLEAR = sf::Color(params.clear_red, params.clear_green, params.clear_blue, params.clear_alpha);
+    return Window(storage, MODE, LIBTBAG_MAIN_TITLE, STYLE, CONTEXT, CLEAR).run();
 }
 
-Window::~Window()
+int runGame(libtbag::res::Storage & storage)
 {
-    // EMPTY.
-}
+    bool exit_game = false;
+    int  exit_code = EXIT_FAILURE;
 
-#ifndef _self_sf
-#define _self_sf() _impl->window
-#endif
-
-static void __process_sf_event__(Window * window, sf::Event & e)
-{
-    // @formatter:off
-    switch (e.type) {
-    case sf::Event::Closed:
-        window->onClosed();
-        break;
-    case sf::Event::Resized:
-        window->onResized(e.size.width, e.size.height);
-        break;
-    case sf::Event::LostFocus:
-        window->onLostFocus();
-        break;
-    case sf::Event::GainedFocus:
-        window->onGainedFocus();
-        break;
-    case sf::Event::TextEntered:
-        window->onTextEntered(e.text.unicode);
-        break;
-    case sf::Event::KeyPressed:
-        window->onKeyPressed((Window::Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
-        break;
-    case sf::Event::KeyReleased:
-        window->onKeyReleased((Window::Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
-        break;
-    case sf::Event::MouseWheelMoved:
-        // DEPRECATED!
-        break;
-    case sf::Event::MouseWheelScrolled:
-        window->onMouseWheelScrolled((Window::Wheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
-        break;
-    case sf::Event::MouseButtonPressed:
-        window->onMouseButtonPressed((Window::Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-        break;
-    case sf::Event::MouseButtonReleased:
-        window->onMouseButtonReleased((Window::Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-        break;
-    case sf::Event::MouseMoved:
-        window->onMouseMoved(e.mouseMove.x, e.mouseMove.y);
-        break;
-    case sf::Event::MouseEntered:
-        window->onMouseEntered();
-        break;
-    case sf::Event::MouseLeft:
-        window->onMouseLeft();
-        break;
-    case sf::Event::JoystickButtonPressed:
-        window->onJoystickButtonPressed(e.joystickButton.joystickId, e.joystickButton.button);
-        break;
-    case sf::Event::JoystickButtonReleased:
-        window->onJoystickButtonReleased(e.joystickButton.joystickId, e.joystickButton.button);
-        break;
-    case sf::Event::JoystickMoved:
-        window->onJoystickMoved(e.joystickMove.joystickId, (Window::JoystickAxis)e.joystickMove.axis, e.joystickMove.position);
-        break;
-    case sf::Event::JoystickConnected:
-        window->onJoystickConnected(e.joystickConnect.joystickId);
-        break;
-    case sf::Event::JoystickDisconnected:
-        window->onJoystickDisconnected(e.joystickConnect.joystickId);
-        break;
-    case sf::Event::TouchBegan:
-        window->onTouchBegan(e.touch.finger, e.touch.x, e.touch.y);
-        break;
-    case sf::Event::TouchMoved:
-        window->onTouchMoved(e.touch.finger, e.touch.x, e.touch.y);
-        break;
-    case sf::Event::TouchEnded:
-        window->onTouchEnded(e.touch.finger, e.touch.x, e.touch.y);
-        break;
-    case sf::Event::SensorChanged:
-        window->onSensorChanged((Window::SensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
-        break;
-    default:
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        break;
-    }
-    // @formatter:on
-}
-
-bool Window::runDefault()
-{
-    auto & window = _self_sf();
-    if (!onCreate()) {
-        return false;
-    }
-
-    WindowState state;
-    sf::Clock   clock;
-    sf::Event   event;
-    sf::Time    delta;
-
-    ImGui::SFML::Init(window);
-
-    while (isOpen()) {
-        delta = clock.restart();
-        state.delta = delta.asMicroseconds();
-
-        onCheck(state);
-
-        while (window.pollEvent(event)) {
-            ImGui::SFML::ProcessEvent(event);
-            onPreEvent(state);
-            __process_sf_event__(this, event);
-            onPostEvent(state);
+    while (!exit_game) {
+        WindowParams params;
+        readWindowParams(storage, params);
+        switch (runGameMain(storage, params)) {
+        case WindowExitCode::WEC_RESTART:
+            break;
+        case WindowExitCode::WEC_EXIT_SUCCESS:
+            exit_game = true;
+            exit_code = EXIT_SUCCESS;
+            break;
+        case WindowExitCode::WEC_EXIT_FAILURE:
+            exit_game = true;
+            exit_code = EXIT_FAILURE;
+            break;
         }
-
-        ImGui::SFML::Update(window, delta);
-        onUpdate(state);
-
-        onPreDraw(state);
-        ImGui::SFML::Render(window);
-        onPostDraw(state);
-
-        window.display();
     }
 
-    onDestroy();
-    return true;
-}
-
-void Window::onClosed()
-{
-    close();
-}
-
-void Window::close()
-{
-    _self_sf().close();
-}
-
-bool Window::isOpen() const
-{
-    return _self_sf().isOpen();
-}
-
-Pointi Window::getPosition() const
-{
-    auto const POS = _self_sf().getPosition();
-    return Pointi(POS.x, POS.y);
-}
-
-void Window::setPosition(Pointi const & position)
-{
-    _self_sf().setPosition(sf::Vector2i(position.x, position.y));
-}
-
-void Window::setSize(Sizeu const & size)
-{
-    _self_sf().setSize(sf::Vector2u(size.width, size.height));
-}
-
-void Window::setTitle(std::string const & title)
-{
-    _self_sf().setTitle(sf::String(title));
-}
-
-void Window::setIcon(unsigned int width, unsigned int height, std::uint8_t const * pixels)
-{
-    _self_sf().setIcon(width, height, pixels);
-}
-
-void Window::setVisible(bool visible)
-{
-    _self_sf().setVisible(visible);
-}
-
-void Window::setVerticalSyncEnabled(bool enabled)
-{
-    _self_sf().setVerticalSyncEnabled(enabled);
-}
-
-void Window::setMouseCursorVisible(bool visible)
-{
-    _self_sf().setMouseCursorVisible(visible);
-}
-
-void Window::setMouseCursorGrabbed(bool grabbed)
-{
-    _self_sf().setMouseCursorGrabbed(grabbed);
-}
-
-void Window::setKeyRepeatEnabled(bool enabled)
-{
-    _self_sf().setKeyRepeatEnabled(enabled);
-}
-
-void Window::setFramerateLimit(unsigned int limit)
-{
-    _self_sf().setFramerateLimit(limit);
-}
-
-void Window::setJoystickThreshold(float threshold)
-{
-    _self_sf().setJoystickThreshold(threshold);
-}
-
-//void Window::setMouseCursor(Cursor const & cursor)
-//{
-//    _self_sf().setMouseCursor(*cursor.cast<sf::Cursor>());
-//}
-
-void Window::requestFocus()
-{
-    _self_sf().requestFocus();
-}
-
-bool Window::hasFocus() const
-{
-    return _self_sf().hasFocus();
-}
-
-void Window::display()
-{
-    _self_sf().display();
-}
-
-void Window::clear(Channel r, Channel g, Channel b, Channel a)
-{
-    _self_sf().clear(sf::Color(r, g, b, a));
-}
-
-void Window::clear(Rgb24 const & color)
-{
-    clear(color.r, color.g, color.b);
-}
-
-void Window::clear(Rgb32 const & color)
-{
-    clear(color.r, color.g, color.b, color.a);
-}
-
-void Window::clear()
-{
-    clear(CHANNEL_MIN, CHANNEL_MIN, CHANNEL_MIN);
-}
-
-Pointf Window::mapPixelToCoords(Pointi const & point) const
-{
-    auto const COORDS = _self_sf().mapPixelToCoords(sf::Vector2i(point.x, point.y));
-    return Pointf(COORDS.x, COORDS.y);
-}
-
-Pointi Window::mapCoordsToPixel(Pointf const & point) const
-{
-    auto const PIXEL = _self_sf().mapCoordsToPixel(sf::Vector2f(point.x, point.y));
-    return Pointi(PIXEL.x, PIXEL.y);
-}
-
-Sizeu Window::getSize() const
-{
-    auto const SIZE = _self_sf().getSize();
-    return Sizeu(SIZE.x, SIZE.y);
-}
-
-bool Window::setActive(bool active)
-{
-    return _self_sf().setActive(active);
-}
-
-void Window::pushGLStates()
-{
-    _self_sf().pushGLStates();
-}
-
-void Window::popGLStates()
-{
-    _self_sf().popGLStates();
-}
-
-void Window::resetGLStates()
-{
-    _self_sf().resetGLStates();
+    return exit_code;
 }
 
 } // namespace gui

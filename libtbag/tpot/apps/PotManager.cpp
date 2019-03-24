@@ -87,23 +87,29 @@ int PotManager::runOrLutjit(RunnerParams const & params)
 
 int PotManager::run(RunnerParams const & params)
 {
-    return run(params, std::string());
+    if (params.args.empty()) {
+        std::cerr << "Empty argument." << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    auto itr = _pots.find(params.args[0]);
+    if (itr == _pots.end()) {
+        std::cerr << "Unknown application name: " << params.args[0] << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    assert(static_cast<bool>(itr->second));
+    itr->second->setParams(params);
+    return itr->second->onMain();
 }
 
 int PotManager::run(RunnerParams const & params, std::string const & default_mode)
 {
-    Pots::iterator itr;
-    if (default_mode.empty()) {
-        if (params.args.empty()) {
-            std::cerr << "Empty argument." << std::endl;
-            return EXIT_FAILURE;
-        }
+    assert(!default_mode.empty());
 
+    Pots::iterator itr;
+    if (!params.args.empty() && _pots.find(params.args[0]) != _pots.end()) {
         itr = _pots.find(params.args[0]);
-        if (itr == _pots.end()) {
-            std::cerr << "Unknown application name: " << params.args[0] << std::endl;
-            return EXIT_FAILURE;
-        }
     } else {
         itr = _pots.find(default_mode);
         if (itr == _pots.end()) {

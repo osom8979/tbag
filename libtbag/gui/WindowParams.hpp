@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/res/Storage.hpp>
 
 #include <cstdint>
 #include <string>
@@ -54,8 +55,6 @@ struct TBAG_API VideoMode
  */
 struct TBAG_API WindowParams : public VideoMode
 {
-    using ContextAttributeFlagType = unsigned int;
-
     /** Non-debug, compatibility context (this and the core attribute are mutually exclusive) */
     TBAG_CONSTEXPR static unsigned int const ATTRIBUTE_DEFAULT_FLAG = 0;
 
@@ -105,10 +104,15 @@ struct TBAG_API WindowParams : public VideoMode
     unsigned int minor_version = 1;
 
     /** The attribute flags to create the context with. */
-    ContextAttributeFlagType attribute_flags = ATTRIBUTE_DEFAULT_FLAG;
+    unsigned int attribute_flags = ATTRIBUTE_DEFAULT_FLAG;
 
     /** Whether the context framebuffer is sRGB capable. */
     bool srgb_capable = false;
+
+    std::uint8_t clear_red   = 0;
+    std::uint8_t clear_green = 0;
+    std::uint8_t clear_blue  = 0;
+    std::uint8_t clear_alpha = 0;
 
     WindowParams();
     ~WindowParams();
@@ -120,6 +124,9 @@ struct TBAG_API WindowParams : public VideoMode
 
 TBAG_API VideoMode getDesktopMode();
 TBAG_API std::vector<VideoMode> getFullscreenModes();
+
+TBAG_API bool readWindowParams(libtbag::res::Storage & storage, WindowParams & params);
+TBAG_API bool saveWindowParams(libtbag::res::Storage & storage, WindowParams const & params);
 
 } // namespace gui
 
