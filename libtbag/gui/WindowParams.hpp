@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -25,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace gui {
 
-struct VideoMode
+struct TBAG_API VideoMode
 {
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_WIDTH  = 600;
     TBAG_CONSTEXPR static unsigned int DEFAULT_WINDOW_HEIGHT = 480;
@@ -40,11 +41,9 @@ struct VideoMode
     /** Bits Per Pixel. */
     unsigned int bpp = DEFAULT_WINDOW_BPP;
 
-    VideoMode()
-    { /* EMPTY. */ }
-
-    ~VideoMode()
-    { /* EMPTY. */ }
+    VideoMode();
+    VideoMode(unsigned int w, unsigned int h, unsigned int b);
+    ~VideoMode();
 };
 
 /**
@@ -53,7 +52,7 @@ struct VideoMode
  * @author zer0
  * @date   2019-03-23
  */
-struct WindowParams : public VideoMode
+struct TBAG_API WindowParams : public VideoMode
 {
     using ContextAttributeFlagType = unsigned int;
 
@@ -111,12 +110,16 @@ struct WindowParams : public VideoMode
     /** Whether the context framebuffer is sRGB capable. */
     bool srgb_capable = false;
 
-    WindowParams()
-    { /* EMPTY. */ }
-
-    ~WindowParams()
-    { /* EMPTY. */ }
+    WindowParams();
+    ~WindowParams();
 };
+
+// ---------
+// Utilities
+// ---------
+
+TBAG_API VideoMode getDesktopMode();
+TBAG_API std::vector<VideoMode> getFullscreenModes();
 
 } // namespace gui
 

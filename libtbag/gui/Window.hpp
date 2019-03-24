@@ -25,7 +25,6 @@
 #include <libtbag/geometry/GeometryTypes.hpp>
 
 #include <string>
-#include <vector>
 #include <memory>
 
 // -------------------
@@ -126,9 +125,6 @@ public:
     void popGLStates();
     void resetGLStates();
 };
-
-TBAG_API VideoMode getDesktopMode();
-TBAG_API std::vector<VideoMode> getFullscreenModes();
 
 } // namespace gui
 
