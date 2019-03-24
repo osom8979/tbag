@@ -24,8 +24,8 @@
 #include <libtbag/3rd/imgui/imgui.h>
 #include <libtbag/3rd/imgui/imgui-SFML.h>
 
-#include <SFML/Window.hpp>
 #include <SFML/System.hpp>
+#include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <Swoosh/ActivityController.h>
@@ -90,6 +90,51 @@ enum class WindowExitCode
     WEC_EXIT_FAILURE,
 };
 
+struct Scene : public swoosh::Activity
+{
+    Scene(swoosh::ActivityController * controller) : swoosh::Activity(controller)
+    {
+        // EMPTY.
+    }
+
+    virtual ~Scene()
+    {
+        // EMPTY.
+    }
+
+    virtual void onStart() override
+    {
+    }
+
+    virtual void onUpdate(double elapsed) override
+    {
+    }
+
+    virtual void onLeave() override
+    {
+    }
+
+    virtual void onExit() override
+    {
+    }
+
+    virtual void onEnter() override
+    {
+    }
+
+    virtual void onResume() override
+    {
+    }
+
+    virtual void onDraw(sf::RenderTexture & surface) override
+    {
+    }
+
+    virtual void onEnd() override
+    {
+    }
+};
+
 /**
  * Window backend implementation.
  *
@@ -141,17 +186,17 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
     sf::RenderWindow _window;
     sf::Color        _clear;
 
-    sol::state * _lua = nullptr;
-    sol::table _lua_tbag;
+    sol::state * _lua;
+    sol::table   _lua_tbag;
 
-    Window(Storage const & storage,
+    Window(Storage & storage,
            sf::VideoMode const mode,
            std::string const & title,
            sf::Uint32 style,
            sf::ContextSettings const context,
            sf::Color const & clear)
-            : _storage(storage), _window(mode, title, style, context), _clear(clear),
-              _lua(_storage->lua.get())
+            : _storage(storage), _window(mode, title, style, context),
+              _clear(clear), _lua(_storage->lua.get())
     {
         assert(_lua != nullptr);
         _lua_tbag = (*_lua)[libtbag::script::SolState::lua_tbag_name()];
