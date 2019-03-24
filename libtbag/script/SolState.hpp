@@ -40,6 +40,10 @@ public:
     using SharedState = std::shared_ptr<State>;
     using Version = libtbag::util::Version;
 
+public:
+    TBAG_CONSTEXPR static char const * const lua_tbag_name()
+    { return "tbag"; }
+
 private:
     SharedState _state;
 

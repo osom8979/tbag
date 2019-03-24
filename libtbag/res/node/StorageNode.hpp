@@ -153,6 +153,15 @@ public:
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
 
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_ENV_NAME      = "default.xml";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_CONFIG_GUI    = "gui.xml";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_MODULE_EXT    = ".so";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_TEXT_NAME     = "en.xml";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_SQLITE_NAME   = "default.sqlite";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_KEYSTORE_NAME = "default.key";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_LUA_NAME      = "config.lua";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_LUA_GUI       = "main.lua";
+
 public:
     struct Property
     {

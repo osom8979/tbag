@@ -32,10 +32,12 @@
 #include <cassert>
 
 #include <iostream>
+#include <functional>
 #include <algorithm>
 #include <utility>
 #include <string>
 #include <vector>
+#include <tuple>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -101,15 +103,20 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
     sf::RenderWindow _window;
     sf::Color        _clear;
 
+    sol::state * _lua = nullptr;
+    sol::table _lua_tbag;
+
     Window(Storage const & storage,
            sf::VideoMode const mode,
            std::string const & title,
            sf::Uint32 style,
            sf::ContextSettings const context,
            sf::Color const & clear)
-            : _storage(storage), _window(mode, title, style, context), _clear(clear)
+            : _storage(storage), _window(mode, title, style, context), _clear(clear),
+              _lua(_storage->lua.get())
     {
-        // EMPTY.
+        assert(_lua != nullptr);
+        _lua_tbag = (*_lua)[libtbag::script::SolState::lua_tbag_name()];
     }
 
     ~Window()
@@ -197,9 +204,165 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
         // @formatter:on
     }
 
+    virtual bool onCreate() override
+    {
+        sol::protected_function lua_function = _lua_tbag["onCreate"];
+        if (lua_function.valid()) {
+            std::function<bool(void)> std_function = lua_function;
+            return std_function();
+        }
+        return true;
+    }
+
+    virtual void onDestroy() override
+    {
+        sol::protected_function lua_function = _lua_tbag["onDestroy"];
+        if (lua_function.valid()) {
+            std::function<void(void)> std_function = lua_function;
+            std_function();
+        }
+    }
+
+    virtual void onCheck(WindowState & state) override
+    {
+    }
+
+    virtual void onPreEvent(WindowState & state) override
+    {
+    }
+
+    virtual void onPostEvent(WindowState & state) override
+    {
+    }
+
+    virtual void onUpdate(WindowState & state) override
+    {
+    }
+
+    virtual void onPreDraw(WindowState & state) override
+    {
+    }
+
+    virtual void onPostDraw(WindowState & state) override
+    {
+    }
+
     virtual void onClosed() override
     {
-        _window.close();
+        bool exit_window = true;
+        sol::protected_function lua_function = _lua_tbag["onClosed"];
+        if (lua_function.valid()) {
+            std::function<bool(void)> std_function = lua_function;
+            exit_window = std_function();
+        }
+        if (exit_window) {
+            _window.close();
+        }
+    }
+
+    virtual void onResized(unsigned int width, unsigned int height) override
+    {
+        _lua_tbag["onResized"](width, height);
+    }
+
+    virtual void onLostFocus() override
+    {
+        _lua_tbag["onLostFocus"]();
+    }
+
+    virtual void onGainedFocus() override
+    {
+        _lua_tbag["onGainedFocus"]();
+    }
+
+    virtual void onKeyPressed(Key code, bool alt, bool control, bool shift, bool system) override
+    {
+        _lua_tbag["onKeyPressed"](code, alt, control, shift, system);
+    }
+
+    virtual void onKeyReleased(Key code, bool alt, bool control, bool shift, bool system) override
+    {
+        _lua_tbag["onKeyReleased"](code, alt, control, shift, system);
+    }
+
+    virtual void onTextEntered(unsigned int unicode) override
+    {
+        _lua_tbag["onTextEntered"](unicode);
+    }
+
+    virtual void onMouseMoved(int x, int y) override
+    {
+        _lua_tbag["onMouseMoved"](x, y);
+    }
+
+    virtual void onMouseEntered() override
+    {
+        _lua_tbag["onMouseEntered"]();
+    }
+
+    virtual void onMouseLeft() override
+    {
+        _lua_tbag["onMouseLeft"]();
+    }
+
+    virtual void onMouseButtonPressed(Button button, int x, int y) override
+    {
+        _lua_tbag["onMouseButtonPressed"](button, x, y);
+    }
+
+    virtual void onMouseButtonReleased(Button button, int x, int y) override
+    {
+        _lua_tbag["onMouseButtonReleased"](button, x, y);
+    }
+
+    virtual void onMouseWheelScrolled(Wheel wheel, float delta, int x, int y) override
+    {
+        _lua_tbag["onMouseWheelScrolled"](wheel, delta, x, y);
+    }
+
+    virtual void onJoystickConnected(unsigned int joystick_id) override
+    {
+        _lua_tbag["onJoystickConnected"](joystick_id);
+    }
+
+    virtual void onJoystickDisconnected(unsigned int joystick_id) override
+    {
+        _lua_tbag["onJoystickDisconnected"](joystick_id);
+    }
+
+    virtual void onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position) override
+    {
+        _lua_tbag["onJoystickMoved"](joystick_id, axis, position);
+    }
+
+    virtual void onJoystickButtonPressed(unsigned int joystick_id, unsigned int button) override
+    {
+        _lua_tbag["onJoystickButtonPressed"](joystick_id, button);
+    }
+
+    virtual void onJoystickButtonReleased(unsigned int joystick_id, unsigned int button) override
+    {
+        _lua_tbag["onJoystickButtonReleased"](joystick_id, button);
+    }
+
+    virtual void onTouchBegan(unsigned int finger, int x, int y) override
+    {
+        _lua_tbag["onTouchBegan"](finger, x, y);
+    }
+
+    virtual void onTouchMoved(unsigned int finger, int x, int y) override
+    {
+        _lua_tbag["onTouchMoved"](finger, x, y);
+    }
+
+    virtual void onTouchEnded(unsigned int finger, int x, int y) override
+    {
+        _lua_tbag["onTouchEnded"](finger, x, y);
+    }
+
+    virtual void onSensorChanged(SensorType type, float x, float y, float z) override
+    {
+        _lua_tbag["onSensorChanged"](type, x, y, z);
     }
 
     WindowExitCode run()
@@ -248,6 +411,16 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
 
 static WindowExitCode runGameMain(libtbag::res::Storage & storage, WindowParams const & params)
 {
+    if (storage->lua_gui.empty()) {
+        tDLogE("runGameMain() Entry point not defined.");
+        return WindowExitCode::WEC_EXIT_FAILURE;
+    }
+
+    if (!storage.runLuaScriptFile(storage->lua_gui)) {
+        tDLogE("runGameMain() Lua script load failed: {}", storage->lua_gui);
+        return WindowExitCode::WEC_EXIT_FAILURE;
+    }
+
     auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
     auto const STYLE = static_cast<sf::Uint32>(params.style);
     auto const CONTEXT = sf::ContextSettings(
@@ -269,7 +442,10 @@ int runGame(libtbag::res::Storage & storage)
 
     while (!exit_game) {
         WindowParams params;
-        readWindowParams(storage, params);
+        if (!readWindowParams(storage, params)) {
+            tDLogW("runGame() Failed to load Window parameters.");
+        }
+
         switch (runGameMain(storage, params)) {
         case WindowExitCode::WEC_RESTART:
             break;

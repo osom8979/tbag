@@ -58,6 +58,8 @@ SolState::SolState() : _state(std::make_shared<State>())
     std::stringstream ss_cpath;
     ss_cpath << "." LUA_DIRSEP LUA_PATH_MARK LUA_MODULE_SUFFIX;
     (*_state)["package"]["cpath"] = ss_cpath.str();
+
+    (*_state)[lua_tbag_name()] = (*_state).create_table();
 }
 
 SolState::SolState(std::nullptr_t) TBAG_NOEXCEPT : _state(nullptr)

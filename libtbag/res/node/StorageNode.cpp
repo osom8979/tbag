@@ -136,6 +136,17 @@ void StorageNode::setup()
     prop.luarocks.exists = true;
     // @formatter:on
 
+    // @formatter:off
+    prop.env.name      = VAL_DEFAULT_ENV_NAME;
+    prop.config.gui    = VAL_DEFAULT_CONFIG_GUI;
+    prop.module.ext    = VAL_DEFAULT_MODULE_EXT;
+    prop.text.name     = VAL_DEFAULT_TEXT_NAME;
+    prop.sqlite.name   = VAL_DEFAULT_SQLITE_NAME;
+    prop.keystore.name = VAL_DEFAULT_KEYSTORE_NAME;
+    prop.lua.name      = VAL_DEFAULT_LUA_NAME;
+    prop.lua.gui       = VAL_DEFAULT_LUA_GUI;
+    // @formatter:on
+
     update(DEFAULT_STORAGE_ROOT, prop);
 }
 
