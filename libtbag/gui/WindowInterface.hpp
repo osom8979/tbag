@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/gui/WindowState.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -185,19 +186,22 @@ struct WindowInterface
     virtual void onDestroy()
     { /* EMPTY. */ }
 
-    virtual void onPreEvent()
+    virtual void onCheck(WindowState & state)
     { /* EMPTY. */ }
 
-    virtual void onPostEvent()
+    virtual void onPreEvent(WindowState & state)
     { /* EMPTY. */ }
 
-    virtual void onUpdate()
+    virtual void onPostEvent(WindowState & state)
     { /* EMPTY. */ }
 
-    virtual void onPreDraw()
+    virtual void onUpdate(WindowState & state)
     { /* EMPTY. */ }
 
-    virtual void onPostDraw()
+    virtual void onPreDraw(WindowState & state)
+    { /* EMPTY. */ }
+
+    virtual void onPostDraw(WindowState & state)
     { /* EMPTY. */ }
 
     /**

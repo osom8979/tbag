@@ -134,8 +134,6 @@ Window::~Window()
 
 static void __process_sf_event__(Window * window, sf::Event & e)
 {
-    window->onPreEvent();
-
     // @formatter:off
     switch (e.type) {
     case sf::Event::Closed:
@@ -212,8 +210,6 @@ static void __process_sf_event__(Window * window, sf::Event & e)
         break;
     }
     // @formatter:on
-
-    window->onPostEvent();
 }
 
 bool Window::runDefault()
@@ -223,23 +219,32 @@ bool Window::runDefault()
         return false;
     }
 
-    sf::Clock delta;
-    sf::Event event;
+    WindowState state;
+    sf::Clock   clock;
+    sf::Event   event;
+    sf::Time    delta;
 
     ImGui::SFML::Init(window);
 
     while (isOpen()) {
+        delta = clock.restart();
+        state.delta = delta.asMicroseconds();
+
+        onCheck(state);
+
         while (window.pollEvent(event)) {
             ImGui::SFML::ProcessEvent(event);
+            onPreEvent(state);
             __process_sf_event__(this, event);
+            onPostEvent(state);
         }
 
-        ImGui::SFML::Update(window, delta.restart());
-        onUpdate();
+        ImGui::SFML::Update(window, delta);
+        onUpdate(state);
 
-        onPreDraw();
+        onPreDraw(state);
         ImGui::SFML::Render(window);
-        onPostDraw();
+        onPostDraw(state);
 
         window.display();
     }
