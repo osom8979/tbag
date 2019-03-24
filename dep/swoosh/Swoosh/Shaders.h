@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_SHADERS_H__
+#define __SWOOSH_SWOOSH_SHADERS_H__
+
 #include <SFML/Graphics.hpp>
 #include <iostream> // debuggin
 
@@ -758,3 +760,5 @@ namespace swoosh {
     };
   }
 }
+
+#endif

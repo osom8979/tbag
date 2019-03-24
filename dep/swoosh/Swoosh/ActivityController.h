@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_ACTIVITYCONTROLLER_H__
+#define __SWOOSH_SWOOSH_ACTIVITYCONTROLLER_H__
 
 #include "Activity.h"
 #include "Segue.h"
@@ -47,7 +48,7 @@ namespace swoosh {
 
     ~ActivityController() {
       if (segueAction != SegueAction::NONE) {
-        swoosh::Segue* effect = dynamic_cast<swoosh::Segue*>(activities.top());
+        swoosh::Segue* effect = (swoosh::Segue*)(activities.top());
 
         if (segueAction == SegueAction::PUSH) {
           delete effect->next;
@@ -335,7 +336,7 @@ namespace swoosh {
       activities.top()->onUpdate(elapsed);
 
       if (segueAction != SegueAction::NONE) {
-        swoosh::Segue* segue = dynamic_cast<swoosh::Segue*>(activities.top());
+        swoosh::Segue* segue = (swoosh::Segue*)(activities.top());
         if (segue->timer.getElapsed().asMilliseconds() >= segue->duration.asMilliseconds()) {
           endSegue(segue);
         }
@@ -458,3 +459,5 @@ namespace swoosh {
     using micro = microseconds<val>;
   }
 }
+
+#endif

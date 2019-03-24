@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_ZOOMIN_H__
+#define __SWOOSH_SEGUES_ZOOMIN_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Game.h>
 #include <Swoosh/Ease.h>
@@ -45,3 +47,5 @@ public:
 
   virtual ~ZoomIn() { }
 };
+
+#endif

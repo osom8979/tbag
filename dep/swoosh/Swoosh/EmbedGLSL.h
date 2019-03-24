@@ -1,8 +1,14 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_EMBEDGLSL_H__
+#define __SWOOSH_SWOOSH_EMBEDGLSL_H__
+
 #include <sstream>
 #include <string.h>
 
 #include <iostream>
+
+#ifndef WIN32
+#define strtok_s strtok_r
+#endif
 
 namespace swoosh {
   namespace glsl{
@@ -39,3 +45,5 @@ namespace swoosh {
 
 #define SWOOSH_EMBED_TO_STR(...) #__VA_ARGS__
 #define GLSL(version, ...)  swoosh::glsl::formatGLSL("#version " #version "\n" SWOOSH_EMBED_TO_STR(#__VA_ARGS__))
+
+#endif

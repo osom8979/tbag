@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿#ifndef __SWOOSH_SEGUES_CHECKERBOARD_H__
+#define __SWOOSH_SEGUES_CHECKERBOARD_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
 #include <Swoosh/EmbedGLSL.h>
@@ -48,3 +50,5 @@ public:
 };
 
 using Checkerboard = CheckerboardCustom<10, 10>;
+
+#endif

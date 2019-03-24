@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_VERTICALOPEN_H__
+#define __SWOOSH_SEGUES_VERTICALOPEN_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Game.h>
 #include <Swoosh/Ease.h>
@@ -48,3 +50,5 @@ public:
 
   virtual ~VerticalOpen() {}
 };
+
+#endif

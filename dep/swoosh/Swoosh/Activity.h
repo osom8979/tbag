@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_ACTIVITY_H__
+#define __SWOOSH_SWOOSH_ACTIVITY_H__
+
 #include <SFML/Graphics.hpp>
 
 namespace swoosh {
@@ -31,3 +33,5 @@ namespace swoosh {
     ActivityController& getController() { return *controller; }
   };
 }
+
+#endif

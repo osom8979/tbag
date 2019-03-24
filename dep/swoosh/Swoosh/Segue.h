@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_SEGUE_H__
+#define __SWOOSH_SWOOSH_SEGUE_H__
+
 #include "Timer.h"
 #include "Activity.h"
 #include <SFML/Graphics.hpp>
@@ -60,3 +62,5 @@ namespace swoosh {
     virtual ~Segue() { }
   };
 }
+
+#endif

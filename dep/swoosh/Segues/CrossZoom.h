@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿#ifndef __SWOOSH_SEGUES_CROSSZOOM_H__
+#define __SWOOSH_SEGUES_CROSSZOOM_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
 #include <Swoosh/EmbedGLSL.h>
@@ -46,3 +48,5 @@ public:
 };
 
 using CrossZoom = CrossZoomCustom<40>;
+
+#endif

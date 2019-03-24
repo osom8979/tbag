@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_DIAMONDTILECIRCLE_H__
+#define __SWOOSH_SEGUES_DIAMONDTILECIRCLE_H__
+
 #include <Swoosh/EmbedGLSL.h>
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
@@ -77,3 +79,5 @@ public:
 
   virtual ~DiamondTileCircle() { }
 };
+
+#endif

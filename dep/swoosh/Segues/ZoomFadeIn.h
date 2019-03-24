@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿#ifndef __SWOOSH_SEGUES_ZOOMFADEIN_H__
+#define __SWOOSH_SEGUES_ZOOMFADEIN_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
 #include <Swoosh/EmbedGLSL.h>
@@ -68,3 +70,5 @@ public:
 
   virtual ~ZoomFadeIn() { ; }
 };
+
+#endif

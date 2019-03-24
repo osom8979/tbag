@@ -577,6 +577,10 @@ macro (tbag_modules__apply_dep_tmxlite)
     tbag_modules__add_whole_archive ($<TARGET_FILE:tmxlite>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_swoosh)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/swoosh)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------

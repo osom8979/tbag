@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_EASE_H__
+#define __SWOOSH_SWOOSH_EASE_H__
+
 #include <cmath>
 
 namespace swoosh {
@@ -149,3 +151,5 @@ namespace swoosh {
     }
   }
 }
+
+#endif

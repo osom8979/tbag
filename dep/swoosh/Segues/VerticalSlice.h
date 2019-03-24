@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_VERTICALSLICE_H__
+#define __SWOOSH_SEGUES_VERTICALSLICE_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Game.h>
 #include <Swoosh/Ease.h>
@@ -51,3 +53,5 @@ public:
 
   virtual ~VerticalSlice() { }
 };
+
+#endif

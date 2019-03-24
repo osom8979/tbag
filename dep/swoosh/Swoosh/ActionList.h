@@ -1,5 +1,7 @@
-#pragma once
-#include <SFML\Graphics.hpp>
+#ifndef __SWOOSH_SWOOSH_ACTIONLIST_H__
+#define __SWOOSH_SWOOSH_ACTIONLIST_H__
+
+#include <SFML/Graphics.hpp>
 #include <functional>
 
 namespace swoosh {
@@ -76,7 +78,7 @@ namespace swoosh {
     bool clearFlag;
   public:
     void updateIndexesFrom(std::size_t pos) {
-      for (pos; pos < items.size(); pos++) {
+      for (; pos < items.size(); pos++) {
         items[pos]->index++;
       }
     }
@@ -303,3 +305,5 @@ namespace swoosh {
     }
   };
 }
+
+#endif

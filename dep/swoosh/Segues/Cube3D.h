@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_CUBE3D_H__
+#define __SWOOSH_SEGUES_CUBE3D_H__
+
 #include <Swoosh/EmbedGLSL.h>
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
@@ -205,3 +207,5 @@ public:
 
   virtual ~Cube3D() { }
 };
+
+#endif

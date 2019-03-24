@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_GAME_H__
+#define __SWOOSH_SWOOSH_GAME_H__
 
 #include <SFML/Graphics.hpp>
 #include <Swoosh/Ease.h>
@@ -58,3 +59,5 @@ namespace swoosh {
     }
   }
 }
+
+#endif

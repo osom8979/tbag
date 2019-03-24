@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SWOOSH_TIMER_H__
+#define __SWOOSH_SWOOSH_TIMER_H__
+
 #include <SFML/System.hpp>
 
 namespace swoosh {
@@ -44,3 +46,5 @@ namespace swoosh {
     }
   };
 }
+
+#endif

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_BLACKWASHFADE_H__
+#define __SWOOSH_SEGUES_BLACKWASHFADE_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
 
@@ -29,3 +31,5 @@ public:
   BlackWashFade(sf::Time duration, Activity* last, Activity* next) : Segue(duration, last, next) { /* ... */ }
   virtual ~BlackWashFade() { ; }
 };
+
+#endif

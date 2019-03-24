@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_PIXELATEBLACKWASHFADE_H__
+#define __SWOOSH_SEGUES_PIXELATEBLACKWASHFADE_H__
+
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
 #include <Swoosh/EmbedGLSL.h>
@@ -49,3 +51,5 @@ public:
 
   virtual ~PixelateBlackWashFade() { ; }
 };
+
+#endif

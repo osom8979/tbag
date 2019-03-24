@@ -1,4 +1,6 @@
-#pragma once
+#ifndef __SWOOSH_SEGUES_CIRCLECLOSE_H__
+#define __SWOOSH_SEGUES_CIRCLECLOSE_H__
+
 #include <Swoosh/EmbedGLSL.h>
 #include <Swoosh/Segue.h>
 #include <Swoosh/Ease.h>
@@ -50,3 +52,6 @@ public:
 
   virtual ~CircleClose() { }
 };
+
+#endif
+
