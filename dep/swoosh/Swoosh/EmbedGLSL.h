@@ -21,7 +21,9 @@ namespace swoosh {
       memcpy(input, glsl, size);
       input[size] = '\0';
 
+#if 0
       rsize_t strmax = sizeof input;
+#endif
       char* next_token;
 
       char* line = strtok_s(input, delim, &next_token);
