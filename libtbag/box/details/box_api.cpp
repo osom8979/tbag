@@ -64,10 +64,17 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
 
     box->type = type;
     box->device = device;
-    box->ext[0] = ext[0];
-    box->ext[1] = ext[1];
-    box->ext[2] = ext[2];
-    box->ext[3] = ext[3];
+    if (ext != nullptr) {
+        box->ext[0] = ext[0];
+        box->ext[1] = ext[1];
+        box->ext[2] = ext[2];
+        box->ext[3] = ext[3];
+    } else {
+        box->ext[0] = 0;
+        box->ext[1] = 0;
+        box->ext[2] = 0;
+        box->ext[3] = 0;
+    }
     box->data = data;
     box->total_byte = TOTAL_BYTE;
     box->dims = dims;

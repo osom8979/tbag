@@ -64,6 +64,8 @@ namespace details {
 #define BOX_DEVICE_GLSL  4
 #define BOX_DEVICE_FBS   5
 
+#define BOX_EXT_SIZE 4
+
 using si8  = int8_t;
 using si16 = int16_t;
 using si32 = int32_t;
@@ -104,7 +106,7 @@ struct box_data
 
     /** Device extension information. */
     /** [PARALLEL] 0:Platform, 1:Device, 2:Context 3:Unused*/
-    ui64 ext[4];
+    ui64 ext[BOX_EXT_SIZE];
 
     /** Real data. */
     void * data;
