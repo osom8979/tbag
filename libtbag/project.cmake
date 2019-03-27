@@ -9,7 +9,7 @@ tbag_modules__update_c_family_subdir_objects (
         3rd/lmdbxx 3rd/sol2 3rd/sqlite3 3rd/sqlite_orm 3rd/tinyxml2
         algorithm animation app archive bitwise box codec common
         container crypto database debug dom dummy filesystem flow
-        functional geometry gpu graph graphic gui http id io iterator
+        functional game geometry gpu graph graphic http id io iterator
         lib locale lock lockfree log loop macro math memory mq net
         network parallel pattern preprocessor process proto random
         res rstl science script security signal string system thread

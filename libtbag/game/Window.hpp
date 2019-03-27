@@ -8,8 +8,8 @@
  * @date   2019-03-23 (Rename: RenderWindow -> Window)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOW_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOW_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOW_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOW_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,15 +25,15 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace game {
 
-TBAG_API int runWindow(libtbag::res::Storage & storage);
+TBAG_API int runGame(libtbag::res::Storage & storage);
 
-} // namespace gui
+} // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOW_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOW_HPP__
 

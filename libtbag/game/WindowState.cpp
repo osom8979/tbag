@@ -5,14 +5,14 @@
  * @date   2019-03-24
  */
 
-#include <libtbag/gui/WindowState.hpp>
+#include <libtbag/game/WindowState.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace game {
 
 WindowState::WindowState()
 {
@@ -24,7 +24,7 @@ WindowState::~WindowState()
     // EMPTY.
 }
 
-} // namespace gui
+} // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

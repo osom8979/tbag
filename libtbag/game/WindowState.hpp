@@ -5,8 +5,8 @@
  * @date   2019-03-24
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWSTATE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWSTATE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWSTATE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWSTATE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -23,7 +23,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace game {
 
 /**
  * WindowState class prototype.
@@ -39,11 +39,11 @@ struct TBAG_API WindowState
     ~WindowState();
 };
 
-} // namespace gui
+} // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWSTATE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWSTATE_HPP__
 

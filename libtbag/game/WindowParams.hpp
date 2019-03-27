@@ -5,8 +5,8 @@
  * @date   2019-03-23
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWPARAMS_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWPARAMS_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWPARAMS_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWPARAMS_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,7 +25,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace game {
 
 struct TBAG_API VideoMode
 {
@@ -128,11 +128,11 @@ TBAG_API std::vector<VideoMode> getFullscreenModes();
 TBAG_API bool readWindowParams(libtbag::res::Storage & storage, WindowParams & params);
 TBAG_API bool saveWindowParams(libtbag::res::Storage & storage, WindowParams const & params);
 
-} // namespace gui
+} // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWPARAMS_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWPARAMS_HPP__
 

@@ -5,23 +5,23 @@
  * @date   2019-03-24
  */
 
-#include <libtbag/gui/WindowParams.hpp>
+#include <libtbag/game/WindowParams.hpp>
 #include <libtbag/Type.hpp>
 
 #include <SFML/Window.hpp>
 
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::None,       libtbag::gui::WindowParams::STYLE_NONE);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Titlebar,   libtbag::gui::WindowParams::STYLE_TITLEBAR);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Resize,     libtbag::gui::WindowParams::STYLE_RESIZE);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Close,      libtbag::gui::WindowParams::STYLE_CLOSE);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Fullscreen, libtbag::gui::WindowParams::STYLE_FULL_SCREEN);
-STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Default,    libtbag::gui::WindowParams::STYLE_DEFAULT);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Style::None,       libtbag::game::WindowParams::STYLE_NONE);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Titlebar,   libtbag::game::WindowParams::STYLE_TITLEBAR);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Resize,     libtbag::game::WindowParams::STYLE_RESIZE);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Close,      libtbag::game::WindowParams::STYLE_CLOSE);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Fullscreen, libtbag::game::WindowParams::STYLE_FULL_SCREEN);
+STATIC_ASSERT_INTEGER_EQUAL(sf::Style::Default,    libtbag::game::WindowParams::STYLE_DEFAULT);
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace game {
 
 // ------------------------
 // VideoMode implementation
@@ -142,7 +142,7 @@ bool saveWindowParams(libtbag::res::Storage & storage, WindowParams const & para
     return true;
 }
 
-} // namespace gui
+} // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

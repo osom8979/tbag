@@ -8,13 +8,13 @@
  * @date   2019-03-23 (Rename: RenderWindow -> Window)
  */
 
-#include <libtbag/gui/Window.hpp>
+#include <libtbag/game/Window.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/gui/WindowInterface.hpp>
-#include <libtbag/gui/WindowParams.hpp>
+#include <libtbag/game/WindowInterface.hpp>
+#include <libtbag/game/WindowParams.hpp>
 
 #include <libtbag/graphic/Color.hpp>
 #include <libtbag/geometry/GeometryTypes.hpp>
@@ -81,7 +81,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace game {
 
 enum class WindowExitCode
 {
@@ -518,7 +518,7 @@ static WindowExitCode runGameMain(libtbag::res::Storage & storage, WindowParams 
     return Window(storage, MODE, LIBTBAG_MAIN_TITLE, STYLE, CONTEXT, CLEAR).run();
 }
 
-int runWindow(libtbag::res::Storage & storage)
+int runGame(libtbag::res::Storage & storage)
 {
     bool exit_game = false;
     int  exit_code = EXIT_FAILURE;
@@ -546,7 +546,7 @@ int runWindow(libtbag::res::Storage & storage)
     return exit_code;
 }
 
-} // namespace gui
+} // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

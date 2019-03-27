@@ -5,8 +5,8 @@
  * @date   2019-03-23
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWINTERFACE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWINTERFACE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWINTERFACE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWINTERFACE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,13 +15,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/gui/WindowState.hpp>
+#include <libtbag/game/WindowState.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace gui {
+namespace game {
 
 /**
  * WindowInterface class prototype.
@@ -409,11 +409,11 @@ struct WindowInterface
     { /* EMPTY. */ }
 };
 
-} // namespace gui
+} // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GUI_WINDOWINTERFACE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_WINDOWINTERFACE_HPP__
 
