@@ -186,18 +186,19 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
     sf::RenderWindow _window;
     sf::Color        _clear;
 
+    swoosh::ActivityController _activities;
+
     sol::state * _lua;
     sol::table   _lua_tbag;
 
-    Window(Storage & storage,
-           sf::VideoMode const mode,
-           std::string const & title,
-           sf::Uint32 style,
-           sf::ContextSettings const context,
-           sf::Color const & clear)
+    Window(Storage & storage, sf::VideoMode const mode,
+           std::string const & title, sf::Uint32 style,
+           sf::ContextSettings const context, sf::Color const & clear)
             : _storage(storage), _window(mode, title, style, context),
-              _clear(clear), _lua(_storage->lua.get())
+              _activities(_window), _clear(clear), _lua(_storage->lua.get())
     {
+        // _activities.push<MainMenuScene>();
+
         assert(_lua != nullptr);
         _lua_tbag = (*_lua)[libtbag::script::SolState::lua_tbag_name()];
     }
@@ -474,12 +475,13 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
                 onPostEvent(state);
             }
 
-            ImGui::SFML::Update(_window, delta);
             onUpdate(state);
+            _activities.update(delta.asSeconds());
+            ImGui::SFML::Update(_window, delta);
 
             _window.clear(_clear);
-
             onPreDraw(state);
+            _activities.draw();
             ImGui::SFML::Render(_window);
             onPostDraw(state);
 
