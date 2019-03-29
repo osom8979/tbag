@@ -154,7 +154,9 @@ if (avdevice_FOUND)
     list (APPEND FFmpeg_LIBRARIES ${avdevice_LIBRARIES})
 endif ()
 
-list (REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
+if (FFmpeg_INCLUDE_DIRS)
+    list (REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
+endif ()
 
 mark_as_advanced (FFmpeg_FOUND
                   FFmpeg_LIBRARIES
