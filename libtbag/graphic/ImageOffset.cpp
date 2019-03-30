@@ -71,7 +71,7 @@ ImageOffset & ImageOffset::operator =(ImageOffset && obj) TBAG_NOEXCEPT
 void ImageOffset::copy(ImageOffset const & obj)
 {
     if (this != &obj) {
-        _items = _items;
+        _items = obj._items;
     }
 }
 
