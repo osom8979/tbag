@@ -199,7 +199,10 @@ configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
 
 ## Run project.
 tbag_flags__set_install_rpath () # [WARNING] Do not change the calling sequence.
-tbag_project2 (tea-bag C CXX CXXPCH)
+tbag_project (tea-bag
+        ROOT "${CMAKE_SOURCE_DIR}"
+        LANG C CXX CXXPCH
+        PROJ libtbag tpot tools/libtbshare tools/tbproc tester)
 
 ## libtbag-cmake build packages.
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"

@@ -179,19 +179,67 @@ function (tbag_project__find_and_build __root_dir)
 endfunction ()
 
 #/// run default tbag project.
-macro (tbag_project)
+macro (tbag_project__find_and_build_default)
     tbag_project__find_and_build ("${PROJECT_SOURCE_DIR}")
+endmacro ()
+
+#/// Create default tbag project and global solution target.
+#///
+#/// @param __name [in] Root project name.
+#/// @param ...    [in] Languages.
+macro (tbag_project__find_and_build_default_solution __name)
+    tbag_project__find_and_build_default ()
+    project (${__name} ${ARGN})
+    tbag_project__find (__libs __exes "${__root_dir}")
+    add_custom_target (${__name} DEPENDS ${__libs} ${__exes})
 endmacro ()
 
 #/// run tbag project.
 #///
-#/// @param __root_project_name [in] Root project name.
-#/// @param ...                 [in] Languages.
-macro (tbag_project2 __root_project_name)
-    tbag_project ()
+#/// @param __name   [in] Root project name.
+#/// @param ROOT ... [in] Root source directory.
+#/// @param LANG ... [in] Languages.
+#/// @param PROJ ... [in] Sub project names.
+macro (tbag_project __name)
+    set (__root_dir "${PROJECT_SOURCE_DIR}")
+    set (__lang_list)
+    set (__proj_list)
+    set (__argn_switch)
 
-    project (${__root_project_name} ${ARGN})
-    tbag_project__find (__libs __exes "${__root_dir}")
-    add_custom_target (${__root_project_name} DEPENDS ${__libs} ${__exes})
+    foreach (__cursor ${ARGN})
+        if ("${__cursor}" STREQUAL "ROOT")
+            set (__argn_switch "ROOT")
+        elseif ("${__cursor}" STREQUAL "LANG")
+            set (__argn_switch "LANG")
+        elseif ("${__cursor}" STREQUAL "PROJ")
+            set (__argn_switch "PROJ")
+        else ()
+            if ("${__argn_switch}" STREQUAL "ROOT")
+                set (__root_dir ${__cursor})
+            elseif ("${__argn_switch}" STREQUAL "LANG")
+                list (APPEND __lang_list ${__cursor})
+            elseif ("${__argn_switch}" STREQUAL "PROJ")
+                list (APPEND __proj_list ${__cursor})
+            else ()
+                message (FATAL "tbag_project() argument error: ${ARGN}")
+            endif ()
+        endif ()
+    endforeach ()
+
+    tbag_debug_list (tbag_project/root_dir ${__root_dir})
+    tbag_debug_list (tbag_project/lang_list ${__lang_list})
+    tbag_debug_list (tbag_project/proj_list ${__proj_list})
+
+    foreach (__cursor ${__proj_list})
+        tbag_project__build ("${__root_dir}" "${__cursor}")
+    endforeach ()
+
+    project (${__name} ${__lang_list})
+    add_custom_target (${__name} DEPENDS ${__proj_list})
+
+    unset (__root_dir)
+    unset (__lang_list)
+    unset (__proj_list)
+    unset (__argn_switch)
 endmacro ()
 
