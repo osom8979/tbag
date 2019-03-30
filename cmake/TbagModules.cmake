@@ -716,7 +716,7 @@ macro (tbag_modules__apply_ext_luajit_install_conf __target __output)
     add_custom_command (
             OUTPUT ${__output}
             COMMAND ${CMAKE_COMMAND} -E copy "${luajit_EXT_CONF_HEADER}" "${__output}"
-            DEPENDS "${luajit_EXT_CONF_HEADER}")
+            DEPENDS luajit)
     add_custom_target (${__target} ALL DEPENDS ${__output})
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
