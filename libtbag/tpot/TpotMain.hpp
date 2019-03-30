@@ -18,6 +18,8 @@
 #include <libtbag/app/ex/DefaultApp.hpp>
 #include <libtbag/tpot/apps/PotManager.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -39,8 +41,11 @@ public:
     using Element       = DefaultApp::Element;
     using Params        = DefaultApp::Params;
     using PotManager    = libtbag::tpot::apps::PotManager;
+    using Pot           = PotManager::Pot;
+    using Pots          = PotManager::Pots;
 
 private:
+    std::string _default_app;
     DefaultApp  _app;
     Params      _params;
     PotManager  _manager;
@@ -49,6 +54,16 @@ public:
     TpotMain();
     TpotMain(int argc, char ** argv);
     TpotMain(int argc, char ** argv, char ** envs);
+    TpotMain(std::string const & service_name,
+             std::string const & config_name,
+             std::string const & synopsis,
+             int argc, char ** argv, char ** envs);
+    TpotMain(std::string const & service_name,
+             std::string const & config_name,
+             std::string const & synopsis,
+             Pots const & pots,
+             std::string const & default_app,
+             int argc, char ** argv, char ** envs);
     virtual ~TpotMain();
 
 private:

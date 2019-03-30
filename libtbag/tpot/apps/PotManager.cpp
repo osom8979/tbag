@@ -39,8 +39,13 @@ PotManager::~PotManager()
 
 bool PotManager::insertPot(Pot const & pot)
 {
+    return insertPot(pot->getName(), pot);
+}
+
+bool PotManager::insertPot(std::string const & name, Pot const & pot)
+{
     assert(static_cast<bool>(pot));
-    return _pots.insert(std::make_pair(std::string(pot->getName()), pot)).second;
+    return _pots.insert(std::make_pair(std::string(name), pot)).second;
 }
 
 std::size_t PotManager::registerDefaultPots()
@@ -49,8 +54,8 @@ std::size_t PotManager::registerDefaultPots()
 #ifndef __INSERT_NEW_POT
 #define __INSERT_NEW_POT(t) if (insertPot<t>()) { count++; }
 #endif
-    __INSERT_NEW_POT(GamePot);
-    __INSERT_NEW_POT(LuaPot);
+    __INSERT_NEW_POT(GamePot)
+    __INSERT_NEW_POT(LuaPot)
 #undef __INSERT_NEW_POT
     return count;
 }

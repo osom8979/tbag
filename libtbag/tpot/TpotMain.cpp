@@ -40,12 +40,34 @@ TpotMain::TpotMain() : TpotMain(0, nullptr)
     // EMPTY.
 }
 
-TpotMain::TpotMain(int argc, char ** argv) : TpotMain(0, nullptr, nullptr)
+TpotMain::TpotMain(int argc, char ** argv)
+        : TpotMain(argc, argv, nullptr)
 {
     // EMPTY.
 }
 
 TpotMain::TpotMain(int argc, char ** argv, char ** envs)
+        : TpotMain(SERVICE_NAME, CONFIG_NAME, SYNOPSIS_TEXT, argc, argv, envs)
+{
+    // EMPTY.
+}
+
+TpotMain::TpotMain(std::string const & service_name,
+                   std::string const & config_name,
+                   std::string const & synopsis,
+                   int argc, char ** argv, char ** envs)
+        : TpotMain(service_name, config_name, synopsis, Pots(), std::string(), argc, argv, envs)
+{
+    // EMPTY.
+}
+
+TpotMain::TpotMain(std::string const & service_name,
+                   std::string const & config_name,
+                   std::string const & synopsis,
+                   Pots const & pots,
+                   std::string const & default_app,
+                   int argc, char ** argv, char ** envs)
+        : _default_app(default_app)
 {
     using namespace std::placeholders;
     _params.argc = argc;
@@ -56,19 +78,23 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
     _params.install_help = true;
     _params.install_verbose = true;
     _params.install_synopsis = true;
-    _params.synopsis = SYNOPSIS_TEXT;
+    _params.synopsis = synopsis;
     _params.install_remarks = true;
     _params.install_create_config = true;
-    _params.config_name = CONFIG_NAME;
+    _params.config_name = config_name;
     _params.install_service = true;
-    _params.service_name = SERVICE_NAME;
+    _params.service_name = service_name;
     _params.version = libtbag::util::getTbagVersion();
     _params.scope = DefaultApp::ConfigScope::EXE;
     _params.options_cb = std::bind(&TpotMain::onOptions, this, _1);
     _params.properties_cb = std::bind(&TpotMain::onInfo, this, _1);
     _params.std_signal = std::bind(&TpotMain::onTerminateSignal, this, _1);
 
-    _manager.registerDefaultPots();
+    if (pots.empty()) {
+        _manager.registerDefaultPots();
+    } else {
+        _manager.pots() = pots;
+    }
 
     COMMENT("Update Remarks") {
         std::stringstream ss;
@@ -129,7 +155,9 @@ int TpotMain::onRun(RunnerParams const & params)
         printParamsInfo(params);
     }
 
-    if (__is_default_tpot_mode_is_luajit()) {
+    if (!_default_app.empty()) {
+        return _manager.run(params, _default_app);
+    } else if (__is_default_tpot_mode_is_luajit()) {
         return _manager.runOrLutjit(params);
     } else {
         return _manager.run(params);

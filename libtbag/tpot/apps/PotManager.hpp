@@ -36,7 +36,7 @@ namespace apps {
  */
 class TBAG_API PotManager : private Noncopyable
 {
-private:
+public:
     using RunnerParams = BasePot::RunnerParams;
     using Pot  = std::shared_ptr<BasePot>;
     using Pots = std::map<std::string, Pot>;
@@ -54,6 +54,7 @@ public:
 
 public:
     bool insertPot(Pot const & pot);
+    bool insertPot(std::string const & name, Pot const & pot);
 
 public:
     template <typename PotType>
