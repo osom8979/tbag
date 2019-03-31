@@ -217,7 +217,7 @@ public:
             installVerboseOptions();
         }
 
-        if (_params.version.getMajor() != 0 && _params.version.getMinor() != 0) {
+        if (_params.version.getMajor() != 0 || _params.version.getMinor() != 0) {
             installVersionOptions(_params.version);
         }
 

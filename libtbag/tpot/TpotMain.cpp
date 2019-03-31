@@ -52,20 +52,16 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
     // EMPTY.
 }
 
-TpotMain::TpotMain(std::string const & service_name,
-                   std::string const & config_name,
-                   std::string const & synopsis,
+TpotMain::TpotMain(std::string const & service_name, std::string const & config_name, std::string const & synopsis,
                    int argc, char ** argv, char ** envs)
-        : TpotMain(service_name, config_name, synopsis, Pots(), std::string(), argc, argv, envs)
+        : TpotMain(service_name, config_name, synopsis, libtbag::util::getTbagVersion(),
+                   DefaultApp::ConfigScope::EXE, Pots(), std::string(), argc, argv, envs)
 {
     // EMPTY.
 }
 
-TpotMain::TpotMain(std::string const & service_name,
-                   std::string const & config_name,
-                   std::string const & synopsis,
-                   Pots const & pots,
-                   std::string const & default_app,
+TpotMain::TpotMain(std::string const & service_name, std::string const & config_name, std::string const & synopsis,
+                   Version const & version, DefaultApp::ConfigScope scope, Pots const & pots, std::string const & default_app,
                    int argc, char ** argv, char ** envs)
         : _default_app(default_app)
 {
@@ -84,8 +80,8 @@ TpotMain::TpotMain(std::string const & service_name,
     _params.config_name = config_name;
     _params.install_service = true;
     _params.service_name = service_name;
-    _params.version = libtbag::util::getTbagVersion();
-    _params.scope = DefaultApp::ConfigScope::EXE;
+    _params.version = version;
+    _params.scope = scope;
     _params.options_cb = std::bind(&TpotMain::onOptions, this, _1);
     _params.properties_cb = std::bind(&TpotMain::onInfo, this, _1);
     _params.std_signal = std::bind(&TpotMain::onTerminateSignal, this, _1);

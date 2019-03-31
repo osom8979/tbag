@@ -36,6 +36,7 @@ class TBAG_API TpotMain : private Noncopyable
 {
 public:
     using DefaultApp    = libtbag::app::ex::DefaultApp;
+    using Version       = libtbag::util::Version;
     using RunnerParams  = DefaultApp::RunnerParams;
     using HelpCommander = DefaultApp::HelpCommander;
     using Element       = DefaultApp::Element;
@@ -54,15 +55,11 @@ public:
     TpotMain();
     TpotMain(int argc, char ** argv);
     TpotMain(int argc, char ** argv, char ** envs);
-    TpotMain(std::string const & service_name,
-             std::string const & config_name,
-             std::string const & synopsis,
+    TpotMain(std::string const & service_name, std::string const & config_name, std::string const & synopsis,
              int argc, char ** argv, char ** envs);
-    TpotMain(std::string const & service_name,
-             std::string const & config_name,
-             std::string const & synopsis,
-             Pots const & pots,
-             std::string const & default_app,
+    TpotMain(std::string const & service_name, std::string const & config_name, std::string const & synopsis,
+             Version const & version, DefaultApp::ConfigScope scope,
+             Pots const & pots, std::string const & default_app,
              int argc, char ** argv, char ** envs);
     virtual ~TpotMain();
 
