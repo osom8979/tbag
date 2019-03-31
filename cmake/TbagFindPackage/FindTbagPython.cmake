@@ -28,12 +28,27 @@ macro (tabg_python__find_development_in_interpreter)
     endif ()
 
     execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
+                            "import distutils.sysconfig as s; print(s.get_config_var('PYTHONFRAMEWORKPREFIX'))"
+            RESULT_VARIABLE __result
+            OUTPUT_VARIABLE __output
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (__result MATCHES 0)
+        set (Python_PYTHONFRAMEWORKPREFIX ${__output})
+    else ()
+        message (FATAL "Python script error (base): ${__result}")
+    endif ()
+
+    execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
                             "import distutils.sysconfig as s; print(s.get_config_var('LDLIBRARY'))"
             RESULT_VARIABLE __result
             OUTPUT_VARIABLE __output
             OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (__result MATCHES 0)
-        set (Python_LIBRARIES ${Python_LIBRARY_DIRS}/${__output})
+        if (Python_PYTHONFRAMEWORKPREFIX)
+            set (Python_LIBRARIES ${Python_PYTHONFRAMEWORKPREFIX}/${__output})
+        else ()
+            set (Python_LIBRARIES ${Python_LIBRARY_DIRS}/${__output})
+        endif ()
     else ()
         message (FATAL "Python script error (LDLIBRARY): ${__result}")
     endif ()
