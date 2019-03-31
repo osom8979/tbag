@@ -83,6 +83,9 @@ tbag_config__set_library_option (USE_OPENCL   OpenCL    OpenCL_FOUND)
 tbag_config__set_library_option (USE_CUDA     TbagCUDA  CUDA_FOUND)
 tbag_config__set_library_option (USE_DOXYGEN  Doxygen   DOXYGEN_FOUND)
 
+#set (TbagPython_PYENV_NAME "opy-$ENV{USER}-3.6.1")
+#find_package (TbagPython COMPONENTS Interpreter Development NumPy)
+
 if (DISABLE_TDLOG)
     message (STATUS "Disable tDLog feature")
 else ()
