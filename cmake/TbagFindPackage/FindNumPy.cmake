@@ -47,7 +47,7 @@ find_package_handle_standard_args (NumPy
 # then <UPPERCASED_NAME>_FOUND will be set to TRUE.
 set (NumPy_FOUND "${NUMPY_FOUND}")
 
-if (NumPy_FOUND)
+if (NumPy_FOUND AND NOT NumPy_FIND_QUIETLY)
     message (STATUS "NumPy ver. ${NumPy_VERSION} found (include: ${NumPy_INCLUDE_DIRS})")
 endif()
 
