@@ -200,6 +200,14 @@ set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
 set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")
 configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
 
+set (LUAROCKS_INSTALL_NAME "luarocks_install.sh")
+set (LUAROCKS_INSTALL_SOURCE "${PROJECT_SOURCE_DIR}/script/${LUAROCKS_INSTALL_NAME}")
+set (LUAROCKS_INSTALL_DESTINATION "${PROJECT_BINARY_DIR}/${LUAROCKS_INSTALL_NAME}")
+if (NOT EXISTS "${LUAROCKS_INSTALL_DESTINATION}")
+    file (COPY "${LUAROCKS_INSTALL_SOURCE}" DESTINATION "${PROJECT_BINARY_DIR}")
+    message (STATUS "Copy ${LUAROCKS_INSTALL_DESTINATION}")
+endif ()
+
 ## Run project.
 tbag_flags__set_install_rpath () # [WARNING] Do not change the calling sequence.
 tbag_project (tea-bag

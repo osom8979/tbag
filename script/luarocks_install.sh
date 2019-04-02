@@ -13,8 +13,12 @@ DOWNLOAD_URL="http://luarocks.github.io/luarocks/releases/luarocks-3.0.4.tar.gz"
 FILENAME="luarocks-3.0.4.tar.gz"
 SOURCE_DIR="luarocks-3.0.4"
 
-curl -o "$FILENAME" "$DOWNLOAD_URL"
-tar xzf "$FILENAME"
+if [[ ! -f "$FILENAME" ]]; then
+    curl -o "$FILENAME" "$DOWNLOAD_URL"
+fi
+if [[ ! -d "$SOURCE_DIR" ]]; then
+    tar xzf "$FILENAME"
+fi
 
 case "$(uname -s)" in
 Darwin)
@@ -28,15 +32,21 @@ Linux)
     ;;
 esac
 
-ln -s "libtbag$LIB_SUFFIX" "liblua$LIB_SUFFIX"
-ln -s "tpot" "luajit"
+if [[ ! -h "liblua$LIB_SUFFIX" ]]; then
+    ln -s "libtbag$LIB_SUFFIX" "liblua$LIB_SUFFIX"
+fi
+if [[ ! -h "luajit" ]]; then
+    ln -s "tpot" "luajit"
+fi
+if [[ ! -d "$WORKING_DIR/storage/luarocks" ]]; then
+    mkdir -p "$WORKING_DIR/storage/luarocks"
+fi
 
-mkdir -p "$WORKING_DIR/storage/luarocks"
 INSTALL_DIR="$WORKING_DIR/storage/luarocks"
 INCLUDE_DIR="$WORKING_DIR/external/local/include"
 LIBRARY_DIR="$WORKING_DIR"
 
-cd $SOURCE_DIR
+cd "$SOURCE_DIR"
 ./configure --prefix=$INSTALL_DIR \
     --with-lua=$WORKING_DIR \
     --with-lua-bin=$WORKING_DIR \
@@ -45,10 +55,9 @@ cd $SOURCE_DIR
     --with-lua-interpreter=tpot \
     --rocks-tree=$INSTALL_DIR \
     --force-config
-#make
-#make install
-make bootstrap
-cd $WORKING_DIR
+make
+make install
+cd "$WORKING_DIR"
 
-echo 'Done.'
+echo 'Install done.'
 
