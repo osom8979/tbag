@@ -222,6 +222,8 @@ enum class Err : int
 #undef _TBAG_XX
 };
 
+static_assert(static_cast<int>(Err::E_SUCCESS) == 0, "The success code must be 0.");
+
 #define _TBAG_XX(name, msg) TBAG_CONSTEXPR Err const E##name = Err::E##name;
 TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
