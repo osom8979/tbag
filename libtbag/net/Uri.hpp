@@ -42,11 +42,11 @@ enum _uri_state
     _uri_state_schema_slash_slash,
 };
 
-// @formatter:off
+// clang-format off
 TBAG_CONSTEXPR int const _uri_state_result_error       = -1;
 TBAG_CONSTEXPR int const _uri_state_result_no_slash    =  0;
 TBAG_CONSTEXPR int const _uri_state_result_success_min =  3; // The last character index of ":///"
-// @formatter:on
+// clang-format on
 
 /**
  * Make sure that the slashes appear three times in succession.

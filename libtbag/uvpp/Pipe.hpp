@@ -95,10 +95,10 @@ public:
 // Utility methods.
 // ----------------
 
-// @formatter:off
+// clang-format off
 TBAG_API Err initPipeServer(Pipe & pipe, std::string const & path);
 TBAG_API Err initPipeClient(Pipe & pipe, ConnectRequest & request, std::string const & path);
-// @formatter:on
+// clang-format on
 
 } // namespace uvpp
 

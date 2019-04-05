@@ -486,7 +486,7 @@ void upperSelf(std::string & str)
 
 bool toVal(std::string const & str, bool & to, std::size_t * index, int base)
 {
-    // @formatter:off
+    // clang-format off
     auto const TRIMMED_LOWER_STRING = lower(trim(str));
     if (TRIMMED_LOWER_STRING ==  TRUE_LOWER_STR1) { to =  true; return true; }
     if (TRIMMED_LOWER_STRING ==  TRUE_LOWER_STR2) { to =  true; return true; }
@@ -497,7 +497,7 @@ bool toVal(std::string const & str, bool & to, std::size_t * index, int base)
     if (TRIMMED_LOWER_STRING == FALSE_LOWER_STR2) { to = false; return true; }
     if (TRIMMED_LOWER_STRING == FALSE_LOWER_STR3) { to = false; return true; }
     if (TRIMMED_LOWER_STRING == FALSE_LOWER_STR4) { to = false; return true; }
-    // @formatter:on
+    // clang-format on
 
     int temp = 0;
     bool const RESULT = toVal(str, temp, index, base);
@@ -507,7 +507,7 @@ bool toVal(std::string const & str, bool & to, std::size_t * index, int base)
     return RESULT;
 }
 
-// @formatter:off
+// clang-format off
 bool toVal(std::string const & str,               char & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stol  , index, base); }
 bool toVal(std::string const & str, unsigned      char & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoul , index, base); }
 bool toVal(std::string const & str,              short & to, std::size_t * index, int base) {  _TBAG_STRING_TO_INTEGER_IMPLEMENT(str, to, std::stoi  , index, base); }
@@ -521,7 +521,7 @@ bool toVal(std::string const & str, unsigned long long & to, std::size_t * index
 bool toVal(std::string const & str,              float & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stof , index); }
 bool toVal(std::string const & str,             double & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stod , index); }
 bool toVal(std::string const & str,        long double & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stold, index); }
-// @formatter:on
+// clang-format on
 
 } // namespace string
 

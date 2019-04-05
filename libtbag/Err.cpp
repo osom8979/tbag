@@ -173,7 +173,7 @@ char const * getErrDetail(Err code) TBAG_NOEXCEPT
 
 Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (uv_error_code) {
     case 0: return Err::E_SUCCESS;
 #define _TBAG_ERASE_XX(name, msg)
@@ -183,7 +183,7 @@ Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT
 #undef _TBAG_XX
     default: return Err::E_UNKNOWN;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_code)

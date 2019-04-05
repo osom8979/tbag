@@ -46,7 +46,7 @@ static std::string getRepresentationDirectory(DirFunction func)
 
 inline static bool isDirentType(DirentType type, uv_dirent_type_t uv_type)
 {
-    // @formatter:off
+    // clang-format off
     if (type & DIRENT_UNKNOWN && uv_type == UV_DIRENT_UNKNOWN) { return true; }
     if (type & DIRENT_FILE    && uv_type == UV_DIRENT_FILE   ) { return true; }
     if (type & DIRENT_DIR     && uv_type == UV_DIRENT_DIR    ) { return true; }
@@ -55,7 +55,7 @@ inline static bool isDirentType(DirentType type, uv_dirent_type_t uv_type)
     if (type & DIRENT_SOCKET  && uv_type == UV_DIRENT_SOCKET ) { return true; }
     if (type & DIRENT_CHAR    && uv_type == UV_DIRENT_CHAR   ) { return true; }
     if (type & DIRENT_BLOCK   && uv_type == UV_DIRENT_BLOCK  ) { return true; }
-    // @formatter:on
+    // clang-format on
 
     return false;
 }

@@ -107,7 +107,7 @@ std::string ImageOffset::toXmlString() const
             element->SetAttribute(FILE_KEY, cursor.second.file.c_str());
         }
 
-        // @formatter:off
+        // clang-format off
         element->SetAttribute(       X_KEY, cursor.second.x       );
         element->SetAttribute(       Y_KEY, cursor.second.y       );
         element->SetAttribute(   WIDTH_KEY, cursor.second.width   );
@@ -115,7 +115,7 @@ std::string ImageOffset::toXmlString() const
         element->SetAttribute(ORIGIN_X_KEY, cursor.second.origin_x);
         element->SetAttribute(ORIGIN_Y_KEY, cursor.second.origin_y);
         element->SetAttribute(  WEIGHT_KEY, cursor.second.weight  );
-        // @formatter:on
+        // clang-format on
 
         if (!cursor.second.body.empty()) {
             element->SetText(cursor.second.body.c_str());

@@ -113,13 +113,13 @@ public:
     ~MqNode();
 
 public:
-    // @formatter:off
+    // clang-format off
     MqParams   params() const TBAG_NOEXCEPT { return PARAMS; }
     MqType       type() const TBAG_NOEXCEPT { return PARAMS.type; }
     MqMode       mode() const TBAG_NOEXCEPT { return   MODE; }
     Loop       & loop()       TBAG_NOEXCEPT { return  _loop; }
     Loop const & loop() const TBAG_NOEXCEPT { return  _loop; }
-    // @formatter:on
+    // clang-format on
 
 public:
     inline char const * const getTypeName() const TBAG_NOEXCEPT

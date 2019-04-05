@@ -131,11 +131,11 @@ Err Version::fromString(std::string const & version, Version & result)
     auto size = tokens.size();
 
     try {
-        // @formatter:off
+        // clang-format off
         if (size >= 1) { result.setMajor(static_cast<uint32_t>(std::stoul(tokens[0]))); }
         if (size >= 2) { result.setMinor(static_cast<uint32_t>(std::stoul(tokens[1]))); }
         if (size >= 3) { result.setPatch(static_cast<uint32_t>(std::stoul(tokens[2]))); }
-        // @formatter:on
+        // clang-format on
         if (size >= 4) {
             result.setTweak(version.substr(tokens[0].size() + tokens[1].size() + tokens[2].size() + 3/*POINT('.') COUNT*/));
         }

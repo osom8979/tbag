@@ -147,10 +147,10 @@ public:
     virtual ~DatagramDecoder();
 
 public:
-    // @formatter:off
+    // clang-format off
     inline CircularBuffer       & atDataBuffer()       TBAG_NOEXCEPT { Guard g(_read_mutex); return _data_buffer; }
     inline CircularBuffer const & atDataBuffer() const TBAG_NOEXCEPT { Guard g(_read_mutex); return _data_buffer; }
-    // @formatter:on
+    // clang-format on
 
 private:
     Size readNextDatagramSize();

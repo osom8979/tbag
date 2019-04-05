@@ -343,7 +343,7 @@ struct Tls::Impl : private Noncopyable
             return E_UNKNOWN;
         }
 
-        // @formatter:off
+        // clang-format off
         auto const REASON = SSL_get_error(ssl.get(), CODE);
         switch (REASON) {
         case SSL_ERROR_NONE:              return E_SSL_NONE;
@@ -355,7 +355,7 @@ struct Tls::Impl : private Noncopyable
             tDLogE("Tls::Impl::handshake() OpenSSL SSL_do_handshake() error: code({}) reason({})", CODE, REASON);
             return E_UNKNOWN;
         }
-        // @formatter:on
+        // clang-format on
     }
 
     inline int pendingWriteBio() const

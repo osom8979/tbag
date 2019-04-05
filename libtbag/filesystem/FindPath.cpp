@@ -63,14 +63,14 @@ Path findEnvOrExe(std::string const & env, std::string const & regex)
     return findFirstUtf8ExecuteFile(regex);
 }
 
-// @formatter:off
+// clang-format off
 Path findBash       () { return findFirstUtf8ExecuteFile("^bash$"); }
 Path findBourneShell() { return findFirstUtf8ExecuteFile("^sh$");   }
 Path findCShell     () { return findFirstUtf8ExecuteFile("^(csh|tcsh)$");  }
 Path findZShell     () { return findFirstUtf8ExecuteFile("^zsh$");  }
 Path findCmd        () { return findEnvOrExe("ComSpec", "^cmd\\.exe$"); }
 Path findShell      () { return findEnvOrExe("SHELL", "^(bash|sh|csh|tcsh|zsh)$"); }
-// @formatter:on
+// clang-format on
 
 Path findDefaultShell()
 {

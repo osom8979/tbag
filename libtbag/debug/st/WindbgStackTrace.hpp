@@ -30,11 +30,11 @@ namespace st    {
 TBAG_API bool isWindbgSupport() TBAG_NOEXCEPT;
 TBAG_API std::vector<void*> getWindbgStackTrace(int skip = 0, int max_depth = DEFAULT_MAX_DEPTH_OF_STACKTRACE);
 
-// @formatter:off
+// clang-format off
 TBAG_API std::string getWindbgName  (void const * addr);
 TBAG_API std::string getWindbgSource(void const * addr);
 TBAG_API std::size_t getWindbgLine  (void const * addr);
-// @formatter:on
+// clang-format on
 
 TBAG_API std::vector<std::string> getWindbgSymbolize(std::vector<void*> const & stack);
 

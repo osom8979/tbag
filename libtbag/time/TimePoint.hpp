@@ -85,7 +85,7 @@ public:
     TimePoint & operator =(TimePoint && obj);
 
 public:
-    // @formatter:off
+    // clang-format off
     inline friend bool operator ==(TimePoint const & lh, TimePoint const & rh) TBAG_NOEXCEPT
     { return lh._system_tp == rh._system_tp; }
     inline friend bool operator !=(TimePoint const & lh, TimePoint const & rh) TBAG_NOEXCEPT
@@ -121,7 +121,7 @@ public:
     { TimePoint tp = lh; tp += rep; return tp; }
     inline friend TimePoint operator -(TimePoint const & lh, Rep rep)
     { TimePoint tp = lh; tp -= rep; return tp; }
-    // @formatter:on
+    // clang-format on
 
 public:
     inline void swap(TimePoint & obj)
@@ -153,12 +153,12 @@ public:
              int milli = 0, int micro = 0, int nano = 0);
 
 public:
-    // @formatter:off
+    // clang-format off
     inline SystemTp getTimePoint() const { return _system_tp; }
     inline SystemTp getLocalTimePoint() const
     { return _system_tp + std::chrono::duration_cast<SystemDuration>(_local_diff); }
     inline Duration getLocalDiff() const { return _local_diff; }
-    // @formatter:on
+    // clang-format on
 
     /**
      * The amount of time between this time_point and the clock's epoch.
@@ -176,7 +176,7 @@ public:
     MicroRep getLocalMicrosecTimeSinceEpoch() const;
 
 public:
-    // @formatter:off
+    // clang-format off
     int year    () const;
     int month   () const;
     int day     () const;
@@ -198,7 +198,7 @@ public:
     int lmicrosec() const;
     int lnanosec () const;
     int lweek    () const;
-    // @formatter:on
+    // clang-format on
 
     int ldhours() const;
     int ldminutes() const;
@@ -211,7 +211,7 @@ private:
     static std::string paddingString(int width, int value);
 
 public:
-    // @formatter:off
+    // clang-format off
     std::string toYearString     (bool padding = false) const;
     std::string toShortYearString(bool padding = false) const;
     std::string toMonthString    (bool padding = false) const;
@@ -237,7 +237,7 @@ public:
     std::string toLocalNanosecString  (bool padding = false) const;
     std::string toLocalWeekIndexString() const;
     std::string toLocalWeekString     () const;
-    // @formatter:on
+    // clang-format on
 
     std::string toLocalDiffString() const;
 

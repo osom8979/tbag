@@ -192,7 +192,7 @@ X509NameEntries getDefaultX509NameEntry(
     }
 
     X509NameEntries entries;
-    // @formatter:on
+    // clang-format on
     entries.push_back(X509NameEntry{COUNTRY            , country            });
     entries.push_back(X509NameEntry{STATE              , state              });
     entries.push_back(X509NameEntry{LOCALITY           , locality           });
@@ -200,7 +200,7 @@ X509NameEntries getDefaultX509NameEntry(
     entries.push_back(X509NameEntry{ORGANIZATIONAL_UNIT, organizational_unit});
     entries.push_back(X509NameEntry{COMMON_NAME        , common_name        });
     entries.push_back(X509NameEntry{EMAIL_ADDRESS      , email_address      });
-    // @formatter:off
+    // clang-format off
     return entries;
 }
 

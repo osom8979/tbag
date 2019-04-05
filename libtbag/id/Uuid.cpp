@@ -204,7 +204,7 @@ Err Uuid::fromString(std::string const & str)
         return E_PARSING;
     }
 
-    // @formatter:off
+    // clang-format off
     using namespace libtbag::string;
     if (convertHexCharToByte(str[0], str[1], id.data[0]) != E_SUCCESS) { return E_PARSING; }
     if (convertHexCharToByte(str[2], str[3], id.data[1]) != E_SUCCESS) { return E_PARSING; }
@@ -226,7 +226,7 @@ Err Uuid::fromString(std::string const & str)
     if (convertHexCharToByte(str[30], str[31], id.data[13]) != E_SUCCESS) { return E_PARSING; }
     if (convertHexCharToByte(str[32], str[33], id.data[14]) != E_SUCCESS) { return E_PARSING; }
     if (convertHexCharToByte(str[34], str[35], id.data[15]) != E_SUCCESS) { return E_PARSING; }
-    // @formatter:on
+    // clang-format on
     return E_SUCCESS;
 }
 

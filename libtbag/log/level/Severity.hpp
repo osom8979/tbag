@@ -38,7 +38,7 @@ private:
     int _level;
 
 public:
-    // @formatter:off
+    // clang-format off
     Severity() TBAG_NOEXCEPT : _text(), _level()
     { /* EMPTY */ }
     Severity(char const * t, int l) TBAG_NOEXCEPT : _text(t), _level(l)
@@ -47,7 +47,7 @@ public:
     { /* EMPTY */ }
     ~Severity() TBAG_NOEXCEPT
     { /* EMPTY */ }
-    // @formatter:on
+    // clang-format on
 
 public:
     Severity & operator =(Severity const & obj) TBAG_NOEXCEPT
@@ -60,7 +60,7 @@ public:
     }
 
 public:
-    // @formatter:off
+    // clang-format off
     inline operator int() const TBAG_NOEXCEPT
     { return _level; }
     inline operator char const *() const TBAG_NOEXCEPT
@@ -83,7 +83,7 @@ public:
 
     inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
     { return _level >= obj._level; }
-    // @formatter:on
+    // clang-format on
 
     inline friend void swap(Severity & lh, Severity & rh) TBAG_NOEXCEPT
     {
@@ -113,7 +113,7 @@ Severity const       UNKNOWN_SEVERITY("UNKNOWN"  , 9 * LEVEL_STEP); // Unknown l
 
 inline Severity getSeverityWithLevelStep(int level) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (level) {
     case 0:  return           OFF_SEVERITY;
     case 1:  return     EMERGENCY_SEVERITY;
@@ -126,7 +126,7 @@ inline Severity getSeverityWithLevelStep(int level) TBAG_NOEXCEPT
     case 8:  return         DEBUG_SEVERITY;
     default: return       UNKNOWN_SEVERITY;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 } // namespace level

@@ -86,21 +86,21 @@ public:
 
     inline friend bool operator <(Version const & lh, Version const & rh) TBAG_NOEXCEPT
     {
-        // @formatter:off
+        // clang-format off
         if (lh._major < rh._major) { return true; } else if (lh._major > rh._major) { return false; }
         if (lh._minor < rh._minor) { return true; } else if (lh._minor > rh._minor) { return false; }
         if (lh._patch < rh._patch) { return true; } else if (lh._patch > rh._patch) { return false; }
-        // @formatter:on
+        // clang-format on
         return false;
     }
 
     inline friend bool operator >(Version const & lh, Version const & rh) TBAG_NOEXCEPT
     {
-        // @formatter:off
+        // clang-format off
         if (lh._major > rh._major) { return true; } else if (lh._major < rh._major) { return false; }
         if (lh._minor > rh._minor) { return true; } else if (lh._minor < rh._minor) { return false; }
         if (lh._patch > rh._patch) { return true; } else if (lh._patch < rh._patch) { return false; }
-        // @formatter:on
+        // clang-format on
         return false;
     }
 

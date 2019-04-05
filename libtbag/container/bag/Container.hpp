@@ -147,12 +147,12 @@ public:
         if (this == &obj) {
             return;
         }
-        // @formatter:off
+        // clang-format off
         std::swap(_allocator, obj._allocator);
         std::swap(_data     , obj._data);
         std::swap(_capacity , obj._capacity);
         std::swap(_size     , obj._size);
-        // @formatter:on
+        // clang-format on
     }
 
     inline friend void swap(Container & lh, Container & rh) TBAG_NOEXCEPT

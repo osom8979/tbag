@@ -49,13 +49,13 @@ private:
     std::set<int> _last_ids;
 
 public:
-    // @formatter:off
+    // clang-format off
     static int getId(Node v) { return Digraph::id(v); }
     static int getId(Arc  e) { return Digraph::id(e); }
 
     static Node getNode(int id) { return Digraph::nodeFromId(id); }
     static Arc   getArc(int id) { return Digraph:: arcFromId(id); }
-    // @formatter:on
+    // clang-format on
 
 public:
     Impl(ModelNet * parent) : _parent(parent), _graph(), _layers(_graph)

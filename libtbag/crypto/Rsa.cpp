@@ -28,7 +28,7 @@ namespace crypto {
 
 static EVP_CIPHER const * __get_evp_cipher(Rsa::CipherAlgorithm algorithm) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (algorithm) {
 #ifndef OPENSSL_NO_DES
     case Rsa::CipherAlgorithm::CA_DES:  return EVP_des_cbc();
@@ -51,7 +51,7 @@ static EVP_CIPHER const * __get_evp_cipher(Rsa::CipherAlgorithm algorithm) TBAG_
     default:
         break;
     }
-    // @formatter:on
+    // clang-format on
     return nullptr;
 }
 
@@ -65,7 +65,7 @@ static EVP_CIPHER const * __get_evp_cipher_by_name(std::string const & name) TBA
 
 int __get_rsa_padding(Rsa::Padding p) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (p) {
     case Rsa::Padding::P_PKCS1:      return RSA_PKCS1_PADDING;
     case Rsa::Padding::P_PKCS1_OAEP: return RSA_PKCS1_OAEP_PADDING;
@@ -75,7 +75,7 @@ int __get_rsa_padding(Rsa::Padding p) TBAG_NOEXCEPT
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         return RSA_NO_PADDING;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 // -------------------

@@ -47,7 +47,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     assert(TOTAL_BYTE >= 1);
 
     void * data;
-    // @formatter:off
+    // clang-format off
     switch (device) {
     case BOX_DEVICE_CPU:  data = box_cpu_malloc(TOTAL_BYTE); break;
     case BOX_DEVICE_CUDA: data = nullptr; break;
@@ -60,7 +60,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         return E_ILLARGS;
     }
-    // @formatter:on
+    // clang-format on
 
     box->type = type;
     box->device = device;
@@ -107,7 +107,7 @@ Err box_free(box_data * box) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
 
-    // @formatter:off
+    // clang-format off
     switch (box->device) {
     case BOX_DEVICE_CPU:  box_cpu_free(box->data); break;
     case BOX_DEVICE_CUDA: break;
@@ -120,7 +120,7 @@ Err box_free(box_data * box) TBAG_NOEXCEPT
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         break;
     }
-    // @formatter:on
+    // clang-format on
     box_dim_free(box->dims);
     return E_SUCCESS;
 }

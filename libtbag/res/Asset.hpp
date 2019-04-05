@@ -53,18 +53,18 @@ public:
             , "Value must be the same type as String::value_type");
 
 public:
-    // @formatter:off
+    // clang-format off
     TBAG_CONSTEXPR Asset() TBAG_NOEXCEPT { /* EMPTY. */ }
     Asset(Asset const & obj) TBAG_NOEXCEPT { /* EMPTY. */ }
     Asset(Asset && obj) TBAG_NOEXCEPT { /* EMPTY. */ }
     ~Asset() { /* EMPTY. */ }
-    // @formatter:on
+    // clang-format on
 
 public:
-    // @formatter:off
+    // clang-format off
     inline Asset & operator =(Asset const & obj) TBAG_NOEXCEPT { return *this; }
     inline Asset & operator =(Asset && obj) TBAG_NOEXCEPT { return *this; }
-    // @formatter:on
+    // clang-format on
 
 public:
     static std::vector<Path> scanDir(Path const & path)

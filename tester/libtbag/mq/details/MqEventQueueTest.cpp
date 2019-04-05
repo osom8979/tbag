@@ -72,12 +72,12 @@ TEST(MqEventQueueTest, Default)
 #endif
         auto const * VAL = MqSendQueueTest::TEST_VALUE;
         std::size_t const SIZE = strlen(VAL);
-        // @formatter:off
+        // clang-format off
         if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
         if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
         if (isSuccess(queue.enqueue(VAL, SIZE))) { ++success_count; }
         if (isSuccess(queue.enqueue(MqMsg(MqSendQueueTest::CLOSE_EVENT_VALUE)))) { ++success_count; }
-        // @formatter:on
+        // clang-format on
     });
 
     Err const CODE = loop.run();

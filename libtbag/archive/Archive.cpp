@@ -54,7 +54,7 @@ TBAG_CONSTEXPR static char const * const EMPTY_ERROR = "Empty error message";
 
 static void entry_internal_to_external(void * e, ArchiveEntry * out) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (_archive_entry_filetype(e)) {
     case _archive_entry_ifreg:  out->type = ArchiveEntry::TYPE_FILE;    break;
     case _archive_entry_ifdir:  out->type = ArchiveEntry::TYPE_DIR;     break;
@@ -65,7 +65,7 @@ static void entry_internal_to_external(void * e, ArchiveEntry * out) TBAG_NOEXCE
     case _archive_entry_ifblk:  out->type = ArchiveEntry::TYPE_BLOCK;   break;
     default:                    out->type = ArchiveEntry::TYPE_UNKNOWN; break;
     }
-    // @formatter:on
+    // clang-format on
 
     char const * source = _archive_entry_sourcepath(e);
     if (source != nullptr) {
@@ -92,7 +92,7 @@ static void entry_internal_to_external(void * e, ArchiveEntry * out) TBAG_NOEXCE
 static void entry_external_to_internal(ArchiveEntry const * in, void * e) TBAG_NOEXCEPT
 {
     unsigned int file_type;
-    // @formatter:off
+    // clang-format off
     switch (in->type) {
     case ArchiveEntry::TYPE_FILE:   file_type = _archive_entry_ifreg;  break;
     case ArchiveEntry::TYPE_DIR:    file_type = _archive_entry_ifdir;  break;
@@ -104,7 +104,7 @@ static void entry_external_to_internal(ArchiveEntry const * in, void * e) TBAG_N
     case ArchiveEntry::TYPE_UNKNOWN:
     default: return;
     }
-    // @formatter:on
+    // clang-format on
 
     _archive_entry_copy_sourcepath(e, in->source_path.c_str());
     _archive_entry_copy_pathname(e, in->path_name.c_str());

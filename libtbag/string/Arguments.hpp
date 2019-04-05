@@ -214,7 +214,7 @@ public:
     std::vector<Rectd      > getDoubleRects  () const;
 
 public:
-    // @formatter:off
+    // clang-format off
     bool opt(std::size_t i, bool               * o, bool c = true) const { return optBoolean         (i, o, c); }
     bool opt(std::size_t i, char               * o, bool c = true) const { return optChar            (i, o, c); }
     bool opt(std::size_t i, unsigned char      * o, bool c = true) const { return optUnsignedChar    (i, o, c); }
@@ -233,7 +233,7 @@ public:
     bool opt(std::size_t i, Pointd             * o, bool c = true) const { return optDoublePoint     (i, o, c); }
     bool opt(std::size_t i, Recti              * o, bool c = true) const { return optIntegerRect     (i, o, c); }
     bool opt(std::size_t i, Rectd              * o, bool c = true) const { return optDoubleRect      (i, o, c); }
-    // @formatter:on
+    // clang-format on
 };
 
 } // namespace string

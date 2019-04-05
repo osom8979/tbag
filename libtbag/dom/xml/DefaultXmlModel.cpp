@@ -96,12 +96,12 @@ DefaultXmlModel::InitParams DefaultXmlModel::getDefaultParams(std::string const 
     InitParams params;
     params.root_name  = root_name;
     params.file_name  = file_name;
-    // @formatter:off
+    // clang-format off
     params.work_dir   = (model.getWorkDir  () / app_dir_name).getString();
     params.exe_dir    = (model.getExeDir   () /* ~~~~~~~~ */).getString();
     params.home_dir   = (model.getHomeDir  () / app_dir_name).getString();
     params.global_dir = (model.getGlobalDir() / app_dir_name).getString();
-    // @formatter:on
+    // clang-format on
     return params;
 }
 

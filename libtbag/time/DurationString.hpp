@@ -37,14 +37,14 @@ inline TBAG_CONSTEXPR char const * getDurationString() TBAG_NOEXCEPT
     return __TBAG_DEFAULT_DURATION_STRING__;
 }
 
-// @formatter:off
+// clang-format off
 template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::nanoseconds> () TBAG_NOEXCEPT { return __TBAG_NANO_DURATION_STRING__; }
 template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::microseconds>() TBAG_NOEXCEPT { return __TBAG_MICRO_DURATION_STRING__; }
 template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::milliseconds>() TBAG_NOEXCEPT { return __TBAG_MILLI_DURATION_STRING__; }
 template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::seconds>     () TBAG_NOEXCEPT { return __TBAG_SEC_DURATION_STRING__; }
 template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::minutes>     () TBAG_NOEXCEPT { return __TBAG_MIN_DURATION_STRING__; }
 template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::hours>       () TBAG_NOEXCEPT { return __TBAG_HOUR_DURATION_STRING__; }
-// @formatter:on
+// clang-format on
 
 } // namespace time
 

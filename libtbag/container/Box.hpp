@@ -50,7 +50,7 @@ namespace container {
  */
 enum class BoxTypeTable : int
 {
-    // @formatter:off
+    // clang-format off
     BTT_NONE = 0, ///< Not initialized.
     BTT_INT8    ,
     BTT_UINT8   ,
@@ -62,7 +62,7 @@ enum class BoxTypeTable : int
     BTT_UINT64  ,
     BTT_FLOAT32 ,
     BTT_FLOAT64 ,
-    // @formatter:on
+    // clang-format on
 };
 
 template <typename T, BoxTypeTable box_type>
@@ -92,7 +92,7 @@ struct BoxInfo<void, BoxTypeTable::BTT_NONE>
     TBAG_CONSTEXPR static bool const is_egg_type = false;
 };
 
-// @formatter:off
+// clang-format off
 template <typename T> struct BoxTypeInfo : public BoxInfo<       T, BoxTypeTable::BTT_NONE   > { /* EMPTY. */ };
 template <> struct BoxTypeInfo<  int8_t> : public BoxInfo<  int8_t, BoxTypeTable::BTT_INT8   > { /* EMPTY. */ };
 template <> struct BoxTypeInfo< uint8_t> : public BoxInfo< uint8_t, BoxTypeTable::BTT_UINT8  > { /* EMPTY. */ };
@@ -104,9 +104,9 @@ template <> struct BoxTypeInfo< int64_t> : public BoxInfo< int64_t, BoxTypeTable
 template <> struct BoxTypeInfo<uint64_t> : public BoxInfo<uint64_t, BoxTypeTable::BTT_UINT64 > { /* EMPTY. */ };
 template <> struct BoxTypeInfo<   float> : public BoxInfo<   float, BoxTypeTable::BTT_FLOAT32> { /* EMPTY. */ };
 template <> struct BoxTypeInfo<  double> : public BoxInfo<  double, BoxTypeTable::BTT_FLOAT64> { /* EMPTY. */ };
-// @formatter:on
+// clang-format on
 
-// @formatter:off
+// clang-format off
 template <BoxTypeTable egg_type> struct BoxEnumInfo      : public BoxInfo<    void, BoxTypeTable::BTT_NONE   > { /* EMPTY. */ };
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT8   > : public BoxInfo<  int8_t, BoxTypeTable::BTT_INT8   > { /* EMPTY. */ };
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT8  > : public BoxInfo< uint8_t, BoxTypeTable::BTT_UINT8  > { /* EMPTY. */ };
@@ -118,9 +118,9 @@ template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT64  > : public BoxInfo< int6
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT64 > : public BoxInfo<uint64_t, BoxTypeTable::BTT_UINT64 > { /* EMPTY. */ };
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_FLOAT32> : public BoxInfo<   float, BoxTypeTable::BTT_FLOAT32> { /* EMPTY. */ };
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_FLOAT64> : public BoxInfo<  double, BoxTypeTable::BTT_FLOAT64> { /* EMPTY. */ };
-// @formatter:on
+// clang-format on
 
-// @formatter:off
+// clang-format off
 static_assert(BoxTypeInfo<  int8_t>::size == 1,    "int8_t size is not correct.");
 static_assert(BoxTypeInfo< uint8_t>::size == 1,   "uint8_t size is not correct.");
 static_assert(BoxTypeInfo< int16_t>::size == 2,   "int16_t size is not correct.");
@@ -131,7 +131,7 @@ static_assert(BoxTypeInfo< int64_t>::size == 8,   "int64_t size is not correct."
 static_assert(BoxTypeInfo<uint64_t>::size == 8,  "uint64_t size is not correct.");
 static_assert(BoxTypeInfo<   float>::size == 4, "float32_t size is not correct.");
 static_assert(BoxTypeInfo<  double>::size == 8, "float64_t size is not correct.");
-// @formatter:on
+// clang-format on
 
 template <typename T>
 struct is_supported_egg : public BoxTypeInfo<T>
@@ -141,12 +141,12 @@ template <typename T, bool is_unsigned, std::size_t size, bool is_floating>
 struct __make_egg_type : public BoxTypeInfo<void>
 { /* EMPTY. */ };
 
-// @formatter:off
+// clang-format off
 template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 4, true> : public BoxTypeInfo<float>  { /* EMPTY. */ };
 template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 8, true> : public BoxTypeInfo<double> { /* EMPTY. */ };
-// @formatter:on
+// clang-format on
 
-// @formatter:off
+// clang-format off
 template <typename T> struct __make_egg_type<T, false, 1, false> : public BoxTypeInfo<  int8_t> { /* EMPTY. */ };
 template <typename T> struct __make_egg_type<T,  true, 1, false> : public BoxTypeInfo< uint8_t> { /* EMPTY. */ };
 template <typename T> struct __make_egg_type<T, false, 2, false> : public BoxTypeInfo< int16_t> { /* EMPTY. */ };
@@ -155,7 +155,7 @@ template <typename T> struct __make_egg_type<T, false, 4, false> : public BoxTyp
 template <typename T> struct __make_egg_type<T,  true, 4, false> : public BoxTypeInfo<uint32_t> { /* EMPTY. */ };
 template <typename T> struct __make_egg_type<T, false, 8, false> : public BoxTypeInfo< int64_t> { /* EMPTY. */ };
 template <typename T> struct __make_egg_type<T,  true, 8, false> : public BoxTypeInfo<uint64_t> { /* EMPTY. */ };
-// @formatter:on
+// clang-format on
 
 template <typename T>
 struct make_egg_type : public __make_egg_type<T, std::is_unsigned<T>::value, sizeof(T), std::is_floating_point<T>::value>
@@ -178,7 +178,7 @@ inline bool isTypeEquals(BoxTypeTable type) TBAG_NOEXCEPT
 inline char const * getBoxTypeName(BoxTypeTable type) TBAG_NOEXCEPT
 {
     switch (type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_NONE   : return    "NONE";
     case BoxTypeTable::BTT_INT8   : return    "INT8";
     case BoxTypeTable::BTT_UINT8  : return   "UINT8";
@@ -191,14 +191,14 @@ inline char const * getBoxTypeName(BoxTypeTable type) TBAG_NOEXCEPT
     case BoxTypeTable::BTT_FLOAT32: return "FLOAT32";
     case BoxTypeTable::BTT_FLOAT64: return "FLOAT64";
     default:                       return "UNKNOWN";
-    // @formatter:on
+    // clang-format on
     }
 }
 
 inline std::size_t getBoxTypeSize(BoxTypeTable type) TBAG_NOEXCEPT
 {
     switch (type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : return  8;
     case BoxTypeTable::BTT_UINT8  : return  8;
     case BoxTypeTable::BTT_INT16  : return 16;
@@ -209,7 +209,7 @@ inline std::size_t getBoxTypeSize(BoxTypeTable type) TBAG_NOEXCEPT
     case BoxTypeTable::BTT_UINT64 : return 64;
     case BoxTypeTable::BTT_FLOAT32: return 32;
     case BoxTypeTable::BTT_FLOAT64: return 64;
-    // @formatter:on
+    // clang-format on
     default:
         return 0;
     }
@@ -502,7 +502,7 @@ public:
         }
 
         switch (_type) {
-        // @formatter:off
+        // clang-format off
         case BoxTypeTable::BTT_INT8   : std::copy(data, data + size, cast<  int8_t>() + offset); break;
         case BoxTypeTable::BTT_UINT8  : std::copy(data, data + size, cast< uint8_t>() + offset); break;
         case BoxTypeTable::BTT_INT16  : std::copy(data, data + size, cast< int16_t>() + offset); break;
@@ -513,7 +513,7 @@ public:
         case BoxTypeTable::BTT_UINT64 : std::copy(data, data + size, cast<uint64_t>() + offset); break;
         case BoxTypeTable::BTT_FLOAT32: std::copy(data, data + size, cast<   float>() + offset); break;
         case BoxTypeTable::BTT_FLOAT64: std::copy(data, data + size, cast<  double>() + offset); break;
-        // @formatter:on
+        // clang-format on
         default:
             assert(false && "Unknown type assertion.");
             return E_UNKNOWN;
@@ -534,7 +534,7 @@ public:
     VectorT toVector() const
     {
         switch (_type) {
-        // @formatter:off
+        // clang-format off
         case BoxTypeTable::BTT_NONE   : return VectorT();
         case BoxTypeTable::BTT_INT8   : return VectorT(cast<  int8_t>(), cast<  int8_t>() + size());
         case BoxTypeTable::BTT_UINT8  : return VectorT(cast< uint8_t>(), cast< uint8_t>() + size());
@@ -547,7 +547,7 @@ public:
         case BoxTypeTable::BTT_FLOAT32: return VectorT(cast<   float>(), cast<   float>() + size());
         case BoxTypeTable::BTT_FLOAT64: return VectorT(cast<  double>(), cast<  double>() + size());
         default: assert(false && "Unknown type assertion.");
-        // @formatter:on
+        // clang-format on
         }
         return VectorT();
     }
@@ -573,7 +573,7 @@ public:
     std::size_t offset(Args && ... args) const
     {
         switch (_type) {
-        // @formatter:off
+        // clang-format off
         case BoxTypeTable::BTT_NONE   : return 0;
         case BoxTypeTable::BTT_INT8   : return ((BagInt8   *)_bag.get())->offset(std::forward<Args>(args) ...);
         case BoxTypeTable::BTT_UINT8  : return ((BagUint8  *)_bag.get())->offset(std::forward<Args>(args) ...);
@@ -586,7 +586,7 @@ public:
         case BoxTypeTable::BTT_FLOAT32: return ((BagFloat32*)_bag.get())->offset(std::forward<Args>(args) ...);
         case BoxTypeTable::BTT_FLOAT64: return ((BagFloat64*)_bag.get())->offset(std::forward<Args>(args) ...);
         default: assert(false && "Unknown type assertion.");
-        // @formatter:on
+        // clang-format on
         }
         return 0;
     }

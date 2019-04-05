@@ -70,11 +70,11 @@ public:
     { return std::static_pointer_cast<FuncFsPoll>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose (FuncFsPoll::OnClose  const & cb) { lock()->close_cb   = cb; }
     void setOnWalk  (FuncFsPoll::OnWalk   const & cb) { lock()->walk_cb    = cb; }
     void setOnFsPoll(FuncFsPoll::OnFsPoll const & cb) { lock()->fs_poll_cb = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);

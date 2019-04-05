@@ -153,7 +153,7 @@ void TimePoint::setLocalDiff()
 
 bool TimePoint::set(int y, int m, int d, int hour, int min, int sec, int milli, int micro, int nano)
 {
-    // @formatter:off
+    // clang-format off
     if (y < RANGE_OR(1970, 9999) < y) { return false; }
     if (m < RANGE_OR(   1,   12) < m) { return false; }
     if (d < RANGE_OR(   1,   31) < d) { return false; }
@@ -165,7 +165,7 @@ bool TimePoint::set(int y, int m, int d, int hour, int min, int sec, int milli, 
     if (milli < RANGE_OR(0, 1000) <= milli) { return false; }
     if (micro < RANGE_OR(0, 1000) <= micro) { return false; }
     if ( nano < RANGE_OR(0, 1000) <=  nano) { return false; }
-    // @formatter:on
+    // clang-format on
 
     using namespace date;
     using namespace std::chrono;
@@ -212,7 +212,7 @@ TimePoint::MicroRep TimePoint::getLocalMicrosecTimeSinceEpoch() const
     return duration_cast<Microsec>(getLocalTimePoint().time_since_epoch()).count();
 }
 
-// @formatter:off
+// clang-format off
 int TimePoint::year    () const { return libtbag::time::getYear    (getTimePoint()); }
 int TimePoint::month   () const { return libtbag::time::getMonth   (getTimePoint()); }
 int TimePoint::day     () const { return libtbag::time::getDay     (getTimePoint()); }
@@ -234,7 +234,7 @@ int TimePoint::lmillisec() const { return libtbag::time::getMillisec(getLocalTim
 int TimePoint::lmicrosec() const { return libtbag::time::getMicrosec(getLocalTimePoint()); }
 int TimePoint::lnanosec () const { return libtbag::time::getNanosec (getLocalTimePoint()); }
 int TimePoint::lweek    () const { return libtbag::time::getWeek    (getLocalTimePoint()); }
-// @formatter:on
+// clang-format on
 
 int TimePoint::ldhours() const
 {
@@ -268,7 +268,7 @@ std::string TimePoint::paddingString(int width, int value)
     return string::fformat("{}", value);
 }
 
-// @formatter:off
+// clang-format off
 std::string TimePoint::toYearString     (bool p) const { return paddingString(p ? 4 : 0,     year()); }
 std::string TimePoint::toShortYearString(bool p) const { return paddingString(p ? 2 : 0,     year() % 100); }
 std::string TimePoint::toMonthString    (bool p) const { return paddingString(p ? 2 : 0,    month()); }
@@ -294,7 +294,7 @@ std::string TimePoint::toLocalMicrosecString (bool p) const { return paddingStri
 std::string TimePoint::toLocalNanosecString  (bool p) const { return paddingString(p ? 3 : 0,  lnanosec()); }
 std::string TimePoint::toLocalWeekIndexString() const { return std::to_string(lweek()); }
 std::string TimePoint::toLocalWeekString     () const { return getWeekString(getLocalTimePoint()); }
-// @formatter:on
+// clang-format on
 
 std::string TimePoint::toLocalDiffString() const
 {
@@ -356,7 +356,7 @@ int TimePoint::onEscape(std::string const & source, std::size_t index, std::stri
         cursor  = source[index + 1];
     }
 
-    // @formatter:off
+    // clang-format off
     switch (cursor) {
     // Global Time:
     case 'Y': output = toYearString          (padding); break;
@@ -382,7 +382,7 @@ int TimePoint::onEscape(std::string const & source, std::size_t index, std::stri
     case 'n': output = toLocalNanosecString  (padding); break;
     default:  output.assign(1, source[index]);          break;
     }
-    // @formatter:on
+    // clang-format on
 
     return consume;
 }

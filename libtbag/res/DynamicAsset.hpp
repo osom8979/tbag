@@ -141,12 +141,12 @@ TBAG_CONSTEXPR std::size_t const DEFAULT_ASSET_LAYOUT_SIZE =
 
 TBAG_API std::vector<std::string> getDefaultLayout();
 
-// @formatter:off
+// clang-format off
 TBAG_API DynamicAsset getDynamicAsset(filesystem::Path const & path, std::vector<std::string> const & layouts);
 TBAG_API DynamicAsset getDynamicAsset(std::string      const & path, std::vector<std::string> const & layouts);
 TBAG_API DynamicAsset getDynamicAsset(filesystem::Path const & path);
 TBAG_API DynamicAsset getDynamicAsset(std::string      const & path);
-// @formatter:on
+// clang-format on
 
 /**
  * Default dynamic asset.

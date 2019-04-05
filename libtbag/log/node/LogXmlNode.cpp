@@ -123,40 +123,40 @@ std::size_t LogXmlNode::parseSize(std::string const & value)
 
 bool LogXmlNode::parseAutoFlush(std::string const & value)
 {
-    // @formatter:off
+    // clang-format off
     std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == AUTO_FLUSH_ON) {
         return true;
     }
     return false;
-    // @formatter:on
+    // clang-format on
 }
 
 bool LogXmlNode::parseMultiThread(std::string const & value)
 {
-    // @formatter:off
+    // clang-format off
     std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == MULTITHREAD_ON) {
         return true;
     }
     return false;
-    // @formatter:on
+    // clang-format on
 }
 
 bool LogXmlNode::parseMutex(std::string const & value)
 {
-    // @formatter:off
+    // clang-format off
     std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == MUTEX_ON) {
         return true;
     }
     return false;
-    // @formatter:on
+    // clang-format on
 }
 
 LogXmlNode::Severity LogXmlNode::parseSeverity(std::string const & value)
 {
-    // @formatter:off
+    // clang-format off
     static Severity const S_EMERGENCY = libtbag::log::level::    EMERGENCY_SEVERITY;
     static Severity const S_ALERT     = libtbag::log::level::        ALERT_SEVERITY;
     static Severity const S_CRITICAL  = libtbag::log::level::     CRITICAL_SEVERITY;
@@ -165,11 +165,11 @@ LogXmlNode::Severity LogXmlNode::parseSeverity(std::string const & value)
     static Severity const S_MOTICE    = libtbag::log::level::       NOTICE_SEVERITY;
     static Severity const S_INFO      = libtbag::log::level::INFORMATIONAL_SEVERITY;
     static Severity const S_DEBUG     = libtbag::log::level::        DEBUG_SEVERITY;
-    // @formatter:on
+    // clang-format on
 
     std::string const UPPER_VALUE = string::upper(value);
 
-    // @formatter:off
+    // clang-format off
     if (UPPER_VALUE.compare(S_EMERGENCY.getText()) == 0) { return S_EMERGENCY; }
     if (UPPER_VALUE.compare(S_ALERT    .getText()) == 0) { return S_ALERT    ; }
     if (UPPER_VALUE.compare(S_CRITICAL .getText()) == 0) { return S_CRITICAL ; }
@@ -179,12 +179,12 @@ LogXmlNode::Severity LogXmlNode::parseSeverity(std::string const & value)
     if (UPPER_VALUE.compare(S_INFO     .getText()) == 0) { return S_INFO     ; }
     if (UPPER_VALUE.compare(S_DEBUG    .getText()) == 0) { return S_DEBUG    ; }
     return OFF_SEVERITY;
-    // @formatter:on
+    // clang-format on
 }
 
 LogXmlNode::MakeType LogXmlNode::parseGeneratorType(std::string const & value)
 {
-    // @formatter:off
+    // clang-format off
     std::string const LOWER_VALUE = string::lower(value);
     if (LOWER_VALUE == GENERATOR_DEFAULT_COLOR) {
         return MakeType::DEFAULT_COLOR;
@@ -192,7 +192,7 @@ LogXmlNode::MakeType LogXmlNode::parseGeneratorType(std::string const & value)
         return MakeType::RAW;
     }
     return MakeType::DEFAULT;
-    // @formatter:on
+    // clang-format on
 }
 
 std::string LogXmlNode::getElementText(Element const * element)
@@ -360,7 +360,7 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfo const & info)
         return false;
     }
 
-    // @formatter:off
+    // clang-format off
     insertName         (*element, info.name);
     insertSink         (*element, info.sink);
     insertDestination  (*element, info.destination);
@@ -371,7 +371,7 @@ bool LogXmlNode::saveLogInfo(Element & parent, LogInfo const & info)
     insertMutex        (*element, info.mutex);
     insertSeverity     (*element, info.severity);
     insertGeneratorType(*element, info.generator);
-    // @formatter:on
+    // clang-format on
 
     return parent.InsertEndChild(element) != nullptr;
 }

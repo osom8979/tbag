@@ -122,7 +122,7 @@ Err Box::create(BoxTypeTable type)
 
     try {
         switch (type) {
-        // @formatter:off
+        // clang-format off
         case BoxTypeTable::BTT_INT8   : _bag.reset((FakeBag*)(new BagInt8   ), [](FakeBag * b){ delete reinterpret_cast<BagInt8   *>(b); }); break;
         case BoxTypeTable::BTT_UINT8  : _bag.reset((FakeBag*)(new BagUint8  ), [](FakeBag * b){ delete reinterpret_cast<BagUint8  *>(b); }); break;
         case BoxTypeTable::BTT_INT16  : _bag.reset((FakeBag*)(new BagInt16  ), [](FakeBag * b){ delete reinterpret_cast<BagInt16  *>(b); }); break;
@@ -133,7 +133,7 @@ Err Box::create(BoxTypeTable type)
         case BoxTypeTable::BTT_UINT64 : _bag.reset((FakeBag*)(new BagUint64 ), [](FakeBag * b){ delete reinterpret_cast<BagUint64 *>(b); }); break;
         case BoxTypeTable::BTT_FLOAT32: _bag.reset((FakeBag*)(new BagFloat32), [](FakeBag * b){ delete reinterpret_cast<BagFloat32*>(b); }); break;
         case BoxTypeTable::BTT_FLOAT64: _bag.reset((FakeBag*)(new BagFloat64), [](FakeBag * b){ delete reinterpret_cast<BagFloat64*>(b); }); break;
-        // @formatter:on
+        // clang-format on
         default:
             assert(false && "Unknown type assertion.");
             _bag.reset();
@@ -164,7 +164,7 @@ Err Box::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
 
     try {
         switch (_type) {
-        // @formatter:off
+        // clang-format off
         case BoxTypeTable::BTT_INT8   : reinterpret_cast<BagInt8   *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
         case BoxTypeTable::BTT_UINT8  : reinterpret_cast<BagUint8  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
         case BoxTypeTable::BTT_INT16  : reinterpret_cast<BagInt16  *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
@@ -175,7 +175,7 @@ Err Box::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
         case BoxTypeTable::BTT_UINT64 : reinterpret_cast<BagUint64 *>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
         case BoxTypeTable::BTT_FLOAT32: reinterpret_cast<BagFloat32*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
         case BoxTypeTable::BTT_FLOAT64: reinterpret_cast<BagFloat64*>(_bag.get())->resize(i0, i1, i2, i3, i4, i5, i6, i7); break;
-        // @formatter:on
+        // clang-format on
         default:
             assert(false && "Unknown type assertion.");
             return E_ILLSTATE;
@@ -197,7 +197,7 @@ Box Box::clone(bool copy_user) const
     assert(_type == BoxTypeTable::BTT_NONE);
 
     switch (_type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : reinterpret_cast<BagInt8   *>(result.get())->copy(*reinterpret_cast<BagInt8   *>(_bag.get())); break;
     case BoxTypeTable::BTT_UINT8  : reinterpret_cast<BagUint8  *>(result.get())->copy(*reinterpret_cast<BagUint8  *>(_bag.get())); break;
     case BoxTypeTable::BTT_INT16  : reinterpret_cast<BagInt16  *>(result.get())->copy(*reinterpret_cast<BagInt16  *>(_bag.get())); break;
@@ -208,7 +208,7 @@ Box Box::clone(bool copy_user) const
     case BoxTypeTable::BTT_UINT64 : reinterpret_cast<BagUint64 *>(result.get())->copy(*reinterpret_cast<BagUint64 *>(_bag.get())); break;
     case BoxTypeTable::BTT_FLOAT32: reinterpret_cast<BagFloat32*>(result.get())->copy(*reinterpret_cast<BagFloat32*>(_bag.get())); break;
     case BoxTypeTable::BTT_FLOAT64: reinterpret_cast<BagFloat64*>(result.get())->copy(*reinterpret_cast<BagFloat64*>(_bag.get())); break;
-    // @formatter:on
+    // clang-format on
     default:
         assert(false && "Unknown type assertion.");
         return Box();
@@ -227,7 +227,7 @@ void * Box::data()
     }
 
     switch (_type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : return reinterpret_cast<BagInt8   *>(_bag.get())->data();
     case BoxTypeTable::BTT_UINT8  : return reinterpret_cast<BagUint8  *>(_bag.get())->data();
     case BoxTypeTable::BTT_INT16  : return reinterpret_cast<BagInt16  *>(_bag.get())->data();
@@ -238,7 +238,7 @@ void * Box::data()
     case BoxTypeTable::BTT_UINT64 : return reinterpret_cast<BagUint64 *>(_bag.get())->data();
     case BoxTypeTable::BTT_FLOAT32: return reinterpret_cast<BagFloat32*>(_bag.get())->data();
     case BoxTypeTable::BTT_FLOAT64: return reinterpret_cast<BagFloat64*>(_bag.get())->data();
-    // @formatter:on
+    // clang-format on
     default:
         assert(false && "Unknown type assertion.");
         return nullptr;
@@ -252,7 +252,7 @@ void const * Box::data() const
     }
 
     switch (_type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->data();
     case BoxTypeTable::BTT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->data();
     case BoxTypeTable::BTT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->data();
@@ -263,7 +263,7 @@ void const * Box::data() const
     case BoxTypeTable::BTT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->data();
     case BoxTypeTable::BTT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->data();
     case BoxTypeTable::BTT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->data();
-    // @formatter:on
+    // clang-format on
     default:
         assert(false && "Unknown type assertion.");
         return nullptr;
@@ -277,7 +277,7 @@ std::size_t Box::size() const
     }
 
     switch (_type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size();
     case BoxTypeTable::BTT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size();
     case BoxTypeTable::BTT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size();
@@ -288,7 +288,7 @@ std::size_t Box::size() const
     case BoxTypeTable::BTT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size();
     case BoxTypeTable::BTT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size();
     case BoxTypeTable::BTT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size();
-    // @formatter:on
+    // clang-format on
     default:
         assert(false && "Unknown type assertion.");
         return 0;
@@ -302,7 +302,7 @@ std::size_t Box::size(std::size_t index) const
     }
 
     switch (_type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->size(index);
     case BoxTypeTable::BTT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->size(index);
     case BoxTypeTable::BTT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->size(index);
@@ -313,7 +313,7 @@ std::size_t Box::size(std::size_t index) const
     case BoxTypeTable::BTT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->size(index);
     case BoxTypeTable::BTT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->size(index);
     case BoxTypeTable::BTT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->size(index);
-    // @formatter:on
+    // clang-format on
     default:
         assert(false && "Unknown type assertion.");
         return 0;
@@ -327,7 +327,7 @@ std::size_t Box::dims() const
     }
 
     switch (_type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->dims();
     case BoxTypeTable::BTT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->dims();
     case BoxTypeTable::BTT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->dims();
@@ -338,7 +338,7 @@ std::size_t Box::dims() const
     case BoxTypeTable::BTT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->dims();
     case BoxTypeTable::BTT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->dims();
     case BoxTypeTable::BTT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->dims();
-    // @formatter:on
+    // clang-format on
     default:
         assert(false && "Unknown type assertion.");
         return 0;
@@ -352,7 +352,7 @@ bool Box::empty() const
     }
 
     switch (_type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_INT8   : return reinterpret_cast<BagInt8    const *>(_bag.get())->empty();
     case BoxTypeTable::BTT_UINT8  : return reinterpret_cast<BagUint8   const *>(_bag.get())->empty();
     case BoxTypeTable::BTT_INT16  : return reinterpret_cast<BagInt16   const *>(_bag.get())->empty();
@@ -363,7 +363,7 @@ bool Box::empty() const
     case BoxTypeTable::BTT_UINT64 : return reinterpret_cast<BagUint64  const *>(_bag.get())->empty();
     case BoxTypeTable::BTT_FLOAT32: return reinterpret_cast<BagFloat32 const *>(_bag.get())->empty();
     case BoxTypeTable::BTT_FLOAT64: return reinterpret_cast<BagFloat64 const *>(_bag.get())->empty();
-    // @formatter:on
+    // clang-format on
     default:
         assert(false && "Unknown type assertion.");
         return true;

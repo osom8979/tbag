@@ -66,11 +66,11 @@ public:
     { return std::static_pointer_cast<FuncIdle>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose(FuncIdle::OnClose const & cb) { lock()->close_cb = cb; }
     void setOnWalk (FuncIdle::OnWalk  const & cb) { lock()->walk_cb  = cb; }
     void setOnIdle (FuncIdle::OnIdle  const & cb) { lock()->idle_cb  = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);

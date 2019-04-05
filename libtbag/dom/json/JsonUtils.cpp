@@ -42,7 +42,7 @@ bool exists(Json::Value const & value, std::string const & key)
     }
 }
 
-// @formatter:off
+// clang-format off
 bool existsNull    (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isNull    (); }
 bool existsBool    (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isBool    (); }
 bool existsInt     (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isInt     (); }
@@ -55,7 +55,7 @@ bool existsNumeric (Json::Value const & v, std::string const & key) { return exi
 bool existsString  (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isString  (); }
 bool existsArray   (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isArray   (); }
 bool existsObject  (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isObject  (); }
-// @formatter:on
+// clang-format on
 
 } // namespace json
 } // namespace dom

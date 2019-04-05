@@ -49,7 +49,7 @@ private:
     String   _message;
 
 public:
-    // @formatter:off
+    // clang-format off
     LogMsgPacket() : _severity(level::INFORMATIONAL_SEVERITY), _message()
     { /* EMPTY. */ }
     LogMsgPacket(Severity const & severity) : _severity(severity), _message()
@@ -64,7 +64,7 @@ public:
     { (*this) = std::move(obj); }
     virtual ~LogMsgPacket()
     { /* EMPTY. */ }
-    // @formatter:on
+    // clang-format on
 
 public:
     inline LogMsgPacket & operator =(LogMsgPacket const & obj)
@@ -106,15 +106,15 @@ public:
     }
 
 public:
-    // @formatter:off
+    // clang-format off
     inline operator char const * () const
     { return _message.c_str(); }
     inline operator String () const
     { return _message; }
-    // @formatter:on
+    // clang-format on
 
 public:
-    // @formatter:off
+    // clang-format off
     inline Severity getSeverity() const TBAG_NOEXCEPT
     { return _severity; }
     inline String getMessage() const
@@ -124,10 +124,10 @@ public:
     { _severity = severity; }
     inline void setMessage(String const & message)
     { _message = message; }
-    // @formatter:on
+    // clang-format on
 
 public:
-    // @formatter:off
+    // clang-format off
     inline char const * c_str() const TBAG_NOEXCEPT_SP_OP(_message.c_str())
     { return _message.c_str(); }
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(_message.empty())
@@ -136,7 +136,7 @@ public:
     { return _message.size(); }
     inline void clear() TBAG_NOEXCEPT_SP_OP(_message.clear())
     { _message.clear(); }
-    // @formatter:on
+    // clang-format on
 
 public:
     friend LogMsgPacket & operator <<(LogMsgPacket & msg, char value)

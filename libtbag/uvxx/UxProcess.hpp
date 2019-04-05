@@ -69,11 +69,11 @@ public:
     { return std::static_pointer_cast<FuncProcess>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose(FuncProcess::OnClose const & cb) { lock()->close_cb = cb; }
     void setOnWalk (FuncProcess::OnWalk  const & cb) { lock()->walk_cb  = cb; }
     void setOnExit (FuncProcess::OnExit  const & cb) { lock()->exit_cb  = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err spawn(UxLoop & loop, Options const & options);

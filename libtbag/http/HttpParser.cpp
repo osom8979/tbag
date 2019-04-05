@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace http {
 
-// @formatter:off
+// clang-format off
 static int __global_http_on_message_begin__   (http_parser * parser);
 static int __global_http_on_url__             (http_parser * parser, const char * at, std::size_t length);
 static int __global_http_on_status__          (http_parser * parser, const char * at, std::size_t length);
@@ -29,7 +29,7 @@ static int __global_http_on_body__            (http_parser * parser, const char 
 static int __global_http_on_message_complete__(http_parser * parser);
 static int __global_http_on_chunk_header__    (http_parser * parser);
 static int __global_http_on_chunk_complete__  (http_parser * parser);
-// @formatter:on
+// clang-format on
 
 /**
  * ParserImpl class implementation.

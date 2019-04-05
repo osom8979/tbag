@@ -130,14 +130,14 @@ public:
     inline bool emptyOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.empty()) { return _ready.empty(); }
 
 public:
-    // @formatter:off
+    // clang-format off
           iterator   begin()       TBAG_NOEXCEPT_SP_OP(_active. begin()) { return _active. begin(); }
     const_iterator   begin() const TBAG_NOEXCEPT_SP_OP(_active. begin()) { return _active. begin(); }
           iterator     end()       TBAG_NOEXCEPT_SP_OP(_active.   end()) { return _active.   end(); }
     const_iterator     end() const TBAG_NOEXCEPT_SP_OP(_active.   end()) { return _active.   end(); }
     const_iterator  cbegin() const TBAG_NOEXCEPT_SP_OP(_active.cbegin()) { return _active.cbegin(); }
     const_iterator    cend() const TBAG_NOEXCEPT_SP_OP(_active.  cend()) { return _active.  cend(); }
-    // @formatter:on
+    // clang-format on
 
 public:
     template <typename ... Args>

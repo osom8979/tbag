@@ -73,7 +73,7 @@ public:
     { return std::static_pointer_cast<FuncPipe>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose     (FuncPipe::OnClose      const & cb) { lock()->close_cb      = cb; }
     void setOnWalk      (FuncPipe::OnWalk       const & cb) { lock()->walk_cb       = cb; }
     void setOnShutdown  (FuncPipe::OnShutdown   const & cb) { lock()->shutdown_cb   = cb; }
@@ -82,7 +82,7 @@ public:
     void setOnRead      (FuncPipe::OnRead       const & cb) { lock()->read_cb       = cb; }
     void setOnWrite     (FuncPipe::OnWrite      const & cb) { lock()->write_cb      = cb; }
     void setOnConnect   (FuncPipe::OnConnect    const & cb) { lock()->connect_cb    = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop, bool is_ipc = false);

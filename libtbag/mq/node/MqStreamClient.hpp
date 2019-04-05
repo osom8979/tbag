@@ -149,10 +149,10 @@ public:
     virtual ~MqStreamClient();
 
 public:
-    // @formatter:off
+    // clang-format off
     inline SharedStream       & client()       TBAG_NOEXCEPT { return _client; }
     inline SharedStream const & client() const TBAG_NOEXCEPT { return _client; }
-    // @formatter:on
+    // clang-format on
 
 private:
     virtual void onInitializerAsync(Initializer * init) override;

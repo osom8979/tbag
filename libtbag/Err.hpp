@@ -303,7 +303,7 @@ inline bool isFailure(libtbag::Err err) TBAG_NOEXCEPT
 
 inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (err) {
     case libtbag::E_SUCCESS:  return true;
     case libtbag::E_WARNING:  return true;
@@ -313,7 +313,7 @@ inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
     case libtbag::E_ENQASYNC: return true;
     default:                  return false;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 inline bool isFailureAnyway(libtbag::Err err) TBAG_NOEXCEPT

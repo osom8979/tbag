@@ -35,9 +35,9 @@ template <typename T>
 inline void swapWithPod(T & a, T & b) TBAG_NOEXCEPT
 {
     static_assert(std::is_pod<T>::value, "Not POD type.");
-    // @formatter:off
+    // clang-format off
     a ^= b; b ^= a; a ^= b;
-    // @formatter:on
+    // clang-format on
 }
 
 } // namespace algorithm

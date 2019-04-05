@@ -30,7 +30,7 @@ namespace uvpp {
 
 inline static uv_run_mode convertRunModeToUvRunMode(BaseLoop::RunMode mode) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (mode) {
     case BaseLoop::RunMode::RUN_DEFAULT: return UV_RUN_DEFAULT;
     case BaseLoop::RunMode::RUN_ONCE:    return UV_RUN_ONCE;
@@ -38,7 +38,7 @@ inline static uv_run_mode convertRunModeToUvRunMode(BaseLoop::RunMode mode) TBAG
     }
     assert(false && "Inaccessible block.");
     return UV_RUN_DEFAULT;
-    // @formatter:on
+    // clang-format on
 }
 
 // --------------------

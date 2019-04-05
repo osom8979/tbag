@@ -127,7 +127,7 @@ public:
     TBAG_CONSTEXPR static char const * const TAG_STORAGE = "storage";
 
 public:
-    // @formatter:off
+    // clang-format off
     TBAG_CONSTEXPR static char const * const TAG_ENV      = Storage::LAYOUT_ENV     ;
     TBAG_CONSTEXPR static char const * const TAG_CONFIG   = Storage::LAYOUT_CONFIG  ;
     TBAG_CONSTEXPR static char const * const TAG_MODULE   = Storage::LAYOUT_MODULE  ;
@@ -138,7 +138,7 @@ public:
     TBAG_CONSTEXPR static char const * const TAG_LUA      = Storage::LAYOUT_LUA     ;
     TBAG_CONSTEXPR static char const * const TAG_LUAROCKS = Storage::LAYOUT_LUAROCKS;
     TBAG_CONSTEXPR static char const * const TAG_USER     = Storage::LAYOUT_USER    ;
-    // @formatter:on
+    // clang-format on
 
     TBAG_CONSTEXPR static char const * const ATT_ROOT       = "root";
     TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE   = "absolute";

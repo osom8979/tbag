@@ -112,7 +112,7 @@ void StorageNode::setup()
 {
     Property prop;
 
-    // @formatter:off
+    // clang-format off
     prop.env     .text = TAG_ENV     ;
     prop.config  .text = TAG_CONFIG  ;
     prop.module  .text = TAG_MODULE  ;
@@ -122,9 +122,9 @@ void StorageNode::setup()
     prop.keystore.text = TAG_KEYSTORE;
     prop.lua     .text = TAG_LUA     ;
     prop.luarocks.text = TAG_LUAROCKS;
-    // @formatter:on
+    // clang-format on
 
-    // @formatter:off
+    // clang-format off
     prop.env     .exists = true;
     prop.config  .exists = true;
     prop.module  .exists = true;
@@ -134,9 +134,9 @@ void StorageNode::setup()
     prop.keystore.exists = true;
     prop.lua     .exists = true;
     prop.luarocks.exists = true;
-    // @formatter:on
+    // clang-format on
 
-    // @formatter:off
+    // clang-format off
     prop.env.name      = VAL_DEFAULT_ENV_NAME;
     prop.config.gui    = VAL_DEFAULT_CONFIG_GUI;
     prop.module.ext    = VAL_DEFAULT_MODULE_EXT;
@@ -145,7 +145,7 @@ void StorageNode::setup()
     prop.keystore.name = VAL_DEFAULT_KEYSTORE_NAME;
     prop.lua.name      = VAL_DEFAULT_LUA_NAME;
     prop.lua.gui       = VAL_DEFAULT_LUA_GUI;
-    // @formatter:on
+    // clang-format on
 
     update(DEFAULT_STORAGE_ROOT, prop);
 }
@@ -163,7 +163,7 @@ void StorageNode::load(Element const & element)
     optAttr(element, ATT_ROOT, root);
 
     Property prop;
-    // @formatter:off
+    // clang-format off
     readElement(element, TAG_ENV      , prop.env);
     readElement(element, TAG_CONFIG   , prop.config);
     readElement(element, TAG_MODULE   , prop.module);
@@ -173,7 +173,7 @@ void StorageNode::load(Element const & element)
     readElement(element, TAG_KEYSTORE , prop.keystore);
     readElement(element, TAG_LUA      , prop.lua);
     readElement(element, TAG_LUAROCKS , prop.luarocks);
-    // @formatter:on
+    // clang-format on
 
     foreachElement(element, TAG_USER, [&](Element const & node){
         Property::usr_layout user;
@@ -188,7 +188,7 @@ void StorageNode::save(Element & element) const
 {
     setAttr(element, ATT_ROOT, _root);
 
-    // @formatter:off
+    // clang-format off
     addNewElement(element, TAG_ENV      , _prop.env);
     addNewElement(element, TAG_CONFIG   , _prop.config);
     addNewElement(element, TAG_MODULE   , _prop.module);
@@ -198,7 +198,7 @@ void StorageNode::save(Element & element) const
     addNewElement(element, TAG_KEYSTORE , _prop.keystore);
     addNewElement(element, TAG_LUA      , _prop.lua);
     addNewElement(element, TAG_LUAROCKS , _prop.luarocks);
-    // @formatter:on
+    // clang-format on
 
     for (auto & user : _prop.users) {
         addNewElement(element, TAG_USER, user);
@@ -482,7 +482,7 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     auto const & ENVIRONMENTS = storage.envs();
     // ----------------------------------------
 
-    // @formatter:off
+    // clang-format off
     if (prop.config  .exists) { storage.setLayoutConfig  (getPath(updated_root, TAG_CONFIG  , prop.config  , ENVIRONMENTS)); }
     if (prop.module  .exists) { storage.setLayoutModule  (getPath(updated_root, TAG_MODULE  , prop.module  , ENVIRONMENTS)); }
     if (prop.text    .exists) { storage.setLayoutText    (getPath(updated_root, TAG_TEXT    , prop.text    , ENVIRONMENTS)); }
@@ -491,7 +491,7 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     if (prop.keystore.exists) { storage.setLayoutKeystore(getPath(updated_root, TAG_KEYSTORE, prop.keystore, ENVIRONMENTS)); }
     if (prop.lua     .exists) { storage.setLayoutLua     (getPath(updated_root, TAG_LUA     , prop.lua     , ENVIRONMENTS)); }
     if (prop.luarocks.exists) { storage.setLayoutLuaRocks(getPath(updated_root, TAG_LUAROCKS, prop.luarocks, ENVIRONMENTS)); }
-    // @formatter:on
+    // clang-format on
 
     if (prop.config.exists) {
         if (!prop.config.gui.empty()) {

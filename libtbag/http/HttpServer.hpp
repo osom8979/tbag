@@ -131,10 +131,10 @@ public:
     ~HttpServer();
 
 public:
-    // @formatter:off
+    // clang-format off
     Loop       & loop();
     Loop const & loop() const;
-    // @formatter:on
+    // clang-format on
 
 private:
     void onBegin();

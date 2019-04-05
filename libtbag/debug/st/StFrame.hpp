@@ -101,11 +101,11 @@ public:
     TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_OFFSET  = 4;
 
 public:
-    // @formatter:off
+    // clang-format off
     static StFrame parseGccSymbolize  (char const * symbols_format, void const * addr = nullptr);
     static StFrame parseClangSymbolize(char const * symbols_format, void const * addr = nullptr);
     static StFrame parseSymbolize     (char const * symbols_format, void const * addr = nullptr);
-    // @formatter:on
+    // clang-format on
 };
 
 inline bool operator< (StFrame const & lh, StFrame const & rh) TBAG_NOEXCEPT { return lh.address() < rh.address(); }

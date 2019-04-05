@@ -53,11 +53,11 @@ public:
     using binf  = libtbag::uvpp::binf;
 
 public:
-    // @formatter:off
+    // clang-format off
     TBAG_CONSTEXPR static unsigned int const FLAG_IPV6ONLY  = libtbag::uvpp::UDP_FLAG_IPV6ONLY ;
     TBAG_CONSTEXPR static unsigned int const FLAG_PARTIAL   = libtbag::uvpp::UDP_FLAG_PARTIAL  ;
     TBAG_CONSTEXPR static unsigned int const FLAG_REUSEADDR = libtbag::uvpp::UDP_FLAG_REUSEADDR;
-    // @formatter:on
+    // clang-format on
 
 public:
     UxUdp();
@@ -83,13 +83,13 @@ public:
     { return std::static_pointer_cast<FuncUdp>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose(FuncUdp::OnClose const & cb) { lock()->close_cb = cb; }
     void setOnWalk (FuncUdp::OnWalk  const & cb) { lock()->walk_cb  = cb; }
     void setOnSend (FuncUdp::OnSend  const & cb) { lock()->send_cb  = cb; }
     void setOnAlloc(FuncUdp::OnAlloc const & cb) { lock()->alloc_cb = cb; }
     void setOnRecv (FuncUdp::OnRecv  const & cb) { lock()->recv_cb  = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);
@@ -103,12 +103,12 @@ public:
     Err bind(sockaddr const * addr, unsigned int flags = 0);
 
 public:
-    // @formatter:off
+    // clang-format off
     inline Err bind(sockaddr_in  const * addr, unsigned int flags = 0)
     { return bind((struct sockaddr const *)addr, flags); }
     inline Err bind(sockaddr_in6 const * addr, unsigned int flags = 0)
     { return bind((struct sockaddr const *)addr, flags); }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err getSockName(sockaddr * name, int * namelen);
@@ -128,7 +128,7 @@ public:
     Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
 public:
-    // @formatter:off
+    // clang-format off
     inline Err send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr_in const * addr)
     { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
     inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in const * addr)
@@ -137,14 +137,14 @@ public:
     { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
     inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in6 const * addr)
     { return send(request, buffer, size, (struct sockaddr const *)addr); }
-    // @formatter:on
+    // clang-format on
 
 public:
     std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result = nullptr);
     std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result = nullptr);
 
 public:
-    // @formatter:off
+    // clang-format off
     inline std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr_in const * addr, Err * result = nullptr)
     { return trySend(infos, infos_size, (struct sockaddr const *)addr, result); }
     inline std::size_t trySend(char const * buffer, std::size_t size, sockaddr_in const * addr, Err * result = nullptr)
@@ -153,7 +153,7 @@ public:
     { return trySend(infos, infos_size, (struct sockaddr const *)addr, result); }
     inline std::size_t trySend(char const * buffer, std::size_t size, sockaddr_in6 const * addr, Err * result = nullptr)
     { return trySend(buffer, size, (struct sockaddr const *)addr, result); }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err startRecv();

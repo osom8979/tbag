@@ -277,7 +277,7 @@ public:
     inline Value const & back() const { return _active.back(); }
 
 public:
-    // @formatter:off
+    // clang-format off
           iterator begin()       TBAG_NOEXCEPT_SP_OP(_active.begin()) { return _active.begin(); }
     const_iterator begin() const TBAG_NOEXCEPT_SP_OP(_active.begin()) { return _active.begin(); }
           iterator   end()       TBAG_NOEXCEPT_SP_OP(_active.  end()) { return _active.  end(); }
@@ -292,7 +292,7 @@ public:
             const_iterator    cend() const TBAG_NOEXCEPT_SP_OP(_active.   cend()) { return _active.   cend(); }
     const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(_active.crbegin()) { return _active.crbegin(); }
     const_reverse_iterator   crend() const TBAG_NOEXCEPT_SP_OP(_active.  crend()) { return _active.  crend(); }
-    // @formatter:on
+    // clang-format on
 
 public:
     template <typename Predicated>

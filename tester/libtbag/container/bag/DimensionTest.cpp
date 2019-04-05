@@ -112,12 +112,12 @@ TEST(DimensionTest, Total)
     ASSERT_EQ(2*3, dims.total());
 
     dims = {2, 3, 4, 5};
-    // @formatter:off
+    // clang-format off
     ASSERT_EQ(2*3*4*5, dims.total());
     ASSERT_EQ(  3*4*5, dims.subTotal(0));
     ASSERT_EQ(    4*5, dims.subTotal(1));
     ASSERT_EQ(      5, dims.subTotal(2));
-    // @formatter:on
+    // clang-format on
 }
 
 TEST(DimensionTest, Offset)

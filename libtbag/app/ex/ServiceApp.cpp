@@ -137,14 +137,14 @@ void ServiceApp::installConfigOptions(ConfigScope scope)
       home_help +=   HOME_PATH;
      local_help +=  LOCAL_PATH;
 
-    // @formatter:on
+    // clang-format on
     switch (scope) {
     case ConfigScope::WORK:   config_help += DEFAULT_DECORATE; break;
     case ConfigScope::EXE:     local_help += DEFAULT_DECORATE; _config_path =  LOCAL_PATH; break;
     case ConfigScope::HOME:     home_help += DEFAULT_DECORATE; _config_path =   HOME_PATH; break;
     case ConfigScope::GLOBAL: global_help += DEFAULT_DECORATE; _config_path = GLOBAL_PATH; break;
     }
-    // @formatter:off
+    // clang-format off
 
     _options.insertDefault(SERVICE_APP_OPTIONS_GLOBAL, &_config_path,   GLOBAL_PATH, global_help);
     _options.insertDefault(SERVICE_APP_OPTIONS_HOME  , &_config_path,     HOME_PATH,   home_help);

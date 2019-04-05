@@ -66,11 +66,11 @@ public:
     { return std::static_pointer_cast<FuncCheck>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose(FuncCheck::OnClose const & cb) { lock()->close_cb = cb; }
     void setOnWalk (FuncCheck::OnWalk  const & cb) { lock()->walk_cb  = cb; }
     void setOnCheck(FuncCheck::OnCheck const & cb) { lock()->check_cb = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);

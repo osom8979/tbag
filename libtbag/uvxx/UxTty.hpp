@@ -74,7 +74,7 @@ public:
     { return std::static_pointer_cast<FuncTty>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose     (FuncTty::OnClose      const & cb) { lock()->close_cb      = cb; }
     void setOnWalk      (FuncTty::OnWalk       const & cb) { lock()->walk_cb       = cb; }
     void setOnShutdown  (FuncTty::OnShutdown   const & cb) { lock()->shutdown_cb   = cb; }
@@ -82,7 +82,7 @@ public:
     void setOnAlloc     (FuncTty::OnAlloc      const & cb) { lock()->alloc_cb      = cb; }
     void setOnRead      (FuncTty::OnRead       const & cb) { lock()->read_cb       = cb; }
     void setOnWrite     (FuncTty::OnWrite      const & cb) { lock()->write_cb      = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop, ufile fd, bool readable);

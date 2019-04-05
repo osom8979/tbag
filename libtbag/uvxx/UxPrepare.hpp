@@ -66,11 +66,11 @@ public:
     { return std::static_pointer_cast<FuncPrepare>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose  (FuncPrepare::OnClose   const & cb) { lock()->close_cb = cb; }
     void setOnWalk   (FuncPrepare::OnWalk    const & cb) { lock()->walk_cb  = cb; }
     void setOnPrepare(FuncPrepare::OnPrepare const & cb) { lock()->prepare_cb = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);

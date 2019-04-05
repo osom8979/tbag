@@ -65,7 +65,7 @@ bool isIpv4(std::string const & ip)
 
 bool isIpv6(std::string const & ip)
 {
-    // @formatter:off
+    // clang-format off
     if (string::isMatch(ip, IPV6REGEX01)) { return true; } // 1:2:3:4:5:6:7:8
     if (string::isMatch(ip, IPV6REGEX02)) { return true; } // 1::                                 1:2:3:4:5:6:7::
     if (string::isMatch(ip, IPV6REGEX03)) { return true; } // 1::8               1:2:3:4:5:6::8   1:2:3:4:5:6::8
@@ -78,7 +78,7 @@ bool isIpv6(std::string const & ip)
     if (string::isMatch(ip, IPV6REGEX10)) { return true; } // fe08::7:8%eth0     fe08::7:8%1
     if (string::isMatch(ip, IPV6REGEX11)) { return true; } // ::255.255.255.255  ::ffff:0:255.255.255.255
     if (string::isMatch(ip, IPV6REGEX12)) { return true; } // 2001:db8:3:4::192.0.2.33  64:ff9b::192.0.2.33
-    // @formatter:on
+    // clang-format on
     return false;
 }
 

@@ -19,11 +19,11 @@ TEST(DynamicPythonTest, FindLibrary)
 {
     libtbag::log::SeverityGuard guard;
 
-    // @formatter:off
+    // clang-format off
     std::cout << "Find python executable: "        << DynamicPython::findPythonExecutable() << std::endl;
     std::cout << "Find python library directory: " << DynamicPython::findPythonLibraryDir() << std::endl;
     std::cout << "Find python library path: "      << DynamicPython::findPythonLibrary()    << std::endl;
-    // @formatter:on
+    // clang-format on
 }
 
 TEST(DynamicPythonTest, Default)

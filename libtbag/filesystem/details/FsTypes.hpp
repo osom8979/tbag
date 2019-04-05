@@ -259,7 +259,7 @@ public:
     }
 
 public:
-    // @formatter:off
+    // clang-format off
     inline FileOpenFlags & rdonly(bool flag = true) TBAG_NOEXCEPT { return set(FILE_OPEN_FLAG_READ_ONLY , flag); }
     inline FileOpenFlags & wronly(bool flag = true) TBAG_NOEXCEPT { return set(FILE_OPEN_FLAG_WRITE_ONLY, flag); }
     inline FileOpenFlags & rdwr  (bool flag = true) TBAG_NOEXCEPT { return set(FILE_OPEN_FLAG_READ_WRITE, flag); }
@@ -267,7 +267,7 @@ public:
     inline FileOpenFlags & creat (bool flag = true) TBAG_NOEXCEPT { return set(FILE_OPEN_CREATE         , flag); }
     inline FileOpenFlags & trunc (bool flag = true) TBAG_NOEXCEPT { return set(FILE_OPEN_TRUNCATE       , flag); }
     inline FileOpenFlags & excl  (bool flag = true) TBAG_NOEXCEPT { return set(FILE_OPEN_EXISTS_ERROR   , flag); }
-    // @formatter:on
+    // clang-format on
 
 private:
     inline FileOpenFlags & set(Value value, bool flag) TBAG_NOEXCEPT

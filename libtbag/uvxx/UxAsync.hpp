@@ -66,11 +66,11 @@ public:
     { return std::static_pointer_cast<FuncAsync>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose(FuncAsync::OnClose const & cb) { lock()->close_cb = cb; }
     void setOnWalk (FuncAsync::OnWalk  const & cb) { lock()->walk_cb  = cb; }
     void setOnAsync(FuncAsync::OnAsync const & cb) { lock()->async_cb = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);

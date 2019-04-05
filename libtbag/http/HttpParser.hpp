@@ -102,7 +102,7 @@ public:
 
 // Event methods.
 public:
-    // @formatter:off
+    // clang-format off
     virtual int onMessageBegin    () { return 0; }
     virtual int onUrl             (char const * buffer, std::size_t size) { return 0; }
     virtual int onStatus          (char const * buffer, std::size_t size) { return 0; }
@@ -113,7 +113,7 @@ public:
     virtual int onMessageComplete () { return 0; }
     virtual int onChunkHeader     () { return 0; }
     virtual int onChunkComplete   () { return 0; }
-    // @formatter:on
+    // clang-format on
 };
 
 } // namespace http

@@ -456,12 +456,12 @@ void updateDefaultRequest(HttpCommon & common, HttpBaseRequest & request)
         insertIfNotExists(common.header, HEADER_CONTENT_LENGTH, std::to_string(common.body.size()));
     }
 
-    // @formatter:off
+    // clang-format off
     if (request.method.empty()) { request.method = getHttpMethodName(HttpMethod::M_GET); }
     if (request.path.empty()) { request.path = PATH_DELIMITER; }
     if (common.http_minor == 0) { common.http_minor = DEFAULT_HTTP_VERSION_MINOR; }
     if (common.http_major == 0) { common.http_major = DEFAULT_HTTP_VERSION_MAJOR; }
-    // @formatter:on
+    // clang-format on
 }
 
 void updateDefaultRequest(HttpRequest & request)
@@ -481,12 +481,12 @@ void updateDefaultWsRequest(HttpCommon & common, HttpBaseRequest & request, std:
     insertIfNotExists(common.header, HEADER_SEC_WEBSOCKET_VERSION, std::to_string(WEBSOCKET_VERSION_HYBI13));
     insertIfNotExists(common.header, HEADER_SEC_WEBSOCKET_KEY, ws_key);
 
-    // @formatter:off
+    // clang-format off
     if (request.method.empty()) { request.method = getHttpMethodName(HttpMethod::M_GET); }
     if (request.path.empty()) { request.path = PATH_DELIMITER; }
     if (common.http_minor == 0) { common.http_minor = DEFAULT_HTTP_VERSION_MINOR; }
     if (common.http_major == 0) { common.http_major = DEFAULT_HTTP_VERSION_MAJOR; }
-    // @formatter:on
+    // clang-format on
 }
 
 void updateDefaultWsRequest(HttpRequest & request, std::string const & ws_key)
@@ -614,11 +614,11 @@ void updateDefaultResponse(HttpCommon & common, HttpBaseResponse & response)
     insertIfNotExists(common.header, HEADER_CONTENT_TYPE, DEFAULT_VALUE_OF_CONTENT_TYPE);
     insertIfNotExists(common.header, HEADER_CONTENT_LENGTH, std::to_string(common.body.size()));
 
-    // @formatter:off
+    // clang-format off
     if (response.code == 0) { setHttpStatus(response, HttpStatus::SC_OK); }
     if (common.http_major == 0) { common.http_major = DEFAULT_HTTP_VERSION_MAJOR; }
     if (common.http_minor == 0) { common.http_minor = DEFAULT_HTTP_VERSION_MINOR; }
-    // @formatter:on
+    // clang-format on
 }
 
 void updateDefaultResponse(HttpResponse & response)
@@ -639,10 +639,10 @@ void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, s
 
     setHttpStatus(response, HttpStatus::SC_SWITCHING_PROTOCOLS); // Force update!
 
-    // @formatter:off
+    // clang-format off
     if (common.http_minor == 0) { common.http_minor = DEFAULT_HTTP_VERSION_MINOR; }
     if (common.http_major == 0) { common.http_major = DEFAULT_HTTP_VERSION_MAJOR; }
-    // @formatter:on
+    // clang-format on
 }
 
 void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, HttpHeader const & request_header)
@@ -743,7 +743,7 @@ std::string toDebugResponseString(HttpProperty const & property)
 
 char const * getWsOpCodeName(WsOpCode code) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (code) {
     case WsOpCode::WSOC_CONTINUATION_FRAME          : return "WSOC_CONTINUE";
     case WsOpCode::WSOC_TEXT_FRAME                  : return "WSOC_TEXT";
@@ -763,15 +763,15 @@ char const * getWsOpCodeName(WsOpCode code) TBAG_NOEXCEPT
     case WsOpCode::WSOC_RESERVED_CONTROL_FRAME_5    : return "WSOC_CF5";
     default: return "WSOC_UNKNOWN";
     }
-    // @formatter:on
+    // clang-format on
 }
 
 bool isWsControlFrame(WsOpCode code) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     return (WsOpCode::WSOC_RESERVED_NON_CONTROL_FRAME_1 <= COMPARE_AND(code) <= WsOpCode::WSOC_RESERVED_NON_CONTROL_FRAME_5) ||
            (WsOpCode::WSOC_RESERVED_CONTROL_FRAME_1     <= COMPARE_AND(code) <= WsOpCode::WSOC_RESERVED_CONTROL_FRAME_5);
-    // @formatter:on
+    // clang-format on
 }
 
 static_assert(WEBSOCKET_MINIMUM_HEADER_BYTE_SIZE == 2,
@@ -813,13 +813,13 @@ uint8_t getPayloadDataByteIndex(WsPayloadBit payload_bit, bool is_mask) TBAG_NOE
 
 uint8_t getMaskingKeyByteIndex(WsPayloadBit payload_bit) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (payload_bit) {
     case WsPayloadBit::WSPL_BIT_7 : return WEBSOCKET_MINIMUM_HEADER_BYTE_SIZE;
     case WsPayloadBit::WSPL_BIT_16: return WEBSOCKET_MINIMUM_HEADER_BYTE_SIZE + sizeof(uint16_t);
     case WsPayloadBit::WSPL_BIT_64: return WEBSOCKET_MINIMUM_HEADER_BYTE_SIZE + sizeof(uint64_t);
     }
-    // @formatter:on
+    // clang-format on
 
     TBAG_INACCESSIBLE_BLOCK_ASSERT();
     return 0;

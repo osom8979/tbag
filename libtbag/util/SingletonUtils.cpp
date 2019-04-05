@@ -83,13 +83,13 @@ static void runCreateOrRelease(bool is_create = true)
 {
     using Func = CreateOrRelease::Func;
 
-    // @formatter:off
+    // clang-format off
     Func    com([](){     lib::ComInitializer::createInstance(); }, [](){     lib::ComInitializer::releaseInstance(); });
     Func    log([](){ log::mgr::LoggerManager::createInstance(); }, [](){ log::mgr::LoggerManager::releaseInstance(); });
     Func signal([](){          signal::__impl::createInstance(); }, [](){          signal::__impl::releaseInstance(); });
     Func   time([](){            time::__impl::createInstance(); }, [](){            time::__impl::releaseInstance(); });
     Func global([](){       container::Global::createInstance(); }, [](){       container::Global::releaseInstance(); });
-    // @formatter:on
+    // clang-format on
 
     CreateOrRelease init({com, log, signal, time, global});
 

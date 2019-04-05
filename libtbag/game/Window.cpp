@@ -210,7 +210,7 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
 
     void runEvent(sf::Event & e)
     {
-        // @formatter:off
+        // clang-format off
         switch (e.type) {
         case sf::Event::Closed:
             onClosed();
@@ -285,7 +285,7 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
             TBAG_INACCESSIBLE_BLOCK_ASSERT();
             break;
         }
-        // @formatter:on
+        // clang-format on
     }
 
     virtual bool onCreate() override

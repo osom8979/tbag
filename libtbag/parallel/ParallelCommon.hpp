@@ -70,12 +70,12 @@ using ParallelPlatformIds = std::vector<ParallelPlatformId>;
 using ParallelDeviceIds   = std::vector<ParallelDeviceId>;
 using ParallelContextIds  = std::vector<ParallelContextId>;
 
-// @formatter:off
+// clang-format off
 static_assert(sizeof(ParallelType)     == sizeof(ParallelTypeId)   /* ---------------------- */, "size checker.");
 static_assert(sizeof(ParallelPlatform) == sizeof(ParallelType)     + sizeof(ParallelPlatformId), "size checker.");
 static_assert(sizeof(ParallelDevice)   == sizeof(ParallelPlatform) + sizeof(ParallelDeviceId)  , "size checker.");
 static_assert(sizeof(ParallelContext)  == sizeof(ParallelDevice)   + sizeof(ParallelContextId) , "size checker.");
-// @formatter:on
+// clang-format on
 
 struct ParallelPlatformInfo
 {

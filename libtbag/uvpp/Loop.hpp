@@ -201,7 +201,7 @@ public:
 
 // By-pass methods.
 public:
-    // @formatter:off
+    // clang-format off
     inline       iterator    begin()       TBAG_NOEXCEPT_SP_OP(_handles.   begin()) { return _handles.   begin(); }
     inline const_iterator    begin() const TBAG_NOEXCEPT_SP_OP(_handles.   begin()) { return _handles.   begin(); }
     inline       iterator      end()       TBAG_NOEXCEPT_SP_OP(_handles.     end()) { return _handles.     end(); }
@@ -211,7 +211,7 @@ public:
     inline           bool    empty() const TBAG_NOEXCEPT_SP_OP(_handles.   empty()) { return _handles.   empty(); }
     inline      size_type     size() const TBAG_NOEXCEPT_SP_OP(_handles.    size()) { return _handles.    size(); }
     inline      size_type max_size() const TBAG_NOEXCEPT_SP_OP(_handles.max_size()) { return _handles.max_size(); }
-    // @formatter:on
+    // clang-format on
 
 public:
     /** @warning This function should be avoided. */

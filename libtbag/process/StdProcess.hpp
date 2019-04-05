@@ -86,12 +86,12 @@ public:
     virtual ~StdProcess();
 
 public:
-    // @formatter:off
+    // clang-format off
     inline bool        isRunning() const TBAG_NOEXCEPT_SP_OP(_is_running.load()) { return _is_running.load(); }
     inline int            getPid() const TBAG_NOEXCEPT { return _pid; }
     inline int64_t getExitStatus() const TBAG_NOEXCEPT { return _exit_status; }
     inline int     getTermSignal() const TBAG_NOEXCEPT { return _term_signal; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err spawn(Loop & loop,
@@ -102,12 +102,12 @@ public:
               std::string const & input = std::string());
 
 public:
-    // @formatter:off
+    // clang-format off
     std::string              getFile() const { return _process->atOptions().file; }
     std::vector<std::string> getArgs() const { return _process->atOptions().args; }
     std::vector<std::string> getEnvs() const { return _process->atOptions().envs; }
     std::string              getCwd () const { return _process->atOptions().cwd;  }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err kill(int signum);

@@ -30,13 +30,13 @@ namespace blas {
 /** Enumerated and derived types. */
 using CBLAS_INDEX = int;
 
-// @formatter:off
+// clang-format off
 enum class CBLAS_ORDER     : CBLAS_INDEX { CblasRowMajor = 101, CblasColMajor= 102 };
 enum class CBLAS_TRANSPOSE : CBLAS_INDEX { CblasNoTrans  = 111, CblasTrans   = 112, CblasConjTrans = 113 };
 enum class CBLAS_UPLO      : CBLAS_INDEX { CblasUpper    = 121, CblasLower   = 122 };
 enum class CBLAS_DIAG      : CBLAS_INDEX { CblasNonUnit  = 131, CblasUnit    = 132 };
 enum class CBLAS_SIDE      : CBLAS_INDEX { CblasLeft     = 141, CblasRight   = 142 };
-// @formatter:on
+// clang-format on
 
 ///*
 // * ===========================================================================

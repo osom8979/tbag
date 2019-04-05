@@ -104,12 +104,12 @@ public:
     bool operator !=(std::string const & path) const;
 
 public:
-    // @formatter:off
+    // clang-format off
     inline void clear() TBAG_NOEXCEPT_SP_OP(_path.clear())
     { _path.clear(); }
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(_path.empty())
     { return _path.empty(); }
-    // @formatter:on
+    // clang-format on
 
 public:
     Path & copy(Path const & obj);

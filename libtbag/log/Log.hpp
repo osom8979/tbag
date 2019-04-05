@@ -143,7 +143,7 @@ inline void logging(Logger * logger, Severity level, std::string const & format,
     }
 }
 
-// @formatter:off
+// clang-format off
 template <typename ... Args>
 inline void emergency(Logger * logger, std::string const & format, Args && ... args)
 { logging(logger, EMERGENCY_SEVERITY, format, std::forward<Args>(args) ...); }
@@ -168,9 +168,9 @@ inline void info     (Logger * logger, std::string const & format, Args && ... a
 template <typename ... Args>
 inline void debug    (Logger * logger, std::string const & format, Args && ... args)
 { logging(logger, DEBUG_SEVERITY, format, std::forward<Args>(args) ...); }
-// @formatter:on
+// clang-format on
 
-// @formatter:off
+// clang-format off
 template <typename ... Args>
 inline void emergency(std::string const & msg, Args && ... args)
 { emergency(getDefaultLogger(), msg, std::forward<Args>(args) ...); }
@@ -195,7 +195,7 @@ inline void info     (std::string const & msg, Args && ... args)
 template <typename ... Args>
 inline void debug    (std::string const & msg, Args && ... args)
 { debug    (getDefaultLogger(), msg, std::forward<Args>(args) ...); }
-// @formatter:on
+// clang-format on
 
 } // namespace log
 

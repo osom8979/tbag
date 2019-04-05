@@ -135,7 +135,7 @@ Err XmlHelper::opt(Element const & element, std::string const & key, std::string
     return E_PARSING;
 }
 
-// @formatter:off
+// clang-format off
 Err XmlHelper::opt(Element const & element, std::string const & key, bool & result, bool default_value)
 { return __impl::queryText2(element, key, result, default_value, &Element::QueryBoolText); }
 Err XmlHelper::opt(Element const & element, std::string const & key, int & result, int default_value)
@@ -146,9 +146,9 @@ Err XmlHelper::opt(Element const & element, std::string const & key, float & res
 { return __impl::queryText2(element, key, result, default_value, &Element::QueryFloatText); }
 Err XmlHelper::opt(Element const & element, std::string const & key, double & result, double default_value)
 { return __impl::queryText2(element, key, result, default_value, &Element::QueryDoubleText); }
-// @formatter:on
+// clang-format on
 
-// @formatter:off
+// clang-format off
 XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, std::string const & value)
 { return __impl::newChild(element, key, value.c_str()); }
 XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, bool value)
@@ -161,7 +161,7 @@ XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, 
 { return __impl::newChild(element, key, value); }
 XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, double value)
 { return __impl::newChild(element, key, value); }
-// @formatter:on
+// clang-format on
 
 Err XmlHelper::optAttr(Element const & element, std::string const & key, std::string & result, std::string const & default_value)
 {
@@ -174,7 +174,7 @@ Err XmlHelper::optAttr(Element const & element, std::string const & key, std::st
     return E_SUCCESS;
 }
 
-// @formatter:off
+// clang-format off
 Err XmlHelper::optAttr(Element const & element, std::string const & key, bool & result, bool default_value)
 { return __impl::queryAttribute(element, key, result, default_value); }
 Err XmlHelper::optAttr(Element const & element, std::string const & key, int & result, int default_value)
@@ -185,9 +185,9 @@ Err XmlHelper::optAttr(Element const & element, std::string const & key, float &
 { return __impl::queryAttribute(element, key, result, default_value); }
 Err XmlHelper::optAttr(Element const & element, std::string const & key, double & result, double default_value)
 { return __impl::queryAttribute(element, key, result, default_value); }
-// @formatter:on
+// clang-format on
 
-// @formatter:off
+// clang-format off
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, std::string const & value)
 { element.SetAttribute(key.c_str(), value.c_str()); return element; }
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, bool value)
@@ -198,7 +198,7 @@ XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & k
 { element.SetAttribute(key.c_str(), value); return element; }
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, double value)
 { element.SetAttribute(key.c_str(), value); return element; }
-// @formatter:on
+// clang-format on
 
 XmlHelper::Element * XmlHelper::newElement(Element & element, std::string const & tag)
 {

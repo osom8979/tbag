@@ -57,12 +57,12 @@ bool DynamicPython::open(std::string const & path)
 
     _path = path;
 
-    // @formatter:off
+    // clang-format off
     _Py_Initialize      = (Py_Initialize)      _lib.symbol("Py_Initialize");
     _Py_Finalize        = (Py_Finalize)        _lib.symbol("Py_Finalize");
     _PyRun_SimpleString = (PyRun_SimpleString) _lib.symbol("PyRun_SimpleString");
     _PyRun_SimpleFile   = (PyRun_SimpleFile)   _lib.symbol("PyRun_SimpleFile");
-    // @formatter:on
+    // clang-format on
     return true;
 }
 

@@ -127,7 +127,7 @@ enum class UvType : int
     __SIZE__
 };
 
-// @formatter:off
+// clang-format off
 #define _TBAG_XX(name, type) name = static_cast<int>(UvType::name),
 #define _TBAG_NX(name, type)
 enum class UvHandleType  : int { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) };
@@ -135,7 +135,7 @@ enum class UvRequestType : int { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_XX, _TBAG_NX
 enum class UvEtcType     : int { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) };
 #undef _TBAG_XX
 #undef _TBAG_NX
-// @formatter:on
+// clang-format on
 
 /** Short name of uv types. */
 typedef UvType        utype;

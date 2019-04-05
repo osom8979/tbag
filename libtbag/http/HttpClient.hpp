@@ -91,10 +91,10 @@ public:
     virtual ~HttpClient();
 
 public:
-    // @formatter:off
+    // clang-format off
     Loop       & loop();
     Loop const & loop() const;
-    // @formatter:on
+    // clang-format on
 
 private:
     Err sendTls(void const * data, std::size_t size);

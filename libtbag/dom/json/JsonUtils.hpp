@@ -31,7 +31,7 @@ TBAG_API std::string write(Json::Value const & value);
 
 TBAG_API bool exists(Json::Value const & value, std::string const & key);
 
-// @formatter:off
+// clang-format off
 TBAG_API bool existsNull    (Json::Value const & v, std::string const & key);
 TBAG_API bool existsBool    (Json::Value const & v, std::string const & key);
 TBAG_API bool existsInt     (Json::Value const & v, std::string const & key);
@@ -44,7 +44,7 @@ TBAG_API bool existsNumeric (Json::Value const & v, std::string const & key);
 TBAG_API bool existsString  (Json::Value const & v, std::string const & key);
 TBAG_API bool existsArray   (Json::Value const & v, std::string const & key);
 TBAG_API bool existsObject  (Json::Value const & v, std::string const & key);
-// @formatter:on
+// clang-format on
 
 } // namespace json
 } // namespace dom

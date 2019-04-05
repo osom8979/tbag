@@ -26,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace bitwise {
 
-// @formatter:off
+// clang-format off
  int16_t    toHost( int16_t network) TBAG_NOEXCEPT { return ntohs(network); }
 uint16_t    toHost(uint16_t network) TBAG_NOEXCEPT { return ntohs(network); }
  int16_t toNetwork( int16_t    host) TBAG_NOEXCEPT { return htons(host); }
@@ -36,7 +36,7 @@ uint16_t toNetwork(uint16_t    host) TBAG_NOEXCEPT { return htons(host); }
 uint32_t    toHost(uint32_t network) TBAG_NOEXCEPT { return ntohl(network); }
  int32_t toNetwork( int32_t    host) TBAG_NOEXCEPT { return htonl(host); }
 uint32_t toNetwork(uint32_t    host) TBAG_NOEXCEPT { return htonl(host); }
-// @formatter:on
+// clang-format on
 
 int64_t toHost(int64_t network) TBAG_NOEXCEPT
 {

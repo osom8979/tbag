@@ -73,7 +73,7 @@ public:
     { return std::static_pointer_cast<FuncTcp>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose     (FuncTcp::OnClose      const & cb) { lock()->close_cb      = cb; }
     void setOnWalk      (FuncTcp::OnWalk       const & cb) { lock()->walk_cb       = cb; }
     void setOnShutdown  (FuncTcp::OnShutdown   const & cb) { lock()->shutdown_cb   = cb; }
@@ -82,7 +82,7 @@ public:
     void setOnRead      (FuncTcp::OnRead       const & cb) { lock()->read_cb       = cb; }
     void setOnWrite     (FuncTcp::OnWrite      const & cb) { lock()->write_cb      = cb; }
     void setOnConnect   (FuncTcp::OnConnect    const & cb) { lock()->connect_cb    = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);
@@ -116,13 +116,13 @@ public:
 // Utility methods.
 // ----------------
 
-// @formatter:off
+// clang-format off
 TBAG_API Err initCommonClientSock(UxTcp & tcp, UxTcp::ConnectRequest & request, struct sockaddr const * addr);
 TBAG_API Err initCommonClient    (UxTcp & tcp, UxTcp::ConnectRequest & request, std::string const & host, int port);
 
 TBAG_API Err initCommonServerSock(UxTcp & tcp, struct sockaddr const * addr);
 TBAG_API Err initCommonServer    (UxTcp & tcp, std::string const & ip, int port);
-// @formatter:on
+// clang-format on
 
 } // namespace uvxx
 

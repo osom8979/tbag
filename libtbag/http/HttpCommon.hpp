@@ -203,11 +203,11 @@ TBAG_HTTP_METHOD_MAP(_TBAG_XX)
 static_assert(static_cast<int>(HttpMethod::M_UNKNOWN) == TBAG_UNKNOWN_HTTP_METHOD,
               "Unknown HTTP Method number is not equals.");
 
-// @formatter:off
+// clang-format off
 TBAG_API char const * getHttpMethodName  (HttpMethod method) TBAG_NOEXCEPT;
 TBAG_API int          getHttpMethodNumber(HttpMethod method) TBAG_NOEXCEPT;
 TBAG_API HttpMethod   getHttpMethod      (std::string const & name);
-// @formatter:on
+// clang-format on
 
 // HTTP Status Code Definitions.
 // Reference: https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -282,11 +282,11 @@ enum class HttpStatus : int
 #undef _TBAG_XX
 };
 
-// @formatter:off
+// clang-format off
 TBAG_API char const * getHttpStatusName  (HttpStatus status) TBAG_NOEXCEPT;
 TBAG_API char const * getHttpStatusReason(HttpStatus status) TBAG_NOEXCEPT;
 TBAG_API int          getHttpStatusNumber(HttpStatus status) TBAG_NOEXCEPT;
-// @formatter:on
+// clang-format on
 
 TBAG_API HttpStatus getHttpStatus(int status) TBAG_NOEXCEPT;
 TBAG_API HttpStatus getHttpStatus(std::string const & status);
@@ -429,14 +429,14 @@ TBAG_API void clear(HttpRequest & request);
 TBAG_API void clear(HttpResponse & response);
 TBAG_API void clear(HttpProperty & property);
 
-// @formatter:off
+// clang-format off
 TBAG_API void swap(HttpCommon       & lh, HttpCommon       & rh) TBAG_NOEXCEPT;
 TBAG_API void swap(HttpBaseRequest  & lh, HttpBaseRequest  & rh) TBAG_NOEXCEPT;
 TBAG_API void swap(HttpBaseResponse & lh, HttpBaseResponse & rh) TBAG_NOEXCEPT;
 TBAG_API void swap(HttpRequest      & lh, HttpRequest      & rh) TBAG_NOEXCEPT;
 TBAG_API void swap(HttpResponse     & lh, HttpResponse     & rh) TBAG_NOEXCEPT;
 TBAG_API void swap(HttpProperty     & lh, HttpProperty     & rh) TBAG_NOEXCEPT;
-// @formatter:on
+// clang-format on
 
 /**
  * Generally, Called from the server side.
@@ -600,28 +600,28 @@ struct HttpProperty : public HttpCommon, public HttpBaseRequest, public HttpBase
     operator HttpRequest() const
     {
         HttpRequest result;
-        // @formatter:off
+        // clang-format off
         result.http_minor = http_minor;
         result.http_major = http_major;
         result.header     = header;
         result.body       = body;
         result.method     = method;
         result.path       = path;
-        // @formatter:on
+        // clang-format on
         return result;
     }
 
     operator HttpResponse() const
     {
         HttpResponse result;
-        // @formatter:off
+        // clang-format off
         result.http_minor = http_minor;
         result.http_major = http_major;
         result.header     = header;
         result.body       = body;
         result.code       = code;
         result.reason     = reason;
-        // @formatter:on
+        // clang-format on
         return result;
     }
 

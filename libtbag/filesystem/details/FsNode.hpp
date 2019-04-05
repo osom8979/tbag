@@ -53,7 +53,7 @@ TBAG_API std::string appendParent(std::string const & path);
 TBAG_API std::vector<std::string> splitNodes(std::string const & path);
 } // namespace windows
 
-// @formatter:off
+// clang-format off
 inline std::string getNative(std::string const & path)
 { return TBAG_FS_PLATFORM_NAMESPACE::getNative(path); }
 inline std::string getGeneric(std::string const & path)
@@ -72,7 +72,7 @@ inline std::string appendParent(std::string const & path)
 { return TBAG_FS_PLATFORM_NAMESPACE::appendParent(path); }
 inline std::vector<std::string> splitNodes(std::string const & path)
 { return TBAG_FS_PLATFORM_NAMESPACE::splitNodes(path); }
-// @formatter:on
+// clang-format on
 
 TBAG_API std::vector<std::string> splitNodesWithCanonical(std::string const & path);
 

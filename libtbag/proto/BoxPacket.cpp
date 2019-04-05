@@ -78,7 +78,7 @@ static libtbag::proto::fbs::box::AnyArr getAnyArr(libtbag::container::BoxTypeTab
     using namespace libtbag::container;
 
     switch (type) {
-    // @formatter:off
+    // clang-format off
     case BoxTypeTable::BTT_NONE   : return AnyArr_NONE     ;
     case BoxTypeTable::BTT_INT8   : return AnyArr_ByteArr  ;
     case BoxTypeTable::BTT_UINT8  : return AnyArr_UbyteArr ;
@@ -90,7 +90,7 @@ static libtbag::proto::fbs::box::AnyArr getAnyArr(libtbag::container::BoxTypeTab
     case BoxTypeTable::BTT_UINT64 : return AnyArr_UlongArr ;
     case BoxTypeTable::BTT_FLOAT32: return AnyArr_FloatArr ;
     case BoxTypeTable::BTT_FLOAT64: return AnyArr_DoubleArr;
-    // @formatter:on
+    // clang-format on
     default:
         return AnyArr_NONE;
     }
@@ -241,7 +241,7 @@ public:
     {
         using namespace libtbag::proto::fbs::box;
         switch (value_type) {
-        // @formatter:off
+        // clang-format off
         case AnyArr_ByteArr:    return   CreateByteArr(builder, builder.CreateVector(bag.cast<  int8_t>(), bag.size())).Union();
         case AnyArr_UbyteArr:   return  CreateUbyteArr(builder, builder.CreateVector(bag.cast< uint8_t>(), bag.size())).Union();
         case AnyArr_ShortArr:   return  CreateShortArr(builder, builder.CreateVector(bag.cast< int16_t>(), bag.size())).Union();
@@ -253,7 +253,7 @@ public:
         case AnyArr_FloatArr:   return  CreateFloatArr(builder, builder.CreateVector(bag.cast<   float>(), bag.size())).Union();
         case AnyArr_DoubleArr:  return CreateDoubleArr(builder, builder.CreateVector(bag.cast<  double>(), bag.size())).Union();
         default:                break;
-        // @formatter:on
+        // clang-format on
         }
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         return flatbuffers::Offset<void>();
@@ -426,7 +426,7 @@ public:
     {
         using namespace libtbag::proto::fbs::box;
         switch (arr_type) {
-        // @formatter:off
+        // clang-format off
         case AnyArr_ByteArr:    return createBagEx<PairItr,   ByteArr,     char>(itr);
         case AnyArr_UbyteArr:   return createBagEx<PairItr,  UbyteArr,  uint8_t>(itr);
         case AnyArr_ShortArr:   return createBagEx<PairItr,  ShortArr,  int16_t>(itr);
@@ -439,7 +439,7 @@ public:
         case AnyArr_DoubleArr:  return createBagEx<PairItr, DoubleArr,   double>(itr);
         case AnyArr_NONE:       return Box();
         default: TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        // @formatter:on
+        // clang-format on
         }
         return Box();
     }

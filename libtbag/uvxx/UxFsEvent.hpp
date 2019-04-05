@@ -48,12 +48,12 @@ public:
     using EventFlag = FuncFsEvent::EventFlag;
 
 public:
-    // @formatter:off
+    // clang-format off
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_WATCH_ENTRY = FuncFsEvent::EVENT_FLAG_WATCH_ENTRY;
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_STAT        = FuncFsEvent::EVENT_FLAG_STAT       ;
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_RECURSIVE   = FuncFsEvent::EVENT_FLAG_RECURSIVE  ;
     TBAG_CONSTEXPR static EventFlag const EVENT_FLAG_DEFAULT     = FuncFsEvent::EVENT_FLAG_DEFAULT    ;
-    // @formatter:on
+    // clang-format on
 
 public:
     UxFsEvent();
@@ -79,11 +79,11 @@ public:
     { return std::static_pointer_cast<FuncFsEvent>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose  (FuncFsEvent::OnClose   const & cb) { lock()->close_cb    = cb; }
     void setOnWalk   (FuncFsEvent::OnWalk    const & cb) { lock()->walk_cb     = cb; }
     void setOnFsEvent(FuncFsEvent::OnFsEvent const & cb) { lock()->fs_event_cb = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);

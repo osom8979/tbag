@@ -126,37 +126,37 @@ XmlModel::Path XmlModel::getGlobalDir() const
 
 XmlModel::Path XmlModel::getFilePath(Scope scope) const
 {
-    // @formatter:off
+    // clang-format off
     if (scope == Scope::WORK  ) { return getWorkDir  () / getFileName(); }
     if (scope == Scope::EXE   ) { return getExeDir   () / getFileName(); }
     if (scope == Scope::HOME  ) { return getHomeDir  () / getFileName(); }
     if (scope == Scope::GLOBAL) { return getGlobalDir() / getFileName(); }
     return Path::getHomeDir() / getFileName();
-    // @formatter:on
+    // clang-format on
 }
 
 XmlModel::Path XmlModel::findExistsFilePathOfNearest() const
 {
-    // @formatter:off
+    // clang-format off
     Path result;
     if (result = getFilePath(Scope::WORK  ), result.exists()) { return result; }
     if (result = getFilePath(Scope::EXE   ), result.exists()) { return result; }
     if (result = getFilePath(Scope::HOME  ), result.exists()) { return result; }
     if (result = getFilePath(Scope::GLOBAL), result.exists()) { return result; }
     return Path();
-    // @formatter:on
+    // clang-format on
 }
 
 XmlModel::Path XmlModel::findWritablePathOfNearest() const
 {
-    // @formatter:off
+    // clang-format off
     Path result;
     if (result = getFilePath(Scope::WORK  ), result.getParent().isWritable()) { return result; }
     if (result = getFilePath(Scope::EXE   ), result.getParent().isWritable()) { return result; }
     if (result = getFilePath(Scope::HOME  ), result.getParent().isWritable()) { return result; }
     if (result = getFilePath(Scope::GLOBAL), result.getParent().isWritable()) { return result; }
     return Path();
-    // @formatter:on
+    // clang-format on
 }
 
 void XmlModel::teardown()

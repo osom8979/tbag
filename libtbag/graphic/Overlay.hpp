@@ -107,7 +107,7 @@ struct Overlay
     std::string toString() const
     {
         std::stringstream ss;
-        // @formatter:off
+        // clang-format off
         switch (state) {
         case OverlayState::OS_NORMAL: ss << "NORMAL"; break;
         case OverlayState::OS_HOVER:  ss << "HOVER";  break;
@@ -121,7 +121,7 @@ struct Overlay
         if (momentarily_pressed) { ss << ",PRESSED"; }
         if (save_inside_clicked) { ss << ",CLICKED"; }
         if (on_click_event) { ss << ",EVENT"; }
-        // @formatter:on
+        // clang-format on
         return ss.str();
     }
 };

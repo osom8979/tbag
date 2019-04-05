@@ -122,7 +122,7 @@ TYPED_TEST(BagTest, Iterator)
 {
     auto & b = this->bag;
     auto itr = b.begin();
-    // @formatter:off
+    // clang-format off
     ASSERT_EQ( 0, *itr++); ASSERT_NE(b.end(), itr);
     ASSERT_EQ( 1, *itr++); ASSERT_NE(b.end(), itr);
     ASSERT_EQ( 2, *itr++); ASSERT_NE(b.end(), itr);
@@ -147,14 +147,14 @@ TYPED_TEST(BagTest, Iterator)
     ASSERT_EQ(21, *itr++); ASSERT_NE(b.end(), itr);
     ASSERT_EQ(22, *itr++); ASSERT_NE(b.end(), itr);
     ASSERT_EQ(23, *itr++); ASSERT_EQ(b.end(), itr);
-    // @formatter:on
+    // clang-format on
 }
 
 TYPED_TEST(BagTest, ReverseIterator)
 {
     auto & b = this->bag;
     auto itr = b.rbegin();
-    // @formatter:off
+    // clang-format off
     ASSERT_EQ(23, *itr++); ASSERT_NE(b.rend(), itr);
     ASSERT_EQ(22, *itr++); ASSERT_NE(b.rend(), itr);
     ASSERT_EQ(21, *itr++); ASSERT_NE(b.rend(), itr);
@@ -179,7 +179,7 @@ TYPED_TEST(BagTest, ReverseIterator)
     ASSERT_EQ( 2, *itr++); ASSERT_NE(b.rend(), itr);
     ASSERT_EQ( 1, *itr++); ASSERT_NE(b.rend(), itr);
     ASSERT_EQ( 0, *itr++); ASSERT_EQ(b.rend(), itr);
-    // @formatter:on
+    // clang-format on
 }
 
 TEST(BagTest_NoTyped, Default)

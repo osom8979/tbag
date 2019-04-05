@@ -75,12 +75,12 @@ public:
     /** Bind the UDP handle to an IP address and port. */
     Err bind(sockaddr const * addr, unsigned int flags = 0);
 
-    // @formatter:off
+    // clang-format off
     inline Err bind(sockaddr_in  const * addr, unsigned int flags = 0)
     { return bind((struct sockaddr const *)addr, flags); }
     inline Err bind(sockaddr_in6 const * addr, unsigned int flags = 0)
     { return bind((struct sockaddr const *)addr, flags); }
-    // @formatter:on
+    // clang-format on
 
     /** Get the local IP and port of the UDP handle. */
     Err getSockName(sockaddr * name, int * namelen);
@@ -110,7 +110,7 @@ public:
     Err send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr const * addr);
     Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr);
 
-    // @formatter:off
+    // clang-format off
     inline Err send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr_in const * addr)
     { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
     inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in const * addr)
@@ -119,13 +119,13 @@ public:
     { return send(request, infos, infos_size, (struct sockaddr const *)addr); }
     inline Err send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr_in6 const * addr)
     { return send(request, buffer, size, (struct sockaddr const *)addr); }
-    // @formatter:on
+    // clang-format on
 
     /** Same as send(), but won't queue a send request if it can't be completed immediately. */
     std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result = nullptr);
     std::size_t trySend(char const * buffer, std::size_t size, sockaddr const * addr, Err * result = nullptr);
 
-    // @formatter:off
+    // clang-format off
     inline std::size_t trySend(binf * infos, std::size_t infos_size, sockaddr_in const * addr, Err * result = nullptr)
     { return trySend(infos, infos_size, (struct sockaddr const *)addr, result); }
     inline std::size_t trySend(char const * buffer, std::size_t size, sockaddr_in const * addr, Err * result = nullptr)
@@ -134,7 +134,7 @@ public:
     { return trySend(infos, infos_size, (struct sockaddr const *)addr, result); }
     inline std::size_t trySend(char const * buffer, std::size_t size, sockaddr_in6 const * addr, Err * result = nullptr)
     { return trySend(buffer, size, (struct sockaddr const *)addr, result); }
-    // @formatter:on
+    // clang-format on
 
     /** Prepare for receiving data. */
     Err startRecv();

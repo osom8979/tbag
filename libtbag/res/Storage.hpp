@@ -163,7 +163,7 @@ public:
     DynamicAsset const & asset() const TBAG_NOEXCEPT { return _impl->asset; }
 
 public:
-    // @formatter:off
+    // clang-format off
     TBAG_CONSTEXPR static char const * const LAYOUT_ENV      = "env";
     TBAG_CONSTEXPR static char const * const LAYOUT_CONFIG   = "config";
     TBAG_CONSTEXPR static char const * const LAYOUT_MODULE   = "module";
@@ -174,10 +174,10 @@ public:
     TBAG_CONSTEXPR static char const * const LAYOUT_LUA      = "lua";
     TBAG_CONSTEXPR static char const * const LAYOUT_LUAROCKS = "luarocks";
     TBAG_CONSTEXPR static char const * const LAYOUT_USER     = "user";
-    // @formatter:on
+    // clang-format on
 
 public:
-    // @formatter:off
+    // clang-format off
     void setLayoutEnv     (std::string const & dir) { asset().set(LAYOUT_ENV     , Path(dir)); }
     void setLayoutConfig  (std::string const & dir) { asset().set(LAYOUT_CONFIG  , Path(dir)); }
     void setLayoutModule  (std::string const & dir) { asset().set(LAYOUT_MODULE  , Path(dir)); }
@@ -187,7 +187,7 @@ public:
     void setLayoutKeystore(std::string const & dir) { asset().set(LAYOUT_KEYSTORE, Path(dir)); }
     void setLayoutLua     (std::string const & dir) { asset().set(LAYOUT_LUA     , Path(dir)); }
     void setLayoutLuaRocks(std::string const & dir) { asset().set(LAYOUT_LUAROCKS, Path(dir)); }
-    // @formatter:on
+    // clang-format on
 
 public:
     std::vector<std::string> getFilenames(std::string const & key) const;

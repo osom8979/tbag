@@ -45,7 +45,7 @@ STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_FLOAT64, BT_FLOAT64);
 
 bool box_support_type(btype type) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (type) {
     case BOX_TYPE_NONE:    return false;
     case BOX_TYPE_INT8:    return true;
@@ -60,12 +60,12 @@ bool box_support_type(btype type) TBAG_NOEXCEPT
     case BOX_TYPE_FLOAT64: return true;
     default:               return false;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 bool box_support_device(bdev dev) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (dev) {
     case BOX_DEVICE_NONE: return false;
     case BOX_DEVICE_CPU:  return true;
@@ -75,12 +75,12 @@ bool box_support_device(bdev dev) TBAG_NOEXCEPT
     case BOX_DEVICE_FBS:  return false;
     default:              return false;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 char const * const box_get_type_name(btype type) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (type) {
     case BOX_TYPE_NONE:    return "NONE";
     case BOX_TYPE_INT8:    return "INT8";
@@ -95,12 +95,12 @@ char const * const box_get_type_name(btype type) TBAG_NOEXCEPT
     case BOX_TYPE_FLOAT64: return "FLOAT64";
     default:               return "UNKNOWN";
     }
-    // @formatter:on
+    // clang-format on
 }
 
 char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (dev) {
     case BOX_DEVICE_CPU:  return "CPU";
     case BOX_DEVICE_CUDA: return "CUDA";
@@ -110,12 +110,12 @@ char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT
     case BOX_DEVICE_NONE: return "NONE";
     default:              return "UNKNOWN";
     }
-    // @formatter:on
+    // clang-format on
 }
 
 ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (type) {
     case BOX_TYPE_NONE:    return 0;
     case BOX_TYPE_INT8:    return sizeof(si8);
@@ -130,7 +130,7 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
     case BOX_TYPE_FLOAT64: return sizeof(fp64);
     default:               return 0;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 void box_clear(box_data * box) TBAG_NOEXCEPT

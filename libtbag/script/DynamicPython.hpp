@@ -49,12 +49,12 @@ private:
     SharedLibrary _lib;
 
 private:
-    // @formatter:off
+    // clang-format off
     Py_Initialize       _Py_Initialize;
     Py_Finalize         _Py_Finalize;
     PyRun_SimpleString  _PyRun_SimpleString;
     PyRun_SimpleFile    _PyRun_SimpleFile;
-    // @formatter:on
+    // clang-format on
 
 public:
     DynamicPython();

@@ -108,19 +108,19 @@ TBAG_API HttpResponse request(std::string const & uri,
                               HttpCommon const & common,
                               int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 
-// @formatter:off
+// clang-format off
 TBAG_API HttpResponse requestGet   (std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestPost  (std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestPut   (std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestDelete(std::string const & uri, HttpCommon const & common, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
-// @formatter:on
+// clang-format on
 
-// @formatter:off
+// clang-format off
 TBAG_API HttpResponse requestGet   (std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestPost  (std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestPut   (std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
 TBAG_API HttpResponse requestDelete(std::string const & uri, int timeout = DEFAULT_HTTP_TIMEOUT_MILLISEC);
-// @formatter:on
+// clang-format on
 
 } // namespace http
 

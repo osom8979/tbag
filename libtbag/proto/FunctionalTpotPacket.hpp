@@ -50,7 +50,7 @@ public:
     { /* EMPTY. */ }
 
 public:
-    // @formatter:off
+    // clang-format off
     TBAG_VOID_CALLBACK_HELPER(onVersionRequest       , util::Header const &, void*);
     TBAG_VOID_CALLBACK_HELPER(onVersionResponse      , util::Header const &, util::Version const &, util::Pairs const &, void*);
     TBAG_VOID_CALLBACK_HELPER(onEchoRequest          , util::Header const &, std::string const &, void*);
@@ -68,7 +68,7 @@ public:
     TBAG_VOID_CALLBACK_HELPER(onProcessRemoveRequest , util::Header const &, int, void*);
     TBAG_VOID_CALLBACK_HELPER(onProcessRemoveResponse, util::Header const &, void*);
     TBAG_VOID_CALLBACK_HELPER(onParsingError, Err, char const *, std::size_t, void*);
-    // @formatter:on
+    // clang-format on
 };
 
 using FuncTpotPacket = FunctionalTpotPacket<TpotPacket>;

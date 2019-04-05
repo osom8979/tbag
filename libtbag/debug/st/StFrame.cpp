@@ -51,13 +51,13 @@ StFrame::~StFrame()
 StFrame & StFrame::operator =(StFrame const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        // @formatter:off
+        // clang-format off
         addr = obj.addr;
         std::memcpy(name  , obj.name  ,   NAME_MEM_SIZE);
         std::memcpy(source, obj.source, SOURCE_MEM_SIZE);
         offset = obj.offset;
         index  = obj.index;
-        // @formatter:on
+        // clang-format on
     }
     return *this;
 }
@@ -65,13 +65,13 @@ StFrame & StFrame::operator =(StFrame const & obj) TBAG_NOEXCEPT
 StFrame & StFrame::operator =(StFrame && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        // @formatter:off
+        // clang-format off
         std::swap(addr  , obj.addr);
         std::swap(name  , obj.name);
         std::swap(source, obj.source);
         std::swap(offset, obj.offset);
         std::swap(index , obj.index);
-        // @formatter:on
+        // clang-format on
     }
     return *this;
 }

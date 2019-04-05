@@ -166,10 +166,10 @@ public:
 
     bool forward(bool reset = true, bool update = true)
     {
-        // @formatter:off
+        // clang-format off
         if (update) {      updateDataMap(); }
         if ( reset) { resetCompleteFlags(); }
-        // @formatter:on
+        // clang-format on
 
         for (auto & layer : _layers) {
             if (layer.second.layer && layer.second.layer->prev.empty()) {
@@ -183,10 +183,10 @@ public:
 
     bool backward(bool reset = true, bool update = true)
     {
-        // @formatter:off
+        // clang-format off
         if (update) {      updateDataMap(); }
         if ( reset) { resetCompleteFlags(); }
-        // @formatter:on
+        // clang-format on
 
         for (auto & layer : _layers) {
             if (layer.second.layer && layer.second.layer->next.empty()) {

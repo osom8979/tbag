@@ -243,12 +243,12 @@ public:
     }
 
 public:
-    // @formatter:off
+    // clang-format off
     inline bool    empty() const TBAG_NOEXCEPT { return _written_size == 0; }
     inline Size     size() const TBAG_NOEXCEPT { return _written_size;      }
     inline Size    start() const TBAG_NOEXCEPT { return _read_index;        }
     inline Size capacity() const TBAG_NOEXCEPT { return _capacity;          }
-    // @formatter:on
+    // clang-format on
 
     inline Size free() const TBAG_NOEXCEPT
     {
@@ -276,12 +276,12 @@ private:
     }
 
 public:
-    // @formatter:off
+    // clang-format off
     inline       iterator  begin()       { return       iterator(&_buffer[0], start(),      0, capacity()); }
     inline       iterator  end  ()       { return       iterator(&_buffer[0],  last(), size(), capacity()); }
     inline const_iterator cbegin() const { return const_iterator(&_buffer[0], start(),      0, capacity()); }
     inline const_iterator cend  () const { return const_iterator(&_buffer[0],  last(), size(), capacity()); }
-    // @formatter:on
+    // clang-format on
 
 public:
     Size push(Value const * buffer, Size size)
@@ -292,12 +292,12 @@ public:
         Size temp_max  = 0U;
 
         for (; index < size; ++index) {
-            // @formatter:off
+            // clang-format off
             // Call it only once in current loop-cycle.
             // Reason: // TODO
             temp_last = last();
             temp_max  = capacity();
-            // @formatter:on
+            // clang-format on
 
             if (_written_size + 1 > temp_max) {
                 break;

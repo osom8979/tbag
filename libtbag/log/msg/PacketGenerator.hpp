@@ -64,11 +64,11 @@ public:
     ~PacketGenerator();
 
 public:
-    // @formatter:off
+    // clang-format off
     inline void setType(MakeType type) TBAG_NOEXCEPT { _type = type; }
     inline MakeType getType() const TBAG_NOEXCEPT { return _type; }
     inline String getNewLine() const { return _endl; }
-    // @formatter:on
+    // clang-format on
 
 public:
     String make(LogMsgPacket const & packet);

@@ -39,7 +39,7 @@ TBAG_API std::string removeDuplicateSeparatorsWithGeneric(std::string const & pa
 TBAG_API std::string removeLastNode(std::string const & path);
 } // namespace windows
 
-// @formatter:off
+// clang-format off
 inline std::string removeLastSeparator(std::string const & path)
 { return TBAG_FS_PLATFORM_NAMESPACE::removeLastSeparator(path); }
 inline std::string removeDuplicateSeparators(std::string const & path)
@@ -48,7 +48,7 @@ inline std::string removeDuplicateSeparatorsWithGeneric(std::string const & path
 { return TBAG_FS_PLATFORM_NAMESPACE::removeDuplicateSeparatorsWithGeneric(path); }
 inline std::string removeLastNode(std::string const & path)
 { return TBAG_FS_PLATFORM_NAMESPACE::removeLastNode(path); }
-// @formatter:on
+// clang-format on
 
 } // namespace details
 } // namespace filesystem

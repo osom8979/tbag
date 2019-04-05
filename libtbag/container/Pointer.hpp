@@ -106,7 +106,7 @@ struct Pointer
     inline Id id() const TBAG_NOEXCEPT
     { return reinterpret_cast<Id>(ptr); }
 
-    // @formatter:off
+    // clang-format off
     template <typename CastType>
     inline typename std::enable_if<
             std::is_convertible< // void types can not use std::is_convertible.
@@ -120,7 +120,7 @@ struct Pointer
     >::type
     cast() const TBAG_NOEXCEPT
     { return static_cast<CastType*>(ptr); }
-    // @formatter:on
+    // clang-format on
 
     template <typename CastType>
     inline CastType * forceCast() const TBAG_NOEXCEPT

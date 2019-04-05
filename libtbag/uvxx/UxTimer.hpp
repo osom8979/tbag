@@ -67,11 +67,11 @@ public:
     { return std::static_pointer_cast<FuncTimer>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose(FuncTimer::OnClose const & cb) { lock()->close_cb = cb; }
     void setOnWalk (FuncTimer::OnWalk  const & cb) { lock()->walk_cb  = cb; }
     void setOnTimer(FuncTimer::OnTimer const & cb) { lock()->timer_cb = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err init(UxLoop & loop);

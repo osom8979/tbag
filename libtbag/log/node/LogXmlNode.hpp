@@ -182,12 +182,12 @@ public:
     virtual ~LogXmlNode();
 
 public:
-    // @formatter:off
+    // clang-format off
     inline LogInfoVector       & atInfos()       TBAG_NOEXCEPT { return _infos; }
     inline LogInfoVector const & atInfos() const TBAG_NOEXCEPT { return _infos; }
     inline Environments        & atEnvs ()       TBAG_NOEXCEPT { return _envs;  }
     inline Environments  const & atEnvs () const TBAG_NOEXCEPT { return _envs;  }
-    // @formatter:on
+    // clang-format on
 
 protected:
     virtual std::string name() const override;
@@ -218,14 +218,14 @@ public:
     StringVector getNames() const;
 
 public:
-    // @formatter:off
+    // clang-format off
     static std::size_t parseSize         (std::string const & value);
     static bool        parseAutoFlush    (std::string const & value);
     static bool        parseMultiThread  (std::string const & value);
     static bool        parseMutex        (std::string const & value);
     static Severity    parseSeverity     (std::string const & value);
     static MakeType    parseGeneratorType(std::string const & value);
-    // @formatter:on
+    // clang-format on
 
 public:
     static std::string getElementText(Element const * element);

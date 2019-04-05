@@ -38,7 +38,7 @@ using ImageRgb24 = libtbag::container::Array2d<Color>;
 
 using Image = ImageRgb24;
 
-// @formatter:off
+// clang-format off
 template <typename ImageType> struct GetChannels : public std::false_type
 { TBAG_CONSTEXPR static int const channels = 0; };
 
@@ -47,7 +47,7 @@ template <> struct GetChannels<ImageGray> : public std::true_type
 
 template <> struct GetChannels<ImageRgb24> : public std::true_type
 { TBAG_CONSTEXPR static int const channels = 3; };
-// @formatter:off
+// clang-format off
 
 enum class ImageFileFormat
 {

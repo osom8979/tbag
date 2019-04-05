@@ -66,7 +66,7 @@ public:
     using EventType = int;
 
 public:
-    // @formatter:off
+    // clang-format off
     struct init_file
     {
         int fd;
@@ -79,7 +79,7 @@ public:
         init_sock(usock s) : sock(s) { /* EMPTY. */ }
         init_sock & operator = (usock s) { sock = s; return *this; }
     };
-    // @formatter:on
+    // clang-format on
 
 public:
     TBAG_CONSTEXPR static EventType const EVENT_READABLE   = 1;
@@ -117,14 +117,14 @@ public:
     Err stop();
 
 public:
-    // @formatter:off
+    // clang-format off
     inline static bool isEventReadable(EventType event) TBAG_NOEXCEPT
     { return bitwise::checkFlag(event, EVENT_READABLE); }
     inline static bool isEventWritable(EventType event) TBAG_NOEXCEPT
     { return bitwise::checkFlag(event, EVENT_WRITABLE); }
     inline static bool isEventDisconnect(EventType event) TBAG_NOEXCEPT
     { return bitwise::checkFlag(event, EVENT_DISCONNECT); }
-    // @formatter:on
+    // clang-format on
 
 // Event methods.
 public:

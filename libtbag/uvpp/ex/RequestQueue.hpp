@@ -90,7 +90,7 @@ public:
     void release(RequestKey request);
 
 public:
-    // @formatter:off
+    // clang-format off
     WeakRequest find(Request     * request) const { return find(RequestKey(request)); }
     WeakRequest find(SharedRequest request) const { return find(request.get());       }
     WeakRequest find(WeakRequest   request) const { return find(request.lock());      }
@@ -98,7 +98,7 @@ public:
     void release(Request     * request) { release(RequestKey(request)); }
     void release(SharedRequest request) { release(request.get());       }
     void release(WeakRequest   request) { release(request.lock());      }
-    // @formatter:on
+    // clang-format on
 };
 
 #ifndef _TBAG_UV_REQUEST_QUEUE_EX

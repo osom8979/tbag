@@ -65,7 +65,7 @@ public:
     virtual ~Logger();
 
 public:
-    // @formatter:off
+    // clang-format off
     inline void setSeverity(Severity const & severity) TBAG_NOEXCEPT
     { _severity = severity; }
     inline Severity getSeverity() const TBAG_NOEXCEPT
@@ -80,7 +80,7 @@ public:
     { _sink.reset(sink); }
     inline SinkType const * getSink() const TBAG_NOEXCEPT
     { return _sink.get(); }
-    // @formatter:on
+    // clang-format on
 
 public:
     void write(Severity const & severity, String const & message);

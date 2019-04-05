@@ -84,13 +84,13 @@ Err Tty::init(Loop & loop, GeneralFile fd)
 Err Tty::setMode(TtyMode mode)
 {
     uv_tty_mode_t uv_mode = UV_TTY_MODE_NORMAL;
-    // @formatter:off
+    // clang-format off
     switch (mode) {
     case TtyMode::TTY_NORMAL: uv_mode = UV_TTY_MODE_NORMAL; break;
     case TtyMode::TTY_RAW:    uv_mode = UV_TTY_MODE_RAW;    break;
     case TtyMode::TTY_IO:     uv_mode = UV_TTY_MODE_IO;     break;
     }
-    // @formatter:on
+    // clang-format on
 
     // Changed in version 1.2.0::
     // the mode is specified as a uv_tty_mode_t value.
@@ -119,13 +119,13 @@ Err Tty::getWinSize(int * width, int * height)
 
 ufile Tty::toFile(GeneralFile fd) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (fd) {
     case GeneralFile::FILE_STDIN : return 0;
     case GeneralFile::FILE_STDOUT: return 1;
     case GeneralFile::FILE_STDERR: return 2;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 bool Tty::guessHandle(ufile fd)

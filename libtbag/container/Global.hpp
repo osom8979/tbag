@@ -53,18 +53,18 @@ private:
     Map _map;
 
 public:
-    // @formatter:off
+    // clang-format off
     inline bool        empty   () const TBAG_NOEXCEPT_SP_OP(_map.empty   ()) { return _map.empty   (); }
     inline std::size_t size    () const TBAG_NOEXCEPT_SP_OP(_map.size    ()) { return _map.size    (); }
     inline std::size_t max_size() const TBAG_NOEXCEPT_SP_OP(_map.max_size()) { return _map.max_size(); }
-    // @formatter:on
+    // clang-format on
 
 public:
-    // @formatter:off
+    // clang-format off
     inline void   clear() { _map.clear();        }
     inline MapItr begin() { return _map.begin(); }
     inline MapItr   end() { return _map.end();   }
-    // @formatter:on
+    // clang-format on
 
 public:
     template <typename UpObject>

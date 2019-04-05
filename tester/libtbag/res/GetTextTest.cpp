@@ -28,11 +28,11 @@ TBAG_CONSTEXPR static char const * const GET_TEXT_KO_XML = R"(
 
 TEST(GetTextTest, Static)
 {
-    // @formatter:off
+    // clang-format off
     ASSERT_STREQ("resource", std::string(GetText::ROOT_TAG).c_str());
     ASSERT_STREQ("text"    , std::string(GetText::PROP_TAG).c_str());
     ASSERT_STREQ("name"    , std::string(GetText::NAME_ATT).c_str());
-    // @formatter:on
+    // clang-format on
 }
 
 TEST(GetTextTest, Read)

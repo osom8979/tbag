@@ -99,13 +99,13 @@ public:
 // Utility methods.
 // ----------------
 
-// @formatter:off
+// clang-format off
 TBAG_API Err initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr const * addr);
 TBAG_API Err initCommonClient    (Tcp & tcp, ConnectRequest & request, std::string const & host, int port);
 
 TBAG_API Err initCommonServerSock(Tcp & tcp, struct sockaddr const * addr);
 TBAG_API Err initCommonServer    (Tcp & tcp, std::string const & ip, int port);
-// @formatter:on
+// clang-format on
 
 } // namespace uvpp
 

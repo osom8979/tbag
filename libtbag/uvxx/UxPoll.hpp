@@ -49,12 +49,12 @@ public:
     using EventType = FuncPoll::EventType;
 
 public:
-    // @formatter:off
+    // clang-format off
     TBAG_CONSTEXPR static EventType const EVENT_READABLE   = FuncPoll::EVENT_READABLE  ;
     TBAG_CONSTEXPR static EventType const EVENT_WRITABLE   = FuncPoll::EVENT_WRITABLE  ;
     TBAG_CONSTEXPR static EventType const EVENT_DISCONNECT = FuncPoll::EVENT_DISCONNECT;
     TBAG_CONSTEXPR static EventType const EVENT_RW         = FuncPoll::EVENT_RW        ;
-    // @formatter:on
+    // clang-format on
 
 public:
     UxPoll();
@@ -81,11 +81,11 @@ public:
     { return std::static_pointer_cast<FuncPoll>(_handle.lock()); }
 
 public:
-    // @formatter:off
+    // clang-format off
     void setOnClose(FuncPoll::OnClose const & cb) { lock()->close_cb = cb; }
     void setOnWalk (FuncPoll::OnWalk  const & cb) { lock()->walk_cb  = cb; }
     void setOnPoll (FuncPoll::OnPoll  const & cb) { lock()->poll_cb  = cb; }
-    // @formatter:on
+    // clang-format on
 
 public:
     Err initFile(UxLoop & loop, int fd);
@@ -96,11 +96,11 @@ public:
     Err stop();
 
 public:
-    // @formatter:off
+    // clang-format off
     static bool isEventReadable  (EventType event) TBAG_NOEXCEPT;
     static bool isEventWritable  (EventType event) TBAG_NOEXCEPT;
     static bool isEventDisconnect(EventType event) TBAG_NOEXCEPT;
-    // @formatter:on
+    // clang-format on
 };
 
 } // namespace uvxx

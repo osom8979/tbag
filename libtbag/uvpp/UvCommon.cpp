@@ -29,7 +29,7 @@ void release()
     ::uv_loop_close(::uv_default_loop());
 }
 
-// @formatter:off
+// clang-format off
 #define _TBAG_XX(name, type) case UvType::name: return true;
 #define _TBAG_NX(name, type)
 bool isHandle (utype type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_XX, _TBAG_NX, _TBAG_NX) default: return false; } }
@@ -37,7 +37,7 @@ bool isRequest(utype type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_
 bool isEtc    (utype type) { switch (type) { TBAG_UV_HANDLE_MAP(_TBAG_NX, _TBAG_NX, _TBAG_XX) default: return false; } }
 #undef _TBAG_XX
 #undef _TBAG_NX
-// @formatter:on
+// clang-format on
 
 bool isStream(utype type)
 {

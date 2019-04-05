@@ -55,10 +55,10 @@ TBAG_CONSTEXPR MqEvent const ME_CLOSE = -1000;
 inline char const * const getEventName(MqEvent event) TBAG_NOEXCEPT
 {
     switch (event) {
-    // @formatter:off
+    // clang-format off
     case ME_MSG:   return "MSG";
     case ME_CLOSE: return "ME_CLOSE";
-    // @formatter:on
+    // clang-format on
     default:
         if (event > ME_MSG) {
             return "USER";
@@ -118,11 +118,11 @@ struct MqConnectMode
     TBAG_CONSTEXPR static MqMode const mode = MqMode::MM_CONNECT;
 };
 
-// @formatter:off
+// clang-format off
 template <typename T> struct IsMqMode      : public std::false_type { /* EMPTY. */ };
 template <> struct IsMqMode<MqBindMode>    : public std::true_type  { /* EMPTY. */ };
 template <> struct IsMqMode<MqConnectMode> : public std::true_type  { /* EMPTY. */ };
-// @formatter:on
+// clang-format on
 
 TBAG_CONSTEXPR MqBindMode    const MQ_BIND    = MqBindMode{};
 TBAG_CONSTEXPR MqConnectMode const MQ_CONNECT = MqConnectMode{};

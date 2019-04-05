@@ -104,7 +104,7 @@ public:
         }
 
         switch (result) {
-        // @formatter:off
+        // clang-format off
         case LFDS711_MISC_VALIDITY_UNKNOWN:                         return MiscValidity::MV_UNKNOWN                       ;
         case LFDS711_MISC_VALIDITY_VALID:                           return MiscValidity::MV_VALID                         ;
         case LFDS711_MISC_VALIDITY_INVALID_LOOP:                    return MiscValidity::MV_INVALID_LOOP                  ;
@@ -114,7 +114,7 @@ public:
         case LFDS711_MISC_VALIDITY_INVALID_ORDER:                   return MiscValidity::MV_INVALID_ORDER                 ;
         case LFDS711_MISC_VALIDITY_INVALID_ATOMIC_FAILED:           return MiscValidity::MV_INVALID_ATOMIC_FAILED         ;
         case LFDS711_MISC_VALIDITY_INDETERMINATE_NONATOMIC_PASSED:  return MiscValidity::MV_INDETERMINATE_NONATOMIC_PASSED;
-        // @formatter:on
+        // clang-format on
         default:
             TBAG_INACCESSIBLE_BLOCK_ASSERT();
             return MiscValidity::MV_ERROR;

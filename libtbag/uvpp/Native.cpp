@@ -18,7 +18,7 @@ namespace uvpp {
 
 Native::Native(utype t) : TYPE(t), _user(nullptr)
 {
-    // @formatter:off
+    // clang-format off
     switch (TYPE) {
 #define _TBAG_XX(name, type)                    \
         case UvType::name:                      \
@@ -31,7 +31,7 @@ Native::Native(utype t) : TYPE(t), _user(nullptr)
         tDLogE("Native::Native({}) Unknown uv type error.", static_cast<int>(TYPE));
         return;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 Native::Native(int type) : Native(static_cast<utype>(type))

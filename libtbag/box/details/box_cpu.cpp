@@ -54,7 +54,7 @@ inline void _box_cpu_element_copy_select_src(itype begin, itype end, otype outpu
 template <typename itype>
 inline void _box_cpu_element_copy_select_dest(itype src, btype src_type, ui32 size, void * dest) TBAG_NOEXCEPT
 {
-    // @formatter:off
+    // clang-format off
     switch (src_type) {
     case BOX_TYPE_INT8:    _box_cpu_element_copy_select_src(src, src + size, (si8  *)dest); break;
     case BOX_TYPE_INT16:   _box_cpu_element_copy_select_src(src, src + size, (si16 *)dest); break;
@@ -72,7 +72,7 @@ inline void _box_cpu_element_copy_select_dest(itype src, btype src_type, ui32 si
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         break;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
@@ -83,7 +83,7 @@ void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
     assert(dest != src);
     assert(size >= 1);
 
-    // @formatter:off
+    // clang-format off
     switch (dest_type) {
     case BOX_TYPE_INT8:    _box_cpu_element_copy_select_dest((si8  *)src, src_type, size, dest); break;
     case BOX_TYPE_INT16:   _box_cpu_element_copy_select_dest((si16 *)src, src_type, size, dest); break;
@@ -101,7 +101,7 @@ void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         break;
     }
-    // @formatter:on
+    // clang-format on
 }
 
 } // namespace details

@@ -102,7 +102,7 @@ static std::string removeLastNode(std::string const & original_path, PathSeparat
         return std::string();
     }
 
-    // @formatter:off
+    // clang-format off
     icu::UnicodeString path = icu::UnicodeString::fromUTF8(icu::StringPiece(original_path.c_str()));
     if (path.length() <= 0) { return std::string(); }
     removeLast(path, checker,  true); // REMOVE LAST PATH_SEPARATOR.
@@ -111,7 +111,7 @@ static std::string removeLastNode(std::string const & original_path, PathSeparat
     if (path.length() <= 0) { return std::string(); }
     //removeLast(path, checker,  true); // REMOVE LAST PATH_SEPARATOR.
     //if (path.length() <= 0) { return std::string(); }
-    // @formatter:on
+    // clang-format on
 
     std::string result;
     path.toUTF8String(result);

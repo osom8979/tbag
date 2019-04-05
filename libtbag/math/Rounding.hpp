@@ -71,7 +71,7 @@ struct RoundingCastCommon : public RoundingDirectionMode
 
     static_assert(!std::is_unsigned<ResultType>::value, "ResultType must not be a unsigned type.");
 
-    // @formatter:off
+    // clang-format off
     static ResultType   up(      float v) { return static_cast<ResultType>(ceilf (v)); }
     static ResultType   up(     double v) { return static_cast<ResultType>(ceil  (v)); }
     static ResultType   up(long double v) { return static_cast<ResultType>(ceill (v)); }
@@ -81,7 +81,7 @@ struct RoundingCastCommon : public RoundingDirectionMode
     static ResultType zero(      float v) { return static_cast<ResultType>(truncf(v)); }
     static ResultType zero(     double v) { return static_cast<ResultType>(trunc (v)); }
     static ResultType zero(long double v) { return static_cast<ResultType>(truncl(v)); }
-    // @formatter:on
+    // clang-format on
 };
 
 /**
@@ -95,14 +95,14 @@ struct RoundingCast : public RoundingCastCommon<T>
 {
     using ResultType = typename RoundingCastCommon<T>::ResultType;
 
-    // @formatter:off
+    // clang-format off
     static ResultType  rint(      float v) { return static_cast<ResultType>(std::rintf (v)); }
     static ResultType  rint(     double v) { return static_cast<ResultType>(std::rint  (v)); }
     static ResultType  rint(long double v) { return static_cast<ResultType>(std::rintl (v)); }
     static ResultType round(      float v) { return static_cast<ResultType>(std::roundf(v)); }
     static ResultType round(     double v) { return static_cast<ResultType>(std::round (v)); }
     static ResultType round(long double v) { return static_cast<ResultType>(std::roundl(v)); }
-    // @formatter:on
+    // clang-format on
 };
 
 template <>
@@ -110,14 +110,14 @@ struct RoundingCast<long int> : public RoundingCastCommon<long int>
 {
     using ResultType = typename RoundingCastCommon<long int>::ResultType;
 
-    // @formatter:off
+    // clang-format off
     static ResultType  rint(      float v) { return static_cast<ResultType>(std::lrintf (v)); }
     static ResultType  rint(     double v) { return static_cast<ResultType>(std::lrint  (v)); }
     static ResultType  rint(long double v) { return static_cast<ResultType>(std::lrintl (v)); }
     static ResultType round(      float v) { return static_cast<ResultType>(std::lroundf(v)); }
     static ResultType round(     double v) { return static_cast<ResultType>(std::lround (v)); }
     static ResultType round(long double v) { return static_cast<ResultType>(std::lroundl(v)); }
-    // @formatter:on
+    // clang-format on
 };
 
 template <>
@@ -125,14 +125,14 @@ struct RoundingCast<long long int> : public RoundingCastCommon<long long int>
 {
     using ResultType = typename RoundingCastCommon<long long int>::ResultType;
 
-    // @formatter:off
+    // clang-format off
     static ResultType  rint(      float v) { return static_cast<ResultType>(std::llrintf (v)); }
     static ResultType  rint(     double v) { return static_cast<ResultType>(std::llrint  (v)); }
     static ResultType  rint(long double v) { return static_cast<ResultType>(std::llrintl (v)); }
     static ResultType round(      float v) { return static_cast<ResultType>(std::llroundf(v)); }
     static ResultType round(     double v) { return static_cast<ResultType>(std::llround (v)); }
     static ResultType round(long double v) { return static_cast<ResultType>(std::llroundl(v)); }
-    // @formatter:on
+    // clang-format on
 };
 
 template <typename ResultType, typename T>

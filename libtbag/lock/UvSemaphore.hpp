@@ -49,11 +49,11 @@ public:
 
 // Alias methods.
 public:
-    // @formatter:off
+    // clang-format off
     inline void lock   () { wait(); }
     inline bool tryLock() { return tryWait(); }
     inline void unlock () { post(); }
-    // @formatter:on
+    // clang-format on
 };
 
 } // namespace lock

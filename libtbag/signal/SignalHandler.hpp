@@ -145,7 +145,7 @@ TBAG_API void registerDefaultHandler(std::string const & logger_name = std::stri
 
 TBAG_API SignalHandler * createDefaultSignalHandler(std::string const & logger_name = std::string());
 
-// @formatter:off
+// clang-format off
 inline int raise(int signal)
 { return std::raise(signal); }
 
@@ -157,7 +157,7 @@ inline int raise(int signal)
 
 [[ noreturn ]] inline void exitForce(int code) TBAG_NOEXCEPT_SP_OP(std::_Exit(code))
 { std::_Exit(code); }
-// @formatter:on
+// clang-format on
 
 } // namespace signal
 

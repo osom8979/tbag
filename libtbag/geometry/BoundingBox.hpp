@@ -37,12 +37,12 @@ getBoundingBox(BasePoint2<T> const * points, std::size_t size) TBAG_NOEXCEPT
     BasePoint2<__point_tparam> rd = *points;
 
     for (std::size_t i = 1; i < size; ++i) {
-        // @formatter:off
+        // clang-format off
         if ((points + i)->x < lt.x) { lt.x = (points + i)->x; }
         if ((points + i)->y < lt.y) { lt.y = (points + i)->y; }
         if ((points + i)->x > rd.x) { rd.x = (points + i)->x; }
         if ((points + i)->y > rd.y) { rd.y = (points + i)->y; }
-        // @formatter:on
+        // clang-format on
     }
 
     return BaseRect2<__point_tparam>(lt, rd);

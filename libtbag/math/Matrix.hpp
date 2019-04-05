@@ -135,7 +135,7 @@ struct BaseMatrix
     }
 };
 
-// @formatter:off
+// clang-format off
 template <std::size_t c, std::size_t r> using Matrixb  = BaseMatrix<bool    , c, r>;
 template <std::size_t c, std::size_t r> using Matrixc  = BaseMatrix<char    , c, r>;
 template <std::size_t c, std::size_t r> using Matrixs  = BaseMatrix<short   , c, r>;
@@ -146,7 +146,7 @@ template <std::size_t c, std::size_t r> using Matrixll = BaseMatrix<int64_t , c,
 template <std::size_t c, std::size_t r> using Matrixf  = BaseMatrix<float   , c, r>;
 template <std::size_t c, std::size_t r> using Matrixd  = BaseMatrix<double  , c, r>;
 template <std::size_t c, std::size_t r> using Matrix   = Matrixi<c, r>;
-// @formatter:on
+// clang-format on
 
 using Matrix2x2b  = Matrixb <2, 2>;
 using Matrix2x2c  = Matrixc <2, 2>;
