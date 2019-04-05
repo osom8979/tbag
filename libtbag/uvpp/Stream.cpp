@@ -101,7 +101,7 @@ static void __global_uv_read_cb__(uv_stream_t * stream, ssize_t nread, uv_buf_t 
     } else {
         Err code;
         if (nread >= 0){
-            code = Err::E_SUCCESS;
+            code = E_SUCCESS;
         } else {
             code = convertUvErrorToErr(static_cast<int>(nread));
         }
@@ -255,7 +255,7 @@ Err Stream::write(WriteRequest & request, binf const * infos, std::size_t infos_
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Stream::write() buffer info size too large.");
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     request.setOwner(this); // IMPORTANT!!
@@ -288,7 +288,7 @@ std::size_t Stream::tryWrite(binf * infos, std::size_t infos_size, Err * result)
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Stream::tryWrite() buffer info size too large.");
         if (result != nullptr) {
-            *result = Err::E_ILLARGS;
+            *result = E_ILLARGS;
         }
         return 0U;
     }

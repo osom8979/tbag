@@ -299,7 +299,7 @@ Err HttpParser::execute(char const * data, std::size_t size, std::size_t * read_
     std::size_t const EXEC_SIZE = ::http_parser_execute(&_impl->parser, &_impl->settings, data, size);
     if (_impl->parser.http_errno != HPE_OK) {
         tDLogE("HttpParser::execute() Execute {} error", getErrnoName());
-        return Err::E_PARSING;
+        return E_PARSING;
     }
 
     if (isFinish()) {
@@ -311,7 +311,7 @@ Err HttpParser::execute(char const * data, std::size_t size, std::size_t * read_
     if (direction != nullptr) {
         *direction = _impl->__cache__.direction;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 bool HttpParser::shouldKeepAlive() const TBAG_NOEXCEPT

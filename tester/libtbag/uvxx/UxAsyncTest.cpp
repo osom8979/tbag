@@ -23,12 +23,12 @@ TEST(UxAsyncTest, Default)
     UxLoop loop;
     ASSERT_TRUE(loop.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, async.init(loop));
+    ASSERT_EQ(E_SUCCESS, async.init(loop));
     ASSERT_TRUE(async.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, async.init(loop));
+    ASSERT_EQ(E_SUCCESS, async.init(loop));
     ASSERT_TRUE(async.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
@@ -41,8 +41,8 @@ TEST(UxAsyncTest, Default)
         ++close_counter;
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, async.send());
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, async.send());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_TRUE(loop.empty());
 
     ASSERT_EQ(1, async_counter);

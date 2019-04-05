@@ -75,9 +75,9 @@ Err ProcessManager::Proc::exec(std::string const & file,
     try {
         _thread = std::thread(&ProcessManager::Proc::runner, this);
     } catch (...) {
-        return Err::E_UNKEXCP;
+        return E_UNKEXCP;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 bool ProcessManager::Proc::joinable() const
@@ -206,13 +206,13 @@ Err ProcessManager::kill(int pid, int signum)
             if (itr->second->isRunning()) {
                 return itr->second->kill(signum);
             } else {
-                return Err::E_ILLSTATE;
+                return E_ILLSTATE;
             }
         } else {
-            return Err::E_EXPIRED;
+            return E_EXPIRED;
         }
     }
-    return Err::E_ENFOUND;
+    return E_ENFOUND;
 }
 
 void ProcessManager::onOutRead(int pid, char const * buffer, std::size_t size)

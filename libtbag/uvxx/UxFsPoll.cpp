@@ -83,7 +83,7 @@ Err UxFsPoll::init(UxLoop & loop)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxFsPoll::start(char const * path, unsigned int interval)
@@ -91,7 +91,7 @@ Err UxFsPoll::start(char const * path, unsigned int interval)
     if (auto shared = lock()) {
         return shared->start(path, interval);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxFsPoll::stop()
@@ -99,7 +99,7 @@ Err UxFsPoll::stop()
     if (auto shared = lock()) {
         return shared->stop();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 std::string UxFsPoll::getPath()

@@ -99,9 +99,9 @@ struct UnixService::Impl : private Noncopyable
                "Fork child process: SID({}) PGID({}) PPID({}) PID({})",
                (int)sid, (int)pgid, (int)ppid, (int)pid);
 
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 #else
-        return Err::E_ENOSYS;
+        return E_ENOSYS;
 #endif
     }
 
@@ -113,9 +113,9 @@ struct UnixService::Impl : private Noncopyable
             tDLogE("UnixService::Impl::changeRootDirectory() chdir() {} error", CHDIR_ERROR_CODE);
             return CHDIR_ERROR_CODE;
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 #else
-        return Err::E_ENOSYS;
+        return E_ENOSYS;
 #endif
     }
 
@@ -129,9 +129,9 @@ struct UnixService::Impl : private Noncopyable
         ::signal(SIGTTOU, SIG_IGN);
         ::signal(SIGTTIN, SIG_IGN);
 
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 #else
-        return Err::E_ENOSYS;
+        return E_ENOSYS;
 #endif
     }
 
@@ -141,9 +141,9 @@ struct UnixService::Impl : private Noncopyable
         stdin  = freopen("/dev/null", "r", stdin);
         stdout = freopen("/dev/null", "w", stdout);
         stderr = freopen("/dev/null", "w", stderr);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 #else
-        return Err::E_ENOSYS;
+        return E_ENOSYS;
 #endif
     }
 
@@ -151,9 +151,9 @@ struct UnixService::Impl : private Noncopyable
     {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
         umask(0);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 #else
-        return Err::E_ENOSYS;
+        return E_ENOSYS;
 #endif
     }
 
@@ -184,9 +184,9 @@ struct UnixService::Impl : private Noncopyable
         if (write_size == -1) {
             tDLogW("UnixService::Impl::createPidFile() Write PID error: {}", getGlobalSystemError());
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 #else
-        return Err::E_ENOSYS;
+        return E_ENOSYS;
 #endif
     }
 
@@ -198,9 +198,9 @@ struct UnixService::Impl : private Noncopyable
             close(pid_file);
             pid_file = 0;
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 #else
-        return Err::E_ENOSYS;
+        return E_ENOSYS;
 #endif
     }
 };
@@ -223,24 +223,24 @@ UnixService::~UnixService()
 Err UnixService::install()
 {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 #else
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 #endif
 }
 
 Err UnixService::uninstall()
 {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 #else
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 #endif
 }
 
 Err UnixService::start()
 {
-    Err code = Err::E_UNKNOWN;
+    Err code = E_UNKNOWN;
     code = _impl->eliminateControlTerminals();
     if (isFailure(code)) {
         return code;
@@ -256,7 +256,7 @@ Err UnixService::start()
     _impl->createPidFile(_pid_path);
     _impl->reopenStdio();
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UnixService::stop()
@@ -265,7 +265,7 @@ Err UnixService::stop()
     if (_pid_path.empty() == false) {
         filesystem::Path(_pid_path).remove();
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace details

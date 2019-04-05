@@ -103,7 +103,7 @@ Err Version::fromNumeric(uint32_t version, uint32_t major_unit, uint32_t minor_u
     _major = static_cast<uint32_t>(version/major_unit);
     _minor = static_cast<uint32_t>((version-(_major*major_unit))/minor_unit);
     _patch = static_cast<uint32_t>((version-(_major*major_unit)-(_minor*minor_unit))/patch_unit);
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 std::string Version::toString() const
@@ -124,7 +124,7 @@ std::string Version::toLongString() const
 Err Version::fromString(std::string const & version, Version & result)
 {
     if (version.empty()) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     auto tokens = string::splitTokens(version, std::string(POINT_STR));
@@ -140,13 +140,13 @@ Err Version::fromString(std::string const & version, Version & result)
             result.setTweak(version.substr(tokens[0].size() + tokens[1].size() + tokens[2].size() + 3/*POINT('.') COUNT*/));
         }
     } catch (std::invalid_argument & e) {
-        return Err::E_PARSING; // Don't use the Err::E_ILLARGS error (Reason: duplicate return value).
+        return E_PARSING; // Don't use the E_ILLARGS error (Reason: duplicate return value).
     } catch (std::out_of_range & e) {
-        return Err::E_OORANGE;
+        return E_OORANGE;
     } catch (...) {
-        return Err::E_UNKNOWN;
+        return E_UNKNOWN;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 std::string Version::toShortString(Version const & version)

@@ -83,7 +83,7 @@ Err UxUdp::init(UxLoop & loop)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 std::size_t UxUdp::getSendQueueSize() const
@@ -107,7 +107,7 @@ Err UxUdp::open(usock sock)
     if (auto shared = lock()) {
         return shared->open(sock);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::bind(sockaddr const * addr, unsigned int flags)
@@ -115,7 +115,7 @@ Err UxUdp::bind(sockaddr const * addr, unsigned int flags)
     if (auto shared = lock()) {
         return shared->bind(addr, flags);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::getSockName(sockaddr * name, int * namelen)
@@ -123,7 +123,7 @@ Err UxUdp::getSockName(sockaddr * name, int * namelen)
     if (auto shared = lock()) {
         return shared->getSockName(name, namelen);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 std::string UxUdp::getSockIp()
@@ -147,7 +147,7 @@ Err UxUdp::setMembership(char const * multicast_addr, char const * interface_add
     if (auto shared = lock()) {
         return shared->setMembership(multicast_addr, interface_addr, membership);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::setMulticastLoop(bool on)
@@ -155,7 +155,7 @@ Err UxUdp::setMulticastLoop(bool on)
     if (auto shared = lock()) {
         return shared->setMulticastLoop(on);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::setMulticastTtl(int ttl)
@@ -163,7 +163,7 @@ Err UxUdp::setMulticastTtl(int ttl)
     if (auto shared = lock()) {
         return shared->setMulticastTtl(ttl);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::setMulticastInterface(char const * interface_addr)
@@ -171,7 +171,7 @@ Err UxUdp::setMulticastInterface(char const * interface_addr)
     if (auto shared = lock()) {
         return shared->setMulticastInterface(interface_addr);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::setBroadcast(bool on)
@@ -179,7 +179,7 @@ Err UxUdp::setBroadcast(bool on)
     if (auto shared = lock()) {
         return shared->setBroadcast(on);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::setTtl(int ttl)
@@ -187,7 +187,7 @@ Err UxUdp::setTtl(int ttl)
     if (auto shared = lock()) {
         return shared->setTtl(ttl);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::send(UdpSendRequest & request, binf const * infos, std::size_t infos_size, sockaddr const * addr)
@@ -195,7 +195,7 @@ Err UxUdp::send(UdpSendRequest & request, binf const * infos, std::size_t infos_
     if (auto shared = lock()) {
         return shared->send(request, infos, infos_size, addr);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::send(UdpSendRequest & request, char const * buffer, std::size_t size, sockaddr const * addr)
@@ -203,7 +203,7 @@ Err UxUdp::send(UdpSendRequest & request, char const * buffer, std::size_t size,
     if (auto shared = lock()) {
         return shared->send(request, buffer, size, addr);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 std::size_t UxUdp::trySend(binf * infos, std::size_t infos_size, sockaddr const * addr, Err * result)
@@ -212,7 +212,7 @@ std::size_t UxUdp::trySend(binf * infos, std::size_t infos_size, sockaddr const 
         return shared->trySend(infos, infos_size, addr, result);
     }
     if (result != nullptr) {
-        *result = Err::E_EXPIRED;
+        *result = E_EXPIRED;
     }
     return 0;
 }
@@ -223,7 +223,7 @@ std::size_t UxUdp::trySend(char const * buffer, std::size_t size, sockaddr const
         return shared->trySend(buffer, size, addr, result);
     }
     if (result != nullptr) {
-        *result = Err::E_EXPIRED;
+        *result = E_EXPIRED;
     }
     return 0;
 }
@@ -233,7 +233,7 @@ Err UxUdp::startRecv()
     if (auto shared = lock()) {
         return shared->startRecv();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxUdp::stopRecv()
@@ -241,7 +241,7 @@ Err UxUdp::stopRecv()
     if (auto shared = lock()) {
         return shared->stopRecv();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 } // namespace uvxx

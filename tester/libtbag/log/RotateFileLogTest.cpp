@@ -177,7 +177,7 @@ TEST(RotateFileLogTest, LoadXml)
     ASSERT_EQ(1, second_scane.back().getState().size);
 
     std::string content;
-    ASSERT_EQ(Err::E_SUCCESS, readFile(oldest_file, content));
+    ASSERT_EQ(E_SUCCESS, readFile(oldest_file, content));
     ASSERT_EQ(MESSAGE_02_CHAR, content[0]);
 
     removeLogger(LOGGER_NAME);

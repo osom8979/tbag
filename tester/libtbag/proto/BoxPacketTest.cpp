@@ -20,11 +20,11 @@ TEST(BoxPacketTest, UpdateSelf)
     int32_t  const TEST_CODE = 30;
 
     BoxPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
+    ASSERT_EQ(E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, packet.parse(BUILD_BUFFER));
+    ASSERT_EQ(E_SUCCESS, packet.parse(BUILD_BUFFER));
     ASSERT_EQ(TEST_ID, packet.id());
     ASSERT_EQ(TEST_TYPE, packet.type());
     ASSERT_EQ(TEST_CODE, packet.code());
@@ -38,7 +38,7 @@ TEST(BoxPacketTest, UpdateSelf_DataSlice)
     int32_t  const TEST_CODE = 30;
 
     BoxPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
+    ASSERT_EQ(E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
@@ -47,11 +47,11 @@ TEST(BoxPacketTest, UpdateSelf_DataSlice)
     std::copy(BUILD_BUFFER.begin(), BUILD_BUFFER.end(), extend_buffer.begin());
 
     std::size_t computed_size = 0;
-    ASSERT_EQ(Err::E_VERIFIER, packet.parse(extend_buffer.data(), BUFFER_SIZE - 1, &computed_size));
-    ASSERT_EQ(Err::E_SUCCESS, packet.parse(extend_buffer.data(), BUFFER_SIZE + 0, &computed_size));
+    ASSERT_EQ(E_VERIFIER, packet.parse(extend_buffer.data(), BUFFER_SIZE - 1, &computed_size));
+    ASSERT_EQ(E_SUCCESS, packet.parse(extend_buffer.data(), BUFFER_SIZE + 0, &computed_size));
     ASSERT_EQ(BUFFER_SIZE, computed_size);
 
-    ASSERT_EQ(Err::E_SUCCESS, packet.parse(extend_buffer.data(), BUFFER_SIZE + 1, &computed_size));
+    ASSERT_EQ(E_SUCCESS, packet.parse(extend_buffer.data(), BUFFER_SIZE + 1, &computed_size));
     ASSERT_EQ(BUFFER_SIZE, computed_size);
 
     ASSERT_EQ(TEST_ID, packet.id());
@@ -79,12 +79,12 @@ TEST(BoxPacketTest, UpdateSelf_BagEx)
     ASSERT_EQ(1, map.size());
 
     BoxPacket packet1;
-    ASSERT_EQ(Err::E_SUCCESS, packet1.build(map));
+    ASSERT_EQ(E_SUCCESS, packet1.build(map));
     auto const BUILD_BUFFER = packet1.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
     BoxPacket packet2;
-    ASSERT_EQ(Err::E_SUCCESS, packet2.parse(BUILD_BUFFER));
+    ASSERT_EQ(E_SUCCESS, packet2.parse(BUILD_BUFFER));
     ASSERT_FALSE(packet2.boxes().empty());
     ASSERT_EQ(1, packet2.boxes().size());
 
@@ -109,11 +109,11 @@ TEST(BoxPacketTest, UpdateSelf_String)
     int32_t  const TEST_CODE = 30;
 
     BoxPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_TEXT, TEST_ID, TEST_TYPE, TEST_CODE));
+    ASSERT_EQ(E_SUCCESS, packet.build(TEST_TEXT, TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, packet.parse(BUILD_BUFFER));
+    ASSERT_EQ(E_SUCCESS, packet.parse(BUILD_BUFFER));
     ASSERT_EQ(TEST_ID, packet.id());
     ASSERT_EQ(TEST_TYPE, packet.type());
     ASSERT_EQ(TEST_CODE, packet.code());
@@ -132,11 +132,11 @@ TEST(BoxPacketTest, UpdateSelf_KeyValue)
     int32_t  const TEST_CODE = 30;
 
     BoxPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_KEY, TEST_VAL, TEST_ID, TEST_TYPE, TEST_CODE));
+    ASSERT_EQ(E_SUCCESS, packet.build(TEST_KEY, TEST_VAL, TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, packet.parse(BUILD_BUFFER));
+    ASSERT_EQ(E_SUCCESS, packet.parse(BUILD_BUFFER));
     ASSERT_EQ(TEST_ID, packet.id());
     ASSERT_EQ(TEST_TYPE, packet.type());
     ASSERT_EQ(TEST_CODE, packet.code());
@@ -153,19 +153,19 @@ TEST(BoxPacketTest, FindKey)
     std::string const TEST_VAL = "FindKey";
 
     BoxPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_KEY, TEST_VAL));
+    ASSERT_EQ(E_SUCCESS, packet.build(TEST_KEY, TEST_VAL));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
-    Err code = Err::E_UNKNOWN;
+    Err code = E_UNKNOWN;
     auto bag1 = packet.findKey(BUILD_BUFFER, TEST_KEY, &code);
-    ASSERT_EQ(Err::E_SUCCESS, code);
+    ASSERT_EQ(E_SUCCESS, code);
     ASSERT_TRUE(bag1.exists());
     ASSERT_EQ(TEST_VAL, bag1.toString());
 
-    code = Err::E_UNKNOWN;
+    code = E_UNKNOWN;
     auto bag2 = packet.findKey(BUILD_BUFFER, "NotFoundKey", &code);
-    ASSERT_EQ(Err::E_ENFOUND, code);
+    ASSERT_EQ(E_ENFOUND, code);
     ASSERT_FALSE(bag2.exists());
 }
 
@@ -176,11 +176,11 @@ TEST(BoxPacketTest, Assign)
     int32_t  const TEST_CODE = 3;
 
     BoxPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
+    ASSERT_EQ(E_SUCCESS, packet.build(TEST_ID, TEST_TYPE, TEST_CODE));
     auto const BUILD_BUFFER1 = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER1.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, packet.assign(BUILD_BUFFER1));
+    ASSERT_EQ(E_SUCCESS, packet.assign(BUILD_BUFFER1));
     auto const BUILD_BUFFER2 = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER2.empty());
     ASSERT_TRUE(std::equal(BUILD_BUFFER1.begin(), BUILD_BUFFER1.end(), BUILD_BUFFER2.begin(), BUILD_BUFFER2.end()));
@@ -212,13 +212,13 @@ TEST(BoxPacketTest, FileSaveLoad)
     ASSERT_EQ(2, map.size());
 
     BoxPacket packet1;
-    ASSERT_EQ(Err::E_SUCCESS, packet1.build(map, TEST_ID, TEST_TYPE, TEST_CODE));
+    ASSERT_EQ(E_SUCCESS, packet1.build(map, TEST_ID, TEST_TYPE, TEST_CODE));
     ASSERT_FALSE(FILE_PATH.exists());
-    ASSERT_EQ(Err::E_SUCCESS, packet1.saveFile(FILE_PATH));
+    ASSERT_EQ(E_SUCCESS, packet1.saveFile(FILE_PATH));
     ASSERT_TRUE(FILE_PATH.exists());
 
     BoxPacket packet2;
-    ASSERT_EQ(Err::E_SUCCESS, packet2.loadFile(FILE_PATH));
+    ASSERT_EQ(E_SUCCESS, packet2.loadFile(FILE_PATH));
 
     ASSERT_EQ(TEST_ID, packet2.id());
     ASSERT_EQ(TEST_TYPE, packet2.type());

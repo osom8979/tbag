@@ -196,9 +196,9 @@ Err TrueType::loadFromMemory(char const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_impl));
     if (_impl->init(buffer, size)) {
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
-    return Err::E_EINIT;
+    return E_EINIT;
 }
 
 Err TrueType::loadFromMemory(Buffer const & buffer)
@@ -264,7 +264,7 @@ TrueType::Size TrueType::calcSize(CodePoints const & code_points, int line_heigh
 Err TrueType::draw(CodePoints const & code_points, ImageGray & bitmap, int line_height) const
 {
     if (code_points.empty() || line_height < 0) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     assert(static_cast<bool>(_impl));
@@ -293,7 +293,7 @@ Err TrueType::draw(CodePoints const & code_points, ImageGray & bitmap, int line_
         drawAndUpdate(bitmap.data(), code_points[i], ASCENT, SCALE, IMAGE_SIZE.width, next_x);
     }
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err TrueType::drawAscii(std::string const & ascii, ImageGray & bitmap, int line_height) const

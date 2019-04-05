@@ -127,7 +127,7 @@ static Err __enqueue(UniqueQueue & ready, Predicated predicated)
 {
     void * value = nullptr;
     if (!ready->dequeue(&value)) {
-        return Err::E_NREADY;
+        return E_NREADY;
     }
 
     auto * msg = (AsyncMsg*)value;
@@ -136,7 +136,7 @@ static Err __enqueue(UniqueQueue & ready, Predicated predicated)
     if (!predicated(msg)) {
         auto const RESULT = ready->enqueue(value);
         assert(RESULT);
-        return Err::E_ECANCELED;
+        return E_ECANCELED;
     }
 
     auto const CODE = msg->send();
@@ -186,13 +186,13 @@ Err MqEventQueue::restoreMessage(AsyncMsg * msg, bool verify)
             }
         }
         if (!ok) {
-            return Err::E_ILLARGS;
+            return E_ILLARGS;
         }
     }
 
     auto const RESULT = _ready->enqueue(msg);
     assert(RESULT);
-    return RESULT ? Err::E_SUCCESS : Err::E_EPUSH;
+    return RESULT ? E_SUCCESS : E_EPUSH;
 }
 
 } // namespace details

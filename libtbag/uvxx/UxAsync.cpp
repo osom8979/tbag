@@ -83,7 +83,7 @@ Err UxAsync::init(UxLoop & loop)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxAsync::send()
@@ -91,7 +91,7 @@ Err UxAsync::send()
     if (auto shared = lock()) {
         return shared->send();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 } // namespace uvxx

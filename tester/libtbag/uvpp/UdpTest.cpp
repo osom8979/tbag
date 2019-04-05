@@ -50,16 +50,16 @@ TEST(UdpTest, Default)
         idle->close();
     };
 
-    ASSERT_EQ(Err::E_SUCCESS, initAddress(libtbag::net::ANY_IPV4, 0, &recv_ipv4));
-    ASSERT_EQ(Err::E_SUCCESS, recv_udp->bind(&recv_ipv4));
-    ASSERT_EQ(Err::E_SUCCESS, recv_udp->startRecv());
+    ASSERT_EQ(E_SUCCESS, initAddress(libtbag::net::ANY_IPV4, 0, &recv_ipv4));
+    ASSERT_EQ(E_SUCCESS, recv_udp->bind(&recv_ipv4));
+    ASSERT_EQ(E_SUCCESS, recv_udp->startRecv());
 
     int const BIND_PORT = recv_udp->getSockPort();
     std::cout << "Bind port: " << BIND_PORT << std::endl;
-    ASSERT_EQ(Err::E_SUCCESS, initAddress(libtbag::net::LOOPBACK_IPV4, BIND_PORT, &send_ipv4));
+    ASSERT_EQ(E_SUCCESS, initAddress(libtbag::net::LOOPBACK_IPV4, BIND_PORT, &send_ipv4));
 
-    ASSERT_EQ(Err::E_SUCCESS, idle->start());
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, idle->start());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_STREQ(TEST_MESSAGE, recv_string.c_str());
 }
 

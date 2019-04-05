@@ -55,10 +55,10 @@ TEST(TimerTest, Default)
         ++check_close_counter;
     };
 
-    ASSERT_EQ(Err::E_SUCCESS, timer->start(0));
-    ASSERT_EQ(Err::E_SUCCESS, check->start());
-    ASSERT_EQ(Err::E_SUCCESS, prepare->start());
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, timer->start(0));
+    ASSERT_EQ(E_SUCCESS, check->start());
+    ASSERT_EQ(E_SUCCESS, prepare->start());
+    ASSERT_EQ(E_SUCCESS, loop.run());
 
     ASSERT_EQ(1, timer_counter);
     ASSERT_EQ(1, timer_close_counter);

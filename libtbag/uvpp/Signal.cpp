@@ -78,7 +78,7 @@ Err Signal::startOneshot(int signum)
     //int const CODE = ::uv_signal_start_oneshot(Parent::cast<uv_signal_t>(), __global_uv_signal_cb__, signum);
     //return convertUvErrorToErrWithLogging("Signal::startOneshot()", CODE);
 
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 }
 
 Err Signal::stop()

@@ -20,11 +20,11 @@ TEST(FileTest, Default)
     std::string const WRITE_CONTENT = "TEST_CONTENT";
 
     ASSERT_FALSE(path.exists());
-    ASSERT_EQ(Err::E_SUCCESS, writeFile(path, WRITE_CONTENT));
+    ASSERT_EQ(E_SUCCESS, writeFile(path, WRITE_CONTENT));
     ASSERT_TRUE(path.exists());
 
     std::string read_buffer;
-    ASSERT_EQ(Err::E_SUCCESS, readFile(path, read_buffer));
+    ASSERT_EQ(E_SUCCESS, readFile(path, read_buffer));
     ASSERT_EQ(WRITE_CONTENT, read_buffer);
 }
 

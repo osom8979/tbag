@@ -33,7 +33,7 @@ int execute(std::string const & file,
 
     if (EXE_FILE.exists() == false) {
         if (code != nullptr) {
-            *code = Err::E_ENOENT;
+            *code = E_ENOENT;
         }
         tDLogE("execute({}) No such file or directory", file);
         return -1;
@@ -41,7 +41,7 @@ int execute(std::string const & file,
 
     if (EXE_FILE.isExecutable() == false) {
         if (code != nullptr) {
-            *code = Err::E_EACCES;
+            *code = E_EACCES;
         }
         tDLogE("execute({}) Permission denied", file);
         return -1;
@@ -82,16 +82,16 @@ int execute(std::string const & file,
     Err const LOOP_RESULT = loop.run();
     if (isFailure(LOOP_RESULT)) {
         if (code != nullptr) {
-            *code = Err::E_ILLSTATE;
+            *code = E_ILLSTATE;
         }
         tDLogW("execute({}) Loop {} error", file, getErrName(LOOP_RESULT));
     }
 
     if (code != nullptr) {
         if (signal != 0) {
-            *code = Err::E_UNKSIG;
+            *code = E_UNKSIG;
         } else {
-            *code = Err::E_SUCCESS;
+            *code = E_SUCCESS;
         }
     }
 
@@ -117,7 +117,7 @@ int execute(std::vector<std::string> const & args, Err * code)
 {
     if (args.empty()) {
         if (code != nullptr) {
-            *code = Err::E_ILLARGS;
+            *code = E_ILLARGS;
         }
         tDLogW("execute() Illegal arguments");
         return -1;

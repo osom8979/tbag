@@ -83,7 +83,7 @@ Err UxSignal::init(UxLoop & loop)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 int UxSignal::getSignalNumber() const TBAG_NOEXCEPT
@@ -99,7 +99,7 @@ Err UxSignal::start(int signum)
     if (auto shared = lock()) {
         return shared->start(signum);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxSignal::startOneshot(int signum)
@@ -107,7 +107,7 @@ Err UxSignal::startOneshot(int signum)
     if (auto shared = lock()) {
         return shared->startOneshot(signum);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxSignal::stop()
@@ -115,7 +115,7 @@ Err UxSignal::stop()
     if (auto shared = lock()) {
         return shared->stop();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 } // namespace uvxx

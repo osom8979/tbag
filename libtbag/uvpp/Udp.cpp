@@ -101,7 +101,7 @@ static void __global_uv_udp_recv_cb__(uv_udp_t       * handle,
     } else {
         Err code;
         if (nread >= 0){
-            code = Err::E_SUCCESS;
+            code = E_SUCCESS;
         } else {
             code = convertUvErrorToErr(static_cast<int>(nread));
         }
@@ -210,7 +210,7 @@ std::string Udp::getSockIp()
     sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
     int length = SOCKADDR_MAX_BYTE_SIZE;
 
-    if (getSockName(address, &length) != Err::E_SUCCESS) {
+    if (getSockName(address, &length) != E_SUCCESS) {
         return std::string();
     }
     return getIpName(address);
@@ -222,7 +222,7 @@ int Udp::getSockPort()
     sockaddr * address = reinterpret_cast<struct sockaddr *>(buffer);
     int length = SOCKADDR_MAX_BYTE_SIZE;
 
-    if (getSockName(address, &length) != Err::E_SUCCESS) {
+    if (getSockName(address, &length) != E_SUCCESS) {
         return UNKNOWN_PORT_NUMBER;
     }
     return getPortNumber(address);
@@ -316,7 +316,7 @@ Err Udp::send(UdpSendRequest & request, binf const * infos, std::size_t infos_si
 {
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Udp::send() buffer info size too large.");
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     request.setOwner(this); // IMPORTANT!!
@@ -363,7 +363,7 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
     if (infos_size > getBufferInfoSizeMax()) {
         tDLogE("Udp::trySend() buffer info size too large.");
         if (result != nullptr) {
-            *result = Err::E_ILLARGS;
+            *result = E_ILLARGS;
         }
         return 0U;
     }
@@ -385,9 +385,9 @@ std::size_t Udp::trySend(binf * infos, std::size_t infos_size, sockaddr const * 
                                              static_cast<unsigned int>(uv_infos.size()),
                                              addr);
 
-    Err error_code = Err::E_UNKNOWN;
+    Err error_code = E_UNKNOWN;
     if (WRITE_SIZE >= 0) {
-        error_code = Err::E_SUCCESS;
+        error_code = E_SUCCESS;
     } else {
         error_code = convertUvErrorToErrWithLogging("Udp::trySend()", WRITE_SIZE);
     }
@@ -464,7 +464,7 @@ bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr, unsigned int flags
     }
 
     Err const BIND_CODE = udp.bind(addr, flags);
-    if (BIND_CODE != Err::E_SUCCESS) {
+    if (BIND_CODE != E_SUCCESS) {
         tDLogE("initRecvUdpSock() udp bind {} error.", getErrName(BIND_CODE));
         return false;
     }
@@ -474,7 +474,7 @@ bool initRecvUdpSock(Udp & udp, struct sockaddr const * addr, unsigned int flags
 bool initRecvUdp(Udp & udp, std::string const & host, int port, unsigned int flags)
 {
     libtbag::net::SocketAddress addr;
-    if (addr.init(host, port) != Err::E_SUCCESS) {
+    if (addr.init(host, port) != E_SUCCESS) {
         return false;
     }
     return initRecvUdpSock(udp, addr.getCommon());

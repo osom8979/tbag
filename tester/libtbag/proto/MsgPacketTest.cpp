@@ -21,13 +21,13 @@ TEST(MsgPacketTest, Default)
     msg1.buffer.assign(TEST_VALUE.begin(), TEST_VALUE.end());
 
     MsgPacket packet;
-    ASSERT_EQ(Err::E_SUCCESS, packet.build(msg1));
+    ASSERT_EQ(E_SUCCESS, packet.build(msg1));
     auto const BUILD_BUFFER = packet.toBuffer();
     ASSERT_FALSE(BUILD_BUFFER.empty());
 
     MsgPacket::MqMsg msg2;
     std::size_t computed_size = 0;
-    ASSERT_EQ(Err::E_SUCCESS, packet.parse(BUILD_BUFFER, &msg2, &computed_size));
+    ASSERT_EQ(E_SUCCESS, packet.parse(BUILD_BUFFER, &msg2, &computed_size));
     ASSERT_EQ(BUILD_BUFFER.size(), computed_size);
     ASSERT_EQ(TEST_EVENT, msg2.event);
     ASSERT_EQ(TEST_VALUE, std::string(msg2.begin(), msg2.end()));

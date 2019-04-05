@@ -66,10 +66,10 @@ TEST(PollTest, Default)
         lock.unlock();
         idle->close();
     };
-    ASSERT_EQ(Err::E_SUCCESS, idle->start());
-    ASSERT_EQ(Err::E_SUCCESS, fs->start());
+    ASSERT_EQ(E_SUCCESS, idle->start());
+    ASSERT_EQ(E_SUCCESS, fs->start());
 
-    Err loop_result = Err::E_UNKNOWN;
+    Err loop_result = E_UNKNOWN;
     auto thread = std::thread([&](){
         loop_result = loop.run();
     });
@@ -85,7 +85,7 @@ TEST(PollTest, Default)
     ASSERT_TRUE(f.close());
 
     thread.join();
-    ASSERT_EQ(Err::E_SUCCESS, loop_result);
+    ASSERT_EQ(E_SUCCESS, loop_result);
     ASSERT_EQ(1, fs->counter);
 }
 

@@ -74,7 +74,7 @@ Loop const & HttpClient::loop() const
 
 Err HttpClient::sendTls(void const * data, std::size_t size)
 {
-    Err encode_code = Err::E_UNKNOWN;
+    Err encode_code = E_UNKNOWN;
     auto encode_result = _tls.encode(data, size, &encode_code);
     if (isFailure(encode_code)) {
         return encode_code;
@@ -99,7 +99,7 @@ void HttpClient::onBeginTls()
     _tls.connect();
     Err const HANDSHAKE_CODE = _tls.handshake();
     // Handshake is not finished, we can ignore it.
-    assert(HANDSHAKE_CODE == Err::E_SSLWREAD);
+    assert(HANDSHAKE_CODE == E_SSLWREAD);
 
     Buffer buffer;
     Err const WRITE_BUFFER_CODE = _tls.readFromWriteBuffer(buffer);
@@ -139,7 +139,7 @@ void HttpClient::onRecvTls(char const * buffer, std::size_t size)
 {
     switch (_state) {
     case TlsState::TS_NOT_READY:
-        onError(Err::E_ILLSTATE);
+        onError(E_ILLSTATE);
         return;
 
     case TlsState::TS_HANDSHAKE:
@@ -155,7 +155,7 @@ void HttpClient::onRecvTls(char const * buffer, std::size_t size)
         return;
 
     default:
-        onError(Err::E_UNKNOWN);
+        onError(E_UNKNOWN);
         return;
     }
 }
@@ -171,13 +171,13 @@ void HttpClient::onHandshakeHello(char const * buffer, std::size_t size)
     }
 
     Err const HANDSHAKE_CODE = _tls.handshake();
-    if (HANDSHAKE_CODE != Err::E_SSLWREAD) {
+    if (HANDSHAKE_CODE != E_SSLWREAD) {
         onError(HANDSHAKE_CODE);
         return;
     }
 
     // Handshake is not finished, we can ignore it.
-    assert(HANDSHAKE_CODE == Err::E_SSLWREAD);
+    assert(HANDSHAKE_CODE == E_SSLWREAD);
 
     Buffer write_buffer;
     _tls.readFromWriteBuffer(write_buffer); // Skip error code check.
@@ -221,10 +221,10 @@ void HttpClient::onApplication(char const * buffer, std::size_t size)
 {
     assert(_state == TlsState::TS_FINISH);
 
-    Err code = Err::E_UNKNOWN;
+    Err code = E_UNKNOWN;
 
     auto cursor = _tls.decode(buffer, size, &code);
-    if (code == Err::E_SSLWREAD || code == Err::E_SSLEREAD) {
+    if (code == E_SSLWREAD || code == E_SSLEREAD) {
         tDLogD("HttpClient::onApplication() Decode #1 result: {}", getErrName(code));
         return;
     } else if (isFailure(code)) {
@@ -235,9 +235,9 @@ void HttpClient::onApplication(char const * buffer, std::size_t size)
     code = _reader.parse(cursor.data(), cursor.size());
     tDLogD("HttpClient::onApplication() result({}), read({})", getErrName(code), cursor.size());
 
-    while (code == Err::E_CONTINUE) {
+    while (code == E_CONTINUE) {
         cursor = _tls.decode(&code);
-        if (code == Err::E_SSLWREAD || code == Err::E_SSLEREAD) {
+        if (code == E_SSLWREAD || code == E_SSLEREAD) {
             tDLogD("HttpClient::onApplication() Decode #2 result: {}", getErrName(code));
             return;
         } else if (isFailure(code)) {
@@ -352,7 +352,7 @@ Err HttpClient::writeWsRequest(HttpRequest const & request)
 Err HttpClient::writeWsFrame(WsFrame const & frame)
 {
     if (!_reader.isEnableWebsocket()) {
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     Buffer buffer;
@@ -360,7 +360,7 @@ Err HttpClient::writeWsFrame(WsFrame const & frame)
 
     if (SIZE == 0) {
         tDLogE("HttpClient::writeWsFrame() WsFrame -> Buffer copy error");
-        return Err::E_ECOPY;
+        return E_ECOPY;
     }
 
     if (PARAMS.enable_tls) {

@@ -46,13 +46,13 @@ Err StdProcess::spawn(Loop & loop,
         exe_file = findFirstUtf8ExecuteFile("^" + file + "$");
         if (exe_file.empty() == false && exe_file.exists() == false) {
             tDLogE("StdProcess::spawn({}) No such file or directory", file);
-            return Err::E_ENOENT;
+            return E_ENOENT;
         }
     }
 
     if (exe_file.isExecutable() == false) {
         tDLogE("StdProcess::spawn({}) Permission denied", file);
-        return Err::E_EACCES;
+        return E_EACCES;
     }
 
     Process::Options options;
@@ -76,7 +76,7 @@ Err StdProcess::spawn(Loop & loop,
     } else {
         _in = loop.newHandle<FuncPipe>(loop, false);
         _in->write_cb = [&](WriteRequest & request, Err code){
-            if (code != Err::E_SUCCESS) {
+            if (code != E_SUCCESS) {
                 tDLogE("StdProcess::spawn() stdin write {} error", getErrName(code));
             }
             _in->close();
@@ -92,9 +92,9 @@ Err StdProcess::spawn(Loop & loop,
         return uvpp::defaultOnAlloc(_out_buffer, suggested_size);
     };
     _out->read_cb = [&](Err code, char const * buffer, std::size_t size){
-        if (code == Err::E_SUCCESS) {
+        if (code == E_SUCCESS) {
             onOutRead(buffer, size);
-        } else if (code == Err::E_EOF) {
+        } else if (code == E_EOF) {
             _out->close();
         } else {
             tDLogE("StdProcess::spawn() stdout read {} error", getErrName(code));
@@ -111,9 +111,9 @@ Err StdProcess::spawn(Loop & loop,
         return uvpp::defaultOnAlloc(_err_buffer, suggested_size);
     };
     _err->read_cb = [&](Err code, char const * buffer, std::size_t size){
-        if (code == Err::E_SUCCESS) {
+        if (code == E_SUCCESS) {
             onErrRead(buffer, size);
-        } else if (code == Err::E_EOF) {
+        } else if (code == E_EOF) {
             _err->close();
         } else {
             tDLogE("StdProcess::spawn() stderr read {} error", getErrName(code));
@@ -128,9 +128,9 @@ Err StdProcess::spawn(Loop & loop,
     try {
         _process = loop.newHandle<FuncProcess>(loop, options);
     } catch (std::bad_alloc & e) {
-        return Err::E_BADALLOC;
+        return E_BADALLOC;
     } catch (...) {
-        return Err::E_UNKEXCP;
+        return E_UNKEXCP;
     }
 
     _process->exit_cb = [&](int64_t exit_status, int term_signal){
@@ -144,30 +144,30 @@ Err StdProcess::spawn(Loop & loop,
 
     if (input.empty() == false) {
         Err const WRITE_CODE = _in->write(_write_req, input.c_str(), input.size());
-        if (WRITE_CODE != Err::E_SUCCESS) {
+        if (WRITE_CODE != E_SUCCESS) {
             tDLogE("StdProcess::spawn({}) stdin write {} error", file, getErrName(WRITE_CODE));
-            return Err::E_WRERR;
+            return E_WRERR;
         }
     }
 
     Err const STDOUT_READ_CODE = _out->startRead();
-    if (STDOUT_READ_CODE != Err::E_SUCCESS) {
+    if (STDOUT_READ_CODE != E_SUCCESS) {
         tDLogE("StdProcess::spawn({}) stdout read {} error", file, getErrName(STDOUT_READ_CODE));
-        return Err::E_RDERR;
+        return E_RDERR;
     }
 
     Err const STDERR_READ_CODE = _err->startRead();
-    if (STDERR_READ_CODE != Err::E_SUCCESS) {
+    if (STDERR_READ_CODE != E_SUCCESS) {
         tDLogE("StdProcess::spawn({}) stderr read {} error", file, getErrName(STDERR_READ_CODE));
-        return Err::E_RDERR;
+        return E_RDERR;
     }
 
     _pid = _process->getPid();
     if (_pid == 0) {
-        return Err::E_UNKNOWN;
+        return E_UNKNOWN;
     }
     _is_running = true;
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err StdProcess::kill(int signum)
@@ -175,7 +175,7 @@ Err StdProcess::kill(int signum)
     if (static_cast<bool>(_process)) {
         return _process->processKill(signum);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 void StdProcess::onOutRead(char const * buffer, std::size_t size)
@@ -270,7 +270,7 @@ Err subprocess(std::string const & file,
     if (error != nullptr) {
         *error = error_result;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace process

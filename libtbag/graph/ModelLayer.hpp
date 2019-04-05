@@ -91,16 +91,16 @@ public:
         void setName(std::string const & name) { _name = name; }
 
     public:
-        virtual Err setup(std::string const & data) { return Err::E_SUCCESS; }
-        virtual Err teardown() { return Err::E_SUCCESS; }
+        virtual Err setup(std::string const & data) { return E_SUCCESS; }
+        virtual Err teardown() { return E_SUCCESS; }
 
     public:
-        virtual Err  forward(Layers const & input) { return Err::E_SUCCESS; }
-        virtual Err backward(Layers const & input) { return Err::E_SUCCESS; }
+        virtual Err  forward(Layers const & input) { return E_SUCCESS; }
+        virtual Err backward(Layers const & input) { return E_SUCCESS; }
 
     public:
-        virtual Err toData(Buffer & output) const { return Err::E_SUCCESS; }
-        virtual Err fromData(Buffer const & input) { return Err::E_SUCCESS; }
+        virtual Err toData(Buffer & output) const { return E_SUCCESS; }
+        virtual Err fromData(Buffer const & input) { return E_SUCCESS; }
 
     public:
         virtual std::string get(std::string const & key) const { return std::string(); }

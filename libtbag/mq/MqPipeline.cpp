@@ -41,13 +41,13 @@ void MqPipeline::run(bool validate, bool verbose)
         assert(recv != nullptr);
 
         code = recv->recvWait(recv_msg, static_cast<uint64_t>(_wait_nano.load()));
-        if (code == Err::E_TIMEOUT) {
+        if (code == E_TIMEOUT) {
             tDLogIfD(verbose, "MqPipeline::run() Node recv timeout.");
-            onError(Err::E_TIMEOUT);
+            onError(E_TIMEOUT);
             continue;
         }
 
-        if (code == Err::E_ECANCELED) {
+        if (code == E_ECANCELED) {
             tDLogIfI(verbose, "MqPipeline::run() Recv canceled.");
             break;
         }
@@ -57,7 +57,7 @@ void MqPipeline::run(bool validate, bool verbose)
 
         if (validate && recv_msg.size() > libtbag::type::TypeInfo<int>::maximum()) {
             tDLogW("MqPipeline::run() The size of the data is too large, Cancel this message.");
-            onError(Err::E_VERIFIER);
+            onError(E_VERIFIER);
             continue;
         }
 

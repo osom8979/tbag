@@ -123,10 +123,10 @@ public:
     Err front(Value & result)
     {
         if (_active.empty()) {
-            return Err::E_EQUEUE;
+            return E_EQUEUE;
         }
         result = _active.front();
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:
@@ -145,23 +145,23 @@ public:
     Err pop()
     {
         if (_active.empty()) {
-            return Err::E_EQUEUE;
+            return E_EQUEUE;
         }
         _ready.push_back(_active.front());
         _active.pop_front();
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:
     Err frontAndPop(Value & result)
     {
         if (_active.empty()) {
-            return Err::E_EQUEUE;
+            return E_EQUEUE;
         }
         result = _active.front();
         _ready.push_back(_active.front());
         _active.pop_front();
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 };
 

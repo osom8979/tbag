@@ -19,7 +19,7 @@ TEST(ImageIOTest, ReadImage)
     auto path = DemoAsset::get_tester_dir_image() / "lena.png";
 
     Image image;
-    ASSERT_EQ(Err::E_SUCCESS, readImage(path.getString(), image));
+    ASSERT_EQ(E_SUCCESS, readImage(path.getString(), image));
 
     ASSERT_EQ(512, image.width());
     ASSERT_EQ(512, image.height());
@@ -35,17 +35,17 @@ TEST(ImageIOTest, ReadImage)
     ASSERT_EQ( 81, image[image.size() - 1].b);
 
     util::Buffer buffer;
-    ASSERT_EQ(Err::E_SUCCESS, writeImage(buffer, image, ImageFileFormat::IFF_PNG));
+    ASSERT_EQ(E_SUCCESS, writeImage(buffer, image, ImageFileFormat::IFF_PNG));
     ASSERT_FALSE(buffer.empty());
 
     // Save & Load.
     tttDir_Automatic();
     auto const SAVE_PATH = tttDir_Get() / "save.png";
-    ASSERT_EQ(Err::E_SUCCESS, writeImage(SAVE_PATH.getString(), image));
+    ASSERT_EQ(E_SUCCESS, writeImage(SAVE_PATH.getString(), image));
     ASSERT_EQ(buffer.size(), SAVE_PATH.getState().size);
 
     Image reload;
-    ASSERT_EQ(Err::E_SUCCESS, readImage(SAVE_PATH.getString(), reload));
+    ASSERT_EQ(E_SUCCESS, readImage(SAVE_PATH.getString(), reload));
 
     ASSERT_EQ(512, reload.width());
     ASSERT_EQ(512, reload.height());
@@ -66,16 +66,16 @@ TEST(ImageIOTest, UseJpeg)
     auto path = DemoAsset::get_tester_dir_image() / "lena.png";
 
     Image image;
-    ASSERT_EQ(Err::E_SUCCESS, readImage(path.getString(), image));
+    ASSERT_EQ(E_SUCCESS, readImage(path.getString(), image));
 
     // Save & Load.
     tttDir_Automatic();
     auto const JPEG_PATH = tttDir_Get() / "save.jpg";
-    ASSERT_EQ(Err::E_SUCCESS, writeImage(JPEG_PATH.getString(), image));
+    ASSERT_EQ(E_SUCCESS, writeImage(JPEG_PATH.getString(), image));
     ASSERT_TRUE(JPEG_PATH.isRegularFile());
 
     Image reload;
-    ASSERT_EQ(Err::E_SUCCESS, readImage(JPEG_PATH.getString(), reload));
+    ASSERT_EQ(E_SUCCESS, readImage(JPEG_PATH.getString(), reload));
 
     ASSERT_EQ(512, reload.width());
     ASSERT_EQ(512, reload.height());

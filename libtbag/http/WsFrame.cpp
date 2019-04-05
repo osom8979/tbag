@@ -60,7 +60,7 @@ void WsFrame::clear()
 Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_size)
 {
     if (size < WsFrame::MINIMUM_BUFFER_SIZE) {
-        return Err::E_SMALLBUF; // Check minimum size.
+        return E_SMALLBUF; // Check minimum size.
     }
 
     auto temp_opcode = data[0] & 0x0F; // 00001111 00000000 // Forces the first checker.
@@ -78,13 +78,13 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
     auto const PAYLOAD_LENGTH      = getPayloadLength(data);
 
     if (size < MASK_KEY_INDEX) {
-        return Err::E_SMALLBUF; // Check header data.
+        return E_SMALLBUF; // Check header data.
     }
     if (temp_mask && size < DATA_INDEX) {
-        return Err::E_SMALLBUF; // Check masking key.
+        return E_SMALLBUF; // Check masking key.
     }
     if (PAYLOAD_LENGTH > 0 && size < DATA_INDEX + PAYLOAD_LENGTH) {
-        return Err::E_SMALLBUF; // Check payload data.
+        return E_SMALLBUF; // Check payload data.
     }
 
     // Parsing OK !! You are ready to assign.
@@ -113,7 +113,7 @@ Err WsFrame::execute(char const * data, std::size_t size, std::size_t * read_siz
     if (read_size != nullptr) {
         *read_size = calculateBufferSize(payload_length, mask);
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 std::size_t WsFrame::copyTo(char * buffer, std::size_t size) const

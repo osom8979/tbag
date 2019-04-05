@@ -163,7 +163,7 @@ TEST(StorageTest, Module)
     auto const SOURCE_PATH      = Path::getExeDir() / MODULE_NAME;
     auto const DESTINATION_PATH = tttDir_Get() / MODULE_NAME;
 
-    ASSERT_EQ(Err::E_SUCCESS, copyFile(SOURCE_PATH, DESTINATION_PATH));
+    ASSERT_EQ(E_SUCCESS, copyFile(SOURCE_PATH, DESTINATION_PATH));
     ASSERT_TRUE(DESTINATION_PATH.isRegularFile());
 
     Storage storage;

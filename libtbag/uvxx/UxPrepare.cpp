@@ -83,7 +83,7 @@ Err UxPrepare::init(UxLoop & loop)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxPrepare::start()
@@ -91,7 +91,7 @@ Err UxPrepare::start()
     if (auto shared = lock()) {
         return shared->start();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxPrepare::stop()
@@ -99,7 +99,7 @@ Err UxPrepare::stop()
     if (auto shared = lock()) {
         return shared->stop();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 } // namespace uvxx

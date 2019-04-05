@@ -46,7 +46,7 @@ void SafetyAsync::MistakeInspector::onIdle()
         if (queue.empty()) {
             _async.stopInspector();
         } else {
-            if (_async.send() != Err::E_SUCCESS) {
+            if (_async.send() != E_SUCCESS) {
                 tDLogE("SafetyAsync::MistakeInspector::onIdle() send error.");
             }
         }
@@ -91,19 +91,19 @@ void SafetyAsync::closeInspector()
 Err SafetyAsync::startInspector()
 {
     if (static_cast<bool>(_inspector) == false) {
-        return Err::E_EXPIRED;
+        return E_EXPIRED;
     }
 
     if (_inspector->isClosing()) {
-        return Err::E_CLOSING;
+        return E_CLOSING;
     }
 
     if (_inspector->isActive()) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     Err const CODE = _inspector->start();
-    if (CODE != Err::E_SUCCESS) {
+    if (CODE != E_SUCCESS) {
         return CODE;
     }
 
@@ -114,19 +114,19 @@ Err SafetyAsync::startInspector()
 Err SafetyAsync::stopInspector()
 {
     if (static_cast<bool>(_inspector) == false) {
-        return Err::E_EXPIRED;
+        return E_EXPIRED;
     }
 
     if (_inspector->isClosing()) {
-        return Err::E_CLOSING;
+        return E_CLOSING;
     }
 
     if (_inspector->isActive() == false) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     Err const CODE = _inspector->stop();
-    if (CODE != Err::E_SUCCESS) {
+    if (CODE != E_SUCCESS) {
         return CODE;
     }
 
@@ -155,7 +155,7 @@ Err SafetyAsync::sendClose()
     }));
 
     if (static_cast<bool>(job) == false) {
-        return Err::E_BADALLOC;
+        return E_BADALLOC;
     }
     return sendJob(job);
 }
@@ -163,7 +163,7 @@ Err SafetyAsync::sendClose()
 void SafetyAsync::onAsync()
 {
     SharedJob job;
-    if (_jobs.frontAndPop(job) == Err::E_SUCCESS) {
+    if (_jobs.frontAndPop(job) == E_SUCCESS) {
         if (static_cast<bool>(job)) {
             job->run();
         }

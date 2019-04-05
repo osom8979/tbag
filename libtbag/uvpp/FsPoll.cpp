@@ -116,7 +116,7 @@ std::string FsPoll::getPath()
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_fs_poll_getpath(Parent::cast<uv_fs_poll_t>(), name, &size);
-    if (convertUvErrorToErrWithLogging("FsPoll::getPath()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("FsPoll::getPath()", CODE) != E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);

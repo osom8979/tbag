@@ -293,7 +293,7 @@ NAMESPACE_LIBTBAG_CLOSE
 
 inline bool isSuccess(libtbag::Err err) TBAG_NOEXCEPT
 {
-    return err == libtbag::Err::E_SUCCESS;
+    return err == libtbag::E_SUCCESS;
 }
 
 inline bool isFailure(libtbag::Err err) TBAG_NOEXCEPT
@@ -305,13 +305,13 @@ inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
 {
     // @formatter:off
     switch (err) {
-    case libtbag::Err::E_SUCCESS:  return true;
-    case libtbag::Err::E_WARNING:  return true;
-    case libtbag::Err::E_RETRY:    return true;
-    case libtbag::Err::E_CONTINUE: return true;
-    case libtbag::Err::E_ASYNCREQ: return true;
-    case libtbag::Err::E_ENQASYNC: return true;
-    default:                       return false;
+    case libtbag::E_SUCCESS:  return true;
+    case libtbag::E_WARNING:  return true;
+    case libtbag::E_RETRY:    return true;
+    case libtbag::E_CONTINUE: return true;
+    case libtbag::E_ASYNCREQ: return true;
+    case libtbag::E_ENQASYNC: return true;
+    default:                  return false;
     }
     // @formatter:on
 }

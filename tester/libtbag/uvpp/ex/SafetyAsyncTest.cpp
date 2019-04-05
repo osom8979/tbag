@@ -29,7 +29,7 @@ TEST(SafetyAsyncTest, Default)
     std::atomic_int async_counter;
     async_counter.store(0);
 
-    Err loop_result = Err::E_UNKNOWN;
+    Err loop_result = E_UNKNOWN;
     std::thread thread = std::thread([&](){
         loop_result = loop.run();
         is_end = true;
@@ -54,7 +54,7 @@ TEST(SafetyAsyncTest, Default)
     ASSERT_TRUE(is_end.load());
     ASSERT_EQ(0, loop.size());
     ASSERT_EQ(TEST_COUNT, async_counter.load());
-    ASSERT_EQ(Err::E_SUCCESS, loop_result);
+    ASSERT_EQ(E_SUCCESS, loop_result);
 
     ASSERT_TRUE(static_cast<bool>(async));
     ASSERT_TRUE(async->isClosing());

@@ -52,11 +52,11 @@ TEST(ArchiveTest, MemoryArchive)
     auto const IMAGE_PATH = DemoAsset::get_tester_dir_image() / IMAGE_FILE_NAME;
 
     libtbag::util::Buffer image_buffer;
-    ASSERT_EQ(Err::E_SUCCESS, libtbag::filesystem::readFile(IMAGE_PATH.toString(), image_buffer));
+    ASSERT_EQ(E_SUCCESS, libtbag::filesystem::readFile(IMAGE_PATH.toString(), image_buffer));
 
     MemoryArchiveWriter writer;//(COMPRESS_FORMAT_7ZIP);
-    ASSERT_EQ(Err::E_SUCCESS, writer.writeFromFile(IMAGE_PATH.toString()));
-    ASSERT_EQ(Err::E_SUCCESS, writer.close());
+    ASSERT_EQ(E_SUCCESS, writer.writeFromFile(IMAGE_PATH.toString()));
+    ASSERT_EQ(E_SUCCESS, writer.close());
     ASSERT_LT(0, writer.used());
 
     MemoryArchiveReader reader(writer.data(), writer.used());

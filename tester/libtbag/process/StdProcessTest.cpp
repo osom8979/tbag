@@ -42,8 +42,8 @@ TEST(StdProcessTest, InAndOut)
     };
 
     uvpp::Loop loop;
-    ASSERT_EQ(Err::E_SUCCESS, proc.spawn(loop, PATH.toString(), {"out"}, {}, std::string(), TEST_OUT));
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, proc.spawn(loop, PATH.toString(), {"out"}, {}, std::string(), TEST_OUT));
+    ASSERT_EQ(E_SUCCESS, loop.run());
 
     ASSERT_EQ(TEST_OUT, output);
     ASSERT_TRUE(error.empty());
@@ -66,7 +66,7 @@ TEST(StdProcessTest, Subprocess)
     int term = -1;
 
     auto const CODE = subprocess(PATH.toString(), {"out"}, {}, std::string(), TEST_OUT, &exit, &term, &output, &error);
-    ASSERT_EQ(Err::E_SUCCESS, CODE);
+    ASSERT_EQ(E_SUCCESS, CODE);
     ASSERT_EQ(0, exit);
     ASSERT_EQ(0, term);
 

@@ -29,7 +29,7 @@ MqLocalQueue::MqLocalQueue(Loop & loop, MqInternal const & internal, MqParams co
 
     if (params.type != MqType::MT_LOCAL) {
         tDLogE("MqLocalQueue::MqLocalQueue() Unsupported type: {}({})", getTypeName(), getTypeInteger());
-        throw ErrException(Err::E_ILLARGS);
+        throw ErrException(E_ILLARGS);
     }
 
     bool const EVENT_QUEUE_INIT = MqEventQueue::initialize(loop, PARAMS.send_queue_size, PARAMS.send_msg_size);

@@ -36,7 +36,7 @@ UvSemaphore::UvSemaphore(unsigned int value) : _handle(new (std::nothrow) uv_sem
 {
     assert(_handle != nullptr);
     int const CODE = ::uv_sem_init(cast_uv_sem(_handle), value);
-    if (convertUvErrorToErrWithLogging("UvSemaphore::UvSemaphore()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("UvSemaphore::UvSemaphore()", CODE) != E_SUCCESS) {
         throw std::bad_alloc();
     }
 }

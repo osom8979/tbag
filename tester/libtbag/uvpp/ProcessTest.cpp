@@ -45,13 +45,13 @@ TEST(ProcessTest, Default)
         proc->close();
     };
 
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_EQ(0, result_exit_status);
     ASSERT_EQ(0, result_term_signal);
     ASSERT_TRUE(TBPROC_TXT.exists());
 
     std::string buffer;
-    ASSERT_EQ(Err::E_SUCCESS, readFile(TBPROC_TXT, buffer));
+    ASSERT_EQ(E_SUCCESS, readFile(TBPROC_TXT, buffer));
     ASSERT_EQ(std::string(WRITE_BODY), buffer);
     ASSERT_TRUE(TBPROC_TXT.remove());
 }

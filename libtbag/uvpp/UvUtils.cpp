@@ -112,7 +112,7 @@ std::vector<CpuInfo> getCpuInfos()
     // Gets information about the CPUs on the system.
     // The cpu_infos array will have count elements and needs to be freed with uv_free_cpu_info().
     int const CODE = ::uv_cpu_info(&infos, &count);
-    if (convertUvErrorToErrWithLogging("getCpuInfos()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("getCpuInfos()", CODE) != E_SUCCESS) {
         return std::vector<CpuInfo>();
     }
 
@@ -145,7 +145,7 @@ std::vector<InterfaceAddress> getInterfaceAddresses()
     // An array of count elements is allocated and returned in addresses.
     // It must be freed by the user, calling uv_free_interface_addresses().
     int const CODE = uv_interface_addresses(&infos, &count);
-    if (convertUvErrorToErrWithLogging("getInterfaceAddresses()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("getInterfaceAddresses()", CODE) != E_SUCCESS) {
         return std::vector<InterfaceAddress>();
     }
 
@@ -261,21 +261,21 @@ Err getEnv(std::string const & name, std::string & value)
     char * env_value = ::getenv(name.c_str());
     if (env_value != nullptr) {
         value = std::string(env_value);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
-    return Err::E_ENFOUND;
+    return E_ENFOUND;
 }
 
 Err setEnv(std::string const & name, std::string const & value)
 {
     tDLogE("setEnv() Function not implemented.");
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 }
 
 Err unsetEnv(std::string const & name)
 {
     tDLogE("unsetEnv() Function not implemented.");
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 }
 
 std::string getHostName()

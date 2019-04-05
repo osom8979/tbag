@@ -30,22 +30,22 @@ TEST(ExecuteTest, Default)
     }
     ASSERT_FALSE(TBPROC_TXT.exists());
 
-    Err code = Err::E_UNKNOWN;
+    Err code = E_UNKNOWN;
     ASSERT_EQ(0, execute(TBPROC_EXE.toString(), {"file", WRITE_BODY}, &code));
-    ASSERT_EQ(Err::E_SUCCESS, code);
+    ASSERT_EQ(E_SUCCESS, code);
 
     ASSERT_TRUE(TBPROC_TXT.exists());
     std::string buffer;
-    ASSERT_EQ(Err::E_SUCCESS, readFile(TBPROC_TXT, buffer));
+    ASSERT_EQ(E_SUCCESS, readFile(TBPROC_TXT, buffer));
     ASSERT_EQ(std::string(WRITE_BODY), buffer);
     ASSERT_TRUE(TBPROC_TXT.remove());
 }
 
 TEST(ExecuteTest, RunShell)
 {
-    Err code = Err::E_UNKNOWN;
+    Err code = E_UNKNOWN;
     ASSERT_EQ(0, runShellCommand("echo 'Test echo message'", &code));
-    ASSERT_EQ(Err::E_SUCCESS, code);
+    ASSERT_EQ(E_SUCCESS, code);
 }
 
 TEST(ExecuteTest, TestLink)
@@ -63,8 +63,8 @@ TEST(ExecuteTest, TestLink)
     ASSERT_TRUE(filesystem::details::symlink(findDefaultShell().toString(), link_path.toString()));
     ASSERT_TRUE(link_path.exists());
 
-    Err code = Err::E_UNKNOWN;
+    Err code = E_UNKNOWN;
     ASSERT_EQ(0, execute(link_path, {(isWindowsPlatform() ? "/C" : "-c"), "echo 'Test(Link) echo message'"}, &code));
-    ASSERT_EQ(Err::E_SUCCESS, code);
+    ASSERT_EQ(E_SUCCESS, code);
 }
 

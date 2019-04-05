@@ -26,7 +26,7 @@ TEST(WsFrameTest, RequestFrame)
 
     // Request buffer to frame.
     WsFrame frame;
-    ASSERT_EQ(Err::E_SUCCESS, frame.execute((char const *)REQUEST_FRAME, sizeof(REQUEST_FRAME)));
+    ASSERT_EQ(E_SUCCESS, frame.execute((char const *)REQUEST_FRAME, sizeof(REQUEST_FRAME)));
     ASSERT_TRUE(frame.fin);
     ASSERT_FALSE(frame.rsv1);
     ASSERT_FALSE(frame.rsv2);
@@ -71,7 +71,7 @@ TEST(WsFrameTest, RequestFrame)
 //    ASSERT_TRUE(request.isComplete());
 //
 //    HttpBuilder response;
-//    ASSERT_EQ(Err::E_SUCCESS, updateResponseWebSocket(request, response));
+//    ASSERT_EQ(E_SUCCESS, updateResponseWebSocket(request, response));
 //
 //    HttpParser test_response;
 //    test_response.execute(TEST_RESPONSE.c_str(), TEST_RESPONSE.size());
@@ -101,7 +101,7 @@ TEST(WsFrameTest, LargeData)
     ASSERT_EQ(BUFFER_SIZE + 2/*header*/ + 8/*payload_length*/ + 4/*masking*/, REQUEST_SIZE);
     ASSERT_EQ(REQUEST_SIZE, buffer.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), REQUEST_SIZE));
+    ASSERT_EQ(E_SUCCESS, receiver.execute(buffer.data(), REQUEST_SIZE));
     ASSERT_EQ(WsOpCode::WSOC_BINARY_FRAME, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
@@ -130,7 +130,7 @@ TEST(WsFrameTest, TextRequest)
     auto const REQUEST_SIZE = sender.copyTo(buffer);
     ASSERT_LT(0, REQUEST_SIZE);
 
-    ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), REQUEST_SIZE));
+    ASSERT_EQ(E_SUCCESS, receiver.execute(buffer.data(), REQUEST_SIZE));
     ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
@@ -154,7 +154,7 @@ TEST(WsFrameTest, TextResponse)
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
     ASSERT_LT(0, RESPONSE_SIZE);
 
-    ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
+    ASSERT_EQ(E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
     ASSERT_EQ(WsOpCode::WSOC_TEXT_FRAME, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
@@ -178,7 +178,7 @@ TEST(WsFrameTest, PingRequest)
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
     ASSERT_LT(0, RESPONSE_SIZE);
 
-    ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
+    ASSERT_EQ(E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
     ASSERT_EQ(WsOpCode::WSOC_DENOTES_PING, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
@@ -201,7 +201,7 @@ TEST(WsFrameTest, CloseResponse)
     auto const RESPONSE_SIZE = sender.copyTo(buffer);
     ASSERT_LT(0, RESPONSE_SIZE);
 
-    ASSERT_EQ(Err::E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
+    ASSERT_EQ(E_SUCCESS, receiver.execute(buffer.data(), RESPONSE_SIZE));
     ASSERT_EQ(WsOpCode::WSOC_CONNECTION_CLOSE, receiver.opcode);
     ASSERT_TRUE(receiver.fin);
     ASSERT_FALSE(receiver.rsv1);
@@ -228,7 +228,7 @@ TEST(WsFrameTest, Case01)
     ASSERT_EQ(86, req.size());
 
     WsFrame frame;
-    ASSERT_EQ(Err::E_SUCCESS, frame.execute(req.data(), req.size()));
+    ASSERT_EQ(E_SUCCESS, frame.execute(req.data(), req.size()));
     ASSERT_EQ(WsOpCode::WSOC_BINARY_FRAME, frame.opcode);
     ASSERT_EQ(req.size() - 6, frame.payload_length);
     ASSERT_TRUE(frame.fin);

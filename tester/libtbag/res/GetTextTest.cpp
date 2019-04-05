@@ -45,8 +45,8 @@ TEST(GetTextTest, Read)
     auto const KO_PATH = PATH / KO_NAME;
 
     using namespace libtbag::filesystem;
-    ASSERT_EQ(Err::E_SUCCESS, writeFile(EN_PATH.toString(), GET_TEXT_EN_XML));
-    ASSERT_EQ(Err::E_SUCCESS, writeFile(KO_PATH.toString(), GET_TEXT_KO_XML));
+    ASSERT_EQ(E_SUCCESS, writeFile(EN_PATH.toString(), GET_TEXT_EN_XML));
+    ASSERT_EQ(E_SUCCESS, writeFile(KO_PATH.toString(), GET_TEXT_KO_XML));
     ASSERT_TRUE(EN_PATH.isRegularFile());
     ASSERT_TRUE(KO_PATH.isRegularFile());
 

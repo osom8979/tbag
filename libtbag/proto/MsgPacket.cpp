@@ -111,7 +111,7 @@ public:
     {
         clear();
         builder.PushFlatBuffer(buffer, size);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     std::string toJsonString() const
@@ -139,7 +139,7 @@ public:
         using namespace libtbag::proto::fbs::msg;
         clear();
         finish(CreateMsgPacket(builder, event, builder.CreateVector(data, size)));
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 };
 
@@ -232,7 +232,7 @@ Err MsgPacketParser::parse(char const * buffer, std::size_t size, MqMsg * msg, s
 #endif
 
     if (!VERIFY_RESULT) {
-        return Err::E_VERIFIER;
+        return E_VERIFIER;
     }
 
     if (msg != nullptr) {
@@ -240,7 +240,7 @@ Err MsgPacketParser::parse(char const * buffer, std::size_t size, MqMsg * msg, s
         msg->event = (MqEvent)PACKET->event();
         msg->buffer.assign(PACKET->data()->begin(), PACKET->data()->end());
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err MsgPacketParser::parse(Buffer const & buffer, MqMsg * msg, std::size_t * computed_size)

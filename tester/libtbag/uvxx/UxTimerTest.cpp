@@ -37,17 +37,17 @@ TEST(UxTimerTest, Default)
     UxLoop loop;
     ASSERT_TRUE(loop.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, prepare.init(loop));
+    ASSERT_EQ(E_SUCCESS, prepare.init(loop));
     ASSERT_TRUE(prepare.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, timer.init(loop));
+    ASSERT_EQ(E_SUCCESS, timer.init(loop));
     ASSERT_TRUE(timer.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, check.init(loop));
+    ASSERT_EQ(E_SUCCESS, check.init(loop));
     ASSERT_TRUE(check.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(3, loop.size());
@@ -76,10 +76,10 @@ TEST(UxTimerTest, Default)
         ++check_close_counter;
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, timer.start(0));
-    ASSERT_EQ(Err::E_SUCCESS, check.start());
-    ASSERT_EQ(Err::E_SUCCESS, prepare.start());
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, timer.start(0));
+    ASSERT_EQ(E_SUCCESS, check.start());
+    ASSERT_EQ(E_SUCCESS, prepare.start());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_TRUE(loop.empty());
 
     ASSERT_EQ(1, timer_counter);

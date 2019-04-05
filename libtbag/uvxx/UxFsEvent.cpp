@@ -83,7 +83,7 @@ Err UxFsEvent::init(UxLoop & loop)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxFsEvent::start(char const * path, EventFlag flags)
@@ -91,7 +91,7 @@ Err UxFsEvent::start(char const * path, EventFlag flags)
     if (auto shared = lock()) {
         return shared->start(path, flags);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxFsEvent::stop()
@@ -99,7 +99,7 @@ Err UxFsEvent::stop()
     if (auto shared = lock()) {
         return shared->stop();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 std::string UxFsEvent::getPath()

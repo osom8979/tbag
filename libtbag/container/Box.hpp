@@ -433,7 +433,7 @@ public:
         static_assert(BoxTypeInfo<RealT>::is_egg_type, "Unsupported Box type.");
 
         Err const CODE = create<RealT>();
-        if (CODE != Err::E_ALREADY && CODE != Err::E_SUCCESS) {
+        if (CODE != E_ALREADY && CODE != E_SUCCESS) {
             return CODE;
         }
         return resize(std::forward<Args>(args) ...);
@@ -495,10 +495,10 @@ public:
     {
         if (!_bag) {
             assert(_type == BoxTypeTable::BTT_NONE);
-            return Err::E_NREADY;
+            return E_NREADY;
         }
         if (size > this->size() - offset) {
-            return Err::E_SMALLBUF;
+            return E_SMALLBUF;
         }
 
         switch (_type) {
@@ -516,10 +516,10 @@ public:
         // @formatter:on
         default:
             assert(false && "Unknown type assertion.");
-            return Err::E_UNKNOWN;
+            return E_UNKNOWN;
         }
 
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:
@@ -565,7 +565,7 @@ public:
             return CODE;
         }
         std::copy(content.begin(), content.end(), cast<RealT>());
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:

@@ -144,7 +144,7 @@ public:
         using namespace libtbag::proto::fbs::box;
         clear();
         builder.PushFlatBuffer(buffer, size);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     std::string toJsonString() const
@@ -167,7 +167,7 @@ public:
         using namespace libtbag::proto::fbs::box;
         clear();
         finish(CreateBoxPacket(builder, id, type, code));
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err build(uint64_t id, int32_t type, int32_t code, BoxMap const & boxes)
@@ -175,7 +175,7 @@ public:
         using namespace libtbag::proto::fbs::box;
         clear();
         finish(CreateBoxPacket(builder, id, type, code, createPairs(boxes)));
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err build(uint64_t id, int32_t type, int32_t code, std::string const & content)
@@ -183,7 +183,7 @@ public:
         using namespace libtbag::proto::fbs::box;
         clear();
         finish(CreateBoxPacket(builder, id, type, code, createPairs(content)));
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err build(uint64_t id, int32_t type, int32_t code, std::string const & key, std::string const & val)
@@ -191,7 +191,7 @@ public:
         using namespace libtbag::proto::fbs::box;
         clear();
         finish(CreateBoxPacket(builder, id, type, code, createPairs(key, val)));
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     PairOffsetVectorOffset createPairs(BoxMap const boxes)
@@ -373,19 +373,19 @@ public:
 #endif
 
         if (!VERIFY_RESULT) {
-            return std::make_pair(Err::E_VERIFIER, COMPUTED_SIZE);
+            return std::make_pair(E_VERIFIER, COMPUTED_SIZE);
         }
 
         auto const * PACKET = GetBoxPacket(buffer);
         _parent->onHeader(PACKET->id(), PACKET->type(), PACKET->code(), arg);
         if (only_header) {
-            return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
+            return std::make_pair(E_SUCCESS, COMPUTED_SIZE);
         }
 
         auto const * PAIRS = PACKET->pairs();
         if (PAIRS == nullptr) {
             // Not exists 'pairs'.
-            return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
+            return std::make_pair(E_SUCCESS, COMPUTED_SIZE);
         }
 
         _parent->onPairSize(PACKET->pairs()->size(), arg);
@@ -399,26 +399,26 @@ public:
 
             auto const VAL_TYPE = itr->val_type();
             if (!(AnyArr_MIN <= COMPARE_AND(VAL_TYPE) <= AnyArr_MAX)) {
-                return std::make_pair(Err::E_ENOMSG, COMPUTED_SIZE);
+                return std::make_pair(E_ENOMSG, COMPUTED_SIZE);
             }
 
             if (!VerifyAnyArr(verifier, itr->val(), VAL_TYPE)) {
                 // Use 'Parsing error' to distinguish it from 'Verifier error' at the top.
-                return std::make_pair(Err::E_PARSING, COMPUTED_SIZE);
+                return std::make_pair(E_PARSING, COMPUTED_SIZE);
             }
 
             _parent->onPair(std::string(itr->key()->str()), createBagEx(itr, VAL_TYPE), arg);
             if (!FIND_KEY.empty() && FIND_KEY == itr->key()->str()) {
                 // Found the key !! Exit the loop.
-                return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
+                return std::make_pair(E_SUCCESS, COMPUTED_SIZE);
             }
         }
 
         if (!FIND_KEY.empty()) {
             // Not found the key.
-            return std::make_pair(Err::E_ENFOUND, COMPUTED_SIZE);
+            return std::make_pair(E_ENFOUND, COMPUTED_SIZE);
         }
-        return std::make_pair(Err::E_SUCCESS, COMPUTED_SIZE);
+        return std::make_pair(E_SUCCESS, COMPUTED_SIZE);
     }
 
     template <typename PairItr>

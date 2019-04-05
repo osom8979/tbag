@@ -34,17 +34,17 @@ TEST(UxUdpTest, Default)
     UxLoop loop;
     ASSERT_TRUE(loop.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, recv_udp.init(loop));
+    ASSERT_EQ(E_SUCCESS, recv_udp.init(loop));
     ASSERT_TRUE(recv_udp.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, send_udp.init(loop));
+    ASSERT_EQ(E_SUCCESS, send_udp.init(loop));
     ASSERT_TRUE(send_udp.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, idle.init(loop));
+    ASSERT_EQ(E_SUCCESS, idle.init(loop));
     ASSERT_TRUE(idle.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(3, loop.size());
@@ -74,16 +74,16 @@ TEST(UxUdpTest, Default)
     std::string const ANY_IPV4      = libtbag::net::ANY_IPV4;
     std::string const LOOPBACK_IPV4 = libtbag::net::LOOPBACK_IPV4;
 
-    ASSERT_EQ(Err::E_SUCCESS, libtbag::uvpp::initAddress(ANY_IPV4, 0, &recv_ipv4));
-    ASSERT_EQ(Err::E_SUCCESS, recv_udp.bind(&recv_ipv4));
-    ASSERT_EQ(Err::E_SUCCESS, recv_udp.startRecv());
+    ASSERT_EQ(E_SUCCESS, libtbag::uvpp::initAddress(ANY_IPV4, 0, &recv_ipv4));
+    ASSERT_EQ(E_SUCCESS, recv_udp.bind(&recv_ipv4));
+    ASSERT_EQ(E_SUCCESS, recv_udp.startRecv());
 
     int const BIND_PORT = recv_udp.getSockPort();
     std::cout << "Bind port: " << BIND_PORT << std::endl;
-    ASSERT_EQ(Err::E_SUCCESS, libtbag::uvpp::initAddress(LOOPBACK_IPV4, BIND_PORT, &send_ipv4));
+    ASSERT_EQ(E_SUCCESS, libtbag::uvpp::initAddress(LOOPBACK_IPV4, BIND_PORT, &send_ipv4));
 
-    ASSERT_EQ(Err::E_SUCCESS, idle.start());
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, idle.start());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_TRUE(loop.empty());
 
     ASSERT_STREQ(TEST_MESSAGE, recv_string.c_str());

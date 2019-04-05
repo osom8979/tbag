@@ -16,7 +16,7 @@ TEST(box_api_test, Default)
 {
     box_data box1;
     box_clear(&box1);
-    ASSERT_EQ(Err::E_SUCCESS, box_malloc_args(&box1, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 1));
+    ASSERT_EQ(E_SUCCESS, box_malloc_args(&box1, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 1));
     box_free(&box1);
 }
 

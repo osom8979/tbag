@@ -42,13 +42,13 @@ TEST(UxPollTest, Default)
     ASSERT_TRUE(f.open(PATH));
     ASSERT_TRUE(f.isOpen());
 
-    ASSERT_EQ(Err::E_SUCCESS, poll.initFile(loop, static_cast<int>(f.getFd())));
+    ASSERT_EQ(E_SUCCESS, poll.initFile(loop, static_cast<int>(f.getFd())));
     ASSERT_TRUE(poll.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
 
     UxIdle idle;
-    ASSERT_EQ(Err::E_SUCCESS, idle.init(loop));
+    ASSERT_EQ(E_SUCCESS, idle.init(loop));
     ASSERT_TRUE(idle.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
@@ -64,13 +64,13 @@ TEST(UxPollTest, Default)
         lock.unlock();
         idle.close();
     });
-    ASSERT_EQ(Err::E_SUCCESS, idle.start());
+    ASSERT_EQ(E_SUCCESS, idle.start());
 
     using EventType = UxPoll::EventType;
 
     int event_counter = 0;
     int close_counter = 0;
-    Err poll_status = Err::E_UNKNOWN;
+    Err poll_status = E_UNKNOWN;
 
     poll.setOnPoll([&](Err status, EventType events){
         ++event_counter;
@@ -81,9 +81,9 @@ TEST(UxPollTest, Default)
         ++close_counter;
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, poll.start());
+    ASSERT_EQ(E_SUCCESS, poll.start());
 
-    Err loop_result = Err::E_UNKNOWN;
+    Err loop_result = E_UNKNOWN;
     auto thread = std::thread([&](){
         loop_result = loop.run();
     });
@@ -100,9 +100,9 @@ TEST(UxPollTest, Default)
 
     thread.join();
     ASSERT_TRUE(loop.empty());
-    ASSERT_EQ(Err::E_SUCCESS, loop_result);
+    ASSERT_EQ(E_SUCCESS, loop_result);
     ASSERT_EQ(1, event_counter);
     ASSERT_EQ(1, close_counter);
-    ASSERT_EQ(Err::E_SUCCESS, poll_status);
+    ASSERT_EQ(E_SUCCESS, poll_status);
 }
 

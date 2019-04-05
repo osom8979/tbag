@@ -80,7 +80,7 @@ static Err __enqueue(UniqueQueue & ready, UniqueQueue & active, Predicated predi
 {
     void * value = nullptr;
     if (!ready->dequeue(&value)) {
-        return Err::E_NREADY;
+        return E_NREADY;
     }
 
     auto * msg = (MqMsg*)value;
@@ -88,12 +88,12 @@ static Err __enqueue(UniqueQueue & ready, UniqueQueue & active, Predicated predi
     if (!predicated(msg)) {
         auto const RESULT = ready->enqueue(value);
         assert(RESULT);
-        return Err::E_ECANCELED;
+        return E_ECANCELED;
     }
 
     auto const RESULT = active->enqueue(value);
     assert(RESULT);
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 template <typename Predicated>
@@ -101,7 +101,7 @@ static Err __dequeue(UniqueQueue & ready, UniqueQueue & active, Predicated predi
 {
     void * value = nullptr;
     if (!active->dequeue(&value)) {
-        return Err::E_NREADY;
+        return E_NREADY;
     }
 
     auto * msg = (MqMsg*)value;
@@ -109,12 +109,12 @@ static Err __dequeue(UniqueQueue & ready, UniqueQueue & active, Predicated predi
     if (!predicated(msg)) {
         auto const RESULT = active->enqueue(value);
         assert(RESULT);
-        return Err::E_ECANCELED;
+        return E_ECANCELED;
     }
 
     auto const RESULT = ready->enqueue(value);
     assert(RESULT);
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err MqQueue::enqueue(MqMsg const & msg)

@@ -35,7 +35,7 @@ MqStreamServer::MqStreamServer(Loop & loop, MqInternal const & internal, MqParam
 
     if (params.type != MqType::MT_PIPE && params.type != MqType::MT_TCP) {
         tDLogE("MqStreamServer::MqStreamServer() Unsupported type: {}({})", getTypeName(), getTypeInteger());
-        throw ErrException(Err::E_ILLARGS);
+        throw ErrException(E_ILLARGS);
     }
 
     createTerminator(loop);
@@ -223,7 +223,7 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
 {
     assert(node != nullptr);
 
-    if (code == Err::E_EOF) {
+    if (code == E_EOF) {
         tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() End of file.");
         if (!node->isClosing()) {
             node->close();
@@ -284,7 +284,7 @@ void MqStreamServer::onNodeRead(Stream * node, Err code, char const * buffer, st
             tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Remaining size: {}",
                      REMAINING_SIZE - computed_total);
         } else {
-            assert(parse_code == Err::E_VERIFIER);
+            assert(parse_code == E_VERIFIER);
             if (computed_size) {
                 tDLogIfD(PARAMS.verbose, "MqStreamServer::onNodeRead() Verify error "
                          "(remaining size: {}, Required size: {})",
@@ -449,7 +449,7 @@ void MqStreamServer::onInitStep2_INIT()
     assert(_server->isInit());
 
     if (_exit) {
-        onInit_FAILURE(Err::E_ECANCELED);
+        onInit_FAILURE(E_ECANCELED);
         return;
     }
 
@@ -460,12 +460,12 @@ void MqStreamServer::onInitStep2_INIT()
                 tDLogI("MqStreamServer::onInitStep2_INIT() Remove named pipe: {}", PARAMS.address);
             } else {
                 tDLogE("MqStreamServer::onInitStep2_INIT() Failed to remove named pipe: {}", PARAMS.address);
-                onInit_FAILURE(Err::E_UNKNOWN);
+                onInit_FAILURE(E_UNKNOWN);
                 return;
             }
         } else {
             tDLogE("MqStreamServer::onInitStep2_INIT() Exists named pipe: {}", PARAMS.address);
-            onInit_FAILURE(Err::E_EEXIST);
+            onInit_FAILURE(E_EEXIST);
             return;
         }
     }

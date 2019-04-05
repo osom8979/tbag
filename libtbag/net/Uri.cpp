@@ -332,12 +332,12 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
 {
     if (!isHost()) {
         tDLogE("Uri::requestAddrInfo() Unknown host: {}", _uri);
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     if (!isPort() && !isSchema()) {
         tDLogE("Uri::requestAddrInfo() Unknown schema or port: {}", _uri);
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     std::string const HOST    = getHost();
@@ -349,7 +349,7 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
     libtbag::uvpp::DnsAddrInfo addr;
 
     Err const REQUEST_RESULT = addr.requestAddrInfoWithSync(loop, HOST, SERVICE);
-    if (REQUEST_RESULT != Err::E_SUCCESS) {
+    if (REQUEST_RESULT != E_SUCCESS) {
         return REQUEST_RESULT;
     }
 
@@ -364,7 +364,7 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
     if (info == nullptr) {
         info = addr.findFirst();
         if (info == nullptr) {
-            return Err::E_ENFOUND;
+            return E_ENFOUND;
         }
     }
 
@@ -376,7 +376,7 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
         port = libtbag::uvpp::getPortNumber(info);
     }
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 // ------------------

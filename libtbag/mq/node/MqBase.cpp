@@ -128,7 +128,7 @@ Err MqBase::enqueueReceiveForSingleProducer(MqMsg const & msg)
 Err MqBase::exit()
 {
     if (_state == libtbag::mq::details::MqMachineState::MMS_CLOSED) {
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     assert(static_cast<bool>(_terminator));
@@ -145,7 +145,7 @@ Err MqBase::exit()
     ++_exiting;
     Err code;
     if (_terminator->isClosing()) {
-        code = Err::E_CLOSING;
+        code = E_CLOSING;
     } else {
         code = _terminator->send();
     }
@@ -156,7 +156,7 @@ Err MqBase::exit()
 Err MqBase::send(MqMsg const & msg)
 {
     if (!libtbag::mq::details::isActiveState(_state)) {
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     // [WARNING]
@@ -190,7 +190,7 @@ Err MqBase::waitEnable(uint64_t timeout_nano)
     _wait_lock.lock();
     while (true) {
         if (_wait_enable) {
-            code = Err::E_SUCCESS;
+            code = E_SUCCESS;
             break;
         }
 
@@ -199,7 +199,7 @@ Err MqBase::waitEnable(uint64_t timeout_nano)
         } else {
             _wait_cond.wait(_wait_lock, (TIMEOUT - (system_clock::now() - BEGIN)).count());
             if ((system_clock::now() - BEGIN) >= TIMEOUT) {
-                code = Err::E_TIMEOUT;
+                code = E_TIMEOUT;
                 break;
             }
         }
@@ -223,7 +223,7 @@ Err MqBase::waitRecv(MqMsg & msg, uint64_t timeout_nano)
             break;
         }
         if (!_wait_enable) {
-            code = Err::E_ECANCELED;
+            code = E_ECANCELED;
             break;
         }
 
@@ -232,7 +232,7 @@ Err MqBase::waitRecv(MqMsg & msg, uint64_t timeout_nano)
         } else {
             _wait_cond.wait(_wait_lock, (TIMEOUT - (system_clock::now() - BEGIN)).count());
             if ((system_clock::now() - BEGIN) >= TIMEOUT) {
-                code = Err::E_TIMEOUT;
+                code = E_TIMEOUT;
                 break;
             }
         }

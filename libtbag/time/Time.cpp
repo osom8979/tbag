@@ -411,7 +411,7 @@ Err getTimeOfDay(long * sec, long * micro)
     if (micro != nullptr) {
         *micro = u;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace time

@@ -222,51 +222,51 @@ std::string convertByteArrayToHexStringBox(uint8_t const * bytes, std::size_t si
 Err convertHexCharToHalfByte(char hex_char, uint8_t & result)
 {
     switch (hex_char) {
-    case '0': result = 0x0; return Err::E_SUCCESS;
-    case '1': result = 0x1; return Err::E_SUCCESS;
-    case '2': result = 0x2; return Err::E_SUCCESS;
-    case '3': result = 0x3; return Err::E_SUCCESS;
-    case '4': result = 0x4; return Err::E_SUCCESS;
-    case '5': result = 0x5; return Err::E_SUCCESS;
-    case '6': result = 0x6; return Err::E_SUCCESS;
-    case '7': result = 0x7; return Err::E_SUCCESS;
-    case '8': result = 0x8; return Err::E_SUCCESS;
-    case '9': result = 0x9; return Err::E_SUCCESS;
+    case '0': result = 0x0; return E_SUCCESS;
+    case '1': result = 0x1; return E_SUCCESS;
+    case '2': result = 0x2; return E_SUCCESS;
+    case '3': result = 0x3; return E_SUCCESS;
+    case '4': result = 0x4; return E_SUCCESS;
+    case '5': result = 0x5; return E_SUCCESS;
+    case '6': result = 0x6; return E_SUCCESS;
+    case '7': result = 0x7; return E_SUCCESS;
+    case '8': result = 0x8; return E_SUCCESS;
+    case '9': result = 0x9; return E_SUCCESS;
     case 'A':
-    case 'a': result = 0xA; return Err::E_SUCCESS;
+    case 'a': result = 0xA; return E_SUCCESS;
     case 'B':
-    case 'b': result = 0xB; return Err::E_SUCCESS;
+    case 'b': result = 0xB; return E_SUCCESS;
     case 'C':
-    case 'c': result = 0xC; return Err::E_SUCCESS;
+    case 'c': result = 0xC; return E_SUCCESS;
     case 'D':
-    case 'd': result = 0xD; return Err::E_SUCCESS;
+    case 'd': result = 0xD; return E_SUCCESS;
     case 'E':
-    case 'e': result = 0xE; return Err::E_SUCCESS;
+    case 'e': result = 0xE; return E_SUCCESS;
     case 'F':
-    case 'f': result = 0xF; return Err::E_SUCCESS;
+    case 'f': result = 0xF; return E_SUCCESS;
     }
-    return Err::E_PARSING;
+    return E_PARSING;
 }
 
 Err convertHexCharToByte(char high_char, char low_char, uint8_t & result)
 {
     uint8_t high = 0x00;
     uint8_t  low = 0x00;
-    if (convertHexCharToHalfByte(high_char, high) != Err::E_SUCCESS) {
-        return Err::E_PARSING;
+    if (convertHexCharToHalfByte(high_char, high) != E_SUCCESS) {
+        return E_PARSING;
     }
-    if (convertHexCharToHalfByte(low_char, low) != Err::E_SUCCESS) {
-        return Err::E_PARSING;
+    if (convertHexCharToHalfByte(low_char, low) != E_SUCCESS) {
+        return E_PARSING;
     }
     result = (high << 4) | low;
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err convertHexStringToBuffer(char const * hex_string, std::size_t length, libtbag::util::Buffer & buffer)
 {
     if ((length & 0x1) == 0x1) {
         tDLogE("convertHexStringToBuffer() Odd length strings are not supported.");
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
     assert(hex_string != nullptr);
     assert(length >= 1);
@@ -283,7 +283,7 @@ Err convertHexStringToBuffer(char const * hex_string, std::size_t length, libtba
         }
         buffer[i/2] = (libtbag::util::Buffer::value_type)byte;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 TBAG_CONSTEXPR char const TBAG_HEX_ARRAY_BYTES[] = "0123456789ABCDEF";

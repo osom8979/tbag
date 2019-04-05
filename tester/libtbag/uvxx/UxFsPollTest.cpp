@@ -34,24 +34,24 @@ TEST(UxFsPollTest, Default)
     UxLoop loop;
     ASSERT_TRUE(loop.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, fs.init(loop));
+    ASSERT_EQ(E_SUCCESS, fs.init(loop));
     ASSERT_TRUE(fs.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, fs.init(loop));
+    ASSERT_EQ(E_SUCCESS, fs.init(loop));
     ASSERT_TRUE(fs.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
 
     UxIdle idle;
-    ASSERT_EQ(Err::E_SUCCESS, idle.init(loop));
+    ASSERT_EQ(E_SUCCESS, idle.init(loop));
     ASSERT_TRUE(idle.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(3, loop.size());
 
     UxCheck check;
-    ASSERT_EQ(Err::E_SUCCESS, check.init(loop));
+    ASSERT_EQ(E_SUCCESS, check.init(loop));
     ASSERT_TRUE(check.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(4, loop.size());
@@ -68,7 +68,7 @@ TEST(UxFsPollTest, Default)
         lock.unlock();
         idle.close();
     });
-    ASSERT_EQ(Err::E_SUCCESS, idle.start());
+    ASSERT_EQ(E_SUCCESS, idle.start());
 
     check.setOnCheck([&](){
         lock.lock();
@@ -77,7 +77,7 @@ TEST(UxFsPollTest, Default)
         lock.unlock();
         check.close();
     });
-    ASSERT_EQ(Err::E_SUCCESS, check.start());
+    ASSERT_EQ(E_SUCCESS, check.start());
 
     libtbag::filesystem::File f;
     ASSERT_TRUE(f.open(PATH));
@@ -86,7 +86,7 @@ TEST(UxFsPollTest, Default)
     int event_counter = 0;
     int close_counter = 0;
     int change_size = 0;
-    Err fs_status = Err::E_UNKNOWN;
+    Err fs_status = E_UNKNOWN;
 
     using FileState = UxFsPoll::FileState;
     fs.setOnFsPoll([&](Err status, FileState const & prev, FileState const & curr){
@@ -99,9 +99,9 @@ TEST(UxFsPollTest, Default)
         ++close_counter;
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, fs.start(PATH.c_str()));
+    ASSERT_EQ(E_SUCCESS, fs.start(PATH.c_str()));
 
-    Err loop_result = Err::E_UNKNOWN;
+    Err loop_result = E_UNKNOWN;
     auto thread = std::thread([&](){
         loop_result = loop.run();
     });
@@ -122,10 +122,10 @@ TEST(UxFsPollTest, Default)
 
     thread.join();
     ASSERT_TRUE(loop.empty());
-    ASSERT_EQ(Err::E_SUCCESS, loop_result);
+    ASSERT_EQ(E_SUCCESS, loop_result);
     ASSERT_EQ(1, event_counter);
     ASSERT_EQ(1, close_counter);
     ASSERT_EQ(WRITE_SIZE, change_size);
-    ASSERT_EQ(Err::E_SUCCESS, fs_status);
+    ASSERT_EQ(E_SUCCESS, fs_status);
 }
 

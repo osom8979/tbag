@@ -27,9 +27,9 @@ TEST(DnsTest, DnsAddrInfo)
     //hints.ai_flags    = AI_PASSIVE;  // Fill in my IP for me.
 
     DnsAddrInfo addr;
-    ASSERT_EQ(Err::E_SUCCESS, addr.requestAddrInfo(loop, TEST_DOMAIN_NAME, "http"));
+    ASSERT_EQ(E_SUCCESS, addr.requestAddrInfo(loop, TEST_DOMAIN_NAME, "http"));
 
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_NE(nullptr, addr.getAddrInfo());
 
     ASSERT_LT(0, addr.getAddrInfo()->ai_addrlen);
@@ -84,10 +84,10 @@ TEST(DnsTest, DnsNameInfo)
     Loop loop;
     DnsNameInfo name;
     struct sockaddr_in addr = {0,};
-    ASSERT_EQ(Err::E_SUCCESS, initAddress(TEST_IP_NAME, 0, &addr));
-    ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfo(loop, (sockaddr*)&addr, 0));
+    ASSERT_EQ(E_SUCCESS, initAddress(TEST_IP_NAME, 0, &addr));
+    ASSERT_EQ(E_SUCCESS, name.requestNameInfo(loop, (sockaddr*)&addr, 0));
 
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_FALSE(name.getHost().empty()); // localhost/HostName/ETC ...
     std::cout << "Ip: " << TEST_IP_NAME << " -> Domain: " << name.getHost() << std::endl;
 }
@@ -98,7 +98,7 @@ TEST(DnsTest, RemoteServer)
     Loop loop;
 
     DnsAddrInfo addr;
-    ASSERT_EQ(Err::E_SUCCESS, addr.requestAddrInfoWithSync(loop, TEST_DOMAIN_NAME));
+    ASSERT_EQ(E_SUCCESS, addr.requestAddrInfoWithSync(loop, TEST_DOMAIN_NAME));
     ASSERT_NE(nullptr, addr.getAddrInfo());
 
     ASSERT_LT(0, addr.getAddrInfo()->ai_addrlen);
@@ -119,12 +119,12 @@ TEST(DnsTest, RemoteServer)
         DnsNameInfo name;
         if (libtbag::net::isIpv4(ip)) {
             struct sockaddr_in addr = {0,};
-            ASSERT_EQ(Err::E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
-            ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
+            ASSERT_EQ(E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
+            ASSERT_EQ(E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
         } else if (libtbag::net::isIpv6(ip)) {
             struct sockaddr_in6 addr = {0,};
-            ASSERT_EQ(Err::E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
-            ASSERT_EQ(Err::E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
+            ASSERT_EQ(E_SUCCESS, initAddress(ip.c_str(), 0, &addr));
+            ASSERT_EQ(E_SUCCESS, name.requestNameInfoWithSync(loop, (sockaddr*)&addr, 0));
         }
 
         ASSERT_FALSE(name.getHost().empty());

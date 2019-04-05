@@ -77,7 +77,7 @@ static void __global_uv_read_tls_cb__(uv_stream_t * stream, ssize_t nread, uv_bu
 //    } else {
 //        Err code;
 //        if (nread >= 0){
-//            code = Err::E_SUCCESS;
+//            code = E_SUCCESS;
 //        } else {
 //            code = convertUvErrorToErr(static_cast<int>(nread));
 //        }

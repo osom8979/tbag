@@ -62,7 +62,7 @@ MqIsConsume onRecvCb(MqMsg const & msg, void * parent)
 // ---------------------
 
 MqNode::MqNode(MqParams const & params, MqMode mode, no_init_t)
-        : PARAMS(params), MODE(mode), _pool(THREAD_SIZE), _last(Err::E_EBUSY), _callbacks()
+        : PARAMS(params), MODE(mode), _pool(THREAD_SIZE), _last(E_EBUSY), _callbacks()
 {
     assert(!static_cast<bool>(_mq));
 }
@@ -74,7 +74,7 @@ MqNode::MqNode(std::string const & uri, MqMode mode, no_init_t)
 }
 
 MqNode::MqNode(MqParams const & params, MqMode mode, Callbacks const & cbs)
-        : PARAMS(params), MODE(mode), _pool(THREAD_SIZE), _last(Err::E_EBUSY), _callbacks(cbs)
+        : PARAMS(params), MODE(mode), _pool(THREAD_SIZE), _last(E_EBUSY), _callbacks(cbs)
 {
     MqInternal internal;
     internal.accept_cb = &onAcceptCb;

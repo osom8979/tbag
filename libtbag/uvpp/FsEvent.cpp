@@ -95,7 +95,7 @@ std::string FsEvent::getPath()
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_fs_event_getpath(Parent::cast<uv_fs_event_t>(), name, &size);
-    if (convertUvErrorToErrWithLogging("FsEvent::getPath()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("FsEvent::getPath()", CODE) != E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);

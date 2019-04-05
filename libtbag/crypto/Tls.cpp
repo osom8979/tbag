@@ -307,19 +307,19 @@ struct Tls::Impl : private Noncopyable
             // Call SSL_shutdown() for a second time, if a bidirectional shutdown shall be performed.
             // The output of SSL_get_error(3) may be misleading,
             // as an erroneous SSL_ERROR_SYSCALL may be flagged even though no error occurred.
-            return Err::E_SSL;
+            return E_SSL;
         } else if (CODE == 1) {
             // The shutdown was successfully completed. The "close notify" alert was sent
             // and the peer's "close notify" alert was received.
-            return Err::E_SUCCESS;
+            return E_SUCCESS;
         } else if (CODE < 0) {
             // The shutdown was not successful
             // because a fatal error occurred either at the protocol level or a connection failure occurred.
             // It can also occur if action is need to continue the operation for non-blocking BIOs.
             // Call SSL_get_error(3) with the return value ret to find out the reason.
-            return Err::E_SSL;
+            return E_SSL;
         } else {
-            return Err::E_UNKNOWN;
+            return E_UNKNOWN;
         }
     }
 
@@ -330,7 +330,7 @@ struct Tls::Impl : private Noncopyable
         if (CODE == 0) {
             // The TLS/SSL handshake was successfully completed,
             // a TLS/SSL connection has been established.
-            return Err::E_SUCCESS;
+            return E_SUCCESS;
         } else if (CODE == 1) {
             // The TLS/SSL handshake was not successful
             // but was shut down controlled and by the specifications of the TLS/SSL protocol.
@@ -340,20 +340,20 @@ struct Tls::Impl : private Noncopyable
             // because a fatal error occurred either at the protocol level or a connection failure occurred.
             // The shutdown was not clean.
         } else {
-            return Err::E_UNKNOWN;
+            return E_UNKNOWN;
         }
 
         // @formatter:off
         auto const REASON = SSL_get_error(ssl.get(), CODE);
         switch (REASON) {
-        case SSL_ERROR_NONE:              return Err::E_SSL_NONE;
-        case SSL_ERROR_SSL:               return Err::E_SSL;
-        case SSL_ERROR_WANT_READ:         return Err::E_SSLWREAD;
-        case SSL_ERROR_WANT_WRITE:        return Err::E_SSLWWRITE;
-        case SSL_ERROR_WANT_X509_LOOKUP:  return Err::E_SSLWX509;
+        case SSL_ERROR_NONE:              return E_SSL_NONE;
+        case SSL_ERROR_SSL:               return E_SSL;
+        case SSL_ERROR_WANT_READ:         return E_SSLWREAD;
+        case SSL_ERROR_WANT_WRITE:        return E_SSLWWRITE;
+        case SSL_ERROR_WANT_X509_LOOKUP:  return E_SSLWX509;
         default:
             tDLogE("Tls::Impl::handshake() OpenSSL SSL_do_handshake() error: code({}) reason({})", CODE, REASON);
-            return Err::E_UNKNOWN;
+            return E_UNKNOWN;
         }
         // @formatter:on
     }
@@ -372,7 +372,7 @@ struct Tls::Impl : private Noncopyable
     {
         int const PENDING = pendingWriteBio();
         if (PENDING <= 0) {
-            return Err::E_SSL;
+            return E_SSL;
         }
 
         assert(PENDING > 0);
@@ -381,13 +381,13 @@ struct Tls::Impl : private Noncopyable
         int const BIO_READ_RESULT = BIO_read(write_bio, result.data(), result.size());
         if (BIO_READ_RESULT > 0) {
             assert(BIO_READ_RESULT == result.size());
-            return Err::E_SUCCESS;
+            return E_SUCCESS;
         } else if (BIO_READ_RESULT == -2) {
-            return Err::E_UNSUPOP;
+            return E_UNSUPOP;
         } else {
             assert(BIO_READ_RESULT <= 0);
         }
-        return Err::E_SSL;
+        return E_SSL;
     }
 
     /**
@@ -406,7 +406,7 @@ struct Tls::Impl : private Noncopyable
             // an error occurred or action must be taken by the calling process.
             tDLogE("Tls::Impl::encode() OpenSSL SSL_write() error: reason({})",
                    SSL_get_error(ssl.get(), WRITE_RESULT));
-            return Err::E_SSL;
+            return E_SSL;
         }
 
         // The write operation was successful,
@@ -419,15 +419,15 @@ struct Tls::Impl : private Noncopyable
     {
         int const BIO_WRITE_RESULT = BIO_write(read_bio, data, size);
         if (BIO_WRITE_RESULT == -2) {
-            return Err::E_UNSUPOP;
+            return E_UNSUPOP;
         } else if (BIO_WRITE_RESULT <= 0) {
-            return Err::E_SSL;
+            return E_SSL;
         }
 
         if (write_size != nullptr) {
             *write_size = static_cast<std::size_t>(BIO_WRITE_RESULT);
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     // Maximum record size of 16kB for SSLv3/TLSv1
@@ -446,20 +446,20 @@ struct Tls::Impl : private Noncopyable
             int const SSL_ERROR = SSL_get_error(ssl.get(), READ_RESULT);
             if (SSL_ERROR == SSL_ERROR_WANT_READ) {
                 if (buffer_size >= MAX_BYTE) {
-                    return Err::E_SSLWREAD;
+                    return E_SSLWREAD;
                 } else {
                     buffer.reserve(0);
                     return read(result, MAX_BYTE);
                 }
             } else {
-                return Err::E_SSL;
+                return E_SSL;
             }
         }
 
         tDLogD("Tls::Impl::read({}) SSL_read() result: {}", buffer_size, READ_RESULT);
         assert(READ_RESULT > 0);
         result.assign(buffer.begin(), buffer.begin() + READ_RESULT);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     /**
@@ -472,10 +472,10 @@ struct Tls::Impl : private Noncopyable
     {
         std::size_t write_size = 0;
         Err const WRITE_CODE = writeToReadBuffer(data, size, &write_size);
-        if (WRITE_CODE != Err::E_SUCCESS) {
+        if (WRITE_CODE != E_SUCCESS) {
             return WRITE_CODE;
         }
-        assert(WRITE_CODE == Err::E_SUCCESS);
+        assert(WRITE_CODE == E_SUCCESS);
         return read(result, write_size);
     }
 
@@ -484,7 +484,7 @@ struct Tls::Impl : private Noncopyable
     {
         int const PENDING_SIZE = pendingReadBio();
         if (PENDING_SIZE <= 0) {
-            return Err::E_SSLEREAD;
+            return E_SSLEREAD;
         }
         assert(PENDING_SIZE > 0);
         return read(result, static_cast<std::size_t>(PENDING_SIZE));
@@ -654,7 +654,7 @@ Err TlsReader::connect()
     _tls.connect();
     Err const HANDSHAKE_CODE = _tls.handshake();
     // Handshake is not finished, we can ignore it.
-    assert(HANDSHAKE_CODE == Err::E_SSLWREAD);
+    assert(HANDSHAKE_CODE == E_SSLWREAD);
 
     Buffer buffer;
     Err const WRITE_BUFFER_CODE = _tls.readFromWriteBuffer(buffer);
@@ -671,7 +671,7 @@ Err TlsReader::connect()
     tDLogD("TlsReader::connect() Update state: Not ready -> Connect & Handshaking");
     assert(_state == TlsState::TS_NOT_READY);
     _state = TlsState::TS_HANDSHAKE;
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err TlsReader::accept()
@@ -681,16 +681,16 @@ Err TlsReader::accept()
     tDLogD("TlsReader::accept() Update state: Not ready -> Accept & Handshaking");
     assert(_state == TlsState::TS_NOT_READY);
     _state = TlsState::TS_HANDSHAKE;
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err TlsReader::parse(char const * buffer, std::size_t size)
 {
     switch (_state) {
-    case TlsState::TS_NOT_READY: return Err::E_ILLSTATE;
+    case TlsState::TS_NOT_READY: return E_ILLSTATE;
     case TlsState::TS_HANDSHAKE: return onHandshaking(buffer, size);
     case TlsState::TS_FINISH:    return onApplication(buffer, size);
-    default:                     return Err::E_UNKNOWN;
+    default:                     return E_UNKNOWN;
     }
 }
 
@@ -704,8 +704,8 @@ Err TlsReader::onHandshaking(char const * buffer, std::size_t size)
     }
 
     Err const HANDSHAKE_CODE = _tls.handshake();
-    if (HANDSHAKE_CODE != Err::E_SSL_NONE) {
-        if (HANDSHAKE_CODE == Err::E_SSLWREAD) {
+    if (HANDSHAKE_CODE != E_SSL_NONE) {
+        if (HANDSHAKE_CODE == E_SSLWREAD) {
             Buffer write_buffer;
             _tls.readFromWriteBuffer(write_buffer); // Skip error code check.
 
@@ -724,7 +724,7 @@ Err TlsReader::onHandshaking(char const * buffer, std::size_t size)
         tDLogD("TlsReader::onHandshaking() Update state: Handshaking -> Finish");
         _state = TlsState::TS_FINISH;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err TlsReader::onApplication(char const * buffer, std::size_t size)
@@ -742,7 +742,7 @@ Err TlsReader::onApplication(char const * buffer, std::size_t size)
         return READ_CODE;
     }
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace crypto

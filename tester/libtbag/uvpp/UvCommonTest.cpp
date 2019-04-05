@@ -20,10 +20,10 @@ TEST(UvCommonTest, Inet4)
     std::size_t const SIZE = sizeof(struct in_addr);
     unsigned char buffer[SIZE] = {0,};
 
-    ASSERT_EQ(Err::E_SUCCESS, convertInetPton(AF_INET, TEST_ADDRESS, &buffer));
+    ASSERT_EQ(E_SUCCESS, convertInetPton(AF_INET, TEST_ADDRESS, &buffer));
 
     std::string result;
-    ASSERT_EQ(Err::E_SUCCESS, convertInetNtop(AF_INET, &buffer, result));
+    ASSERT_EQ(E_SUCCESS, convertInetNtop(AF_INET, &buffer, result));
     ASSERT_STREQ(TEST_ADDRESS, result.c_str());
 }
 
@@ -34,10 +34,10 @@ TEST(UvCommonTest, Inet6)
     std::size_t const SIZE = sizeof(struct in6_addr);
     unsigned char buffer[SIZE] = {0,};
 
-    ASSERT_EQ(Err::E_SUCCESS, convertInetPton(AF_INET6, TEST_ADDRESS, &buffer));
+    ASSERT_EQ(E_SUCCESS, convertInetPton(AF_INET6, TEST_ADDRESS, &buffer));
 
     std::string result;
-    ASSERT_EQ(Err::E_SUCCESS, convertInetNtop(AF_INET6, &buffer, result));
+    ASSERT_EQ(E_SUCCESS, convertInetNtop(AF_INET6, &buffer, result));
     ASSERT_STREQ(TEST_ADDRESS, result.c_str());
 }
 

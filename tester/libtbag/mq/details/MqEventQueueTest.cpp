@@ -81,7 +81,7 @@ TEST(MqEventQueueTest, Default)
     });
 
     Err const CODE = loop.run();
-    ASSERT_EQ(Err::E_SUCCESS, CODE);
+    ASSERT_EQ(E_SUCCESS, CODE);
 
     ASSERT_TRUE(thread.joinable());
     thread.join();

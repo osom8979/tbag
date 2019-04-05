@@ -83,7 +83,7 @@ Err UxPipe::init(UxLoop & loop, bool is_ipc)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxPipe::open(ufile file)
@@ -91,7 +91,7 @@ Err UxPipe::open(ufile file)
     if (auto shared = lock()) {
         return shared->open(file);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxPipe::bind(char const * name)
@@ -99,7 +99,7 @@ Err UxPipe::bind(char const * name)
     if (auto shared = lock()) {
         return shared->bind(name);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 void UxPipe::connect(ConnectRequest & request, char const * name)

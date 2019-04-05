@@ -93,7 +93,7 @@ Err UxStream::setBlocking(bool enable)
     if (auto shared = lockStream()) {
         return shared->setBlocking(enable);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxStream::shutdown(ShutdownRequest & request)
@@ -101,7 +101,7 @@ Err UxStream::shutdown(ShutdownRequest & request)
     if (auto shared = lockStream()) {
         return shared->shutdown(request);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxStream::listen(int backlog)
@@ -109,7 +109,7 @@ Err UxStream::listen(int backlog)
     if (auto shared = lockStream()) {
         return shared->listen(backlog);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxStream::accept(UxStream & client)
@@ -119,7 +119,7 @@ Err UxStream::accept(UxStream & client)
     if (self_shared && client_shared) {
         return self_shared->accept(*client_shared);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxStream::startRead()
@@ -127,7 +127,7 @@ Err UxStream::startRead()
     if (auto shared = lockStream()) {
         return shared->startRead();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxStream::stopRead()
@@ -135,7 +135,7 @@ Err UxStream::stopRead()
     if (auto shared = lockStream()) {
         return shared->stopRead();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxStream::write(WriteRequest & request, binf const * infos, std::size_t infos_size)
@@ -143,7 +143,7 @@ Err UxStream::write(WriteRequest & request, binf const * infos, std::size_t info
     if (auto shared = lockStream()) {
         return shared->write(request, infos, infos_size);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxStream::write(WriteRequest & request, char const * buffer, std::size_t size)
@@ -151,7 +151,7 @@ Err UxStream::write(WriteRequest & request, char const * buffer, std::size_t siz
     if (auto shared = lockStream()) {
         return shared->write(request, buffer, size);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 std::size_t UxStream::tryWrite(binf * infos, std::size_t infos_size, Err * result)
@@ -160,7 +160,7 @@ std::size_t UxStream::tryWrite(binf * infos, std::size_t infos_size, Err * resul
         return shared->tryWrite(infos, infos_size, result);
     }
     if (result != nullptr) {
-        *result = Err::E_EXPIRED;
+        *result = E_EXPIRED;
     }
     return 0;
 }
@@ -171,7 +171,7 @@ std::size_t UxStream::tryWrite(char const * buffer, std::size_t size, Err * resu
         return shared->tryWrite(buffer, size, result);
     }
     if (result != nullptr) {
-        *result = Err::E_EXPIRED;
+        *result = E_EXPIRED;
     }
     return 0;
 }

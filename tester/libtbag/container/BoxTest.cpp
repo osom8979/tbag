@@ -23,11 +23,11 @@ TEST(BoxTest, Default)
     ASSERT_TRUE(obj1.empty());
     ASSERT_TRUE(obj2.empty());
 
-    ASSERT_EQ(Err::E_NREADY, obj1.resize(10));
-    ASSERT_EQ(Err::E_NREADY, obj2.resize(10, 20));
+    ASSERT_EQ(E_NREADY, obj1.resize(10));
+    ASSERT_EQ(E_NREADY, obj2.resize(10, 20));
 
-    ASSERT_EQ(Err::E_SUCCESS, obj1.create(BoxTypeTable::BTT_INT32));
-    ASSERT_EQ(Err::E_SUCCESS, obj2.create<int32_t>());
+    ASSERT_EQ(E_SUCCESS, obj1.create(BoxTypeTable::BTT_INT32));
+    ASSERT_EQ(E_SUCCESS, obj2.create<int32_t>());
     ASSERT_EQ(obj1.getType(), obj2.getType());
 
     ASSERT_TRUE(static_cast<bool>(obj1));
@@ -37,8 +37,8 @@ TEST(BoxTest, Default)
     ASSERT_TRUE(obj1.empty());
     ASSERT_TRUE(obj2.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, obj1.resize(10));
-    ASSERT_EQ(Err::E_SUCCESS, obj2.resize(10, 20));
+    ASSERT_EQ(E_SUCCESS, obj1.resize(10));
+    ASSERT_EQ(E_SUCCESS, obj2.resize(10, 20));
     ASSERT_EQ(10, obj1.size());
     ASSERT_EQ(10*20, obj2.size());
     ASSERT_FALSE(obj1.empty());

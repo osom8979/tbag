@@ -168,7 +168,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in * addr)
         return convertUvErrorToErr(CODE);
     }
     //addr->sin_len = sizeof(struct sockaddr_in); // [BUG] GCC ERROR: has no member named 'sin_len'
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
@@ -179,7 +179,7 @@ Err initAddress(std::string const & ip, int port, sockaddr_in6 * addr)
         return convertUvErrorToErr(CODE);
     }
     //addr->sin6_len = sizeof(struct sockaddr_in6); // [BUG] GCC ERROR: has no member named 'sin6_len'
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err convertInetNtop(int family, void const * address, std::string & text)

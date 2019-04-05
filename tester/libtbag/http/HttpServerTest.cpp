@@ -88,7 +88,7 @@ TEST(HttpServerTest, Callbacks)
     auto const RESPONSE = requestGet(URL);
     ASSERT_EQ(200, RESPONSE.code);
 
-    ASSERT_EQ(Err::E_SUCCESS, server.exit());
+    ASSERT_EQ(E_SUCCESS, server.exit());
     server.join();
 
     ASSERT_EQ(1, begin);
@@ -196,7 +196,7 @@ TEST(HttpServerTest, WebSocket)
     client = std::make_unique<HttpClient>(std::string("ws://127.0.0.1:") + std::to_string(_TEST_SERVER_PORT), client_cbs);
 
     client->join();
-    ASSERT_EQ(Err::E_SUCCESS, server->exit());
+    ASSERT_EQ(E_SUCCESS, server->exit());
     server->join();
 
     ASSERT_EQ(1, server_begin);

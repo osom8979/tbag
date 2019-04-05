@@ -27,7 +27,7 @@ TEST(StorageNodeTest, LoadAndSave)
     auto const PATH = tttDir_Get() / "storage.xml";
 
     using namespace libtbag::filesystem;
-    ASSERT_EQ(Err::E_SUCCESS, writeFile(PATH.toString(), STORAGE_NODE_XML));
+    ASSERT_EQ(E_SUCCESS, writeFile(PATH.toString(), STORAGE_NODE_XML));
     ASSERT_TRUE(PATH.isRegularFile());
 
     StorageNode node;

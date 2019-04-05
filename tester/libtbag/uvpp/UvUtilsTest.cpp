@@ -143,7 +143,7 @@ TEST(UvUtilsTest, HighResolutionTime)
 TEST(UvUtilsTest, GetEnv)
 {
     std::string path;
-    ASSERT_EQ(Err::E_SUCCESS, getEnv("PATH", path));
+    ASSERT_EQ(E_SUCCESS, getEnv("PATH", path));
     ASSERT_FALSE(path.empty());
 }
 

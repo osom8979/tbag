@@ -53,8 +53,8 @@ struct PipeClientTest : public Pipe
         assert(step3 == 0);
         assert(step4 == 0);
 
-        if (startRead() == Err::E_SUCCESS) {
-            if (write(write_req, PIPE_WRITE_TEST_MSG, strlen(PIPE_WRITE_TEST_MSG)) == Err::E_SUCCESS) {
+        if (startRead() == E_SUCCESS) {
+            if (write(write_req, PIPE_WRITE_TEST_MSG, strlen(PIPE_WRITE_TEST_MSG)) == E_SUCCESS) {
                 ++step1;
             }
         }
@@ -81,7 +81,7 @@ struct PipeClientTest : public Pipe
         assert(step3 == 0);
         assert(step4 == 0);
 
-        if (code == Err::E_SUCCESS) {
+        if (code == E_SUCCESS) {
             std::string const ECHO_MESSAGE(buffer, buffer + size);
             if (ECHO_MESSAGE == std::string(PIPE_WRITE_TEST_MSG)) {
                 ++step3;
@@ -126,9 +126,9 @@ struct PipeServerTest : public Pipe
             assert(server.step4 == 0);
             assert(server.step5 == 0);
 
-            if (code == Err::E_SUCCESS) {
+            if (code == E_SUCCESS) {
                 if (std::string(buffer, buffer + size) == std::string(PIPE_WRITE_TEST_MSG)) {
-                    if (write(write_req, buffer, size) == Err::E_SUCCESS) {
+                    if (write(write_req, buffer, size) == E_SUCCESS) {
                         ++server.step2;
                     }
                 }
@@ -183,8 +183,8 @@ struct PipeServerTest : public Pipe
         assert(step5 == 0);
 
         auto client = getLoop()->newHandle<Client>(*getLoop(), *this);
-        if (accept(*client.get()) == Err::E_SUCCESS) {
-            if (client->startRead() == Err::E_SUCCESS) {
+        if (accept(*client.get()) == E_SUCCESS) {
+            if (client->startRead() == E_SUCCESS) {
                 ++step1;
             }
         }
@@ -214,8 +214,8 @@ TEST(PipeTest, Default)
 
     Loop server;
     auto server_pipe = server.newHandle<PipeServerTest>(server);
-    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH));
-    ASSERT_EQ(Err::E_SUCCESS, server_pipe->listen());
+    ASSERT_EQ(E_SUCCESS, server_pipe->bind(PATH));
+    ASSERT_EQ(E_SUCCESS, server_pipe->listen());
 
     std::cout << "Sock name: " << server_pipe->getSockName() << std::endl;
 
@@ -276,15 +276,15 @@ TEST(PipeTest, ClientShutdown)
     server_pipe->connection_cb = [&](Err code){
         ++connection_count;
         auto const CODE = server_pipe->accept(*(node_pipe.get()));
-        assert(CODE == Err::E_SUCCESS);
+        assert(CODE == E_SUCCESS);
         auto const START_CODE = node_pipe->startRead();
-        assert(START_CODE == Err::E_SUCCESS);
+        assert(START_CODE == E_SUCCESS);
         std::cout << "01. Connection" << std::endl;
     };
     client_pipe->connect_cb = [&](ConnectRequest & req, Err code){
         ++connect_count;
         auto const CODE = client_pipe->shutdown(shutdown_req);
-        assert(CODE == Err::E_SUCCESS);
+        assert(CODE == E_SUCCESS);
         std::cout << "02. Connect" << std::endl;
     };
     client_pipe->shutdown_cb = [&](ShutdownRequest & req, Err code){
@@ -303,7 +303,7 @@ TEST(PipeTest, ClientShutdown)
     };
     node_pipe->read_cb = [&](Err code, char const * data, std::size_t size){
         ++node_read_count;
-        assert(code == Err::E_EOF);
+        assert(code == E_EOF);
         node_pipe->close();
         std::cout << "06. Read EOF (Node)" << std::endl;
     };
@@ -317,10 +317,10 @@ TEST(PipeTest, ClientShutdown)
         std::cout << "08. Close (Server)" << std::endl;
     };
 
-    ASSERT_EQ(Err::E_SUCCESS, server_pipe->bind(PATH));
-    ASSERT_EQ(Err::E_SUCCESS, server_pipe->listen());
+    ASSERT_EQ(E_SUCCESS, server_pipe->bind(PATH));
+    ASSERT_EQ(E_SUCCESS, server_pipe->listen());
     client_pipe->connect(connect_req, PATH);
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, loop.run());
 
     ASSERT_EQ(1,   connection_count);
     ASSERT_EQ(1,      connect_count);

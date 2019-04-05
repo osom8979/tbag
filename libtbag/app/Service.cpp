@@ -40,15 +40,15 @@ Err Service::createService(std::string const & name)
 {
     if (static_cast<bool>(_service)) {
         tDLogW("Service::createService() Already service object.");
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     _service.reset(new (std::nothrow) RealService(name));
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::createService() Bad allocation error.");
-        return Err::E_BADALLOC;
+        return E_BADALLOC;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 void Service::registerTerminateHandler()
@@ -62,7 +62,7 @@ Err Service::install()
 {
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::install() The service is not ready.");
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
     return _service->install();
 }
@@ -71,7 +71,7 @@ Err Service::uninstall()
 {
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::uninstall() The service is not ready.");
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
     return _service->uninstall();
 }
@@ -80,12 +80,12 @@ Err Service::start()
 {
     if (_is_start) {
         tDLogE("Service::start() Already started state.");
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::start() The service is not ready.");
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     Err const START_CODE = _service->start();
@@ -102,12 +102,12 @@ Err Service::stop()
 {
     if (_is_start == false) {
         tDLogE("Service::stop() Already stopped state.");
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     if (static_cast<bool>(_service) == false) {
         tDLogE("Service::stop() The service is not ready.");
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     Err const STOP_CODE = _service->stop();

@@ -94,9 +94,9 @@ TEST(AsyncTest, Thread)
         async->send();
         idle->close();
     };
-    ASSERT_EQ(Err::E_SUCCESS, idle->start());
+    ASSERT_EQ(E_SUCCESS, idle->start());
 
-    Err loop_result = Err::E_UNKNOWN;
+    Err loop_result = E_UNKNOWN;
     std::thread thread([&](){
         loop_result = loop.run();
         is_end.store(true);
@@ -109,7 +109,7 @@ TEST(AsyncTest, Thread)
     ASSERT_TRUE(thread.joinable());
     thread.join();
 
-    ASSERT_EQ(Err::E_SUCCESS, loop_result);
+    ASSERT_EQ(E_SUCCESS, loop_result);
     ASSERT_TRUE(is_idle.load());
     ASSERT_TRUE(is_end.load());
 

@@ -87,21 +87,21 @@ Err SocketAddress::init(struct sockaddr const * in)
     } else if (in->sa_family == AF_INET6) {
         return init((struct sockaddr_in6 const *)in);
     }
-    return Err::E_UNKNOWN;
+    return E_UNKNOWN;
 }
 
 Err SocketAddress::init(struct sockaddr_in const * in)
 {
     ::memset(&_addr, 0x00, sizeof(_addr));
     ::memcpy(&_addr.ipv4, in, sizeof(sockaddr_in));
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err SocketAddress::init(struct sockaddr_in6 const * in)
 {
     ::memset(&_addr, 0x00, sizeof(_addr));
     ::memcpy(&_addr.ipv6, in, sizeof(sockaddr_in6));
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err SocketAddress::initIpv4(std::string const & ip, int port)
@@ -121,14 +121,14 @@ Err SocketAddress::initName(std::string const & host, std::string const & servic
     Loop loop;
     DnsAddrInfo dns;
     Err const REQUEST_CODE = dns.requestAddrInfoWithSync(loop, host, service);
-    if (REQUEST_CODE != Err::E_SUCCESS) {
+    if (REQUEST_CODE != E_SUCCESS) {
         return REQUEST_CODE;
     }
 
     addrinfo const * info = dns.getAddrInfo();
     assert(info != nullptr);
     if (info->ai_addrlen == 0) {
-        return Err::E_ENFOUND;
+        return E_ENFOUND;
     }
 
     addrinfo * next = dns.getAddrInfo()->ai_next;
@@ -146,7 +146,7 @@ Err SocketAddress::initName(std::string const & host, std::string const & servic
         int const ASSIGN_PORT = service.empty() ? port : uvpp::getPortNumber(ipv6_sa);
         return initIpv6(uvpp::getIpName(ipv6_sa), ASSIGN_PORT);
     }
-    return Err::E_UNKNOWN;
+    return E_UNKNOWN;
 }
 
 Err SocketAddress::init(std::string const & host, int port)
@@ -163,7 +163,7 @@ Err SocketAddress::init(Uri const & uri)
 {
     if (!uri.isHost()) {
         tDLogE("SocketAddress::initUri() Unknown host from uri: {}.", uri.getString());
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
     if (uri.isPort()) {
         return init(uri.getHost(), uri.getPortNumber());
@@ -171,7 +171,7 @@ Err SocketAddress::init(Uri const & uri)
 
     if (!uri.isSchema()) {
         tDLogE("SocketAddress::initUri() Unknown schema from uri: {}.", uri.getString());
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     std::string const SERVICE = uri.getSchema();

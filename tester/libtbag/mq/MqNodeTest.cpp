@@ -76,7 +76,7 @@ TEST(MqNodeTest, Reconnect)
     std::unique_ptr<MqNode> server;
     server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND);
 
-    ASSERT_EQ(Err::E_SUCCESS, client->waitEnable());
+    ASSERT_EQ(E_SUCCESS, client->waitEnable());
 }
 
 TEST(MqNodeTest, ClientToServerMessage)
@@ -97,8 +97,8 @@ TEST(MqNodeTest, ClientToServerMessage)
     MqNode::MqMsg msg_send1(TEST1_VAL);
     MqNode::MqMsg msg_send2(TEST2_VAL);
 
-    ASSERT_EQ(Err::E_SUCCESS, client->send(msg_send1));
-    ASSERT_EQ(Err::E_SUCCESS, client->send(msg_send2));
+    ASSERT_EQ(E_SUCCESS, client->send(msg_send1));
+    ASSERT_EQ(E_SUCCESS, client->send(msg_send2));
 
     MqNode::MqMsg msg_recv1;
     MqNode::MqMsg msg_recv2;
@@ -134,8 +134,8 @@ TEST(MqNodeTest, ServerToClientMessage)
     MqNode::MqMsg msg_send1(TEST1_VAL);
     MqNode::MqMsg msg_send2(TEST2_VAL);
 
-    ASSERT_EQ(Err::E_SUCCESS, server->send(msg_send1));
-    ASSERT_EQ(Err::E_SUCCESS, server->send(msg_send2));
+    ASSERT_EQ(E_SUCCESS, server->send(msg_send1));
+    ASSERT_EQ(E_SUCCESS, server->send(msg_send2));
 
     MqNode::MqMsg msg_recv1;
     MqNode::MqMsg msg_recv2;
@@ -165,8 +165,8 @@ TEST(MqNodeTest, SendAndClose1)
     server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND);
     client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT);
 
-    ASSERT_EQ(Err::E_SUCCESS, server->send(MqNode::MqMsg(std::string("T1E1ST1"))));
-    ASSERT_EQ(Err::E_SUCCESS, client->send(MqNode::MqMsg(std::string("T2E2ST2"))));
+    ASSERT_EQ(E_SUCCESS, server->send(MqNode::MqMsg(std::string("T1E1ST1"))));
+    ASSERT_EQ(E_SUCCESS, client->send(MqNode::MqMsg(std::string("T2E2ST2"))));
 
     // Client release -> Server release!
     client.reset();
@@ -185,8 +185,8 @@ TEST(MqNodeTest, SendAndClose2)
     server = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_BIND);
     client = std::make_unique<MqNode>(PIPE_PATH, MqMode::MM_CONNECT);
 
-    ASSERT_EQ(Err::E_SUCCESS, server->send(MqNode::MqMsg(std::string("T1E1ST1"))));
-    ASSERT_EQ(Err::E_SUCCESS, client->send(MqNode::MqMsg(std::string("T2E2ST2"))));
+    ASSERT_EQ(E_SUCCESS, server->send(MqNode::MqMsg(std::string("T1E1ST1"))));
+    ASSERT_EQ(E_SUCCESS, client->send(MqNode::MqMsg(std::string("T2E2ST2"))));
 
     // Server release -> Client release!
     server.reset();
@@ -221,12 +221,12 @@ TEST(MqNodeTest, MultiClient)
     MqNode::MqMsg msg_send5(TEST5_VAL);
     MqNode::MqMsg msg_send6(TEST6_VAL);
 
-    ASSERT_EQ(Err::E_SUCCESS, client1->send(msg_send1));
-    ASSERT_EQ(Err::E_SUCCESS, client2->send(msg_send2));
-    ASSERT_EQ(Err::E_SUCCESS, client1->send(msg_send3));
-    ASSERT_EQ(Err::E_SUCCESS, client2->send(msg_send4));
-    ASSERT_EQ(Err::E_SUCCESS, server->send(msg_send5));
-    ASSERT_EQ(Err::E_SUCCESS, server->send(msg_send6));
+    ASSERT_EQ(E_SUCCESS, client1->send(msg_send1));
+    ASSERT_EQ(E_SUCCESS, client2->send(msg_send2));
+    ASSERT_EQ(E_SUCCESS, client1->send(msg_send3));
+    ASSERT_EQ(E_SUCCESS, client2->send(msg_send4));
+    ASSERT_EQ(E_SUCCESS, server->send(msg_send5));
+    ASSERT_EQ(E_SUCCESS, server->send(msg_send6));
 
     MqNode::MqMsg msg_recv1;
     MqNode::MqMsg msg_recv2;

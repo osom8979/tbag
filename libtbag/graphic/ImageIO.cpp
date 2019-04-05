@@ -60,10 +60,10 @@ bool writeTga(char const * path, int width, int height, int channels, char const
 Err readImage(std::string const & path, libtbag::util::Buffer & image, int * width, int * height, int * channels)
 {
     if (!filesystem::Path(path).exists()) {
-        return Err::E_EEXIST;
+        return E_EEXIST;
     }
     //if (!filesystem::Path(path).isReadable()) {
-    //    return Err::E_RDERR;
+    //    return E_RDERR;
     //}
 
     int read_width = 0;
@@ -76,7 +76,7 @@ Err readImage(std::string const & path, libtbag::util::Buffer & image, int * wid
     // but 'n' will always be the number that it would have been if you said 0
     unsigned char * data = ::stbi_load(path.c_str(), &read_width, &read_height, &read_channels, 0);
     if (data == nullptr) {
-        return Err::E_RDERR;
+        return E_RDERR;
     }
 
     image.assign(data, data + (read_width * read_height * read_channels));
@@ -91,7 +91,7 @@ Err readImage(std::string const & path, libtbag::util::Buffer & image, int * wid
     }
 
     stbi_image_free(data);
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err readImage(std::string const & path, ImageRgb24 & image)
@@ -142,7 +142,7 @@ Err readImage(std::string const & path, ImageRgb24 & image)
         assert(false && "Inaccessible block.");
     }
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 // ---------------
@@ -154,7 +154,7 @@ static Err writeImageToFile(std::string const & path, ImageType const & image, i
 {
     auto const PATH = filesystem::Path(path);
     if (PATH.exists() == true) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     auto const WIDTH     = image.width();
@@ -173,10 +173,10 @@ static Err writeImageToFile(std::string const & path, ImageType const & image, i
     } else if (LOWER_EXT == TGA_LOWER_EXT) {
         result = writeTga(path.c_str(), WIDTH, HEIGHT, CHANNELS, DATA);
     } else {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
-    return result != 0 ? Err::E_SUCCESS : Err::E_UNKNOWN;
+    return result != 0 ? E_SUCCESS : E_UNKNOWN;
 }
 
 static void __write_image_cb__(void * context, void * data, int size)
@@ -217,9 +217,9 @@ static Err writeImageToBuffer(util::Buffer & buffer, ImageType const & image, Im
         result = stbi_write_tga_to_func(&__write_image_cb__, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
         break;
     default:
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
-    return result != 0 ? Err::E_SUCCESS : Err::E_UNKNOWN;
+    return result != 0 ? E_SUCCESS : E_UNKNOWN;
 }
 
 // ------------------
@@ -253,9 +253,9 @@ Err convert(ImageRgb24 const & source, ImageGray & destination)
         return static_cast<Channel>((color.r + color.g + color.b) / 3);
     });
     if (ITR == destination.begin()) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err convert(ImageGray const & source, ImageRgb24 & destination)
@@ -265,9 +265,9 @@ Err convert(ImageGray const & source, ImageRgb24 & destination)
         return Color{channel, channel, channel};
     });
     if (ITR == destination.begin()) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace graphic

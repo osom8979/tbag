@@ -98,13 +98,13 @@ TEST(UriTest, AddrInfo)
     int port;
 
     Uri uri1("http://localhost:8080/");
-    ASSERT_EQ(Err::E_SUCCESS, uri1.requestAddrInfo(host, port));
+    ASSERT_EQ(E_SUCCESS, uri1.requestAddrInfo(host, port));
 
     ASSERT_TRUE(libtbag::net::isIpv4(host) || libtbag::net::isIpv6(host));
     ASSERT_EQ(8080, port);
 
     Uri uri2("http://localhost/");
-    ASSERT_EQ(Err::E_SUCCESS, uri2.requestAddrInfo(host, port));
+    ASSERT_EQ(E_SUCCESS, uri2.requestAddrInfo(host, port));
 
     ASSERT_TRUE(libtbag::net::isIpv4(host) || libtbag::net::isIpv6(host));
     ASSERT_EQ(80, port);

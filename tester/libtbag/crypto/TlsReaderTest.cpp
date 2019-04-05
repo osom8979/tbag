@@ -34,13 +34,13 @@ struct TlsReaderTest : public TlsReaderInterface
     virtual Err onWrite(char const * buffer, std::size_t size) override
     {
         write_buffer.assign(buffer, buffer + size);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     virtual Err onRead(char const * buffer, std::size_t size) override
     {
         read_buffer.assign(buffer, buffer + size);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 };
 
@@ -50,12 +50,12 @@ TEST(TlsReaderTest, Default)
     TlsReaderTest server(TlsReaderTest::mem_crt{});
 
 //    // Client connect
-//    ASSERT_EQ(Err::E_SUCCESS, client.tls.connect());
+//    ASSERT_EQ(E_SUCCESS, client.tls.connect());
 //    ASSERT_FALSE(client.write_buffer.empty());
 //    ASSERT_FALSE(client.tls.isFinished());
 //
 //    // Server accept.
-//    ASSERT_EQ(Err::E_SUCCESS, server.tls.accept());
+//    ASSERT_EQ(E_SUCCESS, server.tls.accept());
 //    ASSERT_TRUE(client.write_buffer.empty());
 //    ASSERT_FALSE(server.tls.isFinished());
 //
@@ -71,27 +71,27 @@ TEST(TlsReaderTest, Default)
 //    };
 //
 //    // Client ~~ HELLO ~> Server
-//    ASSERT_EQ(Err::E_SUCCESS, sendClientToServer());
+//    ASSERT_EQ(E_SUCCESS, sendClientToServer());
 //    ASSERT_FALSE(server.write_buffer.empty());
 //    ASSERT_FALSE(server.tls.isFinished());
 //
 //    // Server ~~ HELLO ~> Client
-//    ASSERT_EQ(Err::E_SUCCESS, sendServerToClient());
+//    ASSERT_EQ(E_SUCCESS, sendServerToClient());
 //    ASSERT_FALSE(client.write_buffer.empty());
 //    ASSERT_FALSE(client.tls.isFinished());
 //
 //    // Client ~~ EXCHANGE ~> Server
-//    ASSERT_EQ(Err::E_SUCCESS, sendClientToServer());
+//    ASSERT_EQ(E_SUCCESS, sendClientToServer());
 //    ASSERT_TRUE(server.write_buffer.empty());
 //    ASSERT_TRUE(server.tls.isFinished());
 
 //    // Server[FINISH] ~~ FINISH ~> Client[FINISH]
-//    ASSERT_EQ(Err::E_SUCCESS, sendServerToClient());
+//    ASSERT_EQ(E_SUCCESS, sendServerToClient());
 //    ASSERT_TRUE(client.write_buffer.empty());
 //    ASSERT_TRUE(client.tls.isFinished());
 
 //    // Client ~~ FINISH ~> Server
-//    ASSERT_EQ(Err::E_SUCCESS, sendClientToServer());
+//    ASSERT_EQ(E_SUCCESS, sendClientToServer());
 //    ASSERT_TRUE(server.write_buffer.empty());
 //    ASSERT_TRUE(server.tls.isFinished());
 }

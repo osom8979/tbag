@@ -42,7 +42,7 @@ TEST(NetStreamTest, DefaultEcho)
     MqMsg msg_recv;
     MqMsg msg_echo;
 
-    Err echo_send = Err::E_UNKNOWN;
+    Err echo_send = E_UNKNOWN;
 
     std::unique_ptr<NetStreamServer> server;
     NetStreamServer::Callbacks server_callbacks;
@@ -82,12 +82,12 @@ TEST(NetStreamTest, DefaultEcho)
     };
     client = std::make_unique<NetStreamClient>(PIPE_PATH, client_callbacks);
 
-    ASSERT_EQ(Err::E_SUCCESS, client->send(msg_send));
+    ASSERT_EQ(E_SUCCESS, client->send(msg_send));
     while (client_recv == 0) {
         // Busy wait...
     }
 
-    ASSERT_EQ(Err::E_SUCCESS, echo_send);
+    ASSERT_EQ(E_SUCCESS, echo_send);
     ASSERT_EQ(TEST_VAL, std::string(msg_send.begin(), msg_send.end()));
     ASSERT_EQ(TEST_VAL, std::string(msg_recv.begin(), msg_recv.end()));
     ASSERT_EQ(TEST_VAL, std::string(msg_echo.begin(), msg_echo.end()));

@@ -116,7 +116,7 @@ bool writeInformation(std::string const & prefix,
     if (FILE_PATH.exists()) {
         FILE_PATH.remove();
     }
-    return writeFile(FILE_PATH, content) == Err::E_SUCCESS;
+    return writeFile(FILE_PATH, content) == E_SUCCESS;
 }
 
 bool writeInformation(std::string const & case_name,

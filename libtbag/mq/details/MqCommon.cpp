@@ -309,7 +309,7 @@ MqParams convertUriToParams(std::string const & uri_string, bool auto_encode)
 Err waitOnActivation(MqParams const & params, MqInterface * mq)
 {
     if (params.wait_on_activation_timeout_millisec == 0) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     Err code;
@@ -326,7 +326,7 @@ Err waitOnActivation(MqParams const & params, MqInterface * mq)
     if (isSuccess(code)) {
         tDLogIfD(params.verbose, "waitOnActivation() Wait done.");
     } else {
-        assert(code == Err::E_TIMEOUT);
+        assert(code == E_TIMEOUT);
         tDLogW("waitOnActivation() Connection timeout.");
     }
 

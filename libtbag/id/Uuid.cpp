@@ -34,7 +34,7 @@ Uuid::Uuid(Version version)
 
 Uuid::Uuid(std::string const & str)
 {
-    if (fromString(str) != Err::E_SUCCESS) {
+    if (fromString(str) != E_SUCCESS) {
         fill(0x00);
     }
 }
@@ -201,33 +201,33 @@ std::string Uuid::toString()
 Err Uuid::fromString(std::string const & str)
 {
     if (str.size() != NIL_UUID_STR_LENGTH) {
-        return Err::E_PARSING;
+        return E_PARSING;
     }
 
     // @formatter:off
     using namespace libtbag::string;
-    if (convertHexCharToByte(str[0], str[1], id.data[0]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[2], str[3], id.data[1]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[4], str[5], id.data[2]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[6], str[7], id.data[3]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (str[8] != UUID_STR_DASH) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[ 9], str[10], id.data[4]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[11], str[12], id.data[5]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (str[13] != UUID_STR_DASH) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[14], str[15], id.data[6]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[16], str[17], id.data[7]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (str[18] != UUID_STR_DASH) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[19], str[20], id.data[8]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[21], str[22], id.data[9]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (str[23] != UUID_STR_DASH) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[24], str[25], id.data[10]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[26], str[27], id.data[11]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[28], str[29], id.data[12]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[30], str[31], id.data[13]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[32], str[33], id.data[14]) != Err::E_SUCCESS) { return Err::E_PARSING; }
-    if (convertHexCharToByte(str[34], str[35], id.data[15]) != Err::E_SUCCESS) { return Err::E_PARSING; }
+    if (convertHexCharToByte(str[0], str[1], id.data[0]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[2], str[3], id.data[1]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[4], str[5], id.data[2]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[6], str[7], id.data[3]) != E_SUCCESS) { return E_PARSING; }
+    if (str[8] != UUID_STR_DASH) { return E_PARSING; }
+    if (convertHexCharToByte(str[ 9], str[10], id.data[4]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[11], str[12], id.data[5]) != E_SUCCESS) { return E_PARSING; }
+    if (str[13] != UUID_STR_DASH) { return E_PARSING; }
+    if (convertHexCharToByte(str[14], str[15], id.data[6]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[16], str[17], id.data[7]) != E_SUCCESS) { return E_PARSING; }
+    if (str[18] != UUID_STR_DASH) { return E_PARSING; }
+    if (convertHexCharToByte(str[19], str[20], id.data[8]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[21], str[22], id.data[9]) != E_SUCCESS) { return E_PARSING; }
+    if (str[23] != UUID_STR_DASH) { return E_PARSING; }
+    if (convertHexCharToByte(str[24], str[25], id.data[10]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[26], str[27], id.data[11]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[28], str[29], id.data[12]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[30], str[31], id.data[13]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[32], str[33], id.data[14]) != E_SUCCESS) { return E_PARSING; }
+    if (convertHexCharToByte(str[34], str[35], id.data[15]) != E_SUCCESS) { return E_PARSING; }
     // @formatter:on
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Uuid Uuid::nil() TBAG_NOEXCEPT

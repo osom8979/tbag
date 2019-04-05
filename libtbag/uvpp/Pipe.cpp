@@ -132,7 +132,7 @@ std::string Pipe::getSockName() const
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_pipe_getsockname(Parent::cast<uv_pipe_t>(), name, &size);
-    if (convertUvErrorToErrWithLogging("Pipe::getSockName()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("Pipe::getSockName()", CODE) != E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -151,7 +151,7 @@ std::string Pipe::getPeerName() const
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_pipe_getpeername(Parent::cast<uv_pipe_t>(), name, &size);
-    if (convertUvErrorToErrWithLogging("Pipe::getPeerName()", CODE) != Err::E_SUCCESS) {
+    if (convertUvErrorToErrWithLogging("Pipe::getPeerName()", CODE) != E_SUCCESS) {
         return std::string();
     }
     return std::string(name, name + size);
@@ -193,29 +193,29 @@ void Pipe::onConnect(ConnectRequest & request, Err code)
 Err initPipeServer(Pipe & pipe, std::string const & path)
 {
     Err const BIND_CODE = pipe.bind(path.c_str());
-    if (BIND_CODE != Err::E_SUCCESS) {
+    if (BIND_CODE != E_SUCCESS) {
         tDLogE("initPipeServer() pipe bind {} error.", getErrName(BIND_CODE));
         return BIND_CODE;
     }
 
     Err const LISTEN_CODE = pipe.listen();
-    if (LISTEN_CODE != Err::E_SUCCESS) {
+    if (LISTEN_CODE != E_SUCCESS) {
         tDLogE("initPipeServer() pipe listen {} error.", getErrName(LISTEN_CODE));
         return LISTEN_CODE;
     }
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err initPipeClient(Pipe & pipe, ConnectRequest & request, std::string const & path)
 {
     if (filesystem::Path(path).exists() == false) {
         tDLogE("initPipeClient() not exists error: {}.", path);
-        return Err::E_EEXIST;
+        return E_EEXIST;
     }
 
     pipe.connect(request, path.c_str());
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace uvpp

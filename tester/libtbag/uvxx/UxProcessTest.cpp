@@ -44,7 +44,7 @@ TEST(UxProcessTest, Default)
     options1.setCurrentWorking();
     options1.setFile(TBPROC_EXE);
 
-    ASSERT_EQ(Err::E_SUCCESS, proc.spawn(loop, options1));
+    ASSERT_EQ(E_SUCCESS, proc.spawn(loop, options1));
     ASSERT_TRUE(proc.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
@@ -55,7 +55,7 @@ TEST(UxProcessTest, Default)
     options2.appendArgument("file");
     options2.appendArgument(WRITE_BODY);
 
-    ASSERT_EQ(Err::E_SUCCESS, proc.spawn(loop, options2));
+    ASSERT_EQ(E_SUCCESS, proc.spawn(loop, options2));
     ASSERT_TRUE(proc.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
@@ -66,7 +66,7 @@ TEST(UxProcessTest, Default)
         proc.close();
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_TRUE(loop.empty());
 
     ASSERT_EQ(0, result_exit_status);
@@ -74,7 +74,7 @@ TEST(UxProcessTest, Default)
     ASSERT_TRUE(TBPROC_TXT.exists());
 
     std::string buffer;
-    ASSERT_EQ(Err::E_SUCCESS, readFile(TBPROC_TXT, buffer));
+    ASSERT_EQ(E_SUCCESS, readFile(TBPROC_TXT, buffer));
     ASSERT_EQ(std::string(WRITE_BODY), buffer);
     ASSERT_TRUE(TBPROC_TXT.remove());
 }

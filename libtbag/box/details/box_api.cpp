@@ -58,7 +58,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
         TBAG_FALLTHROUGH
     default:
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
     // @formatter:on
 
@@ -79,7 +79,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     box->total_byte = TOTAL_BYTE;
     box->dims = dims;
     box->rank = rank;
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err box_malloc_args(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT
@@ -122,7 +122,7 @@ Err box_free(box_data * box) TBAG_NOEXCEPT
     }
     // @formatter:on
     box_dim_free(box->dims);
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 bool box_exists_data(box_data const * box) TBAG_NOEXCEPT
@@ -156,9 +156,9 @@ Err box_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     assert(dest->total_byte == src->total_byte);
     if (dest->device == BOX_DEVICE_CPU && src->device == BOX_DEVICE_CPU) {
         box_cpu_memcpy(dest->data, src->data, src->total_byte);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 }
 
 Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
@@ -167,10 +167,10 @@ Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     assert(src != nullptr);
     assert(dest != src);
     if (!box_dim_is_equals(dest->dims, dest->rank, src->dims, src->rank)) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
     if (dest->total_byte != src->total_byte) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
     return box_memcpy(dest, src);
 }
@@ -179,7 +179,7 @@ Err box_memcpy_async(box_data * dest, box_data const * src, void * user, box_mem
 {
     assert(dest != nullptr);
     assert(src != nullptr);
-    return Err::E_ENOSYS;
+    return E_ENOSYS;
 }
 
 } // namespace details

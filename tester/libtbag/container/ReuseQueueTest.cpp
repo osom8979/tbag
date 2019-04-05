@@ -55,11 +55,11 @@ TEST(ReuseQueueTest, Default)
     test2_value = 200;
 
     int result;
-    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
+    ASSERT_EQ(E_SUCCESS, queue.front(result));
     ASSERT_EQ(100, result);
 
     queue.pop();
-    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
+    ASSERT_EQ(E_SUCCESS, queue.front(result));
     ASSERT_EQ(200, result);
     ASSERT_EQ(1U,  queue.size());
     ASSERT_EQ(1U,  queue.sizeOfReadyQueue());
@@ -84,7 +84,7 @@ TEST(ReuseQueueTest, EmplacePush)
     queue.push(TEST_VALUE);
 
     int result = 0;
-    ASSERT_EQ(Err::E_SUCCESS, queue.front(result));
+    ASSERT_EQ(E_SUCCESS, queue.front(result));
     ASSERT_EQ(TEST_VALUE, result);
 }
 

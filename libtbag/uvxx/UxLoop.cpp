@@ -81,7 +81,7 @@ Err UxLoop::release()
     assert(!isAlive());
 
     auto const HANDLE_SIZE = size();
-    Err code = Err::E_SUCCESS;
+    Err code = E_SUCCESS;
 
     if (HANDLE_SIZE >= 1) {
         _loop->tryCloseAllHandles();

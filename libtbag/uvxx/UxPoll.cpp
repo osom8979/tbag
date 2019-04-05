@@ -91,7 +91,7 @@ Err UxPoll::initFile(UxLoop & loop, int fd)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxPoll::initSock(UxLoop & loop, usock sock)
@@ -104,7 +104,7 @@ Err UxPoll::initSock(UxLoop & loop, usock sock)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxPoll::start(EventType events)
@@ -112,7 +112,7 @@ Err UxPoll::start(EventType events)
     if (auto shared = lock()) {
         return shared->start(events);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxPoll::stop()
@@ -120,7 +120,7 @@ Err UxPoll::stop()
     if (auto shared = lock()) {
         return shared->stop();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 bool UxPoll::isEventReadable(EventType event) TBAG_NOEXCEPT

@@ -73,15 +73,15 @@ TEST(ModelNetTest, Default)
     ASSERT_FALSE(log7.isComplete());
     ASSERT_FALSE(log8.isComplete());
 
-    ASSERT_EQ(Err::E_SUCCESS, net.addFirst(log0));
-    ASSERT_EQ(Err::E_SUCCESS, net.addNode(log1));
-    ASSERT_EQ(Err::E_SUCCESS, net.addNode(log2));
-    ASSERT_EQ(Err::E_SUCCESS, net.addNode(log3));
-    ASSERT_EQ(Err::E_SUCCESS, net.addNode(log4));
-    ASSERT_EQ(Err::E_SUCCESS, net.addNode(log5));
-    ASSERT_EQ(Err::E_SUCCESS, net.addNode(log6));
-    ASSERT_EQ(Err::E_SUCCESS, net.addLast(log7));
-    ASSERT_EQ(Err::E_SUCCESS, net.addFirst(log8));
+    ASSERT_EQ(E_SUCCESS, net.addFirst(log0));
+    ASSERT_EQ(E_SUCCESS, net.addNode(log1));
+    ASSERT_EQ(E_SUCCESS, net.addNode(log2));
+    ASSERT_EQ(E_SUCCESS, net.addNode(log3));
+    ASSERT_EQ(E_SUCCESS, net.addNode(log4));
+    ASSERT_EQ(E_SUCCESS, net.addNode(log5));
+    ASSERT_EQ(E_SUCCESS, net.addNode(log6));
+    ASSERT_EQ(E_SUCCESS, net.addLast(log7));
+    ASSERT_EQ(E_SUCCESS, net.addFirst(log8));
 
     auto const LOG0_ID = log0.getId();
     auto const LOG1_ID = log1.getId();
@@ -120,25 +120,25 @@ TEST(ModelNetTest, Default)
     /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
     // Depth 0
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log0, log1));
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log0, log2));
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log0, log6));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log0, log1));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log0, log2));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log0, log6));
 
     // Depth 1
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log1, log3));
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log1, log4));
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log2, log5));
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log2, log6));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log1, log3));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log1, log4));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log2, log5));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log2, log6));
 
     // Depth 2
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log3, log7));
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log4, log7));
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log6, log7));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log3, log7));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log4, log7));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log6, log7));
 
     // Depth Unknown
-    ASSERT_EQ(Err::E_SUCCESS, net.addArc(log8, log7));
+    ASSERT_EQ(E_SUCCESS, net.addArc(log8, log7));
 
-    ASSERT_EQ(Err::E_SUCCESS, net.forward());
+    ASSERT_EQ(E_SUCCESS, net.forward());
 
     ASSERT_TRUE(log0.isComplete());
     ASSERT_TRUE(log1.isComplete());

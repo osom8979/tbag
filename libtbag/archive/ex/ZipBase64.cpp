@@ -133,7 +133,7 @@ bool decodeZipBase64ToFile(std::string const & input, std::string const & output
 
 bool encodeZipBase64FileToFile(std::string const & input_file_path, std::string const & output_file_path)
 {
-    if (filesystem::checkPrepareFiles(input_file_path, output_file_path) != Err::E_SUCCESS) {
+    if (filesystem::checkPrepareFiles(input_file_path, output_file_path) != E_SUCCESS) {
         return false;
     }
 
@@ -152,7 +152,7 @@ bool encodeZipBase64FileToFile(std::string const & input_file_path, std::string 
 
 bool decodeZipBase64FileToFile(std::string const & input_file_path, std::string const & output_file_path)
 {
-    if (filesystem::checkPrepareFiles(input_file_path, output_file_path) != Err::E_SUCCESS) {
+    if (filesystem::checkPrepareFiles(input_file_path, output_file_path) != E_SUCCESS) {
         return false;
     }
 

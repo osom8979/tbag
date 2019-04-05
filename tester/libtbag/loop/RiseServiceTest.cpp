@@ -146,7 +146,7 @@ TEST(RiseServiceTest, Empty)
 {
     log::SeverityGuard guard;
     RiseService service;
-    ASSERT_EQ(Err::E_SUCCESS, service.run());
+    ASSERT_EQ(E_SUCCESS, service.run());
 }
 
 TEST(RiseServiceTest, Callback)
@@ -171,7 +171,7 @@ TEST(RiseServiceTest, Callback)
         ASSERT_EQ(1, coms.size());
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, service.run());
+    ASSERT_EQ(E_SUCCESS, service.run());
 }
 
 TEST(RiseServiceTest, Default)
@@ -191,7 +191,7 @@ TEST(RiseServiceTest, Default)
     ASSERT_EQ(2, coms.size());
 
     RiseService service(1, true);
-    ASSERT_EQ(Err::E_SUCCESS, service.run(coms));
+    ASSERT_EQ(E_SUCCESS, service.run(coms));
 
     ASSERT_EQ(1, test_com1->run_count);
     ASSERT_EQ(1, test_com2->run_count);
@@ -239,7 +239,7 @@ TEST(RiseServiceTest, Intrrupt)
         return true;
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, service.run(coms));
+    ASSERT_EQ(E_SUCCESS, service.run(coms));
     ASSERT_EQ(1, on_interrupt_counter);
 
     ASSERT_EQ(TEST_COUNT + 1, test_com1->run_count);

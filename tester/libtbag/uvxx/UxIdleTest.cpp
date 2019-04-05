@@ -23,12 +23,12 @@ TEST(UxIdleTest, Default)
     UxLoop loop;
     ASSERT_TRUE(loop.empty());
 
-    ASSERT_EQ(Err::E_SUCCESS, idle.init(loop));
+    ASSERT_EQ(E_SUCCESS, idle.init(loop));
     ASSERT_TRUE(idle.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(1, loop.size());
 
-    ASSERT_EQ(Err::E_SUCCESS, idle.init(loop));
+    ASSERT_EQ(E_SUCCESS, idle.init(loop));
     ASSERT_TRUE(idle.isInit());
     ASSERT_FALSE(loop.empty());
     ASSERT_EQ(2, loop.size());
@@ -41,8 +41,8 @@ TEST(UxIdleTest, Default)
         ++close_counter;
     });
 
-    ASSERT_EQ(Err::E_SUCCESS, idle.start());
-    ASSERT_EQ(Err::E_SUCCESS, loop.run());
+    ASSERT_EQ(E_SUCCESS, idle.start());
+    ASSERT_EQ(E_SUCCESS, loop.run());
     ASSERT_TRUE(loop.empty());
 
     ASSERT_EQ(1, idle_counter);

@@ -29,7 +29,7 @@ TEST(RotatePathTest, Default)
     ASSERT_FALSE(path1.exists());
     ASSERT_FALSE(rotate.next());
 
-    ASSERT_EQ(Err::E_SUCCESS, writeFile(path1, BUFFER));
+    ASSERT_EQ(E_SUCCESS, writeFile(path1, BUFFER));
     ASSERT_TRUE(path1.exists());
     ASSERT_FALSE(rotate.next());
     ASSERT_TRUE(rotate.next(nullptr, 1));

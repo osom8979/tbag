@@ -92,7 +92,7 @@ void WsFrameBuffer::push(char const * buffer, std::size_t size)
 bool WsFrameBuffer::next(Err * code, std::size_t * size)
 {
     if (_buffer_size == 0) {
-        if (code != nullptr) { (*code) = Err::E_SMALLBUF; }
+        if (code != nullptr) { (*code) = E_SMALLBUF; }
         if (size != nullptr) { (*size) = 0; }
         return false;
     }
@@ -124,7 +124,7 @@ bool WsFrameBuffer::next(Err * code, std::size_t * size)
         _frames[_frames_size].swap(current_buffer);
         ++_frames_size;
 
-        if (code != nullptr) { (*code) = Err::E_CONTINUE; }
+        if (code != nullptr) { (*code) = E_CONTINUE; }
         if (size != nullptr) { (*size) = 0; }
         return false;
     }
@@ -141,7 +141,7 @@ bool WsFrameBuffer::next(Err * code, std::size_t * size)
     result_payload.insert(result_payload.end(), current_buffer.payload.begin(), current_buffer.payload.end());
     _frames_size = 0;
 
-    if (code != nullptr) { (*code) = Err::E_SUCCESS; }
+    if (code != nullptr) { (*code) = E_SUCCESS; }
     if (size != nullptr) { (*size) = read_size; }
     return true;
 }

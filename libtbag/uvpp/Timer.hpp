@@ -86,10 +86,10 @@ Err startTimer(std::shared_ptr<TimerType> const & timer, uint64_t millisec)
 {
     STATIC_ASSERT_CHECK_IS_BASE_OF(Timer, TimerType);
     if (static_cast<bool>(timer) == false) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
     if (timer->isActive()) {
-        return Err::E_EBUSY;
+        return E_EBUSY;
     }
     return timer->start(millisec);
 }
@@ -99,7 +99,7 @@ Err stopTimer(std::shared_ptr<TimerType> const & timer)
 {
     STATIC_ASSERT_CHECK_IS_BASE_OF(Timer, TimerType);
     if (static_cast<bool>(timer) == false) {
-        return Err::E_EXPIRED;
+        return E_EXPIRED;
     }
     return timer->stop();
 }

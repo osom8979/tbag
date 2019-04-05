@@ -43,22 +43,22 @@ TEST(SignalTest, Default)
 
     Loop loop;
     auto signal = loop.newHandle<SignalTest>(loop);
-    ASSERT_EQ(Err::E_SUCCESS, signal->start(libtbag::signal::TBAG_SIGNAL_INTERRUPT));
+    ASSERT_EQ(E_SUCCESS, signal->start(libtbag::signal::TBAG_SIGNAL_INTERRUPT));
 
     auto idle = loop.newHandle<libtbag::uvpp::func::FuncIdle>(loop);
     idle->idle_cb = [&](){
         libtbag::signal::raise(libtbag::signal::TBAG_SIGNAL_INTERRUPT);
         idle->close();
     };
-    ASSERT_EQ(Err::E_SUCCESS, idle->start());
+    ASSERT_EQ(E_SUCCESS, idle->start());
 
-    Err loop_result = Err::E_UNKNOWN;
+    Err loop_result = E_UNKNOWN;
     auto thread = std::thread([&](){
         loop_result = loop.run();
     });
 
     thread.join();
-    ASSERT_EQ(Err::E_SUCCESS, loop_result);
+    ASSERT_EQ(E_SUCCESS, loop_result);
     ASSERT_EQ(1, signal->counter);
     ASSERT_EQ(libtbag::signal::TBAG_SIGNAL_INTERRUPT, signal->last_signum);
 }

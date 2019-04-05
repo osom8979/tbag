@@ -35,25 +35,25 @@ ModelLayer::LogLayer::~LogLayer()
 Err ModelLayer::LogLayer::setup(std::string const & data)
 {
     tDLogIfD(_verbose, "LogLayer[{}@{}]::setup()", getName(), getId());
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err ModelLayer::LogLayer::teardown()
 {
     tDLogIfD(_verbose, "LogLayer[{}@{}]::teardown()", getName(), getId());
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err ModelLayer::LogLayer::forward(Layers const & input)
 {
     tDLogIfD(_verbose, "LogLayer[{}@{}]::forward(in:{})", getName(), getId(), input.size());
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err ModelLayer::LogLayer::backward(Layers const & input)
 {
     tDLogIfD(_verbose, "LogLayer[{}@{}]::backward(in:{})", getName(), getId(), input.size());
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 // --------------------------

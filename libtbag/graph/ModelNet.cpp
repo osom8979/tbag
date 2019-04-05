@@ -76,7 +76,7 @@ public:
         _first_ids.insert(ID);
         _layers[NODE] = layer;
         _layers[NODE].setId(ID);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err addNode(ModelLayer const & layer)
@@ -84,7 +84,7 @@ public:
         auto node = _graph.addNode();
         _layers[node] = layer;
         _layers[node].setId(getId(node));
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err addLast(ModelLayer const & layer)
@@ -94,13 +94,13 @@ public:
         _last_ids.insert(ID);
         _layers[NODE] = layer;
         _layers[NODE].setId(ID);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err addArc(ModelLayer const & source, ModelLayer const & target)
     {
         _graph.addArc(getNode(source.getId()), getNode(target.getId()));
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:
@@ -235,7 +235,7 @@ public:
                 _layers[n].setup(layer_data);
             }
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err teardown()
@@ -246,7 +246,7 @@ public:
             }
         }
         // TODO: TearDown self network.
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:
@@ -327,14 +327,14 @@ public:
             current.swap(children);
         }
 
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err forward()
     {
         if (_first_ids.empty()) {
             tDLogE("ModelNet::Impl::forward() Not found first nodes.");
-            return Err::E_NREADY;
+            return E_NREADY;
         }
         return run(_first_ids, Direction::D_FORWARD);
     }
@@ -343,7 +343,7 @@ public:
     {
         if (_last_ids.empty()) {
             tDLogE("ModelNet::Impl::forward() Not found last nodes.");
-            return Err::E_NREADY;
+            return E_NREADY;
         }
         return run(_last_ids, Direction::D_BACKWARD);
     }
@@ -360,7 +360,7 @@ public:
                 }
             }
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err fromData(Buffer const & input)
@@ -370,7 +370,7 @@ public:
                 _layers[n].fromData(input);
             }
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:
@@ -518,7 +518,7 @@ Err ModelNet::addFirst(ModelLayer const & layer)
     if (exists()) {
         return _impl->addFirst(layer);
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::addNode(ModelLayer const & layer)
@@ -526,7 +526,7 @@ Err ModelNet::addNode(ModelLayer const & layer)
     if (exists()) {
         return _impl->addNode(layer);
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::addLast(ModelLayer const & layer)
@@ -534,7 +534,7 @@ Err ModelNet::addLast(ModelLayer const & layer)
     if (exists()) {
         return _impl->addLast(layer);
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::addArc(ModelLayer const & source, ModelLayer const & target)
@@ -542,7 +542,7 @@ Err ModelNet::addArc(ModelLayer const & source, ModelLayer const & target)
     if (exists()) {
         return _impl->addArc(source, target);
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 std::vector<int> ModelNet::getLayerIds() const
@@ -574,7 +574,7 @@ Err ModelNet::setup(std::string const & data)
     if (exists()) {
         return _impl->setup(data);
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::teardown()
@@ -582,7 +582,7 @@ Err ModelNet::teardown()
     if (exists()) {
         return _impl->teardown();
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::forward()
@@ -590,7 +590,7 @@ Err ModelNet::forward()
     if (exists()) {
         return _impl->forward();
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::backward()
@@ -598,7 +598,7 @@ Err ModelNet::backward()
     if (exists()) {
         return _impl->backward();
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::toData(Buffer & output) const
@@ -606,7 +606,7 @@ Err ModelNet::toData(Buffer & output) const
     if (exists()) {
         return _impl->toData(output);
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 Err ModelNet::fromData(Buffer const & input)
@@ -614,7 +614,7 @@ Err ModelNet::fromData(Buffer const & input)
     if (exists()) {
         return _impl->fromData(input);
     }
-    return Err::E_NREADY;
+    return E_NREADY;
 }
 
 std::string ModelNet::toString() const

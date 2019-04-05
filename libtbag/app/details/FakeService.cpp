@@ -27,22 +27,22 @@ FakeService::~FakeService()
 
 Err FakeService::install()
 {
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err FakeService::uninstall()
 {
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err FakeService::start()
 {
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err FakeService::stop()
 {
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace details

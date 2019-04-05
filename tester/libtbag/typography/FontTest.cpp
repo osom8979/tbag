@@ -41,11 +41,11 @@ TEST(FontTest, ExportImage)
     int  const LINE_HEIGHT = 32;
 
     TrueType tt;
-    ASSERT_EQ(Err::E_SUCCESS, tt.loadFromMemory(getNgcNormal()));
+    ASSERT_EQ(E_SUCCESS, tt.loadFromMemory(getNgcNormal()));
 
     std::string const DRAW_TEXT = "A";
     libtbag::graphic::ImageGray gray;
-    ASSERT_EQ(Err::E_SUCCESS, tt.drawAscii(DRAW_TEXT, gray, LINE_HEIGHT));
-    ASSERT_EQ(Err::E_SUCCESS, libtbag::graphic::writeImage(IMAGE_PATH, gray));
+    ASSERT_EQ(E_SUCCESS, tt.drawAscii(DRAW_TEXT, gray, LINE_HEIGHT));
+    ASSERT_EQ(E_SUCCESS, libtbag::graphic::writeImage(IMAGE_PATH, gray));
 }
 

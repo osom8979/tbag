@@ -83,7 +83,7 @@ Err UxTimer::init(UxLoop & loop)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxTimer::start(uint64_t timeout, uint64_t repeat)
@@ -91,7 +91,7 @@ Err UxTimer::start(uint64_t timeout, uint64_t repeat)
     if (auto shared = lock()) {
         return shared->start(timeout, repeat);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxTimer::stop()
@@ -99,7 +99,7 @@ Err UxTimer::stop()
     if (auto shared = lock()) {
         return shared->stop();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxTimer::again()
@@ -107,7 +107,7 @@ Err UxTimer::again()
     if (auto shared = lock()) {
         return shared->again();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 void UxTimer::setRepeat(uint64_t repeat)

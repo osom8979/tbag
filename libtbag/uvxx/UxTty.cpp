@@ -91,7 +91,7 @@ Err UxTty::init(UxLoop & loop, ufile fd, bool readable)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxTty::init(UxLoop & loop, GeneralFile fd)
@@ -104,7 +104,7 @@ Err UxTty::init(UxLoop & loop, GeneralFile fd)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxTty::setMode(TtyMode mode)
@@ -112,7 +112,7 @@ Err UxTty::setMode(TtyMode mode)
     if (auto shared = lock()) {
         return shared->setMode(mode);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxTty::resetMode()
@@ -120,7 +120,7 @@ Err UxTty::resetMode()
     if (auto shared = lock()) {
         return shared->resetMode();
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 Err UxTty::getWinSize(int * width, int * height)
@@ -134,7 +134,7 @@ Err UxTty::getWinSize(int * width, int * height)
     if (height != nullptr) {
         *height = 0;
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 UxTty::ufile UxTty::toFile(GeneralFile fd) TBAG_NOEXCEPT

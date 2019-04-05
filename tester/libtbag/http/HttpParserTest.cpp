@@ -33,7 +33,7 @@ TEST(HttpParserTest, Request)
     HttpParser http;
     std::size_t read_size = 0;
 
-    ASSERT_EQ(Err::E_SUCCESS, http.execute(TEST_DATA, TEST_DATA_LENGTH, &read_size));
+    ASSERT_EQ(E_SUCCESS, http.execute(TEST_DATA, TEST_DATA_LENGTH, &read_size));
     ASSERT_EQ(TEST_DATA_LENGTH, read_size);
 
     ASSERT_EQ(1, http.property().http_major);
@@ -69,7 +69,7 @@ TEST(HttpParserTest, Response)
     HttpParser http;
 
     for (std::size_t i = 0; i < SIZE; ++i) {
-        ASSERT_EQ(Err::E_SUCCESS, http.execute(data[i].data(), data[i].size()));
+        ASSERT_EQ(E_SUCCESS, http.execute(data[i].data(), data[i].size()));
 
         if (i + 1 == SIZE) {
             ASSERT_TRUE(http.isFinish());
@@ -95,7 +95,7 @@ TEST(HttpParserTest, DefaultRequest)
     buffer += "\r\n";
 
     HttpParser http;
-    ASSERT_EQ(Err::E_SUCCESS, http.execute(buffer.data(), buffer.size()));
+    ASSERT_EQ(E_SUCCESS, http.execute(buffer.data(), buffer.size()));
     ASSERT_TRUE(http.isFinish());
 
     ASSERT_EQ(1, http.property().http_major);
@@ -113,7 +113,7 @@ TEST(HttpParserTest, DefaultResponse)
     buffer += "\r\n";
 
     HttpParser http;
-    ASSERT_EQ(Err::E_SUCCESS, http.execute(buffer.data(), buffer.size()));
+    ASSERT_EQ(E_SUCCESS, http.execute(buffer.data(), buffer.size()));
     ASSERT_TRUE(http.isFinish());
 
     ASSERT_EQ(1, http.property().http_major);

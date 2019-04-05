@@ -202,19 +202,19 @@ Err RiseService::run(SharedComSet const & init_coms)
     auto timer = loop.newHandle<FuncTimer>(loop);
     if (static_cast<bool>(timer) == false) {
         tDLogA("RiseService::run() Timer handle is expired.");
-        return Err::E_BADALLOC;
+        return E_BADALLOC;
     }
 
     auto signal = loop.newHandle<FuncSignal>(loop);
     if (static_cast<bool>(signal) == false) {
         tDLogA("RiseService::run() Signal handle is expired.");
-        return Err::E_BADALLOC;
+        return E_BADALLOC;
     }
 
     Err const TIMER_START_CODE = timer->start(0, REPEAT);
     Err const SIGNAL_START_CODE = signal->start(signal::TBAG_SIGNAL_INTERRUPT);
 
-    if (SIGNAL_START_CODE != Err::E_SUCCESS || TIMER_START_CODE != Err::E_SUCCESS) {
+    if (SIGNAL_START_CODE != E_SUCCESS || TIMER_START_CODE != E_SUCCESS) {
         tDLogE("RiseService::run() Handle start (T:{}, S:{}) error", getErrName(TIMER_START_CODE), getErrName(SIGNAL_START_CODE));
         timer->close();
         signal->close();
@@ -261,7 +261,7 @@ Err RiseService::run(SharedComSet const & init_coms)
 
     tDLogD("RiseService::run() Timer repeat: {}ms", REPEAT);
     Err const LOOP_EXIT_CODE = loop.run();
-    if (LOOP_EXIT_CODE != Err::E_SUCCESS) {
+    if (LOOP_EXIT_CODE != E_SUCCESS) {
         tDLogE("RiseService::run() Loop end {} error", libtbag::getErrName(LOOP_EXIT_CODE));
     }
 
@@ -278,7 +278,7 @@ Err RiseService::run(SharedComSet const & init_coms)
     onDestroy(coms);
 
     tDLogD("RiseService::run() == END ==");
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 void RiseService::onCreate(SharedComSet & coms)

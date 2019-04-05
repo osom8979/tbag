@@ -39,7 +39,7 @@ MqStreamClient::MqStreamClient(Loop & loop, MqInternal const & internal, MqParam
 
     if (params.type != MqType::MT_PIPE && params.type != MqType::MT_TCP) {
         tDLogE("MqStreamClient::MqStreamClient() Unsupported type: {}({})", getTypeName(), getTypeInteger());
-        throw ErrException(Err::E_ILLARGS);
+        throw ErrException(E_ILLARGS);
     }
 
     createTerminator(loop);
@@ -184,7 +184,7 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
 {
     assert(static_cast<bool>(_client));
 
-    if (code == Err::E_EOF) {
+    if (code == E_EOF) {
         tDLogI("MqStreamClient::onRead() End of file.");
         if (libtbag::mq::details::isActiveState(_state)) {
             onTearDownStep1();
@@ -236,7 +236,7 @@ void MqStreamClient::onRead(Err code, char const * buffer, std::size_t size)
             tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Remaining size: {}",
                      REMAINING_SIZE - computed_total);
         } else {
-            assert(parse_code == Err::E_VERIFIER);
+            assert(parse_code == E_VERIFIER);
             if (computed_size) {
                 tDLogIfD(PARAMS.verbose, "MqStreamClient::onRead() Verify error "
                          "(remaining size: {}, Required size: {})",
@@ -316,14 +316,14 @@ void MqStreamClient::onInitStep2_INIT()
     assert(_client->isInit());
 
     if (_exit) {
-        onInit_FAILURE(Err::E_ECANCELED);
+        onInit_FAILURE(E_ECANCELED);
         return;
     }
 
     if (PARAMS.type == MqType::MT_PIPE) {
         if (!libtbag::filesystem::Path(PARAMS.address).exists()) {
             tDLogE("MqStreamClient::onInitStep2_INIT() Not found named pipe: {}", PARAMS.address);
-            onInit_FAILURE(Err::E_ENFOUND);
+            onInit_FAILURE(E_ENFOUND);
             return;
         }
 
@@ -384,7 +384,7 @@ void MqStreamClient::onInitStep3_TIMEOUT()
     assert(isSuccess(code));
     tDLogIfD(PARAMS.verbose, "MqStreamClient::onInitStep3_TIMEOUT() Cancel the connect request.");
 
-    onInit_FAILURE(Err::E_TIMEOUT);
+    onInit_FAILURE(E_TIMEOUT);
 }
 
 void MqStreamClient::onInitStep3_CONNECT(Err code)
@@ -399,7 +399,7 @@ void MqStreamClient::onInitStep3_CONNECT(Err code)
     _connector->close();
 
     if (_exit) {
-        onInit_FAILURE(Err::E_ECANCELED);
+        onInit_FAILURE(E_ECANCELED);
         return;
     }
 

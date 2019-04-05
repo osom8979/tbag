@@ -207,7 +207,7 @@ Err HttpServer::writeWsResponse(std::intptr_t id, HttpRequest const & request)
 Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)
 {
     if (!PARAMS.enable_websocket) {
-        return Err::E_ILLSTATE;
+        return E_ILLSTATE;
     }
 
     Buffer buffer;
@@ -215,7 +215,7 @@ Err HttpServer::writeWsFrame(std::intptr_t id, WsFrame const & frame)
 
     if (SIZE == 0) {
         tDLogE("HttpServer::writeWsFrame() WsFrame -> Buffer copy error");
-        return Err::E_ECOPY;
+        return E_ECOPY;
     }
     return _server->send(buffer.data(), buffer.size(), id);
 }

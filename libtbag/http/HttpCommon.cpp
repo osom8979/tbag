@@ -690,7 +690,7 @@ std::string toStatusLine(HttpCommon const & common, HttpBaseResponse const & res
     std::stringstream ss;
     ss << toVersionString(common) << SP
        << response.code << SP
-       << (response.reason.empty() ? getErrName(Err::E_EINIT) : response.reason);
+       << (response.reason.empty() ? getErrName(E_EINIT) : response.reason);
     return ss.str();
 }
 
@@ -1009,7 +1009,7 @@ Err WsStatus::parse(char const * buffer, std::size_t size)
     if (isFailure(REASON_RESULT)) {
         return REASON_RESULT;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err WsStatus::parse(HttpBuffer const & payload)
@@ -1020,7 +1020,7 @@ Err WsStatus::parse(HttpBuffer const & payload)
 Err WsStatus::getStatusCode(char const * payload_begin, std::size_t payload_length, uint16_t * result)
 {
     if (payload_length < sizeof(uint16_t)) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     uint16_t temp = 0;
@@ -1028,20 +1028,20 @@ Err WsStatus::getStatusCode(char const * payload_begin, std::size_t payload_leng
     if (result != nullptr) {
         *result = bitwise::toHost(temp);
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err WsStatus::getReason(char const * payload_begin, std::size_t payload_length, std::string * result)
 {
     if (payload_length <= sizeof(uint16_t)) {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     if (result != nullptr) {
         result->assign(&payload_begin[sizeof(uint16_t)],
                        &payload_begin[sizeof(uint16_t)] + payload_length - sizeof(uint16_t));
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 std::string WsStatus::toString() const

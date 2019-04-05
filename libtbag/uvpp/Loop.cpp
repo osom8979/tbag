@@ -105,7 +105,7 @@ Err BaseLoop::run(RunMode mode)
     bool NOW_WAITING = false;
     if (_running.compare_exchange_weak(NOW_WAITING, true) == false) {
         tDLogE("BaseLoop::run() already working");
-        return Err::E_EALREADY;
+        return E_EALREADY;
     }
 
     // Update owner thread id.
@@ -260,7 +260,7 @@ Loop::~Loop()
         stop();
     }
     // RE-TRY.
-    if (Parent::close() != Err::E_SUCCESS) {
+    if (Parent::close() != E_SUCCESS) {
         tDLogE("Loop::~Loop() error.");
     }
 #endif

@@ -117,7 +117,7 @@ void Box::clear()
 Err Box::create(BoxTypeTable type)
 {
     if (_type == type) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
 
     try {
@@ -138,28 +138,28 @@ Err Box::create(BoxTypeTable type)
             assert(false && "Unknown type assertion.");
             _bag.reset();
             _type = BoxTypeTable::BTT_NONE;
-            return Err::E_ILLARGS;
+            return E_ILLARGS;
         }
     } catch (std::exception & e) {
         _bag.reset();
         _type = BoxTypeTable::BTT_NONE;
-        return Err::E_BADALLOC;
+        return E_BADALLOC;
     } catch (...) {
         _bag.reset();
         _type = BoxTypeTable::BTT_NONE;
-        return Err::E_UNKEXCP;
+        return E_UNKEXCP;
     }
 
     assert(static_cast<bool>(_bag));
     _type = type;
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err Box::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
                 unsigned i4, unsigned i5, unsigned i6, unsigned i7)
 {
     if (!_bag) {
-        return Err::E_NREADY;
+        return E_NREADY;
     }
 
     try {
@@ -178,12 +178,12 @@ Err Box::resize(unsigned i0, unsigned i1, unsigned i2, unsigned i3,
         // @formatter:on
         default:
             assert(false && "Unknown type assertion.");
-            return Err::E_ILLSTATE;
+            return E_ILLSTATE;
         }
     } catch (...) {
-        return Err::E_UNKEXCP;
+        return E_UNKEXCP;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Box Box::clone(bool copy_user) const
@@ -428,7 +428,7 @@ Err Box::fromString(std::string const & content)
     }
     assert(_type == BoxTypeTable::BTT_INT8 || _type == BoxTypeTable::BTT_UINT8);
     std::copy(content.begin(), content.end(), cast<char>());
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace container

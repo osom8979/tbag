@@ -34,26 +34,26 @@ HttpReader::~HttpReader()
 Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
 {
     if (buffer == nullptr || size == 0) {
-        onParseError(Err::E_ILLARGS, arg);
-        return Err::E_ILLARGS;
+        onParseError(E_ILLARGS, arg);
+        return E_ILLARGS;
     }
 
     if (_enable_websocket && _switching_protocol) {
         _frame_buffer.push(buffer, size);
 
         int frame_count = 0;
-        Err next_code = Err::E_UNKNOWN;
+        Err next_code = E_UNKNOWN;
         while (_frame_buffer.next(&next_code)) {
             ++frame_count;
             onWsMessage(_frame_buffer.getOpCode(), _frame_buffer.atPayload(), arg);
         }
 
-        if (next_code == Err::E_SMALLBUF || next_code == Err::E_CONTINUE) {
+        if (next_code == E_SMALLBUF || next_code == E_CONTINUE) {
             onContinue(arg);
-        } else if (next_code != Err::E_SUCCESS) {
+        } else if (next_code != E_SUCCESS) {
             onParseError(next_code, arg);
         } else {
-            assert(next_code == Err::E_SUCCESS);
+            assert(next_code == E_SUCCESS);
         }
         return next_code;
     }
@@ -70,7 +70,7 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
 
     if (isFinish() == false) {
         onContinue(arg);
-        return Err::E_CONTINUE;
+        return E_CONTINUE;
     }
 
     if (direction == ParserType::REQUEST) {
@@ -80,14 +80,14 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
             if (checkWsRequest(property())) {
                 tDLogI("HttpReader::parse() Switching protocol!");
                 _switching_protocol = onSwitchingProtocol(property(), arg);
-                return Err::E_SUCCESS;
+                return E_SUCCESS;
             } else {
                 tDLogW("HttpReader::parse() Unknown WebSocket request. Switches to the regular HTTP protocol.");
             }
         }
 
         onRegularHttp(property(), arg);
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
 
     } else if (direction == ParserType::RESPONSE) {
         // This block can be accessed form the 'Client' object.
@@ -97,11 +97,11 @@ Err HttpReader::parse(char const * buffer, std::size_t size, void * arg)
         } else {
             onRegularHttp(property(), arg);
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
-    onParseError(Err::E_ENOSYS, arg);
-    return Err::E_ENOSYS;
+    onParseError(E_ENOSYS, arg);
+    return E_ENOSYS;
 }
 
 } // namespace http

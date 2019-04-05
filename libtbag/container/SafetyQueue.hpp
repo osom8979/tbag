@@ -95,32 +95,32 @@ public:
         Guard guard(_mutex);
         while (_queue.size() > size) {
             if (_queue.empty()) {
-                return Err::E_EQUEUE;
+                return E_EQUEUE;
             }
             _queue.pop();
         }
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err front(Value & result)
     {
         Guard guard(_mutex);
         if (_queue.empty() == true) {
-            return Err::E_EQUEUE;
+            return E_EQUEUE;
         }
         result = _queue.front();
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     Err frontAndPop(Value & result)
     {
         Guard guard(_mutex);
         if (_queue.empty()) {
-            return Err::E_EQUEUE;
+            return E_EQUEUE;
         }
         result = _queue.front();
         _queue.pop();
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     }
 
 public:

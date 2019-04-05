@@ -418,7 +418,7 @@ Err Process::spawn(Loop & loop, Options const & options)
 
     if (impl::updateOptions(_options, args, envs, stdios, uv_options) == false) {
         tDLogE("Process::spawn() options error.");
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     // If the process is successfully spawned, this function will return 0.

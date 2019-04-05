@@ -83,7 +83,7 @@ Err UxProcess::spawn(UxLoop & loop, Options const & options)
     } catch (ErrException e) {
         return e.CODE;
     }
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err UxProcess::processKill(int signum)
@@ -91,7 +91,7 @@ Err UxProcess::processKill(int signum)
     if (auto shared = lock()) {
         return shared->processKill(signum);
     }
-    return Err::E_EXPIRED;
+    return E_EXPIRED;
 }
 
 int UxProcess::getPid() const

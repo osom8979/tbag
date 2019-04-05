@@ -142,7 +142,7 @@ static Err write_single(void * a, ArchiveEntry const & info, std::string const &
         _archive_entry_sparse_clear(entry);
     }
 
-    Err last_err = Err::E_UNKNOWN;
+    Err last_err = E_UNKNOWN;
     int code = _archive_write_header(a, entry);
     if (code == _archive_ok) {
         auto left = info.size;
@@ -152,14 +152,14 @@ static Err write_single(void * a, ArchiveEntry const & info, std::string const &
             auto read = reader(buffer.data(), next);
             if (read != next) {
                 tDLogE("write() read size mismatch: {}/{}", read, next);
-                last_err = Err::E_RDERR;
+                last_err = E_RDERR;
                 break;
             }
 
             auto written = _archive_write_data(a, buffer.data(), next);
             if (written != next) {
                 tDLogE("write() written size mismatch: {}/{}", written, next);
-                last_err = Err::E_WRERR;
+                last_err = E_WRERR;
                 break;
             }
             left -= next;
@@ -234,16 +234,16 @@ std::size_t BaseArchive::getBlockSize() TBAG_NOEXCEPT
 Err BaseArchive::getErrFromArchiveCode(int code) TBAG_NOEXCEPT
 {
     if (code == _archive_ok) {
-        return Err::E_SUCCESS;
+        return E_SUCCESS;
     } else if (code == _archive_eof) {
-        return Err::E_EOF;
+        return E_EOF;
     } else if (code == _archive_retry) {
-        return Err::E_RETRY;
+        return E_RETRY;
     } else if (code >= _archive_warn) {
-        return Err::E_WARNING;
+        return E_WARNING;
     }
     assert(code < _archive_warn);
-    return Err::E_UNKNOWN;
+    return E_UNKNOWN;
 }
 
 char const * BaseArchive::getErrorString() const TBAG_NOEXCEPT
@@ -303,7 +303,7 @@ ArchiveWriter::ArchiveWriter(std::string const & format, CompressType compress)
         break;
     default:
         tDLogE("ArchiveWriter::ArchiveWriter() Unknown compress type: {}", (int)compress);
-        throw ErrException(Err::E_ILLARGS);
+        throw ErrException(E_ILLARGS);
     }
 
     if (code != _archive_ok) {
@@ -341,7 +341,7 @@ ArchiveWriter::~ArchiveWriter()
 Err ArchiveWriter::openFile(std::string const & path)
 {
     if (_open) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
     auto const CODE = _archive_write_open_filename(_archive, path.c_str());
     _open = (CODE == _archive_ok);
@@ -351,7 +351,7 @@ Err ArchiveWriter::openFile(std::string const & path)
 Err ArchiveWriter::openMemory(char * buffer, std::size_t size, std::size_t * used)
 {
     if (_open) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
     auto const CODE = _archive_write_open_memory(_archive, buffer, size, used);
     _open = (CODE == _archive_ok);
@@ -361,7 +361,7 @@ Err ArchiveWriter::openMemory(char * buffer, std::size_t size, std::size_t * use
 Err ArchiveWriter::close()
 {
     if (!_open) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
     auto const CODE = _archive_write_close(_archive);
     _open = false;
@@ -379,7 +379,7 @@ Err ArchiveWriter::writeFromFile(std::string const & path)
     } else if (FILESYSTEM_PATH.isDirectory()) {
         info.type = ArchiveEntry::TYPE_DIR;
     } else {
-        return Err::E_ILLARGS;
+        return E_ILLARGS;
     }
 
     auto const STATE = file.getState();
@@ -471,7 +471,7 @@ Err ArchiveReader::openFile(std::string const & path)
 Err ArchiveReader::openFile(std::string const & path, std::size_t block_size)
 {
     if (_open) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
     auto const CODE = _archive_read_open_filename(_archive, path.c_str(), block_size);
     _open = (CODE == _archive_ok);
@@ -481,7 +481,7 @@ Err ArchiveReader::openFile(std::string const & path, std::size_t block_size)
 Err ArchiveReader::openMemory(char const * buffer, std::size_t size)
 {
     if (_open) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
     auto const CODE = _archive_read_open_memory(_archive, buffer, size);
     _open = (CODE == _archive_ok);
@@ -491,7 +491,7 @@ Err ArchiveReader::openMemory(char const * buffer, std::size_t size)
 Err ArchiveReader::close()
 {
     if (!_open) {
-        return Err::E_ALREADY;
+        return E_ALREADY;
     }
     auto const CODE = _archive_read_close(_archive);
     _open = false;

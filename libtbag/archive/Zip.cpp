@@ -47,7 +47,7 @@ static Err coding(char const * input, std::size_t size, util::Buffer & output,
     }
 
     if (result != Z_OK) {
-        return Err::E_EINIT;
+        return E_EINIT;
     }
 
     int const PAGE_SIZE = system::getPageSize();
@@ -96,9 +96,9 @@ static Err coding(char const * input, std::size_t size, util::Buffer & output,
 
     Err result_code;
     if (result == Z_STREAM_END) {
-        result_code = Err::E_SUCCESS;
+        result_code = E_SUCCESS;
     } else {
-        result_code = Err::E_UNKNOWN;
+        result_code = E_UNKNOWN;
     }
 
     if (direction == CodingDirection::CD_ENCODE) {
@@ -131,12 +131,12 @@ Err zip(std::vector<std::string> const & files,
 {
     filesystem::Path const OUTPUT_FILE_PATH(output_path);
     if (OUTPUT_FILE_PATH.exists()) {
-        return Err::E_EEXIST;
+        return E_EEXIST;
     }
 
     zipFile zf = zipOpen(output_path.c_str(), APPEND_STATUS_CREATE);
     if (zf == nullptr) {
-        return Err::E_EOPEN;
+        return E_EOPEN;
     }
 
     zip_fileinfo info = {0,};
@@ -216,19 +216,19 @@ Err zip(std::vector<std::string> const & files,
     }
 
     zipClose(zf, global_comment.c_str());
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 Err unzip(std::string const & path, std::string const & output_dir)
 {
     unzFile uf = unzOpen(path.c_str());
     if (uf == nullptr) {
-        return Err::E_EOPEN;
+        return E_EOPEN;
     }
 
     if (unzGoToFirstFile(uf) != UNZ_OK) {
         unzClose(uf);
-        return Err::E_EINDEX;
+        return E_EINDEX;
     }
 
     std::size_t const MAX_PATH_LENGTH = filesystem::details::MAX_PATH_LENGTH;
@@ -244,7 +244,7 @@ Err unzip(std::string const & path, std::string const & output_dir)
 
     filesystem::Path const OUTPUT_DIRECTORY(output_dir);
     if (OUTPUT_DIRECTORY.exists() == false) {
-        return Err::E_ENOENT;
+        return E_ENOENT;
     }
 
     do {
@@ -285,7 +285,7 @@ Err unzip(std::string const & path, std::string const & output_dir)
     } while (unzGoToNextFile(uf) == UNZ_OK);
     unzClose(uf);
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 } // namespace archive

@@ -131,13 +131,13 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 {
     File f(path, File::Flags().clear().rdonly());
     if (f.isOpen() == false) {
-        return Err::E_ENOENT;
+        return E_ENOENT;
     }
 
     uint64_t const SIZE = f.getState().size;
     if (SIZE > limit_size) {
         tDLogE("readToBuffer() limit size error: file_size({}) vs limit_siz({})", SIZE, limit_size);
-        return Err::E_SMALLBUF;
+        return E_SMALLBUF;
     }
 
     if (result.size() < SIZE) {
@@ -149,14 +149,14 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
         tDLogW("readToBuffer() Read size is not the same: {}/{}.", READ_SIZE, SIZE);
     }
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 static Err writeFromBuffer(std::string const & path, char const * buffer, std::size_t size)
 {
     File f(path, File::Flags().clear().creat().wronly());
     if (f.isOpen() == false) {
-        return Err::E_ENOENT;
+        return E_ENOENT;
     }
 
     int const WRITE_SIZE = f.write(buffer, size, 0);
@@ -164,7 +164,7 @@ static Err writeFromBuffer(std::string const & path, char const * buffer, std::s
         tDLogW("writeFromBuffer() Read size is not the same: {}/{}.", WRITE_SIZE, size);
     }
 
-    return Err::E_SUCCESS;
+    return E_SUCCESS;
 }
 
 template <typename StlContainerType>

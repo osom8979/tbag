@@ -108,7 +108,7 @@ public:
         Guard guard(_writers_mutex);
 
         SharedBuffer shared;
-        if (_writers.front(shared) != Err::E_SUCCESS) {
+        if (_writers.front(shared) != E_SUCCESS) {
             return false;
         }
 

@@ -22,7 +22,7 @@ TEST(UuidTest, Default)
 
     std::string const TEST_UUID_STR = "123e4567-e89b-12d3-a456-426655440000";
     Uuid uuid3;
-    ASSERT_EQ(Err::E_SUCCESS, uuid3.fromString(TEST_UUID_STR));
+    ASSERT_EQ(E_SUCCESS, uuid3.fromString(TEST_UUID_STR));
 
     std::string const UUID3_STRING = uuid3.toString();
     ASSERT_EQ(TEST_UUID_STR, string::lower(UUID3_STRING));
