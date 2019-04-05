@@ -315,6 +315,17 @@ macro (tbag_config__add_third __root_dir)
     list (INSERT CMAKE_LIBRARY_PATH 0 ${THIRD_LIB})
 endmacro ()
 
+#/// Initialize tparty variables.
+macro (tbag_config__add_third_from_tparty)
+    if ("$ENV{TPARTY_PREFIX}" STREQUAL "")
+        string (REPLACE "\\" "/" __tparty_prefix "$ENV{TPARTY_PREFIX}")
+    else ()
+        string (REPLACE "\\" "/" __tparty_prefix "/usr/local/tparty")
+    endif ()
+    tbag_config__add_third ("${__tparty_prefix}")
+    unset (__tparty_prefix)
+endmacro ()
+
 #/// Add SOURCE PATH's.
 #///
 #/// @remarks
@@ -435,7 +446,7 @@ macro (tbag_config __path)
 
     # Configure cmake settings.
     tbag_config__add_shared_library_option ()
-    # tbag_config__add_third ("$ENV{TPARTY_HOME}/local") # Setup the THIRD_PREFIX variable.
+    # tbag_config__add_third_from_tparty () # Setup the THIRD_PREFIX variable.
     tbag_config__add_source_dir_paths ()
     tbag_config__add_binary_dir_paths ()
     tbag_config__set_include_and_link_directories ()

@@ -16,16 +16,8 @@ endif ()
 #enable_language (C)
 #enable_language (CXX)
 
-## Find tbag module path.
-set (TBAG_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake"                 CACHE PATH "libtbag cmake module directory.")
-#set(TBAG_MODULE_PATH "$ENV{TPARTY_HOME}/local/share/libtbag/cmake" CACHE PATH "libtbag cmake module directory.")
-
-## Default tbag project.
-if (IS_DIRECTORY "${TBAG_MODULE_PATH}")
-    list (APPEND CMAKE_MODULE_PATH "${TBAG_MODULE_PATH}")
-else ()
-    message (FATAL_ERROR "Not found libtbag cmake module directory.")
-endif ()
+## libtbag cmake module directory.
+list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
@@ -49,14 +41,6 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set  (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 endif ()
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_TBAG_LIBRARY_DEBUGGING_LOG")
-
-# Setup the THIRD_PREFIX variable.
-string (REPLACE "\\" "/" __tparty_home_path "$ENV{TPARTY_HOME}/local")
-if (IS_DIRECTORY "${__tparty_home_path}")
-    tbag_config__add_third ("${__tparty_home_path}")
-else ()
-    message (STATUS "Not found tparty local directory: ${__tparty_home_path}")
-endif ()
 
 tbag_config__set_option (USE_CCACHE  ON) ## Enable ccache compile.
 tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compiler.
