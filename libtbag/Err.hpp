@@ -103,8 +103,6 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_CONNECTION_RESET, "A connection was forcibly closed by a peer") \
     _TBAG_XX(_NO_RESPONSE     , "No response"                               ) \
     _TBAG_XX(_NOT_WS_RESPONSE , "Not WebSocket response"                    ) \
-    /* Process */ \
-    _TBAG_XX(_UNKNOWN_PROCESS_ID, "Unknown process id") \
     /* Missing system error in libuv. */ \
     _TBAG_XX(_EBADMSG        ,  "Bad message"                                          ) \
     _TBAG_XX(_ECHILD         ,  "No child processes"                                   ) \
@@ -227,6 +225,8 @@ static_assert(static_cast<int>(Err::E_SUCCESS) == 0, "The success code must be 0
 #define _TBAG_XX(name, msg) TBAG_CONSTEXPR Err const E##name = Err::E##name;
 TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
+
+TBAG_CONSTEXPR Err const E_UNKNOWN_PROCESS_ID = E_EBADF;
 
 inline int toInt(Err code) TBAG_NOEXCEPT { return static_cast<int>(code); }
 inline Err toErr(int code) TBAG_NOEXCEPT { return static_cast<Err>(code); }
