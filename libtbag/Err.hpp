@@ -222,6 +222,10 @@ enum class Err : int
 #undef _TBAG_XX
 };
 
+#define _TBAG_XX(name, msg) TBAG_CONSTEXPR Err const E##name = Err::E##name;
+TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
+#undef _TBAG_XX
+
 inline int toInt(Err code) TBAG_NOEXCEPT { return static_cast<int>(code); }
 inline Err toErr(int code) TBAG_NOEXCEPT { return static_cast<Err>(code); }
 
