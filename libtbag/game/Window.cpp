@@ -11,12 +11,11 @@
 #include <libtbag/game/Window.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
-#include <libtbag/Type.hpp>
-
-#include <libtbag/graphic/Color.hpp>
-#include <libtbag/geometry/GeometryTypes.hpp>
-#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/res/Storage.hpp>
+#include <libtbag/geometry/GeometryTypes.hpp>
+#include <libtbag/graphic/Color.hpp>
+#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/Type.hpp>
 
 #include <libtbag/3rd/imgui/imgui.h>
 #include <libtbag/3rd/imgui/imgui-SFML.h>
@@ -25,43 +24,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
-#include <Swoosh/ActivityController.h>
-#include <Swoosh/Game.h>
-#include <Swoosh/ActionList.h>
-#include <Swoosh/Activity.h>
-#include <Swoosh/Ease.h>
-#include <Swoosh/EmbedGLSL.h>
-#include <Swoosh/Segue.h>
-#include <Swoosh/Shaders.h>
-#include <Swoosh/Timer.h>
-
-#include <Segues/BlackWashFade.h>
-#include <Segues/BlendFadeIn.h>
-#include <Segues/BlurFadeIn.h>
-#include <Segues/Checkerboard.h>
-#include <Segues/CircleClose.h>
-#include <Segues/CircleOpen.h>
-#include <Segues/CrossZoom.h>
-#include <Segues/Cube3D.h>
-#include <Segues/DiamondTileCircle.h>
-#include <Segues/DiamondTileSwipe.h>
-#include <Segues/HorizontalOpen.h>
-#include <Segues/HorizontalSlice.h>
-#include <Segues/Morph.h>
-#include <Segues/PageTurn.h>
-#include <Segues/PixelateBlackWashFade.h>
-#include <Segues/PushIn.h>
-#include <Segues/RadialCCW.h>
-#include <Segues/RetroBlit.h>
-#include <Segues/SlideIn.h>
-#include <Segues/SwipeIn.h>
-#include <Segues/VerticalOpen.h>
-#include <Segues/VerticalSlice.h>
-#include <Segues/WhiteWashFade.h>
-#include <Segues/ZoomFadeIn.h>
-#include <Segues/ZoomFadeInBounce.h>
-#include <Segues/ZoomIn.h>
-#include <Segues/ZoomOut.h>
+#include <swoosh.hpp>
 
 #include <cstdlib>
 #include <cassert>
