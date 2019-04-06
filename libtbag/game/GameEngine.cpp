@@ -10,6 +10,7 @@
  */
 
 #include <libtbag/game/GameEngine.hpp>
+#include <libtbag/game/LuaGameInterface.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/res/Storage.hpp>
@@ -44,9 +45,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace game {
 
-struct GameScene : public swoosh::Activity
+using Activity   = swoosh::Activity;
+using Activities = swoosh::ActivityController;
+
+struct GameScene : public Activity
 {
-    GameScene(swoosh::ActivityController * controller) : swoosh::Activity(controller)
+    GameScene(Activities * controller) : Activity(controller)
     {
         // EMPTY.
     }
@@ -90,13 +94,13 @@ struct GameScene : public swoosh::Activity
 };
 
 /**
- * Window backend implementation.
+ * GameEngine backend implementation.
  *
  * @author zer0
  * @date   2019-03-23
  * @date   2019-04-06 (Rename: Window -> GameEngine)
  */
-struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
+struct GameEngine : public LuaGameInterface, public libtbag::geometry::GeometryTypes
 {
     using Channel = libtbag::graphic::Channel;
     using Rgb24   = libtbag::graphic::Rgb24;
@@ -114,189 +118,23 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
     sf::Color         _clear;
     Activities        _activities;
 
-    sol::state *  _lua;
-    sol::table    _lua_tbag;
+    sol::table _lua_tbag;
 
-    Window(Storage & storage, sf::VideoMode const mode,
-           std::string const & title, sf::Uint32 style,
-           sf::ContextSettings const context, sf::Color const & clear)
+    GameEngine(Storage & storage, sf::VideoMode const mode,
+               std::string const & title, sf::Uint32 style,
+               sf::ContextSettings const context, sf::Color const & clear)
             : _storage(storage), _window(mode, title, style, context),
-              _clear(clear), _activities(_window), _lua(_storage->lua.get())
+              _clear(clear), _activities(_window)
     {
-        assert(_lua != nullptr);
-        _lua_tbag = (*_lua)[libtbag::script::SolState::lua_tbag_name()];
-
+        if (initLuaBind(*_storage->lua.get())) {
+            throw std::bad_alloc();
+        }
         // _activities.push<MainMenuScene>();
     }
 
-    ~Window()
+    virtual ~GameEngine()
     {
         // EMPTY.
-    }
-
-    virtual bool onCreate() override
-    {
-        sol::protected_function lua_function = _lua_tbag["onCreate"];
-        if (lua_function.valid()) {
-            std::function<bool(void)> std_function = lua_function;
-            return std_function();
-        }
-        return true;
-    }
-
-    virtual void onDestroy() override
-    {
-        sol::protected_function lua_function = _lua_tbag["onDestroy"];
-        if (lua_function.valid()) {
-            std::function<void(void)> std_function = lua_function;
-            std_function();
-        }
-    }
-
-    virtual void onCheck(GameState & state) override
-    {
-    }
-
-    virtual void onPreEvent(GameState & state) override
-    {
-    }
-
-    virtual void onPostEvent(GameState & state) override
-    {
-    }
-
-    virtual void onUpdate(GameState & state) override
-    {
-    }
-
-    virtual void onDraw(GameState & state) override
-    {
-    }
-
-    virtual void onPostDraw1(GameState & state) override
-    {
-    }
-
-    virtual void onPostDraw2(GameState & state) override
-    {
-    }
-
-    virtual void onClosed() override
-    {
-        bool exit_window = true;
-        sol::protected_function lua_function = _lua_tbag["onClosed"];
-        if (lua_function.valid()) {
-            std::function<bool(void)> std_function = lua_function;
-            exit_window = std_function();
-        }
-        if (exit_window) {
-            _window.close();
-        }
-    }
-
-    virtual void onResized(unsigned int width, unsigned int height) override
-    {
-        _lua_tbag["onResized"](width, height);
-    }
-
-    virtual void onLostFocus() override
-    {
-        _lua_tbag["onLostFocus"]();
-    }
-
-    virtual void onGainedFocus() override
-    {
-        _lua_tbag["onGainedFocus"]();
-    }
-
-    virtual void onKeyPressed(GameKey code, bool alt, bool control, bool shift, bool system) override
-    {
-        _lua_tbag["onKeyPressed"]((int)code, alt, control, shift, system);
-    }
-
-    virtual void onKeyReleased(GameKey code, bool alt, bool control, bool shift, bool system) override
-    {
-        _lua_tbag["onKeyReleased"]((int)code, alt, control, shift, system);
-    }
-
-    virtual void onTextEntered(unsigned int unicode) override
-    {
-        _lua_tbag["onTextEntered"](unicode);
-    }
-
-    virtual void onMouseMoved(int x, int y) override
-    {
-        _lua_tbag["onMouseMoved"](x, y);
-    }
-
-    virtual void onMouseEntered() override
-    {
-        _lua_tbag["onMouseEntered"]();
-    }
-
-    virtual void onMouseLeft() override
-    {
-        _lua_tbag["onMouseLeft"]();
-    }
-
-    virtual void onMouseButtonPressed(GameButton button, int x, int y) override
-    {
-        _lua_tbag["onMouseButtonPressed"]((int)button, x, y);
-    }
-
-    virtual void onMouseButtonReleased(GameButton button, int x, int y) override
-    {
-        _lua_tbag["onMouseButtonReleased"]((int)button, x, y);
-    }
-
-    virtual void onMouseWheelScrolled(GameWheel wheel, float delta, int x, int y) override
-    {
-        _lua_tbag["onMouseWheelScrolled"]((int)wheel, delta, x, y);
-    }
-
-    virtual void onJoystickConnected(unsigned int joystick_id) override
-    {
-        _lua_tbag["onJoystickConnected"](joystick_id);
-    }
-
-    virtual void onJoystickDisconnected(unsigned int joystick_id) override
-    {
-        _lua_tbag["onJoystickDisconnected"](joystick_id);
-    }
-
-    virtual void onJoystickMoved(unsigned int joystick_id, GameJoystickAxis axis, float position) override
-    {
-        _lua_tbag["onJoystickMoved"](joystick_id, axis, position);
-    }
-
-    virtual void onJoystickButtonPressed(unsigned int joystick_id, unsigned int button) override
-    {
-        _lua_tbag["onJoystickButtonPressed"](joystick_id, button);
-    }
-
-    virtual void onJoystickButtonReleased(unsigned int joystick_id, unsigned int button) override
-    {
-        _lua_tbag["onJoystickButtonReleased"](joystick_id, button);
-    }
-
-    virtual void onTouchBegan(unsigned int finger, int x, int y) override
-    {
-        _lua_tbag["onTouchBegan"](finger, x, y);
-    }
-
-    virtual void onTouchMoved(unsigned int finger, int x, int y) override
-    {
-        _lua_tbag["onTouchMoved"](finger, x, y);
-    }
-
-    virtual void onTouchEnded(unsigned int finger, int x, int y) override
-    {
-        _lua_tbag["onTouchEnded"](finger, x, y);
-    }
-
-    virtual void onSensorChanged(GameSensorType type, float x, float y, float z) override
-    {
-        _lua_tbag["onSensorChanged"]((int)type, x, y, z);
     }
 
     bool run()
@@ -368,7 +206,7 @@ int runGame(libtbag::res::Storage & storage, GameParams const & params)
             params.attribute_flags,
             params.srgb_capable);
     auto const CLEAR = sf::Color(params.clear_red, params.clear_green, params.clear_blue, params.clear_alpha);
-    return Window(storage, MODE, params.title, STYLE, CONTEXT, CLEAR).run();
+    return GameEngine(storage, MODE, params.title, STYLE, CONTEXT, CLEAR).run();
 }
 
 int runGame(libtbag::res::Storage & storage)
