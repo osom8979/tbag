@@ -7,7 +7,7 @@
 
 #include <libtbag/tpot/apps/GamePot.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/game/Window.hpp>
+#include <libtbag/game/GameEngine.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

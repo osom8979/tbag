@@ -1,14 +1,15 @@
 /**
- * @file   Window.cpp
- * @brief  Window class implementation.
+ * @file   GameEngine.cpp
+ * @brief  GameEngine class implementation.
  * @author zer0
  * @date   2019-01-31
  * @date   2019-02-13 (Rename: Window -> SfWindow)
  * @date   2019-02-16 (Rename: SfWindow -> RenderWindow)
  * @date   2019-03-23 (Rename: RenderWindow -> Window)
+ * @date   2019-04-06 (Rename: Window -> GameEngine)
  */
 
-#include <libtbag/game/Window.hpp>
+#include <libtbag/game/GameEngine.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/res/Storage.hpp>
@@ -43,14 +44,14 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace game {
 
-struct Scene : public swoosh::Activity
+struct GameScene : public swoosh::Activity
 {
-    Scene(swoosh::ActivityController * controller) : swoosh::Activity(controller)
+    GameScene(swoosh::ActivityController * controller) : swoosh::Activity(controller)
     {
         // EMPTY.
     }
 
-    virtual ~Scene()
+    virtual ~GameScene()
     {
         // EMPTY.
     }
@@ -93,6 +94,7 @@ struct Scene : public swoosh::Activity
  *
  * @author zer0
  * @date   2019-03-23
+ * @date   2019-04-06 (Rename: Window -> GameEngine)
  */
 struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
 {
@@ -100,20 +102,20 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
     using Rgb24   = libtbag::graphic::Rgb24;
     using Rgb32   = libtbag::graphic::Rgb32;
 
-    using Storage = libtbag::res::Storage;
+    using Storage    = libtbag::res::Storage;
     using Activities = swoosh::ActivityController;
 
     TBAG_CONSTEXPR static Channel const CHANNEL_MAX  = libtbag::graphic::channel_max();
     TBAG_CONSTEXPR static Channel const CHANNEL_MIN  = libtbag::graphic::channel_min();
     TBAG_CONSTEXPR static Channel const CHANNEL_HALF = libtbag::graphic::channel_half();
 
-    Storage          _storage;
-    sf::RenderWindow _window;
-    sf::Color        _clear;
-    Activities       _activities;
+    Storage           _storage;
+    sf::RenderWindow  _window;
+    sf::Color         _clear;
+    Activities        _activities;
 
-    sol::state * _lua;
-    sol::table   _lua_tbag;
+    sol::state *  _lua;
+    sol::table    _lua_tbag;
 
     Window(Storage & storage, sf::VideoMode const mode,
            std::string const & title, sf::Uint32 style,
@@ -304,8 +306,8 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
         }
 
         GameState state;
-        sf::Clock clock;
         sf::Event event;
+        sf::Clock clock;
         sf::Time  delta;
 
         ImGui::SFML::Init(_window);
@@ -344,7 +346,7 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
     }
 };
 
-int runGameMain(libtbag::res::Storage & storage, GameParams const & params)
+int runGame(libtbag::res::Storage & storage, GameParams const & params)
 {
     if (storage->lua_gui.empty()) {
         tDLogE("runGameMain() Entry point not defined.");
@@ -380,7 +382,7 @@ int runGame(libtbag::res::Storage & storage)
             tDLogW("runGame() Failed to load Window parameters.");
         }
 
-        switch (runGameMain(storage, params)) {
+        switch (runGame(storage, params)) {
         case GAME_EXIT_CODE_RESTART:
             break;
         case GAME_EXIT_CODE_EXIT_SUCCESS:
