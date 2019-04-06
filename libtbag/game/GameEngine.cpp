@@ -42,68 +42,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace game {
 
-using Storage    = libtbag::res::Storage;
 using Activity   = swoosh::Activity;
 using Activities = swoosh::ActivityController;
-
-/**
- * GameScene backend implementation.
- *
- * @author zer0
- * @date   2019-04-06
- */
-struct GameScene : public Activity
-{
-    GameScene(Activities * controller)
-            : Activity(controller)
-    {
-        // EMPTY.
-    }
-
-    virtual ~GameScene()
-    {
-        // EMPTY.
-    }
-
-    bool initLuaBind(sol::state & lua)
-    {
-        // sol::table lua_tbag = lua[libtbag::script::SolState::lua_tbag_name()];
-        lua.new_usertype<GameScene>("Scene");
-        return true;
-    }
-
-    virtual void onStart() override
-    {
-    }
-
-    virtual void onUpdate(double elapsed) override
-    {
-    }
-
-    virtual void onLeave() override
-    {
-    }
-
-    virtual void onExit() override
-    {
-    }
-
-    virtual void onEnter() override
-    {
-    }
-
-    virtual void onResume() override
-    {
-    }
-
-    virtual void onDraw(sf::RenderTexture & surface) override
-    {
-    }
-
-    virtual void onEnd() override
-    {
-    }
-};
 
 /**
  * GameEngine backend implementation.
@@ -234,6 +174,92 @@ int GameEngine::run()
         return GAME_EXIT_CODE_EXIT_FAILURE;
     }
     return _impl->run();
+}
+
+/**
+ * GameScene backend implementation.
+ *
+ * @author zer0
+ * @date   2019-04-06
+ */
+struct GameScene::Impl : private Noncopyable, public Activity
+{
+    GameEngine * engine;
+    GameScene * scene;
+
+    Impl(GameEngine * e, GameScene * s) : Activity(&(e->get()->activities)), engine(e), scene(s)
+    {
+        assert(engine != nullptr);
+        assert(scene != nullptr);
+    }
+
+    virtual ~Impl()
+    {
+        // EMPTY.
+    }
+
+    virtual void onStart() override
+    {
+        assert(scene != nullptr);
+        scene->onStart();
+    }
+
+    virtual void onUpdate(double elapsed) override
+    {
+        assert(scene != nullptr);
+        scene->onUpdate(elapsed);
+    }
+
+    virtual void onLeave() override
+    {
+        assert(scene != nullptr);
+        scene->onLeave();
+    }
+
+    virtual void onExit() override
+    {
+        assert(scene != nullptr);
+        scene->onExit();
+    }
+
+    virtual void onEnter() override
+    {
+        assert(scene != nullptr);
+        scene->onEnter();
+    }
+
+    virtual void onResume() override
+    {
+        assert(scene != nullptr);
+        scene->onResume();
+    }
+
+    virtual void onDraw(sf::RenderTexture & surface) override
+    {
+        assert(scene != nullptr);
+        scene->onDraw();
+    }
+
+    virtual void onEnd() override
+    {
+        assert(scene != nullptr);
+        scene->onEnd();
+    }
+};
+
+// ------------------------
+// GameScene implementation
+// ------------------------
+
+GameScene::GameScene(GameEngine * engine)
+        : _impl(std::make_unique<Impl>(engine, this))
+{
+    // EMPTY.
+}
+
+GameScene::~GameScene()
+{
+    // EMPTY.
 }
 
 int runGame(libtbag::res::Storage & storage)

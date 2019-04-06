@@ -42,7 +42,8 @@ TBAG_CONSTEXPR int const GAME_EXIT_CODE_RESTART = 3;
  * @author zer0
  * @date   2019-04-06
  */
-class TBAG_API GameEngine : public GameInterface,
+class TBAG_API GameEngine : private Noncopyable,
+                            public GameInterface,
                             public libtbag::geometry::GeometryTypes
 {
 public:
@@ -77,6 +78,12 @@ public:
     { return static_cast<bool>(_impl); }
 
 public:
+    inline Impl * get() TBAG_NOEXCEPT_SP_OP(_impl.get())
+    { return _impl.get(); }
+    inline Impl const * get() const TBAG_NOEXCEPT_SP_OP(_impl.get())
+    { return _impl.get(); }
+
+public:
     inline Storage & storage() TBAG_NOEXCEPT
     { return _storage; }
     inline Storage const & storage() const TBAG_NOEXCEPT
@@ -87,6 +94,41 @@ public:
 
 public:
     int run();
+};
+
+/**
+ * GameScene class prototype.
+ *
+ * @author zer0
+ * @date   2019-04-06
+ */
+class TBAG_API GameScene : private Noncopyable
+{
+public:
+    struct Impl;
+    friend struct Impl;
+
+public:
+    using UniqueImpl = std::unique_ptr<Impl>;
+
+private:
+    UniqueImpl _impl;
+
+public:
+    GameScene(GameEngine * engine);
+    virtual ~GameScene();
+
+public:
+    // clang-format off
+    virtual void onStart () { /* EMPTY. */ }
+    virtual void onUpdate(double elapsed) { /* EMPTY. */ }
+    virtual void onLeave () { /* EMPTY. */ }
+    virtual void onExit  () { /* EMPTY. */ }
+    virtual void onEnter () { /* EMPTY. */ }
+    virtual void onResume() { /* EMPTY. */ }
+    virtual void onDraw  () { /* EMPTY. */ }
+    virtual void onEnd   () { /* EMPTY. */ }
+    // clang-format on
 };
 
 TBAG_API int runGame(libtbag::res::Storage & storage);
