@@ -72,11 +72,6 @@ bool LuaGameInterface::initLuaBind(sol::state & lua)
     return true;
 }
 
-void LuaGameInterface::closeWindow()
-{
-    // EMPTY.
-}
-
 bool LuaGameInterface::onCreate()
 {
     if (_on_create) {
@@ -162,7 +157,7 @@ void LuaGameInterface::onClosed()
         exit_window = _on_close();
     }
     if (exit_window) {
-        closeWindow();
+        closeGame();
     }
 }
 

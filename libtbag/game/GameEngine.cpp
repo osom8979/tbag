@@ -10,12 +10,9 @@
  */
 
 #include <libtbag/game/GameEngine.hpp>
-#include <libtbag/game/LuaGameInterface.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/res/Storage.hpp>
-#include <libtbag/geometry/GeometryTypes.hpp>
-#include <libtbag/graphic/Color.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/Type.hpp>
 
@@ -45,12 +42,20 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace game {
 
+using Storage    = libtbag::res::Storage;
 using Activity   = swoosh::Activity;
 using Activities = swoosh::ActivityController;
 
+/**
+ * GameScene backend implementation.
+ *
+ * @author zer0
+ * @date   2019-04-06
+ */
 struct GameScene : public Activity
 {
-    GameScene(Activities * controller) : Activity(controller)
+    GameScene(Activities * controller)
+            : Activity(controller)
     {
         // EMPTY.
     }
@@ -58,6 +63,13 @@ struct GameScene : public Activity
     virtual ~GameScene()
     {
         // EMPTY.
+    }
+
+    bool initLuaBind(sol::state & lua)
+    {
+        // sol::table lua_tbag = lua[libtbag::script::SolState::lua_tbag_name()];
+        lua.new_usertype<GameScene>("Scene");
+        return true;
     }
 
     virtual void onStart() override
@@ -100,46 +112,34 @@ struct GameScene : public Activity
  * @date   2019-03-23
  * @date   2019-04-06 (Rename: Window -> GameEngine)
  */
-struct GameEngine : public LuaGameInterface, public libtbag::geometry::GeometryTypes
+struct GameEngine::Impl : private Noncopyable
 {
-    using Channel = libtbag::graphic::Channel;
-    using Rgb24   = libtbag::graphic::Rgb24;
-    using Rgb32   = libtbag::graphic::Rgb32;
+    GameEngine *      parent;
+    sf::RenderWindow  window;
+    sf::Color         clear_color;
+    Activities        activities;
 
-    using Storage    = libtbag::res::Storage;
-    using Activities = swoosh::ActivityController;
-
-    TBAG_CONSTEXPR static Channel const CHANNEL_MAX  = libtbag::graphic::channel_max();
-    TBAG_CONSTEXPR static Channel const CHANNEL_MIN  = libtbag::graphic::channel_min();
-    TBAG_CONSTEXPR static Channel const CHANNEL_HALF = libtbag::graphic::channel_half();
-
-    Storage           _storage;
-    sf::RenderWindow  _window;
-    sf::Color         _clear;
-    Activities        _activities;
-
-    sol::table _lua_tbag;
-
-    GameEngine(Storage & storage, sf::VideoMode const mode,
-               std::string const & title, sf::Uint32 style,
-               sf::ContextSettings const context, sf::Color const & clear)
-            : _storage(storage), _window(mode, title, style, context),
-              _clear(clear), _activities(_window)
+    Impl(GameEngine * p, Storage & storage, sf::VideoMode const mode, std::string const & title,
+         sf::Uint32 style, sf::ContextSettings const context, sf::Color const & clear)
+            : parent(p), window(mode, title, style, context), clear_color(clear), activities(window)
     {
-        if (initLuaBind(*_storage->lua.get())) {
-            throw std::bad_alloc();
-        }
-        // _activities.push<MainMenuScene>();
+        assert(parent != nullptr);
     }
 
-    virtual ~GameEngine()
+    ~Impl()
     {
         // EMPTY.
     }
 
+    void closeGame()
+    {
+        window.close();
+    }
+
     bool run()
     {
-        if (!onCreate()) {
+        assert(parent != nullptr);
+        if (!parent->onCreate()) {
             return false;
         }
 
@@ -148,65 +148,92 @@ struct GameEngine : public LuaGameInterface, public libtbag::geometry::GeometryT
         sf::Clock clock;
         sf::Time  delta;
 
-        ImGui::SFML::Init(_window);
+        ImGui::SFML::Init(window);
 
-        while (_window.isOpen()) {
+        while (window.isOpen()) {
             delta = clock.restart();
             state.delta = delta.asMicroseconds();
 
-            onCheck(state);
+            parent->onCheck(state);
 
-            while (_window.pollEvent(event)) {
+            while (window.pollEvent(event)) {
                 ImGui::SFML::ProcessEvent(event);
-                onPreEvent(state);
-                callEvnet((void*)&event, this);
-                onPostEvent(state);
+                parent->onPreEvent(state);
+                callEvnet((void*)&event, parent);
+                parent->onPostEvent(state);
             }
 
-            onUpdate(state);
-            _activities.update(delta.asSeconds());
-            onPostUpdate1(state);
-            ImGui::SFML::Update(_window, delta);
-            onPostUpdate2(state);
+            parent->onUpdate(state);
+            activities.update(delta.asSeconds());
+            parent->onPostUpdate1(state);
+            ImGui::SFML::Update(window, delta);
+            parent->onPostUpdate2(state);
 
-            _window.clear(_clear);
-            onDraw(state);
-            _activities.draw();
-            onPostDraw1(state);
-            ImGui::SFML::Render(_window);
-            onPostDraw2(state);
+            window.clear(clear_color);
+            parent->onDraw(state);
+            activities.draw();
+            parent->onPostDraw1(state);
+            ImGui::SFML::Render(window);
+            parent->onPostDraw2(state);
 
-            _window.display();
+            window.display();
         }
 
-        onDestroy();
+        parent->onDestroy();
         return true;
     }
 };
 
-int runGame(libtbag::res::Storage & storage, GameParams const & params)
-{
-    if (storage->lua_gui.empty()) {
-        tDLogE("runGameMain() Entry point not defined.");
-        return GAME_EXIT_CODE_EXIT_FAILURE;
-    }
-    if (!storage.runLuaScriptFile(storage->lua_gui)) {
-        tDLogE("runGameMain() Lua script load failed: {}", storage->lua_gui);
-        return GAME_EXIT_CODE_EXIT_FAILURE;
-    }
+// -------------------------
+// GameEngine implementation
+// -------------------------
 
-    auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
-    auto const STYLE = static_cast<sf::Uint32>(params.style);
+GameEngine::GameEngine(Storage & storage, GameParams const & params)
+        : _storage(storage), _params(params), _impl(nullptr)
+{
+    // EMPTY.
+}
+
+GameEngine::~GameEngine()
+{
+    // EMPTY.
+}
+
+void GameEngine::closeGame()
+{
+    if (_impl) {
+        _impl->closeGame();
+    }
+}
+
+int GameEngine::run()
+{
+    //if (_storage->lua_gui.empty()) {
+    //    tDLogE("runGame() Entry point not defined.");
+    //    return GAME_EXIT_CODE_EXIT_FAILURE;
+    //}
+    //if (!_storage.runLuaScriptFile(_storage->lua_gui)) {
+    //    tDLogE("runGame() Lua script load failed: {}", storage->lua_gui);
+    //    return GAME_EXIT_CODE_EXIT_FAILURE;
+    //}
+
+    auto const PARAMS = _params;
+    auto const MODE = sf::VideoMode(PARAMS.width, PARAMS.height, PARAMS.bpp);
+    auto const STYLE = static_cast<sf::Uint32>(PARAMS.style);
     auto const CONTEXT = sf::ContextSettings(
-            params.depth_bits,
-            params.stencil_bits,
-            params.antialiasing_level,
-            params.major_version,
-            params.minor_version,
-            params.attribute_flags,
-            params.srgb_capable);
-    auto const CLEAR = sf::Color(params.clear_red, params.clear_green, params.clear_blue, params.clear_alpha);
-    return GameEngine(storage, MODE, params.title, STYLE, CONTEXT, CLEAR).run();
+            PARAMS.depth_bits,
+            PARAMS.stencil_bits,
+            PARAMS.antialiasing_level,
+            PARAMS.major_version,
+            PARAMS.minor_version,
+            PARAMS.attribute_flags,
+            PARAMS.srgb_capable);
+    auto const CLEAR = sf::Color(PARAMS.clear_red, PARAMS.clear_green, PARAMS.clear_blue, PARAMS.clear_alpha);
+    _impl = std::make_unique<Impl>(this, _storage, MODE, PARAMS.title, STYLE, CONTEXT, CLEAR);
+    if (_impl) {
+        return GAME_EXIT_CODE_EXIT_FAILURE;
+    }
+    return _impl->run();
 }
 
 int runGame(libtbag::res::Storage & storage)
@@ -220,7 +247,7 @@ int runGame(libtbag::res::Storage & storage)
             tDLogW("runGame() Failed to load Window parameters.");
         }
 
-        switch (runGame(storage, params)) {
+        switch (GameEngine(storage, params).run()) {
         case GAME_EXIT_CODE_RESTART:
             break;
         case GAME_EXIT_CODE_EXIT_SUCCESS:

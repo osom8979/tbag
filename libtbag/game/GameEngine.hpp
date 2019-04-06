@@ -20,7 +20,11 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/game/GameCommon.hpp>
+#include <libtbag/geometry/GeometryTypes.hpp>
+#include <libtbag/graphic/Color.hpp>
 #include <libtbag/res/Storage.hpp>
+
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,7 +36,59 @@ TBAG_CONSTEXPR int const GAME_EXIT_CODE_EXIT_SUCCESS = 1;
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_EXIT_FAILURE = 2;
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_RESTART = 3;
 
-TBAG_API int runGame(libtbag::res::Storage & storage, GameParams const & params);
+/**
+ * GameEngine class prototype.
+ *
+ * @author zer0
+ * @date   2019-04-06
+ */
+class TBAG_API GameEngine : public GameInterface,
+                            public libtbag::geometry::GeometryTypes
+{
+public:
+    using Storage = libtbag::res::Storage;
+    using Channel = libtbag::graphic::Channel;
+    using Rgb24   = libtbag::graphic::Rgb24;
+    using Rgb32   = libtbag::graphic::Rgb32;
+
+public:
+    TBAG_CONSTEXPR static Channel const CHANNEL_MAX  = libtbag::graphic::channel_max();
+    TBAG_CONSTEXPR static Channel const CHANNEL_MIN  = libtbag::graphic::channel_min();
+    TBAG_CONSTEXPR static Channel const CHANNEL_HALF = libtbag::graphic::channel_half();
+
+public:
+    struct Impl;
+    friend struct Impl;
+
+public:
+    using UniqueImpl = std::unique_ptr<Impl>;
+
+private:
+    UniqueImpl  _impl;
+    Storage     _storage;
+    GameParams  _params;
+
+public:
+    GameEngine(Storage & storage, GameParams const & params);
+    virtual ~GameEngine();
+
+public:
+    inline bool exists() const TBAG_NOEXCEPT
+    { return static_cast<bool>(_impl); }
+
+public:
+    inline Storage & storage() TBAG_NOEXCEPT
+    { return _storage; }
+    inline Storage const & storage() const TBAG_NOEXCEPT
+    { return _storage; }
+
+public:
+    virtual void closeGame() override;
+
+public:
+    int run();
+};
+
 TBAG_API int runGame(libtbag::res::Storage & storage);
 TBAG_API int runGame();
 

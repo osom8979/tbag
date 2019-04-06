@@ -90,9 +90,6 @@ private:
     }
 
 protected:
-    virtual void closeWindow();
-
-protected:
     virtual bool onCreate() override;
     virtual void onDestroy() override;
     virtual void onCheck(GameState & state) override;

@@ -312,6 +312,9 @@ struct GameInterface
     virtual ~GameInterface()
     { /* EMPTY. */ }
 
+    virtual void closeGame()
+    { /* EMPTY. */ }
+
     virtual bool onCreate()
     { return true; }
 
