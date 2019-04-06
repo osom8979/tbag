@@ -128,7 +128,19 @@ struct GameEngine::Impl : private Noncopyable
 // GameEngine implementation
 // -------------------------
 
-GameEngine::GameEngine(Storage & storage, GameParams const & params)
+GameEngine::GameEngine()
+        : _storage(), _params(), _impl(nullptr)
+{
+    // EMPTY.
+}
+
+GameEngine::GameEngine(Storage const & storage)
+        : _storage(storage), _params(), _impl(nullptr)
+{
+    // EMPTY.
+}
+
+GameEngine::GameEngine(Storage const & storage, GameParams const & params)
         : _storage(storage), _params(params), _impl(nullptr)
 {
     // EMPTY.
@@ -170,9 +182,7 @@ int GameEngine::run()
             PARAMS.srgb_capable);
     auto const CLEAR = sf::Color(PARAMS.clear_red, PARAMS.clear_green, PARAMS.clear_blue, PARAMS.clear_alpha);
     _impl = std::make_unique<Impl>(this, _storage, MODE, PARAMS.title, STYLE, CONTEXT, CLEAR);
-    if (_impl) {
-        return GAME_EXIT_CODE_EXIT_FAILURE;
-    }
+    assert(static_cast<bool>(_impl));
     return _impl->run();
 }
 

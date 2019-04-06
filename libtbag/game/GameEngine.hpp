@@ -70,7 +70,9 @@ private:
     GameParams  _params;
 
 public:
-    GameEngine(Storage & storage, GameParams const & params);
+    GameEngine();
+    GameEngine(Storage const & storage);
+    GameEngine(Storage const & storage, GameParams const & params);
     virtual ~GameEngine();
 
 public:

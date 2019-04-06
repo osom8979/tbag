@@ -312,6 +312,9 @@ struct GameInterface
     virtual ~GameInterface()
     { /* EMPTY. */ }
 
+    /**
+     * You can add implementations that terminate the window.
+     */
     virtual void closeGame()
     { /* EMPTY. */ }
 
@@ -352,7 +355,9 @@ struct GameInterface
      * The window requested to be closed (no data)
      */
     virtual void onClosed()
-    { /* EMPTY. */ }
+    {
+        closeGame();
+    }
 
     /**
      * The window was resized (data in event.size)

@@ -6,7 +6,10 @@
  */
 
 #include <libtbag/tpot/apps/DemoPot.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <libtbag/game/GameEngine.hpp>
 
 #include <cstdlib>
 
@@ -16,6 +19,23 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace tpot {
 namespace apps {
+
+struct DemoGame : public libtbag::game::GameEngine
+{
+    DemoGame(Storage const & storage) : libtbag::game::GameEngine(storage)
+    {
+        // EMPTY.
+    }
+
+    virtual ~DemoGame()
+    {
+        // EMPTY.
+    }
+};
+
+// ----------------------
+// DemoPot implementation
+// ----------------------
 
 DemoPot::DemoPot()
 {
@@ -44,7 +64,7 @@ char const * const DemoPot::getHelp() const TBAG_NOEXCEPT
 
 int DemoPot::onMain()
 {
-    return EXIT_SUCCESS;
+    return DemoGame(storage()).run();
 }
 
 } // namespace apps
