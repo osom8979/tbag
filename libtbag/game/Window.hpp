@@ -18,7 +18,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/game/WindowParams.hpp>
+#include <libtbag/game/GameCommon.hpp>
 #include <libtbag/res/Storage.hpp>
 
 // -------------------
@@ -31,7 +31,7 @@ TBAG_CONSTEXPR int const GAME_EXIT_CODE_EXIT_SUCCESS = 1;
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_EXIT_FAILURE = 2;
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_RESTART = 3;
 
-TBAG_API int runGameMain(libtbag::res::Storage & storage, WindowParams const & params);
+TBAG_API int runGameMain(libtbag::res::Storage & storage, GameParams const & params);
 TBAG_API int runGame(libtbag::res::Storage & storage);
 TBAG_API int runGame();
 

@@ -13,9 +13,6 @@
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/game/WindowInterface.hpp>
-#include <libtbag/game/WindowParams.hpp>
-
 #include <libtbag/graphic/Color.hpp>
 #include <libtbag/geometry/GeometryTypes.hpp>
 #include <libtbag/string/StringUtils.hpp>
@@ -134,37 +131,8 @@ struct Scene : public swoosh::Activity
  * @author zer0
  * @date   2019-03-23
  */
-struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
+struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
 {
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Unknown, Key::Unknown);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::A,       Key::A);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Keyboard::Key::Pause,   Key::Pause);
-
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Left,     Button::Left);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Right,    Button::Right);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::Middle,   Button::Middle);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton1, Button::XButton1);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Button::XButton2, Button::XButton2);
-
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::VerticalWheel,   Wheel::VerticalWheel);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Mouse::Wheel::HorizontalWheel, Wheel::HorizontalWheel);
-
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::X,    JoystickAxis::X);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Y,    JoystickAxis::Y);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::Z,    JoystickAxis::Z);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::R,    JoystickAxis::R);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::U,    JoystickAxis::U);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::V,    JoystickAxis::V);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovX, JoystickAxis::PovX);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Joystick::Axis::PovY, JoystickAxis::PovY);
-
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Accelerometer,    SensorType::Accelerometer);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gyroscope,        SensorType::Gyroscope);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Magnetometer,     SensorType::Magnetometer);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Gravity,          SensorType::Gravity);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::UserAcceleration, SensorType::UserAcceleration);
-    STATIC_ASSERT_INTEGER_EQUAL(sf::Sensor::Type::Orientation,      SensorType::Orientation);
-
     using Channel = libtbag::graphic::Channel;
     using Rgb24   = libtbag::graphic::Rgb24;
     using Rgb32   = libtbag::graphic::Rgb32;
@@ -221,22 +189,22 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
             onTextEntered(e.text.unicode);
             break;
         case sf::Event::KeyPressed:
-            onKeyPressed((Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+            onKeyPressed((GameKey)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
             break;
         case sf::Event::KeyReleased:
-            onKeyReleased((Key)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+            onKeyReleased((GameKey)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
             break;
         case sf::Event::MouseWheelMoved:
             // DEPRECATED!
             break;
         case sf::Event::MouseWheelScrolled:
-            onMouseWheelScrolled((Wheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
+            onMouseWheelScrolled((GameWheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
             break;
         case sf::Event::MouseButtonPressed:
-            onMouseButtonPressed((Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+            onMouseButtonPressed((GameButton)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
             break;
         case sf::Event::MouseButtonReleased:
-            onMouseButtonReleased((Button)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+            onMouseButtonReleased((GameButton)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
             break;
         case sf::Event::MouseMoved:
             onMouseMoved(e.mouseMove.x, e.mouseMove.y);
@@ -254,7 +222,7 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
             onJoystickButtonReleased(e.joystickButton.joystickId, e.joystickButton.button);
             break;
         case sf::Event::JoystickMoved:
-            onJoystickMoved(e.joystickMove.joystickId, (JoystickAxis)e.joystickMove.axis, e.joystickMove.position);
+            onJoystickMoved(e.joystickMove.joystickId, (GameJoystickAxis)e.joystickMove.axis, e.joystickMove.position);
             break;
         case sf::Event::JoystickConnected:
             onJoystickConnected(e.joystickConnect.joystickId);
@@ -272,7 +240,7 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
             onTouchEnded(e.touch.finger, e.touch.x, e.touch.y);
             break;
         case sf::Event::SensorChanged:
-            onSensorChanged((SensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
+            onSensorChanged((GameSensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
             break;
         default:
             TBAG_INACCESSIBLE_BLOCK_ASSERT();
@@ -300,27 +268,27 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
         }
     }
 
-    virtual void onCheck(WindowState & state) override
+    virtual void onCheck(GameState & state) override
     {
     }
 
-    virtual void onPreEvent(WindowState & state) override
+    virtual void onPreEvent(GameState & state) override
     {
     }
 
-    virtual void onPostEvent(WindowState & state) override
+    virtual void onPostEvent(GameState & state) override
     {
     }
 
-    virtual void onUpdate(WindowState & state) override
+    virtual void onUpdate(GameState & state) override
     {
     }
 
-    virtual void onPreDraw(WindowState & state) override
+    virtual void onPreDraw(GameState & state) override
     {
     }
 
-    virtual void onPostDraw(WindowState & state) override
+    virtual void onPostDraw(GameState & state) override
     {
     }
 
@@ -352,12 +320,12 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
         _lua_tbag["onGainedFocus"]();
     }
 
-    virtual void onKeyPressed(Key code, bool alt, bool control, bool shift, bool system) override
+    virtual void onKeyPressed(GameKey code, bool alt, bool control, bool shift, bool system) override
     {
         _lua_tbag["onKeyPressed"]((int)code, alt, control, shift, system);
     }
 
-    virtual void onKeyReleased(Key code, bool alt, bool control, bool shift, bool system) override
+    virtual void onKeyReleased(GameKey code, bool alt, bool control, bool shift, bool system) override
     {
         _lua_tbag["onKeyReleased"]((int)code, alt, control, shift, system);
     }
@@ -382,17 +350,17 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
         _lua_tbag["onMouseLeft"]();
     }
 
-    virtual void onMouseButtonPressed(Button button, int x, int y) override
+    virtual void onMouseButtonPressed(GameButton button, int x, int y) override
     {
         _lua_tbag["onMouseButtonPressed"]((int)button, x, y);
     }
 
-    virtual void onMouseButtonReleased(Button button, int x, int y) override
+    virtual void onMouseButtonReleased(GameButton button, int x, int y) override
     {
         _lua_tbag["onMouseButtonReleased"]((int)button, x, y);
     }
 
-    virtual void onMouseWheelScrolled(Wheel wheel, float delta, int x, int y) override
+    virtual void onMouseWheelScrolled(GameWheel wheel, float delta, int x, int y) override
     {
         _lua_tbag["onMouseWheelScrolled"]((int)wheel, delta, x, y);
     }
@@ -407,7 +375,7 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
         _lua_tbag["onJoystickDisconnected"](joystick_id);
     }
 
-    virtual void onJoystickMoved(unsigned int joystick_id, JoystickAxis axis, float position) override
+    virtual void onJoystickMoved(unsigned int joystick_id, GameJoystickAxis axis, float position) override
     {
         _lua_tbag["onJoystickMoved"](joystick_id, axis, position);
     }
@@ -437,7 +405,7 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
         _lua_tbag["onTouchEnded"](finger, x, y);
     }
 
-    virtual void onSensorChanged(SensorType type, float x, float y, float z) override
+    virtual void onSensorChanged(GameSensorType type, float x, float y, float z) override
     {
         _lua_tbag["onSensorChanged"]((int)type, x, y, z);
     }
@@ -448,10 +416,10 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
             return false;
         }
 
-        WindowState state;
-        sf::Clock   clock;
-        sf::Event   event;
-        sf::Time    delta;
+        GameState state;
+        sf::Clock clock;
+        sf::Event event;
+        sf::Time  delta;
 
         ImGui::SFML::Init(_window);
 
@@ -487,7 +455,7 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
     }
 };
 
-int runGameMain(libtbag::res::Storage & storage, WindowParams const & params)
+int runGameMain(libtbag::res::Storage & storage, GameParams const & params)
 {
     if (storage->lua_gui.empty()) {
         tDLogE("runGameMain() Entry point not defined.");
@@ -518,7 +486,7 @@ int runGame(libtbag::res::Storage & storage)
     int  exit_code = EXIT_FAILURE;
 
     while (!exit_game) {
-        WindowParams params;
+        GameParams params;
         if (!readWindowParams(storage, params)) {
             tDLogW("runGame() Failed to load Window parameters.");
         }
