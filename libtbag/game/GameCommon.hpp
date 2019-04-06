@@ -330,10 +330,19 @@ struct GameInterface
     virtual void onUpdate(GameState & state)
     { /* EMPTY. */ }
 
-    virtual void onPreDraw(GameState & state)
+    virtual void onPostUpdate1(GameState & state)
     { /* EMPTY. */ }
 
-    virtual void onPostDraw(GameState & state)
+    virtual void onPostUpdate2(GameState & state)
+    { /* EMPTY. */ }
+
+    virtual void onDraw(GameState & state)
+    { /* EMPTY. */ }
+
+    virtual void onPostDraw1(GameState & state)
+    { /* EMPTY. */ }
+
+    virtual void onPostDraw2(GameState & state)
     { /* EMPTY. */ }
 
     /**
@@ -550,6 +559,8 @@ TBAG_API std::vector<GameVideoMode> getFullscreenModes();
 
 TBAG_API bool readWindowParams(libtbag::res::Storage & storage, GameParams & params);
 TBAG_API bool saveWindowParams(libtbag::res::Storage & storage, GameParams const & params);
+
+TBAG_API void callEvnet(void * sf_event, GameInterface * interface);
 
 } // namespace game
 

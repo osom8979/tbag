@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/game/GameCommon.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <SFML/Window.hpp>
@@ -135,6 +136,93 @@ bool saveWindowParams(libtbag::res::Storage & storage, GameParams const & params
     __SAVE_WINDOW_PARAMS(clear_alpha)
 #undef __SAVE_WINDOW_PARAMS
     return true;
+}
+
+void callEvnet(void * sf_event, GameInterface * interface)
+{
+    assert(sf_event != nullptr);
+    auto & e = *(static_cast<sf::Event*>(sf_event));
+
+    assert(interface != nullptr);
+    auto & i = *interface;
+
+    // clang-format off
+    switch (e.type) {
+    case sf::Event::Closed:
+        i.onClosed();
+        break;
+    case sf::Event::Resized:
+        i.onResized(e.size.width, e.size.height);
+        break;
+    case sf::Event::LostFocus:
+        i.onLostFocus();
+        break;
+    case sf::Event::GainedFocus:
+        i.onGainedFocus();
+        break;
+    case sf::Event::TextEntered:
+        i.onTextEntered(e.text.unicode);
+        break;
+    case sf::Event::KeyPressed:
+        i.onKeyPressed((GameKey)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+        break;
+    case sf::Event::KeyReleased:
+        i.onKeyReleased((GameKey)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
+        break;
+    case sf::Event::MouseWheelMoved:
+        // DEPRECATED!
+        break;
+    case sf::Event::MouseWheelScrolled:
+        i.onMouseWheelScrolled((GameWheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta,
+                             e.mouseWheelScroll.x, e.mouseWheelScroll.y);
+        break;
+    case sf::Event::MouseButtonPressed:
+        i.onMouseButtonPressed((GameButton)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+        break;
+    case sf::Event::MouseButtonReleased:
+        i.onMouseButtonReleased((GameButton)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
+        break;
+    case sf::Event::MouseMoved:
+        i.onMouseMoved(e.mouseMove.x, e.mouseMove.y);
+        break;
+    case sf::Event::MouseEntered:
+        i.onMouseEntered();
+        break;
+    case sf::Event::MouseLeft:
+        i.onMouseLeft();
+        break;
+    case sf::Event::JoystickButtonPressed:
+        i.onJoystickButtonPressed(e.joystickButton.joystickId, e.joystickButton.button);
+        break;
+    case sf::Event::JoystickButtonReleased:
+        i.onJoystickButtonReleased(e.joystickButton.joystickId, e.joystickButton.button);
+        break;
+    case sf::Event::JoystickMoved:
+        i.onJoystickMoved(e.joystickMove.joystickId, (GameJoystickAxis)e.joystickMove.axis, e.joystickMove.position);
+        break;
+    case sf::Event::JoystickConnected:
+        i.onJoystickConnected(e.joystickConnect.joystickId);
+        break;
+    case sf::Event::JoystickDisconnected:
+        i.onJoystickDisconnected(e.joystickConnect.joystickId);
+        break;
+    case sf::Event::TouchBegan:
+        i.onTouchBegan(e.touch.finger, e.touch.x, e.touch.y);
+        break;
+    case sf::Event::TouchMoved:
+        i.onTouchMoved(e.touch.finger, e.touch.x, e.touch.y);
+        break;
+    case sf::Event::TouchEnded:
+        i.onTouchEnded(e.touch.finger, e.touch.x, e.touch.y);
+        break;
+    case sf::Event::SensorChanged:
+        i.onSensorChanged((GameSensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
+        break;
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+    }
+    // clang-format on
 }
 
 } // namespace game

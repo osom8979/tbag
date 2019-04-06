@@ -137,17 +137,17 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
     using Rgb24   = libtbag::graphic::Rgb24;
     using Rgb32   = libtbag::graphic::Rgb32;
 
+    using Storage = libtbag::res::Storage;
+    using Activities = swoosh::ActivityController;
+
     TBAG_CONSTEXPR static Channel const CHANNEL_MAX  = libtbag::graphic::channel_max();
     TBAG_CONSTEXPR static Channel const CHANNEL_MIN  = libtbag::graphic::channel_min();
     TBAG_CONSTEXPR static Channel const CHANNEL_HALF = libtbag::graphic::channel_half();
 
-    using Storage = libtbag::res::Storage;
-
     Storage          _storage;
     sf::RenderWindow _window;
     sf::Color        _clear;
-
-    swoosh::ActivityController _activities;
+    Activities       _activities;
 
     sol::state * _lua;
     sol::table   _lua_tbag;
@@ -156,97 +156,17 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
            std::string const & title, sf::Uint32 style,
            sf::ContextSettings const context, sf::Color const & clear)
             : _storage(storage), _window(mode, title, style, context),
-              _activities(_window), _clear(clear), _lua(_storage->lua.get())
+              _clear(clear), _activities(_window), _lua(_storage->lua.get())
     {
-        // _activities.push<MainMenuScene>();
-
         assert(_lua != nullptr);
         _lua_tbag = (*_lua)[libtbag::script::SolState::lua_tbag_name()];
+
+        // _activities.push<MainMenuScene>();
     }
 
     ~Window()
     {
         // EMPTY.
-    }
-
-    void runEvent(sf::Event & e)
-    {
-        // clang-format off
-        switch (e.type) {
-        case sf::Event::Closed:
-            onClosed();
-            break;
-        case sf::Event::Resized:
-            onResized(e.size.width, e.size.height);
-            break;
-        case sf::Event::LostFocus:
-            onLostFocus();
-            break;
-        case sf::Event::GainedFocus:
-            onGainedFocus();
-            break;
-        case sf::Event::TextEntered:
-            onTextEntered(e.text.unicode);
-            break;
-        case sf::Event::KeyPressed:
-            onKeyPressed((GameKey)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
-            break;
-        case sf::Event::KeyReleased:
-            onKeyReleased((GameKey)e.key.code, e.key.alt, e.key.control, e.key.shift, e.key.system);
-            break;
-        case sf::Event::MouseWheelMoved:
-            // DEPRECATED!
-            break;
-        case sf::Event::MouseWheelScrolled:
-            onMouseWheelScrolled((GameWheel)e.mouseWheelScroll.wheel, e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
-            break;
-        case sf::Event::MouseButtonPressed:
-            onMouseButtonPressed((GameButton)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-            break;
-        case sf::Event::MouseButtonReleased:
-            onMouseButtonReleased((GameButton)e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-            break;
-        case sf::Event::MouseMoved:
-            onMouseMoved(e.mouseMove.x, e.mouseMove.y);
-            break;
-        case sf::Event::MouseEntered:
-            onMouseEntered();
-            break;
-        case sf::Event::MouseLeft:
-            onMouseLeft();
-            break;
-        case sf::Event::JoystickButtonPressed:
-            onJoystickButtonPressed(e.joystickButton.joystickId, e.joystickButton.button);
-            break;
-        case sf::Event::JoystickButtonReleased:
-            onJoystickButtonReleased(e.joystickButton.joystickId, e.joystickButton.button);
-            break;
-        case sf::Event::JoystickMoved:
-            onJoystickMoved(e.joystickMove.joystickId, (GameJoystickAxis)e.joystickMove.axis, e.joystickMove.position);
-            break;
-        case sf::Event::JoystickConnected:
-            onJoystickConnected(e.joystickConnect.joystickId);
-            break;
-        case sf::Event::JoystickDisconnected:
-            onJoystickDisconnected(e.joystickConnect.joystickId);
-            break;
-        case sf::Event::TouchBegan:
-            onTouchBegan(e.touch.finger, e.touch.x, e.touch.y);
-            break;
-        case sf::Event::TouchMoved:
-            onTouchMoved(e.touch.finger, e.touch.x, e.touch.y);
-            break;
-        case sf::Event::TouchEnded:
-            onTouchEnded(e.touch.finger, e.touch.x, e.touch.y);
-            break;
-        case sf::Event::SensorChanged:
-            onSensorChanged((GameSensorType)e.sensor.type, e.sensor.x, e.sensor.y, e.sensor.z);
-            break;
-        default:
-            TBAG_INACCESSIBLE_BLOCK_ASSERT();
-            break;
-        }
-        // clang-format on
     }
 
     virtual bool onCreate() override
@@ -284,11 +204,15 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
     {
     }
 
-    virtual void onPreDraw(GameState & state) override
+    virtual void onDraw(GameState & state) override
     {
     }
 
-    virtual void onPostDraw(GameState & state) override
+    virtual void onPostDraw1(GameState & state) override
+    {
+    }
+
+    virtual void onPostDraw2(GameState & state) override
     {
     }
 
@@ -432,25 +356,27 @@ struct Window : public GameInterface, public libtbag::geometry::GeometryTypes
             while (_window.pollEvent(event)) {
                 ImGui::SFML::ProcessEvent(event);
                 onPreEvent(state);
-                runEvent(event);
+                callEvnet((void*)&event, this);
                 onPostEvent(state);
             }
 
             onUpdate(state);
             _activities.update(delta.asSeconds());
+            onPostUpdate1(state);
             ImGui::SFML::Update(_window, delta);
+            onPostUpdate2(state);
 
             _window.clear(_clear);
-            onPreDraw(state);
+            onDraw(state);
             _activities.draw();
+            onPostDraw1(state);
             ImGui::SFML::Render(_window);
-            onPostDraw(state);
+            onPostDraw2(state);
 
             _window.display();
         }
 
         onDestroy();
-
         return true;
     }
 };
