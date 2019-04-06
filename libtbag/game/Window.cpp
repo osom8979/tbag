@@ -83,13 +83,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace game {
 
-enum class WindowExitCode
-{
-    WEC_RESTART = 0,
-    WEC_EXIT_SUCCESS,
-    WEC_EXIT_FAILURE,
-};
-
 struct Scene : public swoosh::Activity
 {
     Scene(swoosh::ActivityController * controller) : swoosh::Activity(controller)
@@ -361,12 +354,12 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
 
     virtual void onKeyPressed(Key code, bool alt, bool control, bool shift, bool system) override
     {
-        _lua_tbag["onKeyPressed"](code, alt, control, shift, system);
+        _lua_tbag["onKeyPressed"]((int)code, alt, control, shift, system);
     }
 
     virtual void onKeyReleased(Key code, bool alt, bool control, bool shift, bool system) override
     {
-        _lua_tbag["onKeyReleased"](code, alt, control, shift, system);
+        _lua_tbag["onKeyReleased"]((int)code, alt, control, shift, system);
     }
 
     virtual void onTextEntered(unsigned int unicode) override
@@ -391,17 +384,17 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
 
     virtual void onMouseButtonPressed(Button button, int x, int y) override
     {
-        _lua_tbag["onMouseButtonPressed"](button, x, y);
+        _lua_tbag["onMouseButtonPressed"]((int)button, x, y);
     }
 
     virtual void onMouseButtonReleased(Button button, int x, int y) override
     {
-        _lua_tbag["onMouseButtonReleased"](button, x, y);
+        _lua_tbag["onMouseButtonReleased"]((int)button, x, y);
     }
 
     virtual void onMouseWheelScrolled(Wheel wheel, float delta, int x, int y) override
     {
-        _lua_tbag["onMouseWheelScrolled"](wheel, delta, x, y);
+        _lua_tbag["onMouseWheelScrolled"]((int)wheel, delta, x, y);
     }
 
     virtual void onJoystickConnected(unsigned int joystick_id) override
@@ -446,13 +439,13 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
 
     virtual void onSensorChanged(SensorType type, float x, float y, float z) override
     {
-        _lua_tbag["onSensorChanged"](type, x, y, z);
+        _lua_tbag["onSensorChanged"]((int)type, x, y, z);
     }
 
-    WindowExitCode run()
+    bool run()
     {
         if (!onCreate()) {
-            return WindowExitCode::WEC_EXIT_FAILURE;
+            return false;
         }
 
         WindowState state;
@@ -490,20 +483,19 @@ struct Window : public WindowInterface, public libtbag::geometry::GeometryTypes
 
         onDestroy();
 
-        return WindowExitCode::WEC_EXIT_SUCCESS;
+        return true;
     }
 };
 
-static WindowExitCode runGameMain(libtbag::res::Storage & storage, WindowParams const & params)
+int runGameMain(libtbag::res::Storage & storage, WindowParams const & params)
 {
     if (storage->lua_gui.empty()) {
         tDLogE("runGameMain() Entry point not defined.");
-        return WindowExitCode::WEC_EXIT_FAILURE;
+        return GAME_EXIT_CODE_EXIT_FAILURE;
     }
-
     if (!storage.runLuaScriptFile(storage->lua_gui)) {
         tDLogE("runGameMain() Lua script load failed: {}", storage->lua_gui);
-        return WindowExitCode::WEC_EXIT_FAILURE;
+        return GAME_EXIT_CODE_EXIT_FAILURE;
     }
 
     auto const MODE = sf::VideoMode(params.width, params.height, params.bpp);
@@ -517,7 +509,7 @@ static WindowExitCode runGameMain(libtbag::res::Storage & storage, WindowParams 
             params.attribute_flags,
             params.srgb_capable);
     auto const CLEAR = sf::Color(params.clear_red, params.clear_green, params.clear_blue, params.clear_alpha);
-    return Window(storage, MODE, LIBTBAG_MAIN_TITLE, STYLE, CONTEXT, CLEAR).run();
+    return Window(storage, MODE, params.title, STYLE, CONTEXT, CLEAR).run();
 }
 
 int runGame(libtbag::res::Storage & storage)
@@ -532,20 +524,30 @@ int runGame(libtbag::res::Storage & storage)
         }
 
         switch (runGameMain(storage, params)) {
-        case WindowExitCode::WEC_RESTART:
+        case GAME_EXIT_CODE_RESTART:
             break;
-        case WindowExitCode::WEC_EXIT_SUCCESS:
+        case GAME_EXIT_CODE_EXIT_SUCCESS:
             exit_game = true;
             exit_code = EXIT_SUCCESS;
             break;
-        case WindowExitCode::WEC_EXIT_FAILURE:
+        case GAME_EXIT_CODE_EXIT_FAILURE:
             exit_game = true;
             exit_code = EXIT_FAILURE;
             break;
+        default:
+            TBAG_INACCESSIBLE_BLOCK_ASSERT();
+            exit_game = true;
+            exit_code = EXIT_FAILURE;
         }
     }
 
     return exit_code;
+}
+
+int runGame()
+{
+    libtbag::res::Storage storage;
+    return runGame(storage);
 }
 
 } // namespace game
