@@ -1,8 +1,5 @@
 // Add this to your imconfig.h
 
-#include <libtbag/config.h>
-#include <libtbag/predef.hpp>
-
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/Color.hpp>
 
@@ -29,6 +26,3 @@
             static_cast<sf::Uint8>(z * 255.f),                          \
             static_cast<sf::Uint8>(w * 255.f));                         \
     }
-
-#define IMGUI_API TBAG_API
-
