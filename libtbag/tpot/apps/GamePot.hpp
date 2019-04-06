@@ -40,6 +40,11 @@ public:
     virtual ~GamePot();
 
 public:
+    static char const * const name() TBAG_NOEXCEPT;
+    static char const * const remarks() TBAG_NOEXCEPT;
+    static char const * const help() TBAG_NOEXCEPT;
+
+public:
     virtual char const * const getName() const TBAG_NOEXCEPT override;
     virtual char const * const getRemarks() const TBAG_NOEXCEPT override;
     virtual char const * const getHelp() const TBAG_NOEXCEPT override;

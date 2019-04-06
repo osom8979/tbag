@@ -690,17 +690,17 @@ LuaPot::~LuaPot()
     // EMPTY.
 }
 
-char const * const LuaPot::getName() const TBAG_NOEXCEPT
+char const * const LuaPot::name() TBAG_NOEXCEPT
 {
     return "lua";
 }
 
-char const * const LuaPot::getRemarks() const TBAG_NOEXCEPT
+char const * const LuaPot::remarks() TBAG_NOEXCEPT
 {
     return "Lua Interpreter";
 }
 
-char const * const LuaPot::getHelp() const TBAG_NOEXCEPT
+char const * const LuaPot::help() TBAG_NOEXCEPT
 {
     return "usage: %s lua [options]... [script [args]...].\n"
            "Available options are:\n"
@@ -714,6 +714,21 @@ char const * const LuaPot::getHelp() const TBAG_NOEXCEPT
            "  -E        Ignore environment variables.\n"
            "  --        Stop handling options.\n"
            "  -         Execute stdin and stop handling options.\n";
+}
+
+char const * const LuaPot::getName() const TBAG_NOEXCEPT
+{
+    return name();
+}
+
+char const * const LuaPot::getRemarks() const TBAG_NOEXCEPT
+{
+    return remarks();
+}
+
+char const * const LuaPot::getHelp() const TBAG_NOEXCEPT
+{
+    return help();
 }
 
 int LuaPot::onMain()

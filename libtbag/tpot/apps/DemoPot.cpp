@@ -47,19 +47,34 @@ DemoPot::~DemoPot()
     // EMPTY.
 }
 
-char const * const DemoPot::getName() const TBAG_NOEXCEPT
+char const * const DemoPot::name() TBAG_NOEXCEPT
 {
     return "demo";
 }
 
-char const * const DemoPot::getRemarks() const TBAG_NOEXCEPT
+char const * const DemoPot::remarks() TBAG_NOEXCEPT
 {
     return "Play Demo Game";
 }
 
-char const * const DemoPot::getHelp() const TBAG_NOEXCEPT
+char const * const DemoPot::help() TBAG_NOEXCEPT
 {
     return "";
+}
+
+char const * const DemoPot::getName() const TBAG_NOEXCEPT
+{
+    return name();
+}
+
+char const * const DemoPot::getRemarks() const TBAG_NOEXCEPT
+{
+    return remarks();
+}
+
+char const * const DemoPot::getHelp() const TBAG_NOEXCEPT
+{
+    return help();
 }
 
 int DemoPot::onMain()
