@@ -192,7 +192,7 @@ add_custom_target (ressl DEPENDS ${ressl_EXT_LIBRARIES})
 ##############
 
 set (freetype_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/freetype")
-set (freetype_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (freetype_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include/freetype2")
 set (freetype_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}freetype${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (freetype_EXT_LIBRARIES    "${freetype_EXT_STATIC_LIB}")
 exists_files (freetype_EXT_EXISTS ${freetype_EXT_LIBRARIES})

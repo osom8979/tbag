@@ -17,8 +17,8 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/Type.hpp>
 
-#include <libtbag/3rd/imgui/imgui.h>
-#include <libtbag/3rd/imgui/imgui-SFML.h>
+#include <imgui.h>
+#include <imgui-SFML.h>
 
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>

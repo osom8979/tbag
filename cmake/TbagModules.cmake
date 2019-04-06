@@ -581,6 +581,12 @@ macro (tbag_modules__apply_dep_swoosh)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/swoosh)
 endmacro ()
 
+macro (tbag_modules__apply_dep_imgui)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES imgui)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/imgui)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:imgui>)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
