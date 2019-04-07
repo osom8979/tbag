@@ -2,11 +2,12 @@
  * @file   LuaGameInterface.hpp
  * @brief  LuaGameInterface class prototype.
  * @author zer0
- * @date   2019-04-06
+ * @date   2019-04-07
+ * @date   2019-04-06 (Move: libtbag/game -> libtbag/game/lua)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GAME_LUAGAMEINTERFACE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_GAME_LUAGAMEINTERFACE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_GAME_LUA_LUAGAMEINTERFACE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_GAME_LUA_LUAGAMEINTERFACE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -25,12 +26,14 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace game {
+namespace lua  {
 
 /**
  * LuaGameInterface class prototype.
  *
  * @author zer0
- * @date   2019-04-06
+ * @date   2019-04-07
+ * @date   2019-04-06 (Move: libtbag/game -> libtbag/game/lua)
  */
 class TBAG_API LuaGameInterface : public libtbag::game::GameInterface
 {
@@ -125,11 +128,12 @@ protected:
     virtual void onSensorChanged(GameSensorType type, float x, float y, float z) override;
 };
 
+} // namespace lua
 } // namespace game
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_LUAGAMEINTERFACE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_LUA_LUAGAMEINTERFACE_HPP__
 

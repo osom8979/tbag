@@ -2,10 +2,11 @@
  * @file   LuaGameInterface.cpp
  * @brief  LuaGameInterface class implementation.
  * @author zer0
- * @date   2019-04-06
+ * @date   2019-04-07
+ * @date   2019-04-06 (Move: libtbag/game -> libtbag/game/lua)
  */
 
-#include <libtbag/game/LuaGameInterface.hpp>
+#include <libtbag/game/lua/LuaGameInterface.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
@@ -13,6 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace game {
+namespace lua  {
 
 LuaGameInterface::LuaGameInterface()
 {
@@ -308,6 +310,7 @@ void LuaGameInterface::onSensorChanged(GameSensorType type, float x, float y, fl
     }
 }
 
+} // namespace lua
 } // namespace game
 
 // --------------------
