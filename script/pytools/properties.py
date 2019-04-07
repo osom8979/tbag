@@ -76,6 +76,8 @@ addGlobalString('NAMESPACE_OPEN')
 addGlobalString('NAMESPACE_CLOSE')
 addGlobalString('NAMESPACE_OPEN_COMMENT')
 addGlobalString('NAMESPACE_CLOSE_COMMENT')
+addGlobalString('CLASSNAME_IMPLEMENT_COMMENT')
+addGlobalString('CLASSNAME_IMPLEMENT_HORIZON')
 addGlobalString('NAMESPACE_FULL_LIST_BEGIN')
 addGlobalString('NAMESPACE_FULL_LIST_END')
 addGlobalString('NAMESPACE_FULL_LIST_USING')
@@ -107,9 +109,6 @@ def getFillString(str, count):
     for i in range(0, count):
         result += str
     return result
-
-def getDefaultFillString(basestr):
-    return getFillString('-', len(basestr) - 3)
 
 def getIncludeGuard(namespace, classpath, extension):
     return '__INCLUDE_' + namespace.upper() + '__' + \
@@ -218,8 +217,11 @@ def createDefaultDictionary(classpath):
 
     dic[NAMESPACE_OPEN]  = 'NAMESPACE_' + dic[PROJECT_NAMESPACE].upper() + '_OPEN'
     dic[NAMESPACE_CLOSE] = 'NAMESPACE_' + dic[PROJECT_NAMESPACE].upper() + '_CLOSE'
-    dic[NAMESPACE_OPEN_COMMENT]  = getDefaultFillString(dic[NAMESPACE_OPEN])
-    dic[NAMESPACE_CLOSE_COMMENT] = getDefaultFillString(dic[NAMESPACE_CLOSE])
+    dic[NAMESPACE_OPEN_COMMENT]  = getFillString('-', len(dic[NAMESPACE_OPEN])-3)
+    dic[NAMESPACE_CLOSE_COMMENT] = getFillString('-', len(dic[NAMESPACE_CLOSE])-3)
+
+    dic[CLASSNAME_IMPLEMENT_COMMENT] = dic[CLASSNAME] + ' implementation'
+    dic[CLASSNAME_IMPLEMENT_HORIZON] = getFillString('-', len(dic[CLASSNAME_IMPLEMENT_COMMENT]))
 
     dic[ROOT_CLASSPATH] = classpath.split('/')[0]
     dic[ROOT_CLASSPATH_LOWER] = dic[ROOT_CLASSPATH].lower()

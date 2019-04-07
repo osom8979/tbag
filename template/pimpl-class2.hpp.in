@@ -55,7 +55,8 @@ public:
     void swap(${CLASSNAME} & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(${CLASSNAME} & lh, ${CLASSNAME} & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(${CLASSNAME} & lh, ${CLASSNAME} & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -68,28 +69,33 @@ public:
     inline Impl       * get()       TBAG_NOEXCEPT { return _impl.get(); }
     inline Impl const * get() const TBAG_NOEXCEPT { return _impl.get(); }
 
+    inline Impl       * operator ->()       TBAG_NOEXCEPT { return get(); }
+    inline Impl const * operator ->() const TBAG_NOEXCEPT { return get(); }
+
+    inline Impl       & ref()       TBAG_NOEXCEPT { return *get(); }
+    inline Impl const & ref() const TBAG_NOEXCEPT { return *get(); }
+
+    inline Impl       & operator *()       TBAG_NOEXCEPT { return ref(); }
+    inline Impl const & operator *() const TBAG_NOEXCEPT { return ref(); }
+
 public:
-    /**
-     * Implemented for std::less<> compatibility.
-     *
-     * @see std::set
-     * @see std::map
-     * @see std::less
-     */
     friend inline bool operator <(${CLASSNAME} const & x, ${CLASSNAME} const & y) TBAG_NOEXCEPT
-    {
-        return x.get() < y.get();
-    }
+    { return x.get() < y.get(); }
+
+    friend inline bool operator >(${CLASSNAME} const & x, ${CLASSNAME} const & y) TBAG_NOEXCEPT
+    { return x.get() > y.get(); }
+
+    friend inline bool operator <=(${CLASSNAME} const & x, ${CLASSNAME} const & y) TBAG_NOEXCEPT
+    { return x.get() <= y.get(); }
+
+    friend inline bool operator >=(${CLASSNAME} const & x, ${CLASSNAME} const & y) TBAG_NOEXCEPT
+    { return x.get() >= y.get(); }
 
     inline bool operator ==(${CLASSNAME} const & obj) const TBAG_NOEXCEPT
-    {
-        return get() == obj.get();
-    }
+    { return get() == obj.get(); }
 
     inline bool operator !=(${CLASSNAME} const & obj) const TBAG_NOEXCEPT
-    {
-        return get() != obj.get();
-    }
+    { return get() != obj.get(); }
 
 public:
     void reset();

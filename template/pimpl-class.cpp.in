@@ -42,9 +42,9 @@ public:
     }
 };
 
-// ----------------------------
-// ${CLASSNAME} implementation.
-// ----------------------------
+// ${CLASSNAME_IMPLEMENT_HORIZON}
+// ${CLASSNAME_IMPLEMENT_COMMENT}
+// ${CLASSNAME_IMPLEMENT_HORIZON}
 
 ${CLASSNAME}::${CLASSNAME}() : _impl(std::make_shared<Impl>(this))
 {
