@@ -19,6 +19,7 @@
 #include <libtbag/game/gui/GuiCircle.hpp>
 #include <libtbag/game/gui/GuiConvex.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>
+#include <libtbag/game/gui/GuiSprite.hpp>
 #include <libtbag/game/gui/GuiText.hpp>
 #include <libtbag/game/gui/GuiTexture.hpp>
 
@@ -208,6 +209,12 @@ void GameEngine::draw(GuiRect const & gui)
 {
     assert(static_cast<bool>(_impl));
     _impl->window.draw((sf::RectangleShape const &)gui.ref());
+}
+
+void GameEngine::draw(GuiSprite const & gui)
+{
+    assert(static_cast<bool>(_impl));
+    _impl->window.draw((sf::Sprite const &)gui.ref());
 }
 
 void GameEngine::draw(GuiText const & gui)

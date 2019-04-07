@@ -37,6 +37,7 @@ namespace gui {
 class GuiCircle;
 class GuiConvex;
 class GuiRect;
+class GuiSprite;
 class GuiText;
 } // namespace gui
 
@@ -97,6 +98,7 @@ public:
     using GuiCircle  = libtbag::game::gui::GuiCircle;
     using GuiConvex  = libtbag::game::gui::GuiConvex;
     using GuiRect    = libtbag::game::gui::GuiRect;
+    using GuiSprite  = libtbag::game::gui::GuiSprite;
     using GuiText    = libtbag::game::gui::GuiText;
     // clang-format on
 
@@ -104,6 +106,7 @@ public:
     void draw(GuiCircle const & gui);
     void draw(GuiConvex const & gui);
     void draw(GuiRect const & gui);
+    void draw(GuiSprite const & gui);
     void draw(GuiText const & gui);
 };
 
