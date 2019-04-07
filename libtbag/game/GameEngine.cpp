@@ -16,6 +16,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/Type.hpp>
 
+#include <libtbag/game/gui/GuiCircle.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>
 #include <libtbag/game/gui/GuiText.hpp>
 
@@ -187,6 +188,12 @@ int GameEngine::run()
     _impl = std::make_unique<Impl>(this, _storage, MODE, PARAMS.title, STYLE, CONTEXT, CLEAR);
     assert(static_cast<bool>(_impl));
     return _impl->run();
+}
+
+void GameEngine::draw(GuiCircle const & gui)
+{
+    assert(static_cast<bool>(_impl));
+    _impl->window.draw(*(sf::CircleShape const *)gui.get());
 }
 
 void GameEngine::draw(GuiRect const & gui)

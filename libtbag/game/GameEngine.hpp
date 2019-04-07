@@ -34,6 +34,7 @@ namespace game {
 
 // Forward declaration.
 namespace gui {
+class GuiCircle;
 class GuiRect;
 class GuiText;
 } // namespace gui
@@ -91,10 +92,14 @@ public:
     int run();
 
 public:
-    using GuiRect = libtbag::game::gui::GuiRect;
-    using GuiText = libtbag::game::gui::GuiText;
+    // clang-format off
+    using GuiCircle = libtbag::game::gui::GuiCircle;
+    using GuiRect   = libtbag::game::gui::GuiRect;
+    using GuiText   = libtbag::game::gui::GuiText;
+    // clang-format on
 
 public:
+    void draw(GuiCircle const & gui);
     void draw(GuiRect const & gui);
     void draw(GuiText const & gui);
 };

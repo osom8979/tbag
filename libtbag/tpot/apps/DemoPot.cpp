@@ -27,6 +27,7 @@ struct DemoGame : public libtbag::game::GameEngine
     GuiRect rect1;
     GuiText text1;
     GuiText text2;
+    GuiCircle circle1;
 
     DemoGame(Storage const & storage) : libtbag::game::GameEngine(storage)
     {
@@ -39,7 +40,6 @@ struct DemoGame : public libtbag::game::GameEngine
         rect1.setFillColor(255, 0, 0, 255);
         rect1.setOutlineColor(0, 255, 0, 255);
         rect1.setOutlineThickness(1);
-        rect1.setOrigin(10, 10);
         rect1.move(30, 30);
         rect1.rotate(45);
         rect1.scale(2, 2);
@@ -57,6 +57,13 @@ struct DemoGame : public libtbag::game::GameEngine
         text2.setCharacterSize(24);
         text2.setFillColor(0, 255, 0, 255);
         text2.setStyle(GuiText::STYLE_BOLD|GuiText::STYLE_STRIKETHROUGH);
+
+        circle1.setPosition(100, 30);
+        circle1.setFillColor(255, 255, 0, 255);
+        circle1.setOutlineColor(255, 0, 255, 255);
+        circle1.setOutlineThickness(1);
+        circle1.setRadius(30);
+        circle1.setOrigin(0.5, 0.5);
     }
 
     virtual ~DemoGame()
@@ -74,6 +81,7 @@ struct DemoGame : public libtbag::game::GameEngine
     virtual void onDraw(GameState & state) override
     {
         draw(rect1);
+        draw(circle1);
         draw(text1);
         draw(text2);
     }
