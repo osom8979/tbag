@@ -20,6 +20,7 @@
 #include <libtbag/game/GameEngine.hpp>
 
 #include <libtbag/game/gui/GuiCircle.hpp>
+#include <libtbag/game/gui/GuiConvex.hpp>
 #include <libtbag/game/gui/GuiFont.hpp>
 #include <libtbag/game/gui/GuiImage.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>

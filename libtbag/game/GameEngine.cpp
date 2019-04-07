@@ -17,6 +17,7 @@
 #include <libtbag/Type.hpp>
 
 #include <libtbag/game/gui/GuiCircle.hpp>
+#include <libtbag/game/gui/GuiConvex.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>
 #include <libtbag/game/gui/GuiText.hpp>
 #include <libtbag/game/gui/GuiTexture.hpp>
@@ -195,6 +196,12 @@ void GameEngine::draw(GuiCircle const & gui)
 {
     assert(static_cast<bool>(_impl));
     _impl->window.draw((sf::CircleShape const &)gui.ref());
+}
+
+void GameEngine::draw(GuiConvex const & gui)
+{
+    assert(static_cast<bool>(_impl));
+    _impl->window.draw((sf::ConvexShape const &)gui.ref());
 }
 
 void GameEngine::draw(GuiRect const & gui)

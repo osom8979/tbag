@@ -28,6 +28,7 @@ struct DemoGame : public libtbag::game::GameEngine
     GuiText text1;
     GuiText text2;
     GuiCircle circle1;
+    GuiConvex convex1;
 
     DemoGame(Storage const & storage) : libtbag::game::GameEngine(storage)
     {
@@ -64,6 +65,16 @@ struct DemoGame : public libtbag::game::GameEngine
         circle1.setOutlineThickness(1);
         circle1.setRadius(30);
         circle1.setOrigin(0.5, 0.5);
+
+        convex1.setFillColor(0, 128, 128, 255);
+        convex1.setOutlineColor(128, 0, 128, 255);
+        convex1.setOutlineThickness(1);
+        convex1.setPointCount(5);
+        convex1.setPoint(0, {200, 10});
+        convex1.setPoint(1, {350, 20});
+        convex1.setPoint(2, {320, 90});
+        convex1.setPoint(3, {230, 100});
+        convex1.setPoint(4, {200, 50});
     }
 
     virtual ~DemoGame()
@@ -82,6 +93,7 @@ struct DemoGame : public libtbag::game::GameEngine
     {
         draw(rect1);
         draw(circle1);
+        draw(convex1);
         draw(text1);
         draw(text2);
     }
