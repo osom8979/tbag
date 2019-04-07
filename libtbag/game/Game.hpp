@@ -19,6 +19,7 @@
 #include <libtbag/game/GameCommon.hpp>
 #include <libtbag/game/GameEngine.hpp>
 
+#include <libtbag/game/gui/GuiFont.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_GAME_HPP__
