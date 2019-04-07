@@ -32,6 +32,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace game {
 
+// Forward declaration.
+namespace gui {
+class GuiRect;
+} // namespace gui
+
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_EXIT_SUCCESS = 1;
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_EXIT_FAILURE = 2;
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_RESTART = 3;
@@ -42,21 +47,8 @@ TBAG_CONSTEXPR int const GAME_EXIT_CODE_RESTART = 3;
  * @author zer0
  * @date   2019-04-06
  */
-class TBAG_API GameEngine : private Noncopyable,
-                            public GameInterface,
-                            public libtbag::geometry::GeometryTypes
+class TBAG_API GameEngine : public GameInterface
 {
-public:
-    using Storage = libtbag::res::Storage;
-    using Channel = libtbag::graphic::Channel;
-    using Rgb24   = libtbag::graphic::Rgb24;
-    using Rgb32   = libtbag::graphic::Rgb32;
-
-public:
-    TBAG_CONSTEXPR static Channel const CHANNEL_MAX  = libtbag::graphic::channel_max();
-    TBAG_CONSTEXPR static Channel const CHANNEL_MIN  = libtbag::graphic::channel_min();
-    TBAG_CONSTEXPR static Channel const CHANNEL_HALF = libtbag::graphic::channel_half();
-
 public:
     struct Impl;
     friend struct Impl;
@@ -96,6 +88,12 @@ public:
 
 public:
     int run();
+
+public:
+    using GuiRect = libtbag::game::gui::GuiRect;
+
+public:
+    void draw(GuiRect const & gui);
 };
 
 /**
@@ -104,7 +102,7 @@ public:
  * @author zer0
  * @date   2019-04-06
  */
-class TBAG_API GameScene : private Noncopyable
+class TBAG_API GameScene : public GameCommonTypes
 {
 public:
     struct Impl;

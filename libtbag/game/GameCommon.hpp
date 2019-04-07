@@ -16,6 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/geometry/GeometryTypes.hpp>
+#include <libtbag/graphic/Color.hpp>
 #include <libtbag/res/Storage.hpp>
 
 #include <cstdint>
@@ -298,13 +300,40 @@ enum class GameSensorType
 };
 
 /**
+ * GameCommon types.
+ *
+ * @author zer0
+ * @date   2019-04-07
+ */
+struct GameCommonTypes : public libtbag::geometry::GeometryTypes
+{
+    using GameState         = libtbag::game::GameState;
+    using GameVideoMode     = libtbag::game::GameVideoMode;
+    using GameParams        = libtbag::game::GameParams;
+    using GameKey           = libtbag::game::GameKey;
+    using GameButton        = libtbag::game::GameButton;
+    using GameWheel         = libtbag::game::GameWheel;
+    using GameJoystickAxis  = libtbag::game::GameJoystickAxis;
+    using GameSensorType    = libtbag::game::GameSensorType;
+
+    using Storage = libtbag::res::Storage;
+    using Channel = libtbag::graphic::Channel;
+    using Rgb24   = libtbag::graphic::Rgb24;
+    using Rgb32   = libtbag::graphic::Rgb32;
+
+    TBAG_CONSTEXPR static Channel const CHANNEL_MAX  = libtbag::graphic::channel_max();
+    TBAG_CONSTEXPR static Channel const CHANNEL_MIN  = libtbag::graphic::channel_min();
+    TBAG_CONSTEXPR static Channel const CHANNEL_HALF = libtbag::graphic::channel_half();
+};
+
+/**
  * WindowInterface class prototype.
  *
  * @author zer0
  * @date   2019-03-23
  * @date   2019-04-06 (Rename: WindowInterface -> GameInterface)
  */
-struct GameInterface
+struct GameInterface : public GameCommonTypes
 {
     GameInterface()
     { /* EMPTY. */ }
