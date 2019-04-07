@@ -35,6 +35,7 @@ namespace game {
 // Forward declaration.
 namespace gui {
 class GuiRect;
+class GuiText;
 } // namespace gui
 
 TBAG_CONSTEXPR int const GAME_EXIT_CODE_EXIT_SUCCESS = 1;
@@ -91,9 +92,11 @@ public:
 
 public:
     using GuiRect = libtbag::game::gui::GuiRect;
+    using GuiText = libtbag::game::gui::GuiText;
 
 public:
     void draw(GuiRect const & gui);
+    void draw(GuiText const & gui);
 };
 
 /**

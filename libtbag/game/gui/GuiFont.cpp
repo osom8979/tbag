@@ -120,13 +120,6 @@ bool GuiFont::loadFromMemory(void const * data, std::size_t size)
     return _impl->loadFromMemory(data, size);
 }
 
-bool GuiFont::loadNanumGothicCodingNormal()
-{
-    assert(exists());
-    auto const BUFFER = libtbag::typography::font::getNgcNormal();
-    return loadFromMemory(BUFFER.data(), BUFFER.size());
-}
-
 bool GuiFont::loadNanumGothicCodingBold()
 {
     assert(exists());

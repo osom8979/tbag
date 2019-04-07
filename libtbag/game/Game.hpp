@@ -21,6 +21,7 @@
 
 #include <libtbag/game/gui/GuiFont.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>
+#include <libtbag/game/gui/GuiText.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_GAME_HPP__
 

@@ -22,10 +22,18 @@ namespace apps {
 
 struct DemoGame : public libtbag::game::GameEngine
 {
+    libtbag::game::gui::GuiFont font;
+
     GuiRect rect1;
+    GuiText text1;
+    GuiText text2;
 
     DemoGame(Storage const & storage) : libtbag::game::GameEngine(storage)
     {
+        if (!font.loadNanumGothicCodingBold()) {
+            tDLogE("DemoGame::DemoGame() font2 load error.");
+        }
+
         rect1.setPosition(10, 10);
         rect1.setSize(20, 20);
         rect1.setFillColor(255, 0, 0, 255);
@@ -35,6 +43,20 @@ struct DemoGame : public libtbag::game::GameEngine
         rect1.move(30, 30);
         rect1.rotate(45);
         rect1.scale(2, 2);
+
+        text1.setFont(font);
+        text1.setString("Hello, World");
+        text1.setPosition(0, 0);
+        text1.setCharacterSize(24);
+        text1.setFillColor(0, 0, 255, 255);
+        text1.setStyle(GuiText::STYLE_REGULAR|GuiText::STYLE_UNDERLINED);
+
+        text2.setFont(font);
+        text2.setString("Hello, World");
+        text2.setPosition(0, 30);
+        text2.setCharacterSize(24);
+        text2.setFillColor(0, 255, 0, 255);
+        text2.setStyle(GuiText::STYLE_BOLD|GuiText::STYLE_STRIKETHROUGH);
     }
 
     virtual ~DemoGame()
@@ -52,6 +74,8 @@ struct DemoGame : public libtbag::game::GameEngine
     virtual void onDraw(GameState & state) override
     {
         draw(rect1);
+        draw(text1);
+        draw(text2);
     }
 };
 
