@@ -19,6 +19,7 @@
 #include <libtbag/game/gui/GuiCircle.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>
 #include <libtbag/game/gui/GuiText.hpp>
+#include <libtbag/game/gui/GuiTexture.hpp>
 
 #include <imgui.h>
 #include <imgui-SFML.h>
@@ -193,19 +194,19 @@ int GameEngine::run()
 void GameEngine::draw(GuiCircle const & gui)
 {
     assert(static_cast<bool>(_impl));
-    _impl->window.draw(*(sf::CircleShape const *)gui.get());
+    _impl->window.draw((sf::CircleShape const &)gui.ref());
 }
 
 void GameEngine::draw(GuiRect const & gui)
 {
     assert(static_cast<bool>(_impl));
-    _impl->window.draw(*(sf::RectangleShape const *)gui.get());
+    _impl->window.draw((sf::RectangleShape const &)gui.ref());
 }
 
 void GameEngine::draw(GuiText const & gui)
 {
     assert(static_cast<bool>(_impl));
-    _impl->window.draw(*(sf::Text const *)gui.get());
+    _impl->window.draw((sf::Text const &)gui.ref());
 }
 
 /**

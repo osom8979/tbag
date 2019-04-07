@@ -21,8 +21,10 @@
 
 #include <libtbag/game/gui/GuiCircle.hpp>
 #include <libtbag/game/gui/GuiFont.hpp>
+#include <libtbag/game/gui/GuiImage.hpp>
 #include <libtbag/game/gui/GuiRect.hpp>
 #include <libtbag/game/gui/GuiText.hpp>
+#include <libtbag/game/gui/GuiTexture.hpp>
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GAME_GAME_HPP__
 

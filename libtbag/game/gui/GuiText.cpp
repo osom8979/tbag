@@ -65,7 +65,7 @@ public:
     void setGuiFont(GuiFont const & font)
     {
         _font = font;
-        sf::Text::setFont(*((sf::Font const *)_font.get()));
+        sf::Text::setFont((sf::Font const &)_font.ref());
     }
 
     GuiFont getGuiFont() const

@@ -93,9 +93,9 @@ public:
 
 public:
     // clang-format off
-    using GuiCircle = libtbag::game::gui::GuiCircle;
-    using GuiRect   = libtbag::game::gui::GuiRect;
-    using GuiText   = libtbag::game::gui::GuiText;
+    using GuiCircle  = libtbag::game::gui::GuiCircle;
+    using GuiRect    = libtbag::game::gui::GuiRect;
+    using GuiText    = libtbag::game::gui::GuiText;
     // clang-format on
 
 public:

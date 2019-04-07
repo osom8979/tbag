@@ -18,6 +18,7 @@
 #include <libtbag/game/GameCommon.hpp>
 
 #include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

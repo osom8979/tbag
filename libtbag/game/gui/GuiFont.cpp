@@ -7,7 +7,6 @@
 
 #include <libtbag/game/gui/GuiFont.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/Noncopyable.hpp>
 #include <libtbag/typography/font/Ngc.hpp>
 
 #include <cassert>
