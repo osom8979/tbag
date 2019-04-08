@@ -128,6 +128,7 @@ public:
     bool loadFromMemory(void const * data, std::size_t size);
 
 public:
+    bool loadNanumGothicCodingNormal();
     bool loadNanumGothicCodingBold();
 
 public:

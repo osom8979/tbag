@@ -22,18 +22,27 @@ namespace apps {
 
 struct DemoGame : public libtbag::game::GameEngine
 {
-    libtbag::game::gui::GuiFont font;
+    libtbag::game::gui::GuiFont font1;
+    libtbag::game::gui::GuiFont font2;
+    libtbag::game::gui::GuiTexture texture;
 
     GuiRect rect1;
     GuiText text1;
     GuiText text2;
     GuiCircle circle1;
     GuiConvex convex1;
+    GuiSprite sprite1;
 
     DemoGame(Storage const & storage) : libtbag::game::GameEngine(storage)
     {
-        if (!font.loadNanumGothicCodingBold()) {
-            tDLogE("DemoGame::DemoGame() font2 load error.");
+        if (!font1.loadNanumGothicCodingNormal()) {
+            tDLogE("DemoGame::DemoGame() font load error.");
+        }
+        if (!font2.loadNanumGothicCodingBold()) {
+            tDLogE("DemoGame::DemoGame() font load error.");
+        }
+        if (!texture.loadFromFile("lena.png")) {
+            tDLogE("DemoGame::DemoGame() texture load error.");
         }
 
         rect1.setPosition(10, 10);
@@ -45,14 +54,14 @@ struct DemoGame : public libtbag::game::GameEngine
         rect1.rotate(45);
         rect1.scale(2, 2);
 
-        text1.setFont(font);
+        text1.setFont(font1);
         text1.setString("Hello, World");
         text1.setPosition(0, 0);
         text1.setCharacterSize(24);
         text1.setFillColor(0, 0, 255, 255);
         text1.setStyle(GuiText::STYLE_REGULAR|GuiText::STYLE_UNDERLINED);
 
-        text2.setFont(font);
+        text2.setFont(font2);
         text2.setString("Hello, World");
         text2.setPosition(0, 30);
         text2.setCharacterSize(24);
@@ -75,6 +84,9 @@ struct DemoGame : public libtbag::game::GameEngine
         convex1.setPoint(2, {320, 90});
         convex1.setPoint(3, {230, 100});
         convex1.setPoint(4, {200, 50});
+
+        sprite1.setTexture(texture);
+        sprite1.setPosition(10, 100);
     }
 
     virtual ~DemoGame()
@@ -94,6 +106,9 @@ struct DemoGame : public libtbag::game::GameEngine
         draw(rect1);
         draw(circle1);
         draw(convex1);
+
+        draw(sprite1);
+
         draw(text1);
         draw(text2);
     }

@@ -34,6 +34,9 @@ private:
     GuiFont * _parent;
 
 public:
+    libtbag::util::Buffer _buffer;
+
+public:
     Impl(GuiFont * parent) : _parent(parent)
     {
         assert(_parent != nullptr);
@@ -119,11 +122,18 @@ bool GuiFont::loadFromMemory(void const * data, std::size_t size)
     return _impl->loadFromMemory(data, size);
 }
 
+bool GuiFont::loadNanumGothicCodingNormal()
+{
+    assert(exists());
+    _impl->_buffer = libtbag::typography::font::getNgcNormal();
+    return loadFromMemory(_impl->_buffer.data(), _impl->_buffer.size());
+}
+
 bool GuiFont::loadNanumGothicCodingBold()
 {
     assert(exists());
-    auto const BUFFER = libtbag::typography::font::getNgcBold();
-    return loadFromMemory(BUFFER.data(), BUFFER.size());
+    _impl->_buffer = libtbag::typography::font::getNgcBold();
+    return loadFromMemory(_impl->_buffer.data(), _impl->_buffer.size());
 }
 
 std::string GuiFont::getFamily() const
