@@ -37,18 +37,18 @@ bool LuaGameInterface::initLuaBind(sol::state & lua)
 {
     // clang-format off
     sol::table lua_tbag = lua[libtbag::script::SolState::lua_tbag_name()];
-    _bind_lua_cb(lua_tbag, "on_create",                    _on_create);
-    _bind_lua_cb(lua_tbag, "on_destroy",                   _on_destroy);
-    _bind_lua_cb(lua_tbag, "on_check",                     _on_check);
-    _bind_lua_cb(lua_tbag, "on_pre_event",                 _on_pre_event);
-    _bind_lua_cb(lua_tbag, "on_post_event",                _on_post_event);
-    _bind_lua_cb(lua_tbag, "on_update",                    _on_update);
-    _bind_lua_cb(lua_tbag, "on_post_update1",              _on_post_update1);
-    _bind_lua_cb(lua_tbag, "on_post_update2",              _on_post_update2);
-    _bind_lua_cb(lua_tbag, "on_draw",                      _on_draw);
-    _bind_lua_cb(lua_tbag, "on_post_draw1",                _on_post_draw1);
-    _bind_lua_cb(lua_tbag, "on_post_draw2",                _on_post_draw2);
-    _bind_lua_cb(lua_tbag, "on_closed",                    _on_close);
+    _bind_lua_cb(lua_tbag, "on_create",                   _on_create);
+    _bind_lua_cb(lua_tbag, "on_destroy",                  _on_destroy);
+    _bind_lua_cb(lua_tbag, "on_check",                    _on_check);
+    _bind_lua_cb(lua_tbag, "on_pre_event",                _on_pre_event);
+    _bind_lua_cb(lua_tbag, "on_post_event",               _on_post_event);
+    _bind_lua_cb(lua_tbag, "on_update",                   _on_update);
+    _bind_lua_cb(lua_tbag, "on_post_update1",             _on_post_update1);
+    _bind_lua_cb(lua_tbag, "on_post_update2",             _on_post_update2);
+    _bind_lua_cb(lua_tbag, "on_draw",                     _on_draw);
+    _bind_lua_cb(lua_tbag, "on_post_draw1",               _on_post_draw1);
+    _bind_lua_cb(lua_tbag, "on_post_draw2",               _on_post_draw2);
+    _bind_lua_cb(lua_tbag, "on_closed",                   _on_close);
     _bind_lua_cb(lua_tbag, "on_resized",                  _on_resized);
     _bind_lua_cb(lua_tbag, "on_lost_focus",               _on_lost_focus);
     _bind_lua_cb(lua_tbag, "on_gained_focus",             _on_gained_focus);
