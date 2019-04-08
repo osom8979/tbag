@@ -1,7 +1,10 @@
 ## Find the FFmpeg library.
 #
 # The following variables are optionally searched for defaults
-#  FFmpeg_ROOT
+#  FFmpeg_ROOT_INCLUDE_PATHS
+#  FFmpeg_ROOT_LIBRARY_PATHS
+#  FFmpeg_ROOT_INCLUDE_PATHS_ONLY
+#  FFmpeg_ROOT_LIBRARY_PATHS_ONLY
 #
 # The following are set after configuration is done:
 #  FFmpeg_FOUND

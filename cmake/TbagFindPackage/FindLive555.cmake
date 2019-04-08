@@ -1,10 +1,10 @@
 ## Find the Live555 (OpenRTSP) library.
 #
 # The following variables are optionally searched for defaults
-#  BasicUsageEnvironment_ROOT
-#  UsageEnvironment_ROOT
-#  Groupsock_ROOT
-#  LiveMedia_ROOT
+#  Live555_ROOT_INCLUDE_PATHS
+#  Live555_ROOT_LIBRARY_PATHS
+#  Live555_ROOT_INCLUDE_PATHS_ONLY
+#  Live555_ROOT_LIBRARY_PATHS_ONLY
 #
 # The following are set after configuration is done:
 #  Live555_FOUND
@@ -13,6 +13,66 @@
 
 if (Live555_FOUND)
     return ()
+endif ()
+
+if (DEFINED Live555_ROOT_INCLUDE_PATHS)
+    if (NOT DEFINED BasicUsageEnvironment_ROOT_INCLUDE_PATHS)
+        set (BasicUsageEnvironment_ROOT_INCLUDE_PATHS ${Live555_ROOT_INCLUDE_PATHS})
+    endif ()
+    if (NOT DEFINED UsageEnvironment_ROOT_INCLUDE_PATHS)
+        set (UsageEnvironment_ROOT_INCLUDE_PATHS ${Live555_ROOT_INCLUDE_PATHS})
+    endif ()
+    if (NOT DEFINED Groupsock_ROOT_INCLUDE_PATHS)
+        set (Groupsock_ROOT_INCLUDE_PATHS ${Live555_ROOT_INCLUDE_PATHS})
+    endif ()
+    if (NOT DEFINED LiveMedia_ROOT_INCLUDE_PATHS)
+        set (LiveMedia_ROOT_INCLUDE_PATHS ${Live555_ROOT_INCLUDE_PATHS})
+    endif ()
+endif ()
+
+if (DEFINED Live555_ROOT_LIBRARY_PATHS)
+    if (NOT DEFINED BasicUsageEnvironment_ROOT_LIBRARY_PATHS)
+        set (BasicUsageEnvironment_ROOT_LIBRARY_PATHS ${Live555_ROOT_LIBRARY_PATHS})
+    endif ()
+    if (NOT DEFINED UsageEnvironment_ROOT_LIBRARY_PATHS)
+        set (UsageEnvironment_ROOT_LIBRARY_PATHS ${Live555_ROOT_LIBRARY_PATHS})
+    endif ()
+    if (NOT DEFINED Groupsock_ROOT_LIBRARY_PATHS)
+        set (Groupsock_ROOT_LIBRARY_PATHS ${Live555_ROOT_LIBRARY_PATHS})
+    endif ()
+    if (NOT DEFINED LiveMedia_ROOT_LIBRARY_PATHS)
+        set (LiveMedia_ROOT_LIBRARY_PATHS ${Live555_ROOT_LIBRARY_PATHS})
+    endif ()
+endif ()
+
+if (DEFINED Live555_ROOT_INCLUDE_PATHS_ONLY)
+    if (NOT DEFINED BasicUsageEnvironment_ROOT_INCLUDE_PATHS_ONLY)
+        set (BasicUsageEnvironment_ROOT_INCLUDE_PATHS_ONLY ${Live555_ROOT_INCLUDE_PATHS_ONLY})
+    endif ()
+    if (NOT DEFINED UsageEnvironment_ROOT_INCLUDE_PATHS_ONLY)
+        set (UsageEnvironment_ROOT_INCLUDE_PATHS_ONLY ${Live555_ROOT_INCLUDE_PATHS_ONLY})
+    endif ()
+    if (NOT DEFINED Groupsock_ROOT_INCLUDE_PATHS_ONLY)
+        set (Groupsock_ROOT_INCLUDE_PATHS_ONLY ${Live555_ROOT_INCLUDE_PATHS_ONLY})
+    endif ()
+    if (NOT DEFINED LiveMedia_ROOT_INCLUDE_PATHS_ONLY)
+        set (LiveMedia_ROOT_INCLUDE_PATHS_ONLY ${Live555_ROOT_INCLUDE_PATHS_ONLY})
+    endif ()
+endif ()
+
+if (DEFINED Live555_ROOT_LIBRARY_PATHS_ONLY)
+    if (NOT DEFINED BasicUsageEnvironment_ROOT_LIBRARY_PATHS_ONLY)
+        set (BasicUsageEnvironment_ROOT_LIBRARY_PATHS_ONLY ${Live555_ROOT_LIBRARY_PATHS_ONLY})
+    endif ()
+    if (NOT DEFINED UsageEnvironment_ROOT_LIBRARY_PATHS_ONLY)
+        set (UsageEnvironment_ROOT_LIBRARY_PATHS_ONLY ${Live555_ROOT_LIBRARY_PATHS_ONLY})
+    endif ()
+    if (NOT DEFINED Groupsock_ROOT_LIBRARY_PATHS_ONLY)
+        set (Groupsock_ROOT_LIBRARY_PATHS_ONLY ${Live555_ROOT_LIBRARY_PATHS_ONLY})
+    endif ()
+    if (NOT DEFINED LiveMedia_ROOT_LIBRARY_PATHS_ONLY)
+        set (LiveMedia_ROOT_LIBRARY_PATHS_ONLY ${Live555_ROOT_LIBRARY_PATHS_ONLY})
+    endif ()
 endif ()
 
 include (TbagSimpleFindLibrary)
@@ -46,7 +106,9 @@ if (LiveMedia_FOUND)
     list (APPEND Live555_LIBRARIES ${LiveMedia_LIBRARIES})
 endif ()
 
-list (REMOVE_DUPLICATES Live555_INCLUDE_DIRS)
+if (Live555_INCLUDE_DIRS)
+    list (REMOVE_DUPLICATES Live555_INCLUDE_DIRS)
+endif ()
 
 mark_as_advanced (Live555_FOUND
                   Live555_LIBRARIES
