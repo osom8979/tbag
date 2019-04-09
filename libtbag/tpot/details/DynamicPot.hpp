@@ -40,11 +40,11 @@ public:
     using PotMain0 = std::function<void(void)>;
     using PotMain1 = std::function<int(void)>;
     using PotMain2 = std::function<int(RunnerParams&)>;
-    using PotMain3 = std::function<int(RunnerParams&, Environments&)>;
-    using PotMain4 = std::function<int(RunnerParams&, Environments&, Arguments&)>;
-    using PotMain5 = std::function<int(RunnerParams&, Environments&, Arguments&, ValueMap&)>;
-    using PotMain6 = std::function<int(RunnerParams&, Environments&, Arguments&, ValueMap&, Storage&)>;
-    using PotMain7 = std::function<int(RunnerParams&, Environments&, Arguments&, ValueMap&, Storage&, bool)>;
+    using PotMain3 = std::function<int(Environments&)>;
+    using PotMain4 = std::function<int(Arguments&)>;
+    using PotMain5 = std::function<int(ValueMap&)>;
+    using PotMain6 = std::function<int(Storage&)>;
+    using PotMain7 = std::function<int(bool)>;
 
 public:
     using FakeFunction = void;

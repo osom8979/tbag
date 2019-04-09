@@ -130,11 +130,11 @@ int DynamicPot::onMain()
         return EXIT_SUCCESS;
     case 1: return (*((PotMain1*)fake_func))();
     case 2: return (*((PotMain2*)fake_func))(params());
-    case 3: return (*((PotMain3*)fake_func))(params(), envs());
-    case 4: return (*((PotMain4*)fake_func))(params(), envs(), args());
-    case 5: return (*((PotMain5*)fake_func))(params(), envs(), args(), values());
-    case 6: return (*((PotMain6*)fake_func))(params(), envs(), args(), values(), storage());
-    case 7: return (*((PotMain7*)fake_func))(params(), envs(), args(), values(), storage(), verbose());
+    case 3: return (*((PotMain3*)fake_func))(envs());
+    case 4: return (*((PotMain4*)fake_func))(args());
+    case 5: return (*((PotMain5*)fake_func))(values());
+    case 6: return (*((PotMain6*)fake_func))(storage());
+    case 7: return (*((PotMain7*)fake_func))(verbose());
     default:
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
     }
