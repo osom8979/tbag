@@ -97,8 +97,6 @@ DynamicPot::~DynamicPot()
 void DynamicPot::checkParams()
 {
     assert(!NAME.empty());
-    assert(!REMARKS.empty());
-    assert(!HELP.empty());
     assert(0 <= COMPARE_AND(MAIN_TYPE) <= 7);
     assert(static_cast<bool>(_func));
 }
