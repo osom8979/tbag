@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/tpot/apps/BasePot.hpp>
+#include <libtbag/tpot/details/BasePot.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -30,7 +30,7 @@ namespace apps {
  * @author zer0
  * @date   2019-01-31
  */
-class TBAG_API GamePot : public BasePot
+class TBAG_API GamePot : public libtbag::tpot::details::BasePot
 {
 public:
     TBAG_CONSTEXPR static char const * const GAME_POT_MAIN_LUA = "GamePotMain.lua";

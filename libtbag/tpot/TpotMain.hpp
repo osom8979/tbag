@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/app/ex/DefaultApp.hpp>
-#include <libtbag/tpot/apps/PotManager.hpp>
+#include <libtbag/tpot/PotManager.hpp>
 
 #include <string>
 
@@ -41,7 +41,7 @@ public:
     using HelpCommander = DefaultApp::HelpCommander;
     using Element       = DefaultApp::Element;
     using Params        = DefaultApp::Params;
-    using PotManager    = libtbag::tpot::apps::PotManager;
+    using PotManager    = libtbag::tpot::PotManager;
     using Pot           = PotManager::Pot;
     using Pots          = PotManager::Pots;
 

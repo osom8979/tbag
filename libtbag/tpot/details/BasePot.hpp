@@ -3,10 +3,11 @@
  * @brief  BasePot class prototype.
  * @author zer0
  * @date   2019-01-30
+ * @date   2019-04-09 (Move: libtbag/tpot/app -> libtbag/tpot/details)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_TPOT_APPS_BASEPOT_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_TPOT_APPS_BASEPOT_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_TPOT_DETAILS_BASEPOT_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_TPOT_DETAILS_BASEPOT_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -22,14 +23,15 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace tpot {
-namespace apps {
+namespace tpot    {
+namespace details {
 
 /**
  * BasePot class prototype.
  *
  * @author zer0
  * @date   2019-01-30
+ * @date   2019-04-09 (Move: libtbag/tpot/app -> libtbag/tpot/details)
  */
 class TBAG_API BasePot : private Noncopyable
 {
@@ -79,12 +81,12 @@ public:
     virtual int onMain() = 0;
 };
 
-} // namespace apps
+} // namespace details
 } // namespace tpot
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_TPOT_APPS_BASEPOT_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_TPOT_DETAILS_BASEPOT_HPP__
 

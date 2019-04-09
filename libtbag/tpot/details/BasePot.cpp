@@ -3,17 +3,18 @@
  * @brief  BasePot class implementation.
  * @author zer0
  * @date   2019-01-30
+ * @date   2019-04-09 (Move: libtbag/tpot/app -> libtbag/tpot/details)
  */
 
-#include <libtbag/tpot/apps/BasePot.hpp>
+#include <libtbag/tpot/details/BasePot.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace tpot {
-namespace apps {
+namespace tpot    {
+namespace details {
 
 BasePot::BasePot()
 {
@@ -25,7 +26,7 @@ BasePot::~BasePot()
     // EMPTY.
 }
 
-} // namespace apps
+} // namespace details
 } // namespace tpot
 
 // --------------------

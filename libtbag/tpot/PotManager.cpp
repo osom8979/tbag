@@ -3,9 +3,10 @@
  * @brief  PotManager class implementation.
  * @author zer0
  * @date   2019-01-30
+ * @date   2019-04-09 (Move: libtbag/tpot/app -> libtbag/tpot)
  */
 
-#include <libtbag/tpot/apps/PotManager.hpp>
+#include <libtbag/tpot/PotManager.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/string/Format.hpp>
@@ -26,7 +27,6 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace tpot {
-namespace apps {
 
 PotManager::PotManager()
 {
@@ -53,11 +53,11 @@ std::size_t PotManager::registerDefaultPots()
 {
     std::size_t count = 0;
 #ifndef __INSERT_NEW_POT
-#define __INSERT_NEW_POT(t) if (insertPot<t>()) { count++; }
+#define __INSERT_NEW_POT(t) if (insertPot(t::name(), std::make_shared<t>())) { count++; }
 #endif
-    __INSERT_NEW_POT(DemoPot)
-    __INSERT_NEW_POT(GamePot)
-    __INSERT_NEW_POT(LuaPot)
+    __INSERT_NEW_POT(libtbag::tpot::apps::DemoPot)
+    __INSERT_NEW_POT(libtbag::tpot::apps::GamePot)
+    __INSERT_NEW_POT(libtbag::tpot::apps::LuaPot)
 #undef __INSERT_NEW_POT
     return count;
 }
@@ -89,7 +89,7 @@ std::string PotManager::getRemarks() const
 
 int PotManager::runOrLutjit(RunnerParams const & params)
 {
-    return run(params, LuaPot().getName());
+    return run(params, libtbag::tpot::apps::LuaPot::name());
 }
 
 int PotManager::run(RunnerParams const & params)
@@ -130,7 +130,6 @@ int PotManager::run(RunnerParams const & params, std::string const & default_mod
     return itr->second->onMain();
 }
 
-} // namespace apps
 } // namespace tpot
 
 // --------------------
