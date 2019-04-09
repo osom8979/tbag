@@ -17,6 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/tpot/details/BasePot.hpp>
+#include <libtbag/tpot/details/DynamicPot.hpp>
 
 #include <string>
 #include <map>
@@ -39,10 +40,20 @@ class TBAG_API PotManager : private Noncopyable
 {
 public:
     using BasePot      = libtbag::tpot::details::BasePot;
+    using DynamicPot   = libtbag::tpot::details::DynamicPot;
     using RunnerParams = BasePot::RunnerParams;
 
     using Pot  = std::shared_ptr<BasePot>;
     using Pots = std::map<std::string, Pot>;
+
+    using PotMain0 = DynamicPot::PotMain0;
+    using PotMain1 = DynamicPot::PotMain1;
+    using PotMain2 = DynamicPot::PotMain2;
+    using PotMain3 = DynamicPot::PotMain3;
+    using PotMain4 = DynamicPot::PotMain4;
+    using PotMain5 = DynamicPot::PotMain5;
+    using PotMain6 = DynamicPot::PotMain6;
+    using PotMain7 = DynamicPot::PotMain7;
 
 private:
     Pots _pots;
@@ -58,6 +69,16 @@ public:
 public:
     bool insertPot(Pot const & pot);
     bool insertPot(std::string const & name, Pot const & pot);
+
+public:
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain0 const & pot);
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain1 const & pot);
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain2 const & pot);
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain3 const & pot);
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain4 const & pot);
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain5 const & pot);
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain6 const & pot);
+    bool insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain7 const & pot);
 
 public:
     std::size_t registerDefaultPots();

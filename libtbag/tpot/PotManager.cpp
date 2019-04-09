@@ -49,6 +49,46 @@ bool PotManager::insertPot(std::string const & name, Pot const & pot)
     return _pots.insert(std::make_pair(std::string(name), pot)).second;
 }
 
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain0 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain1 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain2 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain3 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain4 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain5 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain6 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
+bool PotManager::insertPot(std::string const & n, std::string const & r, std::string const & h, PotMain7 const & pot)
+{
+    return insertPot(n, std::make_shared<DynamicPot>(n, r, h, pot));
+}
+
 std::size_t PotManager::registerDefaultPots()
 {
     std::size_t count = 0;
