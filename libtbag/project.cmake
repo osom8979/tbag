@@ -43,7 +43,6 @@ tbag_modules__apply_ext_bzip2    ()
 tbag_modules__apply_ext_lzma     ()
 tbag_modules__apply_ext_archive  ()
 tbag_modules__apply_ext_nng      ()
-tbag_modules__apply_ext_sfml_ignore_gl_al ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
@@ -56,9 +55,7 @@ tbag_modules__apply_dep_lfds        ()
 tbag_modules__apply_dep_miniz       ()
 tbag_modules__apply_dep_pugixml     ()
 tbag_modules__apply_dep_tmxlite     ()
-tbag_modules__apply_dep_luasfml     ()
-tbag_modules__apply_dep_swoosh      ()
-tbag_modules__apply_dep_imgui       ()
+# tbag_modules__apply_dep_imgui     ()
 
 tbag_modules__check_opengl ()
 tbag_modules__apply_opengl ()

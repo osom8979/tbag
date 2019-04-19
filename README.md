@@ -31,14 +31,10 @@ Tea-bag is Third party extension utility project.
 - nanosvg master-2b08dee (zlib license)
 - lfds 7.1.1 (Public domain)
 - termbox 1.1.2 (MIT license)
-- Canadadry/luaSFML master-f55fdd4 (MIT license)
 - miniz 2.0.8 (MIT license)
 - pugixml 1.9 (MIT license)
 - tmxlite master-591dd03 (zlib license)
 - imgui 1.69 (MIT license)
-- imgui-sfml master-e5bc24e (MIT license)
-- SelbaWard master-3e86c0b (zlib license)
-- Swoosh master-ad8e00f (zlib license)
 
 ## External target
 
@@ -49,7 +45,6 @@ Tea-bag is Third party extension utility project.
 - ogg 1.3.3 (BSD license)
 - flac 1.3.2 (BSD license)
 - vorbis 1.3.6 (BSD license)
-- sfml 2.5.1 (zlib/png license)
 - LuaJIT 2.0.5 (MIT license)
   - LuaDist/LuaJIT-CMakeLists.txt 2.0.3 (MIT license)
 - bzip2 1.0.5 (BSD-like license)

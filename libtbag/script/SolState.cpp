@@ -10,7 +10,6 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/script/lua/luasfml.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -46,7 +45,7 @@ SolState::SolState() : _state(std::make_shared<State>())
     lua_gc(_state->lua_state(), LUA_GCSTOP, 0);
     COMMENT("Load all libraries.") {
         luaL_openlibs(_state->lua_state());
-        libtbag::script::lua::luaopen_sfml(_state->lua_state());
+        //libtbag::script::lua::luaopen_sfml(_state->lua_state());
     }
     lua_gc(_state->lua_state(), LUA_GCRESTART, -1);
 

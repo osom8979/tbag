@@ -12,7 +12,6 @@ enable_language (CXX)
 project (imgui)
 
 set (SRCS imgui.cpp
-          imgui-SFML.cpp
           imgui_draw.cpp
           imgui_freetype.cpp
           imgui_widgets.cpp)
@@ -23,8 +22,8 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}
     add_compile_options (-w)
 endif ()
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${sfml_EXT_INCLUDE_DIR} ${freetype_EXT_INCLUDE_DIR})
+include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${freetype_EXT_INCLUDE_DIR})
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 add_definitions (-DSFML_STATIC)
 add_library (imgui STATIC ${SRCS})
-add_dependencies (imgui sfml freetype)
+add_dependencies (imgui freetype)
