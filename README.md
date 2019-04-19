@@ -28,9 +28,7 @@ Tea-bag is Third party extension utility project.
 - tinyxml2 3.0.0 (zlib license)
 - sol2 2.20.6 (MIT license)
 - lemon 1.3.1 (Boost Software License, Version 1.0)
-- nanosvg master-2b08dee (zlib license)
 - lfds 7.1.1 (Public domain)
-- termbox 1.1.2 (MIT license)
 - miniz 2.0.8 (MIT license)
 - pugixml 1.9 (MIT license)
 - tmxlite master-591dd03 (zlib license)
@@ -42,9 +40,6 @@ Tea-bag is Third party extension utility project.
 - zlib 1.2.11 (zlib license)
 - libuv 1.22.0 (MIT license)
 - freetype 2.9.1 (FreeType License)
-- ogg 1.3.3 (BSD license)
-- flac 1.3.2 (BSD license)
-- vorbis 1.3.6 (BSD license)
 - LuaJIT 2.0.5 (MIT license)
   - LuaDist/LuaJIT-CMakeLists.txt 2.0.3 (MIT license)
 - bzip2 1.0.5 (BSD-like license)
@@ -53,8 +48,6 @@ Tea-bag is Third party extension utility project.
 - CMake 3.13.4 (BSD 3-Clause license)
   - external/archive/build/Modules/CMakePushCheckState.cmake
 - gperftools 2.7 (BSD 3-Clause license)
-- Box2D master-ef96a4f (zlib license)
-- SoLoud master-f2ec233 (zlib license)
 - nng 1.1.1 (MIT license)
 
 ## Resources
