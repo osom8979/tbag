@@ -49,6 +49,7 @@ Tea-bag is Third party extension utility project.
   - external/archive/build/Modules/CMakePushCheckState.cmake
 - gperftools 2.7 (BSD 3-Clause license)
 - nng 1.1.1 (MIT license)
+- raylib 2.5-dev (zlib license)
 
 ## Resources
 

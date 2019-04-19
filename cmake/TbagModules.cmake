@@ -764,6 +764,27 @@ macro (tbag_modules__apply_ext_nng)
     tbag_modules__add_whole_archive (${nng_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_raylib)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES raylib)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${raylib_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${raylib_EXT_STATIC_LIB})
+
+    if (WIN32)
+        list (APPEND TBAG_PROJECT_LDFLAGS gdi32.lib)
+    elseif (UNIX)
+        if (APPLE)
+            list (APPEND TBAG_PROJECT_LDFLAGS -ObjC
+                    -Wl,-framework,OpenGL
+                    -Wl,-framework,Cocoa
+                    -Wl,-framework,IOKit
+                    -Wl,-framework,CoreFoundation
+                    -Wl,-framework,CoreVideo)
+        else ()
+            list (APPEND TBAG_PROJECT_LDFLAGS -lGLU -lrt -lm -ldl -lX11)
+        endif ()
+    endif ()
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------
