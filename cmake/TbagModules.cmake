@@ -588,7 +588,9 @@ macro (tbag_modules__apply_dep_imgui)
 endmacro ()
 
 macro (tbag_modules__apply_dep_raygui)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES raygui)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/raygui)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:raygui>)
 endmacro ()
 
 ## -------------------
