@@ -53,7 +53,7 @@ bool bindRayForLua(lua_State * L)
 {
     sol::state_view lua(L);
     auto tbag = lua["tbag"].get_or_create<sol::table>();
-    auto ray = lua["ray"].get_or_create<sol::table>();
+    auto ray = tbag["ray"].get_or_create<sol::table>();
 
     ray.new_usertype<Vector2>("Vector2",
                               "x", &Vector2::x,
