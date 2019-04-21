@@ -5,13 +5,21 @@
  * @date   2019-04-20
  */
 
+// ========================================
+// [WARNING] Don't change the order of including.
 #include <libtbag/ray/RayBypass.hpp>
 #define RAYGUIDEF static
 #define RAYGUI_IMPLEMENTATION
 #define RICONS_IMPLEMENTATION
 using namespace libtbag::ray;
 #include <libtbag/ray/raygui/ricons.h.impl>
+// Migration guide:
+//  - VIM COMMAND: '%s/(Rectangle){/{/g'
+//  - VIM COMMAND: '%s/(Vector2){/{/g'
+//  - VIM COMMAND: '%s/(Vector3){/{/g'
+//  - VIM COMMAND: '%s/(Color){/{/g'
 #include <libtbag/ray/raygui/raygui.h.impl>
+// ========================================
 
 #include <libtbag/ray/RayGuiBypass.hpp>
 

@@ -5,6 +5,7 @@
  * @date   2019-03-21
  */
 
+// [WARNING] Don't change the order of including.
 #include <nng/nng.h>
 #include <libtbag/mq/NngBypass.hpp>
 
