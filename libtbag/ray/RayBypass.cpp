@@ -29,7 +29,9 @@ bool WindowShouldClose()
 
 void CloseWindow()
 {
-    ::CloseWindow();
+    // Change symbol name: CloseWindow -> CloseWindow_
+    // [REASON] LNK2005 CloseWindow already defined in user32.lib(USER32.dll)
+    ::CloseWindow_();
 }
 
 bool IsWindowReady()
@@ -154,7 +156,9 @@ void SetClipboardText(char const * text)
 
 void ShowCursor()
 {
-    ::ShowCursor();
+    // Change symbol name: ShowCursor -> ShowCursor_
+    // [REASON] LNK2005 ShowCursor already defined in user32.lib(USER32.dll)
+    ::ShowCursor_();
 }
 
 void HideCursor()
