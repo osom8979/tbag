@@ -8,6 +8,9 @@
 #include <raylib.h>
 #include <libtbag/ray/RayBypass.hpp>
 
+#include <cstdarg>
+#include <cstdio>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -1252,10 +1255,18 @@ unsigned int TextLength(char const * text)
     return ::TextLength(text);
 }
 
-//char const * TextFormat(char const * text, ...)
-//{
-//    return ::TextFormat(text, ...);
-//}
+// Size of internal static buffers of some Text*() functions
+#define MAX_TEXT_BUFFER_LENGTH 1024
+
+char const * TextFormat(char const * text, ...)
+{
+    static char buffer[MAX_TEXT_BUFFER_LENGTH] = { 0 };
+    va_list args;
+    va_start(args, text);
+    vsprintf(buffer, text, args);
+    va_end(args);
+    return buffer;
+}
 
 char const * TextSubtext(char const * text, int position, int length)
 {

@@ -305,7 +305,9 @@ TBAG_API int GetGlyphIndex(Font font, int character);
 
 TBAG_API bool TextIsEqual(char const * text1, char const * text2);
 TBAG_API unsigned int TextLength(char const * text);
-// TBAG_API char const * TextFormat(char const * text, ...);
+
+/** @warning Not recommended */
+TBAG_API char const * TextFormat(char const * text, ...);
 
 TBAG_API char const * TextSubtext(char const * text, int position, int length);
 TBAG_API char const * TextReplace(char * text, char const * replace, char const * by);

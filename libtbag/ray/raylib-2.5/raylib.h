@@ -96,6 +96,20 @@ typedef struct Rectangle {
     float y;
     float width;
     float height;
+
+#if defined(__cplusplus)
+    /* The trick for compatibility with the raygui library. */
+
+    Rectangle() : x(0), y(0), width(0), height(0)
+    { /* EMPTY. */ }
+
+    Rectangle(int v) : x(v), y(v), width(v), height(v)
+    { /* EMPTY. */ }
+
+    template <typename T1, typename T2, typename T3, typename T4>
+    Rectangle(T1 x_, T2 y_, T3 w_, T4 h_) : x(x_), y(y_), width(w_), height(h_)
+    { /* EMPTY. */ }
+#endif
 } Rectangle;
 
 typedef struct Image {
