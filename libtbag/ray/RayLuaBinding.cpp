@@ -49,6 +49,27 @@ static void _new_rendertexture2d_type(sol::table & t, std::string const & name)
                       "depthTexture", &T::depthTexture);
 }
 
+template <typename T>
+static void _new_font_type(sol::table & t, std::string const & name)
+{
+    t.new_usertype<T>(name,
+                      "texture", &T::texture,
+                      "baseSize", &T::baseSize,
+                      "charsCount", &T::charsCount,
+                      "offsetY", &T::chars);
+}
+
+template <typename T>
+static void _new_camera3d_type(sol::table & t, std::string const & name)
+{
+    t.new_usertype<T>(name,
+                      "position", &T::position,
+                      "target", &T::target,
+                      "up", &T::up,
+                      "fovy", &T::fovy,
+                      "type", &T::type);
+}
+
 bool bindRayForLua(lua_State * L)
 {
     sol::state_view lua(L);
@@ -62,8 +83,10 @@ bool bindRayForLua(lua_State * L)
                               "x", &Vector3::x,
                               "y", &Vector3::y,
                               "z", &Vector3::z);
+
     _new_vector4_type<Vector4>(ray, "Vector4");
     _new_vector4_type<Quaternion>(ray, "Quaternion");
+
     ray.new_usertype<Matrix>("Matrix",
                              "m0", &Matrix::m0, "m4", &Matrix::m4, "m8", &Matrix::m8, "m12", &Matrix::m12,
                              "m1", &Matrix::m1, "m5", &Matrix::m5, "m9", &Matrix::m9, "m13", &Matrix::m13,
@@ -85,6 +108,7 @@ bool bindRayForLua(lua_State * L)
                             "height", &Image::height,
                             "mipmaps", &Image::mipmaps,
                             "format", &Image::format);
+
     _new_texture2d_type<Texture2D>(ray, "Texture2D");
     _new_texture2d_type<Texture>(ray, "Texture2D");
     _new_texture2d_type<TextureCubemap>(ray, "Texture2D");
@@ -92,101 +116,79 @@ bool bindRayForLua(lua_State * L)
     _new_rendertexture2d_type<RenderTexture2D>(ray, "RenderTexture2D");
     _new_rendertexture2d_type<RenderTexture>(ray, "RenderTexture");
 
-//    typedef struct NPatchInfo {
-//        Rectangle sourceRec;
-//        int left;
-//        int top;
-//        int right;
-//        int bottom;
-//        int type;
-//    } NPatchInfo;
-//
-//    typedef struct CharInfo {
-//        int value;
-//        Rectangle rec;
-//        int offsetX;
-//        int offsetY;
-//        int advanceX;
-//        unsigned char * data;
-//    } CharInfo;
-//
-//    typedef struct Font {
-//        Texture2D texture;
-//        int baseSize;
-//        int charsCount;
-//        CharInfo * chars;
-//    } Font;
-//
-//#define SpriteFont Font
-//
-//    typedef struct Camera3D {
-//        Vector3 position;
-//        Vector3 target;
-//        Vector3 up;
-//        float fovy;
-//        int type;
-//    } Camera3D;
-//
-//#define Camera Camera3D
-//
-//    typedef struct Camera2D {
-//        Vector2 offset;
-//        Vector2 target;
-//        float rotation;
-//        float zoom;
-//    } Camera2D;
-//
-//    typedef struct BoundingBox {
-//        Vector3 min;
-//        Vector3 max;
-//    } BoundingBox;
-//
-//    typedef struct Mesh {
-//        int vertexCount;
-//        int triangleCount;
-//        float * vertices;
-//        float * texcoords;
-//        float * texcoords2;
-//        float * normals;
-//        float * tangents;
-//        unsigned char * colors;
-//        unsigned short * indices;
-//        float * animVertices;
-//        float * animNormals;
-//        int * boneIds;
-//        float * boneWeights;
-//        unsigned int vaoId;
-//        unsigned int vboId[7];
-//    } Mesh;
-//
-//    typedef struct Shader {
-//        unsigned int id;
-//        int locs[MAX_SHADER_LOCATIONS];
-//    } Shader;
-//
+    ray.new_usertype<NPatchInfo>("NPatchInfo",
+                                 "sourceRec", &NPatchInfo::sourceRec,
+                                 "left", &NPatchInfo::left,
+                                 "top", &NPatchInfo::top,
+                                 "right", &NPatchInfo::right,
+                                 "bottom", &NPatchInfo::bottom,
+                                 "type", &NPatchInfo::type);
+    ray.new_usertype<CharInfo>("CharInfo",
+                               "value", &CharInfo::value,
+                               "rec", &CharInfo::rec,
+                               "offsetX", &CharInfo::offsetX,
+                               "offsetY", &CharInfo::offsetY,
+                               "advanceX", &CharInfo::advanceX,
+                               "data", &CharInfo::data);
+
+    _new_font_type<Font>(ray, "Font");
+    _new_font_type<SpriteFont>(ray, "SpriteFont");
+
+    _new_camera3d_type<Camera3D>(ray, "Camera3D");
+    _new_camera3d_type<Camera>(ray, "Camera");
+
+    ray.new_usertype<Camera2D>("Camera2D",
+                               "offset", &Camera2D::offset,
+                               "target", &Camera2D::target,
+                               "rotation", &Camera2D::rotation,
+                               "zoom", &Camera2D::zoom);
+    ray.new_usertype<BoundingBox>("BoundingBox",
+                                  "min", &BoundingBox::min,
+                                  "max", &BoundingBox::max);
+    ray.new_usertype<Mesh>("Mesh",
+                           "vertexCount", &Mesh::vertexCount,
+                           "triangleCount", &Mesh::triangleCount,
+                           "vertices", &Mesh::vertices,
+                           "texcoords", &Mesh::texcoords,
+                           "texcoords2", &Mesh::texcoords2,
+                           "normals", &Mesh::normals,
+                           "tangents", &Mesh::tangents,
+                           "colors", &Mesh::colors,
+                           "indices", &Mesh::indices,
+                           "animVertices", &Mesh::animVertices,
+                           "animNormals", &Mesh::animNormals,
+                           "boneIds", &Mesh::boneIds,
+                           "boneWeights", &Mesh::boneWeights,
+                           "vaoId", &Mesh::vaoId,
+                           "vboId", sol::property([](Mesh & self) { return self.vboId; }));
+
+//    ray.new_usertype<Shader>("Shader",
+//                             "id", &Shader::id,
+//                             "locs", &Shader::locs);
+
 //    typedef struct MaterialMap {
 //        Texture2D texture;
 //        Color color;
 //        float value;
 //    } MaterialMap;
-//
+
 //    typedef struct Material {
 //        Shader shader;
 //        MaterialMap maps[MAX_MATERIAL_MAPS];
 //        float * params;
 //    } Material;
-//
+
 //    typedef struct Transform {
 //        Vector3 translation;
 //        Quaternion rotation;
 //        Vector3 scale;
 //    } Transform;
-//
+
 //    typedef struct BoneInfo {
 //        char name[32];
 //        int parent;
 //    } BoneInfo;
-//
+
 //    typedef struct Model {
 //        Matrix transform;
 //        int meshCount;
@@ -198,26 +200,26 @@ bool bindRayForLua(lua_State * L)
 //        BoneInfo * bones;
 //        Transform * bindPose;
 //    } Model;
-//
+
 //    typedef struct ModelAnimation {
 //        int boneCount;
 //        BoneInfo * bones;
 //        int frameCount;
 //        Transform ** framePoses;
 //    } ModelAnimation;
-//
+
 //    typedef struct Ray {
 //        Vector3 position;
 //        Vector3 direction;
 //    } Ray;
-//
+
 //    typedef struct RayHitInfo {
 //        bool hit;
 //        float distance;
 //        Vector3 position;
 //        Vector3 normal;
 //    } RayHitInfo;
-//
+
 //    typedef struct Wave {
 //        unsigned int sampleCount;
 //        unsigned int sampleRate;
@@ -225,16 +227,16 @@ bool bindRayForLua(lua_State * L)
 //        unsigned int channels;
 //        void * data;
 //    } Wave;
-//
+
 //    typedef struct Sound {
 //        void * audioBuffer;
 //        unsigned int source;
 //        unsigned int buffer;
 //        int format;
 //    } Sound;
-//
+
 //    typedef struct MusicData * Music;
-//
+
 //    typedef struct AudioStream {
 //        unsigned int sampleRate;
 //        unsigned int sampleSize;
@@ -244,7 +246,7 @@ bool bindRayForLua(lua_State * L)
 //        unsigned int source;
 //        unsigned int buffers[2];
 //    } AudioStream;
-//
+
 //    typedef struct VrDeviceInfo {
 //        int hResolution;
 //        int vResolution;
@@ -257,7 +259,7 @@ bool bindRayForLua(lua_State * L)
 //        float lensDistortionValues[4];
 //        float chromaAbCorrection[4];
 //    } VrDeviceInfo;
-//
+
 //    typedef struct VrStereoConfig {
 //        RenderTexture2D stereoFbo;
 //        Shader distortionShader;
@@ -266,7 +268,7 @@ bool bindRayForLua(lua_State * L)
 //        int eyeViewportRight[4];
 //        int eyeViewportLeft[4];
 //    } VrStereoConfig;
-//
+
 //    typedef enum {
 //        FLAG_SHOW_LOGO          = 1,
 //        FLAG_FULLSCREEN_MODE    = 2,
@@ -277,7 +279,7 @@ bool bindRayForLua(lua_State * L)
 //        FLAG_MSAA_4X_HINT       = 32,
 //        FLAG_VSYNC_HINT         = 64
 //    } ConfigFlag;
-//
+
 //    typedef enum {
 //        LOG_ALL = 0,
 //        LOG_TRACE,
@@ -288,7 +290,7 @@ bool bindRayForLua(lua_State * L)
 //        LOG_FATAL,
 //        LOG_NONE
 //    } TraceLogType;
-//
+
 //    typedef enum {
 //        KEY_APOSTROPHE      = 39,
 //        KEY_COMMA           = 44,
@@ -333,7 +335,7 @@ bool bindRayForLua(lua_State * L)
 //        KEY_X               = 88,
 //        KEY_Y               = 89,
 //        KEY_Z               = 90,
-//
+
 //        KEY_SPACE           = 32,
 //        KEY_ESCAPE          = 256,
 //        KEY_ENTER           = 257,
@@ -379,7 +381,7 @@ bool bindRayForLua(lua_State * L)
 //        KEY_BACKSLASH       = 92,
 //        KEY_RIGHT_BRACKET   = 93,
 //        KEY_GRAVE           = 96,
-//
+
 //        KEY_KP_0            = 320,
 //        KEY_KP_1            = 321,
 //        KEY_KP_2            = 322,
@@ -398,27 +400,27 @@ bool bindRayForLua(lua_State * L)
 //        KEY_KP_ENTER        = 335,
 //        KEY_KP_EQUAL        = 336
 //    } KeyboardKey;
-//
+
 //    typedef enum {
 //        KEY_BACK            = 4,
 //        KEY_MENU            = 82,
 //        KEY_VOLUME_UP       = 24,
 //        KEY_VOLUME_DOWN     = 25
 //    } AndroidButton;
-//
+
 //    typedef enum {
 //        MOUSE_LEFT_BUTTON   = 0,
 //        MOUSE_RIGHT_BUTTON  = 1,
 //        MOUSE_MIDDLE_BUTTON = 2
 //    } MouseButton;
-//
+
 //    typedef enum {
 //        GAMEPAD_PLAYER1     = 0,
 //        GAMEPAD_PLAYER2     = 1,
 //        GAMEPAD_PLAYER3     = 2,
 //        GAMEPAD_PLAYER4     = 3
 //    } GamepadNumber;
-//
+
 //    typedef enum {
 //        GAMEPAD_PS3_BUTTON_TRIANGLE = 0,
 //        GAMEPAD_PS3_BUTTON_CIRCLE   = 1,
@@ -436,7 +438,7 @@ bool bindRayForLua(lua_State * L)
 //        GAMEPAD_PS3_BUTTON_DOWN     = 26,
 //        GAMEPAD_PS3_BUTTON_LEFT     = 27
 //    } GamepadPS3Button;
-//
+
 //    typedef enum {
 //        GAMEPAD_PS3_AXIS_LEFT_X     = 0,
 //        GAMEPAD_PS3_AXIS_LEFT_Y     = 1,
@@ -445,7 +447,7 @@ bool bindRayForLua(lua_State * L)
 //        GAMEPAD_PS3_AXIS_L2         = 3,
 //        GAMEPAD_PS3_AXIS_R2         = 4
 //    } GamepadPS3Axis;
-//
+
 //    typedef enum {
 //        GAMEPAD_XBOX_BUTTON_A       = 0,
 //        GAMEPAD_XBOX_BUTTON_B       = 1,
@@ -461,7 +463,7 @@ bool bindRayForLua(lua_State * L)
 //        GAMEPAD_XBOX_BUTTON_DOWN    = 12,
 //        GAMEPAD_XBOX_BUTTON_LEFT    = 13
 //    } GamepadXbox360Button;
-//
+
 //    typedef enum {
 //        GAMEPAD_XBOX_AXIS_LEFT_X    = 0,
 //        GAMEPAD_XBOX_AXIS_LEFT_Y    = 1,
@@ -470,7 +472,7 @@ bool bindRayForLua(lua_State * L)
 //        GAMEPAD_XBOX_AXIS_LT        = 4,
 //        GAMEPAD_XBOX_AXIS_RT        = 5
 //    } GamepadXbox360Axis;
-//
+
 //    typedef enum {
 //        GAMEPAD_ANDROID_DPAD_UP     = 19,
 //        GAMEPAD_ANDROID_DPAD_DOWN   = 20,
@@ -488,7 +490,7 @@ bool bindRayForLua(lua_State * L)
 //        GAMEPAD_ANDROID_BUTTON_L2   = 104,
 //        GAMEPAD_ANDROID_BUTTON_R2   = 105
 //    } GamepadAndroid;
-//
+
 //    typedef enum {
 //        LOC_VERTEX_POSITION = 0,
 //        LOC_VERTEX_TEXCOORD01,
@@ -516,10 +518,10 @@ bool bindRayForLua(lua_State * L)
 //        LOC_MAP_PREFILTER,
 //        LOC_MAP_BRDF
 //    } ShaderLocationIndex;
-//
+
 //#define LOC_MAP_DIFFUSE   LOC_MAP_ALBEDO
 //#define LOC_MAP_SPECULAR  LOC_MAP_METALNESS
-//
+
 //    typedef enum {
 //        UNIFORM_FLOAT = 0,
 //        UNIFORM_VEC2,
@@ -531,7 +533,7 @@ bool bindRayForLua(lua_State * L)
 //        UNIFORM_IVEC4,
 //        UNIFORM_SAMPLER2D
 //    } ShaderUniformDataType;
-//
+
 //    typedef enum {
 //        MAP_ALBEDO    = 0,
 //        MAP_METALNESS = 1,
@@ -545,10 +547,10 @@ bool bindRayForLua(lua_State * L)
 //        MAP_PREFILTER,
 //        MAP_BRDF
 //    } MaterialMapType;
-//
+
 //#define MAP_DIFFUSE   MAP_ALBEDO
 //#define MAP_SPECULAR  MAP_METALNESS
-//
+
 //    typedef enum {
 //        UNCOMPRESSED_GRAYSCALE = 1,
 //        UNCOMPRESSED_GRAY_ALPHA,
@@ -572,7 +574,7 @@ bool bindRayForLua(lua_State * L)
 //        COMPRESSED_ASTC_4x4_RGBA,
 //        COMPRESSED_ASTC_8x8_RGBA
 //    } PixelFormat;
-//
+
 //    typedef enum {
 //        FILTER_POINT = 0,
 //        FILTER_BILINEAR,
@@ -581,7 +583,7 @@ bool bindRayForLua(lua_State * L)
 //        FILTER_ANISOTROPIC_8X,
 //        FILTER_ANISOTROPIC_16X,
 //    } TextureFilterMode;
-//
+
 //    typedef enum {
 //        CUBEMAP_AUTO_DETECT = 0,
 //        CUBEMAP_LINE_VERTICAL,
@@ -590,26 +592,26 @@ bool bindRayForLua(lua_State * L)
 //        CUBEMAP_CROSS_FOUR_BY_THREE,
 //        CUBEMAP_PANORAMA
 //    } CubemapLayoutType;
-//
+
 //    typedef enum {
 //        WRAP_REPEAT = 0,
 //        WRAP_CLAMP,
 //        WRAP_MIRROR_REPEAT,
 //        WRAP_MIRROR_CLAMP
 //    } TextureWrapMode;
-//
+
 //    typedef enum {
 //        FONT_DEFAULT = 0,
 //        FONT_BITMAP,
 //        FONT_SDF
 //    } FontType;
-//
+
 //    typedef enum {
 //        BLEND_ALPHA = 0,
 //        BLEND_ADDITIVE,
 //        BLEND_MULTIPLIED
 //    } BlendMode;
-//
+
 //    typedef enum {
 //        GESTURE_NONE        = 0,
 //        GESTURE_TAP         = 1,
@@ -623,7 +625,7 @@ bool bindRayForLua(lua_State * L)
 //        GESTURE_PINCH_IN    = 256,
 //        GESTURE_PINCH_OUT   = 512
 //    } GestureType;
-//
+
 //    typedef enum {
 //        CAMERA_CUSTOM = 0,
 //        CAMERA_FREE,
@@ -631,12 +633,12 @@ bool bindRayForLua(lua_State * L)
 //        CAMERA_FIRST_PERSON,
 //        CAMERA_THIRD_PERSON
 //    } CameraMode;
-//
+
 //    typedef enum {
 //        CAMERA_PERSPECTIVE = 0,
 //        CAMERA_ORTHOGRAPHIC
 //    } CameraType;
-//
+
 //    typedef enum {
 //        HMD_DEFAULT_DEVICE = 0,
 //        HMD_OCULUS_RIFT_DK2,
@@ -645,7 +647,7 @@ bool bindRayForLua(lua_State * L)
 //        HMD_VALVE_HTC_VIVE,
 //        HMD_SONY_PSVR
 //    } VrDeviceType;
-//
+
 //    typedef enum {
 //        NPT_9PATCH = 0,
 //        NPT_3PATCH_VERTICAL,
