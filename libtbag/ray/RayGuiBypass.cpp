@@ -18,6 +18,7 @@ using namespace libtbag::ray;
 //  - VIM COMMAND: '%s/(Vector2){/{/g'
 //  - VIM COMMAND: '%s/(Vector3){/{/g'
 //  - VIM COMMAND: '%s/(Color){/{/g'
+//  - Fixed build error in GuiScrollPanel()
 #include <libtbag/ray/raygui/raygui.h.impl>
 // ========================================
 
