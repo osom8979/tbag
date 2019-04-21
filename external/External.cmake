@@ -460,10 +460,16 @@ add_custom_target (nng DEPENDS ${nng_EXT_LIBRARIES})
 ## RAYLIB ##
 ############
 
+if (WIN32)
+    set (raylib_EXT_STATIC_LIB_NAME raylib_static)
+else ()
+    set (raylib_EXT_STATIC_LIB_NAME raylib)
+endif()
+
 set (raylib_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/raylib")
 set (raylib_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (raylib_EXT_HEADER       "${raylib_EXT_INCLUDE_DIR}/raylib.h")
-set (raylib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}raylib${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (raylib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${raylib_EXT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (raylib_EXT_LIBRARIES    "${raylib_EXT_STATIC_LIB}")
 exists_files (raylib_EXT_EXISTS ${raylib_EXT_LIBRARIES} ${raylib_EXT_HEADER})
 

@@ -1,4 +1,3 @@
-## CMake build script.
 cmake_minimum_required (VERSION 2.8.8)
 
 if (POLICY CMP0046)
@@ -8,9 +7,7 @@ if (POLICY CMP0054)
     cmake_policy (SET CMP0054 NEW)
 endif ()
 
-enable_language (CXX)
-
-project (LEMON)
+project (LEMON CXX)
 add_definitions (-DLEMON_VERSION=1.3.1)
 
 include (CheckTypeSize)
