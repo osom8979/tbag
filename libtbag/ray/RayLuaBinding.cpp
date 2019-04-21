@@ -161,113 +161,93 @@ bool bindRayForLua(lua_State * L)
                            "boneWeights", &Mesh::boneWeights,
                            "vaoId", &Mesh::vaoId,
                            "vboId", sol::property([](Mesh & self) { return self.vboId; }));
+    ray.new_usertype<Shader>("Shader",
+                             "id", &Shader::id,
+                             "locs", sol::property([](Shader & self) { return self.locs; }));
+    ray.new_usertype<MaterialMap>("MaterialMap",
+                                  "texture", &MaterialMap::texture,
+                                  "color", &MaterialMap::color,
+                                  "value", &MaterialMap::value);
+    ray.new_usertype<Material>("Material",
+                               "shader", &Material::shader,
+                               "maps", sol::property([](Material & self) { return self.maps; }),
+                               "params", &Material::params);
+    ray.new_usertype<Transform>("Transform",
+                                "translation", &Transform::translation,
+                                "rotation", &Transform::rotation,
+                                "scale", &Transform::scale);
+    ray.new_usertype<BoneInfo>("BoneInfo",
+                               "name", sol::property([](BoneInfo & self) { return self.name; }),
+                               "parent", &BoneInfo::parent);
+    ray.new_usertype<Model>("Model",
+                            "transform", &Model::transform,
+                            "meshCount", &Model::meshCount,
+                            "meshes", &Model::meshes,
+                            "materialCount", &Model::materialCount,
+                            "materials", &Model::materials,
+                            "meshMaterial", &Model::meshMaterial,
+                            "boneCount", &Model::boneCount,
+                            "bones", &Model::bones,
+                            "bindPose", &Model::bindPose);
+//    ray.new_usertype<ModelAnimation>("ModelAnimation",
+//                                     "boneCount", &ModelAnimation::boneCount,
+//                                     "bones", &ModelAnimation::bones,
+//                                     "frameCount", &ModelAnimation::frameCount,
+//                                     "framePoses", &ModelAnimation::framePoses);
 
-//    ray.new_usertype<Shader>("Shader",
-//                             "id", &Shader::id,
-//                             "locs", &Shader::locs);
+    ray.new_usertype<Ray>("Ray",
+                          "position", &Ray::position,
+                          "direction", &Ray::direction);
+    ray.new_usertype<RayHitInfo>("RayHitInfo",
+                                 "hit", &RayHitInfo::hit,
+                                 "distance", &RayHitInfo::distance,
+                                 "position", &RayHitInfo::position,
+                                 "normal", &RayHitInfo::normal);
+    ray.new_usertype<Wave>("Wave",
+                           "sampleCount", &Wave::sampleCount,
+                           "sampleRate", &Wave::sampleRate,
+                           "sampleSize", &Wave::sampleSize,
+                           "channels", &Wave::channels,
+                           "data", &Wave::data);
+    ray.new_usertype<Sound>("Sound",
+                           "audioBuffer", &Sound::audioBuffer,
+                           "source", &Sound::source,
+                           "buffer", &Sound::buffer,
+                           "format", &Sound::format);
+    ray.new_usertype<Sound>("Sound",
+                            "audioBuffer", &Sound::audioBuffer,
+                            "source", &Sound::source,
+                            "buffer", &Sound::buffer,
+                            "format", &Sound::format);
 
-//    typedef struct MaterialMap {
-//        Texture2D texture;
-//        Color color;
-//        float value;
-//    } MaterialMap;
+    // ray.new_usertype<Music>("Music");
 
-//    typedef struct Material {
-//        Shader shader;
-//        MaterialMap maps[MAX_MATERIAL_MAPS];
-//        float * params;
-//    } Material;
-
-//    typedef struct Transform {
-//        Vector3 translation;
-//        Quaternion rotation;
-//        Vector3 scale;
-//    } Transform;
-
-//    typedef struct BoneInfo {
-//        char name[32];
-//        int parent;
-//    } BoneInfo;
-
-//    typedef struct Model {
-//        Matrix transform;
-//        int meshCount;
-//        Mesh * meshes;
-//        int materialCount;
-//        Material * materials;
-//        int * meshMaterial;
-//        int boneCount;
-//        BoneInfo * bones;
-//        Transform * bindPose;
-//    } Model;
-
-//    typedef struct ModelAnimation {
-//        int boneCount;
-//        BoneInfo * bones;
-//        int frameCount;
-//        Transform ** framePoses;
-//    } ModelAnimation;
-
-//    typedef struct Ray {
-//        Vector3 position;
-//        Vector3 direction;
-//    } Ray;
-
-//    typedef struct RayHitInfo {
-//        bool hit;
-//        float distance;
-//        Vector3 position;
-//        Vector3 normal;
-//    } RayHitInfo;
-
-//    typedef struct Wave {
-//        unsigned int sampleCount;
-//        unsigned int sampleRate;
-//        unsigned int sampleSize;
-//        unsigned int channels;
-//        void * data;
-//    } Wave;
-
-//    typedef struct Sound {
-//        void * audioBuffer;
-//        unsigned int source;
-//        unsigned int buffer;
-//        int format;
-//    } Sound;
-
-//    typedef struct MusicData * Music;
-
-//    typedef struct AudioStream {
-//        unsigned int sampleRate;
-//        unsigned int sampleSize;
-//        unsigned int channels;
-//        void * audioBuffer;
-//        int format;
-//        unsigned int source;
-//        unsigned int buffers[2];
-//    } AudioStream;
-
-//    typedef struct VrDeviceInfo {
-//        int hResolution;
-//        int vResolution;
-//        float hScreenSize;
-//        float vScreenSize;
-//        float vScreenCenter;
-//        float eyeToScreenDistance;
-//        float lensSeparationDistance;
-//        float interpupillaryDistance;
-//        float lensDistortionValues[4];
-//        float chromaAbCorrection[4];
-//    } VrDeviceInfo;
-
-//    typedef struct VrStereoConfig {
-//        RenderTexture2D stereoFbo;
-//        Shader distortionShader;
-//        Matrix eyesProjection[2];
-//        Matrix eyesViewOffset[2];
-//        int eyeViewportRight[4];
-//        int eyeViewportLeft[4];
-//    } VrStereoConfig;
+    ray.new_usertype<AudioStream>("AudioStream",
+                                  "sampleRate", &AudioStream::sampleRate,
+                                  "sampleSize", &AudioStream::sampleSize,
+                                  "channels", &AudioStream::channels,
+                                  "audioBuffer", &AudioStream::audioBuffer,
+                                  "format", &AudioStream::format,
+                                  "source", &AudioStream::source,
+                                  "buffers", sol::property([](AudioStream & self) { return self.buffers; }));
+    ray.new_usertype<VrDeviceInfo>("VrDeviceInfo",
+                                   "hResolution", &VrDeviceInfo::hResolution,
+                                   "vResolution", &VrDeviceInfo::vResolution,
+                                   "hScreenSize", &VrDeviceInfo::hScreenSize,
+                                   "vScreenSize", &VrDeviceInfo::vScreenSize,
+                                   "vScreenCenter", &VrDeviceInfo::vScreenCenter,
+                                   "eyeToScreenDistance", &VrDeviceInfo::eyeToScreenDistance,
+                                   "lensSeparationDistance", &VrDeviceInfo::lensSeparationDistance,
+                                   "interpupillaryDistance", &VrDeviceInfo::interpupillaryDistance,
+                                   "lensDistortionValues", sol::property([](VrDeviceInfo & self) { return self.lensDistortionValues; }),
+                                   "chromaAbCorrection", sol::property([](VrDeviceInfo & self) { return self.chromaAbCorrection; }));
+    ray.new_usertype<VrStereoConfig>("VrStereoConfig",
+                                     "stereoFbo", &VrStereoConfig::stereoFbo,
+                                     "distortionShader", &VrStereoConfig::distortionShader,
+                                     "eyesProjection", sol::property([](VrStereoConfig & self) { return self.eyesProjection; }),
+                                     "eyesViewOffset", sol::property([](VrStereoConfig & self) { return self.eyesViewOffset; }),
+                                     "eyeViewportRight", sol::property([](VrStereoConfig & self) { return self.eyeViewportRight; }),
+                                     "eyeViewportLeft", sol::property([](VrStereoConfig & self) { return self.eyeViewportLeft; }));
 
 //    typedef enum {
 //        FLAG_SHOW_LOGO          = 1,
