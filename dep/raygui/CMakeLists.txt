@@ -12,5 +12,6 @@ endif ()
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${raylib_EXT_INCLUDE_DIR})
 add_library (raygui STATIC ${SOURCES})
+add_dependencies (raygui raylib)
 target_link_libraries (raygui PRIVATE ${raylib_EXT_STATIC_LIB})
 

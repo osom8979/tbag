@@ -173,6 +173,7 @@ if(STATIC)
       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
       PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
   )
+  # install(FILES raymath.h physac.h DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 set_target_properties(raylib_static PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}")
 
   add_test("pkg-config--static" ${PROJECT_SOURCE_DIR}/../cmake/test-pkgconfig.sh --static)
