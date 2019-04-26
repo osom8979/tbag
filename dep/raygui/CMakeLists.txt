@@ -5,7 +5,7 @@ project (raygui C)
 set (SOURCES raygui.c)
 
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang OR ${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
-    add_compile_options (-w)
+    add_compile_options (-w -std=c99)
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
     add_compile_options (/w)
 endif ()
