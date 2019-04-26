@@ -3,6 +3,10 @@
 
 #include <raylib.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 void _GuiEnable();
 void _GuiDisable();
 void _GuiLock();
@@ -51,6 +55,10 @@ void _GuiLoadStyle(char const * file_name);
 void _GuiLoadStyleProps(const int * props, int count);
 void _GuiLoadStyleDefault();
 void _GuiUpdateStyleComplete();
+
+#if defined(__cplusplus)
+} /* extern "C" */
+#endif
 
 #endif // RAYGUI_FRONTEND_H
 

@@ -6,10 +6,7 @@
  */
 
 #include <libtbag/ray/RayGuiBypass.hpp>
-
-extern "C" {
 #include <raygui.frontend.h>
-}
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
