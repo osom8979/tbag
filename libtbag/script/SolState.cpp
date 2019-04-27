@@ -22,20 +22,20 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 
-static int __sol_state_exception_cb(lua_State * L,
-                                    sol::optional<std::exception const &> exception,
-                                    sol::string_view description)
-{
-    if (exception) {
-        if (exception->what() != nullptr) {
-            tDLogE("__sol_state_exception_cb() Catch exception: {}", exception->what());
-        } else {
-            tDLogE("__sol_state_exception_cb() Catch unknown exception.");
-        }
-        tDLogD("__sol_state_exception_cb() Details information: {}", std::string(description.data(), description.size()));
-    }
-    return sol::stack::push(L, description);
-}
+//static int __sol_state_exception_cb(lua_State * L,
+//                                    sol::optional<std::exception const &> exception,
+//                                    sol::string_view description)
+//{
+//    if (exception) {
+//        if (exception->what() != nullptr) {
+//            tDLogE("__sol_state_exception_cb() Catch exception: {}", exception->what());
+//        } else {
+//            tDLogE("__sol_state_exception_cb() Catch unknown exception.");
+//        }
+//        tDLogD("__sol_state_exception_cb() Details information: {}", std::string(description.data(), description.size()));
+//    }
+//    return sol::stack::push(L, description);
+//}
 
 SolState::SolState() : _state(std::make_shared<State>())
 {
