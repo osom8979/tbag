@@ -81,16 +81,32 @@ public:
     { return _state.get(); }
 
 public:
+    static std::string getDefaultLuaPath();
+    static std::string getDefaultLuaCPath();
+
+private:
+    void initDefaultOpenLibraries();
+    void initDefaultLuaPath();
+    void initDefaultLuaCPath();
+    void initDefaultTbagTable();
+
+public:
     void reset();
 
 public:
     std::string getLuaPath() const;
     std::vector<std::string> getLuaPaths() const;
+    void setLuaPath(std::string const & path);
     bool appendLuaPath(std::string const & path);
 
+public:
     std::string getLuaCPath() const;
     std::vector<std::string> getLuaCPaths() const;
+    void setLuaCPath(std::string const & path);
     bool appendLuaCPath(std::string const & path);
+
+public:
+    std::string getTbagVersion() const;
 
 public:
     bool runScriptFile(std::string const & path);
@@ -102,6 +118,9 @@ public:
 public:
     Version getLuaVersion() const;
     Version getLuaJITVersion() const;
+
+public:
+    int getTop() const;
 };
 
 } // namespace script

@@ -27,25 +27,16 @@ LuaMachine::LuaMachine() : _state(nullptr)
 {
     auto * lua = luaL_newstate();
     assert(lua != nullptr);
-    lua_gc(lua, LUA_GCSTOP, 0);
-    luaL_openlibs(lua);
-    lua_gc(lua, LUA_GCRESTART, -1);
 
     _state.reset(lua, [](lua_State * l){
         lua_close(l);
     });
     assert(static_cast<bool>(_state));
 
-//    std::stringstream ss_path;
-//    ss_path << "." LUA_DIRSEP LUA_PATH_MARK ".lua" << LUA_PATHSEP
-//            << "." LUA_DIRSEP LUA_PATH_MARK LUA_DIRSEP "init.lua";
-//    (*_state)["package"]["path"] = ss_path.str();
-//
-//    std::stringstream ss_cpath;
-//    ss_cpath << "." LUA_DIRSEP LUA_PATH_MARK LUA_MODULE_SUFFIX;
-//    (*_state)["package"]["cpath"] = ss_cpath.str();
-//
-//    (*_state)[lua_tbag_name()] = (*_state).create_table();
+    initDefaultOpenLibraries();
+    initDefaultLuaPath();
+    initDefaultLuaCPath();
+    initDefaultTbagTable();
 }
 
 LuaMachine::LuaMachine(std::nullptr_t) TBAG_NOEXCEPT : _state(nullptr)
@@ -94,6 +85,51 @@ void LuaMachine::swap(LuaMachine & obj) TBAG_NOEXCEPT
     }
 }
 
+std::string LuaMachine::getDefaultLuaPath()
+{
+    std::stringstream path;
+    path << "." LUA_DIRSEP LUA_PATH_MARK ".lua" << LUA_PATHSEP
+         << "." LUA_DIRSEP LUA_PATH_MARK LUA_DIRSEP "init.lua";
+    return path.str();
+}
+
+std::string LuaMachine::getDefaultLuaCPath()
+{
+    std::stringstream cpath;
+    cpath << "." LUA_DIRSEP LUA_PATH_MARK LUA_MODULE_SUFFIX;
+    return cpath.str();
+}
+
+void LuaMachine::initDefaultOpenLibraries()
+{
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+
+    lua_gc(lua, LUA_GCSTOP, 0);
+    luaL_openlibs(lua);
+    lua_gc(lua, LUA_GCRESTART, -1);
+}
+
+void LuaMachine::initDefaultLuaPath()
+{
+    setLuaPath(getDefaultLuaPath());
+}
+
+void LuaMachine::initDefaultLuaCPath()
+{
+    setLuaCPath(getDefaultLuaCPath());
+}
+
+void LuaMachine::initDefaultTbagTable()
+{
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    lua_newtable(lua);
+    lua_pushstring(lua, libtbag::util::getTbagVersion().toString().c_str());
+    lua_setfield(lua, -2, "version");
+    lua_setglobal(lua, lua_tbag_name());
+}
+
 void LuaMachine::reset()
 {
     _state.reset();
@@ -101,12 +137,13 @@ void LuaMachine::reset()
 
 std::string LuaMachine::getLuaPath() const
 {
-//    try {
-//        return (*_state)["package"]["path"];
-//    } catch (...) {
-//        return std::string();
-//    }
-    return "";
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    lua_getglobal(lua, "package");
+    lua_getfield(lua, -1, "path");
+    std::string const PACKAGE_PATH = lua_tostring(lua, -1);
+    lua_pop(lua, 2);
+    return PACKAGE_PATH;
 }
 
 std::vector<std::string> LuaMachine::getLuaPaths() const
@@ -114,31 +151,36 @@ std::vector<std::string> LuaMachine::getLuaPaths() const
     return libtbag::string::splitTokens(getLuaPath(), LUA_PATHSEP);
 }
 
+void LuaMachine::setLuaPath(std::string const & path)
+{
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    lua_getglobal(lua, "package");
+    lua_pushstring(lua, path.c_str());
+    lua_setfield(lua, -2, "path");
+    lua_pop(lua, 1);
+}
+
 bool LuaMachine::appendLuaPath(std::string const & path)
 {
-//    std::string lua_path = getLuaPath();
-//    if (!lua_path.empty()) {
-//        lua_path += LUA_PATHSEP;
-//    }
-//    lua_path += path;
-//
-//    try {
-//        (*_state)["package"]["path"] = lua_path;
-//        return true;
-//    } catch (...) {
-//        return false;
-//    }
-    return false;
+    auto const PATH = getLuaPath();
+    if (PATH.empty()) {
+        setLuaPath(path);
+    } else {
+        setLuaPath(PATH + LUA_PATHSEP + path);
+    }
+    return true;
 }
 
 std::string LuaMachine::getLuaCPath() const
 {
-//    try {
-//        return (*_state)["package"]["cpath"];
-//    } catch (...) {
-//        return std::string();
-//    }
-    return "";
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    lua_getglobal(lua, "package");
+    lua_getfield(lua, -1, "cpath");
+    std::string const PACKAGE_PATH = lua_tostring(lua, -1);
+    lua_pop(lua, 2);
+    return PACKAGE_PATH;
 }
 
 std::vector<std::string> LuaMachine::getLuaCPaths() const
@@ -146,51 +188,57 @@ std::vector<std::string> LuaMachine::getLuaCPaths() const
     return libtbag::string::splitTokens(getLuaCPath(), LUA_PATHSEP);
 }
 
+void LuaMachine::setLuaCPath(std::string const & path)
+{
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    lua_getglobal(lua, "package");
+    lua_pushstring(lua, path.c_str());
+    lua_setfield(lua, -2, "cpath");
+    lua_pop(lua, 1);
+}
+
 bool LuaMachine::appendLuaCPath(std::string const & path)
 {
-//    std::string lua_cpath = getLuaCPath();
-//    if (!lua_cpath.empty()) {
-//        lua_cpath += LUA_PATHSEP;
-//    }
-//    lua_cpath += path;
-//
-//    try {
-//        (*_state)["package"]["cpath"] = lua_cpath;
-//        return true;
-//    } catch (...) {
-//        return false;
-//    }
-    return false;
+    auto const PATH = getLuaCPath();
+    if (PATH.empty()) {
+        setLuaCPath(path);
+    } else {
+        setLuaCPath(PATH + LUA_PATHSEP + path);
+    }
+    return true;
+}
+
+std::string LuaMachine::getTbagVersion() const
+{
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    lua_getglobal(lua, lua_tbag_name());
+    lua_getfield(lua, -1, "version");
+    std::string const VERSION_PATH = lua_tostring(lua, -1);
+    lua_pop(lua, 2);
+    return VERSION_PATH;
 }
 
 bool LuaMachine::runScriptFile(std::string const & path)
 {
-//    if (!libtbag::filesystem::Path(path).isRegularFile()) {
-//        return false;
-//    }
-//
-//    try {
-//        _state->script_file(path);
-//        return true;
-//    } catch (...) {
-//        return false;
-//    }
-    return false;
+    using namespace libtbag::filesystem;
+    if (!Path(path).isRegularFile()) {
+        return false;
+    }
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    return luaL_dofile(lua, path.c_str()) == 0;
 }
 
 bool LuaMachine::runScript(std::string const & code)
 {
-//    if (code.empty()) {
-//        return false;
-//    }
-//
-//    try {
-//        _state->script(code);
-//        return true;
-//    } catch (...) {
-//        return false;
-//    }
-    return false;
+    if (code.empty()) {
+        return false;
+    }
+    auto * lua = _state.get();
+    assert(lua != nullptr);
+    return luaL_dostring(lua, code.c_str()) == 0;
 }
 
 std::string LuaMachine::findScriptPath(std::string const & filename, bool include_working) const
@@ -221,6 +269,11 @@ LuaMachine::Version LuaMachine::getLuaVersion() const
 LuaMachine::Version LuaMachine::getLuaJITVersion() const
 {
     return Version(LUAJIT_VERSION_NUM, 10000, 100, 1);
+}
+
+int LuaMachine::getTop() const
+{
+    return lua_gettop(_state.get());
 }
 
 } // namespace script
