@@ -13,6 +13,8 @@
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
+#include <cstring>
+
 #include <sstream>
 #include <algorithm>
 #include <utility>
@@ -274,6 +276,460 @@ LuaMachine::Version LuaMachine::getLuaJITVersion() const
 int LuaMachine::getTop() const
 {
     return lua_gettop(_state.get());
+}
+
+void LuaMachine::setTop(int idx) const
+{
+    lua_settop(_state.get(), idx);
+}
+
+void LuaMachine::pushValue(int idx) const
+{
+    lua_pushvalue(_state.get(), idx);
+}
+
+void LuaMachine::remove(int idx) const
+{
+    lua_remove(_state.get(), idx);
+}
+
+void LuaMachine::insert(int idx) const
+{
+    lua_insert(_state.get(), idx);
+}
+
+void LuaMachine::replace(int idx) const
+{
+    lua_replace(_state.get(), idx);
+}
+
+int LuaMachine::checkStack(int sz) const
+{
+    return lua_checkstack(_state.get(), sz);
+}
+
+int LuaMachine::isNumber(int idx) const
+{
+    return lua_isnumber(_state.get(), idx);
+}
+
+int LuaMachine::isString(int idx) const
+{
+    return lua_isstring(_state.get(), idx);
+}
+
+int LuaMachine::isCFunction(int idx) const
+{
+    return lua_iscfunction(_state.get(), idx);
+}
+
+int LuaMachine::isUserdata(int idx) const
+{
+    return lua_isuserdata(_state.get(), idx);
+}
+
+int LuaMachine::getType(int idx) const
+{
+    return lua_type(_state.get(), idx);
+}
+
+char const * LuaMachine::getTypename(int tp) const
+{
+    return lua_typename(_state.get(), tp);
+}
+
+int LuaMachine::equal(int idx1, int idx2) const
+{
+    return lua_equal(_state.get(), idx1, idx2);
+}
+
+int LuaMachine::rawEqual(int idx1, int idx2) const
+{
+    return lua_rawequal(_state.get(), idx1, idx2);
+}
+
+int LuaMachine::lessThan(int idx1, int idx2) const
+{
+    return lua_lessthan(_state.get(), idx1, idx2);
+}
+
+lua_Number LuaMachine::toNumber(int idx) const
+{
+    return lua_tonumber(_state.get(), idx);
+}
+
+lua_Integer LuaMachine::toInteger(int idx) const
+{
+    return lua_tointeger(_state.get(), idx);
+}
+
+int LuaMachine::toBoolean(int idx) const
+{
+    return lua_toboolean(_state.get(), idx);
+}
+
+char const * LuaMachine::toLString(int idx, size_t * len) const
+{
+    return lua_tolstring(_state.get(), idx, len);
+}
+
+size_t LuaMachine::objLen(int idx) const
+{
+    return lua_objlen(_state.get(), idx);
+}
+
+lua_CFunction LuaMachine::toCFunction(int idx) const
+{
+    return lua_tocfunction(_state.get(), idx);
+}
+
+void * LuaMachine::toUserdata(int idx) const
+{
+    return lua_touserdata(_state.get(), idx);
+}
+
+lua_State * LuaMachine::toThread(int idx) const
+{
+    return lua_tothread(_state.get(), idx);
+}
+
+void const * LuaMachine::toPointer(int idx) const
+{
+    return lua_topointer(_state.get(), idx);
+}
+
+void LuaMachine::pushNil() const
+{
+    lua_pushnil(_state.get());
+}
+
+void LuaMachine::pushNumber(lua_Number n) const
+{
+    lua_pushnumber(_state.get(), n);
+}
+
+void LuaMachine::pushInteger(lua_Integer n) const
+{
+    lua_pushinteger(_state.get(), n);
+}
+
+void LuaMachine::pushLString(char const * s, size_t l) const
+{
+    lua_pushlstring(_state.get(), s, l);
+}
+
+void LuaMachine::pushString(char const * s) const
+{
+    lua_pushstring(_state.get(), s);
+}
+
+char const * LuaMachine::pushVFString(char const * fmt, va_list argp) const
+{
+    return lua_pushvfstring(_state.get(), fmt, argp);
+}
+
+char const * LuaMachine::pushFString(char const * fmt, ...) const
+{
+    va_list args;
+    va_start(args, fmt);
+    char const * result = pushVFString(fmt, args);
+    va_end(args);
+    return result;
+}
+
+void LuaMachine::pushCClosure(lua_CFunction fn, int n) const
+{
+    lua_pushcclosure(_state.get(), fn, n);
+}
+
+void LuaMachine::pushBoolean(int b) const
+{
+    lua_pushboolean(_state.get(), b);
+}
+
+void LuaMachine::pushLightUserdata(void * p) const
+{
+    lua_pushlightuserdata(_state.get(), p);
+}
+
+int LuaMachine::pushThread() const
+{
+    return lua_pushthread(_state.get());
+}
+
+void LuaMachine::getTable(int idx) const
+{
+    lua_gettable(_state.get(), idx);
+}
+
+void LuaMachine::getField(int idx, char const * k) const
+{
+    lua_getfield(_state.get(), idx, k);
+}
+
+void LuaMachine::rawGet(int idx) const
+{
+    lua_rawget(_state.get(), idx);
+}
+
+void LuaMachine::rawGeti(int idx, int n) const
+{
+    lua_rawgeti(_state.get(), idx, n);
+}
+
+void LuaMachine::createTable(int narr, int nrec) const
+{
+    lua_createtable(_state.get(), narr, nrec);
+}
+
+void * LuaMachine::newUserdata(size_t sz) const
+{
+    return lua_newuserdata(_state.get(), sz);
+}
+
+int LuaMachine::getMetatable(int objindex) const
+{
+    return lua_getmetatable(_state.get(), objindex);
+}
+
+void LuaMachine::getFenv(int idx) const
+{
+    lua_getfenv(_state.get(), idx);
+}
+
+void LuaMachine::setTable(int idx) const
+{
+    lua_settable(_state.get(), idx);
+}
+
+void LuaMachine::setField(int idx, char const * k) const
+{
+    lua_setfield(_state.get(), idx, k);
+}
+
+void LuaMachine::rawSet(int idx) const
+{
+    lua_rawset(_state.get(), idx);
+}
+
+void LuaMachine::rawSeti(int idx, int n) const
+{
+    lua_rawseti(_state.get(), idx, n);
+}
+
+int LuaMachine::setMetatable(int objindex) const
+{
+    return lua_setmetatable(_state.get(), objindex);
+}
+
+int LuaMachine::setFenv(int idx) const
+{
+    return lua_setfenv(_state.get(), idx);
+}
+
+void LuaMachine::call(int nargs, int nresults) const
+{
+    lua_call(_state.get(), nargs, nresults);
+}
+
+int LuaMachine::pcall(int nargs, int nresults, int errfunc) const
+{
+    return lua_pcall(_state.get(), nargs, nresults, errfunc);
+}
+
+int LuaMachine::cpcall(lua_CFunction func, void * ud) const
+{
+    return lua_cpcall(_state.get(), func, ud);
+}
+
+int LuaMachine::load(lua_Reader reader, void * dt, char const * chunkname) const
+{
+    return lua_load(_state.get(), reader, dt, chunkname);
+}
+
+int LuaMachine::dump(lua_Writer writer, void * data) const
+{
+    return lua_dump(_state.get(), writer, data);
+}
+
+int LuaMachine::yield(int nresults) const
+{
+    return lua_yield(_state.get(), nresults);
+}
+
+int LuaMachine::resume(int narg) const
+{
+    return lua_resume(_state.get(), narg);
+}
+
+int LuaMachine::status() const
+{
+    return lua_status(_state.get());
+}
+
+int LuaMachine::gc(int what, int data) const
+{
+    return lua_gc(_state.get(), what, data);
+}
+
+int LuaMachine::error() const
+{
+    return lua_error(_state.get());
+}
+
+int LuaMachine::next(int idx) const
+{
+    return lua_next(_state.get(), idx);
+}
+
+void LuaMachine::concat(int n) const
+{
+    lua_concat(_state.get(), n);
+}
+
+lua_Alloc LuaMachine::getAllocf(void ** ud) const
+{
+    return lua_getallocf(_state.get(), ud);
+}
+
+void LuaMachine::setAllocf(lua_Alloc f, void * ud) const
+{
+    lua_setallocf(_state.get(), f, ud);
+}
+
+int LuaMachine::getStack(int level, lua_Debug * ar) const
+{
+    return lua_getstack(_state.get(), level, ar);
+}
+
+int LuaMachine::getInfo(char const * what, lua_Debug * ar) const
+{
+    return lua_getinfo(_state.get(), what, ar);
+}
+
+char const * LuaMachine::getLocal(lua_Debug const * ar, int n) const
+{
+    return lua_getlocal(_state.get(), ar, n);
+}
+
+char const * LuaMachine::setLocal(lua_Debug const * ar, int n) const
+{
+    return lua_setlocal(_state.get(), ar, n);
+}
+
+char const * LuaMachine::getUpValue(int funcindex, int n) const
+{
+    return lua_getupvalue(_state.get(), funcindex, n);
+}
+
+char const * LuaMachine::setUpValue(int funcindex, int n) const
+{
+    return lua_setupvalue(_state.get(), funcindex, n);
+}
+
+int LuaMachine::setHook(lua_Hook func, int mask, int count) const
+{
+    return lua_sethook(_state.get(), func, mask, count);
+}
+
+lua_Hook LuaMachine::getHook() const
+{
+    return lua_gethook(_state.get());
+}
+
+int LuaMachine::getHookMask() const
+{
+    return lua_gethookmask(_state.get());
+}
+
+int LuaMachine::getHookCount() const
+{
+    return lua_gethookcount(_state.get());
+}
+
+void LuaMachine::pop(int n) const
+{
+    lua_pop(_state.get(), n);
+}
+
+void LuaMachine::newTable() const
+{
+    lua_newtable(_state.get());
+}
+
+void LuaMachine::registerFunction(char const * n, lua_CFunction f) const
+{
+    lua_register(_state.get(), n, f);
+}
+
+void LuaMachine::pushCFunction(lua_CFunction f) const
+{
+    lua_pushcfunction(_state.get(), f);
+}
+
+size_t LuaMachine::strlen(int i) const
+{
+    return lua_strlen(_state.get(), i);
+}
+
+bool LuaMachine::isFunction(int n) const
+{
+    return lua_isfunction(_state.get(), n);
+}
+
+bool LuaMachine::isTable(int n) const
+{
+    return lua_istable(_state.get(), n);
+}
+
+bool LuaMachine::isLightUserdata(int n) const
+{
+    return lua_islightuserdata(_state.get(), n);
+}
+
+bool LuaMachine::isNil(int n) const
+{
+    return lua_isnil(_state.get(), n);
+}
+
+bool LuaMachine::isBoolean(int n) const
+{
+    return lua_isboolean(_state.get(), n);
+}
+
+bool LuaMachine::isThread(int n) const
+{
+    return lua_isthread(_state.get(), n);
+}
+
+bool LuaMachine::isNone(int n) const
+{
+    return lua_isnone(_state.get(), n);
+}
+
+bool LuaMachine::isNoneOrNil(int n) const
+{
+    return lua_isnoneornil(_state.get(), n);
+}
+
+void LuaMachine::pushLiteral(char const * s) const
+{
+    lua_pushlstring(_state.get(), s, (::strlen(s)/sizeof(char))-1);
+}
+
+void LuaMachine::setGlobal(char const * s) const
+{
+     lua_setglobal(_state.get(), s);
+}
+
+void LuaMachine::getGlobal(char const * s) const
+{
+    lua_getglobal(_state.get(), s);
+}
+
+char const * LuaMachine::toString(int i) const
+{
+    return lua_tostring(_state.get(), i);
 }
 
 } // namespace script

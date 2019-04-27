@@ -90,7 +90,7 @@ TBAG_API void   lua_getfenv     (lua_State * L, int idx);
 
 // set functions (stack -> Lua)
 TBAG_API void lua_settable    (lua_State * L, int idx);
-TBAG_API void lua_setfield    (lua_State * L, int idx, const char * k);
+TBAG_API void lua_setfield    (lua_State * L, int idx, char const * k);
 TBAG_API void lua_rawset      (lua_State * L, int idx);
 TBAG_API void lua_rawseti     (lua_State * L, int idx, int n);
 TBAG_API int  lua_setmetatable(lua_State * L, int objindex);

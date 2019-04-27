@@ -282,7 +282,7 @@ void lua_settable(lua_State * L, int idx)
     ::lua_settable(L, idx);
 }
 
-void lua_setfield(lua_State * L, int idx, const char * k)
+void lua_setfield(lua_State * L, int idx, char const * k)
 {
     ::lua_setfield(L, idx, k);
 }
