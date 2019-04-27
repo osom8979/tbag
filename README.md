@@ -26,7 +26,6 @@ Tea-bag is Third party extension utility project.
 - fmt 3.0.1 (BSD license)
 - jsoncpp 1.7.7 (MIT license)
 - tinyxml2 3.0.0 (zlib license)
-- sol2 2.20.6 (MIT license)
 - lemon 1.3.1 (Boost Software License, Version 1.0)
 - lfds 7.1.1 (Public domain)
 - miniz 2.0.8 (MIT license)

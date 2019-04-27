@@ -6,9 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/ray/RayBypass.hpp>
 #include <libtbag/ray/RayLuaBinding.hpp>
-#include <libtbag/script/Sol2Bypass.hpp>
 
 using namespace libtbag;
 using namespace libtbag::ray;

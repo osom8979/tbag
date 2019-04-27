@@ -47,6 +47,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tpot {
 namespace apps {
 
+using namespace libtbag::script;
+
 /**
  * Backend of LuaPot class.
  *
@@ -753,7 +755,7 @@ int LuaPot::onMain()
 
     tDLogIfD(params().verbose && !original_args.empty(), "LuaPot::onMain() Passed arguments: {}",
              libtbag::string::mergeTokens(original_args));
-    return LuaPotBackend(static_cast<int>(argv.size()), argv.data(), params().storage->lua->lua_state()).run();
+    return LuaPotBackend(static_cast<int>(argv.size()), argv.data(), params().storage->lua.state()).run();
 }
 
 } // namespace apps
