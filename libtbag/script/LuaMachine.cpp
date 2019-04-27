@@ -11,6 +11,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/script/lua/RayLua.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -39,6 +40,10 @@ LuaMachine::LuaMachine() : _state(nullptr)
     initDefaultLuaPath();
     initDefaultLuaCPath();
     initDefaultTbagTable();
+
+    if (!libtbag::script::lua::bindRayLua(lua)) {
+        tDLogW("LuaMachine::LuaMachine() Ray bind failed.");
+    }
 }
 
 LuaMachine::LuaMachine(std::nullptr_t) TBAG_NOEXCEPT : _state(nullptr)
