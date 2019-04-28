@@ -15,7 +15,7 @@ using namespace libtbag::script;
 TEST(LuaMachineTest, Default)
 {
     LuaMachine lua;
-    ASSERT_EQ(0, lua.getTop());
+    ASSERT_EQ(0, lua._gettop());
     using namespace libtbag::util;
     ASSERT_EQ(getTbagVersion().toString(), lua.getTbagVersion());
     ASSERT_EQ(LuaMachine::getDefaultLuaPath(), lua.getLuaPath());

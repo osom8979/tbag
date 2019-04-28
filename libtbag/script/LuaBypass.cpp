@@ -734,6 +734,14 @@ void luaL_openlibs(lua_State * L)
     return ::luaL_openlibs(L);
 }
 
+int lua_absindex(lua_State * L, int i)
+{
+    if (i < 0 && i > LUA_REGISTRYINDEX) {
+        i += ::lua_gettop(L) + 1;
+    }
+    return i;
+}
+
 } // namespace script
 
 // --------------------

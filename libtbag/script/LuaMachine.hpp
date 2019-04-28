@@ -120,133 +120,152 @@ public:
     Version getLuaVersion() const;
     Version getLuaJITVersion() const;
 
-// basic stack manipulation
 public:
-    int getTop() const;
-    void setTop(int idx) const;
-    void pushValue(int idx) const;
-    void remove(int idx) const;
-    void insert(int idx) const;
-    void replace(int idx) const;
-    int checkStack(int sz) const;
-
-// access functions (stack -> C)
-public:
-    int isNumber(int idx) const;
-    int isString(int idx) const;
-    int isCFunction(int idx) const;
-    int isUserdata(int idx) const;
-    int getType(int idx) const;
-    char const * getTypename(int tp) const;
-
-    int equal(int idx1, int idx2) const;
-    int rawEqual(int idx1, int idx2) const;
-    int lessThan(int idx1, int idx2) const;
-
-    lua_Number toNumber(int idx) const;
-    lua_Integer toInteger(int idx) const;
-    int toBoolean(int idx) const;
-    char const * toLString(int idx, size_t * len) const;
-    size_t objLen(int idx) const;
-    lua_CFunction toCFunction(int idx) const;
-    void * toUserdata(int idx) const;
-    lua_State * toThread(int idx) const;
-    void const * toPointer(int idx) const;
-
-// push functions (C -> stack)
-public:
-    void pushNil() const;
-    void pushNumber(lua_Number n) const;
-    void pushInteger(lua_Integer n) const;
-    void pushLString(char const * s, size_t l) const;
-    void pushString(char const * s) const;
-    char const * pushVFString(char const * fmt, va_list argp) const;
-    char const * pushFString(char const * fmt, ...) const;
-    void pushCClosure(lua_CFunction fn, int n) const;
-    void pushBoolean(int b) const;
-    void pushLightUserdata(void * p) const;
-    int pushThread() const;
-
-// get functions (Lua -> stack)
-public:
-    void getTable(int idx) const;
-    void getField(int idx, char const * k) const;
-    void rawGet(int idx) const;
-    void rawGeti(int idx, int n) const;
-    void createTable(int narr, int nrec) const;
-    void * newUserdata(size_t sz) const;
-    int getMetatable(int objindex) const;
-    void getFenv(int idx) const;
-
-// set functions (stack -> Lua)
-public:
-    void setTable(int idx) const;
-    void setField(int idx, char const * k) const;
-    void rawSet(int idx) const;
-    void rawSeti(int idx, int n) const;
-    int setMetatable(int objindex) const;
-    int setFenv(int idx) const;
-
-// load and run Lua code
-public:
-    void call(int nargs, int nresults) const;
-    int pcall(int nargs, int nresults, int errfunc) const;
-    int cpcall(lua_CFunction func, void * ud) const;
-    int load(lua_Reader reader, void * dt, char const * chunkname) const;
-    int dump(lua_Writer writer, void * data) const;
-
-// coroutine functions
-public:
-    int yield(int nresults) const;
-    int resume(int narg) const;
-    int status() const;
-
-// garbage-collection function
-public:
-    int gc(int what, int data) const;
-
-// miscellaneous functions
-public:
-    int error() const;
-    int next(int idx) const;
-    void concat(int n) const;
-    lua_Alloc getAllocf(void ** ud) const;
-    void setAllocf(lua_Alloc f, void * ud) const;
-
-// debug api
-public:
-    int getStack(int level, lua_Debug * ar) const;
-    int getInfo(char const * what, lua_Debug * ar) const;
-    char const * getLocal(lua_Debug const * ar, int n) const;
-    char const * setLocal(lua_Debug const * ar, int n) const;
-    char const * getUpValue(int funcindex, int n) const;
-    char const * setUpValue(int funcindex, int n) const;
-    int setHook(lua_Hook func, int mask, int count) const;
-    lua_Hook getHook() const;
-    int getHookMask() const;
-    int getHookCount() const;
-
-// some useful macros
-public:
-    void pop(int n) const;
-    void newTable() const;
-    void registerFunction(char const * n, lua_CFunction f) const;
-    void pushCFunction(lua_CFunction f) const;
-    size_t strlen(int i) const;
-
-    bool isFunction(int n) const;
-    bool isTable(int n) const;
-    bool isLightUserdata(int n) const;
-    bool isNil(int n) const;
-    bool isBoolean(int n) const;
-    bool isThread(int n) const;
-    bool isNone(int n) const;
-    bool isNoneOrNil(int n) const;
-
-    void pushLiteral(char const * s) const;
-    void setGlobal(char const * s) const;
-    void getGlobal(char const * s) const;
-    char const * toString(int i) const;
+    // clang-format off
+    lua_CFunction _atpanic          (lua_CFunction panicf) const;
+    int           _gettop           () const;
+    void          _settop           (int idx) const;
+    void          _pushvalue        (int idx) const;
+    void          _remove           (int idx) const;
+    void          _insert           (int idx) const;
+    void          _replace          (int idx) const;
+    int           _checkstack       (int sz) const;
+    void          _xmove            (lua_State * to, int n) const;
+    int           _isnumber         (int idx) const;
+    int           _isstring         (int idx) const;
+    int           _iscfunction      (int idx) const;
+    int           _isuserdata       (int idx) const;
+    int           _type             (int idx) const;
+    char const *  _typename         (int tp) const;
+    int           _equal            (int idx1, int idx2) const;
+    int           _rawequal         (int idx1, int idx2) const;
+    int           _lessthan         (int idx1, int idx2) const;
+    lua_Number    _tonumber         (int idx) const;
+    lua_Integer   _tointeger        (int idx) const;
+    int           _toboolean        (int idx) const;
+    char const *  _tolstring        (int idx, size_t *len) const;
+    size_t        _objlen           (int idx) const;
+    lua_CFunction _tocfunction      (int idx) const;
+    void *        _touserdata       (int idx) const;
+    lua_State *   _tothread         (int idx) const;
+    void const *  _topointer        (int idx) const;
+    void          _pushnil          () const;
+    void          _pushnumber       (lua_Number n) const;
+    void          _pushinteger      (lua_Integer n) const;
+    void          _pushlstring      (char const * s, size_t l) const;
+    void          _pushstring       (char const * s) const;
+    char const *  _pushvfstring     (char const * fmt, va_list argp) const;
+    char const *  _pushfstring      (char const * fmt, ...) const;
+    void          _pushcclosure     (lua_CFunction fn, int n) const;
+    void          _pushboolean      (int b) const;
+    void          _pushlightuserdata(void * p) const;
+    int           _pushthread       () const;
+    void          _gettable         (int idx) const;
+    void          _getfield         (int idx, char const * k) const;
+    void          _rawget           (int idx) const;
+    void          _rawgeti          (int idx, int n) const;
+    void          _createtable      (int narr, int nrec) const;
+    void *        _newuserdata      (size_t sz) const;
+    int           _getmetatable     (int objindex) const;
+    void          _getfenv          (int idx) const;
+    void          _settable         (int idx) const;
+    void          _setfield         (int idx, char const * k) const;
+    void          _rawset           (int idx) const;
+    void          _rawseti          (int idx, int n) const;
+    int           _setmetatable     (int objindex) const;
+    int           _setfenv          (int idx) const;
+    void          _call             (int nargs, int nresults) const;
+    int           _pcall            (int nargs, int nresults, int errfunc) const;
+    int           _cpcall           (lua_CFunction func, void * ud) const;
+    int           _load             (lua_Reader reader, void * dt, char const * chunkname) const;
+    int           _dump             (lua_Writer writer, void * data) const;
+    int           _yield            (int nresults) const;
+    int           _resume           (int narg) const;
+    int           _status           () const;
+    int           _gc               (int what, int data) const;
+    int           _error            () const;
+    int           _next             (int idx) const;
+    void          _concat           (int n) const;
+    lua_Alloc     _getallocf        (void ** ud) const;
+    void          _setallocf        (lua_Alloc f, void * ud) const;
+    void          _setlevel         (lua_State * to) const;
+    int           _getstack         (int level, lua_Debug * ar) const;
+    int           _getinfo          (char const * what, lua_Debug * ar) const;
+    char const *  _getlocal         (lua_Debug const * ar, int n) const;
+    char const *  _setlocal         (lua_Debug const * ar, int n) const;
+    char const *  _getupvalue       (int funcindex, int n) const;
+    char const *  _setupvalue       (int funcindex, int n) const;
+    int           _sethook          (lua_Hook func, int mask, int count) const;
+    lua_Hook      _gethook          () const;
+    int           _gethookmask      () const;
+    int           _gethookcount     () const;
+    void *        _upvalueid        (int idx, int n) const;
+    void          _upvaluejoin      (int idx1, int n1, int idx2, int n2) const;
+    int           _loadx            (lua_Reader reader, void * dt, char const * chunkname, char const * mode) const;
+    int           _setmode          (int idx, int mode) const;
+    void          _openlib          (char const * libname, luaL_Reg const * l, int nup) const;
+    void          _register         (char const * libname, luaL_Reg const * l) const;
+    int           _getmetafield     (int obj, char const * e) const;
+    int           _callmeta         (int obj, char const * e) const;
+    int           _typerror         (int narg, char const * tname) const;
+    int           _argerror         (int numarg, char const * extramsg) const;
+    char const *  _checklstring     (int numArg, size_t * l) const;
+    char const *  _optlstring       (int numArg, char const * def, size_t * l) const;
+    lua_Number    _checknumber      (int numArg) const;
+    lua_Number    _optnumber        (int nArg, lua_Number def) const;
+    lua_Integer   _checkinteger     (int numArg) const;
+    lua_Integer   _optinteger       (int nArg, lua_Integer def) const;
+    void          _checkstack       (int sz, char const * msg) const;
+    void          _checktype        (int narg, int t) const;
+    void          _checkany         (int narg) const;
+    int           _newmetatable     (char const * tname) const;
+    void *        _checkudata       (int ud, char const * tname) const;
+    void          _where            (int lvl) const;
+    int           _error            (char const * fmt, ...) const;
+    int           _checkoption      (int narg, char const * def, char const * const lst[]) const;
+    int           _ref              (int t) const;
+    void          _unref            (int t, int ref) const;
+    int           _loadfile         (char const * filename) const;
+    int           _loadbuffer       (char const * buff, size_t sz, char const * name) const;
+    int           _loadstring       (char const * s) const;
+    char const *  _gsub             (char const * s, char const * p, char const * r) const;
+    char const *  _findtable        (int idx, char const * fname, int szhint) const;
+    int           _fileresult       (int stat, char const * fname) const;
+    int           _execresult       (int stat) const;
+    int           _loadfilex        (char const * filename, char const * mode) const;
+    int           _loadbufferx      (char const * buff, size_t sz, char const * name, char const * mode) const;
+    void          _traceback        (lua_State * L1, char const * msg, int level) const;
+    int           _open_base        () const;
+    int           _open_math        () const;
+    int           _open_string      () const;
+    int           _open_table       () const;
+    int           _open_io          () const;
+    int           _open_os          () const;
+    int           _open_package     () const;
+    int           _open_debug       () const;
+    int           _open_bit         () const;
+    int           _open_jit         () const;
+    int           _open_ffi         () const;
+    void          _openlibs         () const;
+    int           _absindex         (int i) const;
+    void          _pop              (int n) const;
+    void          _newtable         () const;
+    void          _register         (char const * n, lua_CFunction f) const;
+    void          _pushcfunction    (lua_CFunction f) const;
+    size_t        _strlen           (int i) const;
+    bool          _isfunction       (int n) const;
+    bool          _istable          (int n) const;
+    bool          _islightuserdata  (int n) const;
+    bool          _isnil            (int n) const;
+    bool          _isboolean        (int n) const;
+    bool          _isthread         (int n) const;
+    bool          _isnone           (int n) const;
+    bool          _isnoneornil      (int n) const;
+    void          _pushlstring      (char const * s) const;
+    void          _setglobal        (char const * s) const;
+    void          _getglobal        (char const * s) const;
+    char const *  _tostring         (int i) const;
+    // clang-format on
 };
 
 } // namespace script

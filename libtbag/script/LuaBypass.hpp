@@ -28,7 +28,7 @@ namespace script {
 // -----------
 
 // state manipulation
-TBAG_API lua_State *   lua_newstate (lua_Alloc f, void *ud);
+TBAG_API lua_State *   lua_newstate (lua_Alloc f, void * ud);
 TBAG_API void          lua_close    (lua_State * L);
 TBAG_API lua_State *   lua_newthread(lua_State * L);
 TBAG_API lua_CFunction lua_atpanic  (lua_State * L, lua_CFunction panicf);
@@ -222,6 +222,12 @@ TBAG_API int  luaopen_bit    (lua_State * L);
 TBAG_API int  luaopen_jit    (lua_State * L);
 TBAG_API int  luaopen_ffi    (lua_State * L);
 TBAG_API void luaL_openlibs  (lua_State * L);
+
+// ------------------
+// more compatibility
+// ------------------
+
+TBAG_API int lua_absindex(lua_State * L, int i);
 
 } // namespace script
 
