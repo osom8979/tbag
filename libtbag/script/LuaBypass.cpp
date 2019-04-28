@@ -744,6 +744,13 @@ int lua_absindex(lua_State * L, int i)
     return i;
 }
 
+void luaL_setmetatable(lua_State * L, char const * tname)
+{
+    ::luaL_checkstack(L, 1, "Not enough stack slots");
+    ::lua_getfield(L, LUA_REGISTRYINDEX, tname); // == luaL_getmetatable(L, tname);
+    ::lua_setmetatable(L, -2);
+}
+
 std::string getPrintableStackInformation(lua_State * L)
 {
     std::stringstream ss;

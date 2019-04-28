@@ -234,6 +234,7 @@ TBAG_API void luaL_openlibs  (lua_State * L);
 // ------------------
 
 TBAG_API int lua_absindex(lua_State * L, int i);
+TBAG_API void luaL_setmetatable(lua_State * L, char const * tname);
 
 // -----
 // Extra
