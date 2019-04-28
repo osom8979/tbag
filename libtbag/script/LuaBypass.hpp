@@ -19,6 +19,10 @@
 
 #include <string>
 
+#ifndef TBAG_LUA_REGISTER
+#define TBAG_LUA_REGISTER(name) { #name, __lua_ray_##name }
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

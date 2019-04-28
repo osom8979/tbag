@@ -42,7 +42,7 @@ LuaMachine::LuaMachine() : _state(nullptr)
     initDefaultLuaCPath();
     initDefaultTbagTable();
 
-    if (!libtbag::script::lua::luaopen_raylib(L)) {
+    if (!libtbag::script::lua::luaopen_ray(L)) {
         tDLogW("LuaMachine::LuaMachine() Ray bind failed.");
     }
 }
