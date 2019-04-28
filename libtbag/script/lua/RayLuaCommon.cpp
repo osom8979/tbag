@@ -116,6 +116,33 @@ Color lua_ray_getcolor(lua_State * L, int num_arg)
     return result;
 }
 
+TBAG_CONSTEXPR static char const * const METATABLE_IMAGE = "Image";
+
+static int __lua_ray_Image_new(lua_State * L)
+{
+    auto * image = (Image*)lua_newuserdata(L, sizeof(Image));
+    memset(image, 0x00, sizeof(Image));
+    luaL_setmetatable(L, METATABLE_IMAGE);
+    return 1;
+}
+
+static luaL_Reg const __lua_lay_image[] = {
+        { "new", __lua_ray_Image_new },
+        { nullptr, nullptr }
+};
+
+void lua_ray_register_image(lua_State * L)
+{
+    luaL_newmetatable(L, METATABLE_IMAGE);
+    luaL_register(L, lua_ray_name(), __lua_lay_image);
+    lua_setfield(L, -1, "__index");
+}
+
+bool luaopen_ray_common(lua_State * L)
+{
+    return true;
+}
+
 } // namespace lua
 } // namespace script
 

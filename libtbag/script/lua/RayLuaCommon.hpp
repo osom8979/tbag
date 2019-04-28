@@ -43,6 +43,10 @@ TBAG_API void lua_ray_pushmatrix(lua_State * L, Matrix const & mat);
 
 TBAG_API Color lua_ray_getcolor(lua_State * L, int num_arg);
 
+TBAG_API void lua_ray_register_image(lua_State * L);
+
+TBAG_API bool luaopen_ray_common(lua_State * L);
+
 } // namespace lua
 } // namespace script
 

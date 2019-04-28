@@ -325,8 +325,11 @@ namespace lua    {
 
 bool luaopen_ray(lua_State * L)
 {
+    if (!luaopen_ray_common(L)) {
+        tDLogW("luaopen_ray_common() ray-common load failed.");
+    }
     if (!luaopen_ray_core(L)) {
-        tDLogW("luaopen_ray() ray-core load failed.");
+        tDLogW("luaopen_ray_core() ray-core load failed.");
     }
     return true;
 }
