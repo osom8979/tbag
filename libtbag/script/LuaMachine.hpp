@@ -44,6 +44,9 @@ public:
     using Version = libtbag::util::Version;
 
 public:
+    TBAG_CONSTEXPR static char const * const TABLE_SPLIT_STRING = ".";
+
+public:
     TBAG_CONSTEXPR static char const * const lua_tbag_name() TBAG_NOEXCEPT
     { return "tbag"; }
 
