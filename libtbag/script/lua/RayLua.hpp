@@ -19,6 +19,8 @@
 #include <libtbag/ray/RayBypass.hpp>
 #include <libtbag/ray/RayGuiBypass.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -28,13 +30,17 @@ namespace lua    {
 
 using namespace libtbag::ray;
 
-TBAG_API void lua_ray_pushvector2(lua_State * lua, Vector2 const & vec);
-TBAG_API void lua_ray_pushvector3(lua_State * lua, Vector3 const & vec);
-TBAG_API void lua_ray_pushvector4(lua_State * lua, Vector4 const & vec);
-TBAG_API void lua_ray_pushquaternion(lua_State * lua, Quaternion const & vec);
-TBAG_API void lua_ray_pushmatrix(lua_State * lua, Matrix const & mat);
+TBAG_API void lua_ray_pushvector2(lua_State * L, Vector2 const & vec);
+TBAG_API void lua_ray_pushvector3(lua_State * L, Vector3 const & vec);
+TBAG_API void lua_ray_pushvector4(lua_State * L, Vector4 const & vec);
+TBAG_API void lua_ray_pushquaternion(lua_State * L, Quaternion const & vec);
+TBAG_API void lua_ray_pushmatrix(lua_State * L, Matrix const & mat);
 
-TBAG_API bool bindRayLua(lua_State * lua);
+TBAG_API Color lua_ray_getcolor(lua_State * L, int num_arg);
+
+TBAG_API bool luaopen_raylib(lua_State * L);
+
+TBAG_API char const * const get_basic_window_lua(lua_State * L) TBAG_NOEXCEPT;
 
 } // namespace lua
 } // namespace script
