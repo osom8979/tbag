@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/script/luajit-2.0.5/lua.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -228,6 +230,12 @@ TBAG_API void luaL_openlibs  (lua_State * L);
 // ------------------
 
 TBAG_API int lua_absindex(lua_State * L, int i);
+
+// -----
+// Extra
+// -----
+
+TBAG_API std::string getPrintableStackInformation(lua_State * L);
 
 } // namespace script
 

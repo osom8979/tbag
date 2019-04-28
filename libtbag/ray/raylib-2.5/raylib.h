@@ -20,32 +20,34 @@
 #define CLITERAL  (Color)
 #endif
 
-#define LIGHTGRAY  CLITERAL{ 200, 200, 200, 255 }
-#define GRAY       CLITERAL{ 130, 130, 130, 255 }
-#define DARKGRAY   CLITERAL{ 80, 80, 80, 255 }
-#define YELLOW     CLITERAL{ 253, 249, 0, 255 }
-#define GOLD       CLITERAL{ 255, 203, 0, 255 }
-#define ORANGE     CLITERAL{ 255, 161, 0, 255 }
-#define PINK       CLITERAL{ 255, 109, 194, 255 }
-#define RED        CLITERAL{ 230, 41, 55, 255 }
-#define MAROON     CLITERAL{ 190, 33, 55, 255 }
-#define GREEN      CLITERAL{ 0, 228, 48, 255 }
-#define LIME       CLITERAL{ 0, 158, 47, 255 }
-#define DARKGREEN  CLITERAL{ 0, 117, 44, 255 }
-#define SKYBLUE    CLITERAL{ 102, 191, 255, 255 }
-#define BLUE       CLITERAL{ 0, 121, 241, 255 }
-#define DARKBLUE   CLITERAL{ 0, 82, 172, 255 }
-#define PURPLE     CLITERAL{ 200, 122, 255, 255 }
-#define VIOLET     CLITERAL{ 135, 60, 190, 255 }
-#define DARKPURPLE CLITERAL{ 112, 31, 126, 255 }
-#define BEIGE      CLITERAL{ 211, 176, 131, 255 }
-#define BROWN      CLITERAL{ 127, 106, 79, 255 }
-#define DARKBROWN  CLITERAL{ 76, 63, 47, 255 }
-#define WHITE      CLITERAL{ 255, 255, 255, 255 }
-#define BLACK      CLITERAL{ 0, 0, 0, 255 }
-#define BLANK      CLITERAL{ 0, 0, 0, 0 }
-#define MAGENTA    CLITERAL{ 255, 0, 255, 255 }
-#define RAYWHITE   CLITERAL{ 245, 245, 245, 255 }
+/*
+ * #define LIGHTGRAY  CLITERAL{ 200, 200, 200, 255 }
+ * #define GRAY       CLITERAL{ 130, 130, 130, 255 }
+ * #define DARKGRAY   CLITERAL{ 80, 80, 80, 255 }
+ * #define YELLOW     CLITERAL{ 253, 249, 0, 255 }
+ * #define GOLD       CLITERAL{ 255, 203, 0, 255 }
+ * #define ORANGE     CLITERAL{ 255, 161, 0, 255 }
+ * #define PINK       CLITERAL{ 255, 109, 194, 255 }
+ * #define RED        CLITERAL{ 230, 41, 55, 255 }
+ * #define MAROON     CLITERAL{ 190, 33, 55, 255 }
+ * #define GREEN      CLITERAL{ 0, 228, 48, 255 }
+ * #define LIME       CLITERAL{ 0, 158, 47, 255 }
+ * #define DARKGREEN  CLITERAL{ 0, 117, 44, 255 }
+ * #define SKYBLUE    CLITERAL{ 102, 191, 255, 255 }
+ * #define BLUE       CLITERAL{ 0, 121, 241, 255 }
+ * #define DARKBLUE   CLITERAL{ 0, 82, 172, 255 }
+ * #define PURPLE     CLITERAL{ 200, 122, 255, 255 }
+ * #define VIOLET     CLITERAL{ 135, 60, 190, 255 }
+ * #define DARKPURPLE CLITERAL{ 112, 31, 126, 255 }
+ * #define BEIGE      CLITERAL{ 211, 176, 131, 255 }
+ * #define BROWN      CLITERAL{ 127, 106, 79, 255 }
+ * #define DARKBROWN  CLITERAL{ 76, 63, 47, 255 }
+ * #define WHITE      CLITERAL{ 255, 255, 255, 255 }
+ * #define BLACK      CLITERAL{ 0, 0, 0, 255 }
+ * #define BLANK      CLITERAL{ 0, 0, 0, 0 }
+ * #define MAGENTA    CLITERAL{ 255, 0, 255, 255 }
+ * #define RAYWHITE   CLITERAL{ 245, 245, 245, 255 }
+ */
 
 #define FormatText  TextFormat
 #define SubText     TextSubtext

@@ -18,6 +18,8 @@ extern "C" {
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Err.hpp>
 
+#include <sstream>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -740,6 +742,27 @@ int lua_absindex(lua_State * L, int i)
         i += ::lua_gettop(L) + 1;
     }
     return i;
+}
+
+std::string getPrintableStackInformation(lua_State * L)
+{
+    std::stringstream ss;
+    int code = 0;
+    int top = ::lua_gettop(L);
+    ss << "StackTop[" << top << "]" << std::endl;
+    for (int i = 0; i < top; ++i) {
+        lua_Debug ar = {0,};
+        code = ::lua_getstack(L, i, &ar);
+        assert(code);
+        code = ::lua_getinfo(L, "nSl", &ar);
+        assert(code);
+        using namespace libtbag::string;
+        ss << fformat("[{}] Name:{}, NameWhat:{}", i, ar.name, ar.namewhat) << std::endl
+           << fformat(" - Source:{}, ShortSrc:{}, LineDefined:{}, LastLineDefined:{}, What:{}",
+                      ar.source, ar.short_src, ar.linedefined, ar.lastlinedefined, ar.what) << std::endl
+           << fformat(" - CurrentLine:{}", ar.currentline) << std::endl;
+    }
+    return ss.str();
 }
 
 } // namespace script
