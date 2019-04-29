@@ -18,6 +18,7 @@
 #include <libtbag/script/luajit-2.0.5/lua.hpp>
 
 #include <string>
+#include <vector>
 
 #ifndef TBAG_LUA_REGISTER
 #define TBAG_LUA_REGISTER(name) { #name, __lua_ray_##name }

@@ -753,21 +753,58 @@ void luaL_setmetatable(lua_State * L, char const * tname)
 
 std::string getPrintableStackInformation(lua_State * L)
 {
+    using namespace libtbag::string;
+
+    int max_length = 0;
+    int const TOP = ::lua_gettop(L);
+    std::vector<std::string> stack_infos;
+    for (int i = 0; i < TOP; ++i) {
+        int const INDEX = -(i+1);
+        int const TYPE = ::lua_type(L, INDEX);
+        assert(TYPE != LUA_TNONE);
+        auto const TYPE_NAME = ::lua_typename(L, TYPE);
+
+        std::string info;
+        switch (TYPE) {
+        case LUA_TNUMBER:
+            info = fformat("|{:0>2}| {} ({}) |", TOP+INDEX, TYPE_NAME, ::lua_tonumber(L, INDEX));
+            break;
+        case LUA_TBOOLEAN:
+            info = fformat("|{:0>2}| {} ({}) |", TOP+INDEX, TYPE_NAME, ::lua_toboolean(L, INDEX));
+            break;
+        case LUA_TSTRING:
+            info = fformat("|{:0>2}| {} ({}) |", TOP+INDEX, TYPE_NAME, ::lua_tolstring(L, INDEX, nullptr));
+            break;
+        default:
+            info = fformat("|{:0>2}| {} |", TOP+INDEX, TYPE_NAME);
+            break;
+        }
+
+        stack_infos.push_back(info);
+        if (info.size() > max_length) {
+            max_length = info.size();
+        }
+
+//        lua_Debug ar = {0,};
+//        code = ::lua_getstack(L, i, &ar);
+//        assert(code);
+//        code = ::lua_getinfo(L, "nSl", &ar);
+//        assert(code);
+//        using namespace libtbag::string;
+//        ss << fformat("[{}] Name:{}, NameWhat:{}", i, ar.name, ar.namewhat) << std::endl
+//           << fformat(" - Source:{}, ShortSrc:{}, LineDefined:{}, LastLineDefined:{}, What:{}",
+//                      ar.source, ar.short_src, ar.linedefined, ar.lastlinedefined, ar.what) << std::endl
+//           << fformat(" - CurrentLine:{}", ar.currentline) << std::endl;
+    }
+
     std::stringstream ss;
-    int code = 0;
-    int top = ::lua_gettop(L);
-    ss << "StackTop[" << top << "]" << std::endl;
-    for (int i = 0; i < top; ++i) {
-        lua_Debug ar = {0,};
-        code = ::lua_getstack(L, i, &ar);
-        assert(code);
-        code = ::lua_getinfo(L, "nSl", &ar);
-        assert(code);
-        using namespace libtbag::string;
-        ss << fformat("[{}] Name:{}, NameWhat:{}", i, ar.name, ar.namewhat) << std::endl
-           << fformat(" - Source:{}, ShortSrc:{}, LineDefined:{}, LastLineDefined:{}, What:{}",
-                      ar.source, ar.short_src, ar.linedefined, ar.lastlinedefined, ar.what) << std::endl
-           << fformat(" - CurrentLine:{}", ar.currentline) << std::endl;
+    if (max_length) {
+        std::string const HORIZONTAL_BAR = fformat("+{}+", std::string(max_length-2, '-'));
+        ss << HORIZONTAL_BAR << std::endl;
+        for (auto const & info : stack_infos) {
+            ss << info << std::endl;
+        }
+        ss << HORIZONTAL_BAR << std::endl;
     }
     return ss.str();
 }
