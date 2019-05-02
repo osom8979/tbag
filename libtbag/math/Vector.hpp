@@ -166,8 +166,7 @@ inline T getDotProduct(T s1, T s2, double theta)
  * @see <https://en.wikipedia.org/wiki/Cross_product>
  */
 template <typename T>
-inline Vector3<T>
-getCrossProduct(Vector3<T> const & v1, Vector3<T> const & v2)
+inline Vector3<T> getCrossProduct(Vector3<T> const & v1, Vector3<T> const & v2)
 {
     return Vector3<T>{(v1.y * v2.z) - (v1.z * v2.y)
                     , (v1.z * v2.x) - (v1.x * v2.z)
@@ -203,7 +202,7 @@ getCrossProduct(Vector3<T> const & v1, Vector3<T> const & v2)
  *   \vec{v_2} = p2 - p0 = [p2_x - p0_x, p2_y - p0_y, 0]
  *   \vec{v_1} \times \vec{v_2} = [0, 0, ((p1_x - p0_x) * (p2_y - p0_y) - (p1_y - p0_y) * (p2_x - p0_x))]
  *  \f]
- *  외적(Cross-Product)의 오늘손 법칙을 사용하여, Vector(p1 - p0)과 Vector(p2 - p0)의 위치에 따라 음수 또는 양수로 변하는 성질을 이용한다.
+ *  외적(Cross-Product)의 오른손 법칙을 사용하여, Vector(p1 - p0)과 Vector(p2 - p0)의 위치에 따라 음수 또는 양수로 변하는 성질을 이용한다.
  */
 template <typename T, typename Point = libtbag::geometry::BasePoint2<T> >
 inline T getRelativePositionOfPointToLine(Point const & p0, Point const & p1, Point const & check)
