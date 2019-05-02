@@ -135,11 +135,8 @@ static luaL_Reg const __lua_lay_image[] = {
 void lua_ray_register_image(lua_State * L)
 {
     luaL_newmetatable(L, METATABLE_IMAGE);
-    std::cout << "lua_ray_register_image(2):\n" << getPrintableStackInformation(L);
     luaL_register(L, lua_ray_name(), __lua_lay_image);
-    std::cout << "lua_ray_register_image(3):\n" << getPrintableStackInformation(L);
     lua_setfield(L, -1, "__index");
-    std::cout << "lua_ray_register_image(4):\n" << getPrintableStackInformation(L);
 }
 
 bool luaopen_ray_common(lua_State * L)

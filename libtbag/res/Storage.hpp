@@ -285,6 +285,7 @@ public:
     LuaMachine const & lua() const TBAG_NOEXCEPT { return _impl->lua; }
 
     void initLuaDefault();
+    bool appendLuaCPath();
     bool appendLuaPath();
     bool runLuaScriptFile(std::string const & filename);
     bool runLuaScript(std::string const & code);

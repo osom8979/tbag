@@ -142,7 +142,7 @@ void TpotMain::onInfo(Element const & element)
 void TpotMain::printParamsInfo(RunnerParams const & params) const
 {
     auto const & STORAGE_INFO = params.storage.getInfo();
-    tDLogIfD(params.verbose && !STORAGE_INFO.empty(), "TpotMain::printParamsInfo() {}", STORAGE_INFO);
+    tDLogIfD(params.verbose && !STORAGE_INFO.empty(), "TpotMain::printParamsInfo()\n{}", STORAGE_INFO);
 }
 
 int TpotMain::onRun(RunnerParams const & params)

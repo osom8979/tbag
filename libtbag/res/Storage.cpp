@@ -470,6 +470,13 @@ void Storage::initLuaDefault()
     _impl->lua.initDefault();
 }
 
+bool Storage::appendLuaCPath()
+{
+    auto const CPATH = asset().get(LAYOUT_MODULE);
+    auto const CANONICAL_CPATH = (CPATH / "?.so").getCanonicalString();
+    return _impl->lua.appendLuaCPath(CANONICAL_CPATH);
+}
+
 bool Storage::appendLuaPath()
 {
     auto const PATH = asset().get(LAYOUT_LUA);
@@ -510,26 +517,38 @@ bool Storage::appendLuaRocksCPath()
 
 std::string Storage::getInfo() const
 {
+    using namespace libtbag::string;
     std::stringstream ss;
     auto const ENV_KEYS = envs().keys();
     if (!ENV_KEYS.empty()) {
-        ss << "Environments:\n";
+        ss << "[ENVIRONMENTS]\n";
         for (auto & env_key : ENV_KEYS) {
-            ss << " " << env_key << "=" << envs().opt(env_key) << "\n";
+            ss << fformat(" {}={}\n", env_key, envs().opt(env_key));
         }
     }
 
     auto const ASSET_KEYS = asset().getKeys();
     if (!ASSET_KEYS.empty()) {
-        ss << "Dynamic asset:\n";
+        ss << "[ASSET]\n";
         for (auto & asset_key : ASSET_KEYS) {
-            ss << " " << asset_key << "=" << asset().get(asset_key) << "\n";
+            ss << fformat(" {}={}\n", asset_key, asset().get(asset_key));
         }
     }
 
-    auto const LUA_PATH_STRING = lua().getLuaPath();
-    if (!LUA_PATH_STRING.empty()) {
-        ss << "LUA_PATH: " << LUA_PATH_STRING << "\n";
+    auto const LUA_CPATHS = lua().getLuaCPaths();
+    if (!LUA_CPATHS.empty()) {
+        ss << "[LUA_CPATH]\n";
+        for (auto & cpath : LUA_CPATHS) {
+            ss << fformat(" {}\n", cpath);
+        }
+    }
+
+    auto const LUA_PATHS = lua().getLuaPaths();
+    if (!LUA_PATHS.empty()) {
+        ss << "[LUA_PATH]\n";
+        for (auto & path : LUA_PATHS) {
+            ss << fformat(" {}\n", path);
+        }
     }
 
     return ss.str();

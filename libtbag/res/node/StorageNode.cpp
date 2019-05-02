@@ -518,6 +518,9 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         if (prop.lua.init) {
             storage.initLuaDefault();
         }
+        if (prop.module.exists) {
+            storage.appendLuaCPath();
+        }
         storage.appendLuaPath();
         if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.name);
