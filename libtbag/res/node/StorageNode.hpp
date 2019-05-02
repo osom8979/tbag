@@ -100,10 +100,11 @@ namespace node {
  *     <!-- Directory containing the LuaRosks root directory. -->
  *     <luarocks>dir</luarocks>
  *
- *     <!-- Directory containing the lua script package.                            -->
- *     <!-- If 'name' attribute is exists, Apply only those files.                  -->
- *     <!-- If 'gui' attribute is exists, The first script file to run in GUI mode. -->
- *     <lua name='file.lua' gui='entry.lua'>dir</lua>
+ *     <!-- Directory containing the lua script package.                    -->
+ *     <!-- If the 'init' attribute is 'true', update 'default initialize'. -->
+ *     <!-- If 'init' attribute is not exists, it is set a 'true'.          -->
+ *     <!-- If 'name' attribute is exists, Apply only those files.          -->
+ *     <lua init='true' name='file.lua'>dir</lua>
  *
  *     <!-- Specify the Layout name and path to hold the data. -->
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
@@ -149,6 +150,7 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
     TBAG_CONSTEXPR static char const * const ATT_AUTO_CLEAR = "autoclear";
     TBAG_CONSTEXPR static char const * const ATT_GUI        = "gui";
+    TBAG_CONSTEXPR static char const * const ATT_INIT       = "init";
 
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
@@ -160,7 +162,7 @@ public:
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_SQLITE_NAME   = "default.sqlite";
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_KEYSTORE_NAME = "default.key";
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_LUA_NAME      = "config.lua";
-    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_LUA_GUI       = "main.lua";
+    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_LUA_INIT      = VAL_TRUE;
 
 public:
     struct Property
@@ -217,7 +219,7 @@ public:
 
         struct lua_layout : public txt_layout
         {
-            str gui;
+            bool init = true;
         };
 
         struct usr_layout : public txt_layout

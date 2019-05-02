@@ -465,6 +465,11 @@ std::vector<std::string> Storage::getKeyStoreFilenames() const
     return getFilenames(LAYOUT_KEYSTORE);
 }
 
+void Storage::initLuaDefault()
+{
+    _impl->lua.initDefault();
+}
+
 bool Storage::appendLuaPath()
 {
     auto const PATH = asset().get(LAYOUT_LUA);

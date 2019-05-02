@@ -144,7 +144,7 @@ void StorageNode::setup()
     prop.sqlite.name   = VAL_DEFAULT_SQLITE_NAME;
     prop.keystore.name = VAL_DEFAULT_KEYSTORE_NAME;
     prop.lua.name      = VAL_DEFAULT_LUA_NAME;
-    prop.lua.gui       = VAL_DEFAULT_LUA_GUI;
+    prop.lua.init      = VAL_DEFAULT_LUA_INIT;
     // clang-format on
 
     update(DEFAULT_STORAGE_ROOT, prop);
@@ -301,7 +301,7 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
         optAttr(*child, ATT_NAME    , layout.name);
         optAttr(*child, ATT_ABSOLUTE, layout.abs);
         optAttr(*child, ATT_RAW     , layout.raw);
-        optAttr(*child, ATT_GUI     , layout.gui);
+        optAttr(*child, ATT_INIT    , layout.init);
     } else {
         layout.exists = false;
     }
@@ -406,7 +406,7 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
             setAttr(child, ATT_NAME    , layout.name);
             setAttr(child, ATT_ABSOLUTE, layout.abs);
             setAttr(child, ATT_RAW     , layout.raw);
-            setAttr(child, ATT_GUI     , layout.gui);
+            setAttr(child, ATT_INIT    , layout.init);
         });
     }
 }
@@ -515,12 +515,12 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.openKeyStore(prop.keystore.name);
     }
     if (prop.lua.exists) {
+        if (prop.lua.init) {
+            storage.initLuaDefault();
+        }
         storage.appendLuaPath();
         if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.name);
-        }
-        if (!prop.lua.gui.empty()) {
-            storage->lua_gui = prop.lua.gui;
         }
     }
     if (prop.luarocks.exists) {
