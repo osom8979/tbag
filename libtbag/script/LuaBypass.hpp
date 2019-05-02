@@ -16,9 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/script/luajit-2.0.5/lua.hpp>
-
-#include <string>
-#include <vector>
+#include <libtbag/util/Structures.hpp>
 
 #ifndef TBAG_LUA_REGISTER
 #define TBAG_LUA_REGISTER(name) { #name, __lua_ray_##name }
@@ -241,6 +239,10 @@ TBAG_API void luaL_setmetatable(lua_State * L, char const * tname);
 // Extra
 // -----
 
+using Pair  = libtbag::util::Pair;
+using Pairs = libtbag::util::Pairs;
+
+TBAG_API Pairs getRegistryPairs(lua_State * L);
 TBAG_API std::string getPrintableStackInformation(lua_State * L);
 
 } // namespace script

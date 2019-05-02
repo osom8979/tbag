@@ -544,7 +544,16 @@ void luaL_checkany(lua_State * L, int narg)
 
 int luaL_newmetatable(lua_State * L, char const * tname)
 {
-    return ::luaL_newmetatable(L, tname);
+    auto const CODE = ::luaL_newmetatable(L, tname);
+    if (CODE == 0) {
+        tDLogD("luaL_newmetatable() Exists MetaTable: {}", tname);
+    } else {
+        // Insert '__name = tname' into the table.
+        // Insert 'tname = [New Table]' into the registry.
+        // Then, push the table onto the stack.
+        tDLogD("luaL_newmetatable() Create new MetaTable: {}", tname);
+    }
+    return CODE;
 }
 
 void * luaL_checkudata(lua_State * L, int ud, char const * tname)
@@ -749,6 +758,19 @@ void luaL_setmetatable(lua_State * L, char const * tname)
     ::luaL_checkstack(L, 1, "Not enough stack slots");
     ::lua_getfield(L, LUA_REGISTRYINDEX, tname); // == luaL_getmetatable(L, tname);
     ::lua_setmetatable(L, -2);
+}
+
+Pairs getRegistryPairs(lua_State * L)
+{
+    Pairs result;
+    ::lua_pushnil(L);  // First key.
+    while (::lua_next(L, LUA_REGISTRYINDEX) != 0) {
+        // Key index: -2
+        // Value index: -1
+        // printf("%s - %s\n", lua_typename(L, lua_type(L, -2)), lua_typename(L, lua_type(L, -1)));
+        // lua_pop(L, 1); // removes 'value'; keeps 'key' for next iteration
+    }
+    return result;
 }
 
 std::string getPrintableStackInformation(lua_State * L)

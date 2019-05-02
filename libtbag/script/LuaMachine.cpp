@@ -36,15 +36,6 @@ LuaMachine::LuaMachine() : _state(nullptr)
         lua_close(l);
     });
     assert(static_cast<bool>(_state));
-
-    initDefaultOpenLibraries();
-    initDefaultLuaPath();
-    initDefaultLuaCPath();
-    initDefaultTbagTable();
-
-    if (!libtbag::script::lua::luaopen_ray(L)) {
-        tDLogW("LuaMachine::LuaMachine() Ray bind failed.");
-    }
 }
 
 LuaMachine::LuaMachine(std::nullptr_t) TBAG_NOEXCEPT : _state(nullptr)
@@ -132,10 +123,26 @@ void LuaMachine::initDefaultTbagTable()
 {
     auto * L = _state.get();
     assert(L != nullptr);
+
     lua_newtable(L);
     lua_pushstring(L, libtbag::util::getTbagVersion().toString().c_str());
     lua_setfield(L, -2, "version");
     lua_setglobal(L, lua_tbag_name());
+}
+
+void LuaMachine::initDefault()
+{
+    auto * L = _state.get();
+    assert(L != nullptr);
+
+    initDefaultOpenLibraries();
+    initDefaultLuaPath();
+    initDefaultLuaCPath();
+    initDefaultTbagTable();
+
+    if (!libtbag::script::lua::luaopen_ray(L)) {
+        tDLogW("LuaMachine::initDefault() Ray bind failed.");
+    }
 }
 
 void LuaMachine::reset()
@@ -147,6 +154,7 @@ std::string LuaMachine::getLuaPath() const
 {
     auto * L = _state.get();
     assert(L != nullptr);
+
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "path");
     std::string const PACKAGE_PATH = lua_tostring(L, -1);
@@ -163,6 +171,7 @@ void LuaMachine::setLuaPath(std::string const & path)
 {
     auto * L = _state.get();
     assert(L != nullptr);
+
     lua_getglobal(L, "package");
     lua_pushstring(L, path.c_str());
     lua_setfield(L, -2, "path");
@@ -184,6 +193,7 @@ std::string LuaMachine::getLuaCPath() const
 {
     auto * L = _state.get();
     assert(L != nullptr);
+
     lua_getglobal(L, "package");
     lua_getfield(L, -1, "cpath");
     std::string const PACKAGE_PATH = lua_tostring(L, -1);
@@ -200,6 +210,7 @@ void LuaMachine::setLuaCPath(std::string const & path)
 {
     auto * L = _state.get();
     assert(L != nullptr);
+
     lua_getglobal(L, "package");
     lua_pushstring(L, path.c_str());
     lua_setfield(L, -2, "cpath");
@@ -221,6 +232,7 @@ std::string LuaMachine::getTbagVersion() const
 {
     auto * L = _state.get();
     assert(L != nullptr);
+
     lua_getglobal(L, lua_tbag_name());
     lua_getfield(L, -1, "version");
     std::string const VERSION_PATH = lua_tostring(L, -1);

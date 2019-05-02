@@ -95,6 +95,9 @@ private:
     void initDefaultTbagTable();
 
 public:
+    void initDefault();
+
+public:
     void reset();
 
 public:
