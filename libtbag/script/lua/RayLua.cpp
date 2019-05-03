@@ -107,18 +107,192 @@ static void _push_matrix(lua_State * L, Matrix const & mat)
     lua_rawseti(L, -2, 16);
 }
 
-static Color _get_color(lua_State * L, int num_arg)
+static void lua_pushrectangle(lua_State * L, Rectangle const & rect)
+{
+    lua_createtable(L, 0, 4);
+    lua_pushnumber(L, rect.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, rect.y);
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, rect.width);
+    lua_setfield(L, -2, "width");
+    lua_pushnumber(L, rect.height);
+    lua_setfield(L, -2, "height");
+}
+
+static Vector2 luaL_checkvector2(lua_State * L, int num_arg)
+{
+    Vector2 result = {0,};
+    if (lua_objlen(L, num_arg) >= 2) {
+        lua_rawgeti(L, num_arg, 1);
+        result.x = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 2);
+        result.y = lua_tonumber(L, -1);
+        lua_pop(L, 2);
+    } else {
+        lua_getfield(L, num_arg, "x");
+        result.x = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "y");
+        result.y = luaL_checknumber(L, -1);
+        lua_pop(L, 2);
+    }
+    return result;
+}
+
+static std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg)
+{
+    auto const length = lua_objlen(L, num_arg);
+    std::vector<Vector2> result(length);
+    for (auto i = 0; i < length; ++i) {
+        lua_rawgeti(L, num_arg, 1);
+        result[i] = luaL_checkvector2(L, lua_absindex(L, -1));
+    }
+    lua_pop(L, length);
+    return result;
+}
+
+static Vector3 luaL_checkvector3(lua_State * L, int num_arg)
+{
+    Vector3 result = {0,};
+    if (lua_objlen(L, num_arg) >= 3) {
+        lua_rawgeti(L, num_arg, 1);
+        result.x = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 2);
+        result.y = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 3);
+        result.z = lua_tonumber(L, -1);
+        lua_pop(L, 3);
+    } else {
+        lua_getfield(L, num_arg, "x");
+        result.x = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "y");
+        result.y = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "z");
+        result.z = luaL_checknumber(L, -1);
+        lua_pop(L, 3);
+    }
+    return result;
+}
+
+static Vector4 luaL_checkvector4(lua_State * L, int num_arg)
+{
+    Vector4 result = {0,};
+    if (lua_objlen(L, num_arg) >= 4) {
+        lua_rawgeti(L, num_arg, 1);
+        result.x = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 2);
+        result.y = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 3);
+        result.z = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 4);
+        result.w = lua_tonumber(L, -1);
+        lua_pop(L, 4);
+    } else {
+        lua_getfield(L, num_arg, "x");
+        result.x = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "y");
+        result.y = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "z");
+        result.z = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "w");
+        result.w = luaL_checknumber(L, -1);
+        lua_pop(L, 4);
+    }
+    return result;
+}
+
+static Color luaL_checkcolor(lua_State * L, int num_arg)
 {
     Color result = {0,};
-    lua_getfield(L, num_arg, "r");
-    result.r = luaL_checkinteger(L, -1);
-    lua_getfield(L, num_arg, "g");
-    result.g = luaL_checkinteger(L, -1);
-    lua_getfield(L, num_arg, "b");
-    result.b = luaL_checkinteger(L, -1);
-    lua_getfield(L, num_arg, "a");
-    result.a = luaL_checkinteger(L, -1);
-    lua_pop(L, 4);
+    auto const length = lua_objlen(L, num_arg);
+    if (length >= 3) {
+        lua_rawgeti(L, num_arg, 1);
+        result.r = luaL_checkinteger(L, -1);
+        lua_rawgeti(L, num_arg, 2);
+        result.g = luaL_checkinteger(L, -1);
+        lua_rawgeti(L, num_arg, 3);
+        result.b = luaL_checkinteger(L, -1);
+        if (length >= 4) {
+            lua_rawgeti(L, num_arg, 4);
+            result.a = luaL_checkinteger(L, -1);
+            lua_pop(L, 4);
+        } else {
+            result.a = 255;
+            lua_pop(L, 3);
+        }
+    } else {
+        lua_getfield(L, num_arg, "r");
+        result.r = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "g");
+        result.g = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "b");
+        result.b = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "a");
+        if (lua_type(L, -1) == LUA_TNUMBER) {
+            result.a = luaL_checkinteger(L, -1);
+        } else {
+            result.a = 255;
+        }
+        lua_pop(L, 4);
+    }
+    return result;
+}
+
+static Rectangle luaL_checkrectangle(lua_State * L, int num_arg)
+{
+    Rectangle result = {0,};
+    if (lua_objlen(L, num_arg) >= 4) {
+        lua_rawgeti(L, num_arg, 1);
+        result.x = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 2);
+        result.y = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 3);
+        result.width = lua_tonumber(L, -1);
+        lua_rawgeti(L, num_arg, 4);
+        result.height = lua_tonumber(L, -1);
+        lua_pop(L, 4);
+    } else {
+        lua_getfield(L, num_arg, "x");
+        result.x = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "y");
+        result.y = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "width");
+        result.width = luaL_checknumber(L, -1);
+        lua_getfield(L, num_arg, "height");
+        result.height = luaL_checknumber(L, -1);
+        lua_pop(L, 4);
+    }
+    return result;
+}
+
+static Texture2D lual_checktexture2d(lua_State * L, int num_arg)
+{
+    Texture2D result = {0,};
+    if (lua_objlen(L, num_arg) >= 4) {
+        lua_rawgeti(L, num_arg, 1);
+        result.id = lua_tointeger(L, -1);
+        lua_rawgeti(L, num_arg, 2);
+        result.width = lua_tointeger(L, -1);
+        lua_rawgeti(L, num_arg, 3);
+        result.height = lua_tointeger(L, -1);
+        lua_rawgeti(L, num_arg, 4);
+        result.mipmaps = lua_tointeger(L, -1);
+        lua_rawgeti(L, num_arg, 5);
+        result.format = lua_tointeger(L, -1);
+        lua_pop(L, 5);
+    } else {
+        lua_getfield(L, num_arg, "id");
+        result.id = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "width");
+        result.width = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "height");
+        result.height = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "mipmaps");
+        result.mipmaps = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "format");
+        result.format = luaL_checkinteger(L, -1);
+        lua_pop(L, 5);
+    }
     return result;
 }
 
@@ -389,7 +563,7 @@ static int _DisableCursor(lua_State * L)
 
 static int _ClearBackground(lua_State * L)
 {
-    ClearBackground(_get_color(L, 1));
+    ClearBackground(luaL_checkcolor(L, 1));
     return 0;
 }
 
@@ -528,13 +702,363 @@ static int _GetTime(lua_State * L)
 //void SetCameraSmoothZoomControl(int sz_key);
 //void SetCameraMoveControls(int front_key, int back_key, int right_key, int left_key, int up_key, int down_key);
 
+static int _DrawPixel(lua_State * L)
+{
+    DrawPixel(luaL_checkinteger(L, 1),
+              luaL_checkinteger(L, 2),
+              luaL_checkcolor(L, 3));
+    return 0;
+}
+
+static int _DrawPixelV(lua_State * L)
+{
+    DrawPixelV(luaL_checkvector2(L, 1),
+               luaL_checkcolor(L, 2));
+    return 0;
+}
+
+static int _DrawLine(lua_State * L)
+{
+    DrawLine(luaL_checkinteger(L, 1),
+             luaL_checkinteger(L, 2),
+             luaL_checkinteger(L, 3),
+             luaL_checkinteger(L, 4),
+             luaL_checkcolor(L, 5));
+    return 0;
+}
+
+static int _DrawLineV(lua_State * L)
+{
+    DrawLineV(luaL_checkvector2(L, 1),
+              luaL_checkvector2(L, 2),
+              luaL_checkcolor(L, 3));
+    return 0;
+}
+
+static int _DrawLineEx(lua_State * L)
+{
+    DrawLineEx(luaL_checkvector2(L, 1),
+               luaL_checkvector2(L, 2),
+               luaL_checknumber(L, 3),
+               luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawLineBezier(lua_State * L)
+{
+    DrawLineBezier(luaL_checkvector2(L, 1),
+                   luaL_checkvector2(L, 2),
+                   luaL_checknumber(L, 3),
+                   luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawCircle(lua_State * L)
+{
+    DrawCircle(luaL_checkinteger(L, 1),
+               luaL_checkinteger(L, 2),
+               luaL_checknumber(L, 3),
+               luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawCircleSector(lua_State * L)
+{
+    DrawCircleSector(luaL_checkvector2(L, 1),
+                     luaL_checknumber(L, 2),
+                     luaL_checkinteger(L, 3),
+                     luaL_checkinteger(L, 4),
+                     luaL_checkinteger(L, 5),
+                     luaL_checkcolor(L, 6));
+    return 0;
+}
+
+static int _DrawCircleSectorLines(lua_State * L)
+{
+    DrawCircleSectorLines(luaL_checkvector2(L, 1),
+                          luaL_checknumber(L, 2),
+                          luaL_checkinteger(L, 3),
+                          luaL_checkinteger(L, 4),
+                          luaL_checkinteger(L, 5),
+                          luaL_checkcolor(L, 6));
+    return 0;
+}
+
+static int _DrawCircleGradient(lua_State * L)
+{
+    DrawCircleGradient(luaL_checkinteger(L, 1),
+                       luaL_checkinteger(L, 2),
+                       luaL_checknumber(L, 3),
+                       luaL_checkcolor(L, 4),
+                       luaL_checkcolor(L, 5));
+    return 0;
+}
+
+static int _DrawCircleV(lua_State * L)
+{
+    DrawCircleV(luaL_checkvector2(L, 1),
+                luaL_checknumber(L, 2),
+                luaL_checkcolor(L, 3));
+    return 0;
+}
+
+static int _DrawCircleLines(lua_State * L)
+{
+    DrawCircleLines(luaL_checkinteger(L, 1),
+                    luaL_checkinteger(L, 2),
+                    luaL_checknumber(L, 3),
+                    luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawRing(lua_State * L)
+{
+    DrawRing(luaL_checkvector2(L, 1),
+             luaL_checknumber(L, 2),
+             luaL_checknumber(L, 3),
+             luaL_checkinteger(L, 4),
+             luaL_checkinteger(L, 5),
+             luaL_checkinteger(L, 6),
+             luaL_checkcolor(L, 7));
+    return 0;
+}
+
+static int _DrawRingLines(lua_State * L)
+{
+    DrawRingLines(luaL_checkvector2(L, 1),
+                  luaL_checknumber(L, 2),
+                  luaL_checknumber(L, 3),
+                  luaL_checkinteger(L, 4),
+                  luaL_checkinteger(L, 5),
+                  luaL_checkinteger(L, 6),
+                  luaL_checkcolor(L, 7));
+    return 0;
+}
+
+static int _DrawRectangle(lua_State * L)
+{
+    DrawRectangle(luaL_checkinteger(L, 1),
+                  luaL_checkinteger(L, 2),
+                  luaL_checkinteger(L, 3),
+                  luaL_checkinteger(L, 4),
+                  luaL_checkcolor(L, 5));
+    return 0;
+}
+
+static int _DrawRectangleV(lua_State * L)
+{
+    DrawRectangleV(luaL_checkvector2(L, 1),
+                   luaL_checkvector2(L, 2),
+                   luaL_checkcolor(L, 3));
+    return 0;
+}
+
+static int _DrawRectangleRec(lua_State * L)
+{
+    DrawRectangleRec(luaL_checkrectangle(L, 1),
+                     luaL_checkcolor(L, 2));
+    return 0;
+}
+
+static int _DrawRectanglePro(lua_State * L)
+{
+    DrawRectanglePro(luaL_checkrectangle(L, 1),
+                     luaL_checkvector2(L, 2),
+                     luaL_checknumber(L, 3),
+                     luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawRectangleGradientV(lua_State * L)
+{
+    DrawRectangleGradientV(luaL_checkinteger(L, 1),
+                           luaL_checkinteger(L, 2),
+                           luaL_checkinteger(L, 3),
+                           luaL_checkinteger(L, 4),
+                           luaL_checkcolor(L, 5),
+                           luaL_checkcolor(L, 6));
+    return 0;
+}
+
+static int _DrawRectangleGradientH(lua_State * L)
+{
+    DrawRectangleGradientH(luaL_checkinteger(L, 1),
+                           luaL_checkinteger(L, 2),
+                           luaL_checkinteger(L, 3),
+                           luaL_checkinteger(L, 4),
+                           luaL_checkcolor(L, 5),
+                           luaL_checkcolor(L, 6));
+    return 0;
+}
+
+static int _DrawRectangleGradientEx(lua_State * L)
+{
+    DrawRectangleGradientEx(luaL_checkrectangle(L, 1),
+                            luaL_checkcolor(L, 2),
+                            luaL_checkcolor(L, 3),
+                            luaL_checkcolor(L, 4),
+                            luaL_checkcolor(L, 5));
+    return 0;
+}
+
+static int _DrawRectangleLines(lua_State * L)
+{
+    DrawRectangleLines(luaL_checkinteger(L, 1),
+                       luaL_checkinteger(L, 2),
+                       luaL_checkinteger(L, 3),
+                       luaL_checkinteger(L, 4),
+                       luaL_checkcolor(L, 5));
+    return 0;
+}
+
+static int _DrawRectangleLinesEx(lua_State * L)
+{
+    DrawRectangleLinesEx(luaL_checkrectangle(L, 1),
+                         luaL_checkinteger(L, 2),
+                         luaL_checkcolor(L, 3));
+    return 0;
+}
+
+static int _DrawRectangleRounded(lua_State * L)
+{
+    DrawRectangleRounded(luaL_checkrectangle(L, 1),
+                         luaL_checknumber(L, 2),
+                         luaL_checkinteger(L, 3),
+                         luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawRectangleRoundedLines(lua_State * L)
+{
+    DrawRectangleRoundedLines(luaL_checkrectangle(L, 1),
+                              luaL_checknumber(L, 2),
+                              luaL_checkinteger(L, 3),
+                              luaL_checkinteger(L, 4),
+                              luaL_checkcolor(L, 5));
+    return 0;
+}
+
+static int _DrawTriangle(lua_State * L)
+{
+    DrawTriangle(luaL_checkvector2(L, 1),
+                 luaL_checkvector2(L, 2),
+                 luaL_checkvector2(L, 3),
+                 luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawTriangleLines(lua_State * L)
+{
+    DrawTriangleLines(luaL_checkvector2(L, 1),
+                      luaL_checkvector2(L, 2),
+                      luaL_checkvector2(L, 3),
+                      luaL_checkcolor(L, 4));
+    return 0;
+}
+
+static int _DrawPoly(lua_State * L)
+{
+    DrawPoly(luaL_checkvector2(L, 1),
+             luaL_checkinteger(L, 2),
+             luaL_checknumber(L, 3),
+             luaL_checknumber(L, 4),
+             luaL_checkcolor(L, 5));
+    return 0;
+}
+
+static int _DrawPolyEx(lua_State * L)
+{
+    DrawPolyEx(luaL_checkvector2_array(L, 1).data(),
+               luaL_checkinteger(L, 2),
+               luaL_checkcolor(L, 3));
+    return 0;
+}
+
+static int _DrawPolyExLines(lua_State * L)
+{
+    DrawPolyExLines(luaL_checkvector2_array(L, 1).data(),
+                    luaL_checkinteger(L, 2),
+                    luaL_checkcolor(L, 3));
+    return 0;
+}
+
+static int _SetShapesTexture(lua_State * L)
+{
+    SetShapesTexture(lual_checktexture2d(L, 1),
+                     luaL_checkrectangle(L, 2));
+    return 0;
+}
+
+int _CheckCollisionRecs(lua_State * L)
+{
+    auto const result = CheckCollisionRecs(luaL_checkrectangle(L, 1),
+                                           luaL_checkrectangle(L, 2));
+    lua_pushboolean(L, result?1:0);
+    return 1;
+}
+
+int _CheckCollisionCircles(lua_State * L)
+{
+    auto const result = CheckCollisionCircles(luaL_checkvector2(L, 1),
+                                              luaL_checknumber(L, 2),
+                                              luaL_checkvector2(L, 3),
+                                              luaL_checknumber(L, 4));
+    lua_pushboolean(L, result?1:0);
+    return 1;
+}
+
+int _CheckCollisionCircleRec(lua_State * L)
+{
+    auto const result = CheckCollisionCircleRec(luaL_checkvector2(L, 1),
+                                                luaL_checknumber(L, 2),
+                                                luaL_checkrectangle(L, 3));
+    lua_pushboolean(L, result?1:0);
+    return 1;
+}
+
+int _GetCollisionRec(lua_State * L)
+{
+    auto const result = GetCollisionRec(luaL_checkrectangle(L, 1),
+                                        luaL_checkrectangle(L, 2));
+    lua_pushrectangle(L, result);
+    return 1;
+}
+
+int _CheckCollisionPointRec(lua_State * L)
+{
+    auto const result = CheckCollisionPointRec(luaL_checkvector2(L, 1),
+                                               luaL_checkrectangle(L, 2));
+    lua_pushboolean(L, result?1:0);
+    return 1;
+}
+
+int _CheckCollisionPointCircle(lua_State * L)
+{
+    auto const result = CheckCollisionPointCircle(luaL_checkvector2(L, 1),
+                                                  luaL_checkvector2(L, 2),
+                                                  luaL_checknumber(L, 3));
+    lua_pushboolean(L, result?1:0);
+    return 1;
+}
+
+int _CheckCollisionPointTriangle(lua_State * L)
+{
+    auto const result = CheckCollisionPointTriangle(luaL_checkvector2(L, 1),
+                                                    luaL_checkvector2(L, 2),
+                                                    luaL_checkvector2(L, 3),
+                                                    luaL_checkvector2(L, 4));
+    lua_pushboolean(L, result?1:0);
+    return 1;
+}
+
+
 #ifndef RAY_REGISTER
 #define RAY_REGISTER(name) { #name, _##name }
 #endif
 
 static luaL_Reg const __lua_lay_core[] = {
         { METATABLE_IMAGE, _Image },
-        // Window-related functions
+        // [CORE] Window-related functions
         RAY_REGISTER(InitWindow),
         RAY_REGISTER(WindowShouldClose),
         RAY_REGISTER(CloseWindow),
@@ -561,13 +1085,15 @@ static luaL_Reg const __lua_lay_core[] = {
         RAY_REGISTER(GetMonitorName),
         RAY_REGISTER(GetClipboardText),
         RAY_REGISTER(SetClipboardText),
-        // Cursor-related functions
+
+        // [CORE] Cursor-related functions
         RAY_REGISTER(ShowCursor),
         RAY_REGISTER(HideCursor),
         RAY_REGISTER(IsCursorHidden),
         RAY_REGISTER(EnableCursor),
         RAY_REGISTER(DisableCursor),
-        // Drawing-related functions
+
+        // [CORE] Drawing-related functions
         RAY_REGISTER(ClearBackground),
         RAY_REGISTER(BeginDrawing),
         RAY_REGISTER(EndDrawing),
@@ -577,59 +1103,63 @@ static luaL_Reg const __lua_lay_core[] = {
         //RAY_REGISTER(EndMode3D),
         //RAY_REGISTER(BeginTextureMode),
         //RAY_REGISTER(EndTextureMode),
-        // Screen-space-related functions
+
+        // [CORE] Screen-space-related functions
         //RAY_REGISTER(GetMouseRay),
         //RAY_REGISTER(GetWorldToScreen),
         //RAY_REGISTER(GetCameraMatrix),
-        // Timing-related functions
+
+        // [CORE] Timing-related functions
         RAY_REGISTER(SetTargetFPS),
         RAY_REGISTER(GetFPS),
         RAY_REGISTER(GetFrameTime),
         RAY_REGISTER(GetTime),
+
+        // [SHAPES] Basic shapes drawing functions
+        RAY_REGISTER(DrawPixel),
+        RAY_REGISTER(DrawPixelV),
+        RAY_REGISTER(DrawLine),
+        RAY_REGISTER(DrawLineV),
+        RAY_REGISTER(DrawLineEx),
+        RAY_REGISTER(DrawLineBezier),
+        RAY_REGISTER(DrawCircle),
+        RAY_REGISTER(DrawCircleSector),
+        RAY_REGISTER(DrawCircleSectorLines),
+        RAY_REGISTER(DrawCircleGradient),
+        RAY_REGISTER(DrawCircleV),
+        RAY_REGISTER(DrawCircleLines),
+        RAY_REGISTER(DrawRing),
+        RAY_REGISTER(DrawRingLines),
+        RAY_REGISTER(DrawRectangle),
+        RAY_REGISTER(DrawRectangleV),
+        RAY_REGISTER(DrawRectangleRec),
+        RAY_REGISTER(DrawRectanglePro),
+        RAY_REGISTER(DrawRectangleGradientV),
+        RAY_REGISTER(DrawRectangleGradientH),
+        RAY_REGISTER(DrawRectangleGradientEx),
+        RAY_REGISTER(DrawRectangleLines),
+        RAY_REGISTER(DrawRectangleLinesEx),
+        RAY_REGISTER(DrawRectangleRounded),
+        RAY_REGISTER(DrawRectangleRoundedLines),
+        RAY_REGISTER(DrawTriangle),
+        RAY_REGISTER(DrawTriangleLines),
+        RAY_REGISTER(DrawPoly),
+        RAY_REGISTER(DrawPolyEx),
+        RAY_REGISTER(DrawPolyExLines),
+        RAY_REGISTER(SetShapesTexture),
+
+        // [SHAPES] Basic shapes collision detection functions
+        RAY_REGISTER(CheckCollisionRecs),
+        RAY_REGISTER(CheckCollisionCircles),
+        RAY_REGISTER(CheckCollisionCircleRec),
+        RAY_REGISTER(GetCollisionRec),
+        RAY_REGISTER(CheckCollisionPointRec),
+        RAY_REGISTER(CheckCollisionPointCircle),
+        RAY_REGISTER(CheckCollisionPointTriangle),
+
         { nullptr, nullptr }
 };
 
-//void DrawPixel(int pos_x, int pos_y, Color color);
-//void DrawPixelV(Vector2 position, Color color);
-//void DrawLine(int start_pos_x, int start_pos_y, int end_pos_x, int end_pos_y, Color color);
-//void DrawLineV(Vector2 start_pos, Vector2 end_pos, Color color);
-//void DrawLineEx(Vector2 start_pos, Vector2 end_pos, float thick, Color color);
-//void DrawLineBezier(Vector2 start_pos, Vector2 end_pos, float thick, Color color);
-//void DrawCircle(int center_x, int center_y, float radius, Color color);
-//void DrawCircleSector(Vector2 center, float radius, int start_angle, int end_angle, int segments, Color color);
-//void DrawCircleSectorLines(Vector2 center, float radius, int start_angle, int end_angle, int segments, Color color);
-//void DrawCircleGradient(int center_x, int center_y, float radius, Color color1, Color color2);
-//void DrawCircleV(Vector2 center, float radius, Color color);
-//void DrawCircleLines(int center_x, int center_y, float radius, Color color);
-//void DrawRing(Vector2 center, float inner_radius, float outer_radius, int start_angle, int end_angle, int segments, Color color);
-//void DrawRingLines(Vector2 center, float inner_radius, float outer_radius, int start_angle, int end_angle, int segments, Color color);
-//void DrawRectangle(int pos_x, int pos_y, int width, int height, Color color);
-//void DrawRectangleV(Vector2 position, Vector2 size, Color color);
-//void DrawRectangleRec(Rectangle rec, Color color);
-//void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color);
-//void DrawRectangleGradientV(int pos_x, int pos_y, int width, int height, Color color1, Color color2);
-//void DrawRectangleGradientH(int pos_x, int pos_y, int width, int height, Color color1, Color color2);
-//void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4);
-//void DrawRectangleLines(int pos_x, int pos_y, int width, int height, Color color);
-//void DrawRectangleLinesEx(Rectangle rec, int line_thick, Color color);
-//void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color);
-//void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, int line_thick, Color color);
-//void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color);
-//void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color);
-//void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);
-//void DrawPolyEx(Vector2 * points, int num_points, Color color);
-//void DrawPolyExLines(Vector2 * points, int num_points, Color color);
-//
-//void SetShapesTexture(Texture2D texture, Rectangle source);
-//
-//bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2);
-//bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2);
-//bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec);
-//Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2);
-//bool CheckCollisionPointRec(Vector2 point, Rectangle rec);
-//bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius);
-//bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3);
-//
 //Image LoadImage(char const * file_name);
 //Image LoadImageEx(Color * pixels, int width, int height);
 //Image LoadImagePro(void * data, int width, int height, int format);

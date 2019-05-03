@@ -7,12 +7,18 @@
  * @remarks
  *  Example:
  *  @code{.lua}
- *   -- Core - Basic window
- *   ray.InitWindow(800, 450, "Basic window")
- *   ray.SetTargetFPS(60);
+ *   -- Core - Basic
+ *
+ *   width = 800
+ *   height = 450
+ *
+ *   ray.InitWindow(width, height, "Basic window")
+ *   ray.SetTargetFPS(60)
+ *
  *   while not ray.WindowShouldClose() do
  *       ray.BeginDrawing()
- *       ray.ClearBackground({r=30, g=30, b=30, a=255})
+ *       ray.ClearBackground({30, 30, 30})
+ *       ray.DrawCircleV({width/2, height/2}, 50, {255, 0, 0});
  *       ray.EndDrawing()
  *   end
  *   ray.CloseWindow()
