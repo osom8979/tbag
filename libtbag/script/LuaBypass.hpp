@@ -18,10 +18,6 @@
 #include <libtbag/script/luajit-2.0.5/lua.hpp>
 #include <libtbag/util/Structures.hpp>
 
-#ifndef TBAG_LUA_REGISTER
-#define TBAG_LUA_REGISTER(name) { #name, __lua_ray_##name }
-#endif
-
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

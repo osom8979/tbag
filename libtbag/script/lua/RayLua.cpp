@@ -21,7 +21,7 @@ namespace lua    {
 
 using namespace libtbag::ray;
 
-void lua_ray_pushvector2(lua_State * L, Vector2 const & vec)
+static void _push_vector2(lua_State * L, Vector2 const & vec)
 {
     lua_createtable(L, 0, 2);
     lua_pushnumber(L, vec.x);
@@ -30,7 +30,7 @@ void lua_ray_pushvector2(lua_State * L, Vector2 const & vec)
     lua_setfield(L, -2, "y");
 }
 
-void lua_ray_pushvector3(lua_State * L, Vector3 const & vec)
+static void _push_vector3(lua_State * L, Vector3 const & vec)
 {
     lua_createtable(L, 0, 3);
     lua_pushnumber(L, vec.x);
@@ -41,7 +41,7 @@ void lua_ray_pushvector3(lua_State * L, Vector3 const & vec)
     lua_setfield(L, -2, "z");
 }
 
-void lua_ray_pushvector4(lua_State * L, Vector4 const & vec)
+static void _push_vector4(lua_State * L, Vector4 const & vec)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, vec.x);
@@ -54,7 +54,7 @@ void lua_ray_pushvector4(lua_State * L, Vector4 const & vec)
     lua_setfield(L, -2, "w");
 }
 
-void lua_ray_pushquaternion(lua_State * L, Quaternion const & vec)
+static void _push_quaternion(lua_State * L, Quaternion const & vec)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, vec.x);
@@ -67,7 +67,7 @@ void lua_ray_pushquaternion(lua_State * L, Quaternion const & vec)
     lua_setfield(L, -2, "w");
 }
 
-void lua_ray_pushmatrix(lua_State * L, Matrix const & mat)
+static void _push_matrix(lua_State * L, Matrix const & mat)
 {
     lua_createtable(L, 16, 0);
 
@@ -108,7 +108,7 @@ void lua_ray_pushmatrix(lua_State * L, Matrix const & mat)
     lua_rawseti(L, -2, 16);
 }
 
-Color lua_ray_getcolor(lua_State * L, int num_arg)
+static Color _get_color(lua_State * L, int num_arg)
 {
     Color result = {0,};
     lua_getfield(L, num_arg, "r");
@@ -138,11 +138,11 @@ static luaL_Reg const __lua_lay_image[] = {
         { nullptr, nullptr }
 };
 
-void lua_ray_register_image(lua_State * L)
+void register_image(lua_State * L)
 {
-//    luaL_register(L, lua_ray_name(), __lua_lay_image); // Create methods table, add it to the globals.
-//    std::cout << "lua_ray_register_image(1):\n" << getPrintableStackInformation(L);
-//
+    luaL_register(L, lua_ray_name(), __lua_lay_image);
+    lua_pop(L, 1);
+
 //    luaL_newmetatable(L, METATABLE_IMAGE); // Create metatable for Foo, and add it to the Lua registry.
 //    std::cout << "lua_ray_register_image(2):\n" << getPrintableStackInformation(L);
 //
@@ -165,10 +165,9 @@ void lua_ray_register_image(lua_State * L)
 //    lua_pushvalue(L, -3);               /* dup methods table*/
 //    lua_rawset(L, -3);                  /* hide metatable: metatable.__metatable = methods */
 //    lua_pop(L, 1);                      /* drop metatable */
-//    return 1;                           /* return methods on the stack */
 }
 
-static int __lua_ray_InitWindow(lua_State * L)
+static int _InitWindow(lua_State * L)
 {
     InitWindow(luaL_checkinteger(L, 1),
                luaL_checkinteger(L, 2),
@@ -176,62 +175,62 @@ static int __lua_ray_InitWindow(lua_State * L)
     return 0;
 }
 
-static int __lua_ray_WindowShouldClose(lua_State * L)
+static int _WindowShouldClose(lua_State * L)
 {
     bool result = WindowShouldClose();
     lua_pushboolean(L, result);
     return 1;
 }
 
-static int __lua_ray_CloseWindow(lua_State * L)
+static int _CloseWindow(lua_State * L)
 {
     CloseWindow();
     return 0;
 }
 
-static int __lua_ray_IsWindowReady(lua_State * L)
+static int _IsWindowReady(lua_State * L)
 {
     lua_pushboolean(L, IsWindowReady()?1:0);
     return 1;
 }
 
-static int __lua_ray_IsWindowMinimized(lua_State * L)
+static int _IsWindowMinimized(lua_State * L)
 {
     lua_pushboolean(L, IsWindowMinimized()?1:0);
     return 1;
 }
 
-static int __lua_ray_IsWindowResized(lua_State * L)
+static int _IsWindowResized(lua_State * L)
 {
     lua_pushboolean(L, IsWindowResized()?1:0);
     return 1;
 }
 
-static int __lua_ray_IsWindowHidden(lua_State * L)
+static int _IsWindowHidden(lua_State * L)
 {
     lua_pushboolean(L, IsWindowHidden()?1:0);
     return 1;
 }
 
-static int __lua_ray_ToggleFullscreen(lua_State * L)
+static int _ToggleFullscreen(lua_State * L)
 {
     ToggleFullscreen();
     return 0;
 }
 
-static int __lua_ray_UnhideWindow(lua_State * L)
+static int _UnhideWindow(lua_State * L)
 {
     UnhideWindow();
     return 0;
 }
 
-static int __lua_ray_HideWindow(lua_State * L)
+static int _HideWindow(lua_State * L)
 {
     HideWindow();
     return 0;
 }
 
-static int __lua_ray_SetWindowIcon(lua_State * L)
+static int _SetWindowIcon(lua_State * L)
 {
     Image image;
     // TODO
@@ -239,142 +238,142 @@ static int __lua_ray_SetWindowIcon(lua_State * L)
     return 0;
 }
 
-static int __lua_ray_SetWindowTitle(lua_State * L)
+static int _SetWindowTitle(lua_State * L)
 {
     SetWindowTitle(luaL_checkstring(L, 1));
     return 0;
 }
 
-static int __lua_ray_SetWindowPosition(lua_State * L)
+static int _SetWindowPosition(lua_State * L)
 {
     SetWindowPosition(luaL_checkinteger(L, 1),
                       luaL_checkinteger(L, 2));
     return 0;
 }
 
-static int __lua_ray_SetWindowMonitor(lua_State * L)
+static int _SetWindowMonitor(lua_State * L)
 {
     SetWindowMonitor(luaL_checkinteger(L, 1));
     return 0;
 }
 
-static int __lua_ray_SetWindowMinSize(lua_State * L)
+static int _SetWindowMinSize(lua_State * L)
 {
     SetWindowMinSize(luaL_checkinteger(L, 1),
                      luaL_checkinteger(L, 2));
     return 0;
 }
 
-static int __lua_ray_SetWindowSize(lua_State * L)
+static int _SetWindowSize(lua_State * L)
 {
     SetWindowSize(luaL_checkinteger(L, 1),
                   luaL_checkinteger(L, 2));
     return 0;
 }
 
-static int __lua_ray_GetScreenWidth(lua_State * L)
+static int _GetScreenWidth(lua_State * L)
 {
     lua_pushinteger(L, GetScreenWidth());
     return 1;
 }
 
-static int __lua_ray_GetScreenHeight(lua_State * L)
+static int _GetScreenHeight(lua_State * L)
 {
     lua_pushinteger(L, GetScreenHeight());
     return 1;
 }
 
-static int __lua_ray_GetMonitorCount(lua_State * L)
+static int _GetMonitorCount(lua_State * L)
 {
     lua_pushinteger(L, GetMonitorCount());
     return 1;
 }
 
-static int __lua_ray_GetMonitorWidth(lua_State * L)
+static int _GetMonitorWidth(lua_State * L)
 {
     lua_pushinteger(L, GetMonitorWidth(luaL_checkinteger(L, 1)));
     return 1;
 }
 
-static int __lua_ray_GetMonitorHeight(lua_State * L)
+static int _GetMonitorHeight(lua_State * L)
 {
     lua_pushinteger(L, GetMonitorHeight(luaL_checkinteger(L, 1)));
     return 1;
 }
 
-static int __lua_ray_GetMonitorPhysicalWidth(lua_State * L)
+static int _GetMonitorPhysicalWidth(lua_State * L)
 {
     lua_pushinteger(L, GetMonitorPhysicalWidth(luaL_checkinteger(L, 1)));
     return 1;
 }
 
-static int __lua_ray_GetMonitorPhysicalHeight(lua_State * L)
+static int _GetMonitorPhysicalHeight(lua_State * L)
 {
     lua_pushinteger(L, GetMonitorPhysicalHeight(luaL_checkinteger(L, 1)));
     return 1;
 }
 
-static int __lua_ray_GetMonitorName(lua_State * L)
+static int _GetMonitorName(lua_State * L)
 {
     lua_pushstring(L, GetMonitorName(luaL_checkinteger(L, 1)));
     return 1;
 }
 
-static int __lua_ray_GetClipboardText(lua_State * L)
+static int _GetClipboardText(lua_State * L)
 {
     lua_pushstring(L, GetClipboardText());
     return 1;
 }
 
-static int __lua_ray_SetClipboardText(lua_State * L)
+static int _SetClipboardText(lua_State * L)
 {
     SetClipboardText(luaL_checkstring(L, 1));
     return 0;
 }
 
-static int __lua_ray_ShowCursor(lua_State * L)
+static int _ShowCursor(lua_State * L)
 {
     ShowCursor();
     return 0;
 }
 
-static int __lua_ray_HideCursor(lua_State * L)
+static int _HideCursor(lua_State * L)
 {
     HideCursor();
     return 0;
 }
 
-static int __lua_ray_IsCursorHidden(lua_State * L)
+static int _IsCursorHidden(lua_State * L)
 {
     lua_pushboolean(L, IsCursorHidden()?1:0);
     return 1;
 }
 
-static int __lua_ray_EnableCursor(lua_State * L)
+static int _EnableCursor(lua_State * L)
 {
     EnableCursor();
     return 0;
 }
 
-static int __lua_ray_DisableCursor(lua_State * L)
+static int _DisableCursor(lua_State * L)
 {
     DisableCursor();
     return 0;
 }
 
-static int __lua_ray_ClearBackground(lua_State * L)
+static int _ClearBackground(lua_State * L)
 {
-    ClearBackground(lua_ray_getcolor(L, 1));
+    ClearBackground(_get_color(L, 1));
     return 0;
 }
 
-static int __lua_ray_BeginDrawing(lua_State * L)
+static int _BeginDrawing(lua_State * L)
 {
     BeginDrawing();
     return 0;
 }
 
-static int __lua_ray_EndDrawing(lua_State * L)
+static int _EndDrawing(lua_State * L)
 {
     EndDrawing();
     return 0;
@@ -391,25 +390,25 @@ static int __lua_ray_EndDrawing(lua_State * L)
 //Vector2 GetWorldToScreen(Vector3 position, Camera camera);
 //Matrix GetCameraMatrix(Camera camera);
 
-static int __lua_ray_SetTargetFPS(lua_State * L)
+static int _SetTargetFPS(lua_State * L)
 {
     SetTargetFPS(luaL_checkinteger(L, 1));
     return 0;
 }
 
-static int __lua_ray_GetFPS(lua_State * L)
+static int _GetFPS(lua_State * L)
 {
     lua_pushinteger(L, GetFPS());
     return 1;
 }
 
-static int __lua_ray_GetFrameTime(lua_State * L)
+static int _GetFrameTime(lua_State * L)
 {
     lua_pushnumber(L, GetFrameTime());
     return 1;
 }
 
-static int __lua_ray_GetTime(lua_State * L)
+static int _GetTime(lua_State * L)
 {
     lua_pushnumber(L, GetTime());
     return 1;
@@ -503,59 +502,63 @@ static int __lua_ray_GetTime(lua_State * L)
 //void SetCameraSmoothZoomControl(int sz_key);
 //void SetCameraMoveControls(int front_key, int back_key, int right_key, int left_key, int up_key, int down_key);
 
+#ifndef RAY_REGISTER
+#define RAY_REGISTER(name) { #name, _##name }
+#endif
+
 static luaL_Reg const __lua_lay_core[] = {
         // Window-related functions
-        TBAG_LUA_REGISTER(InitWindow),
-        TBAG_LUA_REGISTER(WindowShouldClose),
-        TBAG_LUA_REGISTER(CloseWindow),
-        TBAG_LUA_REGISTER(IsWindowReady),
-        TBAG_LUA_REGISTER(IsWindowMinimized),
-        TBAG_LUA_REGISTER(IsWindowResized),
-        TBAG_LUA_REGISTER(IsWindowHidden),
-        TBAG_LUA_REGISTER(ToggleFullscreen),
-        TBAG_LUA_REGISTER(UnhideWindow),
-        TBAG_LUA_REGISTER(HideWindow),
-        TBAG_LUA_REGISTER(SetWindowIcon),
-        TBAG_LUA_REGISTER(SetWindowTitle),
-        TBAG_LUA_REGISTER(SetWindowPosition),
-        TBAG_LUA_REGISTER(SetWindowMonitor),
-        TBAG_LUA_REGISTER(SetWindowMinSize),
-        TBAG_LUA_REGISTER(SetWindowSize),
-        TBAG_LUA_REGISTER(GetScreenWidth),
-        TBAG_LUA_REGISTER(GetScreenHeight),
-        TBAG_LUA_REGISTER(GetMonitorCount),
-        TBAG_LUA_REGISTER(GetMonitorWidth),
-        TBAG_LUA_REGISTER(GetMonitorHeight),
-        TBAG_LUA_REGISTER(GetMonitorPhysicalWidth),
-        TBAG_LUA_REGISTER(GetMonitorPhysicalHeight),
-        TBAG_LUA_REGISTER(GetMonitorName),
-        TBAG_LUA_REGISTER(GetClipboardText),
-        TBAG_LUA_REGISTER(SetClipboardText),
+        RAY_REGISTER(InitWindow),
+        RAY_REGISTER(WindowShouldClose),
+        RAY_REGISTER(CloseWindow),
+        RAY_REGISTER(IsWindowReady),
+        RAY_REGISTER(IsWindowMinimized),
+        RAY_REGISTER(IsWindowResized),
+        RAY_REGISTER(IsWindowHidden),
+        RAY_REGISTER(ToggleFullscreen),
+        RAY_REGISTER(UnhideWindow),
+        RAY_REGISTER(HideWindow),
+        RAY_REGISTER(SetWindowIcon),
+        RAY_REGISTER(SetWindowTitle),
+        RAY_REGISTER(SetWindowPosition),
+        RAY_REGISTER(SetWindowMonitor),
+        RAY_REGISTER(SetWindowMinSize),
+        RAY_REGISTER(SetWindowSize),
+        RAY_REGISTER(GetScreenWidth),
+        RAY_REGISTER(GetScreenHeight),
+        RAY_REGISTER(GetMonitorCount),
+        RAY_REGISTER(GetMonitorWidth),
+        RAY_REGISTER(GetMonitorHeight),
+        RAY_REGISTER(GetMonitorPhysicalWidth),
+        RAY_REGISTER(GetMonitorPhysicalHeight),
+        RAY_REGISTER(GetMonitorName),
+        RAY_REGISTER(GetClipboardText),
+        RAY_REGISTER(SetClipboardText),
         // Cursor-related functions
-        TBAG_LUA_REGISTER(ShowCursor),
-        TBAG_LUA_REGISTER(HideCursor),
-        TBAG_LUA_REGISTER(IsCursorHidden),
-        TBAG_LUA_REGISTER(EnableCursor),
-        TBAG_LUA_REGISTER(DisableCursor),
+        RAY_REGISTER(ShowCursor),
+        RAY_REGISTER(HideCursor),
+        RAY_REGISTER(IsCursorHidden),
+        RAY_REGISTER(EnableCursor),
+        RAY_REGISTER(DisableCursor),
         // Drawing-related functions
-        TBAG_LUA_REGISTER(ClearBackground),
-        TBAG_LUA_REGISTER(BeginDrawing),
-        TBAG_LUA_REGISTER(EndDrawing),
-        //TBAG_LUA_REGISTER(BeginMode2D),
-        //TBAG_LUA_REGISTER(EndMode2D),
-        //TBAG_LUA_REGISTER(BeginMode3D),
-        //TBAG_LUA_REGISTER(EndMode3D),
-        //TBAG_LUA_REGISTER(BeginTextureMode),
-        //TBAG_LUA_REGISTER(EndTextureMode),
+        RAY_REGISTER(ClearBackground),
+        RAY_REGISTER(BeginDrawing),
+        RAY_REGISTER(EndDrawing),
+        //RAY_REGISTER(BeginMode2D),
+        //RAY_REGISTER(EndMode2D),
+        //RAY_REGISTER(BeginMode3D),
+        //RAY_REGISTER(EndMode3D),
+        //RAY_REGISTER(BeginTextureMode),
+        //RAY_REGISTER(EndTextureMode),
         // Screen-space-related functions
-        //TBAG_LUA_REGISTER(GetMouseRay),
-        //TBAG_LUA_REGISTER(GetWorldToScreen),
-        //TBAG_LUA_REGISTER(GetCameraMatrix),
+        //RAY_REGISTER(GetMouseRay),
+        //RAY_REGISTER(GetWorldToScreen),
+        //RAY_REGISTER(GetCameraMatrix),
         // Timing-related functions
-        TBAG_LUA_REGISTER(SetTargetFPS),
-        TBAG_LUA_REGISTER(GetFPS),
-        TBAG_LUA_REGISTER(GetFrameTime),
-        TBAG_LUA_REGISTER(GetTime),
+        RAY_REGISTER(SetTargetFPS),
+        RAY_REGISTER(GetFPS),
+        RAY_REGISTER(GetFrameTime),
+        RAY_REGISTER(GetTime),
         { nullptr, nullptr }
 };
 
@@ -566,13 +569,11 @@ bool luaopen_ray_core(lua_State * L)
     return true;
 }
 
-
 bool luaopen_ray_common(lua_State * L)
 {
-    lua_ray_register_image(L);
+    register_image(L);
     return true;
 }
-
 
 //void DrawPixel(int pos_x, int pos_y, Color color);
 //void DrawPixelV(Vector2 position, Color color);
