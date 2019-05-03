@@ -130,13 +130,6 @@ public:
     inline Impl const * operator ->() const TBAG_NOEXCEPT { return get(); }
 
 public:
-    /**
-     * Implemented for std::less<> compatibility.
-     *
-     * @see std::set
-     * @see std::map
-     * @see std::less
-     */
     friend inline bool operator <(Storage const & x, Storage const & y) TBAG_NOEXCEPT
     {
         return x.get() < y.get();

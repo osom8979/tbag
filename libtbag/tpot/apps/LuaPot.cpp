@@ -753,6 +753,11 @@ int LuaPot::onMain()
     argv.push_back(nullptr);
     assert(!argv.empty());
 
+    if (!storage().lua().isInitialized()) {
+        storage().lua().initDefault();
+        tDLogN("LuaPot::onMain() The LuaPot app is forces a lua machine to initialize.");
+    }
+
     tDLogIfD(params().verbose && !original_args.empty(), "LuaPot::onMain() Passed arguments: {}",
              libtbag::string::mergeTokens(original_args));
     return LuaPotBackend(static_cast<int>(argv.size()), argv.data(), params().storage->lua.state()).run();

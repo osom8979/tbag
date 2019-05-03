@@ -517,18 +517,18 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     if (prop.lua.exists) {
         if (prop.lua.init) {
             storage.initLuaDefault();
+            if (prop.module.exists) {
+                storage.appendLuaCPath();
+            }
+            storage.appendLuaPath();
+            if (prop.luarocks.exists) {
+                storage.appendLuaRocksPath();
+                storage.appendLuaRocksCPath();
+            }
         }
-        if (prop.module.exists) {
-            storage.appendLuaCPath();
-        }
-        storage.appendLuaPath();
         if (!prop.lua.name.empty()) {
             storage.runLuaScriptFile(prop.lua.name);
         }
-    }
-    if (prop.luarocks.exists) {
-        storage.appendLuaRocksPath();
-        storage.appendLuaRocksCPath();
     }
 
     auto & asset = storage.asset();

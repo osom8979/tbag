@@ -95,25 +95,29 @@ private:
     void initDefaultTbagTable();
 
 public:
+    void create();
     void initDefault();
 
 public:
     void reset();
 
 public:
+    bool existsLuaPath() const;
     std::string getLuaPath() const;
     std::vector<std::string> getLuaPaths() const;
-    void setLuaPath(std::string const & path);
+    bool setLuaPath(std::string const & path);
     bool appendLuaPath(std::string const & path);
 
 public:
+    bool existsLuaCPath() const;
     std::string getLuaCPath() const;
     std::vector<std::string> getLuaCPaths() const;
-    void setLuaCPath(std::string const & path);
+    bool setLuaCPath(std::string const & path);
     bool appendLuaCPath(std::string const & path);
 
 public:
     std::string getTbagVersion() const;
+    bool isInitialized() const;
 
 public:
     bool runScriptFile(std::string const & path);
