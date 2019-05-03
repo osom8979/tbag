@@ -9,6 +9,7 @@
 #include <libtbag/ray/RayBypass.hpp>
 #include <libtbag/string/Format.hpp>
 
+#include <cstring>
 #include <iostream>
 
 // -------------------
@@ -20,7 +21,7 @@ namespace lua    {
 
 using namespace libtbag::ray;
 
-static void _push_vector2(lua_State * L, Vector2 const & vec)
+static void luaL_pushvector2(lua_State * L, Vector2 const & vec)
 {
     lua_createtable(L, 0, 2);
     lua_pushnumber(L, vec.x);
@@ -29,7 +30,7 @@ static void _push_vector2(lua_State * L, Vector2 const & vec)
     lua_setfield(L, -2, "y");
 }
 
-static void _push_vector3(lua_State * L, Vector3 const & vec)
+static void luaL_pushvector3(lua_State * L, Vector3 const & vec)
 {
     lua_createtable(L, 0, 3);
     lua_pushnumber(L, vec.x);
@@ -40,7 +41,7 @@ static void _push_vector3(lua_State * L, Vector3 const & vec)
     lua_setfield(L, -2, "z");
 }
 
-static void _push_vector4(lua_State * L, Vector4 const & vec)
+static void luaL_pushvector4(lua_State * L, Vector4 const & vec)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, vec.x);
@@ -53,7 +54,7 @@ static void _push_vector4(lua_State * L, Vector4 const & vec)
     lua_setfield(L, -2, "w");
 }
 
-static void _push_quaternion(lua_State * L, Quaternion const & vec)
+static void luaL_pushquaternion(lua_State * L, Quaternion const & vec)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, vec.x);
@@ -66,7 +67,7 @@ static void _push_quaternion(lua_State * L, Quaternion const & vec)
     lua_setfield(L, -2, "w");
 }
 
-static void _push_matrix(lua_State * L, Matrix const & mat)
+static void luaL_pushmatrix(lua_State * L, Matrix const & mat)
 {
     lua_createtable(L, 16, 0);
 
@@ -107,7 +108,7 @@ static void _push_matrix(lua_State * L, Matrix const & mat)
     lua_rawseti(L, -2, 16);
 }
 
-static void lua_pushrectangle(lua_State * L, Rectangle const & rect)
+static void luaL_pushrectangle(lua_State * L, Rectangle const & rect)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, rect.x);
@@ -118,6 +119,21 @@ static void lua_pushrectangle(lua_State * L, Rectangle const & rect)
     lua_setfield(L, -2, "width");
     lua_pushnumber(L, rect.height);
     lua_setfield(L, -2, "height");
+}
+
+static void luaL_pushtexture2d(lua_State * L, Texture2D const & tex)
+{
+    lua_createtable(L, 0, 5);
+    lua_pushinteger(L, tex.id);
+    lua_setfield(L, -2, "id");
+    lua_pushinteger(L, tex.width);
+    lua_setfield(L, -2, "width");
+    lua_pushinteger(L, tex.height);
+    lua_setfield(L, -2, "height");
+    lua_pushinteger(L, tex.mipmaps);
+    lua_setfield(L, -2, "mipmaps");
+    lua_pushinteger(L, tex.format);
+    lua_setfield(L, -2, "format");
 }
 
 static Vector2 luaL_checkvector2(lua_State * L, int num_arg)
@@ -265,10 +281,10 @@ static Rectangle luaL_checkrectangle(lua_State * L, int num_arg)
     return result;
 }
 
-static Texture2D lual_checktexture2d(lua_State * L, int num_arg)
+static Texture2D luaL_checktexture2d(lua_State * L, int num_arg)
 {
     Texture2D result = {0,};
-    if (lua_objlen(L, num_arg) >= 4) {
+    if (lua_objlen(L, num_arg) >= 5) {
         lua_rawgeti(L, num_arg, 1);
         result.id = lua_tointeger(L, -1);
         lua_rawgeti(L, num_arg, 2);
@@ -296,7 +312,42 @@ static Texture2D lual_checktexture2d(lua_State * L, int num_arg)
     return result;
 }
 
-static void _register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
+static NPatchInfo lual_checknpatchinfo(lua_State * L, int num_arg)
+{
+    NPatchInfo result = {0,};
+    if (lua_objlen(L, num_arg) >= 6) {
+        lua_rawgeti(L, num_arg, 1);
+        result.sourceRec = luaL_checkrectangle(L, lua_absindex(L, -1));
+        lua_rawgeti(L, num_arg, 2);
+        result.left = luaL_checkinteger(L, -1);
+        lua_rawgeti(L, num_arg, 3);
+        result.top = luaL_checkinteger(L, -1);
+        lua_rawgeti(L, num_arg, 4);
+        result.right = luaL_checkinteger(L, -1);
+        lua_rawgeti(L, num_arg, 5);
+        result.bottom = luaL_checkinteger(L, -1);
+        lua_rawgeti(L, num_arg, 6);
+        result.type = luaL_checkinteger(L, -1);
+        lua_pop(L, 6);
+    } else {
+        lua_getfield(L, num_arg, "sourceRec");
+        result.sourceRec = luaL_checkrectangle(L, lua_absindex(L, -1));
+        lua_getfield(L, num_arg, "left");
+        result.left = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "top");
+        result.top = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "right");
+        result.right = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "bottom");
+        result.bottom = luaL_checkinteger(L, -1);
+        lua_getfield(L, num_arg, "type");
+        result.type = luaL_checkinteger(L, -1);
+        lua_pop(L, 6);
+    }
+    return result;
+}
+
+static void lua_register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
 {
     luaL_newmetatable(L, name);
     {
@@ -311,6 +362,31 @@ static void _register_metatable(lua_State * L, char const * name, luaL_Reg const
 
 TBAG_CONSTEXPR static char const * const METATABLE_IMAGE = "Image";
 
+static Image * luaL_pushimage(lua_State * L, Image const * copy_image = nullptr)
+{
+    auto * image = (Image*)lua_newuserdata(L, sizeof(Image));
+    assert(image != nullptr);
+    if (copy_image) {
+        memcpy((void*)image, (void const *)copy_image, sizeof(Image));
+    } else {
+        memset((void*)image, 0x00, sizeof(Image));
+    }
+    luaL_getmetatable(L, METATABLE_IMAGE);
+    lua_setmetatable(L, -2);
+    return image;
+}
+
+static Image * luaL_checkimage(lua_State *L, int num_arg)
+{
+    luaL_checktype(L, num_arg, LUA_TUSERDATA);
+    auto * image = (Image*)luaL_checkudata(L, num_arg, METATABLE_IMAGE);
+    if (image == nullptr) {
+        luaL_typerror(L, num_arg, METATABLE_IMAGE);
+        return nullptr;
+    }
+    return image;
+}
+
 static int _Image(lua_State * L)
 {
     // clang-format off
@@ -320,7 +396,7 @@ static int _Image(lua_State * L)
     auto const format  = luaL_optint(L, 4, 0);
     // clang-format on
 
-    auto * image = (Image*)lua_newuserdata(L, sizeof(Image));
+    auto * image = luaL_pushimage(L);
     assert(image != nullptr);
 
     // clang-format off
@@ -330,27 +406,19 @@ static int _Image(lua_State * L)
     image->mipmaps = mipmaps;
     image->format  = format;
     // clang-format on
-
-    luaL_getmetatable(L, METATABLE_IMAGE);
-    lua_setmetatable(L, -2);
     return 1;
 }
 
 static int _Image_gc(lua_State * L)
 {
-    auto * image = (Image*)lua_touserdata(L, 1);
-    if (image == nullptr) {
-        luaL_typerror(L, 1, METATABLE_IMAGE);
-        return 0;
-    }
+    luaL_checkimage(L, 1);
     return 0;
 }
 
 static int _Image_tostring(lua_State * L)
 {
-    auto * image = (Image*)lua_touserdata(L, 1);
+    auto * image = luaL_checkimage(L, 1);
     if (image == nullptr) {
-        luaL_typerror(L, 1, METATABLE_IMAGE);
         lua_pushstring(L, METATABLE_IMAGE);
         return 1;
     }
@@ -432,9 +500,7 @@ static int _HideWindow(lua_State * L)
 
 static int _SetWindowIcon(lua_State * L)
 {
-    Image image;
-    // TODO
-    SetWindowIcon(image);
+    SetWindowIcon(*luaL_checkimage(L, 1));
     return 0;
 }
 
@@ -984,7 +1050,7 @@ static int _DrawPolyExLines(lua_State * L)
 
 static int _SetShapesTexture(lua_State * L)
 {
-    SetShapesTexture(lual_checktexture2d(L, 1),
+    SetShapesTexture(luaL_checktexture2d(L, 1),
                      luaL_checkrectangle(L, 2));
     return 0;
 }
@@ -1020,7 +1086,7 @@ int _GetCollisionRec(lua_State * L)
 {
     auto const result = GetCollisionRec(luaL_checkrectangle(L, 1),
                                         luaL_checkrectangle(L, 2));
-    lua_pushrectangle(L, result);
+    luaL_pushrectangle(L, result);
     return 1;
 }
 
@@ -1051,6 +1117,259 @@ int _CheckCollisionPointTriangle(lua_State * L)
     return 1;
 }
 
+int _LoadImage(lua_State * L)
+{
+    auto const result = LoadImage(luaL_checkstring(L, 1));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+//Image LoadImageEx(Color * pixels, int width, int height);
+//Image LoadImagePro(void * data, int width, int height, int format);
+//Image LoadImageRaw(char const * file_name, int width, int height, int format, int header_size);
+//void ExportImage(Image image, char const * file_name);
+//void ExportImageAsCode(Image image, char const * file_name);
+
+int _LoadTexture(lua_State * L)
+{
+    auto const result = LoadTexture(luaL_checkstring(L, 1));
+    luaL_pushtexture2d(L, result);
+    return 1;
+}
+
+int _LoadTextureFromImage(lua_State * L)
+{
+    luaL_pushtexture2d(L, LoadTextureFromImage(*luaL_checkimage(L, 1)));
+    return 1;
+}
+
+//TextureCubemap LoadTextureCubemap(Image image, int layout_type);
+//RenderTexture2D LoadRenderTexture(int width, int height);
+
+int _UnloadImage(lua_State * L)
+{
+    UnloadImage(*luaL_checkimage(L, 1));
+    return 0;
+}
+
+int _UnloadTexture(lua_State * L)
+{
+    UnloadTexture(luaL_checktexture2d(L, 1));
+    return 0;
+}
+
+//void UnloadRenderTexture(RenderTexture2D target);
+//Color * GetImageData(Image image);
+//Vector4 * GetImageDataNormalized(Image image);
+//int GetPixelDataSize(int width, int height, int format);
+//Image GetTextureData(Texture2D texture);
+//Image GetScreenData();
+//void UpdateTexture(Texture2D texture, void const * pixels);
+
+//Image LoadImage(char const * file_name);
+//Image LoadImageEx(Color * pixels, int width, int height);
+//Image LoadImagePro(void * data, int width, int height, int format);
+//Image LoadImageRaw(char const * file_name, int width, int height, int format, int header_size);
+//void ExportImage(Image image, char const * file_name);
+//void ExportImageAsCode(Image image, char const * file_name);
+//Texture2D LoadTexture(char const * file_name);
+//Texture2D LoadTextureFromImage(Image image);
+//TextureCubemap LoadTextureCubemap(Image image, int layout_type);
+//RenderTexture2D LoadRenderTexture(int width, int height);
+//void UnloadImage(Image image);
+//void UnloadTexture(Texture2D texture);
+//void UnloadRenderTexture(RenderTexture2D target);
+//Color * GetImageData(Image image);
+//Vector4 * GetImageDataNormalized(Image image);
+//int GetPixelDataSize(int width, int height, int format);
+//Image GetTextureData(Texture2D texture);
+//Image GetScreenData();
+//void UpdateTexture(Texture2D texture, void const * pixels);
+
+//Image ImageCopy(Image image);
+//void ImageToPOT(Image * image, Color fill_color);
+//void ImageFormat(Image * image, int new_format);
+//void ImageAlphaMask(Image * image, Image alpha_mask);
+//void ImageAlphaClear(Image * image, Color color, float threshold);
+//void ImageAlphaCrop(Image * image, float threshold);
+//void ImageAlphaPremultiply(Image * image);
+//void ImageCrop(Image * image, Rectangle crop);
+//void ImageResize(Image * image, int new_width, int new_height);
+//void ImageResizeNN(Image * image, int new_width, int new_height);
+//void ImageResizeCanvas(Image * image, int new_width, int new_height, int offset_x, int offset_y, Color color);
+//void ImageMipmaps(Image * image);
+//void ImageDither(Image * image, int r_bpp, int g_bpp, int b_bpp, int a_bpp);
+//Color * ImageExtractPalette(Image image, int maxPalette_size, int * extract_count);
+//Image ImageText(char const * text, int font_size, Color color);
+//Image ImageTextEx(Font font, char const * text, float font_size, float spacing, Color tint);
+//void ImageDraw(Image * dst, Image src, Rectangle src_rec, Rectangle dst_rec);
+//void ImageDrawRectangle(Image * dst, Rectangle rec, Color color);
+//void ImageDrawRectangleLines(Image * dst, Rectangle rec, int thick, Color color);
+//void ImageDrawText(Image * dst, Vector2 position, char const * text, int font_size, Color color);
+//void ImageDrawTextEx(Image * dst, Vector2 position, Font font, char const * text, float font_size, float spacing, Color color);
+//void ImageFlipVertical(Image * image);
+//void ImageFlipHorizontal(Image * image);
+//void ImageRotateCW(Image * image);
+//void ImageRotateCCW(Image * image);
+//void ImageColorTint(Image * image, Color color);
+//void ImageColorInvert(Image * image);
+//void ImageColorGrayscale(Image * image);
+//void ImageColorContrast(Image * image, float contrast);
+//void ImageColorBrightness(Image * image, int brightness);
+//void ImageColorReplace(Image * image, Color color, Color replace);
+
+int _GenImageColor(lua_State * L)
+{
+    auto const result = GenImageColor(luaL_checkinteger(L, 1),
+                                      luaL_checkinteger(L, 2),
+                                      luaL_checkcolor(L, 3));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+int _GenImageGradientV(lua_State * L)
+{
+    auto const result = GenImageGradientV(luaL_checkinteger(L, 1),
+                                          luaL_checkinteger(L, 2),
+                                          luaL_checkcolor(L, 3),
+                                          luaL_checkcolor(L, 4));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+int _GenImageGradientH(lua_State * L)
+{
+    auto const result = GenImageGradientH(luaL_checkinteger(L, 1),
+                                          luaL_checkinteger(L, 2),
+                                          luaL_checkcolor(L, 3),
+                                          luaL_checkcolor(L, 4));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+int _GenImageGradientRadial(lua_State * L)
+{
+    auto const result = GenImageGradientRadial(luaL_checkinteger(L, 1),
+                                               luaL_checkinteger(L, 2),
+                                               luaL_checknumber(L, 3),
+                                               luaL_checkcolor(L, 4),
+                                               luaL_checkcolor(L, 5));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+int _GenImageChecked(lua_State * L)
+{
+    auto const result = GenImageChecked(luaL_checkinteger(L, 1),
+                                        luaL_checkinteger(L, 2),
+                                        luaL_checkinteger(L, 3),
+                                        luaL_checkinteger(L, 4),
+                                        luaL_checkcolor(L, 5),
+                                        luaL_checkcolor(L, 6));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+int _GenImageWhiteNoise(lua_State * L)
+{
+    auto const result = GenImageWhiteNoise(luaL_checkinteger(L, 1),
+                                           luaL_checkinteger(L, 2),
+                                           luaL_checknumber(L, 3));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+int _GenImagePerlinNoise(lua_State * L)
+{
+    auto const result = GenImagePerlinNoise(luaL_checkinteger(L, 1),
+                                            luaL_checkinteger(L, 2),
+                                            luaL_checkinteger(L, 3),
+                                            luaL_checkinteger(L, 4),
+                                            luaL_checknumber(L, 5));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+int _GenImageCellular(lua_State * L)
+{
+    auto const result = GenImageCellular(luaL_checkinteger(L, 1),
+                                         luaL_checkinteger(L, 2),
+                                         luaL_checkinteger(L, 3));
+    luaL_pushimage(L, &result);
+    return 1;
+}
+
+//void GenTextureMipmaps(Texture2D * texture);
+//void SetTextureFilter(Texture2D texture, int filter_mode);
+//void SetTextureWrap(Texture2D texture, int wrap_mode);
+
+int _DrawTexture(lua_State * L)
+{
+    DrawTexture(luaL_checktexture2d(L, 1),
+                luaL_checkinteger(L, 2),
+                luaL_checkinteger(L, 3),
+                luaL_checkcolor(L, 4));
+    return 0;
+}
+
+int _DrawTextureV(lua_State * L)
+{
+    DrawTextureV(luaL_checktexture2d(L, 1),
+                 luaL_checkvector2(L, 2),
+                 luaL_checkcolor(L, 3));
+    return 0;
+}
+
+int _DrawTextureEx(lua_State * L)
+{
+    DrawTextureEx(luaL_checktexture2d(L, 1),
+                  luaL_checkvector2(L, 2),
+                  luaL_checknumber(L, 3),
+                  luaL_checknumber(L, 4),
+                  luaL_checkcolor(L, 5));
+    return 0;
+}
+
+int _DrawTextureRec(lua_State * L)
+{
+    DrawTextureRec(luaL_checktexture2d(L, 1),
+                   luaL_checkrectangle(L, 2),
+                   luaL_checkvector2(L, 3),
+                   luaL_checkcolor(L, 4));
+    return 0;
+}
+
+int _DrawTextureQuad(lua_State * L)
+{
+    DrawTextureQuad(luaL_checktexture2d(L, 1),
+                    luaL_checkvector2(L, 2),
+                    luaL_checkvector2(L, 3),
+                    luaL_checkrectangle(L, 4),
+                    luaL_checkcolor(L, 5));
+    return 0;
+}
+
+int _DrawTexturePro(lua_State * L)
+{
+    DrawTexturePro(luaL_checktexture2d(L, 1),
+                   luaL_checkrectangle(L, 2),
+                   luaL_checkrectangle(L, 3),
+                   luaL_checkvector2(L, 4),
+                   luaL_checknumber(L, 5),
+                   luaL_checkcolor(L, 6));
+    return 0;
+}
+
+int _DrawTextureNPatch(lua_State * L)
+{
+    DrawTextureNPatch(luaL_checktexture2d(L, 1),
+                      lual_checknpatchinfo(L, 2),
+                      luaL_checkrectangle(L, 3),
+                      luaL_checkvector2(L, 4),
+                      luaL_checknumber(L, 5),
+                      luaL_checkcolor(L, 6));
+    return 0;
+}
 
 #ifndef RAY_REGISTER
 #define RAY_REGISTER(name) { #name, _##name }
@@ -1157,82 +1476,87 @@ static luaL_Reg const __lua_lay_core[] = {
         RAY_REGISTER(CheckCollisionPointCircle),
         RAY_REGISTER(CheckCollisionPointTriangle),
 
+        // [TEXTURES] Image/Texture2D data loading/unloading/saving functions
+        RAY_REGISTER(LoadImage),
+        // RAY_REGISTER(LoadImageEx),
+        // RAY_REGISTER(LoadImagePro),
+        // RAY_REGISTER(LoadImageRaw),
+        // RAY_REGISTER(ExportImage),
+        // RAY_REGISTER(ExportImageAsCode),
+         RAY_REGISTER(LoadTexture),
+         RAY_REGISTER(LoadTextureFromImage),
+        // RAY_REGISTER(LoadTextureCubemap),
+        // RAY_REGISTER(LoadRenderTexture),
+        RAY_REGISTER(UnloadImage),
+        RAY_REGISTER(UnloadTexture),
+        // RAY_REGISTER(UnloadRenderTexture),
+        // RAY_REGISTER(GetImageData),
+        // RAY_REGISTER(GetImageDataNormalized),
+        // RAY_REGISTER(GetPixelDataSize),
+        // RAY_REGISTER(GetTextureData),
+        // RAY_REGISTER(GetScreenData),
+        // RAY_REGISTER(UpdateTexture),
+
+        // [TEXTURES] Image manipulation functions
+        // RAY_REGISTER(ImageCopy),
+        // RAY_REGISTER(ImageToPOT),
+        // RAY_REGISTER(ImageFormat),
+        // RAY_REGISTER(ImageAlphaMask),
+        // RAY_REGISTER(ImageAlphaClear),
+        // RAY_REGISTER(ImageAlphaCrop),
+        // RAY_REGISTER(ImageAlphaPremultiply),
+        // RAY_REGISTER(ImageCrop),
+        // RAY_REGISTER(ImageResize),
+        // RAY_REGISTER(ImageResizeNN),
+        // RAY_REGISTER(ImageResizeCanvas),
+        // RAY_REGISTER(ImageMipmaps),
+        // RAY_REGISTER(ImageDither),
+        // RAY_REGISTER(ImageExtractPalette),
+        // RAY_REGISTER(ImageText),
+        // RAY_REGISTER(ImageTextEx),
+        // RAY_REGISTER(ImageDraw),
+        // RAY_REGISTER(ImageDrawRectangle),
+        // RAY_REGISTER(ImageDrawRectangleLines),
+        // RAY_REGISTER(ImageDrawText),
+        // RAY_REGISTER(ImageDrawTextEx),
+        // RAY_REGISTER(ImageFlipVertical),
+        // RAY_REGISTER(ImageFlipHorizontal),
+        // RAY_REGISTER(ImageRotateCW),
+        // RAY_REGISTER(ImageRotateCCW),
+        // RAY_REGISTER(ImageColorTint),
+        // RAY_REGISTER(ImageColorInvert),
+        // RAY_REGISTER(ImageColorGrayscale),
+        // RAY_REGISTER(ImageColorContrast),
+        // RAY_REGISTER(ImageColorBrightness),
+        // RAY_REGISTER(ImageColorReplace),
+
+        // [TEXTURES] Image generation functions
+        RAY_REGISTER(GenImageColor),
+        RAY_REGISTER(GenImageGradientV),
+        RAY_REGISTER(GenImageGradientH),
+        RAY_REGISTER(GenImageGradientRadial),
+        RAY_REGISTER(GenImageChecked),
+        RAY_REGISTER(GenImageWhiteNoise),
+        RAY_REGISTER(GenImagePerlinNoise),
+        RAY_REGISTER(GenImageCellular),
+
+        // [TEXTURES] Texture2D configuration functions
+        // RAY_REGISTER(GenTextureMipmaps),
+        // RAY_REGISTER(SetTextureFilter),
+        // RAY_REGISTER(SetTextureWrap),
+
+        // [TEXTURES] Texture2D drawing functions
+         RAY_REGISTER(DrawTexture),
+         RAY_REGISTER(DrawTextureV),
+         RAY_REGISTER(DrawTextureEx),
+         RAY_REGISTER(DrawTextureRec),
+         RAY_REGISTER(DrawTextureQuad),
+         RAY_REGISTER(DrawTexturePro),
+         RAY_REGISTER(DrawTextureNPatch),
+
         { nullptr, nullptr }
 };
 
-//Image LoadImage(char const * file_name);
-//Image LoadImageEx(Color * pixels, int width, int height);
-//Image LoadImagePro(void * data, int width, int height, int format);
-//Image LoadImageRaw(char const * file_name, int width, int height, int format, int header_size);
-//void ExportImage(Image image, char const * file_name);
-//void ExportImageAsCode(Image image, char const * file_name);
-//Texture2D LoadTexture(char const * file_name);
-//Texture2D LoadTextureFromImage(Image image);
-//TextureCubemap LoadTextureCubemap(Image image, int layout_type);
-//RenderTexture2D LoadRenderTexture(int width, int height);
-//void UnloadImage(Image image);
-//void UnloadTexture(Texture2D texture);
-//void UnloadRenderTexture(RenderTexture2D target);
-//Color * GetImageData(Image image);
-//Vector4 * GetImageDataNormalized(Image image);
-//int GetPixelDataSize(int width, int height, int format);
-//Image GetTextureData(Texture2D texture);
-//Image GetScreenData();
-//void UpdateTexture(Texture2D texture, void const * pixels);
-//
-//Image ImageCopy(Image image);
-//void ImageToPOT(Image * image, Color fill_color);
-//void ImageFormat(Image * image, int new_format);
-//void ImageAlphaMask(Image * image, Image alpha_mask);
-//void ImageAlphaClear(Image * image, Color color, float threshold);
-//void ImageAlphaCrop(Image * image, float threshold);
-//void ImageAlphaPremultiply(Image * image);
-//void ImageCrop(Image * image, Rectangle crop);
-//void ImageResize(Image * image, int new_width, int new_height);
-//void ImageResizeNN(Image * image, int new_width, int new_height);
-//void ImageResizeCanvas(Image * image, int new_width, int new_height, int offset_x, int offset_y, Color color);
-//void ImageMipmaps(Image * image);
-//void ImageDither(Image * image, int r_bpp, int g_bpp, int b_bpp, int a_bpp);
-//Color * ImageExtractPalette(Image image, int maxPalette_size, int * extract_count);
-//Image ImageText(char const * text, int font_size, Color color);
-//Image ImageTextEx(Font font, char const * text, float font_size, float spacing, Color tint);
-//void ImageDraw(Image * dst, Image src, Rectangle src_rec, Rectangle dst_rec);
-//void ImageDrawRectangle(Image * dst, Rectangle rec, Color color);
-//void ImageDrawRectangleLines(Image * dst, Rectangle rec, int thick, Color color);
-//void ImageDrawText(Image * dst, Vector2 position, char const * text, int font_size, Color color);
-//void ImageDrawTextEx(Image * dst, Vector2 position, Font font, char const * text, float font_size, float spacing, Color color);
-//void ImageFlipVertical(Image * image);
-//void ImageFlipHorizontal(Image * image);
-//void ImageRotateCW(Image * image);
-//void ImageRotateCCW(Image * image);
-//void ImageColorTint(Image * image, Color color);
-//void ImageColorInvert(Image * image);
-//void ImageColorGrayscale(Image * image);
-//void ImageColorContrast(Image * image, float contrast);
-//void ImageColorBrightness(Image * image, int brightness);
-//void ImageColorReplace(Image * image, Color color, Color replace);
-//
-//Image GenImageColor(int width, int height, Color color);
-//Image GenImageGradientV(int width, int height, Color top, Color bottom);
-//Image GenImageGradientH(int width, int height, Color left, Color right);
-//Image GenImageGradientRadial(int width, int height, float density, Color inner, Color outer);
-//Image GenImageChecked(int width, int height, int checks_x, int checks_y, Color col1, Color col2);
-//Image GenImageWhiteNoise(int width, int height, float factor);
-//Image GenImagePerlinNoise(int width, int height, int offset_x, int offset_y, float scale);
-//Image GenImageCellular(int width, int height, int tile_size);
-//
-//void GenTextureMipmaps(Texture2D * texture);
-//void SetTextureFilter(Texture2D texture, int filter_mode);
-//void SetTextureWrap(Texture2D texture, int wrap_mode);
-//
-//void DrawTexture(Texture2D texture, int pos_x, int pos_y, Color tint);
-//void DrawTextureV(Texture2D texture, Vector2 position, Color tint);
-//void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);
-//void DrawTextureRec(Texture2D texture, Rectangle source_rec, Vector2 position, Color tint);
-//void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle quad, Color tint);
-//void DrawTexturePro(Texture2D texture, Rectangle source_rec, Rectangle dest_rec, Vector2 origin, float rotation, Color tint);
-//void DrawTextureNPatch(Texture2D texture, NPatchInfo n_patch_info, Rectangle dest_rec, Vector2 origin, float rotation, Color tint);
-//
 //Font GetFontDefault();
 //Font LoadFont(char const * file_name);
 //Font LoadFontEx(char const * file_name, int font_size, int * font_chars, int chars_count);
@@ -1430,7 +1754,7 @@ bool luaopen_ray(lua_State * L)
 {
     luaL_register(L, lua_ray_name(), __lua_lay_core);
     {
-        _register_metatable(L, METATABLE_IMAGE, __lua_lay_image);
+        lua_register_metatable(L, METATABLE_IMAGE, __lua_lay_image);
     }
     lua_pop(L, 1);
     return true;

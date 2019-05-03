@@ -7,7 +7,7 @@
  * @remarks
  *  Example:
  *  @code{.lua}
- *   -- Core - Basic
+ *   -- Core - Basic window
  *
  *   width = 800
  *   height = 450
@@ -15,12 +15,22 @@
  *   ray.InitWindow(width, height, "Basic window")
  *   ray.SetTargetFPS(60)
  *
+ *   gradient = ray.GenImageGradientV(400, 400, {255, 0, 0}, {0, 0, 255});
+ *   texture = ray.LoadTextureFromImage(gradient);
+ *   ray.UnloadImage(gradient);
+ *   gradient = nil
+ *
  *   while not ray.WindowShouldClose() do
  *       ray.BeginDrawing()
  *       ray.ClearBackground({30, 30, 30})
+ *       ray.DrawTexture(texture, 0, 0, {255, 255, 255});
  *       ray.DrawCircleV({width/2, height/2}, 50, {255, 0, 0});
  *       ray.EndDrawing()
  *   end
+ *
+ *   ray.UnloadTexture(texture);
+ *   texture = nil
+ *
  *   ray.CloseWindow()
  *  @endcode
  */
