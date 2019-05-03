@@ -15,10 +15,11 @@ extern "C" {
 
 #include <libtbag/script/LuaBypass.hpp>
 #include <libtbag/string/Format.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Err.hpp>
 
-#include <sstream>
+#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -548,10 +549,14 @@ int luaL_newmetatable(lua_State * L, char const * tname)
     if (CODE == 0) {
         tDLogD("luaL_newmetatable() Exists MetaTable: {}", tname);
     } else {
-        // Insert '__name = tname' into the table.
         // Insert 'tname = [New Table]' into the registry.
         // Then, push the table onto the stack.
         tDLogD("luaL_newmetatable() Create new MetaTable: {}", tname);
+#if defined(LUA_VERSION_NUM) && (LUA_VERSION_NUM <= 501)
+        ::lua_pushlstring(L, "__name", 6);
+        ::lua_pushlstring(L, tname, ::strlen(tname));
+        ::lua_rawset(L, -3);
+#endif
     }
     return CODE;
 }
@@ -773,62 +778,42 @@ Pairs getRegistryPairs(lua_State * L)
     return result;
 }
 
-std::string getPrintableStackInformation(lua_State * L)
+void luadebug_printstack(lua_State * L)
 {
-    using namespace libtbag::string;
-
-    int max_length = 0;
     int const TOP = ::lua_gettop(L);
-    std::vector<std::string> stack_infos;
-    for (int i = 0; i < TOP; ++i) {
-        int const INDEX = -(i+1);
-        int const TYPE = ::lua_type(L, INDEX);
-        assert(TYPE != LUA_TNONE);
-        auto const TYPE_NAME = ::lua_typename(L, TYPE);
+    if (TOP == 0) {
+        std::cout << "||" << std::endl;
+    } else {
+        std::cout << '|';
+    }
 
-        std::string info;
+    for (int i = 1; i <= TOP; ++i) {
+        auto const TYPE = ::lua_type(L, i);
         switch (TYPE) {
         case LUA_TNUMBER:
-            info = fformat("|{:0>2}| {} ({}) |", TOP+INDEX, TYPE_NAME, ::lua_tonumber(L, INDEX));
+            std::cout << ::lua_tonumber(L, i);
             break;
         case LUA_TBOOLEAN:
-            info = fformat("|{:0>2}| {} ({}) |", TOP+INDEX, TYPE_NAME, ::lua_toboolean(L, INDEX));
+            std::cout << (::lua_toboolean(L, i) == 1 ? "true" : "false");
             break;
         case LUA_TSTRING:
-            info = fformat("|{:0>2}| {} ({}) |", TOP+INDEX, TYPE_NAME, ::lua_tolstring(L, INDEX, nullptr));
+            std::cout << '"' << ::lua_tolstring(L, i, nullptr) << '"';
+            break;
+        case LUA_TTABLE:
+            if (::luaL_getmetafield(L, i, "__name")) {
+                std::cout << ::lua_tolstring(L, -1, nullptr);
+                ::lua_settop(L, -2);
+            } else {
+                std::cout << "table";
+            }
             break;
         default:
-            info = fformat("|{:0>2}| {} |", TOP+INDEX, TYPE_NAME);
+            std::cout << ::lua_typename(L, TYPE);
             break;
         }
-
-        stack_infos.push_back(info);
-        if (info.size() > max_length) {
-            max_length = info.size();
-        }
-
-//        lua_Debug ar = {0,};
-//        code = ::lua_getstack(L, i, &ar);
-//        assert(code);
-//        code = ::lua_getinfo(L, "nSl", &ar);
-//        assert(code);
-//        using namespace libtbag::string;
-//        ss << fformat("[{}] Name:{}, NameWhat:{}", i, ar.name, ar.namewhat) << std::endl
-//           << fformat(" - Source:{}, ShortSrc:{}, LineDefined:{}, LastLineDefined:{}, What:{}",
-//                      ar.source, ar.short_src, ar.linedefined, ar.lastlinedefined, ar.what) << std::endl
-//           << fformat(" - CurrentLine:{}", ar.currentline) << std::endl;
+        std::cout << '|';
     }
-
-    std::stringstream ss;
-    if (max_length) {
-        std::string const HORIZONTAL_BAR = fformat("+{}+", std::string(max_length-2, '-'));
-        ss << HORIZONTAL_BAR << std::endl;
-        for (auto const & info : stack_infos) {
-            ss << info << std::endl;
-        }
-        ss << HORIZONTAL_BAR << std::endl;
-    }
-    return ss.str();
+    std::cout << std::endl;
 }
 
 } // namespace script

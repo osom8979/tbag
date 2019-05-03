@@ -239,7 +239,7 @@ using Pair  = libtbag::util::Pair;
 using Pairs = libtbag::util::Pairs;
 
 TBAG_API Pairs getRegistryPairs(lua_State * L);
-TBAG_API std::string getPrintableStackInformation(lua_State * L);
+TBAG_API void luadebug_printstack(lua_State * L);
 
 } // namespace script
 

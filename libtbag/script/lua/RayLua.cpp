@@ -7,9 +7,8 @@
 
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/ray/RayBypass.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/string/Format.hpp>
 
-#include <cstring>
 #include <iostream>
 
 // -------------------
@@ -123,49 +122,76 @@ static Color _get_color(lua_State * L, int num_arg)
     return result;
 }
 
+static void _register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
+{
+    luaL_newmetatable(L, name);
+    {
+        luaL_register(L, nullptr, l);
+
+        lua_pushliteral(L, "__index");
+        lua_pushvalue(L, -2); // Duplicate metatable.
+        lua_rawset(L, -3);
+    }
+    lua_pop(L, 1);
+}
+
 TBAG_CONSTEXPR static char const * const METATABLE_IMAGE = "Image";
 
-static int __lua_ray_Image_new(lua_State * L)
+static int _Image(lua_State * L)
 {
+    // clang-format off
+    auto const width   = luaL_optint(L, 1, 0);
+    auto const height  = luaL_optint(L, 2, 0);
+    auto const mipmaps = luaL_optint(L, 3, 0);
+    auto const format  = luaL_optint(L, 4, 0);
+    // clang-format on
+
     auto * image = (Image*)lua_newuserdata(L, sizeof(Image));
-    memset(image, 0x00, sizeof(Image));
-    luaL_setmetatable(L, METATABLE_IMAGE);
+    assert(image != nullptr);
+
+    // clang-format off
+    image->data    = nullptr;
+    image->width   = width;
+    image->height  = height;
+    image->mipmaps = mipmaps;
+    image->format  = format;
+    // clang-format on
+
+    luaL_getmetatable(L, METATABLE_IMAGE);
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
+static int _Image_gc(lua_State * L)
+{
+    auto * image = (Image*)lua_touserdata(L, 1);
+    if (image == nullptr) {
+        luaL_typerror(L, 1, METATABLE_IMAGE);
+        return 0;
+    }
+    return 0;
+}
+
+static int _Image_tostring(lua_State * L)
+{
+    auto * image = (Image*)lua_touserdata(L, 1);
+    if (image == nullptr) {
+        luaL_typerror(L, 1, METATABLE_IMAGE);
+        lua_pushstring(L, METATABLE_IMAGE);
+        return 1;
+    }
+    auto const RESULT = libtbag::string::fformat("{}({}x{}M{}F{})", METATABLE_IMAGE,
+                                                 image->width, image->height,
+                                                 image->mipmaps, image->format);
+    lua_pushstring(L, RESULT.c_str());
     return 1;
 }
 
 static luaL_Reg const __lua_lay_image[] = {
-        { "new", __lua_ray_Image_new },
+        { "__gc", _Image_gc },
+        { "__tostring", _Image_tostring },
         { nullptr, nullptr }
 };
-
-void register_image(lua_State * L)
-{
-    luaL_register(L, lua_ray_name(), __lua_lay_image);
-    lua_pop(L, 1);
-
-//    luaL_newmetatable(L, METATABLE_IMAGE); // Create metatable for Foo, and add it to the Lua registry.
-//    std::cout << "lua_ray_register_image(2):\n" << getPrintableStackInformation(L);
-//
-//    lua_pushliteral(L, "__index");
-//    std::cout << "lua_ray_register_image(3):\n" << getPrintableStackInformation(L);
-//
-//    lua_pushvalue(L, -3); // dup methods table.
-//    std::cout << "lua_ray_register_image(4):\n" << getPrintableStackInformation(L);
-//
-//    lua_rawset(L, -3); // metatable.__index = methods
-//    std::cout << "lua_ray_register_image(5):\n" << getPrintableStackInformation(L);
-
-//    luaL_openlib(L, FOO, Foo_methods, 0);  /* create methods table, add it to the globals */
-//    luaL_newmetatable(L, FOO);          /* create metatable for Foo, and add it to the Lua registry */
-//    luaL_openlib(L, 0, Foo_meta, 0);    /* fill metatable */
-//    lua_pushliteral(L, "__index");
-//    lua_pushvalue(L, -3);               /* dup methods table*/
-//    lua_rawset(L, -3);                  /* metatable.__index = methods */
-//    lua_pushliteral(L, "__metatable");
-//    lua_pushvalue(L, -3);               /* dup methods table*/
-//    lua_rawset(L, -3);                  /* hide metatable: metatable.__metatable = methods */
-//    lua_pop(L, 1);                      /* drop metatable */
-}
 
 static int _InitWindow(lua_State * L)
 {
@@ -507,6 +533,7 @@ static int _GetTime(lua_State * L)
 #endif
 
 static luaL_Reg const __lua_lay_core[] = {
+        { METATABLE_IMAGE, _Image },
         // Window-related functions
         RAY_REGISTER(InitWindow),
         RAY_REGISTER(WindowShouldClose),
@@ -561,19 +588,6 @@ static luaL_Reg const __lua_lay_core[] = {
         RAY_REGISTER(GetTime),
         { nullptr, nullptr }
 };
-
-bool luaopen_ray_core(lua_State * L)
-{
-    luaL_register(L, lua_ray_name(), __lua_lay_core);
-    lua_pop(L, 1);
-    return true;
-}
-
-bool luaopen_ray_common(lua_State * L)
-{
-    register_image(L);
-    return true;
-}
 
 //void DrawPixel(int pos_x, int pos_y, Color color);
 //void DrawPixelV(Vector2 position, Color color);
@@ -884,12 +898,11 @@ bool luaopen_ray_common(lua_State * L)
 
 bool luaopen_ray(lua_State * L)
 {
-    if (!luaopen_ray_common(L)) {
-        tDLogW("luaopen_ray_common() ray-common load failed.");
+    luaL_register(L, lua_ray_name(), __lua_lay_core);
+    {
+        _register_metatable(L, METATABLE_IMAGE, __lua_lay_image);
     }
-    if (!luaopen_ray_core(L)) {
-        tDLogW("luaopen_ray_core() ray-core load failed.");
-    }
+    lua_pop(L, 1);
     return true;
 }
 
