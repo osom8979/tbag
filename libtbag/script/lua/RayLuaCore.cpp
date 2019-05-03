@@ -407,7 +407,8 @@ static luaL_Reg const __lua_lay_core[] = {
 
 bool luaopen_ray_core(lua_State * L)
 {
-    luaL_openlib(L, lua_ray_name(), __lua_lay_core, 0);
+    luaL_register(L, lua_ray_name(), __lua_lay_core);
+    lua_pop(L, 1);
     return true;
 }
 

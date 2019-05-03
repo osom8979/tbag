@@ -134,20 +134,20 @@ static luaL_Reg const __lua_lay_image[] = {
 
 void lua_ray_register_image(lua_State * L)
 {
-    luaL_register(L, lua_ray_name(), __lua_lay_image); // Create methods table, add it to the globals.
-    std::cout << "lua_ray_register_image(1):\n" << getPrintableStackInformation(L);
-
-    luaL_newmetatable(L, METATABLE_IMAGE); // Create metatable for Foo, and add it to the Lua registry.
-    std::cout << "lua_ray_register_image(2):\n" << getPrintableStackInformation(L);
-
-    lua_pushliteral(L, "__index");
-    std::cout << "lua_ray_register_image(3):\n" << getPrintableStackInformation(L);
-
-    lua_pushvalue(L, -3); // dup methods table.
-    std::cout << "lua_ray_register_image(4):\n" << getPrintableStackInformation(L);
-
-    lua_rawset(L, -3); // metatable.__index = methods
-    std::cout << "lua_ray_register_image(5):\n" << getPrintableStackInformation(L);
+//    luaL_register(L, lua_ray_name(), __lua_lay_image); // Create methods table, add it to the globals.
+//    std::cout << "lua_ray_register_image(1):\n" << getPrintableStackInformation(L);
+//
+//    luaL_newmetatable(L, METATABLE_IMAGE); // Create metatable for Foo, and add it to the Lua registry.
+//    std::cout << "lua_ray_register_image(2):\n" << getPrintableStackInformation(L);
+//
+//    lua_pushliteral(L, "__index");
+//    std::cout << "lua_ray_register_image(3):\n" << getPrintableStackInformation(L);
+//
+//    lua_pushvalue(L, -3); // dup methods table.
+//    std::cout << "lua_ray_register_image(4):\n" << getPrintableStackInformation(L);
+//
+//    lua_rawset(L, -3); // metatable.__index = methods
+//    std::cout << "lua_ray_register_image(5):\n" << getPrintableStackInformation(L);
 
 //    luaL_openlib(L, FOO, Foo_methods, 0);  /* create methods table, add it to the globals */
 //    luaL_newmetatable(L, FOO);          /* create metatable for Foo, and add it to the Lua registry */
