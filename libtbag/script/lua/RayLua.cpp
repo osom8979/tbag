@@ -6,8 +6,11 @@
  */
 
 #include <libtbag/script/lua/RayLua.hpp>
-#include <libtbag/script/lua/RayLuaCore.hpp>
+#include <libtbag/ray/RayBypass.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cstring>
+#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,6 +18,561 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 namespace lua    {
+
+using namespace libtbag::ray;
+
+void lua_ray_pushvector2(lua_State * L, Vector2 const & vec)
+{
+    lua_createtable(L, 0, 2);
+    lua_pushnumber(L, vec.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, vec.y);
+    lua_setfield(L, -2, "y");
+}
+
+void lua_ray_pushvector3(lua_State * L, Vector3 const & vec)
+{
+    lua_createtable(L, 0, 3);
+    lua_pushnumber(L, vec.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, vec.y);
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, vec.z);
+    lua_setfield(L, -2, "z");
+}
+
+void lua_ray_pushvector4(lua_State * L, Vector4 const & vec)
+{
+    lua_createtable(L, 0, 4);
+    lua_pushnumber(L, vec.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, vec.y);
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, vec.z);
+    lua_setfield(L, -2, "z");
+    lua_pushnumber(L, vec.w);
+    lua_setfield(L, -2, "w");
+}
+
+void lua_ray_pushquaternion(lua_State * L, Quaternion const & vec)
+{
+    lua_createtable(L, 0, 4);
+    lua_pushnumber(L, vec.x);
+    lua_setfield(L, -2, "x");
+    lua_pushnumber(L, vec.y);
+    lua_setfield(L, -2, "y");
+    lua_pushnumber(L, vec.z);
+    lua_setfield(L, -2, "z");
+    lua_pushnumber(L, vec.w);
+    lua_setfield(L, -2, "w");
+}
+
+void lua_ray_pushmatrix(lua_State * L, Matrix const & mat)
+{
+    lua_createtable(L, 16, 0);
+
+    lua_pushnumber(L, mat.m0);
+    lua_rawseti(L, -2, 1);
+    lua_pushnumber(L, mat.m4);
+    lua_rawseti(L, -2, 2);
+    lua_pushnumber(L, mat.m8);
+    lua_rawseti(L, -2, 3);
+    lua_pushnumber(L, mat.m12);
+    lua_rawseti(L, -2, 4);
+
+    lua_pushnumber(L, mat.m1);
+    lua_rawseti(L, -2, 5);
+    lua_pushnumber(L, mat.m5);
+    lua_rawseti(L, -2, 6);
+    lua_pushnumber(L, mat.m9);
+    lua_rawseti(L, -2, 7);
+    lua_pushnumber(L, mat.m13);
+    lua_rawseti(L, -2, 8);
+
+    lua_pushnumber(L, mat.m2);
+    lua_rawseti(L, -2, 9);
+    lua_pushnumber(L, mat.m6);
+    lua_rawseti(L, -2, 10);
+    lua_pushnumber(L, mat.m10);
+    lua_rawseti(L, -2, 11);
+    lua_pushnumber(L, mat.m14);
+    lua_rawseti(L, -2, 12);
+
+    lua_pushnumber(L, mat.m3);
+    lua_rawseti(L, -2, 13);
+    lua_pushnumber(L, mat.m7);
+    lua_rawseti(L, -2, 14);
+    lua_pushnumber(L, mat.m11);
+    lua_rawseti(L, -2, 15);
+    lua_pushnumber(L, mat.m15);
+    lua_rawseti(L, -2, 16);
+}
+
+Color lua_ray_getcolor(lua_State * L, int num_arg)
+{
+    Color result = {0,};
+    lua_getfield(L, num_arg, "r");
+    result.r = luaL_checkinteger(L, -1);
+    lua_getfield(L, num_arg, "g");
+    result.g = luaL_checkinteger(L, -1);
+    lua_getfield(L, num_arg, "b");
+    result.b = luaL_checkinteger(L, -1);
+    lua_getfield(L, num_arg, "a");
+    result.a = luaL_checkinteger(L, -1);
+    lua_pop(L, 4);
+    return result;
+}
+
+TBAG_CONSTEXPR static char const * const METATABLE_IMAGE = "Image";
+
+static int __lua_ray_Image_new(lua_State * L)
+{
+    auto * image = (Image*)lua_newuserdata(L, sizeof(Image));
+    memset(image, 0x00, sizeof(Image));
+    luaL_setmetatable(L, METATABLE_IMAGE);
+    return 1;
+}
+
+static luaL_Reg const __lua_lay_image[] = {
+        { "new", __lua_ray_Image_new },
+        { nullptr, nullptr }
+};
+
+void lua_ray_register_image(lua_State * L)
+{
+//    luaL_register(L, lua_ray_name(), __lua_lay_image); // Create methods table, add it to the globals.
+//    std::cout << "lua_ray_register_image(1):\n" << getPrintableStackInformation(L);
+//
+//    luaL_newmetatable(L, METATABLE_IMAGE); // Create metatable for Foo, and add it to the Lua registry.
+//    std::cout << "lua_ray_register_image(2):\n" << getPrintableStackInformation(L);
+//
+//    lua_pushliteral(L, "__index");
+//    std::cout << "lua_ray_register_image(3):\n" << getPrintableStackInformation(L);
+//
+//    lua_pushvalue(L, -3); // dup methods table.
+//    std::cout << "lua_ray_register_image(4):\n" << getPrintableStackInformation(L);
+//
+//    lua_rawset(L, -3); // metatable.__index = methods
+//    std::cout << "lua_ray_register_image(5):\n" << getPrintableStackInformation(L);
+
+//    luaL_openlib(L, FOO, Foo_methods, 0);  /* create methods table, add it to the globals */
+//    luaL_newmetatable(L, FOO);          /* create metatable for Foo, and add it to the Lua registry */
+//    luaL_openlib(L, 0, Foo_meta, 0);    /* fill metatable */
+//    lua_pushliteral(L, "__index");
+//    lua_pushvalue(L, -3);               /* dup methods table*/
+//    lua_rawset(L, -3);                  /* metatable.__index = methods */
+//    lua_pushliteral(L, "__metatable");
+//    lua_pushvalue(L, -3);               /* dup methods table*/
+//    lua_rawset(L, -3);                  /* hide metatable: metatable.__metatable = methods */
+//    lua_pop(L, 1);                      /* drop metatable */
+//    return 1;                           /* return methods on the stack */
+}
+
+static int __lua_ray_InitWindow(lua_State * L)
+{
+    InitWindow(luaL_checkinteger(L, 1),
+               luaL_checkinteger(L, 2),
+               luaL_checkstring(L, 3));
+    return 0;
+}
+
+static int __lua_ray_WindowShouldClose(lua_State * L)
+{
+    bool result = WindowShouldClose();
+    lua_pushboolean(L, result);
+    return 1;
+}
+
+static int __lua_ray_CloseWindow(lua_State * L)
+{
+    CloseWindow();
+    return 0;
+}
+
+static int __lua_ray_IsWindowReady(lua_State * L)
+{
+    lua_pushboolean(L, IsWindowReady()?1:0);
+    return 1;
+}
+
+static int __lua_ray_IsWindowMinimized(lua_State * L)
+{
+    lua_pushboolean(L, IsWindowMinimized()?1:0);
+    return 1;
+}
+
+static int __lua_ray_IsWindowResized(lua_State * L)
+{
+    lua_pushboolean(L, IsWindowResized()?1:0);
+    return 1;
+}
+
+static int __lua_ray_IsWindowHidden(lua_State * L)
+{
+    lua_pushboolean(L, IsWindowHidden()?1:0);
+    return 1;
+}
+
+static int __lua_ray_ToggleFullscreen(lua_State * L)
+{
+    ToggleFullscreen();
+    return 0;
+}
+
+static int __lua_ray_UnhideWindow(lua_State * L)
+{
+    UnhideWindow();
+    return 0;
+}
+
+static int __lua_ray_HideWindow(lua_State * L)
+{
+    HideWindow();
+    return 0;
+}
+
+static int __lua_ray_SetWindowIcon(lua_State * L)
+{
+    Image image;
+    // TODO
+    SetWindowIcon(image);
+    return 0;
+}
+
+static int __lua_ray_SetWindowTitle(lua_State * L)
+{
+    SetWindowTitle(luaL_checkstring(L, 1));
+    return 0;
+}
+
+static int __lua_ray_SetWindowPosition(lua_State * L)
+{
+    SetWindowPosition(luaL_checkinteger(L, 1),
+                      luaL_checkinteger(L, 2));
+    return 0;
+}
+
+static int __lua_ray_SetWindowMonitor(lua_State * L)
+{
+    SetWindowMonitor(luaL_checkinteger(L, 1));
+    return 0;
+}
+
+static int __lua_ray_SetWindowMinSize(lua_State * L)
+{
+    SetWindowMinSize(luaL_checkinteger(L, 1),
+                     luaL_checkinteger(L, 2));
+    return 0;
+}
+
+static int __lua_ray_SetWindowSize(lua_State * L)
+{
+    SetWindowSize(luaL_checkinteger(L, 1),
+                  luaL_checkinteger(L, 2));
+    return 0;
+}
+
+static int __lua_ray_GetScreenWidth(lua_State * L)
+{
+    lua_pushinteger(L, GetScreenWidth());
+    return 1;
+}
+
+static int __lua_ray_GetScreenHeight(lua_State * L)
+{
+    lua_pushinteger(L, GetScreenHeight());
+    return 1;
+}
+
+static int __lua_ray_GetMonitorCount(lua_State * L)
+{
+    lua_pushinteger(L, GetMonitorCount());
+    return 1;
+}
+
+static int __lua_ray_GetMonitorWidth(lua_State * L)
+{
+    lua_pushinteger(L, GetMonitorWidth(luaL_checkinteger(L, 1)));
+    return 1;
+}
+
+static int __lua_ray_GetMonitorHeight(lua_State * L)
+{
+    lua_pushinteger(L, GetMonitorHeight(luaL_checkinteger(L, 1)));
+    return 1;
+}
+
+static int __lua_ray_GetMonitorPhysicalWidth(lua_State * L)
+{
+    lua_pushinteger(L, GetMonitorPhysicalWidth(luaL_checkinteger(L, 1)));
+    return 1;
+}
+
+static int __lua_ray_GetMonitorPhysicalHeight(lua_State * L)
+{
+    lua_pushinteger(L, GetMonitorPhysicalHeight(luaL_checkinteger(L, 1)));
+    return 1;
+}
+
+static int __lua_ray_GetMonitorName(lua_State * L)
+{
+    lua_pushstring(L, GetMonitorName(luaL_checkinteger(L, 1)));
+    return 1;
+}
+
+static int __lua_ray_GetClipboardText(lua_State * L)
+{
+    lua_pushstring(L, GetClipboardText());
+    return 1;
+}
+
+static int __lua_ray_SetClipboardText(lua_State * L)
+{
+    SetClipboardText(luaL_checkstring(L, 1));
+    return 0;
+}
+
+static int __lua_ray_ShowCursor(lua_State * L)
+{
+    ShowCursor();
+    return 0;
+}
+
+static int __lua_ray_HideCursor(lua_State * L)
+{
+    HideCursor();
+    return 0;
+}
+
+static int __lua_ray_IsCursorHidden(lua_State * L)
+{
+    lua_pushboolean(L, IsCursorHidden()?1:0);
+    return 1;
+}
+
+static int __lua_ray_EnableCursor(lua_State * L)
+{
+    EnableCursor();
+    return 0;
+}
+
+static int __lua_ray_DisableCursor(lua_State * L)
+{
+    DisableCursor();
+    return 0;
+}
+
+static int __lua_ray_ClearBackground(lua_State * L)
+{
+    ClearBackground(lua_ray_getcolor(L, 1));
+    return 0;
+}
+
+static int __lua_ray_BeginDrawing(lua_State * L)
+{
+    BeginDrawing();
+    return 0;
+}
+
+static int __lua_ray_EndDrawing(lua_State * L)
+{
+    EndDrawing();
+    return 0;
+}
+
+//void BeginMode2D(Camera2D camera);
+//void EndMode2D();
+//void BeginMode3D(Camera3D camera);
+//void EndMode3D();
+//void BeginTextureMode(RenderTexture2D target);
+//void EndTextureMode();
+
+//Ray GetMouseRay(Vector2 mouse_position, Camera camera);
+//Vector2 GetWorldToScreen(Vector3 position, Camera camera);
+//Matrix GetCameraMatrix(Camera camera);
+
+static int __lua_ray_SetTargetFPS(lua_State * L)
+{
+    SetTargetFPS(luaL_checkinteger(L, 1));
+    return 0;
+}
+
+static int __lua_ray_GetFPS(lua_State * L)
+{
+    lua_pushinteger(L, GetFPS());
+    return 1;
+}
+
+static int __lua_ray_GetFrameTime(lua_State * L)
+{
+    lua_pushnumber(L, GetFrameTime());
+    return 1;
+}
+
+static int __lua_ray_GetTime(lua_State * L)
+{
+    lua_pushnumber(L, GetTime());
+    return 1;
+}
+
+//int ColorToInt(Color color);
+//Vector4 ColorNormalize(Color color);
+//Vector3 ColorToHSV(Color color);
+//Color ColorFromHSV(Vector3 hsv);
+//Color GetColor(int hex_value);
+//Color Fade(Color color, float alpha);
+
+//void SetConfigFlags(unsigned char flags);
+//void SetTraceLogLevel(int log_type);
+//void SetTraceLogExit(int log_type);
+//void SetTraceLogCallback(TraceLogCallback callback);
+//// void TraceLog(int log_type, char const * text, ...);
+
+//void TakeScreenshot(char const * file_name);
+//int GetRandomValue(int min, int max);
+
+//bool FileExists(char const * file_name);
+//bool IsFileExtension(char const * file_name, char const * ext);
+//char const * GetExtension(char const * file_name);
+//char const * GetFileName(char const * file_path);
+//char const * GetFileNameWithoutExt(char const * file_path);
+//char const * GetDirectoryPath(char const * file_name);
+//char const * GetWorkingDirectory();
+//char ** GetDirectoryFiles(char const * dir_path, int * count);
+//void ClearDirectoryFiles();
+//bool ChangeDirectory(char const * dir);
+//bool IsFileDropped();
+//char ** GetDroppedFiles(int * count);
+//void ClearDroppedFiles();
+//long GetFileModTime(char const * file_name);
+
+//void StorageSaveValue(int position, int value);
+//int StorageLoadValue(int position);
+
+//void OpenURL(char const * url);
+
+//bool IsKeyPressed(int key);
+//bool IsKeyDown(int key);
+//bool IsKeyReleased(int key);
+//bool IsKeyUp(int key);
+//int GetKeyPressed();
+//void SetExitKey(int key);
+
+//bool IsGamepadAvailable(int gamepad);
+//bool IsGamepadName(int gamepad, char const * name);
+//char const * GetGamepadName(int gamepad);
+//bool IsGamepadButtonPressed(int gamepad, int button);
+//bool IsGamepadButtonDown(int gamepad, int button);
+//bool IsGamepadButtonReleased(int gamepad, int button);
+//bool IsGamepadButtonUp(int gamepad, int button);
+//int GetGamepadButtonPressed();
+//int GetGamepadAxisCount(int gamepad);
+//float GetGamepadAxisMovement(int gamepad, int axis);
+
+//bool IsMouseButtonPressed(int button);
+//bool IsMouseButtonDown(int button);
+//bool IsMouseButtonReleased(int button);
+//bool IsMouseButtonUp(int button);
+//int GetMouseX();
+//int GetMouseY();
+//Vector2 GetMousePosition();
+//void SetMousePosition(int x, int y);
+//void SetMouseOffset(int offset_x, int offset_y);
+//void SetMouseScale(float scale_x, float scale_y);
+//int GetMouseWheelMove();
+
+//int GetTouchX();
+//int GetTouchY();
+//Vector2 GetTouchPosition(int index);
+
+//void SetGesturesEnabled(unsigned int gesture_flags);
+//bool IsGestureDetected(int gesture);
+//int GetGestureDetected();
+//int GetTouchPointsCount();
+//float GetGestureHoldDuration();
+//Vector2 GetGestureDragVector();
+//float GetGestureDragAngle();
+//Vector2 GetGesturePinchVector();
+//float GetGesturePinchAngle();
+
+//void SetCameraMode(Camera camera, int mode);
+//void UpdateCamera(Camera * camera);
+
+//void SetCameraPanControl(int pan_key);
+//void SetCameraAltControl(int alt_key);
+//void SetCameraSmoothZoomControl(int sz_key);
+//void SetCameraMoveControls(int front_key, int back_key, int right_key, int left_key, int up_key, int down_key);
+
+static luaL_Reg const __lua_lay_core[] = {
+        // Window-related functions
+        TBAG_LUA_REGISTER(InitWindow),
+        TBAG_LUA_REGISTER(WindowShouldClose),
+        TBAG_LUA_REGISTER(CloseWindow),
+        TBAG_LUA_REGISTER(IsWindowReady),
+        TBAG_LUA_REGISTER(IsWindowMinimized),
+        TBAG_LUA_REGISTER(IsWindowResized),
+        TBAG_LUA_REGISTER(IsWindowHidden),
+        TBAG_LUA_REGISTER(ToggleFullscreen),
+        TBAG_LUA_REGISTER(UnhideWindow),
+        TBAG_LUA_REGISTER(HideWindow),
+        TBAG_LUA_REGISTER(SetWindowIcon),
+        TBAG_LUA_REGISTER(SetWindowTitle),
+        TBAG_LUA_REGISTER(SetWindowPosition),
+        TBAG_LUA_REGISTER(SetWindowMonitor),
+        TBAG_LUA_REGISTER(SetWindowMinSize),
+        TBAG_LUA_REGISTER(SetWindowSize),
+        TBAG_LUA_REGISTER(GetScreenWidth),
+        TBAG_LUA_REGISTER(GetScreenHeight),
+        TBAG_LUA_REGISTER(GetMonitorCount),
+        TBAG_LUA_REGISTER(GetMonitorWidth),
+        TBAG_LUA_REGISTER(GetMonitorHeight),
+        TBAG_LUA_REGISTER(GetMonitorPhysicalWidth),
+        TBAG_LUA_REGISTER(GetMonitorPhysicalHeight),
+        TBAG_LUA_REGISTER(GetMonitorName),
+        TBAG_LUA_REGISTER(GetClipboardText),
+        TBAG_LUA_REGISTER(SetClipboardText),
+        // Cursor-related functions
+        TBAG_LUA_REGISTER(ShowCursor),
+        TBAG_LUA_REGISTER(HideCursor),
+        TBAG_LUA_REGISTER(IsCursorHidden),
+        TBAG_LUA_REGISTER(EnableCursor),
+        TBAG_LUA_REGISTER(DisableCursor),
+        // Drawing-related functions
+        TBAG_LUA_REGISTER(ClearBackground),
+        TBAG_LUA_REGISTER(BeginDrawing),
+        TBAG_LUA_REGISTER(EndDrawing),
+        //TBAG_LUA_REGISTER(BeginMode2D),
+        //TBAG_LUA_REGISTER(EndMode2D),
+        //TBAG_LUA_REGISTER(BeginMode3D),
+        //TBAG_LUA_REGISTER(EndMode3D),
+        //TBAG_LUA_REGISTER(BeginTextureMode),
+        //TBAG_LUA_REGISTER(EndTextureMode),
+        // Screen-space-related functions
+        //TBAG_LUA_REGISTER(GetMouseRay),
+        //TBAG_LUA_REGISTER(GetWorldToScreen),
+        //TBAG_LUA_REGISTER(GetCameraMatrix),
+        // Timing-related functions
+        TBAG_LUA_REGISTER(SetTargetFPS),
+        TBAG_LUA_REGISTER(GetFPS),
+        TBAG_LUA_REGISTER(GetFrameTime),
+        TBAG_LUA_REGISTER(GetTime),
+        { nullptr, nullptr }
+};
+
+bool luaopen_ray_core(lua_State * L)
+{
+    luaL_register(L, lua_ray_name(), __lua_lay_core);
+    lua_pop(L, 1);
+    return true;
+}
+
+
+bool luaopen_ray_common(lua_State * L)
+{
+    lua_ray_register_image(L);
+    return true;
+}
+
 
 //void DrawPixel(int pos_x, int pos_y, Color color);
 //void DrawPixelV(Vector2 position, Color color);

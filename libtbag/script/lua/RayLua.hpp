@@ -3,6 +3,20 @@
  * @brief  RayLua class prototype.
  * @author zer0
  * @date   2019-04-27
+ *
+ * @remarks
+ *  Example:
+ *  @code{.lua}
+ *   -- Core - Basic window
+ *   ray.InitWindow(800, 450, "Basic window")
+ *   ray.SetTargetFPS(60);
+ *   while not ray.WindowShouldClose() do
+ *       ray.BeginDrawing()
+ *       ray.ClearBackground({r=30, g=30, b=30, a=255})
+ *       ray.EndDrawing()
+ *   end
+ *   ray.CloseWindow()
+ *  @endcode
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_SCRIPT_LUA_RAYLUA_HPP__
@@ -15,7 +29,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/script/lua/RayLuaCommon.hpp>
+#include <libtbag/script/LuaBypass.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,7 +38,10 @@ NAMESPACE_LIBTBAG_OPEN
 namespace script {
 namespace lua    {
 
-using namespace libtbag::ray;
+TBAG_CONSTEXPR char const * const lua_ray_name() TBAG_NOEXCEPT
+{
+    return "ray";
+}
 
 TBAG_API bool luaopen_ray(lua_State * L);
 
