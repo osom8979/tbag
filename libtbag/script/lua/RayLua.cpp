@@ -108,7 +108,7 @@ static void luaL_pushmatrix(lua_State * L, Matrix const & mat)
     lua_rawseti(L, -2, 16);
 }
 
-static void luaL_pushrectangle(lua_State * L, Rectangle const & rect)
+static void luaL_pushrectangle(lua_State * L, ::Rectangle const & rect)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, rect.x);
