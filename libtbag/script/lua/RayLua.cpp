@@ -8,11 +8,10 @@
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/ray/RayBypass.hpp>
 
-// #include <libtbag/string/Format.hpp> // [WARNING] Don't use this header.
-
 #include <cstring>
-#include <iostream>
+#include <cassert>
 
+// #include <libtbag/string/Format.hpp> // [WARNING] Don't use this header.
 #if defined(TBAG_PLATFORM_WINDOWS) && defined(_WINGDI_)
 #error The Rectangle symbol in wingdi.h conflicts.
 #endif
