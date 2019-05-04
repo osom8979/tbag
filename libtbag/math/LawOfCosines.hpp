@@ -4,10 +4,10 @@
  * @author zer0
  * @date   2019-05-02
  *
+ * @translate{ko, 코사인 법칙은 삼각형의 두 변과 그 사잇각을 알 때 남은 한 변을 구하거나 세 변을 알 때 세 각을 구하는 데 사용될 수 있다.}
+ *
  * @see <https://en.wikipedia.org/wiki/Law_of_cosines>
  * @see <https://ko.wikipedia.org/wiki/%EC%BD%94%EC%82%AC%EC%9D%B8_%EB%B2%95%EC%B9%99>
- *
- * @translate{ko, 코사인 법칙은 삼각형의 두 변과 그 사잇각을 알 때 남은 한 변을 구하거나, 세 변을 알 때 세 각을 구하는 데 사용될 수 있다.}
  *
  * @remarks
  *  @code
