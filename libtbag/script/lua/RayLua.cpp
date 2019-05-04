@@ -7,10 +7,15 @@
 
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/ray/RayBypass.hpp>
-#include <libtbag/string/Format.hpp>
+
+// #include <libtbag/string/Format.hpp> // [WARNING] Don't use this header.
 
 #include <cstring>
 #include <iostream>
+
+#if defined(TBAG_PLATFORM_WINDOWS) && defined(_WINGDI_)
+#error The Rectangle symbol in wingdi.h conflicts.
+#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -52,6 +57,19 @@ static void luaL_pushvector4(lua_State * L, Vector4 const & vec)
     lua_setfield(L, -2, "z");
     lua_pushnumber(L, vec.w);
     lua_setfield(L, -2, "w");
+}
+
+static void luaL_pushcolor(lua_State * L, Color const & color)
+{
+    lua_createtable(L, 0, 4);
+    lua_pushinteger(L, color.r);
+    lua_setfield(L, -2, "r");
+    lua_pushinteger(L, color.g);
+    lua_setfield(L, -2, "g");
+    lua_pushinteger(L, color.b);
+    lua_setfield(L, -2, "b");
+    lua_pushinteger(L, color.a);
+    lua_setfield(L, -2, "a");
 }
 
 static void luaL_pushquaternion(lua_State * L, Quaternion const & vec)
@@ -108,7 +126,7 @@ static void luaL_pushmatrix(lua_State * L, Matrix const & mat)
     lua_rawseti(L, -2, 16);
 }
 
-static void luaL_pushrectangle(lua_State * L, ::Rectangle const & rect)
+static void luaL_pushrectangle(lua_State * L, Rectangle const & rect)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, rect.x);
@@ -422,10 +440,7 @@ static int _Image_tostring(lua_State * L)
         lua_pushstring(L, METATABLE_IMAGE);
         return 1;
     }
-    auto const RESULT = libtbag::string::fformat("{}({}x{}M{}F{})", METATABLE_IMAGE,
-                                                 image->width, image->height,
-                                                 image->mipmaps, image->format);
-    lua_pushstring(L, RESULT.c_str());
+    lua_pushstring(L, METATABLE_IMAGE);
     return 1;
 }
 
@@ -680,12 +695,41 @@ static int _GetTime(lua_State * L)
     return 1;
 }
 
-//int ColorToInt(Color color);
-//Vector4 ColorNormalize(Color color);
-//Vector3 ColorToHSV(Color color);
-//Color ColorFromHSV(Vector3 hsv);
-//Color GetColor(int hex_value);
-//Color Fade(Color color, float alpha);
+int _ColorToInt(lua_State * L)
+{
+    lua_pushnumber(L, ColorToInt(luaL_checkcolor(L, 1)));
+    return 1;
+}
+
+int _ColorNormalize(lua_State * L)
+{
+    luaL_pushvector4(L, ColorNormalize(luaL_checkcolor(L, 1)));
+    return 1;
+}
+
+int _ColorToHSV(lua_State * L)
+{
+    luaL_pushvector3(L, ColorToHSV(luaL_checkcolor(L, 1)));
+    return 1;
+}
+
+int _ColorFromHSV(lua_State * L)
+{
+    luaL_pushcolor(L, ColorFromHSV(luaL_checkvector3(L, 1)));
+    return 1;
+}
+
+int _GetColor(lua_State * L)
+{
+    luaL_pushcolor(L, GetColor(luaL_checkinteger(L, 1)));
+    return 1;
+}
+
+int _Fade(lua_State * L)
+{
+    luaL_pushcolor(L, Fade(luaL_checkcolor(L, 1), luaL_checknumber(L, 2)));
+    return 1;
+}
 
 //void SetConfigFlags(unsigned char flags);
 //void SetTraceLogLevel(int log_type);
@@ -1433,6 +1477,14 @@ static luaL_Reg const __lua_lay_core[] = {
         RAY_REGISTER(GetFPS),
         RAY_REGISTER(GetFrameTime),
         RAY_REGISTER(GetTime),
+
+        // [CORE] Color-related functions
+        RAY_REGISTER(ColorToInt),
+        RAY_REGISTER(ColorNormalize),
+        RAY_REGISTER(ColorToHSV),
+        RAY_REGISTER(ColorFromHSV),
+        RAY_REGISTER(GetColor),
+        RAY_REGISTER(Fade),
 
         // [SHAPES] Basic shapes drawing functions
         RAY_REGISTER(DrawPixel),
