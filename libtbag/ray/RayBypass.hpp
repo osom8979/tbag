@@ -23,6 +23,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace ray {
 
+// Max length of one trace-log message
+TBAG_CONSTEXPR int const MAX_TRACELOG_BUFFER_SIZE = 128;
+
+// Size of internal static buffers of some Text*() functions
+TBAG_CONSTEXPR int const MAX_TEXT_BUFFER_LENGTH = 1024;
+
 TBAG_API void InitWindow(int width, int height, char const * title);
 TBAG_API bool WindowShouldClose();
 TBAG_API void CloseWindow();
@@ -87,7 +93,9 @@ TBAG_API void SetConfigFlags(unsigned char flags);
 TBAG_API void SetTraceLogLevel(int log_type);
 TBAG_API void SetTraceLogExit(int log_type);
 TBAG_API void SetTraceLogCallback(TraceLogCallback callback);
-// TBAG_API void TraceLog(int log_type, char const * text, ...);
+
+/** @warning Not recommended */
+TBAG_API void TraceLog(int log_type, char const * text, ...);
 
 TBAG_API void TakeScreenshot(char const * file_name);
 TBAG_API int GetRandomValue(int min, int max);

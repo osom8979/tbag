@@ -311,10 +311,15 @@ void SetTraceLogCallback(TraceLogCallback callback)
     ::SetTraceLogCallback(callback);
 }
 
-//void TraceLog(int log_type, char const * text, ...)
-//{
-//    ::TraceLog(log_type, text, ...);
-//}
+void TraceLog(int log_type, char const * text, ...)
+{
+    char buffer[MAX_TRACELOG_BUFFER_SIZE] = {0,};
+    va_list args;
+    va_start(args, text);
+    vsprintf(buffer, text, args);
+    va_end(args);
+    ::TraceLog(log_type, buffer);
+}
 
 void TakeScreenshot(char const * file_name)
 {
@@ -1259,12 +1264,9 @@ unsigned int TextLength(char const * text)
     return ::TextLength(text);
 }
 
-// Size of internal static buffers of some Text*() functions
-#define MAX_TEXT_BUFFER_LENGTH 1024
-
 char const * TextFormat(char const * text, ...)
 {
-    static char buffer[MAX_TEXT_BUFFER_LENGTH] = { 0 };
+    static char buffer[MAX_TEXT_BUFFER_LENGTH] = {0,};
     va_list args;
     va_start(args, text);
     vsprintf(buffer, text, args);
