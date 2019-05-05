@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/ray/RayGuiBypass.hpp>
+#include <libtbag/Type.hpp>
 #include <raygui.frontend.h>
 
 // -------------------

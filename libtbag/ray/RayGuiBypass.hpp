@@ -23,6 +23,121 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace ray {
 
+typedef enum {
+    GUI_STATE_NORMAL = 0,
+    GUI_STATE_FOCUSED,
+    GUI_STATE_PRESSED,
+    GUI_STATE_DISABLED,
+} GuiControlState;
+
+typedef enum {
+    GUI_TEXT_ALIGN_LEFT = 0,
+    GUI_TEXT_ALIGN_CENTER,
+    GUI_TEXT_ALIGN_RIGHT,
+} GuiTextAlignment;
+
+typedef enum {
+    DEFAULT = 0,
+    LABEL,
+    BUTTON,
+    TOGGLE,
+    SLIDER,
+    PROGRESSBAR,
+    CHECKBOX,
+    COMBOBOX,
+    DROPDOWNBOX,
+    TEXTBOX,
+    LISTVIEW,
+    COLORPICKER,
+    SCROLLBAR
+} GuiControlStandard;
+
+typedef enum {
+    BORDER_COLOR_NORMAL = 0,
+    BASE_COLOR_NORMAL,
+    TEXT_COLOR_NORMAL,
+    BORDER_COLOR_FOCUSED,
+    BASE_COLOR_FOCUSED,
+    TEXT_COLOR_FOCUSED,
+    BORDER_COLOR_PRESSED,
+    BASE_COLOR_PRESSED,
+    TEXT_COLOR_PRESSED,
+    BORDER_COLOR_DISABLED,
+    BASE_COLOR_DISABLED,
+    TEXT_COLOR_DISABLED,
+    BORDER_WIDTH,
+    INNER_PADDING,
+    TEXT_ALIGNMENT,
+    RESERVED02
+} GuiControlProperty;
+
+typedef enum {
+    TEXT_SIZE = 16,
+    TEXT_SPACING,
+    LINE_COLOR,
+    // LINE_THICK,
+    BACKGROUND_COLOR,
+} GuiDefaultProperty;
+
+typedef enum {
+    GROUP_PADDING = 16,
+} GuiToggleProperty;
+
+typedef enum {
+    SLIDER_WIDTH = 16,
+    TEXT_PADDING
+} GuiSliderProperty;
+
+typedef enum {
+    MULTILINE_PADDING = 16,
+    SPINNER_BUTTON_WIDTH,
+    SPINNER_BUTTON_PADDING,
+    SPINNER_BUTTON_BORDER_WIDTH
+} GuiTextBoxProperty;
+
+typedef enum {
+    CHECK_TEXT_PADDING = 16
+} GuiCheckBoxProperty;
+
+typedef enum {
+    SELECTOR_WIDTH = 16,
+    SELECTOR_PADDING
+} GuiComboBoxProperty;
+
+typedef enum {
+    ARROW_RIGHT_PADDING = 16,
+} GuiDropdownBoxProperty;
+
+typedef enum {
+    COLOR_SELECTOR_SIZE = 16,
+    BAR_WIDTH,
+    BAR_PADDING,
+    BAR_SELECTOR_HEIGHT,
+    BAR_SELECTOR_PADDING
+} GuiColorPickerProperty;
+
+typedef enum {
+    ELEMENTS_HEIGHT = 16,
+    ELEMENTS_PADDING,
+    SCROLLBAR_WIDTH,
+    SCROLLBAR_SIDE,
+} GuiListViewProperty;
+
+typedef enum {
+    SCROLLBAR_BORDER = 16,
+    SCROLLBAR_SHOW_SPINNER_BUTTONS,
+    SCROLLBAR_ARROWS_SIZE,
+    SCROLLBAR_PADDING,
+    SCROLLBAR_SLIDER_PADDING,
+    SCROLLBAR_SLIDER_SIZE,
+    SCROLLBAR_SCROLL_SPEED,
+} GuiScrollBarProperty;
+
+typedef enum {
+    SCROLLBAR_LEFT_SIDE = 0,
+    SCROLLBAR_RIGHT_SIDE
+} GuiScrollBarSide;
+
 TBAG_API void GuiEnable();
 TBAG_API void GuiDisable();
 TBAG_API void GuiLock();

@@ -15,7 +15,7 @@
  *   ray.InitWindow(width, height, 'Basic window')
  *   ray.SetTargetFPS(60)
  *
- *   gradient = ray.GenImageGradientV(400, 400, {255, 0, 0}, {0, 0, 255});
+ *   gradient = ray.GenImageGradientV(400, 400, ray.RED, ray.BLUE);
  *   texture = ray.LoadTextureFromImage(gradient);
  *   ray.UnloadImage(gradient);
  *   gradient = nil
@@ -23,8 +23,8 @@
  *   while not ray.WindowShouldClose() do
  *       ray.BeginDrawing()
  *       ray.ClearBackground({30, 30, 30})
- *       ray.DrawTexture(texture, 0, 0, {255, 255, 255});
- *       ray.DrawCircleV({width/2, height/2}, 50, {255, 0, 0});
+ *       ray.DrawTexture(texture, 0, 0, ray.WHITE);
+ *       ray.DrawCircleV({width/2, height/2}, 50, ray.RED);
  *       ray.DrawText('Basic window!', 10, 20, 20, {200, 200, 200});
  *       ray.EndDrawing()
  *   end
