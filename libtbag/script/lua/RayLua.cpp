@@ -29,6 +29,11 @@ namespace lua    {
 
 using namespace libtbag::ray;
 
+static int luaL_unsupport(lua_State * L)
+{
+    return luaL_error(L, "Unsupported operation error");
+}
+
 static void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
 {
     luaL_newmetatable(L, name);
@@ -42,16 +47,28 @@ static void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg c
     lua_pop(L, 1);
 }
 
-static std::vector<int> luaL_checkinteger_array(lua_State * L, int arg_num)
+static std::vector<lua_Integer> luaL_checkinteger_array(lua_State * L, int arg_num)
 {
     auto size = lua_objlen(L, arg_num);
-    std::vector<int> result(size);
+    std::vector<lua_Integer> result(size);
     for (int i = 0; i < size; ++i) {
         lua_rawgeti(L, arg_num, i+1);
         result[i] = luaL_checkinteger(L, -1);
     }
     return result;
 }
+
+static std::vector<lua_Number> luaL_checknumber_array(lua_State * L, int arg_num)
+{
+    auto size = lua_objlen(L, arg_num);
+    std::vector<lua_Number> result(size);
+    for (int i = 0; i < size; ++i) {
+        lua_rawgeti(L, arg_num, i+1);
+        result[i] = luaL_checkinteger(L, -1);
+    }
+    return result;
+}
+
 
 static std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_num)
 {
@@ -65,8 +82,8 @@ static std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_nu
 }
 
 #ifndef RAY_USERDATA
-#define RAY_USERDATA(type, upper, lower, more_regs)                             \
-    TBAG_CONSTEXPR static char const * const METATABLE_##upper = "#name";       \
+#define RAY_USERDATA(type, name, upper, lower, more_regs)                       \
+    TBAG_CONSTEXPR static char const * const METATABLE_##upper = #name;         \
     static type * luaL_push##lower(lua_State * L, type const * src = nullptr)   \
     {                                                                           \
         auto * result = (type*)lua_newuserdata(L, sizeof(type));                \
@@ -89,25 +106,30 @@ static std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_nu
         }                                                                       \
         return result;                                                          \
     }                                                                           \
-    static int _##type(lua_State * L)                                           \
+    static int _##name(lua_State * L)                                           \
     {                                                                           \
         luaL_push##lower(L);                                                    \
         return 1;                                                               \
     }                                                                           \
-    static int _##type##_gc(lua_State * L)                                      \
+    static int _##name##_gc(lua_State * L)                                      \
     {                                                                           \
         return 0;                                                               \
     }                                                                           \
-    static int _##type##_tostring(lua_State * L)                                \
+    static int _##name##_tostring(lua_State * L)                                \
     {                                                                           \
         lua_pushstring(L, METATABLE_##upper);                                   \
         return 1;                                                               \
     }                                                                           \
     static luaL_Reg const __lua_lay_##lower[] = {                               \
-            { "__gc", _##type##_gc },                                           \
-            { "__tostring", _##type##_tostring },                               \
+            { "__gc", _##name##_gc },                                           \
+            { "__tostring", _##name##_tostring },                               \
             { nullptr, nullptr }                                                \
     }; /* -- END -- */
+#endif
+
+#ifndef RAY_USERDATA_DEFAULT
+#define RAY_USERDATA_DEFAULT(type, upper, lower) \
+    RAY_USERDATA(type, type, upper, lower,)
 #endif
 
 # /***********/
@@ -439,7 +461,7 @@ static Rectangle luaL_checkrectangle(lua_State * L, int num_arg)
 # /* Image */
 # /*********/
 
-RAY_USERDATA(Image, IMAGE, image,)
+RAY_USERDATA_DEFAULT(Image, IMAGE, image)
 
 # /***************************************/
 # /* Texture2D (Texture, TextureCubemap) */
@@ -583,7 +605,7 @@ static NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
 # /* CharInfo */
 # /************/
 
-RAY_USERDATA(CharInfo, CHARINFO, charinfo,)
+RAY_USERDATA_DEFAULT(CharInfo, CHARINFO, charinfo)
 
 static void luaL_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int size)
 {
@@ -625,7 +647,7 @@ static std::vector<int> luaL_checkchars_array(lua_State * L, int num_arg)
 # /* Font (SpriteFont) */
 # /*********************/
 
-RAY_USERDATA(Font, FONT, font,)
+RAY_USERDATA_DEFAULT(Font, FONT, font)
 
 # /*********************/
 # /* Camera3D (Camera) */
@@ -757,32 +779,81 @@ static BoundingBox luaL_checkboundingbox(lua_State * L, int num_arg)
 # /* Mesh */
 # /********/
 
-RAY_USERDATA(Mesh, MESH, mesh,)
+RAY_USERDATA_DEFAULT(Mesh, MESH, mesh)
 
 # /**********/
 # /* Shader */
 # /**********/
 
-//typedef struct Shader {
-//    unsigned int id;
-//    int locs[MAX_SHADER_LOCATIONS];
-//} Shader;
+static void luaL_pushshader(lua_State * L, Shader const & shader)
+{
+    lua_createtable(L, 0, 2);
+    lua_pushinteger(L, shader.id);
+    lua_setfield(L, -2, "id");
+
+    lua_createtable(L, MAX_SHADER_LOCATIONS, 0);
+    for (int i = 0; i < MAX_SHADER_LOCATIONS; ++i) {
+        lua_pushinteger(L, shader.locs[i]);
+        lua_rawseti(L, -2, i+1);
+    }
+    lua_setfield(L, -2, "locs");
+}
+
+static Shader luaL_checkshader(lua_State * L, int num_arg)
+{
+    Shader result = {0,};
+    lua_getfield(L, num_arg, "id");
+    result.id = luaL_checkinteger(L, lua_absindex(L, -1));
+
+    lua_getfield(L, num_arg, "locs");
+    auto locs = luaL_checkinteger_array(L, lua_absindex(L, -1));
+    auto min_size = locs.size();
+    if (min_size > MAX_SHADER_LOCATIONS) {
+        min_size = MAX_SHADER_LOCATIONS;
+    }
+    if (min_size >= 1) {
+        for (int i = 0; i < min_size; ++i) {
+            result.locs[i] = locs[i];
+        }
+    }
+
+    lua_pop(L, 2);
+    return result;
+}
 
 # /***************/
 # /* MaterialMap */
 # /***************/
 
-//typedef struct MaterialMap {
-//    Texture2D texture;
-//    Color color;
-//    float value;
-//} MaterialMap;
+static void luaL_pushmaterialmap(lua_State * L, MaterialMap const & materials)
+{
+    lua_createtable(L, 0, 3);
+    luaL_pushtexture2d(L, materials.texture);
+    lua_setfield(L, -2, "texture");
+    luaL_pushcolor(L, materials.color);
+    lua_setfield(L, -2, "color");
+    lua_pushnumber(L, materials.value);
+    lua_setfield(L, -2, "value");
+}
+
+static MaterialMap luaL_checkmaterialmap(lua_State * L, int num_arg)
+{
+    MaterialMap result = {0,};
+    lua_getfield(L, num_arg, "texture");
+    result.texture = luaL_checktexture2d(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "color");
+    result.color = luaL_checkcolor(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "value");
+    result.value = luaL_checknumber(L, lua_absindex(L, -1));
+    lua_pop(L, 3);
+    return result;
+}
 
 # /************/
 # /* Material */
 # /************/
 
-RAY_USERDATA(Material, MATERIAL, material,)
+RAY_USERDATA_DEFAULT(Material, MATERIAL, material)
 
 # /*************/
 # /* Transform */
@@ -807,13 +878,13 @@ RAY_USERDATA(Material, MATERIAL, material,)
 # /* Model */
 # /*********/
 
-RAY_USERDATA(Model, MODEL, model,)
+RAY_USERDATA_DEFAULT(Model, MODEL, model)
 
 # /******************/
 # /* ModelAnimation */
 # /******************/
 
-RAY_USERDATA(ModelAnimation, MODELANIMATION, modelanimation,)
+RAY_USERDATA_DEFAULT(ModelAnimation, MODELANIMATION, modelanimation)
 
 # /*******/
 # /* Ray */
@@ -851,47 +922,169 @@ static Ray luaL_checkray(lua_State * L, int num_arg)
 # /* RayHitInfo */
 # /**************/
 
-//typedef struct RayHitInfo {
-//    bool hit;
-//    float distance;
-//    Vector3 position;
-//    Vector3 normal;
-//} RayHitInfo;
+static void luaL_pushrayhitinfo(lua_State * L, RayHitInfo const & info)
+{
+    lua_createtable(L, 0, 4);
+    lua_pushboolean(L, info.hit);
+    lua_setfield(L, -2, "hit");
+    lua_pushnumber(L, info.distance);
+    lua_setfield(L, -2, "distance");
+    luaL_pushvector3(L, info.position);
+    lua_setfield(L, -2, "position");
+    luaL_pushvector3(L, info.normal);
+    lua_setfield(L, -2, "normal");
+}
+
+static RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
+{
+    RayHitInfo result = {0,};
+    if (lua_objlen(L, num_arg) >= 4) {
+        lua_rawgeti(L, num_arg, 1);
+        result.hit = lua_toboolean(L, lua_absindex(L, -1));
+        lua_rawgeti(L, num_arg, 2);
+        result.distance = luaL_checknumber(L, lua_absindex(L, -1));
+        lua_rawgeti(L, num_arg, 3);
+        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        lua_rawgeti(L, num_arg, 4);
+        result.normal = luaL_checkvector3(L, lua_absindex(L, -1));
+        lua_pop(L, 4);
+    } else {
+        lua_getfield(L, num_arg, "hit");
+        result.hit = lua_toboolean(L, lua_absindex(L, -1));
+        lua_getfield(L, num_arg, "distance");
+        result.distance = luaL_checknumber(L, lua_absindex(L, -1));
+        lua_getfield(L, num_arg, "position");
+        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        lua_getfield(L, num_arg, "normal");
+        result.normal = luaL_checkvector3(L, lua_absindex(L, -1));
+        lua_pop(L, 4);
+    }
+    return result;
+}
 
 # /********/
 # /* Wave */
 # /********/
 
-RAY_USERDATA(Wave, WAVE, wave,)
+RAY_USERDATA_DEFAULT(Wave, WAVE, wave)
 
 # /*********/
 # /* Sound */
 # /*********/
 
-RAY_USERDATA(Sound, SOUND, sound,)
+RAY_USERDATA_DEFAULT(Sound, SOUND, sound)
+
+# /*********/
+# /* Music */
+# /*********/
+
+struct MusicWrapper
+{
+    Music music;
+};
+
+RAY_USERDATA(MusicWrapper, Music, MUSIC, music,)
 
 # /***************/
 # /* AudioStream */
 # /***************/
 
-RAY_USERDATA(AudioStream, AUDIOSTREAM, audiostream,)
+RAY_USERDATA_DEFAULT(AudioStream, AUDIOSTREAM, audiostream)
 
 # /******************/
 # /* VrDeviceInfo */
 # /******************/
 
-//typedef struct VrDeviceInfo {
-//    int hResolution;
-//    int vResolution;
-//    float hScreenSize;
-//    float vScreenSize;
-//    float vScreenCenter;
-//    float eyeToScreenDistance;
-//    float lensSeparationDistance;
-//    float interpupillaryDistance;
-//    float lensDistortionValues[4];
-//    float chromaAbCorrection[4];
-//} VrDeviceInfo;
+static void luaL_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info)
+{
+    lua_createtable(L, 0, 10);
+    lua_pushinteger(L, info.hResolution);
+    lua_setfield(L, -2, "hResolution");
+    lua_pushinteger(L, info.vResolution);
+    lua_setfield(L, -2, "vResolution");
+    lua_pushnumber(L, info.hScreenSize);
+    lua_setfield(L, -2, "hScreenSize");
+    lua_pushnumber(L, info.vScreenSize);
+    lua_setfield(L, -2, "vScreenSize");
+    lua_pushnumber(L, info.vScreenCenter);
+    lua_setfield(L, -2, "vScreenCenter");
+    lua_pushnumber(L, info.eyeToScreenDistance);
+    lua_setfield(L, -2, "eyeToScreenDistance");
+    lua_pushnumber(L, info.lensSeparationDistance);
+    lua_setfield(L, -2, "lensSeparationDistance");
+    lua_pushnumber(L, info.interpupillaryDistance);
+    lua_setfield(L, -2, "interpupillaryDistance");
+
+    lua_createtable(L, 4, 0);
+    lua_pushnumber(L, info.lensDistortionValues[0]);
+    lua_rawseti(L, -2, 1);
+    lua_pushnumber(L, info.lensDistortionValues[1]);
+    lua_rawseti(L, -2, 2);
+    lua_pushnumber(L, info.lensDistortionValues[2]);
+    lua_rawseti(L, -2, 3);
+    lua_pushnumber(L, info.lensDistortionValues[3]);
+    lua_rawseti(L, -2, 4);
+    lua_setfield(L, -2, "lensDistortionValues");
+
+    lua_createtable(L, 4, 0);
+    lua_pushnumber(L, info.chromaAbCorrection[0]);
+    lua_rawseti(L, -2, 1);
+    lua_pushnumber(L, info.chromaAbCorrection[1]);
+    lua_rawseti(L, -2, 2);
+    lua_pushnumber(L, info.chromaAbCorrection[2]);
+    lua_rawseti(L, -2, 3);
+    lua_pushnumber(L, info.chromaAbCorrection[3]);
+    lua_rawseti(L, -2, 4);
+    lua_setfield(L, -2, "chromaAbCorrection");
+}
+
+static VrDeviceInfo luaL_checkvrdeviceinfo(lua_State * L, int num_arg)
+{
+    VrDeviceInfo result = {0,};
+    lua_getfield(L, num_arg, "hResolution");
+    result.hResolution = luaL_checkinteger(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "vResolution");
+    result.vResolution = luaL_checkinteger(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "hScreenSize");
+    result.hScreenSize = luaL_checknumber(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "vScreenSize");
+    result.vScreenSize = luaL_checknumber(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "vScreenCenter");
+    result.vScreenCenter = luaL_checknumber(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "eyeToScreenDistance");
+    result.eyeToScreenDistance = luaL_checknumber(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "lensSeparationDistance");
+    result.lensSeparationDistance = luaL_checknumber(L, lua_absindex(L, -1));
+    lua_getfield(L, num_arg, "interpupillaryDistance");
+    result.interpupillaryDistance = luaL_checknumber(L, lua_absindex(L, -1));
+
+    lua_getfield(L, num_arg, "lensDistortionValues");
+    auto lens_distortion_values = luaL_checknumber_array(L, lua_absindex(L, -1));
+    auto lens_distortion_values_size = lens_distortion_values.size();
+    if (lens_distortion_values_size > 4) {
+        lens_distortion_values_size = 4;
+    }
+    if (lens_distortion_values_size >= 1) {
+        for (int i = 0; i < lens_distortion_values_size; ++i) {
+            result.lensDistortionValues[i] = lens_distortion_values[i];
+        }
+    }
+
+    lua_getfield(L, num_arg, "chromaAbCorrection");
+    auto chroma_ab_correction = luaL_checknumber_array(L, lua_absindex(L, -1));
+    auto chroma_ab_correction_size = chroma_ab_correction.size();
+    if (chroma_ab_correction_size > 4) {
+        chroma_ab_correction_size = 4;
+    }
+    if (chroma_ab_correction_size >= 1) {
+        for (int i = 0; i < chroma_ab_correction_size; ++i) {
+            result.chromaAbCorrection[i] = chroma_ab_correction[i];
+        }
+    }
+
+    lua_pop(L, 10);
+    return result;
+}
 
 # /******************/
 # /* VrStereoConfig */
@@ -1254,7 +1447,7 @@ static int _SetTraceLogExit(lua_State * L)
 
 static int _SetTraceLogCallback(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
@@ -2041,7 +2234,7 @@ static int _LoadImageEx(lua_State * L)
 
 static int _LoadImagePro(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
@@ -2805,79 +2998,79 @@ static int _GetGlyphIndex(lua_State * L)
 
 static int _TextIsEqual(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextLength(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextSubtext(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextReplace(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextInsert(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextJoin(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextSplit(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextAppend(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextFindIndex(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextToUpper(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextToLower(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextToPascal(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
 static int _TextToInteger(lua_State * L)
 {
-    luaL_error(L, "Unsupported operation error");
+    luaL_unsupport(L);
     return 0;
 }
 
@@ -3100,100 +3293,527 @@ static int _UnloadModel(lua_State * L)
 # /* [SHADERS MODULE] */
 # /********************/
 
-//char * LoadText(char const * file_name);
-//Shader LoadShader(char const * vs_file_name, char const * fs_file_name);
-//Shader LoadShaderCode(char * vs_code, char * fs_code);
-//void UnloadShader(Shader shader);
-//
-//Shader GetShaderDefault();
-//Texture2D GetTextureDefault();
-//
-//int GetShaderLocation(Shader shader, char const * uniform_name);
-//void SetShaderValue(Shader shader, int uniform_loc, void const * value, int uniform_type);
-//void SetShaderValueV(Shader shader, int uniform_loc, void const * value, int uniform_type, int count);
-//void SetShaderValueMatrix(Shader shader, int uniform_loc, Matrix mat);
-//void SetShaderValueTexture(Shader shader, int uniform_loc, Texture2D texture);
-//void SetMatrixProjection(Matrix proj);
-//void SetMatrixModelview(Matrix view);
-//Matrix GetMatrixModelview();
-//
-//Texture2D GenTextureCubemap(Shader shader, Texture2D sky_hdr, int size);
-//Texture2D GenTextureIrradiance(Shader shader, Texture2D cubemap, int size);
-//Texture2D GenTexturePrefilter(Shader shader, Texture2D cubemap, int size);
-//Texture2D GenTextureBRDF(Shader shader, int size);
-//
-//void BeginShaderMode(Shader shader);
-//void EndShaderMode();
-//void BeginBlendMode(int mode);
-//void EndBlendMode();
-//void BeginScissorMode(int x, int y, int width, int height);
-//void EndScissorMode();
-//
-//VrDeviceInfo GetVrDeviceInfo(int vr_device_type);
-//void InitVrSimulator(VrDeviceInfo info);
-//void UpdateVrTracking(Camera * camera);
-//void CloseVrSimulator();
-//bool IsVrSimulatorReady();
-//void ToggleVrMode();
-//void BeginVrDrawing();
-//void EndVrDrawing();
+static int _LoadText(lua_State * L)
+{
+    lua_pushstring(L, LoadText(luaL_checkstring(L, 1)));
+    return 1;
+}
+
+static int _LoadShader(lua_State * L)
+{
+    luaL_pushshader(L, LoadShader(luaL_checkstring(L, 1), luaL_checkstring(L, 2)));
+    return 1;
+}
+
+static int _LoadShaderCode(lua_State * L)
+{
+    std::string vs_code = luaL_checkstring(L, 1);
+    std::string fs_code = luaL_checkstring(L, 2);
+    luaL_pushshader(L, LoadShaderCode(&vs_code[0], &fs_code[0]));
+    return 1;
+}
+
+static int _UnloadShader(lua_State * L)
+{
+    UnloadShader(luaL_checkshader(L, 1));
+    return 0;
+}
+
+static int _GetShaderDefault(lua_State * L)
+{
+    luaL_pushshader(L, GetShaderDefault());
+    return 1;
+}
+
+static int _GetTextureDefault(lua_State * L)
+{
+    luaL_pushtexture2d(L, GetTextureDefault());
+    return 1;
+}
+
+static int _GetShaderLocation(lua_State * L)
+{
+    lua_pushinteger(L, GetShaderLocation(luaL_checkshader(L, 1), luaL_checkstring(L, 2)));
+    return 1;
+}
+
+static int _SetShaderValue(lua_State * L)
+{
+    // TODO: Implement
+    return 0;
+}
+
+static int _SetShaderValueV(lua_State * L)
+{
+    // TODO: Implement
+    return 0;
+}
+
+static int _SetShaderValueMatrix(lua_State * L)
+{
+    SetShaderValueMatrix(luaL_checkshader(L, 1),
+                         luaL_checkinteger(L, 2),
+                         luaL_checkmatrix(L, 3));
+    return 0;
+}
+
+static int _SetShaderValueTexture(lua_State * L)
+{
+    SetShaderValueTexture(luaL_checkshader(L, 1),
+                          luaL_checkinteger(L, 2),
+                          luaL_checktexture2d(L, 3));
+    return 0;
+}
+
+static int _SetMatrixProjection(lua_State * L)
+{
+    SetMatrixProjection(luaL_checkmatrix(L, 1));
+    return 0;
+}
+
+static int _SetMatrixModelview(lua_State * L)
+{
+    SetMatrixModelview(luaL_checkmatrix(L, 1));
+    return 0;
+}
+
+static int _GetMatrixModelview(lua_State * L)
+{
+    luaL_pushmatrix(L, GetMatrixModelview());
+    return 1;
+}
+
+static int _GenTextureCubemap(lua_State * L)
+{
+    luaL_pushtexture2d(L, GenTextureCubemap(luaL_checkshader(L, 1),
+                                            luaL_checktexture2d(L, 2),
+                                            luaL_checkinteger(L, 3)));
+    return 1;
+}
+
+static int _GenTextureIrradiance(lua_State * L)
+{
+    luaL_pushtexture2d(L, GenTextureIrradiance(luaL_checkshader(L, 1),
+                                               luaL_checktexture2d(L, 2),
+                                               luaL_checkinteger(L, 3)));
+    return 1;
+}
+
+static int _GenTexturePrefilter(lua_State * L)
+{
+    luaL_pushtexture2d(L, GenTexturePrefilter(luaL_checkshader(L, 1),
+                                              luaL_checktexture2d(L, 2),
+                                              luaL_checkinteger(L, 3)));
+    return 1;
+}
+
+static int _GenTextureBRDF(lua_State * L)
+{
+    luaL_pushtexture2d(L, GenTextureBRDF(luaL_checkshader(L, 1),
+                                         luaL_checkinteger(L, 2)));
+    return 1;
+}
+
+static int _BeginShaderMode(lua_State * L)
+{
+    BeginShaderMode(luaL_checkshader(L, 1));
+    return 0;
+}
+
+static int _EndShaderMode(lua_State * L)
+{
+    EndShaderMode();
+    return 0;
+}
+
+static int _BeginBlendMode(lua_State * L)
+{
+    BeginBlendMode(luaL_checkinteger(L, 1));
+    return 0;
+}
+
+static int _EndBlendMode(lua_State * L)
+{
+    EndBlendMode();
+    return 0;
+}
+
+static int _BeginScissorMode(lua_State * L)
+{
+    BeginScissorMode(luaL_checkinteger(L, 1),
+                     luaL_checkinteger(L, 2),
+                     luaL_checkinteger(L, 3),
+                     luaL_checkinteger(L, 4));
+    return 0;
+}
+
+static int _EndScissorMode(lua_State * L)
+{
+    EndScissorMode();
+    return 0;
+}
+
+static int _GetVrDeviceInfo(lua_State * L)
+{
+    luaL_pushvrdeviceinfo(L, GetVrDeviceInfo(luaL_checkinteger(L, 1)));
+    return 1;
+}
+
+static int _InitVrSimulator(lua_State * L)
+{
+    InitVrSimulator(luaL_checkvrdeviceinfo(L, 1));
+    return 0;
+}
+
+static int _UpdateVrTracking(lua_State * L)
+{
+    auto cam = luaL_checkcamera3d(L, 1);
+    UpdateVrTracking(&cam);
+    luaL_pushcamera3d(L, cam);
+    return 1;
+}
+
+static int _SetVrConfiguration(lua_State * L)
+{
+    // SetVrConfiguration(VrDeviceInfo info, Shader distortion)
+    luaL_unsupport(L);
+    return 0;
+}
+
+static int _CloseVrSimulator(lua_State * L)
+{
+    CloseVrSimulator();
+    return 0;
+}
+
+static int _IsVrSimulatorReady(lua_State * L)
+{
+    lua_pushboolean(L, IsVrSimulatorReady());
+    return 1;
+}
+
+static int _ToggleVrMode(lua_State * L)
+{
+    ToggleVrMode();
+    return 0;
+}
+
+static int _BeginVrDrawing(lua_State * L)
+{
+    BeginVrDrawing();
+    return 0;
+}
+
+static int _EndVrDrawing(lua_State * L)
+{
+    EndVrDrawing();
+    return 0;
+}
 
 # /******************/
 # /* [AUDIO MODULE] */
 # /******************/
 
-//void InitAudioDevice();
-//void CloseAudioDevice();
-//bool IsAudioDeviceReady();
-//void SetMasterVolume(float volume);
-//
-//Wave LoadWave(char const * file_name);
-//Wave LoadWaveEx(void * data, int sample_count, int sample_rate, int sample_size, int channels);
-//Sound LoadSound(char const * file_name);
-//Sound LoadSoundFromWave(Wave wave);
-//void UpdateSound(Sound sound, void const * data, int samples_count);
-//void UnloadWave(Wave wave);
-//void UnloadSound(Sound sound);
-//void ExportWave(Wave wave, char const * file_name);
-//void ExportWaveAsCode(Wave wave, char const * file_name);
-//
-//void PlaySound(Sound sound);
-//void PauseSound(Sound sound);
-//void ResumeSound(Sound sound);
-//void StopSound(Sound sound);
-//bool IsSoundPlaying(Sound sound);
-//void SetSoundVolume(Sound sound, float volume);
-//void SetSoundPitch(Sound sound, float pitch);
-//void WaveFormat(Wave * wave, int sample_rate, int sample_size, int channels);
-//Wave WaveCopy(Wave wave);
-//void WaveCrop(Wave * wave, int init_sample, int final_sample);
-//float * GetWaveData(Wave wave);
-//
-//Music LoadMusicStream(char const * file_name);
-//void UnloadMusicStream(Music music);
-//void PlayMusicStream(Music music);
-//void UpdateMusicStream(Music music);
-//void StopMusicStream(Music music);
-//void PauseMusicStream(Music music);
-//void ResumeMusicStream(Music music);
-//bool IsMusicPlaying(Music music);
-//void SetMusicVolume(Music music, float volume);
-//void SetMusicPitch(Music music, float pitch);
-//void SetMusicLoopCount(Music music, int count);
-//float GetMusicTimeLength(Music music);
-//float GetMusicTimePlayed(Music music);
-//
-//AudioStream InitAudioStream(unsigned int sample_rate, unsigned int sample_size, unsigned int channels);
-//void UpdateAudioStream(AudioStream stream, void const * data, int samples_count);
-//void CloseAudioStream(AudioStream stream);
-//bool IsAudioBufferProcessed(AudioStream stream);
-//void PlayAudioStream(AudioStream stream);
-//void PauseAudioStream(AudioStream stream);
-//void ResumeAudioStream(AudioStream stream);
-//bool IsAudioStreamPlaying(AudioStream stream);
-//void StopAudioStream(AudioStream stream);
-//void SetAudioStreamVolume(AudioStream stream, float volume);
-//void SetAudioStreamPitch(AudioStream stream, float pitch);
+static int _InitAudioDevice(lua_State * L)
+{
+    InitAudioDevice();
+    return 0;
+}
+
+static int _CloseAudioDevice(lua_State * L)
+{
+    CloseAudioDevice();
+    return 0;
+}
+
+static int _IsAudioDeviceReady(lua_State * L)
+{
+    lua_pushboolean(L, IsAudioDeviceReady());
+    return 1;
+}
+
+static int _SetMasterVolume(lua_State * L)
+{
+    SetMasterVolume(luaL_checknumber(L, 1));
+    return 0;
+}
+
+static int _LoadWave(lua_State * L)
+{
+    auto result = LoadWave(luaL_checkstring(L, 1));
+    luaL_pushwave(L, &result);
+    return 1;
+}
+
+static int _LoadWaveEx(lua_State * L)
+{
+    luaL_unsupport(L);
+    return 0;
+}
+
+static int _LoadSound(lua_State * L)
+{
+    auto result = LoadSound(luaL_checkstring(L, 1));
+    luaL_pushsound(L, &result);
+    return 1;
+}
+
+static int _LoadSoundFromWave(lua_State * L)
+{
+    auto result = LoadSoundFromWave(*luaL_checkwave(L, 1));
+    luaL_pushsound(L, &result);
+    return 1;
+}
+
+static int _UpdateSound(lua_State * L)
+{
+    luaL_unsupport(L);
+    return 0;
+}
+
+static int _UnloadWave(lua_State * L)
+{
+    UnloadWave(*luaL_checkwave(L, 1));
+    return 0;
+}
+
+static int _UnloadSound(lua_State * L)
+{
+    UnloadSound(*luaL_checksound(L, 1));
+    return 0;
+}
+
+static int _ExportWave(lua_State * L)
+{
+    ExportWave(*luaL_checkwave(L, 1), luaL_checkstring(L, 2));
+    return 0;
+}
+
+static int _ExportWaveAsCode(lua_State * L)
+{
+    ExportWaveAsCode(*luaL_checkwave(L, 1), luaL_checkstring(L, 2));
+    return 0;
+}
+
+static int _PlaySound(lua_State * L)
+{
+    PlaySound(*luaL_checksound(L, 1));
+    return 0;
+}
+
+static int _PauseSound(lua_State * L)
+{
+    PauseSound(*luaL_checksound(L, 1));
+    return 0;
+}
+
+static int _ResumeSound(lua_State * L)
+{
+    ResumeSound(*luaL_checksound(L, 1));
+    return 0;
+}
+
+static int _StopSound(lua_State * L)
+{
+    StopSound(*luaL_checksound(L, 1));
+    return 0;
+}
+
+static int _IsSoundPlaying(lua_State * L)
+{
+    lua_pushboolean(L, IsSoundPlaying(*luaL_checksound(L, 1)));
+    return 1;
+}
+
+static int _SetSoundVolume(lua_State * L)
+{
+    SetSoundVolume(*luaL_checksound(L, 1), luaL_checknumber(L, 2));
+    return 0;
+}
+
+static int _SetSoundPitch(lua_State * L)
+{
+    SetSoundPitch(*luaL_checksound(L, 1), luaL_checknumber(L, 2));
+    return 0;
+}
+
+static int _WaveFormat(lua_State * L)
+{
+    WaveFormat(luaL_checkwave(L, 1),
+               luaL_checkinteger(L, 2),
+               luaL_checkinteger(L, 3),
+               luaL_checkinteger(L, 4));
+    return 0;
+}
+
+static int _WaveCopy(lua_State * L)
+{
+    auto result = WaveCopy(*luaL_checkwave(L, 1));
+    luaL_pushwave(L, &result);
+    return 1;
+}
+
+static int _WaveCrop(lua_State * L)
+{
+    WaveCrop(luaL_checkwave(L, 1),
+             luaL_checkinteger(L, 2),
+             luaL_checkinteger(L, 3));
+    return 0;
+}
+
+static int _GetWaveData(lua_State * L)
+{
+    luaL_unsupport(L);
+    return 0;
+}
+
+static int _LoadMusicStream(lua_State * L)
+{
+    auto result = LoadMusicStream(luaL_checkstring(L, 1));
+    MusicWrapper wrapper = {0,};
+    wrapper.music = result;
+    luaL_pushmusic(L, &wrapper);
+    return 1;
+}
+
+static int _UnloadMusicStream(lua_State * L)
+{
+    UnloadMusicStream(luaL_checkmusic(L, 1)->music);
+    return 0;
+}
+
+static int _PlayMusicStream(lua_State * L)
+{
+    PlayMusicStream(luaL_checkmusic(L, 1)->music);
+    return 0;
+}
+
+static int _UpdateMusicStream(lua_State * L)
+{
+    UpdateMusicStream(luaL_checkmusic(L, 1)->music);
+    return 0;
+}
+
+static int _StopMusicStream(lua_State * L)
+{
+    StopMusicStream(luaL_checkmusic(L, 1)->music);
+    return 0;
+}
+
+static int _PauseMusicStream(lua_State * L)
+{
+    PauseMusicStream(luaL_checkmusic(L, 1)->music);
+    return 0;
+}
+
+static int _ResumeMusicStream(lua_State * L)
+{
+    ResumeMusicStream(luaL_checkmusic(L, 1)->music);
+    return 0;
+}
+
+static int _IsMusicPlaying(lua_State * L)
+{
+    lua_pushboolean(L, IsMusicPlaying(luaL_checkmusic(L, 1)->music)?1:0);
+    return 1;
+}
+
+static int _SetMusicVolume(lua_State * L)
+{
+    SetMusicVolume(luaL_checkmusic(L, 1)->music, luaL_checknumber(L, 2));
+    return 0;
+}
+
+static int _SetMusicPitch(lua_State * L)
+{
+    SetMusicPitch(luaL_checkmusic(L, 1)->music, luaL_checknumber(L, 2));
+    return 0;
+}
+
+static int _SetMusicLoopCount(lua_State * L)
+{
+    SetMusicLoopCount(luaL_checkmusic(L, 1)->music, luaL_checkinteger(L, 2));
+    return 0;
+}
+
+static int _GetMusicTimeLength(lua_State * L)
+{
+    lua_pushnumber(L, GetMusicTimeLength(luaL_checkmusic(L, 1)->music));
+    return 1;
+}
+
+static int _GetMusicTimePlayed(lua_State * L)
+{
+    lua_pushnumber(L, GetMusicTimePlayed(luaL_checkmusic(L, 1)->music));
+    return 1;
+}
+
+static int _InitAudioStream(lua_State * L)
+{
+    auto result = InitAudioStream(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
+    luaL_pushaudiostream(L, &result);
+    return 1;
+}
+
+static int _UpdateAudioStream(lua_State * L)
+{
+    luaL_unsupport(L);
+    return 0;
+}
+
+static int _CloseAudioStream(lua_State * L)
+{
+    CloseAudioStream(*luaL_checkaudiostream(L, 1));
+    return 0;
+}
+
+static int _IsAudioBufferProcessed(lua_State * L)
+{
+    lua_pushboolean(L, IsAudioBufferProcessed(*luaL_checkaudiostream(L, 1))?1:0);
+    return 1;
+}
+
+static int _PlayAudioStream(lua_State * L)
+{
+    PlayAudioStream(*luaL_checkaudiostream(L, 1));
+    return 0;
+}
+
+static int _PauseAudioStream(lua_State * L)
+{
+    PauseAudioStream(*luaL_checkaudiostream(L, 1));
+    return 0;
+}
+
+static int _ResumeAudioStream(lua_State * L)
+{
+    ResumeAudioStream(*luaL_checkaudiostream(L, 1));
+    return 0;
+}
+
+static int _IsAudioStreamPlaying(lua_State * L)
+{
+    lua_pushboolean(L, IsAudioStreamPlaying(*luaL_checkaudiostream(L, 1))?1:0);
+    return 1;
+}
+
+static int _StopAudioStream(lua_State * L)
+{
+    StopAudioStream(*luaL_checkaudiostream(L, 1));
+    return 0;
+}
+
+static int _SetAudioStreamVolume(lua_State * L)
+{
+    SetAudioStreamVolume(*luaL_checkaudiostream(L, 1), luaL_checknumber(L, 2));
+    return 0;
+}
+
+static int _SetAudioStreamPitch(lua_State * L)
+{
+    SetAudioStreamPitch(*luaL_checkaudiostream(L, 1), luaL_checknumber(L, 2));
+    return 0;
+}
 
 # /****************/
 # /* [GUI MODULE] */
@@ -3604,98 +4224,99 @@ static luaL_Reg const __lua_lay_core[] = {
         // RAY_REGISTER(GetCollisionRayGround),
 
         // [SHADERS] Shader loading/unloading functions
-        // RAY_REGISTER(LoadText),
-        // RAY_REGISTER(LoadShader),
-        // RAY_REGISTER(LoadShaderCode),
-        // RAY_REGISTER(UnloadShader),
-        // RAY_REGISTER(GetShaderDefault),
-        // RAY_REGISTER(GetTextureDefault),
+        RAY_REGISTER(LoadText),
+        RAY_REGISTER(LoadShader),
+        RAY_REGISTER(LoadShaderCode),
+        RAY_REGISTER(UnloadShader),
+        RAY_REGISTER(GetShaderDefault),
+        RAY_REGISTER(GetTextureDefault),
 
         // [SHADERS] Shader configuration functions
-        // RAY_REGISTER(GetShaderLocation),
-        // RAY_REGISTER(SetShaderValue),
-        // RAY_REGISTER(SetShaderValueV),
-        // RAY_REGISTER(SetShaderValueMatrix),
-        // RAY_REGISTER(SetShaderValueTexture),
-        // RAY_REGISTER(SetMatrixProjection),
-        // RAY_REGISTER(SetMatrixModelview),
-        // RAY_REGISTER(GetMatrixModelview),
+        RAY_REGISTER(GetShaderLocation),
+        RAY_REGISTER(SetShaderValue),
+        RAY_REGISTER(SetShaderValueV),
+        RAY_REGISTER(SetShaderValueMatrix),
+        RAY_REGISTER(SetShaderValueTexture),
+        RAY_REGISTER(SetMatrixProjection),
+        RAY_REGISTER(SetMatrixModelview),
+        RAY_REGISTER(GetMatrixModelview),
 
         // [SHADERS] Shading begin/end functions
-        // RAY_REGISTER(BeginShaderMode),
-        // RAY_REGISTER(EndShaderMode),
-        // RAY_REGISTER(BeginBlendMode),
-        // RAY_REGISTER(EndBlendMode),
-        // RAY_REGISTER(BeginScissorMode),
-        // RAY_REGISTER(EndScissorMode),
+        RAY_REGISTER(BeginShaderMode),
+        RAY_REGISTER(EndShaderMode),
+        RAY_REGISTER(BeginBlendMode),
+        RAY_REGISTER(EndBlendMode),
+        RAY_REGISTER(BeginScissorMode),
+        RAY_REGISTER(EndScissorMode),
 
         // [SHADERS] VR control functions
-        // RAY_REGISTER(InitVrSimulator),
-        // RAY_REGISTER(CloseVrSimulator),
-        // RAY_REGISTER(UpdateVrTracking),
-        // RAY_REGISTER(SetVrConfiguration),
-        // RAY_REGISTER(IsVrSimulatorReady),
-        // RAY_REGISTER(ToggleVrMode),
-        // RAY_REGISTER(BeginVrDrawing),
-        // RAY_REGISTER(EndVrDrawing),
+        RAY_REGISTER(GetVrDeviceInfo), // [DEPRECATED]
+        RAY_REGISTER(InitVrSimulator),
+        RAY_REGISTER(CloseVrSimulator),
+        RAY_REGISTER(UpdateVrTracking),
+        RAY_REGISTER(SetVrConfiguration),
+        RAY_REGISTER(IsVrSimulatorReady),
+        RAY_REGISTER(ToggleVrMode),
+        RAY_REGISTER(BeginVrDrawing),
+        RAY_REGISTER(EndVrDrawing),
 
         // [AUDIO] Audio device management functions
-        // RAY_REGISTER(InitAudioDevice),
-        // RAY_REGISTER(CloseAudioDevice),
-        // RAY_REGISTER(IsAudioDeviceReady),
-        // RAY_REGISTER(SetMasterVolume),
+        RAY_REGISTER(InitAudioDevice),
+        RAY_REGISTER(CloseAudioDevice),
+        RAY_REGISTER(IsAudioDeviceReady),
+        RAY_REGISTER(SetMasterVolume),
 
         // [AUDIO] Wave/Sound loading/unloading functions
-        // RAY_REGISTER(LoadWave),
-        // RAY_REGISTER(LoadWaveEx),
-        // RAY_REGISTER(LoadSound),
-        // RAY_REGISTER(LoadSoundFromWave),
-        // RAY_REGISTER(UpdateSound),
-        // RAY_REGISTER(UnloadWave),
-        // RAY_REGISTER(UnloadSound),
-        // RAY_REGISTER(ExportWave),
-        // RAY_REGISTER(ExportWaveAsCode),
+        RAY_REGISTER(LoadWave),
+        RAY_REGISTER(LoadWaveEx),
+        RAY_REGISTER(LoadSound),
+        RAY_REGISTER(LoadSoundFromWave),
+        RAY_REGISTER(UpdateSound),
+        RAY_REGISTER(UnloadWave),
+        RAY_REGISTER(UnloadSound),
+        RAY_REGISTER(ExportWave),
+        RAY_REGISTER(ExportWaveAsCode),
 
         // [AUDIO] Wave/Sound management functions
-        // RAY_REGISTER(PlaySound),
-        // RAY_REGISTER(PauseSound),
-        // RAY_REGISTER(ResumeSound),
-        // RAY_REGISTER(StopSound),
-        // RAY_REGISTER(IsSoundPlaying),
-        // RAY_REGISTER(SetSoundVolume),
-        // RAY_REGISTER(SetSoundPitch),
-        // RAY_REGISTER(WaveFormat),
-        // RAY_REGISTER(WaveCopy),
-        // RAY_REGISTER(WaveCrop),
-        // RAY_REGISTER(GetWaveData),
+        RAY_REGISTER(PlaySound),
+        RAY_REGISTER(PauseSound),
+        RAY_REGISTER(ResumeSound),
+        RAY_REGISTER(StopSound),
+        RAY_REGISTER(IsSoundPlaying),
+        RAY_REGISTER(SetSoundVolume),
+        RAY_REGISTER(SetSoundPitch),
+        RAY_REGISTER(WaveFormat),
+        RAY_REGISTER(WaveCopy),
+        RAY_REGISTER(WaveCrop),
+        RAY_REGISTER(GetWaveData),
 
         // [AUDIO] Music management functions
-        // RAY_REGISTER(LoadMusicStream),
-        // RAY_REGISTER(UnloadMusicStream),
-        // RAY_REGISTER(PlayMusicStream),
-        // RAY_REGISTER(UpdateMusicStream),
-        // RAY_REGISTER(StopMusicStream),
-        // RAY_REGISTER(PauseMusicStream),
-        // RAY_REGISTER(ResumeMusicStream),
-        // RAY_REGISTER(IsMusicPlaying),
-        // RAY_REGISTER(SetMusicVolume),
-        // RAY_REGISTER(SetMusicPitch),
-        // RAY_REGISTER(SetMusicLoopCount),
-        // RAY_REGISTER(GetMusicTimeLength),
-        // RAY_REGISTER(GetMusicTimePlayed),
+        RAY_REGISTER(LoadMusicStream),
+        RAY_REGISTER(UnloadMusicStream),
+        RAY_REGISTER(PlayMusicStream),
+        RAY_REGISTER(UpdateMusicStream),
+        RAY_REGISTER(StopMusicStream),
+        RAY_REGISTER(PauseMusicStream),
+        RAY_REGISTER(ResumeMusicStream),
+        RAY_REGISTER(IsMusicPlaying),
+        RAY_REGISTER(SetMusicVolume),
+        RAY_REGISTER(SetMusicPitch),
+        RAY_REGISTER(SetMusicLoopCount),
+        RAY_REGISTER(GetMusicTimeLength),
+        RAY_REGISTER(GetMusicTimePlayed),
 
         // [AUDIO] AudioStream management functions
-        // RAY_REGISTER(InitAudioStream),
-        // RAY_REGISTER(UpdateAudioStream),
-        // RAY_REGISTER(CloseAudioStream),
-        // RAY_REGISTER(IsAudioBufferProcessed),
-        // RAY_REGISTER(PlayAudioStream),
-        // RAY_REGISTER(PauseAudioStream),
-        // RAY_REGISTER(ResumeAudioStream),
-        // RAY_REGISTER(IsAudioStreamPlaying),
-        // RAY_REGISTER(StopAudioStream),
-        // RAY_REGISTER(SetAudioStreamVolume),
-        // RAY_REGISTER(SetAudioStreamPitch),
+        RAY_REGISTER(InitAudioStream),
+        RAY_REGISTER(UpdateAudioStream),
+        RAY_REGISTER(CloseAudioStream),
+        RAY_REGISTER(IsAudioBufferProcessed),
+        RAY_REGISTER(PlayAudioStream),
+        RAY_REGISTER(PauseAudioStream),
+        RAY_REGISTER(ResumeAudioStream),
+        RAY_REGISTER(IsAudioStreamPlaying),
+        RAY_REGISTER(StopAudioStream),
+        RAY_REGISTER(SetAudioStreamVolume),
+        RAY_REGISTER(SetAudioStreamPitch),
 
         { nullptr, nullptr }
 };
