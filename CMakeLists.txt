@@ -101,6 +101,7 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lfds)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/miniz)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/pugixml)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/tmxlite)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/imgui)
 
 ## CI Preset.
 if (RUN_TRAVIS)
