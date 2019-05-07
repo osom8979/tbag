@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/ray/RayBypass.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -22,9 +23,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace ray {
 
-struct RayGuiContext
-{
-};
+TBAG_API bool InitRayGui();
+TBAG_API void UpdateRayGui();
+TBAG_API void RenderRayGui();
+TBAG_API void ShutdownRayGui();
+
+TBAG_API bool GuiBegin(char const * text);
+TBAG_API void GuiEnd();
+
+TBAG_API void GuiText(char const * text);
 
 } // namespace ray
 

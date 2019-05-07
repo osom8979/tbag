@@ -3815,10 +3815,6 @@ static int _SetAudioStreamPitch(lua_State * L)
     return 0;
 }
 
-# /****************/
-# /* [GUI MODULE] */
-# /****************/
-
 #ifndef RAY_REGISTER
 #define RAY_REGISTER(name) { #name, _##name }
 #endif

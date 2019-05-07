@@ -12,6 +12,7 @@
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/script/lua/RayLua.hpp>
+#include <libtbag/script/lua/RayGuiLua.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -146,6 +147,9 @@ void LuaMachine::initDefault()
 
     if (!libtbag::script::lua::luaopen_ray(L)) {
         tDLogW("LuaMachine::initDefault() Ray bind failed.");
+    }
+    if (!libtbag::script::lua::luaopen_raygui(L)) {
+        tDLogW("LuaMachine::initDefault() RayGui bind failed.");
     }
 }
 

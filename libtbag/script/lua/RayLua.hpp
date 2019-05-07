@@ -13,6 +13,7 @@
  *   height = 450
  *
  *   ray.InitWindow(width, height, 'Basic window')
+ *   ray.InitRayGui()
  *   ray.SetTargetFPS(60)
  *
  *   gradient = ray.GenImageGradientV(400, 400, ray.RED, ray.BLUE);
@@ -21,6 +22,13 @@
  *   gradient = nil
  *
  *   while not ray.WindowShouldClose() do
+ *       ray.UpdateRayGui()
+ *       if ray.GuiBegin('Window') then
+ *           ray.GuiText('Label')
+ *           ray.GuiEnd()
+ *       end
+ *       ray.RenderRayGui()
+ *
  *       ray.BeginDrawing()
  *       ray.ClearBackground({30, 30, 30})
  *       ray.DrawTexture(texture, 0, 0, ray.WHITE);
@@ -32,6 +40,7 @@
  *   ray.UnloadTexture(texture);
  *   texture = nil
  *
+ *   ray.ShutdownRayGui()
  *   ray.CloseWindow()
  *  @endcode
  */
@@ -54,8 +63,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 namespace lua    {
-
-TBAG_CONSTEXPR int const MAX_TEXT_BOX_LENGTH = 2048;
 
 TBAG_CONSTEXPR char const * const lua_ray_name() TBAG_NOEXCEPT
 {
