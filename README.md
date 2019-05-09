@@ -32,8 +32,7 @@ Tea-bag is Third party extension utility project.
 - pugixml 1.9 (MIT license)
 - tmxlite master-591dd03 (zlib license)
 - imgui 1.70 (MIT license)
-- raygui master-4925bba (zlib license)
-- glfw 3.3 (zlib license)
+- raylib 2.5-dev (zlib license)
 
 ## External target
 
@@ -50,7 +49,7 @@ Tea-bag is Third party extension utility project.
   - external/archive/build/Modules/CMakePushCheckState.cmake
 - gperftools 2.7 (BSD 3-Clause license)
 - nng 1.1.1 (MIT license)
-- raylib 2.5-dev (zlib license)
+- glfw 3.3 (zlib license)
 
 ## Resources
 

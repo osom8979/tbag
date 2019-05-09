@@ -463,7 +463,7 @@ add_custom_target (nng DEPENDS ${nng_EXT_LIBRARIES})
 set (glfw_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/glfw")
 set (glfw_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
 set (glfw_EXT_HEADER       "${glfw_EXT_INCLUDE_DIR}/GLFW/glfw.h")
-set (glfw_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glfw${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (glfw_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glfw3${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (glfw_EXT_LIBRARIES    "${glfw_EXT_STATIC_LIB}")
 exists_files (glfw_EXT_EXISTS ${glfw_EXT_LIBRARIES} ${glfw_EXT_HEADER})
 
@@ -495,50 +495,4 @@ else ()
     fake_output_library (glfw_ext_output glfw_ext ${glfw_EXT_LIBRARIES})
 endif ()
 add_custom_target (glfw DEPENDS ${glfw_EXT_LIBRARIES})
-
-############
-## RAYLIB ##
-############
-
-if (WIN32)
-    set (raylib_EXT_STATIC_LIB_NAME raylib_static)
-else ()
-    set (raylib_EXT_STATIC_LIB_NAME raylib)
-endif()
-
-set (raylib_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/raylib")
-set (raylib_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
-set (raylib_EXT_HEADER       "${raylib_EXT_INCLUDE_DIR}/raylib.h")
-set (raylib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${raylib_EXT_STATIC_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (raylib_EXT_LIBRARIES    "${raylib_EXT_STATIC_LIB}")
-exists_files (raylib_EXT_EXISTS ${raylib_EXT_LIBRARIES} ${raylib_EXT_HEADER})
-
-if (raylib_EXT_EXISTS)
-    message (STATUS "Skip external/raylib (Exists: ${raylib_EXT_STATIC_LIB})")
-else ()
-    message (STATUS "Add external/raylib")
-    ExternalProject_Add (raylib_ext
-            PREFIX "${EXT_PREFIX_DIR}"
-            #--Configure step-------------
-            SOURCE_DIR "${raylib_EXT_SOURCE_DIR}"
-            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
-                       "-DBUILD_SHARED_LIBS=OFF"
-                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
-                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
-                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-                       "-DBUILD_EXAMPLES=OFF"
-                       "-DBUILD_GAMES=OFF"
-                       "-DENABLE_ASAN=OFF"
-                       "-DENABLE_UBSAN=OFF"
-                       "-DENABLE_MSAN=OFF"
-            #--Output lraylibing-------------
-            LOG_DOWNLOAD  1
-            LOG_UPDATE    1
-            LOG_CONFIGURE 1
-            LOG_BUILD     0
-            LOG_TEST      1
-            LOG_INSTALL   1)
-    fake_output_library (raylib_ext_output raylib_ext ${raylib_EXT_LIBRARIES})
-endif ()
-add_custom_target (raylib DEPENDS ${raylib_EXT_LIBRARIES})
 

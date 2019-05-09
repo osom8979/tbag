@@ -22,7 +22,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}
     add_compile_options (-w)
 endif ()
 
-include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${freetype_EXT_INCLUDE_DIR} ${raylib_EXT_INCLUDE_DIR})
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}
+                     ${freetype_EXT_INCLUDE_DIR}
+                     ${CMAKE_SOURCE_DIR}/dep/raylib)
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 add_definitions (-DSFML_STATIC)
 add_library (imgui STATIC ${SRCS})

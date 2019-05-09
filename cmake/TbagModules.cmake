@@ -593,6 +593,27 @@ macro (tbag_modules__apply_dep_raygui)
     tbag_modules__add_whole_archive ($<TARGET_FILE:raygui>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_raylib)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES raylib)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/raylib)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:raylib>)
+
+    if (WIN32)
+        list (APPEND TBAG_PROJECT_LDFLAGS gdi32.lib)
+    elseif (UNIX)
+        if (APPLE)
+            list (APPEND TBAG_PROJECT_LDFLAGS -ObjC
+                    -Wl,-framework,OpenGL
+                    -Wl,-framework,Cocoa
+                    -Wl,-framework,IOKit
+                    -Wl,-framework,CoreFoundation
+                    -Wl,-framework,CoreVideo)
+        else ()
+            list (APPEND TBAG_PROJECT_LDFLAGS -lGLU -lrt -lm -ldl -lX11)
+        endif ()
+    endif ()
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
@@ -768,6 +789,12 @@ macro (tbag_modules__apply_ext_nng)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${nng_EXT_INCLUDE_DIR})
     list (APPEND TBAG_PROJECT_DEFINITIONS NNG_STATIC_LIB)
     tbag_modules__add_whole_archive (${nng_EXT_STATIC_LIB})
+endmacro ()
+
+macro (tbag_modules__apply_ext_glfw)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES glfw)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${glfw_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${glfw_EXT_STATIC_LIB})
 endmacro ()
 
 macro (tbag_modules__apply_ext_raylib)
