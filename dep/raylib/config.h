@@ -33,6 +33,10 @@
     #include "cmake/config.h"
 #else
 
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 //------------------------------------------------------------------------------------
 // Module: core - Configuration Flags
 //------------------------------------------------------------------------------------
@@ -140,5 +144,10 @@
 // NOTE: By default LOG_DEBUG traces not shown
 #define SUPPORT_TRACELOG    1
 
+
+// Support saving image data as PNG fileformat. NOTE: Requires stb_image_write library
+// #define SUPPORT_SAVE_PNG 1
+// Support saving image data as PMP fileformat. NOTE: Requires stb_image_write library
+// #define SUPPORT_SAVE_BMP 1
 
 #endif  //defined(RAYLIB_CMAKE)
