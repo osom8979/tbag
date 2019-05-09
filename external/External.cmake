@@ -456,6 +456,46 @@ else ()
 endif ()
 add_custom_target (nng DEPENDS ${nng_EXT_LIBRARIES})
 
+##########
+## GLFW ##
+##########
+
+set (glfw_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/glfw")
+set (glfw_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (glfw_EXT_HEADER       "${glfw_EXT_INCLUDE_DIR}/GLFW/glfw.h")
+set (glfw_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glfw${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (glfw_EXT_LIBRARIES    "${glfw_EXT_STATIC_LIB}")
+exists_files (glfw_EXT_EXISTS ${glfw_EXT_LIBRARIES} ${glfw_EXT_HEADER})
+
+if (glfw_EXT_EXISTS)
+    message (STATUS "Skip external/glfw (Exists: ${glfw_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/glfw")
+    ExternalProject_Add (glfw_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${glfw_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DGLFW_BUILD_EXAMPLES=OFF"
+                       "-DGLFW_BUILD_TESTS=OFF"
+                       "-DGLFW_BUILD_DOCS=OFF"
+                       "-DGLFW_INSTALL=ON"
+                       "-DGLFW_VULKAN_STATIC=OFF"
+            #--Output lglfwing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (glfw_ext_output glfw_ext ${glfw_EXT_LIBRARIES})
+endif ()
+add_custom_target (glfw DEPENDS ${glfw_EXT_LIBRARIES})
+
 ############
 ## RAYLIB ##
 ############
