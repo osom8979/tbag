@@ -142,8 +142,8 @@ float GetGesturePinchAngle(void);                       // Get gesture pinch ang
 
 #if defined(_WIN32)
     // Functions required to query time on Windows
-    int __stdcall QueryPerformanceCounter(unsigned long long int *lpPerformanceCount);
-    int __stdcall QueryPerformanceFrequency(unsigned long long int *lpFrequency);
+//    int __stdcall QueryPerformanceCounter(unsigned long long int *lpPerformanceCount);
+//    int __stdcall QueryPerformanceFrequency(unsigned long long int *lpFrequency);
 #elif defined(__linux__)
     #if _POSIX_C_SOURCE < 199309L
         #undef _POSIX_C_SOURCE

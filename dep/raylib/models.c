@@ -2376,13 +2376,13 @@ void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotationAxis, float
 // Draw a billboard
 void DrawBillboard(Camera camera, Texture2D texture, Vector3 center, float size, Color tint)
 {
-    Rectangle sourceRec = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+    Rectangle2 sourceRec = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
 
     DrawBillboardRec(camera, texture, sourceRec, center, size, tint);
 }
 
 // Draw a billboard (part of a texture defined by a rectangle)
-void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle sourceRec, Vector3 center, float size, Color tint)
+void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle2 sourceRec, Vector3 center, float size, Color tint)
 {
     // NOTE: Billboard size will maintain sourceRec aspect ratio, size will represent billboard width
     Vector2 sizeRatio = { size, size*(float)sourceRec.height/sourceRec.width };
