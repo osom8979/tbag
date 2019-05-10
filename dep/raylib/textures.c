@@ -178,7 +178,7 @@ static Image LoadASTC(const char *fileName);  // Load ASTC file
 //----------------------------------------------------------------------------------
 
 // Load image from file into CPU memory (RAM)
-Image LoadImage(const char *fileName)
+Image LoadImage_(const char *fileName)
 {
     Image image = { 0 };
 
@@ -385,7 +385,7 @@ Texture2D LoadTexture(const char *fileName)
 {
     Texture2D texture = { 0 };
 
-    Image image = LoadImage(fileName);
+    Image image = LoadImage_(fileName);
 
     if (image.data != NULL)
     {

@@ -283,7 +283,7 @@ Font LoadFont(const char *fileName)
     else
 #endif
     {
-        Image image = LoadImage(fileName);
+        Image image = LoadImage_(fileName);
         if (image.data != NULL) font = LoadFontFromImage(image, MAGENTA, DEFAULT_FIRST_CHAR);
         UnloadImage(image);
     }
@@ -733,13 +733,13 @@ void DrawText_(const char *text, int posX, int posY, int fontSize, Color color)
         if (fontSize < defaultFontSize) fontSize = defaultFontSize;
         int spacing = fontSize/defaultFontSize;
 
-        DrawTextEx(GetFontDefault(), text, position, (float)fontSize, (float)spacing, color);
+        DrawTextEx_(GetFontDefault(), text, position, (float)fontSize, (float)spacing, color);
     }
 }
 
 // Draw text using Font
 // NOTE: chars spacing is NOT proportional to fontSize
-void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
+void DrawTextEx_(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
 {
     int length = strlen(text);
     int textOffsetX = 0;        // Offset between characters
@@ -1405,7 +1405,7 @@ static Font LoadBMFont(const char *fileName)
 
     TraceLog(LOG_DEBUG, "[%s] Font texture loading path: %s", fileName, texPath);
 
-    Image imFont = LoadImage(texPath);
+    Image imFont = LoadImage_(texPath);
 
     if (imFont.format == UNCOMPRESSED_GRAYSCALE)
     {

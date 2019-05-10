@@ -835,7 +835,7 @@ bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 
 
 Image LoadImage(char const * file_name)
 {
-    return ::LoadImage(file_name);
+    return ::LoadImage_(file_name);
 }
 
 Image LoadImageEx(Color * pixels, int width, int height)
@@ -1223,7 +1223,7 @@ void DrawText(char const * text, int pos_x, int pos_y, int font_size, Color colo
 
 void DrawTextEx(Font font, char const * text, Vector2 position, float font_size, float spacing, Color tint)
 {
-    ::DrawTextEx(font, text, position, font_size, spacing, tint);
+    ::DrawTextEx_(font, text, position, font_size, spacing, tint);
 }
 
 void DrawTextRec(Font font, char const * text, Rectangle2 rec, float font_size, float spacing,

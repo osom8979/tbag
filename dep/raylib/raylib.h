@@ -1108,7 +1108,7 @@ RLAPI bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Ve
 //------------------------------------------------------------------------------------
 
 // Image/Texture2D data loading/unloading/saving functions
-RLAPI Image LoadImage(const char *fileName);                                                             // Load image from file into CPU memory (RAM)
+RLAPI Image LoadImage_(const char *fileName);                                                             // Load image from file into CPU memory (RAM)
 RLAPI Image LoadImageEx(Color *pixels, int width, int height);                                           // Load image from Color array data (RGBA - 32bit)
 RLAPI Image LoadImagePro(void *data, int width, int height, int format);                                 // Load image from raw data with parameters
 RLAPI Image LoadImageRaw(const char *fileName, int width, int height, int format, int headerSize);       // Load image from RAW file data
@@ -1201,7 +1201,7 @@ RLAPI void UnloadFont(Font font);                                               
 // Text drawing functions
 RLAPI void DrawFPS(int posX, int posY);                                                     // Shows current FPS
 RLAPI void DrawText_(const char *text, int posX, int posY, int fontSize, Color color);       // Draw text (using default font)
-RLAPI void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);                // Draw text using font and additional parameters
+RLAPI void DrawTextEx_(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint);                // Draw text using font and additional parameters
 RLAPI void DrawTextRec(Font font, const char *text, Rectangle2 rec, float fontSize, float spacing, bool wordWrap, Color tint);   // Draw text using font inside rectangle limits
 RLAPI void DrawTextRecEx(Font font, const char *text, Rectangle2 rec, float fontSize, float spacing, bool wordWrap, Color tint,
                          int selectStart, int selectLength, Color selectText, Color selectBack);    // Draw text using font inside rectangle limits with support for text selection
