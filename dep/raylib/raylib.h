@@ -140,9 +140,9 @@
 
 // Temporal hack to avoid breaking old codebases using
 // deprecated raylib implementation of these functions
-#define FormatText  TextFormat
-#define SubText     TextSubtext
-#define ShowWindow  UnhideWindow_
+//#define TextFormat  TextFormat
+//#define TextSubtext     TextSubtext
+//#define UnhideWindow_  UnhideWindow_
 
 //----------------------------------------------------------------------------------
 // Structures Definition

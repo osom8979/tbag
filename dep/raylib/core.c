@@ -4021,7 +4021,7 @@ static void ProcessKeyboard(void)
     // Check screen capture key (raylib key: KEY_F12)
     if (currentKeyState[301] == 1)
     {
-        TakeScreenshot(FormatText("screenshot%03i.png", screenshotCounter));
+        TakeScreenshot(TextFormat("screenshot%03i.png", screenshotCounter));
         screenshotCounter++;
     }
 #endif
