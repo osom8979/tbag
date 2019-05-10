@@ -49,9 +49,9 @@
  * #define RAYWHITE   CLITERAL{ 245, 245, 245, 255 }
  */
 
-#define FormatText  TextFormat
-#define SubText     TextSubtext
-#define ShowWindow  UnhideWindow
+//#define FormatText  TextFormat
+//#define SubText     TextSubtext
+//#define ShowWindow  UnhideWindow_
 
 #if defined(__STDC__) && __STDC_VERSION__ >= 199901L
 #include <stdbool.h>

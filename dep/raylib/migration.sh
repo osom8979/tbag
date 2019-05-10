@@ -20,13 +20,20 @@ sed -i .tmp -e 's/\(#define SubText.*\)/\/\/\1/g' raylib.h
 echo 'Remove ShowWindow macro.'
 sed -i .tmp -e 's/\(#define ShowWindow.*\)/\/\/\1/g' raylib.h
 
-rename_symbol Rectangle     Rectangle2
-rename_symbol UnhideWindow  UnhideWindow_
-rename_symbol SwapBuffers   SwapBuffers_
-rename_symbol DrawText      DrawText_
-rename_symbol FormatText    TextFormat
-rename_symbol SubText       TextSubtext
-rename_symbol ShowWindow    UnhideWindow_
+rename_symbol Rectangle       Rectangle2
+rename_symbol UnhideWindow    UnhideWindow_
+rename_symbol SwapBuffers     SwapBuffers_
+rename_symbol DrawText        DrawText_
+rename_symbol FormatText      TextFormat
+rename_symbol SubText         TextSubtext
+rename_symbol ShowWindow      UnhideWindow_
+rename_symbol GetCurrentTime  GetCurrentTime_
+
+echo "Rename symbol (raymath.h): far -> far_"
+sed -i .tmp -e "s/[[:<:]]far[[:>:]]/far_/g" raymath.h
+
+echo "Rename symbol (raymath.h): near -> near_"
+sed -i .tmp -e "s/[[:<:]]near[[:>:]]/near_/g" raymath.h
 
 echo 'Remove all tmp files.'
 rm *.tmp

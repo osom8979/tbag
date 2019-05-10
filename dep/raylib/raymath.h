@@ -880,32 +880,32 @@ RMDEF Matrix MatrixMultiply(Matrix left, Matrix right)
 }
 
 // Returns perspective projection matrix
-RMDEF Matrix MatrixFrustum(double left, double right, double bottom, double top, double near, double far)
+RMDEF Matrix MatrixFrustum(double left, double right, double bottom, double top, double near_, double far_)
 {
     Matrix result = { 0 };
 
     float rl = (float)(right - left);
     float tb = (float)(top - bottom);
-    float fn = (float)(far - near);
+    float fn = (float)(far_ - near_);
 
-    result.m0 = ((float) near*2.0f)/rl;
+    result.m0 = ((float) near_*2.0f)/rl;
     result.m1 = 0.0f;
     result.m2 = 0.0f;
     result.m3 = 0.0f;
 
     result.m4 = 0.0f;
-    result.m5 = ((float) near*2.0f)/tb;
+    result.m5 = ((float) near_*2.0f)/tb;
     result.m6 = 0.0f;
     result.m7 = 0.0f;
 
     result.m8 = ((float)right + (float)left)/rl;
     result.m9 = ((float)top + (float)bottom)/tb;
-    result.m10 = -((float)far + (float)near)/fn;
+    result.m10 = -((float)far_ + (float)near_)/fn;
     result.m11 = -1.0f;
 
     result.m12 = 0.0f;
     result.m13 = 0.0f;
-    result.m14 = -((float)far*(float)near*2.0f)/fn;
+    result.m14 = -((float)far_*(float)near_*2.0f)/fn;
     result.m15 = 0.0f;
 
     return result;
@@ -913,23 +913,23 @@ RMDEF Matrix MatrixFrustum(double left, double right, double bottom, double top,
 
 // Returns perspective projection matrix
 // NOTE: Angle should be provided in radians
-RMDEF Matrix MatrixPerspective(double fovy, double aspect, double near, double far)
+RMDEF Matrix MatrixPerspective(double fovy, double aspect, double near_, double far_)
 {
-    double top = near*tan(fovy*0.5);
+    double top = near_*tan(fovy*0.5);
     double right = top*aspect;
-    Matrix result = MatrixFrustum(-right, right, -top, top, near, far);
+    Matrix result = MatrixFrustum(-right, right, -top, top, near_, far_);
 
     return result;
 }
 
 // Returns orthographic projection matrix
-RMDEF Matrix MatrixOrtho(double left, double right, double bottom, double top, double near, double far)
+RMDEF Matrix MatrixOrtho(double left, double right, double bottom, double top, double near_, double far_)
 {
     Matrix result = { 0 };
 
     float rl = (float)(right - left);
     float tb = (float)(top - bottom);
-    float fn = (float)(far - near);
+    float fn = (float)(far_ - near_);
 
     result.m0 = 2.0f/rl;
     result.m1 = 0.0f;
@@ -945,7 +945,7 @@ RMDEF Matrix MatrixOrtho(double left, double right, double bottom, double top, d
     result.m11 = 0.0f;
     result.m12 = -((float)left + (float)right)/rl;
     result.m13 = -((float)top + (float)bottom)/tb;
-    result.m14 = -((float)far + (float)near)/fn;
+    result.m14 = -((float)far_ + (float)near_)/fn;
     result.m15 = 1.0f;
 
     return result;

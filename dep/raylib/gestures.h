@@ -227,7 +227,7 @@ static unsigned int enabledGestures = 0b0000001111111111;
 static float Vector2Angle(Vector2 initialPosition, Vector2 finalPosition);
 static float Vector2Distance(Vector2 v1, Vector2 v2);
 #endif
-static double GetCurrentTime(void);
+static double GetCurrentTime_(void);
 
 //----------------------------------------------------------------------------------
 // Module Functions Definition
@@ -259,7 +259,7 @@ void ProcessGestureEvent(GestureEvent event)
             tapCounter++;    // Tap counter
             
             // Detect GESTURE_DOUBLE_TAP
-            if ((currentGesture == GESTURE_NONE) && (tapCounter >= 2) && ((GetCurrentTime() - eventTime) < TAP_TIMEOUT) && (Vector2Distance(touchDownPosition, event.position[0]) < DOUBLETAP_RANGE))
+            if ((currentGesture == GESTURE_NONE) && (tapCounter >= 2) && ((GetCurrentTime_() - eventTime) < TAP_TIMEOUT) && (Vector2Distance(touchDownPosition, event.position[0]) < DOUBLETAP_RANGE))
             {
                 currentGesture = GESTURE_DOUBLETAP;
                 tapCounter = 0;
@@ -274,7 +274,7 @@ void ProcessGestureEvent(GestureEvent event)
             touchDownDragPosition = event.position[0];
             
             touchUpPosition = touchDownPosition;
-            eventTime = GetCurrentTime();
+            eventTime = GetCurrentTime_();
             
             firstTouchId = event.pointerId[0];
             
@@ -286,7 +286,7 @@ void ProcessGestureEvent(GestureEvent event)
 
             // NOTE: dragIntensity dependend on the resolution of the screen
             dragDistance = Vector2Distance(touchDownPosition, touchUpPosition);
-            dragIntensity = dragDistance/(float)((GetCurrentTime() - swipeTime));
+            dragIntensity = dragDistance/(float)((GetCurrentTime_() - swipeTime));
             
             startMoving = false;
             
@@ -316,11 +316,11 @@ void ProcessGestureEvent(GestureEvent event)
         }
         else if (event.touchAction == TOUCH_MOVE)
         {
-            if (currentGesture == GESTURE_DRAG) eventTime = GetCurrentTime();
+            if (currentGesture == GESTURE_DRAG) eventTime = GetCurrentTime_();
             
             if (!startMoving)
             {
-                swipeTime = GetCurrentTime();
+                swipeTime = GetCurrentTime_();
                 startMoving = true;
             }
             
@@ -335,7 +335,7 @@ void ProcessGestureEvent(GestureEvent event)
                 // Detect GESTURE_DRAG
                 if (Vector2Distance(touchDownPosition, moveDownPosition) >= MINIMUM_DRAG)
                 {
-                    eventTime = GetCurrentTime();
+                    eventTime = GetCurrentTime_();
                     currentGesture = GESTURE_DRAG;
                 }
             }
@@ -357,7 +357,7 @@ void ProcessGestureEvent(GestureEvent event)
             pinchVector.y = touchDownPosition2.y - touchDownPosition.y;
             
             currentGesture = GESTURE_HOLD;
-            timeHold = GetCurrentTime();
+            timeHold = GetCurrentTime_();
         }
         else if (event.touchAction == TOUCH_MOVE)
         {
@@ -380,7 +380,7 @@ void ProcessGestureEvent(GestureEvent event)
             else
             {
                 currentGesture = GESTURE_HOLD;
-                timeHold = GetCurrentTime();
+                timeHold = GetCurrentTime_();
             }
             
             // NOTE: Angle should be inverted in Y
@@ -407,13 +407,13 @@ void UpdateGestures(void)
     if (((currentGesture == GESTURE_TAP) || (currentGesture == GESTURE_DOUBLETAP)) && (pointCount < 2))
     {
         currentGesture = GESTURE_HOLD;
-        timeHold = GetCurrentTime();
+        timeHold = GetCurrentTime_();
     }
     
-    if (((GetCurrentTime() - eventTime) > TAP_TIMEOUT) && (currentGesture == GESTURE_DRAG) && (pointCount < 2))
+    if (((GetCurrentTime_() - eventTime) > TAP_TIMEOUT) && (currentGesture == GESTURE_DRAG) && (pointCount < 2))
     {
         currentGesture = GESTURE_HOLD;
-        timeHold = GetCurrentTime();
+        timeHold = GetCurrentTime_();
         resetHold = true;
     }
    
@@ -446,7 +446,7 @@ float GetGestureHoldDuration(void)
     
     double time = 0.0;
     
-    if (currentGesture == GESTURE_HOLD) time = GetCurrentTime() - timeHold;
+    if (currentGesture == GESTURE_HOLD) time = GetCurrentTime_() - timeHold;
     
     return (float)time;
 }
@@ -515,7 +515,7 @@ static float Vector2Distance(Vector2 v1, Vector2 v2)
 #endif
 
 // Time measure returned are milliseconds
-static double GetCurrentTime(void)
+static double GetCurrentTime_(void)
 {
     double time = 0;
     
