@@ -765,18 +765,18 @@ void luaL_setmetatable(lua_State * L, char const * tname)
     ::lua_setmetatable(L, -2);
 }
 
-Pairs getRegistryPairs(lua_State * L)
-{
-    Pairs result;
-    ::lua_pushnil(L);  // First key.
-    while (::lua_next(L, LUA_REGISTRYINDEX) != 0) {
-        // Key index: -2
-        // Value index: -1
-        // printf("%s - %s\n", lua_typename(L, lua_type(L, -2)), lua_typename(L, lua_type(L, -1)));
-        // lua_pop(L, 1); // removes 'value'; keeps 'key' for next iteration
-    }
-    return result;
-}
+//Pairs getRegistryPairs(lua_State * L)
+//{
+//    Pairs result;
+//    ::lua_pushnil(L);  // First key.
+//    while (::lua_next(L, LUA_REGISTRYINDEX) != 0) {
+//        // Key index: -2
+//        // Value index: -1
+//        // printf("%s - %s\n", lua_typename(L, lua_type(L, -2)), lua_typename(L, lua_type(L, -1)));
+//        // lua_pop(L, 1); // removes 'value'; keeps 'key' for next iteration
+//    }
+//    return result;
+//}
 
 void luadebug_printstack(lua_State * L)
 {

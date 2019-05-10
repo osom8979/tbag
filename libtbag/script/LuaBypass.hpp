@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/script/luajit-2.0.5/lua.hpp>
-#include <libtbag/util/Structures.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -235,10 +234,6 @@ TBAG_API void luaL_setmetatable(lua_State * L, char const * tname);
 // Extra
 // -----
 
-using Pair  = libtbag::util::Pair;
-using Pairs = libtbag::util::Pairs;
-
-TBAG_API Pairs getRegistryPairs(lua_State * L);
 TBAG_API void luadebug_printstack(lua_State * L);
 
 } // namespace script
