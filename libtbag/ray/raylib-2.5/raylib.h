@@ -93,12 +93,12 @@ typedef struct Color {
     unsigned char a;
 } Color;
 
-typedef struct Rectangle {
+typedef struct Rectangle2 {
     float x;
     float y;
     float width;
     float height;
-} Rectangle;
+} Rectangle2;
 
 typedef struct Image {
     void * data;
@@ -129,7 +129,7 @@ typedef struct RenderTexture2D {
 typedef RenderTexture2D RenderTexture;
 
 typedef struct NPatchInfo {
-    Rectangle sourceRec;
+    Rectangle2 sourceRec;
     int left;
     int top;
     int right;
@@ -139,7 +139,7 @@ typedef struct NPatchInfo {
 
 typedef struct CharInfo {
     int value;
-    Rectangle rec;
+    Rectangle2 rec;
     int offsetX;
     int offsetY;
     int advanceX;

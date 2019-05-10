@@ -17,7 +17,7 @@
 
 // #include <libtbag/string/Format.hpp> // [WARNING] Don't use this header.
 #if defined(TBAG_PLATFORM_WINDOWS) && defined(_WINGDI_)
-#error The Rectangle symbol in wingdi.h conflicts.
+#error The Rectangle2 symbol in wingdi.h conflicts.
 #endif
 
 // -------------------
@@ -413,11 +413,11 @@ static std::vector<Color> luaL_checkcolor_array(lua_State * L, int num_arg)
     return result;
 }
 
-# /*************/
-# /* Rectangle */
-# /*************/
+# /**************/
+# /* Rectangle2 */
+# /**************/
 
-static void luaL_pushrectangle(lua_State * L, Rectangle const & rect)
+static void luaL_pushrectangle(lua_State * L, Rectangle2 const & rect)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, rect.x);
@@ -430,9 +430,9 @@ static void luaL_pushrectangle(lua_State * L, Rectangle const & rect)
     lua_setfield(L, -2, "height");
 }
 
-static Rectangle luaL_checkrectangle(lua_State * L, int num_arg)
+static Rectangle2 luaL_checkrectangle(lua_State * L, int num_arg)
 {
-    Rectangle result = {0,};
+    Rectangle2 result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
         lua_rawgeti(L, num_arg, 1);
         result.x = luaL_checknumber(L, -1);
@@ -3277,7 +3277,7 @@ static int _UnloadModel(lua_State * L)
 //void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotation_axis, float rotation_angle, Vector3 scale, Color tint);
 //void DrawBoundingBox(BoundingBox box, Color color);
 //void DrawBillboard(Camera camera, Texture2D texture, Vector3 center, float size, Color tint);
-//void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source_rec, Vector3 center, float size, Color tint);
+//void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle2 source_rec, Vector3 center, float size, Color tint);
 //
 //bool CheckCollisionSpheres(Vector3 center_a, float radius_a, Vector3 center_b, float radius_b);
 //bool CheckCollisionBoxes(BoundingBox box1, BoundingBox box2);

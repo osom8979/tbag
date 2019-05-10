@@ -61,7 +61,7 @@ void ToggleFullscreen()
 
 void UnhideWindow()
 {
-    ::UnhideWindow();
+    ::UnhideWindow_();
 }
 
 void HideWindow()
@@ -723,12 +723,12 @@ void DrawRectangleV(Vector2 position, Vector2 size, Color color)
     ::DrawRectangleV(position, size, color);
 }
 
-void DrawRectangleRec(Rectangle rec, Color color)
+void DrawRectangleRec(Rectangle2 rec, Color color)
 {
     ::DrawRectangleRec(rec, color);
 }
 
-void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color)
+void DrawRectanglePro(Rectangle2 rec, Vector2 origin, float rotation, Color color)
 {
     ::DrawRectanglePro(rec, origin, rotation, color);
 }
@@ -743,7 +743,7 @@ void DrawRectangleGradientH(int pos_x, int pos_y, int width, int height, Color c
     ::DrawRectangleGradientH(pos_x, pos_y, width, height, color1, color2);
 }
 
-void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4)
+void DrawRectangleGradientEx(Rectangle2 rec, Color col1, Color col2, Color col3, Color col4)
 {
     ::DrawRectangleGradientEx(rec, col1, col2, col3, col4);
 }
@@ -753,17 +753,17 @@ void DrawRectangleLines(int pos_x, int pos_y, int width, int height, Color color
     ::DrawRectangleLines(pos_x, pos_y, width, height, color);
 }
 
-void DrawRectangleLinesEx(Rectangle rec, int line_thick, Color color)
+void DrawRectangleLinesEx(Rectangle2 rec, int line_thick, Color color)
 {
     ::DrawRectangleLinesEx(rec, line_thick, color);
 }
 
-void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color)
+void DrawRectangleRounded(Rectangle2 rec, float roundness, int segments, Color color)
 {
     ::DrawRectangleRounded(rec, roundness, segments, color);
 }
 
-void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, int line_thick, Color color)
+void DrawRectangleRoundedLines(Rectangle2 rec, float roundness, int segments, int line_thick, Color color)
 {
     ::DrawRectangleRoundedLines(rec, roundness, segments, line_thick, color);
 }
@@ -793,12 +793,12 @@ void DrawPolyExLines(Vector2 * points, int num_points, Color color)
     ::DrawPolyExLines(points, num_points, color);
 }
 
-void SetShapesTexture(Texture2D texture, Rectangle source)
+void SetShapesTexture(Texture2D texture, Rectangle2 source)
 {
     ::SetShapesTexture(texture, source);
 }
 
-bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2)
+bool CheckCollisionRecs(Rectangle2 rec1, Rectangle2 rec2)
 {
     return ::CheckCollisionRecs(rec1, rec2);
 }
@@ -808,17 +808,17 @@ bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, floa
     return ::CheckCollisionCircles(center1, radius1, center2, radius2);
 }
 
-bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
+bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle2 rec)
 {
     return ::CheckCollisionCircleRec(center, radius, rec);
 }
 
-Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2)
+Rectangle2 GetCollisionRec(Rectangle2 rec1, Rectangle2 rec2)
 {
     return ::GetCollisionRec(rec1, rec2);
 }
 
-bool CheckCollisionPointRec(Vector2 point, Rectangle rec)
+bool CheckCollisionPointRec(Vector2 point, Rectangle2 rec)
 {
     return ::CheckCollisionPointRec(point, rec);
 }
@@ -963,7 +963,7 @@ void ImageAlphaPremultiply(Image * image)
     ::ImageAlphaPremultiply(image);
 }
 
-void ImageCrop(Image * image, Rectangle crop)
+void ImageCrop(Image * image, Rectangle2 crop)
 {
     ::ImageCrop(image, crop);
 }
@@ -1008,17 +1008,17 @@ Image ImageTextEx(Font font, char const * text, float font_size, float spacing, 
     return ::ImageTextEx(font, text, font_size, spacing, tint);
 }
 
-void ImageDraw(Image * dst, Image src, Rectangle src_rec, Rectangle dst_rec)
+void ImageDraw(Image * dst, Image src, Rectangle2 src_rec, Rectangle2 dst_rec)
 {
     ::ImageDraw(dst, src, src_rec, dst_rec);
 }
 
-void ImageDrawRectangle(Image * dst, Rectangle rec, Color color)
+void ImageDrawRectangle(Image * dst, Rectangle2 rec, Color color)
 {
     ::ImageDrawRectangle(dst, rec, color);
 }
 
-void ImageDrawRectangleLines(Image * dst, Rectangle rec, int thick, Color color)
+void ImageDrawRectangleLines(Image * dst, Rectangle2 rec, int thick, Color color)
 {
     ::ImageDrawRectangleLines(dst, rec, thick, color);
 }
@@ -1154,23 +1154,23 @@ void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float sc
     ::DrawTextureEx(texture, position, rotation, scale, tint);
 }
 
-void DrawTextureRec(Texture2D texture, Rectangle source_rec, Vector2 position, Color tint)
+void DrawTextureRec(Texture2D texture, Rectangle2 source_rec, Vector2 position, Color tint)
 {
     ::DrawTextureRec(texture, source_rec, position, tint);
 }
 
-void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle quad, Color tint)
+void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle2 quad, Color tint)
 {
     ::DrawTextureQuad(texture, tiling, offset, quad, tint);
 }
 
-void DrawTexturePro(Texture2D texture, Rectangle source_rec, Rectangle dest_rec, Vector2 origin,
+void DrawTexturePro(Texture2D texture, Rectangle2 source_rec, Rectangle2 dest_rec, Vector2 origin,
                     float rotation, Color tint)
 {
     ::DrawTexturePro(texture, source_rec, dest_rec, origin, rotation, tint);
 }
 
-void DrawTextureNPatch(Texture2D texture, NPatchInfo n_patch_info, Rectangle dest_rec, Vector2 origin,
+void DrawTextureNPatch(Texture2D texture, NPatchInfo n_patch_info, Rectangle2 dest_rec, Vector2 origin,
                        float rotation, Color tint)
 {
     ::DrawTextureNPatch(texture, n_patch_info, dest_rec, origin, rotation, tint);
@@ -1218,7 +1218,7 @@ void DrawFPS(int pos_x, int pos_y)
 
 void DrawText(char const * text, int pos_x, int pos_y, int font_size, Color color)
 {
-    ::DrawText(text, pos_x, pos_y, font_size, color);
+    ::DrawText_(text, pos_x, pos_y, font_size, color);
 }
 
 void DrawTextEx(Font font, char const * text, Vector2 position, float font_size, float spacing, Color tint)
@@ -1226,13 +1226,13 @@ void DrawTextEx(Font font, char const * text, Vector2 position, float font_size,
     ::DrawTextEx(font, text, position, font_size, spacing, tint);
 }
 
-void DrawTextRec(Font font, char const * text, Rectangle rec, float font_size, float spacing,
+void DrawTextRec(Font font, char const * text, Rectangle2 rec, float font_size, float spacing,
                  bool word_wrap, Color tint)
 {
     ::DrawTextRec(font, text, rec, font_size, spacing, word_wrap, tint);
 }
 
-void DrawTextRecEx(Font font, char const * text, Rectangle rec, float font_size, float spacing, bool word_wrap,
+void DrawTextRecEx(Font font, char const * text, Rectangle2 rec, float font_size, float spacing, bool word_wrap,
                    Color tint, int select_start, int select_length, Color select_text, Color select_back)
 {
     ::DrawTextRecEx(font, text, rec, font_size, spacing, word_wrap, tint,
@@ -1581,7 +1581,7 @@ void DrawBillboard(Camera camera, Texture2D texture, Vector3 center, float size,
     ::DrawBillboard(camera, texture, center, size, tint);
 }
 
-void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source_rec, Vector3 center, float size, Color tint)
+void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle2 source_rec, Vector3 center, float size, Color tint)
 {
     ::DrawBillboardRec(camera, texture, source_rec, center, size, tint);
 }

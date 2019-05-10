@@ -190,28 +190,28 @@ TBAG_API void DrawRingLines(Vector2 center, float inner_radius, float outer_radi
                             int segments, Color color);
 TBAG_API void DrawRectangle(int pos_x, int pos_y, int width, int height, Color color);
 TBAG_API void DrawRectangleV(Vector2 position, Vector2 size, Color color);
-TBAG_API void DrawRectangleRec(Rectangle rec, Color color);
-TBAG_API void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color);
+TBAG_API void DrawRectangleRec(Rectangle2 rec, Color color);
+TBAG_API void DrawRectanglePro(Rectangle2 rec, Vector2 origin, float rotation, Color color);
 TBAG_API void DrawRectangleGradientV(int pos_x, int pos_y, int width, int height, Color color1, Color color2);
 TBAG_API void DrawRectangleGradientH(int pos_x, int pos_y, int width, int height, Color color1, Color color2);
-TBAG_API void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4);
+TBAG_API void DrawRectangleGradientEx(Rectangle2 rec, Color col1, Color col2, Color col3, Color col4);
 TBAG_API void DrawRectangleLines(int pos_x, int pos_y, int width, int height, Color color);
-TBAG_API void DrawRectangleLinesEx(Rectangle rec, int line_thick, Color color);
-TBAG_API void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color);
-TBAG_API void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, int line_thick, Color color);
+TBAG_API void DrawRectangleLinesEx(Rectangle2 rec, int line_thick, Color color);
+TBAG_API void DrawRectangleRounded(Rectangle2 rec, float roundness, int segments, Color color);
+TBAG_API void DrawRectangleRoundedLines(Rectangle2 rec, float roundness, int segments, int line_thick, Color color);
 TBAG_API void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color);
 TBAG_API void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color);
 TBAG_API void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);
 TBAG_API void DrawPolyEx(Vector2 * points, int num_points, Color color);
 TBAG_API void DrawPolyExLines(Vector2 * points, int num_points, Color color);
 
-TBAG_API void SetShapesTexture(Texture2D texture, Rectangle source);
+TBAG_API void SetShapesTexture(Texture2D texture, Rectangle2 source);
 
-TBAG_API bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2);
+TBAG_API bool CheckCollisionRecs(Rectangle2 rec1, Rectangle2 rec2);
 TBAG_API bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, float radius2);
-TBAG_API bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec);
-TBAG_API Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2);
-TBAG_API bool CheckCollisionPointRec(Vector2 point, Rectangle rec);
+TBAG_API bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle2 rec);
+TBAG_API Rectangle2 GetCollisionRec(Rectangle2 rec1, Rectangle2 rec2);
+TBAG_API bool CheckCollisionPointRec(Vector2 point, Rectangle2 rec);
 TBAG_API bool CheckCollisionPointCircle(Vector2 point, Vector2 center, float radius);
 TBAG_API bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 p3);
 
@@ -242,7 +242,7 @@ TBAG_API void ImageAlphaMask(Image * image, Image alpha_mask);
 TBAG_API void ImageAlphaClear(Image * image, Color color, float threshold);
 TBAG_API void ImageAlphaCrop(Image * image, float threshold);
 TBAG_API void ImageAlphaPremultiply(Image * image);
-TBAG_API void ImageCrop(Image * image, Rectangle crop);
+TBAG_API void ImageCrop(Image * image, Rectangle2 crop);
 TBAG_API void ImageResize(Image * image, int new_width, int new_height);
 TBAG_API void ImageResizeNN(Image * image, int new_width, int new_height);
 TBAG_API void ImageResizeCanvas(Image * image, int new_width, int new_height, int offset_x, int offset_y, Color color);
@@ -251,9 +251,9 @@ TBAG_API void ImageDither(Image * image, int r_bpp, int g_bpp, int b_bpp, int a_
 TBAG_API Color * ImageExtractPalette(Image image, int maxPalette_size, int * extract_count);
 TBAG_API Image ImageText(char const * text, int font_size, Color color);
 TBAG_API Image ImageTextEx(Font font, char const * text, float font_size, float spacing, Color tint);
-TBAG_API void ImageDraw(Image * dst, Image src, Rectangle src_rec, Rectangle dst_rec);
-TBAG_API void ImageDrawRectangle(Image * dst, Rectangle rec, Color color);
-TBAG_API void ImageDrawRectangleLines(Image * dst, Rectangle rec, int thick, Color color);
+TBAG_API void ImageDraw(Image * dst, Image src, Rectangle2 src_rec, Rectangle2 dst_rec);
+TBAG_API void ImageDrawRectangle(Image * dst, Rectangle2 rec, Color color);
+TBAG_API void ImageDrawRectangleLines(Image * dst, Rectangle2 rec, int thick, Color color);
 TBAG_API void ImageDrawText(Image * dst, Vector2 position, char const * text, int font_size, Color color);
 TBAG_API void ImageDrawTextEx(Image * dst, Vector2 position, Font font, char const * text, float font_size,
                               float spacing, Color color);
@@ -284,11 +284,11 @@ TBAG_API void SetTextureWrap(Texture2D texture, int wrap_mode);
 TBAG_API void DrawTexture(Texture2D texture, int pos_x, int pos_y, Color tint);
 TBAG_API void DrawTextureV(Texture2D texture, Vector2 position, Color tint);
 TBAG_API void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint);
-TBAG_API void DrawTextureRec(Texture2D texture, Rectangle source_rec, Vector2 position, Color tint);
-TBAG_API void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle quad, Color tint);
-TBAG_API void DrawTexturePro(Texture2D texture, Rectangle source_rec, Rectangle dest_rec, Vector2 origin,
+TBAG_API void DrawTextureRec(Texture2D texture, Rectangle2 source_rec, Vector2 position, Color tint);
+TBAG_API void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle2 quad, Color tint);
+TBAG_API void DrawTexturePro(Texture2D texture, Rectangle2 source_rec, Rectangle2 dest_rec, Vector2 origin,
                              float rotation, Color tint);
-TBAG_API void DrawTextureNPatch(Texture2D texture, NPatchInfo n_patch_info, Rectangle dest_rec, Vector2 origin,
+TBAG_API void DrawTextureNPatch(Texture2D texture, NPatchInfo n_patch_info, Rectangle2 dest_rec, Vector2 origin,
                                 float rotation, Color tint);
 
 TBAG_API Font GetFontDefault();
@@ -302,9 +302,9 @@ TBAG_API void UnloadFont(Font font);
 TBAG_API void DrawFPS(int pos_x, int pos_y);
 TBAG_API void DrawText(char const * text, int pos_x, int pos_y, int font_size, Color color);
 TBAG_API void DrawTextEx(Font font, char const * text, Vector2 position, float font_size, float spacing, Color tint);
-TBAG_API void DrawTextRec(Font font, char const * text, Rectangle rec, float font_size, float spacing,
+TBAG_API void DrawTextRec(Font font, char const * text, Rectangle2 rec, float font_size, float spacing,
                           bool word_wrap, Color tint);
-TBAG_API void DrawTextRecEx(Font font, char const * text, Rectangle rec, float font_size, float spacing, bool word_wrap,
+TBAG_API void DrawTextRecEx(Font font, char const * text, Rectangle2 rec, float font_size, float spacing, bool word_wrap,
                             Color tint, int select_start, int select_length, Color select_text, Color select_back);
 
 TBAG_API int MeasureText(char const * text, int font_size);
@@ -390,7 +390,7 @@ TBAG_API void DrawModelWiresEx(Model model, Vector3 position, Vector3 rotation_a
                                Vector3 scale, Color tint);
 TBAG_API void DrawBoundingBox(BoundingBox box, Color color);
 TBAG_API void DrawBillboard(Camera camera, Texture2D texture, Vector3 center, float size, Color tint);
-TBAG_API void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle source_rec, Vector3 center,
+TBAG_API void DrawBillboardRec(Camera camera, Texture2D texture, Rectangle2 source_rec, Vector3 center,
                                float size, Color tint);
 
 TBAG_API bool CheckCollisionSpheres(Vector3 center_a, float radius_a, Vector3 center_b, float radius_b);
