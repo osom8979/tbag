@@ -29,12 +29,6 @@ static int _UpdateRayGui(lua_State * L)
     return 0;
 }
 
-static int _RenderRayGui(lua_State * L)
-{
-    RenderRayGui();
-    return 0;
-}
-
 static int _ShutdownRayGui(lua_State * L)
 {
     ShutdownRayGui();
@@ -67,7 +61,6 @@ static luaL_Reg const __lua_lay_gui[] = {
         // [GUI] GUI core.
         RAY_REGISTER(InitRayGui),
         RAY_REGISTER(UpdateRayGui),
-        RAY_REGISTER(RenderRayGui),
         RAY_REGISTER(ShutdownRayGui),
 
         // [GUI] GUI widgets.

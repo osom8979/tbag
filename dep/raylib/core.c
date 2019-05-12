@@ -1092,6 +1092,10 @@ void BeginDrawing(void)
                                         // NOTE: Not required with OpenGL 3.3+
 }
 
+static void (*end_drawing_callback)(void) = NULL;
+void SetEndDrawingCallback(void(*cb)(void))
+{ end_drawing_callback = cb; }
+
 // End canvas drawing and swap buffers (double buffering)
 void EndDrawing(void)
 {
@@ -1125,6 +1129,10 @@ void EndDrawing(void)
         rlglDraw();                 // Draw RECORDING message
     }
 #endif
+
+    if (end_drawing_callback) {
+        end_drawing_callback();
+    }
 
     SwapBuffers_();                  // Copy back buffer to front buffer
     PollInputEvents();              // Poll user events

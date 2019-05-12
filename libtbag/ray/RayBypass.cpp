@@ -191,6 +191,11 @@ void BeginDrawing()
     ::BeginDrawing();
 }
 
+void SetEndDrawingCallback(void(*cb)(void))
+{
+    ::SetEndDrawingCallback(cb);
+}
+
 void EndDrawing()
 {
     ::EndDrawing();

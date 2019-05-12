@@ -43,5 +43,16 @@ done
 echo 'Remove all tmp files.'
 find . -name '*.tmp' | xargs rm
 
+echo 'Update raylib.h file:'
+echo 'RLAPI void SetEndDrawingCallback(void(*cb)(void));'
+
+echo 'Update core.c file:'
+echo 'static void (*end_drawing_callback)(void) = NULL;'
+echo 'void SetEndDrawingCallback(void(*cb)(void))'
+echo '{ end_drawing_callback = cb; }'
+
+echo 'Update EndDrawing() method (core.c)'
+echo 'if (end_drawing_callback) { end_drawing_callback(); }'
+
 echo 'Done.'
 

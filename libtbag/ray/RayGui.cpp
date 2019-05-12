@@ -67,6 +67,12 @@ struct RayGui final : private Noncopyable
     }
 };
 
+static void __render_ray_gui()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
 bool InitRayGui()
 {
     ImGuiContext * context = ImGui::CreateContext();
@@ -146,6 +152,7 @@ bool InitRayGui()
     //  ES 3.0    300       "#version 300 es"   = WebGL 2.0
     //----------------------------------------
     ImGui_ImplOpenGL3_Init(GLSL_VERSION.c_str());
+    SetEndDrawingCallback(&__render_ray_gui);
 
     return true;
 }
@@ -294,12 +301,6 @@ void UpdateRayGui()
     ImGui::NewFrame();
 }
 
-void RenderRayGui()
-{
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
 void ShutdownRayGui()
 {
     ImGuiIO & io = ImGui::GetIO();
@@ -312,6 +313,7 @@ void ShutdownRayGui()
     io.UserData = nullptr;
     io.Fonts->TexID = nullptr;
 
+    SetEndDrawingCallback(nullptr);
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
 }

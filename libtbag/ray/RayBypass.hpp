@@ -65,6 +65,7 @@ TBAG_API void DisableCursor();
 
 TBAG_API void ClearBackground(Color color);
 TBAG_API void BeginDrawing();
+TBAG_API void SetEndDrawingCallback(void(*cb)(void));
 TBAG_API void EndDrawing();
 TBAG_API void BeginMode2D(Camera2D camera);
 TBAG_API void EndMode2D();

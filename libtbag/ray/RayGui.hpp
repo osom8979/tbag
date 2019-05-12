@@ -25,7 +25,6 @@ namespace ray {
 
 TBAG_API bool InitRayGui();
 TBAG_API void UpdateRayGui();
-TBAG_API void RenderRayGui();
 TBAG_API void ShutdownRayGui();
 
 TBAG_API bool GuiBegin(char const * text);

@@ -25,9 +25,8 @@
  *       ray.UpdateRayGui()
  *       if ray.GuiBegin('Window') then
  *           ray.GuiText('Label')
- *           ray.GuiEnd()
  *       end
- *       ray.RenderRayGui()
+ *       ray.GuiEnd()
  *
  *       ray.BeginDrawing()
  *       ray.ClearBackground({30, 30, 30})
