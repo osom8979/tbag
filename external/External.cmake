@@ -462,7 +462,7 @@ add_custom_target (nng DEPENDS ${nng_EXT_LIBRARIES})
 
 set (glfw_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/glfw")
 set (glfw_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
-set (glfw_EXT_HEADER       "${glfw_EXT_INCLUDE_DIR}/GLFW/glfw.h")
+set (glfw_EXT_HEADER       "${glfw_EXT_INCLUDE_DIR}/GLFW/glfw3.h")
 set (glfw_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}glfw3${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (glfw_EXT_LIBRARIES    "${glfw_EXT_STATIC_LIB}")
 exists_files (glfw_EXT_EXISTS ${glfw_EXT_LIBRARIES} ${glfw_EXT_HEADER})

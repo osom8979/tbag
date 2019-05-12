@@ -7,13 +7,44 @@
 
 #include <libtbag/ray/RayGui.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Format.hpp>
 
 #include <imgui.h>
+#include <imgui_impl_opengl3.h>
+
+#if defined(__APPLE__)
+#include <TargetConditionals.h>
+#endif
+
+// Auto-detect GL version
+#if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3)
+# if (defined(__APPLE__) && TARGET_OS_IOS) || (defined(__ANDROID__))
+#  define IMGUI_IMPL_OPENGL_ES3       // iOS, Android  -> GL ES 3, "#version 300 es"
+# elif defined(__EMSCRIPTEN__)
+#  define IMGUI_IMPL_OPENGL_ES2       // Emscripten    -> GL ES 2, "#version 100"
+# endif
+#endif
+
+#if defined(IMGUI_IMPL_OPENGL_ES2)
+# include <GLES2/gl2.h>
+#elif defined(IMGUI_IMPL_OPENGL_ES3)
+# include <GLES3/gl3.h>  // Use GL ES 3
+#else
+# if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
+#  include <GL/gl3w.h>    // Needs to be initialized with gl3wInit() in user's code
+# elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
+#  include <GL/glew.h>    // Needs to be initialized with glewInit() in user's code
+# elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
+#  include <glad/glad.h>  // Needs to be initialized with gladLoadGL() in user's code
+# else
+#  include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
+# endif
+#endif
 
 #include <cassert>
 #include <cstdlib>
-
-#include <vector>
+#include <cstdio>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,11 +54,6 @@ namespace ray {
 
 struct RayGui final : private Noncopyable
 {
-    bool is_pad1 = false;
-    bool is_pad2 = false;
-    bool is_pad3 = false;
-    bool is_pad4 = false;
-
     Texture font_texture;
 
     RayGui()
@@ -95,6 +121,32 @@ bool InitRayGui()
     }
 
     ImGui::StyleColorsDark();
+    // ImGui::StyleColorsClassic();
+
+    char shader_version[32] = {0,};
+    snprintf(shader_version, 32, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    auto const VERSIONS = libtbag::string::splitTokens(shader_version, ".");
+    auto const GLSL_VERSION = libtbag::string::fformat("#version {}{} core", VERSIONS[0], VERSIONS[1]);
+
+    //----------------------------------------
+    // OpenGL    GLSL      GLSL
+    // version   version   string
+    //----------------------------------------
+    //  2.0       110       "#version 110"
+    //  2.1       120       "#version 120"
+    //  3.0       130       "#version 130"
+    //  3.1       140       "#version 140"
+    //  3.2       150       "#version 150"
+    //  3.3       330       "#version 330 core"
+    //  4.0       400       "#version 400 core"
+    //  4.1       410       "#version 410 core"
+    //  4.2       420       "#version 410 core"
+    //  4.3       430       "#version 430 core"
+    //  ES 2.0    100       "#version 100"      = WebGL 1.0
+    //  ES 3.0    300       "#version 300 es"   = WebGL 2.0
+    //----------------------------------------
+    ImGui_ImplOpenGL3_Init(GLSL_VERSION.c_str());
+
     return true;
 }
 
@@ -238,86 +290,14 @@ void UpdateRayGui()
         io.MousePos = GetMousePosition();
     }
 
+    ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
 }
 
 void RenderRayGui()
 {
-    ImGui::EndFrame();
-
     ImGui::Render();
-    ImDrawData * draw_data = ImGui::GetDrawData();
-    assert(draw_data != nullptr);
-
-    if (draw_data->CmdListsCount == 0) {
-        return;
-    }
-    ImGuiIO & io = ImGui::GetIO();
-
-    // Avoid rendering when minimized,
-    // scale coordinates for retina displays
-    // (screen coordinates != framebuffer coordinates)
-    auto const FRAME_BUFFER_WIDTH  = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);
-    auto const FRAME_BUFFER_HEIGHT = (int)(draw_data->DisplaySize.y * draw_data->FramebufferScale.y);
-    if (FRAME_BUFFER_WIDTH <= 0 || FRAME_BUFFER_HEIGHT <= 0) {
-        return;
-    }
-
-    // Will project scissor/clipping rectangles into framebuffer space
-    ImVec2 const CLIP_OFF = draw_data->DisplayPos;         // (0,0) unless using multi-viewports
-    ImVec2 const CLIP_SCALE = draw_data->FramebufferScale; // (1,1) unless using retina display which are often (2,2)
-
-    // Render command lists
-    for (int n = 0; n < draw_data->CmdListsCount; n++) {
-        ImDrawList const * cmd_list   = draw_data->CmdLists[n];
-        ImDrawVert const * vtx_buffer = cmd_list->VtxBuffer.Data;
-        ImDrawIdx  const * idx_buffer = cmd_list->IdxBuffer.Data;
-
-        std::vector<Vector2> vectors(cmd_list->VtxBuffer.Size);
-        for (int i = 0; i < cmd_list->VtxBuffer.Size; ++i) {
-            vectors[i] = cmd_list->VtxBuffer[i].pos;
-        }
-
-        DrawPolyEx(vectors.data(), vectors.size(), Color{255, 0, 0, 255});
-        // glVertexPointer(2, GL_FLOAT, sizeof(ImDrawVert), (const GLvoid*)((const char*)vtx_buffer + IM_OFFSETOF(ImDrawVert, pos)));
-        // glTexCoordPointer(2, GL_FLOAT, sizeof(ImDrawVert), (const GLvoid*)((const char*)vtx_buffer + IM_OFFSETOF(ImDrawVert, uv)));
-        // glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(ImDrawVert), (const GLvoid*)((const char*)vtx_buffer + IM_OFFSETOF(ImDrawVert, col)));
-
-        for (int cmd_i = 0; cmd_i < cmd_list->CmdBuffer.Size; cmd_i++) {
-            ImDrawCmd const * pcmd = &cmd_list->CmdBuffer[cmd_i];
-            if (pcmd->UserCallback) {
-                // User callback, registered via ImDrawList::AddCallback()
-                // (ImDrawCallback_ResetRenderState is a special callback value used by the user to request the renderer to reset render state.)
-                if (pcmd->UserCallback == ImDrawCallback_ResetRenderState) {
-                    // draw_data
-                    // FRAME_BUFFER_WIDTH
-                    // FRAME_BUFFER_HEIGHT
-                } else {
-                    pcmd->UserCallback(cmd_list, pcmd);
-                }
-            } else {
-                // Project scissor/clipping rectangles into framebuffer space
-                ImVec4 clip_rect;
-                clip_rect.x = (pcmd->ClipRect.x - CLIP_OFF.x) * CLIP_SCALE.x;
-                clip_rect.y = (pcmd->ClipRect.y - CLIP_OFF.y) * CLIP_SCALE.y;
-                clip_rect.z = (pcmd->ClipRect.z - CLIP_OFF.x) * CLIP_SCALE.x;
-                clip_rect.w = (pcmd->ClipRect.w - CLIP_OFF.y) * CLIP_SCALE.y;
-
-                if (/**/clip_rect.x < FRAME_BUFFER_WIDTH &&
-                        clip_rect.y < FRAME_BUFFER_HEIGHT &&
-                        clip_rect.z >= 0.0f &&
-                        clip_rect.w >= 0.0f) {
-                    // // Apply scissor/clipping rectangle
-                    // glScissor((int)clip_rect.x, (int)(FRAME_BUFFER_HEIGHT - clip_rect.w), (int)(clip_rect.z - clip_rect.x), (int)(clip_rect.w - clip_rect.y));
-                    //
-                    // // Bind texture, Draw
-                    // glBindTexture(GL_TEXTURE_2D, (GLuint)(intptr_t)pcmd->TextureId);
-                    // glDrawElements(GL_TRIANGLES, (GLsizei)pcmd->ElemCount, sizeof(ImDrawIdx) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, idx_buffer);
-                }
-            }
-            idx_buffer += pcmd->ElemCount;
-        }
-    }
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void ShutdownRayGui()
@@ -328,9 +308,11 @@ void ShutdownRayGui()
     assert(user != nullptr);
     UnloadTexture(user->font_texture);
     delete user;
-    io.UserData = nullptr;
 
-    // ImGui::GetIO().Fonts->TexID = nullptr;
+    io.UserData = nullptr;
+    io.Fonts->TexID = nullptr;
+
+    ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
 }
 

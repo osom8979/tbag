@@ -14,7 +14,9 @@ project (imgui)
 set (SRCS imgui.cpp
           imgui_draw.cpp
           imgui_freetype.cpp
-          imgui_widgets.cpp)
+          imgui_widgets.cpp
+          imgui_impl_opengl2.cpp
+          imgui_impl_opengl3.cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     add_compile_options (/w)
@@ -24,8 +26,8 @@ endif ()
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}
                      ${freetype_EXT_INCLUDE_DIR}
+                     ${glfw_EXT_INCLUDE_DIR}
                      ${CMAKE_SOURCE_DIR}/dep/raylib)
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
-add_definitions (-DSFML_STATIC)
 add_library (imgui STATIC ${SRCS})
-add_dependencies (imgui freetype raylib)
+add_dependencies (imgui freetype raylib glfw)

@@ -80,4 +80,5 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${glfw_EXT_INCLUDE_DIR})
 link_directories (${CMAKE_CURRENT_SOURCE_DIR})
 add_library (raylib STATIC ${SRCS})
 add_dependencies (raylib glfw)
+add_definitions (-D${GRAPHICS})
 
