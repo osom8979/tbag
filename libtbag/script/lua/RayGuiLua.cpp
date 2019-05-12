@@ -35,6 +35,12 @@ static int _ShutdownRayGui(lua_State * L)
     return 0;
 }
 
+static int _GuiShowDemoWindow(lua_State * L)
+{
+    GuiShowDemoWindow();
+    return 0;
+}
+
 static int _GuiBegin(lua_State * L)
 {
     lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1)));
@@ -62,6 +68,9 @@ static luaL_Reg const __lua_lay_gui[] = {
         RAY_REGISTER(InitRayGui),
         RAY_REGISTER(UpdateRayGui),
         RAY_REGISTER(ShutdownRayGui),
+
+        // [GUI] GUI Demo widgets.
+        RAY_REGISTER(GuiShowDemoWindow),
 
         // [GUI] GUI widgets.
         RAY_REGISTER(GuiBegin),

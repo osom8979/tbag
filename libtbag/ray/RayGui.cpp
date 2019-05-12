@@ -318,6 +318,11 @@ void ShutdownRayGui()
     ImGui::DestroyContext();
 }
 
+void GuiShowDemoWindow(bool * p_open)
+{
+    return ImGui::ShowDemoWindow(p_open);
+}
+
 bool GuiBegin(char const * text)
 {
     return ImGui::Begin(text);
