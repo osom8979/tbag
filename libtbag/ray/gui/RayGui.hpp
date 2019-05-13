@@ -171,7 +171,7 @@ enum HoveredFlags_
     HoveredFlags_AnyWindow                     = 1 << 2,
     HoveredFlags_AllowWhenBlockedByPopup       = 1 << 3,
     //HoveredFlags_AllowWhenBlockedByModal     = 1 << 4,
-            HoveredFlags_AllowWhenBlockedByActiveItem  = 1 << 5,
+    HoveredFlags_AllowWhenBlockedByActiveItem  = 1 << 5,
     HoveredFlags_AllowWhenOverlapped           = 1 << 6,
     HoveredFlags_AllowWhenDisabled             = 1 << 7,
 
@@ -308,7 +308,7 @@ enum TreeNodeFlags_
     TreeNodeFlags_FramePadding         = 1 << 10,
     //TreeNodeFlags_SpanAllAvailWidth  = 1 << 11,
     //TreeNodeFlags_NoScrollOnOpen     = 1 << 12,
-            TreeNodeFlags_NavLeftJumpsBackHere = 1 << 13,
+    TreeNodeFlags_NavLeftJumpsBackHere = 1 << 13,
 
     TreeNodeFlags_CollapsingHeader = TreeNodeFlags_Framed |
                                      TreeNodeFlags_NoTreePushOnOpen |
@@ -354,7 +354,7 @@ enum DragDropFlags_
     DragDropFlags_None = 0,
 
     // BeginDragDropSource() flags
-            DragDropFlags_SourceNoPreviewTooltip       = 1 << 0,
+    DragDropFlags_SourceNoPreviewTooltip       = 1 << 0,
     DragDropFlags_SourceNoDisableHover         = 1 << 1,
     DragDropFlags_SourceNoHoldToOpenOthers     = 1 << 2,
     DragDropFlags_SourceAllowNullID            = 1 << 3,
@@ -362,7 +362,7 @@ enum DragDropFlags_
     DragDropFlags_SourceAutoExpirePayload      = 1 << 5,
 
     // AcceptDragDropPayload() flags
-            DragDropFlags_AcceptBeforeDelivery         = 1 << 10,
+    DragDropFlags_AcceptBeforeDelivery         = 1 << 10,
     DragDropFlags_AcceptNoDrawDefaultRect      = 1 << 11,
     DragDropFlags_AcceptNoPreviewTooltip       = 1 << 12,
     DragDropFlags_AcceptPeekOnly = DragDropFlags_AcceptBeforeDelivery | DragDropFlags_AcceptNoDrawDefaultRect

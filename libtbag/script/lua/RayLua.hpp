@@ -13,7 +13,7 @@
  *   height = 450
  *
  *   ray.InitWindow(width, height, 'Basic window')
- *   ray.InitRayGui()
+ *   gui.InitRayGui()
  *   ray.SetTargetFPS(60)
  *
  *   gradient = ray.GenImageGradientV(400, 400, ray.RED, ray.BLUE);
@@ -22,11 +22,11 @@
  *   gradient = nil
  *
  *   while not ray.WindowShouldClose() do
- *       ray.UpdateRayGui()
- *       if ray.GuiBegin('Window') then
- *           ray.GuiText('Label')
+ *       gui.UpdateRayGui()
+ *       if gui.Begin('Window') then
+ *           gui.Text('Label')
  *       end
- *       ray.GuiEnd()
+ *       gui.End()
  *
  *       ray.BeginDrawing()
  *       ray.ClearBackground({30, 30, 30})
@@ -39,7 +39,7 @@
  *   ray.UnloadTexture(texture);
  *   texture = nil
  *
- *   ray.ShutdownRayGui()
+ *   gui.ShutdownRayGui()
  *   ray.CloseWindow()
  *  @endcode
  */
@@ -54,6 +54,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/ray/RayBypass.hpp>
 #include <libtbag/script/LuaBypass.hpp>
 
 // -------------------

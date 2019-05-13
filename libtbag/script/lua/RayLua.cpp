@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/script/lua/RayLua.hpp>
-#include <libtbag/ray/RayBypass.hpp>
 
 #include <cstring>
 #include <cstdlib>
@@ -14,11 +13,6 @@
 
 #include <vector>
 #include <string>
-
-// #include <libtbag/string/Format.hpp> // [WARNING] Don't use this header.
-#if defined(TBAG_PLATFORM_WINDOWS) && defined(_WINGDI_)
-#error The Rectangle2 symbol in wingdi.h conflicts.
-#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -4341,7 +4335,7 @@ static luaL_Reg const __lua_lay_core[] = {
     } while (false) /* -- END -- */
 #endif
 
-void luaL_push_raylib_symbols(lua_State * L)
+static void luaL_push_raylib_symbols(lua_State * L)
 {
     RAY_FLOAT_SYMBOL(L, PI);
     RAY_FLOAT_SYMBOL(L, DEG2RAD);

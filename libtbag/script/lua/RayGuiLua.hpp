@@ -15,7 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/script/lua/RayLua.hpp>
+#include <libtbag/ray/gui/RayGui.hpp>
+#include <libtbag/script/LuaBypass.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,6 +24,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 namespace lua    {
+
+TBAG_CONSTEXPR char const * const lua_raygui_name() TBAG_NOEXCEPT
+{
+    return "gui";
+}
 
 TBAG_API bool luaopen_raygui(lua_State * L);
 
