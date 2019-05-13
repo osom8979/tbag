@@ -406,233 +406,246 @@ static int _GetFontTexUvWhitePixel(lua_State * L)
     return 1;
 }
 
+static int _GetColorU32WithAlpha(lua_State * L)
+{
+    lua_pushinteger(L, GetColorU32(luaL_checkinteger(L, 1), luaL_optnumber(L, 2, 1.0f)));
+    return 1;
+}
+
 static int _GetColorU32(lua_State * L)
 {
-    //unsigned int GetColorU32(Col idx, float alpha_mul = 1.0f);
-    //unsigned int GetColorU32(Vector4 const & col);
-    //unsigned int GetColorU32(unsigned int col);
-    return 0;
+    if (lua_isnumber(L, 1)) {
+        lua_pushinteger(L, GetColorU32((unsigned int)luaL_checkinteger(L, 1)));
+    } else {
+        lua_pushinteger(L, GetColorU32(luaL_checkvector4(L, 1)));
+    }
+    return 1;
 }
 
 static int _PushItemWidth(lua_State * L)
 {
-    //void PushItemWidth(float item_width);
+    PushItemWidth(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _PopItemWidth(lua_State * L)
 {
-    //void PopItemWidth();
+    PopItemWidth();
     return 0;
 }
 
 static int _SetNextItemWidth(lua_State * L)
 {
-    //void SetNextItemWidth(float item_width);
+    SetNextItemWidth(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _CalcItemWidth(lua_State * L)
 {
-    //float CalcItemWidth();
-    return 0;
+    lua_pushnumber(L, CalcItemWidth());
+    return 1;
 }
 
 static int _PushTextWrapPos(lua_State * L)
 {
-    //void PushTextWrapPos(float wrap_local_pos_x = 0.0f);
+    PushTextWrapPos(luaL_optnumber(L, 1, 0.0f));
     return 0;
 }
 
 static int _PopTextWrapPos(lua_State * L)
 {
-    //void PopTextWrapPos();
+    PopTextWrapPos();
     return 0;
 }
 
 static int _PushAllowKeyboardFocus(lua_State * L)
 {
-    //void PushAllowKeyboardFocus(bool allow_keyboard_focus);
+    PushAllowKeyboardFocus(luaL_checkinteger(L, 1));
     return 0;
 }
 
 static int _PopAllowKeyboardFocus(lua_State * L)
 {
-    //void PopAllowKeyboardFocus();
+    PopAllowKeyboardFocus();
     return 0;
 }
 
 static int _PushButtonRepeat(lua_State * L)
 {
-    //void PushButtonRepeat(bool repeat);
+    PushButtonRepeat(luaL_checkinteger(L, 1));
     return 0;
 }
 
 static int _PopButtonRepeat(lua_State * L)
 {
-    //void PopButtonRepeat();
+    PopButtonRepeat();
     return 0;
 }
 
 static int _Separator(lua_State * L)
 {
-    //void Separator();
+    Separator();
     return 0;
 }
 
 static int _SameLine(lua_State * L)
 {
-    //void SameLine(float offset_from_start_x = 0.0f, float spacing = -1.0f);
+    SameLine(luaL_optnumber(L, 1, 0.0f), luaL_optnumber(L, 2, -1.0f));
     return 0;
 }
 
 static int _NewLine(lua_State * L)
 {
-    //void NewLine();
+    NewLine();
     return 0;
 }
 
 static int _Spacing(lua_State * L)
 {
-    //void Spacing();
+    Spacing();
     return 0;
 }
 
 static int _Dummy(lua_State * L)
 {
-    //void Dummy(Vector2 const & size);
+    Dummy(luaL_checkvector2(L, 1));
     return 0;
 }
 
 static int _Indent(lua_State * L)
 {
-    //void Indent(float indent_w = 0.0f);
+    Indent(luaL_optnumber(L, 1, 0.0f));
     return 0;
 }
 
 static int _Unindent(lua_State * L)
 {
-    //void Unindent(float indent_w = 0.0f);
+    Unindent(luaL_optnumber(L, 1, 0.0f));
     return 0;
 }
 
 static int _BeginGroup(lua_State * L)
 {
-    //void BeginGroup();
+    BeginGroup();
     return 0;
 }
 
 static int _EndGroup(lua_State * L)
 {
-    //void EndGroup();
+    EndGroup();
     return 0;
 }
 
 static int _GetCursorPos(lua_State * L)
 {
-    //Vector2 GetCursorPos();
-    return 0;
+    luaL_pushvector2(L, GetCursorPos());
+    return 1;
 }
 
 static int _GetCursorPosX(lua_State * L)
 {
-    //float GetCursorPosX();
-    return 0;
+    lua_pushnumber(L, GetCursorPosX());
+    return 1;
 }
 
 static int _GetCursorPosY(lua_State * L)
 {
-    //float GetCursorPosY();
+    lua_pushnumber(L, GetCursorPosY());
     return 0;
 }
 
 static int _SetCursorPos(lua_State * L)
 {
-    //void SetCursorPos(Vector2 const & local_pos);
+    SetCursorPos(luaL_checkvector2(L, 1));
     return 0;
 }
 
 static int _SetCursorPosX(lua_State * L)
 {
-    //void SetCursorPosX(float local_x);
+    SetCursorPosX(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _SetCursorPosY(lua_State * L)
 {
-    //void SetCursorPosY(float local_y);
+    SetCursorPosY(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _GetCursorStartPos(lua_State * L)
 {
-    //Vector2 GetCursorStartPos();
-    return 0;
+    luaL_pushvector2(L, GetCursorStartPos());
+    return 1;
 }
 
 static int _GetCursorScreenPos(lua_State * L)
 {
-    //Vector2 GetCursorScreenPos();
-    return 0;
+    luaL_pushvector2(L, GetCursorScreenPos());
+    return 1;
 }
 
 static int _SetCursorScreenPos(lua_State * L)
 {
-    //void SetCursorScreenPos(Vector2 const & pos);
+    SetCursorScreenPos(luaL_checkvector2(L, 1));
     return 0;
 }
 
 static int _AlignTextToFramePadding(lua_State * L)
 {
-    //void AlignTextToFramePadding();
+    AlignTextToFramePadding();
     return 0;
 }
 
 static int _GetTextLineHeight(lua_State * L)
 {
-    //float GetTextLineHeight();
-    return 0;
+    lua_pushnumber(L, GetTextLineHeight());
+    return 1;
 }
 
 static int _GetTextLineHeightWithSpacing(lua_State * L)
 {
-    //float GetTextLineHeightWithSpacing();
-    return 0;
+    lua_pushnumber(L, GetTextLineHeightWithSpacing());
+    return 1;
 }
 
 static int _GetFrameHeight(lua_State * L)
 {
-    //float GetFrameHeight();
-    return 0;
+    lua_pushnumber(L, GetFrameHeight());
+    return 1;
 }
 
 static int _GetFrameHeightWithSpacing(lua_State * L)
 {
-    //float GetFrameHeightWithSpacing();
-    return 0;
+    lua_pushnumber(L, GetFrameHeightWithSpacing());
+    return 1;
 }
 
 static int _PushID(lua_State * L)
 {
-    //void PushID(char const * str_id);
-    //void PushID(char const * str_id_begin, char const * str_id_end);
-    //void PushID(void const * ptr_id);
-    //void PushID(int int_id);
+    if (lua_isnumber(L, lua_absindex(L, 1))) {
+        PushID(luaL_checkinteger(L, 1));
+    } else if (lua_isstring(L, lua_absindex(L, 2))) {
+        PushID(luaL_checkstring(L, 1), luaL_checkstring(L, 2));
+    } else {
+        PushID(luaL_checkstring(L, 1));
+    }
     return 0;
 }
 
 static int _PopID(lua_State * L)
 {
-    //void PopID();
+    PopID();
     return 0;
 }
 
 static int _GetID(lua_State * L)
 {
-    //ID GetID(char const * str_id);
-    //ID GetID(char const * str_id_begin, char const * str_id_end);
-    //ID GetID(void const * ptr_id);
-    return 0;
+    if (lua_isstring(L, lua_absindex(L, 2))) {
+        lua_pushinteger(L, GetID(luaL_checkstring(L, 1), luaL_checkstring(L, 2)));
+    } else {
+        lua_pushinteger(L, GetID(luaL_checkstring(L, 1)));
+    }
+    return 1;
 }
 
 static int _TextUnformatted(lua_State * L)
@@ -649,74 +662,85 @@ static int _Text(lua_State * L)
 
 static int _TextColored(lua_State * L)
 {
-    //void TextColored(Vector4 const & col, char const * text);
+    TextColored(luaL_checkvector4(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
 static int _TextDisabled(lua_State * L)
 {
-    //void TextDisabled(char const * text);
+    TextDisabled(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _TextWrapped(lua_State * L)
 {
-    //void TextWrapped(char const * text);
+    TextWrapped(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _LabelText(lua_State * L)
 {
-    //void LabelText(char const * label, char const * text);
+    LabelText(luaL_checkstring(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
 static int _BulletText(lua_State * L)
 {
-    //void BulletText(char const * text);
+    BulletText(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _Button(lua_State * L)
 {
-    //bool Button(char const * label, Vector2 const & size = Vector2{0,0});
-    return 0;
+    lua_pushboolean(L, Button(luaL_checkstring(L, 1), luaL_optvector2(L, 2, Vector2{0,0})));
+    return 1;
 }
 
 static int _SmallButton(lua_State * L)
 {
-    //bool SmallButton(char const * label);
-    return 0;
+    lua_pushboolean(L, SmallButton(luaL_checkstring(L, 1)));
+    return 1;
 }
 
 static int _InvisibleButton(lua_State * L)
 {
-    //bool InvisibleButton(char const * str_id, Vector2 const & size);
-    return 0;
+    lua_pushboolean(L, InvisibleButton(luaL_checkstring(L, 1), luaL_checkvector2(L, 2)));
+    return 1;
 }
 
 static int _ArrowButton(lua_State * L)
 {
-    //bool ArrowButton(char const * str_id, Dir dir);
-    return 0;
+    lua_pushboolean(L, ArrowButton(luaL_checkstring(L, 1), luaL_checkinteger(L, 2)));
+    return 1;
 }
 
 static int _Image(lua_State * L)
 {
-    //void Image(TextureID user_texture_id, Vector2 const & size, Vector2 const & uv0 = Vector2{0,0}, Vector2 const & uv1 = Vector2{1,1}, Vector4 const & tint_col = Vector4{1,1,1,1}, Vector4 const & border_col = Vector4{0,0,0,0});
+    libtbag::ray::gui::Image((TextureID)luaL_checkinteger(L, 1),
+                             luaL_checkvector2(L, 2),
+                             luaL_optvector2(L, 3, Vector2{0,0}),
+                             luaL_optvector2(L, 4, Vector2{1,1}),
+                             luaL_optvector4(L, 5, Vector4{1,1,1,1}),
+                             luaL_optvector4(L, 6, Vector4{0,0,0,0}));
     return 0;
 }
 
 static int _ImageButton(lua_State * L)
 {
-    //bool ImageButton(TextureID user_texture_id, Vector2 const & size, Vector2 const & uv0 = Vector2{0,0}, Vector2 const & uv1 = Vector2{1,1}, int frame_padding = -1, Vector4 const & bg_col = Vector4{0,0,0,0}, Vector4 const & tint_col = Vector4{1,1,1,1});
-    return 0;
+    lua_pushboolean(L, ImageButton((TextureID)luaL_checkinteger(L, 1),
+                                   luaL_checkvector2(L, 2),
+                                   luaL_optvector2(L, 3, Vector2{0,0}),
+                                   luaL_optvector2(L, 4, Vector2{1,1}),
+                                   luaL_optinteger(L, 5, -1),
+                                   luaL_optvector4(L, 6, Vector4{0,0,0,0}),
+                                   luaL_optvector4(L, 7, Vector4{1,1,1,1})));
+    return 1;
 }
 
 static int _Checkbox(lua_State * L)
 {
-    //bool Checkbox(char const * label, bool * v);
-    return 0;
+    //lua_pushboolean(L, Checkbox(luaL_checkstring(L, 1), bool * v));
+    return 1;
 }
 
 static int _CheckboxFlags(lua_State * L)
@@ -1857,6 +1881,7 @@ static luaL_Reg const __lua_lay_gui[] = {
         RAYGUI_REGISTER(GetStyleColorVec4),
         RAYGUI_REGISTER(GetFontSize),
         RAYGUI_REGISTER(GetFontTexUvWhitePixel),
+        RAYGUI_REGISTER(GetColorU32WithAlpha),
         RAYGUI_REGISTER(GetColorU32),
 
         // Parameters stacks

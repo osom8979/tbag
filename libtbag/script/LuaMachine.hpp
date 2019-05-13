@@ -17,6 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/script/LuaBypass.hpp>
+#include <libtbag/script/LuaExtension.hpp>
 #include <libtbag/util/Version.hpp>
 
 #include <string>

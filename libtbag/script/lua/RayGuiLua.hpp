@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/ray/gui/RayGui.hpp>
 #include <libtbag/script/LuaBypass.hpp>
+#include <libtbag/script/LuaExtension.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

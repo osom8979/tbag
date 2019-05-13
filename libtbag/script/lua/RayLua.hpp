@@ -56,6 +56,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/ray/RayBypass.hpp>
 #include <libtbag/script/LuaBypass.hpp>
+#include <libtbag/script/LuaExtension.hpp>
 
 #include <vector>
 
@@ -78,9 +79,11 @@ TBAG_API std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg
 
 TBAG_API void luaL_pushvector3(lua_State * L, Vector3 const & vec);
 TBAG_API Vector3 luaL_checkvector3(lua_State * L, int num_arg);
+TBAG_API Vector3 luaL_optvector3(lua_State * L, int num_arg, Vector3 const & def);
 
 TBAG_API void luaL_pushvector4(lua_State * L, Vector4 const & vec);
 TBAG_API Vector4 luaL_checkvector4(lua_State * L, int num_arg);
+TBAG_API Vector4 luaL_optvector4(lua_State * L, int num_arg, Vector4 const & def);
 
 TBAG_API void luaL_pushmatrix(lua_State * L, Matrix const & mat);
 TBAG_API Matrix luaL_checkmatrix(lua_State * L, int num_arg);

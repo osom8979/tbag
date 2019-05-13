@@ -113,6 +113,14 @@ Vector3 luaL_checkvector3(lua_State * L, int num_arg)
     return result;
 }
 
+Vector3 luaL_optvector3(lua_State * L, int num_arg, Vector3 const & def)
+{
+    if (lua_istable(L, num_arg)) {
+        return luaL_checkvector3(L, num_arg);
+    }
+    return def;
+}
+
 # /************************/
 # /* Vector4 (Quaternion) */
 # /************************/
@@ -155,6 +163,14 @@ Vector4 luaL_checkvector4(lua_State * L, int num_arg)
         lua_pop(L, 4);
     }
     return result;
+}
+
+Vector4 luaL_optvector4(lua_State * L, int num_arg, Vector4 const & def)
+{
+    if (lua_istable(L, num_arg)) {
+        return luaL_checkvector4(L, num_arg);
+    }
+    return def;
 }
 
 # /**********/
