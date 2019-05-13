@@ -82,24 +82,11 @@
 #endif
 #endif
 
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#include <GLES2/gl2.h>
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
-#include <GLES3/gl3.h>  // Use GL ES 3
+#if defined(__APPLE__)
+# include <OpenGL/gl3.h>         // OpenGL 3 library for OSX
+# include <OpenGL/gl3ext.h>      // OpenGL 3 extensions library for OSX
 #else
-// About Desktop OpenGL function loaders:
-//  Modern desktop OpenGL doesn't have a standard portable header file to load OpenGL function pointers.
-//  Helper libraries are often used for this purpose! Here we are supporting a few common ones (gl3w, glew, glad).
-//  You may use another loader/header of your choice (glext, glLoadGen, etc.), or chose to manually implement your own.
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-#include <GL/gl3w.h>    // Needs to be initialized with gl3wInit() in user's code
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <GL/glew.h>    // Needs to be initialized with glewInit() in user's code
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-#include <glad/glad.h>  // Needs to be initialized with gladLoadGL() in user's code
-#else
-#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#endif
+# include "external/glad.h"
 #endif
 
 // OpenGL Data
@@ -124,8 +111,17 @@ bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
     if (glsl_version == NULL)
         glsl_version = "#version 300 es";
 #else
-    if (glsl_version == NULL)
-        glsl_version = "#version 130";
+    char shader_version_buffer[32] = {0,}; // x.xx
+    snprintf(shader_version_buffer, 32, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    char glsl_version_buffer[32] = {0,};
+    if (shader_version_buffer[0] >= '3') {
+        snprintf(glsl_version_buffer, 32, "#version %c%s core", shader_version_buffer[0], (shader_version_buffer+2));
+    } else {
+        snprintf(glsl_version_buffer, 32, "#version %c%s", shader_version_buffer[0], (shader_version_buffer+2));
+    }
+    if (glsl_version == NULL) {
+        glsl_version = glsl_version_buffer;
+    }
 #endif
     IM_ASSERT((int)strlen(glsl_version) + 2 < IM_ARRAYSIZE(g_GlslVersionString));
     strcpy(g_GlslVersionString, glsl_version);

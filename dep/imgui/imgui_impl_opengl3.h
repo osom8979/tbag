@@ -22,11 +22,6 @@
 
 #pragma once
 
-#if defined(__APPLE__)
-#define GLFW_INCLUDE_GLCOREARB
-#endif
-#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM <GLFW/glfw3.h>
-
 // Specific OpenGL versions
 //#define IMGUI_IMPL_OPENGL_ES2     // Auto-detected on Emscripten
 //#define IMGUI_IMPL_OPENGL_ES3     // Auto-detected on iOS/Android

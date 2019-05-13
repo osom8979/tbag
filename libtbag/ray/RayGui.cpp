@@ -7,40 +7,9 @@
 
 #include <libtbag/ray/RayGui.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/string/StringUtils.hpp>
-#include <libtbag/string/Format.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
-
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#endif
-
-// Auto-detect GL version
-#if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3)
-# if (defined(__APPLE__) && TARGET_OS_IOS) || (defined(__ANDROID__))
-#  define IMGUI_IMPL_OPENGL_ES3       // iOS, Android  -> GL ES 3, "#version 300 es"
-# elif defined(__EMSCRIPTEN__)
-#  define IMGUI_IMPL_OPENGL_ES2       // Emscripten    -> GL ES 2, "#version 100"
-# endif
-#endif
-
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-# include <GLES2/gl2.h>
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
-# include <GLES3/gl3.h>  // Use GL ES 3
-#else
-# if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-#  include <GL/gl3w.h>    // Needs to be initialized with gl3wInit() in user's code
-# elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#  include <GL/glew.h>    // Needs to be initialized with glewInit() in user's code
-# elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-#  include <glad/glad.h>  // Needs to be initialized with gladLoadGL() in user's code
-# else
-#  include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-# endif
-#endif
 
 #include <cassert>
 #include <cstdlib>
@@ -129,29 +98,7 @@ bool InitRayGui()
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
 
-    char shader_version[32] = {0,};
-    snprintf(shader_version, 32, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-    auto const VERSIONS = libtbag::string::splitTokens(shader_version, ".");
-    auto const GLSL_VERSION = libtbag::string::fformat("#version {}{} core", VERSIONS[0], VERSIONS[1]);
-
-    //----------------------------------------
-    // OpenGL    GLSL      GLSL
-    // version   version   string
-    //----------------------------------------
-    //  2.0       110       "#version 110"
-    //  2.1       120       "#version 120"
-    //  3.0       130       "#version 130"
-    //  3.1       140       "#version 140"
-    //  3.2       150       "#version 150"
-    //  3.3       330       "#version 330 core"
-    //  4.0       400       "#version 400 core"
-    //  4.1       410       "#version 410 core"
-    //  4.2       420       "#version 410 core"
-    //  4.3       430       "#version 430 core"
-    //  ES 2.0    100       "#version 100"      = WebGL 1.0
-    //  ES 3.0    300       "#version 300 es"   = WebGL 2.0
-    //----------------------------------------
-    ImGui_ImplOpenGL3_Init(GLSL_VERSION.c_str());
+    ImGui_ImplOpenGL3_Init();
     SetEndDrawingCallback(&__render_ray_gui);
 
     return true;
