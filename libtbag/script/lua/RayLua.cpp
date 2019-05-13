@@ -376,17 +376,7 @@ Rectangle2 luaL_checkrectangle(lua_State * L, int num_arg)
 # /* Image */
 # /*********/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(Image, IMAGE, image)
-
-Image * luaL_pushimage(lua_State * L, Image const * src)
-{
-    return _luaL_pushimage(L, src);
-}
-
-Image * luaL_checkimage(lua_State * L, int num_arg)
-{
-    return _luaL_checkimage(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(Image, IMAGE, image)
 
 # /***************************************/
 # /* Texture2D (Texture, TextureCubemap) */
@@ -530,17 +520,7 @@ NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
 # /* CharInfo */
 # /************/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(CharInfo, CHARINFO, charinfo)
-
-CharInfo * luaL_pushcharinfo(lua_State * L, CharInfo const * src)
-{
-    return _luaL_pushcharinfo(L, src);
-}
-
-CharInfo * luaL_checkcharinfo(lua_State * L, int num_arg)
-{
-    return _luaL_checkcharinfo(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(CharInfo, CHARINFO, charinfo)
 
 void luaL_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int size)
 {
@@ -582,17 +562,7 @@ std::vector<int> luaL_checkchars_array(lua_State * L, int num_arg)
 # /* Font (SpriteFont) */
 # /*********************/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(Font, FONT, font)
-
-Font * luaL_pushfont(lua_State * L, Font const * src)
-{
-    return _luaL_pushfont(L, src);
-}
-
-Font * luaL_checkfont(lua_State * L, int num_arg)
-{
-    return _luaL_checkfont(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(Font, FONT, font)
 
 # /*********************/
 # /* Camera3D (Camera) */
@@ -724,17 +694,7 @@ BoundingBox luaL_checkboundingbox(lua_State * L, int num_arg)
 # /* Mesh */
 # /********/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(Mesh, MESH, mesh)
-
-Mesh * luaL_pushmesh(lua_State * L, Mesh const * src)
-{
-    return _luaL_pushmesh(L, src);
-}
-
-Mesh * luaL_checkmesh(lua_State * L, int num_arg)
-{
-    return _luaL_checkmesh(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(Mesh, MESH, mesh)
 
 # /**********/
 # /* Shader */
@@ -808,17 +768,7 @@ MaterialMap luaL_checkmaterialmap(lua_State * L, int num_arg)
 # /* Material */
 # /************/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(Material, MATERIAL, material)
-
-Material * luaL_pushmaterial(lua_State * L, Material const * src)
-{
-    return _luaL_pushmaterial(L, src);
-}
-
-Material * luaL_checkmaterial(lua_State * L, int num_arg)
-{
-    return _luaL_checkmaterial(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(Material, MATERIAL, material)
 
 # /*************/
 # /* Transform */
@@ -843,33 +793,13 @@ Material * luaL_checkmaterial(lua_State * L, int num_arg)
 # /* Model */
 # /*********/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(Model, MODEL, model)
-
-Model * luaL_pushmodel(lua_State * L, Model const * src)
-{
-    return _luaL_pushmodel(L, src);
-}
-
-Model * luaL_checkmodel(lua_State * L, int num_arg)
-{
-    return _luaL_checkmodel(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(Model, MODEL, model)
 
 # /******************/
 # /* ModelAnimation */
 # /******************/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(ModelAnimation, MODELANIMATION, modelanimation)
-
-ModelAnimation * luaL_pushmodelanimation(lua_State * L, ModelAnimation const * src)
-{
-    return _luaL_pushmodelanimation(L, src);
-}
-
-ModelAnimation * luaL_checkmodelanimation(lua_State * L, int num_arg)
-{
-    return _luaL_checkmodelanimation(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(ModelAnimation, MODELANIMATION, modelanimation)
 
 # /*******/
 # /* Ray */
@@ -951,65 +881,25 @@ RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
 # /* Wave */
 # /********/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(Wave, WAVE, wave)
-
-Wave * luaL_pushwave(lua_State * L, Wave const * src)
-{
-    return _luaL_pushwave(L, src);
-}
-
-Wave * luaL_checkwave(lua_State * L, int num_arg)
-{
-    return _luaL_checkwave(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(Wave, WAVE, wave)
 
 # /*********/
 # /* Sound */
 # /*********/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(Sound, SOUND, sound)
-
-Sound * luaL_pushsound(lua_State * L, Sound const * src)
-{
-    return _luaL_pushsound(L, src);
-}
-
-Sound * luaL_checksound(lua_State * L, int num_arg)
-{
-    return _luaL_checksound(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(Sound, SOUND, sound)
 
 # /*********/
 # /* Music */
 # /*********/
 
-TBAG_LUA_USERDATA_REG(MusicWrapper, Music, MUSIC, music,)
-
-MusicWrapper * luaL_pushmusic(lua_State * L, MusicWrapper const * src)
-{
-    return _luaL_pushmusic(L, src);
-}
-
-MusicWrapper * luaL_checkmusic(lua_State * L, int num_arg)
-{
-    return _luaL_checkmusic(L, num_arg);
-}
+TBAG_LUA_USERDATA_IMPL(MusicWrapper, Music, MUSIC, music, , )
 
 # /***************/
 # /* AudioStream */
 # /***************/
 
-TBAG_LUA_USERDATA_DEFAULT_REG(AudioStream, AUDIOSTREAM, audiostream)
-
-AudioStream * luaL_pushaudiostream(lua_State * L, AudioStream const * src)
-{
-    return _luaL_pushaudiostream(L, src);
-}
-
-AudioStream * luaL_checkaudiostream(lua_State * L, int num_arg)
-{
-    return _luaL_checkaudiostream(L, num_arg);
-}
+TBAG_LUA_USERDATA_DEFAULT_IMPL(AudioStream, AUDIOSTREAM, audiostream)
 
 # /****************/
 # /* VrDeviceInfo */
@@ -4713,16 +4603,16 @@ bool luaopen_ray(lua_State * L)
         luaL_push_raylib_symbols(L);
 
         // clang-format off
-        luaL_register_metatable(L, METATABLE_IMAGE,          __lua_lay_image);
-        luaL_register_metatable(L, METATABLE_CHARINFO,       __lua_lay_charinfo);
-        luaL_register_metatable(L, METATABLE_FONT,           __lua_lay_font);
-        luaL_register_metatable(L, METATABLE_MESH,           __lua_lay_mesh);
-        luaL_register_metatable(L, METATABLE_MATERIAL,       __lua_lay_material);
-        luaL_register_metatable(L, METATABLE_MODEL,          __lua_lay_model);
-        luaL_register_metatable(L, METATABLE_MODELANIMATION, __lua_lay_modelanimation);
-        luaL_register_metatable(L, METATABLE_WAVE,           __lua_lay_wave);
-        luaL_register_metatable(L, METATABLE_SOUND,          __lua_lay_sound);
-        luaL_register_metatable(L, METATABLE_AUDIOSTREAM,    __lua_lay_audiostream);
+        luaL_register_metatable(L, METATABLE_IMAGE,          __lua_reg_image);
+        luaL_register_metatable(L, METATABLE_CHARINFO,       __lua_reg_charinfo);
+        luaL_register_metatable(L, METATABLE_FONT,           __lua_reg_font);
+        luaL_register_metatable(L, METATABLE_MESH,           __lua_reg_mesh);
+        luaL_register_metatable(L, METATABLE_MATERIAL,       __lua_reg_material);
+        luaL_register_metatable(L, METATABLE_MODEL,          __lua_reg_model);
+        luaL_register_metatable(L, METATABLE_MODELANIMATION, __lua_reg_modelanimation);
+        luaL_register_metatable(L, METATABLE_WAVE,           __lua_reg_wave);
+        luaL_register_metatable(L, METATABLE_SOUND,          __lua_reg_sound);
+        luaL_register_metatable(L, METATABLE_AUDIOSTREAM,    __lua_reg_audiostream);
         // clang-format on
     }
     lua_pop(L, 1);

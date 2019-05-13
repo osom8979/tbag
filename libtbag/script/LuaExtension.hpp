@@ -17,6 +17,9 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/script/LuaBypass.hpp>
 
+#include <cassert>
+#include <cstring>
+
 #include <vector>
 #include <string>
 
@@ -27,18 +30,27 @@ NAMESPACE_LIBTBAG_OPEN
 namespace script {
 
 TBAG_API int luaL_unsupport(lua_State * L);
-
-TBAG_API void luadebug_printstack(lua_State * L);
 TBAG_API void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg const * l);
+TBAG_API void luadebug_printstack(lua_State * L);
 
+// clang-format off
 TBAG_API std::vector<lua_Integer> luaL_checkinteger_array(lua_State * L, int arg_num);
-TBAG_API std::vector<lua_Number>  luaL_checknumber_array(lua_State * L, int arg_num);
-TBAG_API std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_num);
+TBAG_API std::vector<lua_Number>  luaL_checknumber_array (lua_State * L, int arg_num);
+TBAG_API std::vector<std::string> luaL_checkstring_array (lua_State * L, int arg_num);
+// clang-format on
 
-#ifndef TBAG_LUA_USERDATA_REG
-#define TBAG_LUA_USERDATA_REG(type, name, upper, lower, more_regs)              \
+#ifndef TBAG_LUA_USERDATA_PROTO
+#define TBAG_LUA_USERDATA_PROTO(type, lower, api)                               \
+    api type * luaL_push##lower(lua_State * L, type const * src = nullptr);     \
+    api type * luaL_check##lower(lua_State * L, int num_arg);                   \
+    api type * luaL_opt##lower(lua_State * L, int num_arg, type * def);         \
+    /* -- END -- */
+#endif
+
+#ifndef TBAG_LUA_USERDATA_IMPL
+#define TBAG_LUA_USERDATA_IMPL(type, name, upper, lower, api, more_regs)        \
     TBAG_CONSTEXPR static char const * const METATABLE_##upper = #name;         \
-    static type * _luaL_push##lower(lua_State * L, type const * src = nullptr)  \
+    api type * luaL_push##lower(lua_State * L, type const * src)                \
     {                                                                           \
         auto * result = (type*)lua_newuserdata(L, sizeof(type));                \
         assert(result != nullptr);                                              \
@@ -51,7 +63,7 @@ TBAG_API std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_
         lua_setmetatable(L, -2);                                                \
         return result;                                                          \
     }                                                                           \
-    static type * _luaL_check##lower(lua_State * L, int num_arg)                \
+    api type * luaL_check##lower(lua_State * L, int num_arg)                    \
     {                                                                           \
         auto * result = (type*)luaL_checkudata(L, num_arg, METATABLE_##upper);  \
         if (result == nullptr) {                                                \
@@ -60,9 +72,16 @@ TBAG_API std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_
         }                                                                       \
         return result;                                                          \
     }                                                                           \
+    api type * luaL_opt##lower(lua_State * L, int num_arg, type * def)          \
+    {                                                                           \
+        if (lua_isuserdata(L, num_arg)) {                                       \
+            return luaL_check##lower(L, num_arg);                               \
+        }                                                                       \
+        return def;                                                             \
+    }                                                                           \
     static int _##name(lua_State * L)                                           \
     {                                                                           \
-        _luaL_push##lower(L);                                                   \
+        luaL_push##lower(L);                                                    \
         return 1;                                                               \
     }                                                                           \
     static int _##name##_gc(lua_State * L)                                      \
@@ -74,7 +93,7 @@ TBAG_API std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_
         lua_pushstring(L, METATABLE_##upper);                                   \
         return 1;                                                               \
     }                                                                           \
-    static luaL_Reg const __lua_lay_##lower[] = {                               \
+    static luaL_Reg const __lua_reg_##lower[] = {                               \
             { "__gc", _##name##_gc },                                           \
             { "__tostring", _##name##_tostring },                               \
             more_regs                                                           \
@@ -82,9 +101,9 @@ TBAG_API std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_
     }; /* -- END -- */
 #endif
 
-#ifndef TBAG_LUA_USERDATA_DEFAULT_REG
-#define TBAG_LUA_USERDATA_DEFAULT_REG(type, upper, lower) \
-    TBAG_LUA_USERDATA_REG(type, type, upper, lower,)
+#ifndef TBAG_LUA_USERDATA_DEFAULT_IMPL
+#define TBAG_LUA_USERDATA_DEFAULT_IMPL(type, upper, lower) \
+    TBAG_LUA_USERDATA_IMPL(type, type, upper, lower,,)
 #endif
 
 template <typename T>
@@ -93,22 +112,17 @@ struct PodWrapper
     T value;
 };
 
-using BooleanWrapper = PodWrapper<bool>;
-using IntegerWrapper = PodWrapper<int>;
-using FloatWrapper   = PodWrapper<float>;
-using DoubleWrapper  = PodWrapper<double>;
+using BooleanWrapper  = PodWrapper<bool>;
+using IntegerWrapper  = PodWrapper<int>;
+using UnsignedWrapper = PodWrapper<unsigned int>;
+using FloatWrapper    = PodWrapper<float>;
+using DoubleWrapper   = PodWrapper<double>;
 
-TBAG_API BooleanWrapper * luaL_pushbooleanwrapper(lua_State * L, BooleanWrapper const * src = nullptr);
-TBAG_API BooleanWrapper * luaL_checkbooleanwrapper(lua_State * L, int num_arg);
-
-TBAG_API IntegerWrapper * luaL_pushintegerwrapper(lua_State * L, IntegerWrapper const * src = nullptr);
-TBAG_API IntegerWrapper * luaL_checkintegerwrapper(lua_State * L, int num_arg);
-
-TBAG_API FloatWrapper * luaL_pushfloatwrapper(lua_State * L, FloatWrapper const * src = nullptr);
-TBAG_API FloatWrapper * luaL_checkfloatwrapper(lua_State * L, int num_arg);
-
-TBAG_API DoubleWrapper * luaL_pushdoublewrapper(lua_State * L, DoubleWrapper const * src = nullptr);
-TBAG_API DoubleWrapper * luaL_checkdoublewrapper(lua_State * L, int num_arg);
+TBAG_LUA_USERDATA_PROTO(BooleanWrapper , booleanwrapper , TBAG_API)
+TBAG_LUA_USERDATA_PROTO(IntegerWrapper , integerwrapper , TBAG_API)
+TBAG_LUA_USERDATA_PROTO(UnsignedWrapper, unsignedwrapper, TBAG_API)
+TBAG_LUA_USERDATA_PROTO(FloatWrapper   , floatwrapper   , TBAG_API)
+TBAG_LUA_USERDATA_PROTO(DoubleWrapper  , doublewrapper  , TBAG_API)
 
 } // namespace script
 
