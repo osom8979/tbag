@@ -73,6 +73,7 @@ TBAG_CONSTEXPR char const * const lua_ray_name() TBAG_NOEXCEPT
 
 TBAG_API void luaL_pushvector2(lua_State * L, Vector2 const & vec);
 TBAG_API Vector2 luaL_checkvector2(lua_State * L, int num_arg);
+TBAG_API Vector2 luaL_optvector2(lua_State * L, int num_arg, Vector2 const & def);
 TBAG_API std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg);
 
 TBAG_API void luaL_pushvector3(lua_State * L, Vector3 const & vec);

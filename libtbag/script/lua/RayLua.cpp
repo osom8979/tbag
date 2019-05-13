@@ -55,6 +55,14 @@ Vector2 luaL_checkvector2(lua_State * L, int num_arg)
     return result;
 }
 
+Vector2 luaL_optvector2(lua_State * L, int num_arg, Vector2 const & def)
+{
+    if (lua_istable(L, num_arg)) {
+        return luaL_checkvector2(L, num_arg);
+    }
+    return def;
+}
+
 std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);

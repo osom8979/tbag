@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/script/lua/RayGuiLua.hpp>
+#include <libtbag/script/lua/RayLua.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,11 +16,6 @@ namespace script {
 namespace lua    {
 
 using namespace libtbag::ray::gui;
-
-static int luaL_unsupport(lua_State * L)
-{
-    return luaL_error(L, "Unsupported operation error");
-}
 
 static int _InitRayGui(lua_State * L)
 {
@@ -131,255 +127,283 @@ static int _End(lua_State * L)
 
 static int _BeginChild(lua_State * L)
 {
-    //bool BeginChild(char const * str_id, Vector2 const & size = Vector2{0,0}, bool border = false, WindowFlags flags = 0);
-    //bool BeginChild(ID id, Vector2 const & size = Vector2{0,0}, bool border = false, WindowFlags flags = 0);
-    return 0;
+    auto const size = luaL_optvector2(L, 2, Vector2{0, 0});
+    auto const border = luaL_optinteger(L, 3, 0);
+    auto const flags = luaL_optinteger(L, 4, 0);
+    if (lua_isstring(L, lua_absindex(L, 1))) {
+        lua_pushboolean(L, BeginChild(luaL_checkstring(L, 1), size, border, flags));
+    } else {
+        lua_pushboolean(L, BeginChild(luaL_checkinteger(L, 1), size, border, flags));
+    }
+    return 1;
 }
 
 static int _EndChild(lua_State * L)
 {
-    //void EndChild();
+    EndChild();
     return 0;
 }
 
 static int _IsWindowAppearing(lua_State * L)
 {
-    //bool IsWindowAppearing();
-    return 0;
+    lua_pushboolean(L, IsWindowAppearing());
+    return 1;
 }
 
 static int _IsWindowCollapsed(lua_State * L)
 {
-    //bool IsWindowCollapsed();
-    return 0;
+    lua_pushboolean(L, IsWindowCollapsed());
+    return 1;
 }
 
 static int _IsWindowFocused(lua_State * L)
 {
-    //bool IsWindowFocused(FocusedFlags flags = 0);
-    return 0;
+    lua_pushboolean(L, IsWindowFocused(luaL_optinteger(L, 1, 0)));
+    return 1;
 }
 
 static int _IsWindowHovered(lua_State * L)
 {
-    //bool IsWindowHovered(HoveredFlags flags = 0);
-    return 0;
+    lua_pushboolean(L, IsWindowHovered(luaL_optinteger(L, 1, 0)));
+    return 1;
 }
 
 static int _GetWindowPos(lua_State * L)
 {
-    //Vector2 GetWindowPos();
-    return 0;
+    luaL_pushvector2(L, GetWindowPos());
+    return 1;
 }
 
 static int _GetWindowSize(lua_State * L)
 {
-    //Vector2 GetWindowSize();
-    return 0;
+    luaL_pushvector2(L, GetWindowSize());
+    return 1;
 }
 
 static int _GetWindowWidth(lua_State * L)
 {
-    //float GetWindowWidth();
-    return 0;
+    lua_pushnumber(L, GetWindowWidth());
+    return 1;
 }
 
 static int _GetWindowHeight(lua_State * L)
 {
-    //float GetWindowHeight();
-    return 0;
+    lua_pushnumber(L, GetWindowHeight());
+    return 1;
 }
 
 static int _SetNextWindowPos(lua_State * L)
 {
-    //void SetNextWindowPos(Vector2 const & pos, Cond cond = 0, Vector2 const & pivot = Vector2{0,0});
+    SetNextWindowPos(luaL_checkvector2(L, 1),
+                     luaL_optinteger(L, 2, 0),
+                     luaL_optvector2(L, 3, Vector2{0, 0}));
     return 0;
 }
 
 static int _SetNextWindowSize(lua_State * L)
 {
-    //void SetNextWindowSize(Vector2 const & size, Cond cond = 0);
+    SetNextWindowSize(luaL_checkvector2(L, 1),
+                      luaL_optinteger(L, 2, 0));
     return 0;
 }
 
 static int _SetNextWindowContentSize(lua_State * L)
 {
-    //void SetNextWindowContentSize(Vector2 const & size);
+    SetNextWindowContentSize(luaL_checkvector2(L, 1));
     return 0;
 }
 
 static int _SetNextWindowCollapsed(lua_State * L)
 {
-    //void SetNextWindowCollapsed(bool collapsed, Cond cond = 0);
+    SetNextWindowCollapsed(luaL_checkinteger(L, 1),
+                           luaL_optinteger(L, 2, 0));
     return 0;
 }
 
 static int _SetNextWindowFocus(lua_State * L)
 {
-    //void SetNextWindowFocus();
+    SetNextWindowFocus();
     return 0;
 }
 
 static int _SetNextWindowBgAlpha(lua_State * L)
 {
-    //void SetNextWindowBgAlpha(float alpha);
+    SetNextWindowBgAlpha(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _SetWindowPos(lua_State * L)
 {
-    //void SetWindowPos(Vector2 const & pos, Cond cond = 0);
-    //void SetWindowPos(char const * name, Vector2 const & pos, Cond cond = 0);
+    if (lua_isstring(L, lua_absindex(L, 1))) {
+        SetWindowPos(luaL_checkstring(L, 1), luaL_checkvector2(L, 2), luaL_optinteger(L, 3, 0));
+    } else {
+        SetWindowPos(luaL_checkvector2(L, 1), luaL_optinteger(L, 2, 0));
+    }
     return 0;
 }
 
 static int _SetWindowSize(lua_State * L)
 {
-    //void SetWindowSize(Vector2 const & size, Cond cond = 0);
-    //void SetWindowSize(char const * name, Vector2 const & size, Cond cond = 0);
+    if (lua_isstring(L, lua_absindex(L, 1))) {
+        SetWindowSize(luaL_checkstring(L, 1), luaL_checkvector2(L, 2), luaL_optinteger(L, 3, 0));
+    } else {
+        SetWindowSize(luaL_checkvector2(L, 1), luaL_optinteger(L, 2, 0));
+    }
     return 0;
 }
 
 static int _SetWindowCollapsed(lua_State * L)
 {
-    //void SetWindowCollapsed(bool collapsed, Cond cond = 0);
-    //void SetWindowCollapsed(char const * name, bool collapsed, Cond cond = 0);
+    if (lua_isstring(L, lua_absindex(L, 1))) {
+        SetWindowCollapsed(luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaL_optinteger(L, 3, 0));
+    } else {
+        SetWindowCollapsed(luaL_checkinteger(L, 1), luaL_optinteger(L, 2, 0));
+    }
     return 0;
 }
 
 static int _SetWindowFocus(lua_State * L)
 {
-    //void SetWindowFocus();
-    //void SetWindowFocus(char const * name);
+    if (lua_isstring(L, lua_absindex(L, 1))) {
+        SetWindowFocus(luaL_checkstring(L, 1));
+    } else {
+        SetWindowFocus();
+    }
     return 0;
 }
 
 static int _SetWindowFontScale(lua_State * L)
 {
-    //void SetWindowFontScale(float scale);
+    SetWindowFontScale(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _GetContentRegionMax(lua_State * L)
 {
-    //Vector2 GetContentRegionMax();
-    return 0;
+    luaL_pushvector2(L, GetContentRegionMax());
+    return 1;
 }
 
 static int _GetContentRegionAvail(lua_State * L)
 {
-    //Vector2 GetContentRegionAvail();
-    return 0;
+    luaL_pushvector2(L, GetContentRegionAvail());
+    return 1;
 }
 
 static int _GetWindowContentRegionMin(lua_State * L)
 {
-    //Vector2 GetWindowContentRegionMin();
-    return 0;
+    luaL_pushvector2(L, GetWindowContentRegionMin());
+    return 1;
 }
 
 static int _GetWindowContentRegionMax(lua_State * L)
 {
-    //Vector2 GetWindowContentRegionMax();
-    return 0;
+    luaL_pushvector2(L, GetWindowContentRegionMax());
+    return 1;
 }
 
 static int _GetWindowContentRegionWidth(lua_State * L)
 {
-    //float GetWindowContentRegionWidth();
-    return 0;
+    lua_pushnumber(L, GetWindowContentRegionWidth());
+    return 1;
 }
 
 static int _GetScrollX(lua_State * L)
 {
-    //float GetScrollX();
-    return 0;
+    lua_pushnumber(L, GetScrollX());
+    return 1;
 }
 
 static int _GetScrollY(lua_State * L)
 {
-    //float GetScrollY();
-    return 0;
+    lua_pushnumber(L, GetScrollY());
+    return 1;
 }
 
 static int _GetScrollMaxX(lua_State * L)
 {
-    //float GetScrollMaxX();
-    return 0;
+    lua_pushnumber(L, GetScrollMaxX());
+    return 1;
 }
 
 static int _GetScrollMaxY(lua_State * L)
 {
-    //float GetScrollMaxY();
-    return 0;
+    lua_pushnumber(L, GetScrollMaxY());
+    return 1;
 }
 
 static int _SetScrollX(lua_State * L)
 {
-    //void SetScrollX(float scroll_x);
+    SetScrollX(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _SetScrollY(lua_State * L)
 {
-    //void SetScrollY(float scroll_y);
+    SetScrollY(luaL_checknumber(L, 1));
     return 0;
 }
 
 static int _SetScrollHereY(lua_State * L)
 {
-    //void SetScrollHereY(float center_y_ratio = 0.5f);
+    SetScrollHereY(luaL_optnumber(L, 1, 0.5f));
     return 0;
 }
 
 static int _SetScrollFromPosY(lua_State * L)
 {
-    //void SetScrollFromPosY(float local_y, float center_y_ratio = 0.5f);
+    SetScrollFromPosY(luaL_checknumber(L, 1), luaL_optnumber(L, 2, 0.5f));
     return 0;
 }
 
 static int _PushStyleColor(lua_State * L)
 {
-    //void PushStyleColor(Col idx, unsigned int col);
-    //void PushStyleColor(Col idx, Vector4 const & col);
+    if (lua_isnumber(L, lua_absindex(L, 2))) {
+        PushStyleColor(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
+    } else {
+        PushStyleColor(luaL_checkinteger(L, 1), luaL_checkvector4(L, 2));
+    }
     return 0;
 }
 
 static int _PopStyleColor(lua_State * L)
 {
-    //void PopStyleColor(int count = 1);
+    PopStyleColor(luaL_optinteger(L, 1, 1));
     return 0;
 }
 
 static int _PushStyleVar(lua_State * L)
 {
-    //void PushStyleVar(StyleVar idx, float val);
-    //void PushStyleVar(StyleVar idx, Vector2 const & val);
+    if (lua_isnumber(L, lua_absindex(L, 2))) {
+        PushStyleVar(luaL_checkinteger(L, 1), luaL_checknumber(L, 2));
+    } else {
+        PushStyleVar(luaL_checkinteger(L, 1), luaL_checkvector2(L, 2));
+    }
     return 0;
 }
 
 static int _PopStyleVar(lua_State * L)
 {
-    //void PopStyleVar(int count = 1);
+    PopStyleVar(luaL_optinteger(L, 1, 1));
     return 0;
 }
 
 static int _GetStyleColorVec4(lua_State * L)
 {
-    //Vector4 GetStyleColorVec4(Col idx);
-    return 0;
+    luaL_pushvector4(L, GetStyleColorVec4(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GetFontSize(lua_State * L)
 {
-    //float GetFontSize();
-    return 0;
+    lua_pushnumber(L, GetFontSize());
+    return 1;
 }
 
 static int _GetFontTexUvWhitePixel(lua_State * L)
 {
-    //Vector2 GetFontTexUvWhitePixel();
-    return 0;
+    luaL_pushvector2(L, GetFontTexUvWhitePixel());
+    return 1;
 }
 
 static int _GetColorU32(lua_State * L)
@@ -2122,7 +2146,7 @@ static luaL_Reg const __lua_lay_gui[] = {
 };
 
 #ifndef RAYGUI_INT_SYMBOL
-#define RAYGUI_INT_SYMBOL(L, s)        \
+#define RAYGUI_INT_SYMBOL(L, s)     \
     do {                            \
         lua_pushinteger(L, s);      \
         lua_setfield(L, -2, #s);    \
