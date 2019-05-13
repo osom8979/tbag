@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/script/lua/RayGuiLua.hpp>
-#include <libtbag/ray/RayGui.hpp>
+#include <libtbag/ray/gui/RayGui.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,7 +15,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace script {
 namespace lua    {
 
-using namespace libtbag::ray;
+using namespace libtbag::ray::gui;
 
 static int _InitRayGui(lua_State * L)
 {
@@ -37,25 +37,25 @@ static int _ShutdownRayGui(lua_State * L)
 
 static int _GuiShowDemoWindow(lua_State * L)
 {
-    GuiShowDemoWindow();
+    ShowDemoWindow();
     return 0;
 }
 
 static int _GuiBegin(lua_State * L)
 {
-    lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1)));
+    lua_pushboolean(L, Begin(luaL_checkstring(L, 1)));
     return 1;
 }
 
 static int _GuiEnd(lua_State * L)
 {
-    GuiEnd();
+    End();
     return 0;
 }
 
 static int _GuiText(lua_State * L)
 {
-    GuiText(luaL_checkstring(L, 1));
+    Text(luaL_checkstring(L, 1));
     return 0;
 }
 
