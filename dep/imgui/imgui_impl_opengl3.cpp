@@ -111,13 +111,18 @@ bool    ImGui_ImplOpenGL3_Init(const char* glsl_version)
     if (glsl_version == NULL)
         glsl_version = "#version 300 es";
 #else
-    char shader_version_buffer[32] = {0,}; // x.xx
+    // Version format:
+    // APPLE: 4.10
+    // WIN32: 3.30 - Build 22.20.16.4749
+    char shader_version_buffer[32] = {0,};
     snprintf(shader_version_buffer, 32, "%s", glGetString(GL_SHADING_LANGUAGE_VERSION));
     char glsl_version_buffer[32] = {0,};
     if (shader_version_buffer[0] >= '3') {
-        snprintf(glsl_version_buffer, 32, "#version %c%s core", shader_version_buffer[0], (shader_version_buffer+2));
+        snprintf(glsl_version_buffer, 32, "#version %c%c%c core",
+                 shader_version_buffer[0], shader_version_buffer[2], shader_version_buffer[3]);
     } else {
-        snprintf(glsl_version_buffer, 32, "#version %c%s", shader_version_buffer[0], (shader_version_buffer+2));
+        snprintf(glsl_version_buffer, 32, "#version %c%c%c",
+                 shader_version_buffer[0], shader_version_buffer[2], shader_version_buffer[3]);
     }
     if (glsl_version == NULL) {
         glsl_version = glsl_version_buffer;
