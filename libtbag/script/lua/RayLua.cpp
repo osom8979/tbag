@@ -23,114 +23,11 @@ namespace lua    {
 
 using namespace libtbag::ray;
 
-static int luaL_unsupport(lua_State * L)
-{
-    return luaL_error(L, "Unsupported operation error");
-}
-
-static void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
-{
-    luaL_newmetatable(L, name);
-    {
-        luaL_register(L, nullptr, l);
-
-        lua_pushliteral(L, "__index");
-        lua_pushvalue(L, -2); // Duplicate metatable.
-        lua_rawset(L, -3);
-    }
-    lua_pop(L, 1);
-}
-
-static std::vector<lua_Integer> luaL_checkinteger_array(lua_State * L, int arg_num)
-{
-    auto size = lua_objlen(L, arg_num);
-    std::vector<lua_Integer> result(size);
-    for (int i = 0; i < size; ++i) {
-        lua_rawgeti(L, arg_num, i+1);
-        result[i] = luaL_checkinteger(L, -1);
-    }
-    return result;
-}
-
-static std::vector<lua_Number> luaL_checknumber_array(lua_State * L, int arg_num)
-{
-    auto size = lua_objlen(L, arg_num);
-    std::vector<lua_Number> result(size);
-    for (int i = 0; i < size; ++i) {
-        lua_rawgeti(L, arg_num, i+1);
-        result[i] = luaL_checkinteger(L, -1);
-    }
-    return result;
-}
-
-
-static std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_num)
-{
-    auto size = lua_objlen(L, arg_num);
-    std::vector<std::string> result(size);
-    for (int i = 0; i < size; ++i) {
-        lua_rawgeti(L, arg_num, i+1);
-        result[i] = luaL_checkstring(L, -1);
-    }
-    return result;
-}
-
-#ifndef RAY_USERDATA
-#define RAY_USERDATA(type, name, upper, lower, more_regs)                       \
-    TBAG_CONSTEXPR static char const * const METATABLE_##upper = #name;         \
-    static type * luaL_push##lower(lua_State * L, type const * src = nullptr)   \
-    {                                                                           \
-        auto * result = (type*)lua_newuserdata(L, sizeof(type));                \
-        assert(result != nullptr);                                              \
-        if (src) {                                                              \
-            memcpy((void*)result, (void const *)src, sizeof(type));             \
-        } else {                                                                \
-            memset((void*)result, 0x00, sizeof(type));                          \
-        }                                                                       \
-        luaL_getmetatable(L, METATABLE_##upper);                                \
-        lua_setmetatable(L, -2);                                                \
-        return result;                                                          \
-    }                                                                           \
-    static type * luaL_check##lower(lua_State * L, int num_arg)                 \
-    {                                                                           \
-        auto * result = (type*)luaL_checkudata(L, num_arg, METATABLE_##upper);  \
-        if (result == nullptr) {                                                \
-            luaL_typerror(L, num_arg, METATABLE_##upper);                       \
-            return nullptr;                                                     \
-        }                                                                       \
-        return result;                                                          \
-    }                                                                           \
-    static int _##name(lua_State * L)                                           \
-    {                                                                           \
-        luaL_push##lower(L);                                                    \
-        return 1;                                                               \
-    }                                                                           \
-    static int _##name##_gc(lua_State * L)                                      \
-    {                                                                           \
-        return 0;                                                               \
-    }                                                                           \
-    static int _##name##_tostring(lua_State * L)                                \
-    {                                                                           \
-        lua_pushstring(L, METATABLE_##upper);                                   \
-        return 1;                                                               \
-    }                                                                           \
-    static luaL_Reg const __lua_lay_##lower[] = {                               \
-            { "__gc", _##name##_gc },                                           \
-            { "__tostring", _##name##_tostring },                               \
-            { nullptr, nullptr }                                                \
-    }; /* -- END -- */
-#endif
-
-#ifndef RAY_USERDATA_DEFAULT
-#define RAY_USERDATA_DEFAULT(type, upper, lower) \
-    RAY_USERDATA(type, type, upper, lower,)
-#endif
-
 # /***********/
 # /* Vector2 */
 # /***********/
 
-static void luaL_pushvector2(lua_State * L, Vector2 const & vec)
+void luaL_pushvector2(lua_State * L, Vector2 const & vec)
 {
     lua_createtable(L, 0, 2);
     lua_pushnumber(L, vec.x);
@@ -139,7 +36,7 @@ static void luaL_pushvector2(lua_State * L, Vector2 const & vec)
     lua_setfield(L, -2, "y");
 }
 
-static Vector2 luaL_checkvector2(lua_State * L, int num_arg)
+Vector2 luaL_checkvector2(lua_State * L, int num_arg)
 {
     Vector2 result = {0,};
     if (lua_objlen(L, num_arg) >= 2) {
@@ -158,7 +55,7 @@ static Vector2 luaL_checkvector2(lua_State * L, int num_arg)
     return result;
 }
 
-static std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg)
+std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<Vector2> result(length);
@@ -174,7 +71,7 @@ static std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg)
 # /* Vector3 */
 # /***********/
 
-static void luaL_pushvector3(lua_State * L, Vector3 const & vec)
+void luaL_pushvector3(lua_State * L, Vector3 const & vec)
 {
     lua_createtable(L, 0, 3);
     lua_pushnumber(L, vec.x);
@@ -185,7 +82,7 @@ static void luaL_pushvector3(lua_State * L, Vector3 const & vec)
     lua_setfield(L, -2, "z");
 }
 
-static Vector3 luaL_checkvector3(lua_State * L, int num_arg)
+Vector3 luaL_checkvector3(lua_State * L, int num_arg)
 {
     Vector3 result = {0,};
     if (lua_objlen(L, num_arg) >= 3) {
@@ -212,7 +109,7 @@ static Vector3 luaL_checkvector3(lua_State * L, int num_arg)
 # /* Vector4 (Quaternion) */
 # /************************/
 
-static void luaL_pushvector4(lua_State * L, Vector4 const & vec)
+void luaL_pushvector4(lua_State * L, Vector4 const & vec)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, vec.x);
@@ -225,7 +122,7 @@ static void luaL_pushvector4(lua_State * L, Vector4 const & vec)
     lua_setfield(L, -2, "w");
 }
 
-static Vector4 luaL_checkvector4(lua_State * L, int num_arg)
+Vector4 luaL_checkvector4(lua_State * L, int num_arg)
 {
     Vector4 result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
@@ -256,7 +153,7 @@ static Vector4 luaL_checkvector4(lua_State * L, int num_arg)
 # /* Matrix */
 # /**********/
 
-static void luaL_pushmatrix(lua_State * L, Matrix const & mat)
+void luaL_pushmatrix(lua_State * L, Matrix const & mat)
 {
     lua_createtable(L, 16, 0);
 
@@ -297,7 +194,7 @@ static void luaL_pushmatrix(lua_State * L, Matrix const & mat)
     lua_rawseti(L, -2, 16);
 }
 
-static Matrix luaL_checkmatrix(lua_State * L, int num_arg)
+Matrix luaL_checkmatrix(lua_State * L, int num_arg)
 {
     Matrix result = {0,};
     if (lua_objlen(L, num_arg) >= 16) {
@@ -345,7 +242,7 @@ static Matrix luaL_checkmatrix(lua_State * L, int num_arg)
 # /* Color */
 # /*********/
 
-static void luaL_pushcolor(lua_State * L, Color const & color)
+void luaL_pushcolor(lua_State * L, Color const & color)
 {
     lua_createtable(L, 0, 4);
     lua_pushinteger(L, color.r);
@@ -358,7 +255,7 @@ static void luaL_pushcolor(lua_State * L, Color const & color)
     lua_setfield(L, -2, "a");
 }
 
-static Color luaL_checkcolor(lua_State * L, int num_arg)
+Color luaL_checkcolor(lua_State * L, int num_arg)
 {
     Color result = {0,};
     auto const length = lua_objlen(L, num_arg);
@@ -395,7 +292,7 @@ static Color luaL_checkcolor(lua_State * L, int num_arg)
     return result;
 }
 
-static std::vector<Color> luaL_checkcolor_array(lua_State * L, int num_arg)
+std::vector<Color> luaL_checkcolor_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<Color> result(length);
@@ -411,7 +308,7 @@ static std::vector<Color> luaL_checkcolor_array(lua_State * L, int num_arg)
 # /* Rectangle2 */
 # /**************/
 
-static void luaL_pushrectangle(lua_State * L, Rectangle2 const & rect)
+void luaL_pushrectangle(lua_State * L, Rectangle2 const & rect)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, rect.x);
@@ -424,7 +321,7 @@ static void luaL_pushrectangle(lua_State * L, Rectangle2 const & rect)
     lua_setfield(L, -2, "height");
 }
 
-static Rectangle2 luaL_checkrectangle(lua_State * L, int num_arg)
+Rectangle2 luaL_checkrectangle(lua_State * L, int num_arg)
 {
     Rectangle2 result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
@@ -455,13 +352,23 @@ static Rectangle2 luaL_checkrectangle(lua_State * L, int num_arg)
 # /* Image */
 # /*********/
 
-RAY_USERDATA_DEFAULT(Image, IMAGE, image)
+TBAG_LUA_USERDATA_DEFAULT_REG(Image, IMAGE, image)
+
+Image * luaL_pushimage(lua_State * L, Image const * src)
+{
+    return _luaL_pushimage(L, src);
+}
+
+Image * luaL_checkimage(lua_State * L, int num_arg)
+{
+    return _luaL_checkimage(L, num_arg);
+}
 
 # /***************************************/
 # /* Texture2D (Texture, TextureCubemap) */
 # /***************************************/
 
-static void luaL_pushtexture2d(lua_State * L, Texture2D const & tex)
+void luaL_pushtexture2d(lua_State * L, Texture2D const & tex)
 {
     lua_createtable(L, 0, 5);
     lua_pushinteger(L, tex.id);
@@ -476,7 +383,7 @@ static void luaL_pushtexture2d(lua_State * L, Texture2D const & tex)
     lua_setfield(L, -2, "format");
 }
 
-static Texture2D luaL_checktexture2d(lua_State * L, int num_arg)
+Texture2D luaL_checktexture2d(lua_State * L, int num_arg)
 {
     Texture2D result = {0,};
     if (lua_objlen(L, num_arg) >= 5) {
@@ -511,7 +418,7 @@ static Texture2D luaL_checktexture2d(lua_State * L, int num_arg)
 # /* RenderTexture2D (RenderTexture) */
 # /***********************************/
 
-static void luaL_pushrendertexture2d(lua_State * L, RenderTexture2D const & tex)
+void luaL_pushrendertexture2d(lua_State * L, RenderTexture2D const & tex)
 {
     lua_createtable(L, 0, 5);
     lua_pushinteger(L, tex.id);
@@ -524,7 +431,7 @@ static void luaL_pushrendertexture2d(lua_State * L, RenderTexture2D const & tex)
     lua_setfield(L, -2, "depthTexture");
 }
 
-static RenderTexture2D luaL_checkrendertexture2d(lua_State * L, int num_arg)
+RenderTexture2D luaL_checkrendertexture2d(lua_State * L, int num_arg)
 {
     RenderTexture2D result = {0,};
     lua_getfield(L, num_arg, "id");
@@ -543,7 +450,7 @@ static RenderTexture2D luaL_checkrendertexture2d(lua_State * L, int num_arg)
 # /* NPatchInfo */
 # /**************/
 
-static void luaL_pushnpatchinfo(lua_State * L, NPatchInfo const & npatch)
+void luaL_pushnpatchinfo(lua_State * L, NPatchInfo const & npatch)
 {
     lua_createtable(L, 0, 6);
     luaL_pushrectangle(L, npatch.sourceRec);
@@ -560,7 +467,7 @@ static void luaL_pushnpatchinfo(lua_State * L, NPatchInfo const & npatch)
     lua_setfield(L, -2, "type");
 }
 
-static NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
+NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
 {
     NPatchInfo result = {0,};
     if (lua_objlen(L, num_arg) >= 6) {
@@ -599,9 +506,19 @@ static NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
 # /* CharInfo */
 # /************/
 
-RAY_USERDATA_DEFAULT(CharInfo, CHARINFO, charinfo)
+TBAG_LUA_USERDATA_DEFAULT_REG(CharInfo, CHARINFO, charinfo)
 
-static void luaL_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int size)
+CharInfo * luaL_pushcharinfo(lua_State * L, CharInfo const * src)
+{
+    return _luaL_pushcharinfo(L, src);
+}
+
+CharInfo * luaL_checkcharinfo(lua_State * L, int num_arg)
+{
+    return _luaL_checkcharinfo(L, num_arg);
+}
+
+void luaL_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int size)
 {
     assert(char_infos != nullptr);
     assert(size >= 1);
@@ -613,7 +530,7 @@ static void luaL_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int si
     }
 }
 
-static std::vector<CharInfo> luaL_checkcharinfo_array(lua_State * L, int num_arg)
+std::vector<CharInfo> luaL_checkcharinfo_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<CharInfo> result(length);
@@ -625,7 +542,7 @@ static std::vector<CharInfo> luaL_checkcharinfo_array(lua_State * L, int num_arg
     return result;
 }
 
-static std::vector<int> luaL_checkchars_array(lua_State * L, int num_arg)
+std::vector<int> luaL_checkchars_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<int> result(length);
@@ -641,13 +558,23 @@ static std::vector<int> luaL_checkchars_array(lua_State * L, int num_arg)
 # /* Font (SpriteFont) */
 # /*********************/
 
-RAY_USERDATA_DEFAULT(Font, FONT, font)
+TBAG_LUA_USERDATA_DEFAULT_REG(Font, FONT, font)
+
+Font * luaL_pushfont(lua_State * L, Font const * src)
+{
+    return _luaL_pushfont(L, src);
+}
+
+Font * luaL_checkfont(lua_State * L, int num_arg)
+{
+    return _luaL_checkfont(L, num_arg);
+}
 
 # /*********************/
 # /* Camera3D (Camera) */
 # /*********************/
 
-static void luaL_pushcamera3d(lua_State * L, Camera3D const & cam)
+void luaL_pushcamera3d(lua_State * L, Camera3D const & cam)
 {
     lua_createtable(L, 0, 5);
     luaL_pushvector3(L, cam.position);
@@ -662,7 +589,7 @@ static void luaL_pushcamera3d(lua_State * L, Camera3D const & cam)
     lua_setfield(L, -2, "type");
 }
 
-static Camera3D luaL_checkcamera3d(lua_State * L, int num_arg)
+Camera3D luaL_checkcamera3d(lua_State * L, int num_arg)
 {
     Camera3D result = {0,};
     if (lua_objlen(L, num_arg) >= 5) {
@@ -697,7 +624,7 @@ static Camera3D luaL_checkcamera3d(lua_State * L, int num_arg)
 # /* Camera2D */
 # /************/
 
-static void luaL_pushcamera2d(lua_State * L, Camera2D const & cam)
+void luaL_pushcamera2d(lua_State * L, Camera2D const & cam)
 {
     lua_createtable(L, 0, 4);
     luaL_pushvector2(L, cam.offset);
@@ -710,7 +637,7 @@ static void luaL_pushcamera2d(lua_State * L, Camera2D const & cam)
     lua_setfield(L, -2, "zoom");
 }
 
-static Camera2D luaL_checkcamera2d(lua_State * L, int num_arg)
+Camera2D luaL_checkcamera2d(lua_State * L, int num_arg)
 {
     Camera2D result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
@@ -741,7 +668,7 @@ static Camera2D luaL_checkcamera2d(lua_State * L, int num_arg)
 # /* BoundingBox */
 # /***************/
 
-static void luaL_pushboundingbox(lua_State * L, BoundingBox const & bbox)
+void luaL_pushboundingbox(lua_State * L, BoundingBox const & bbox)
 {
     lua_createtable(L, 0, 2);
     luaL_pushvector3(L, bbox.min);
@@ -750,7 +677,7 @@ static void luaL_pushboundingbox(lua_State * L, BoundingBox const & bbox)
     lua_setfield(L, -2, "max");
 }
 
-static BoundingBox luaL_checkboundingbox(lua_State * L, int num_arg)
+BoundingBox luaL_checkboundingbox(lua_State * L, int num_arg)
 {
     BoundingBox result = {0,};
     if (lua_objlen(L, num_arg) >= 2) {
@@ -773,13 +700,23 @@ static BoundingBox luaL_checkboundingbox(lua_State * L, int num_arg)
 # /* Mesh */
 # /********/
 
-RAY_USERDATA_DEFAULT(Mesh, MESH, mesh)
+TBAG_LUA_USERDATA_DEFAULT_REG(Mesh, MESH, mesh)
+
+Mesh * luaL_pushmesh(lua_State * L, Mesh const * src)
+{
+    return _luaL_pushmesh(L, src);
+}
+
+Mesh * luaL_checkmesh(lua_State * L, int num_arg)
+{
+    return _luaL_checkmesh(L, num_arg);
+}
 
 # /**********/
 # /* Shader */
 # /**********/
 
-static void luaL_pushshader(lua_State * L, Shader const & shader)
+void luaL_pushshader(lua_State * L, Shader const & shader)
 {
     lua_createtable(L, 0, 2);
     lua_pushinteger(L, shader.id);
@@ -793,7 +730,7 @@ static void luaL_pushshader(lua_State * L, Shader const & shader)
     lua_setfield(L, -2, "locs");
 }
 
-static Shader luaL_checkshader(lua_State * L, int num_arg)
+Shader luaL_checkshader(lua_State * L, int num_arg)
 {
     Shader result = {0,};
     lua_getfield(L, num_arg, "id");
@@ -819,7 +756,7 @@ static Shader luaL_checkshader(lua_State * L, int num_arg)
 # /* MaterialMap */
 # /***************/
 
-static void luaL_pushmaterialmap(lua_State * L, MaterialMap const & materials)
+void luaL_pushmaterialmap(lua_State * L, MaterialMap const & materials)
 {
     lua_createtable(L, 0, 3);
     luaL_pushtexture2d(L, materials.texture);
@@ -830,7 +767,7 @@ static void luaL_pushmaterialmap(lua_State * L, MaterialMap const & materials)
     lua_setfield(L, -2, "value");
 }
 
-static MaterialMap luaL_checkmaterialmap(lua_State * L, int num_arg)
+MaterialMap luaL_checkmaterialmap(lua_State * L, int num_arg)
 {
     MaterialMap result = {0,};
     lua_getfield(L, num_arg, "texture");
@@ -847,7 +784,17 @@ static MaterialMap luaL_checkmaterialmap(lua_State * L, int num_arg)
 # /* Material */
 # /************/
 
-RAY_USERDATA_DEFAULT(Material, MATERIAL, material)
+TBAG_LUA_USERDATA_DEFAULT_REG(Material, MATERIAL, material)
+
+Material * luaL_pushmaterial(lua_State * L, Material const * src)
+{
+    return _luaL_pushmaterial(L, src);
+}
+
+Material * luaL_checkmaterial(lua_State * L, int num_arg)
+{
+    return _luaL_checkmaterial(L, num_arg);
+}
 
 # /*************/
 # /* Transform */
@@ -872,19 +819,39 @@ RAY_USERDATA_DEFAULT(Material, MATERIAL, material)
 # /* Model */
 # /*********/
 
-RAY_USERDATA_DEFAULT(Model, MODEL, model)
+TBAG_LUA_USERDATA_DEFAULT_REG(Model, MODEL, model)
+
+Model * luaL_pushmodel(lua_State * L, Model const * src)
+{
+    return _luaL_pushmodel(L, src);
+}
+
+Model * luaL_checkmodel(lua_State * L, int num_arg)
+{
+    return _luaL_checkmodel(L, num_arg);
+}
 
 # /******************/
 # /* ModelAnimation */
 # /******************/
 
-RAY_USERDATA_DEFAULT(ModelAnimation, MODELANIMATION, modelanimation)
+TBAG_LUA_USERDATA_DEFAULT_REG(ModelAnimation, MODELANIMATION, modelanimation)
+
+ModelAnimation * luaL_pushmodelanimation(lua_State * L, ModelAnimation const * src)
+{
+    return _luaL_pushmodelanimation(L, src);
+}
+
+ModelAnimation * luaL_checkmodelanimation(lua_State * L, int num_arg)
+{
+    return _luaL_checkmodelanimation(L, num_arg);
+}
 
 # /*******/
 # /* Ray */
 # /*******/
 
-static void luaL_pushray(lua_State * L, Ray const & ray)
+void luaL_pushray(lua_State * L, Ray const & ray)
 {
     lua_createtable(L, 0, 2);
     luaL_pushvector3(L, ray.position);
@@ -893,7 +860,7 @@ static void luaL_pushray(lua_State * L, Ray const & ray)
     lua_setfield(L, -2, "direction");
 }
 
-static Ray luaL_checkray(lua_State * L, int num_arg)
+Ray luaL_checkray(lua_State * L, int num_arg)
 {
     Ray result = {0,};
     if (lua_objlen(L, num_arg) >= 2) {
@@ -916,7 +883,7 @@ static Ray luaL_checkray(lua_State * L, int num_arg)
 # /* RayHitInfo */
 # /**************/
 
-static void luaL_pushrayhitinfo(lua_State * L, RayHitInfo const & info)
+void luaL_pushrayhitinfo(lua_State * L, RayHitInfo const & info)
 {
     lua_createtable(L, 0, 4);
     lua_pushboolean(L, info.hit);
@@ -929,7 +896,7 @@ static void luaL_pushrayhitinfo(lua_State * L, RayHitInfo const & info)
     lua_setfield(L, -2, "normal");
 }
 
-static RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
+RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
 {
     RayHitInfo result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
@@ -960,36 +927,71 @@ static RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
 # /* Wave */
 # /********/
 
-RAY_USERDATA_DEFAULT(Wave, WAVE, wave)
+TBAG_LUA_USERDATA_DEFAULT_REG(Wave, WAVE, wave)
+
+Wave * luaL_pushwave(lua_State * L, Wave const * src)
+{
+    return _luaL_pushwave(L, src);
+}
+
+Wave * luaL_checkwave(lua_State * L, int num_arg)
+{
+    return _luaL_checkwave(L, num_arg);
+}
 
 # /*********/
 # /* Sound */
 # /*********/
 
-RAY_USERDATA_DEFAULT(Sound, SOUND, sound)
+TBAG_LUA_USERDATA_DEFAULT_REG(Sound, SOUND, sound)
+
+Sound * luaL_pushsound(lua_State * L, Sound const * src)
+{
+    return _luaL_pushsound(L, src);
+}
+
+Sound * luaL_checksound(lua_State * L, int num_arg)
+{
+    return _luaL_checksound(L, num_arg);
+}
 
 # /*********/
 # /* Music */
 # /*********/
 
-struct MusicWrapper
-{
-    Music music;
-};
+TBAG_LUA_USERDATA_REG(MusicWrapper, Music, MUSIC, music,)
 
-RAY_USERDATA(MusicWrapper, Music, MUSIC, music,)
+MusicWrapper * luaL_pushmusic(lua_State * L, MusicWrapper const * src)
+{
+    return _luaL_pushmusic(L, src);
+}
+
+MusicWrapper * luaL_checkmusic(lua_State * L, int num_arg)
+{
+    return _luaL_checkmusic(L, num_arg);
+}
 
 # /***************/
 # /* AudioStream */
 # /***************/
 
-RAY_USERDATA_DEFAULT(AudioStream, AUDIOSTREAM, audiostream)
+TBAG_LUA_USERDATA_DEFAULT_REG(AudioStream, AUDIOSTREAM, audiostream)
 
-# /******************/
+AudioStream * luaL_pushaudiostream(lua_State * L, AudioStream const * src)
+{
+    return _luaL_pushaudiostream(L, src);
+}
+
+AudioStream * luaL_checkaudiostream(lua_State * L, int num_arg)
+{
+    return _luaL_checkaudiostream(L, num_arg);
+}
+
+# /****************/
 # /* VrDeviceInfo */
-# /******************/
+# /****************/
 
-static void luaL_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info)
+void luaL_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info)
 {
     lua_createtable(L, 0, 10);
     lua_pushinteger(L, info.hResolution);
@@ -1032,7 +1034,7 @@ static void luaL_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info)
     lua_setfield(L, -2, "chromaAbCorrection");
 }
 
-static VrDeviceInfo luaL_checkvrdeviceinfo(lua_State * L, int num_arg)
+VrDeviceInfo luaL_checkvrdeviceinfo(lua_State * L, int num_arg)
 {
     VrDeviceInfo result = {0,};
     lua_getfield(L, num_arg, "hResolution");

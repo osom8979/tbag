@@ -816,6 +816,57 @@ void luadebug_printstack(lua_State * L)
     std::cout << std::endl;
 }
 
+int luaL_unsupport(lua_State * L)
+{
+    return ::luaL_error(L, "Unsupported operation error");
+}
+
+void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
+{
+    ::luaL_newmetatable(L, name);
+    {
+        ::luaL_register(L, nullptr, l);
+
+        ::lua_pushlstring(L, "__index", 7); // == lua_pushliteral(L, "__index");
+        ::lua_pushvalue(L, -2); // Duplicate metatable.
+        ::lua_rawset(L, -3);
+    }
+    ::lua_settop(L, -2); // == lua_pop(L, 1);
+}
+
+std::vector<lua_Integer> luaL_checkinteger_array(lua_State * L, int arg_num)
+{
+    auto size = ::lua_objlen(L, arg_num);
+    std::vector<lua_Integer> result(size);
+    for (int i = 0; i < size; ++i) {
+        ::lua_rawgeti(L, arg_num, i+1);
+        result[i] = ::luaL_checkinteger(L, -1);
+    }
+    return result;
+}
+
+std::vector<lua_Number> luaL_checknumber_array(lua_State * L, int arg_num)
+{
+    auto size = ::lua_objlen(L, arg_num);
+    std::vector<lua_Number> result(size);
+    for (int i = 0; i < size; ++i) {
+        ::lua_rawgeti(L, arg_num, i+1);
+        result[i] = ::luaL_checkinteger(L, -1);
+    }
+    return result;
+}
+
+std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_num)
+{
+    auto size = ::lua_objlen(L, arg_num);
+    std::vector<std::string> result(size);
+    for (int i = 0; i < size; ++i) {
+        ::lua_rawgeti(L, arg_num, i+1);
+        result[i] = ::luaL_checklstring(L, -1, nullptr); // == luaL_checkstring(L, -1);
+    }
+    return result;
+}
+
 } // namespace script
 
 // --------------------
