@@ -103,13 +103,13 @@ static int _StyleColorsLight(lua_State * L)
 
 static int _GetStyle(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _SetStyle(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
@@ -127,7 +127,7 @@ static int _End(lua_State * L)
 
 static int _BeginChild(lua_State * L)
 {
-    auto const size = luaL_optvector2(L, 2, Vector2{0, 0});
+    auto const size = luaE_optvector2(L, 2, Vector2{0, 0});
     auto const border = luaL_optinteger(L, 3, 0);
     auto const flags = luaL_optinteger(L, 4, 0);
     if (lua_isstring(L, lua_absindex(L, 1))) {
@@ -170,13 +170,13 @@ static int _IsWindowHovered(lua_State * L)
 
 static int _GetWindowPos(lua_State * L)
 {
-    luaL_pushvector2(L, GetWindowPos());
+    luaE_pushvector2(L, GetWindowPos());
     return 1;
 }
 
 static int _GetWindowSize(lua_State * L)
 {
-    luaL_pushvector2(L, GetWindowSize());
+    luaE_pushvector2(L, GetWindowSize());
     return 1;
 }
 
@@ -194,22 +194,22 @@ static int _GetWindowHeight(lua_State * L)
 
 static int _SetNextWindowPos(lua_State * L)
 {
-    SetNextWindowPos(luaL_checkvector2(L, 1),
+    SetNextWindowPos(luaE_checkvector2(L, 1),
                      luaL_optinteger(L, 2, 0),
-                     luaL_optvector2(L, 3, Vector2{0, 0}));
+                     luaE_optvector2(L, 3, Vector2{0, 0}));
     return 0;
 }
 
 static int _SetNextWindowSize(lua_State * L)
 {
-    SetNextWindowSize(luaL_checkvector2(L, 1),
+    SetNextWindowSize(luaE_checkvector2(L, 1),
                       luaL_optinteger(L, 2, 0));
     return 0;
 }
 
 static int _SetNextWindowContentSize(lua_State * L)
 {
-    SetNextWindowContentSize(luaL_checkvector2(L, 1));
+    SetNextWindowContentSize(luaE_checkvector2(L, 1));
     return 0;
 }
 
@@ -235,9 +235,9 @@ static int _SetNextWindowBgAlpha(lua_State * L)
 static int _SetWindowPos(lua_State * L)
 {
     if (lua_isstring(L, lua_absindex(L, 1))) {
-        SetWindowPos(luaL_checkstring(L, 1), luaL_checkvector2(L, 2), luaL_optinteger(L, 3, 0));
+        SetWindowPos(luaL_checkstring(L, 1), luaE_checkvector2(L, 2), luaL_optinteger(L, 3, 0));
     } else {
-        SetWindowPos(luaL_checkvector2(L, 1), luaL_optinteger(L, 2, 0));
+        SetWindowPos(luaE_checkvector2(L, 1), luaL_optinteger(L, 2, 0));
     }
     return 0;
 }
@@ -245,9 +245,9 @@ static int _SetWindowPos(lua_State * L)
 static int _SetWindowSize(lua_State * L)
 {
     if (lua_isstring(L, lua_absindex(L, 1))) {
-        SetWindowSize(luaL_checkstring(L, 1), luaL_checkvector2(L, 2), luaL_optinteger(L, 3, 0));
+        SetWindowSize(luaL_checkstring(L, 1), luaE_checkvector2(L, 2), luaL_optinteger(L, 3, 0));
     } else {
-        SetWindowSize(luaL_checkvector2(L, 1), luaL_optinteger(L, 2, 0));
+        SetWindowSize(luaE_checkvector2(L, 1), luaL_optinteger(L, 2, 0));
     }
     return 0;
 }
@@ -280,25 +280,25 @@ static int _SetWindowFontScale(lua_State * L)
 
 static int _GetContentRegionMax(lua_State * L)
 {
-    luaL_pushvector2(L, GetContentRegionMax());
+    luaE_pushvector2(L, GetContentRegionMax());
     return 1;
 }
 
 static int _GetContentRegionAvail(lua_State * L)
 {
-    luaL_pushvector2(L, GetContentRegionAvail());
+    luaE_pushvector2(L, GetContentRegionAvail());
     return 1;
 }
 
 static int _GetWindowContentRegionMin(lua_State * L)
 {
-    luaL_pushvector2(L, GetWindowContentRegionMin());
+    luaE_pushvector2(L, GetWindowContentRegionMin());
     return 1;
 }
 
 static int _GetWindowContentRegionMax(lua_State * L)
 {
-    luaL_pushvector2(L, GetWindowContentRegionMax());
+    luaE_pushvector2(L, GetWindowContentRegionMax());
     return 1;
 }
 
@@ -361,7 +361,7 @@ static int _PushStyleColor(lua_State * L)
     if (lua_isnumber(L, lua_absindex(L, 2))) {
         PushStyleColor(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
     } else {
-        PushStyleColor(luaL_checkinteger(L, 1), luaL_checkvector4(L, 2));
+        PushStyleColor(luaL_checkinteger(L, 1), luaE_checkvector4(L, 2));
     }
     return 0;
 }
@@ -377,7 +377,7 @@ static int _PushStyleVar(lua_State * L)
     if (lua_isnumber(L, lua_absindex(L, 2))) {
         PushStyleVar(luaL_checkinteger(L, 1), luaL_checknumber(L, 2));
     } else {
-        PushStyleVar(luaL_checkinteger(L, 1), luaL_checkvector2(L, 2));
+        PushStyleVar(luaL_checkinteger(L, 1), luaE_checkvector2(L, 2));
     }
     return 0;
 }
@@ -390,7 +390,7 @@ static int _PopStyleVar(lua_State * L)
 
 static int _GetStyleColorVec4(lua_State * L)
 {
-    luaL_pushvector4(L, GetStyleColorVec4(luaL_checkinteger(L, 1)));
+    luaE_pushvector4(L, GetStyleColorVec4(luaL_checkinteger(L, 1)));
     return 1;
 }
 
@@ -402,7 +402,7 @@ static int _GetFontSize(lua_State * L)
 
 static int _GetFontTexUvWhitePixel(lua_State * L)
 {
-    luaL_pushvector2(L, GetFontTexUvWhitePixel());
+    luaE_pushvector2(L, GetFontTexUvWhitePixel());
     return 1;
 }
 
@@ -417,7 +417,7 @@ static int _GetColorU32(lua_State * L)
     if (lua_isnumber(L, 1)) {
         lua_pushinteger(L, GetColorU32((unsigned int)luaL_checkinteger(L, 1)));
     } else {
-        lua_pushinteger(L, GetColorU32(luaL_checkvector4(L, 1)));
+        lua_pushinteger(L, GetColorU32(luaE_checkvector4(L, 1)));
     }
     return 1;
 }
@@ -508,7 +508,7 @@ static int _Spacing(lua_State * L)
 
 static int _Dummy(lua_State * L)
 {
-    Dummy(luaL_checkvector2(L, 1));
+    Dummy(luaE_checkvector2(L, 1));
     return 0;
 }
 
@@ -538,7 +538,7 @@ static int _EndGroup(lua_State * L)
 
 static int _GetCursorPos(lua_State * L)
 {
-    luaL_pushvector2(L, GetCursorPos());
+    luaE_pushvector2(L, GetCursorPos());
     return 1;
 }
 
@@ -556,7 +556,7 @@ static int _GetCursorPosY(lua_State * L)
 
 static int _SetCursorPos(lua_State * L)
 {
-    SetCursorPos(luaL_checkvector2(L, 1));
+    SetCursorPos(luaE_checkvector2(L, 1));
     return 0;
 }
 
@@ -574,19 +574,19 @@ static int _SetCursorPosY(lua_State * L)
 
 static int _GetCursorStartPos(lua_State * L)
 {
-    luaL_pushvector2(L, GetCursorStartPos());
+    luaE_pushvector2(L, GetCursorStartPos());
     return 1;
 }
 
 static int _GetCursorScreenPos(lua_State * L)
 {
-    luaL_pushvector2(L, GetCursorScreenPos());
+    luaE_pushvector2(L, GetCursorScreenPos());
     return 1;
 }
 
 static int _SetCursorScreenPos(lua_State * L)
 {
-    SetCursorScreenPos(luaL_checkvector2(L, 1));
+    SetCursorScreenPos(luaE_checkvector2(L, 1));
     return 0;
 }
 
@@ -662,7 +662,7 @@ static int _Text(lua_State * L)
 
 static int _TextColored(lua_State * L)
 {
-    TextColored(luaL_checkvector4(L, 1), luaL_checkstring(L, 2));
+    TextColored(luaE_checkvector4(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
@@ -692,7 +692,7 @@ static int _BulletText(lua_State * L)
 
 static int _Button(lua_State * L)
 {
-    lua_pushboolean(L, Button(luaL_checkstring(L, 1), luaL_optvector2(L, 2, Vector2{0,0})));
+    lua_pushboolean(L, Button(luaL_checkstring(L, 1), luaE_optvector2(L, 2, Vector2{0,0})));
     return 1;
 }
 
@@ -704,7 +704,7 @@ static int _SmallButton(lua_State * L)
 
 static int _InvisibleButton(lua_State * L)
 {
-    lua_pushboolean(L, InvisibleButton(luaL_checkstring(L, 1), luaL_checkvector2(L, 2)));
+    lua_pushboolean(L, InvisibleButton(luaL_checkstring(L, 1), luaE_checkvector2(L, 2)));
     return 1;
 }
 
@@ -717,23 +717,23 @@ static int _ArrowButton(lua_State * L)
 static int _Image(lua_State * L)
 {
     libtbag::ray::gui::Image((TextureID)luaL_checkinteger(L, 1),
-                             luaL_checkvector2(L, 2),
-                             luaL_optvector2(L, 3, Vector2{0,0}),
-                             luaL_optvector2(L, 4, Vector2{1,1}),
-                             luaL_optvector4(L, 5, Vector4{1,1,1,1}),
-                             luaL_optvector4(L, 6, Vector4{0,0,0,0}));
+                             luaE_checkvector2(L, 2),
+                             luaE_optvector2(L, 3, Vector2{0,0}),
+                             luaE_optvector2(L, 4, Vector2{1,1}),
+                             luaE_optvector4(L, 5, Vector4{1,1,1,1}),
+                             luaE_optvector4(L, 6, Vector4{0,0,0,0}));
     return 0;
 }
 
 static int _ImageButton(lua_State * L)
 {
     lua_pushboolean(L, ImageButton((TextureID)luaL_checkinteger(L, 1),
-                                   luaL_checkvector2(L, 2),
-                                   luaL_optvector2(L, 3, Vector2{0,0}),
-                                   luaL_optvector2(L, 4, Vector2{1,1}),
+                                   luaE_checkvector2(L, 2),
+                                   luaE_optvector2(L, 3, Vector2{0,0}),
+                                   luaE_optvector2(L, 4, Vector2{1,1}),
                                    luaL_optinteger(L, 5, -1),
-                                   luaL_optvector4(L, 6, Vector4{0,0,0,0}),
-                                   luaL_optvector4(L, 7, Vector4{1,1,1,1})));
+                                   luaE_optvector4(L, 6, Vector4{0,0,0,0}),
+                                   luaE_optvector4(L, 7, Vector4{1,1,1,1})));
     return 1;
 }
 

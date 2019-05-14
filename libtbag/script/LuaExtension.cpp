@@ -28,12 +28,12 @@ namespace script {
 //    return result;
 //}
 
-int luaL_unsupport(lua_State * L)
+int luaE_unsupport(lua_State * L)
 {
     return luaL_error(L, "Unsupported operation error");
 }
 
-void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
+void luaE_register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
 {
     luaL_newmetatable(L, name);
     {
@@ -46,7 +46,7 @@ void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg const * 
     lua_pop(L, 1);
 }
 
-void luadebug_printstack(lua_State * L)
+void luaE_printstack(lua_State * L)
 {
     int const TOP = lua_gettop(L);
     if (TOP == 0) {
@@ -84,7 +84,7 @@ void luadebug_printstack(lua_State * L)
     std::cout << std::endl;
 }
 
-std::vector<lua_Integer> luaL_checkinteger_array(lua_State * L, int arg_num)
+std::vector<lua_Integer> luaE_checkinteger_array(lua_State * L, int arg_num)
 {
     auto size = lua_objlen(L, arg_num);
     std::vector<lua_Integer> result(size);
@@ -95,7 +95,7 @@ std::vector<lua_Integer> luaL_checkinteger_array(lua_State * L, int arg_num)
     return result;
 }
 
-std::vector<lua_Number> luaL_checknumber_array(lua_State * L, int arg_num)
+std::vector<lua_Number> luaE_checknumber_array(lua_State * L, int arg_num)
 {
     auto size = lua_objlen(L, arg_num);
     std::vector<lua_Number> result(size);
@@ -106,7 +106,7 @@ std::vector<lua_Number> luaL_checknumber_array(lua_State * L, int arg_num)
     return result;
 }
 
-std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_num)
+std::vector<std::string> luaE_checkstring_array(lua_State * L, int arg_num)
 {
     auto size = lua_objlen(L, arg_num);
     std::vector<std::string> result(size);
@@ -121,10 +121,11 @@ std::vector<std::string> luaL_checkstring_array(lua_State * L, int arg_num)
 # /* PosWrapper */
 # /**************/
 
-TBAG_LUA_USERDATA_DEFAULT_IMPL(BooleanWrapper, BOOLEANWRAPPER, booleanwrapper)
-TBAG_LUA_USERDATA_DEFAULT_IMPL(IntegerWrapper, INTEGERWRAPPER, integerwrapper)
-TBAG_LUA_USERDATA_DEFAULT_IMPL(FloatWrapper, FLOATWRAPPER, floatwrapper)
-TBAG_LUA_USERDATA_DEFAULT_IMPL(DoubleWrapper, DOUBLEWRAPPER, doublewrapper)
+TBAG_LUA_USERDATA_DEFAULT_IMPL(BooleanWrapper , BOOLEANWRAPPER , booleanwrapper )
+TBAG_LUA_USERDATA_DEFAULT_IMPL(IntegerWrapper , INTEGERWRAPPER , integerwrapper )
+TBAG_LUA_USERDATA_DEFAULT_IMPL(UnsignedWrapper, UNSIGNEDWRAPPER, unsignedwrapper)
+TBAG_LUA_USERDATA_DEFAULT_IMPL(FloatWrapper   , FLOATWRAPPER   , floatwrapper   )
+TBAG_LUA_USERDATA_DEFAULT_IMPL(DoubleWrapper  , DOUBLEWRAPPER  , doublewrapper  )
 
 } // namespace script
 

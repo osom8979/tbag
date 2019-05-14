@@ -27,7 +27,7 @@ using namespace libtbag::ray;
 # /* Vector2 */
 # /***********/
 
-void luaL_pushvector2(lua_State * L, Vector2 const & vec)
+void luaE_pushvector2(lua_State * L, Vector2 const & vec)
 {
     lua_createtable(L, 0, 2);
     lua_pushnumber(L, vec.x);
@@ -36,7 +36,7 @@ void luaL_pushvector2(lua_State * L, Vector2 const & vec)
     lua_setfield(L, -2, "y");
 }
 
-Vector2 luaL_checkvector2(lua_State * L, int num_arg)
+Vector2 luaE_checkvector2(lua_State * L, int num_arg)
 {
     Vector2 result = {0,};
     if (lua_objlen(L, num_arg) >= 2) {
@@ -55,21 +55,21 @@ Vector2 luaL_checkvector2(lua_State * L, int num_arg)
     return result;
 }
 
-Vector2 luaL_optvector2(lua_State * L, int num_arg, Vector2 const & def)
+Vector2 luaE_optvector2(lua_State * L, int num_arg, Vector2 const & def)
 {
     if (lua_istable(L, num_arg)) {
-        return luaL_checkvector2(L, num_arg);
+        return luaE_checkvector2(L, num_arg);
     }
     return def;
 }
 
-std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg)
+std::vector<Vector2> luaE_checkvector2_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<Vector2> result(length);
     for (auto i = 0; i < length; ++i) {
         lua_rawgeti(L, num_arg, 1);
-        result[i] = luaL_checkvector2(L, lua_absindex(L, -1));
+        result[i] = luaE_checkvector2(L, lua_absindex(L, -1));
     }
     lua_pop(L, length);
     return result;
@@ -79,7 +79,7 @@ std::vector<Vector2> luaL_checkvector2_array(lua_State * L, int num_arg)
 # /* Vector3 */
 # /***********/
 
-void luaL_pushvector3(lua_State * L, Vector3 const & vec)
+void luaE_pushvector3(lua_State * L, Vector3 const & vec)
 {
     lua_createtable(L, 0, 3);
     lua_pushnumber(L, vec.x);
@@ -90,7 +90,7 @@ void luaL_pushvector3(lua_State * L, Vector3 const & vec)
     lua_setfield(L, -2, "z");
 }
 
-Vector3 luaL_checkvector3(lua_State * L, int num_arg)
+Vector3 luaE_checkvector3(lua_State * L, int num_arg)
 {
     Vector3 result = {0,};
     if (lua_objlen(L, num_arg) >= 3) {
@@ -113,10 +113,10 @@ Vector3 luaL_checkvector3(lua_State * L, int num_arg)
     return result;
 }
 
-Vector3 luaL_optvector3(lua_State * L, int num_arg, Vector3 const & def)
+Vector3 luaE_optvector3(lua_State * L, int num_arg, Vector3 const & def)
 {
     if (lua_istable(L, num_arg)) {
-        return luaL_checkvector3(L, num_arg);
+        return luaE_checkvector3(L, num_arg);
     }
     return def;
 }
@@ -125,7 +125,7 @@ Vector3 luaL_optvector3(lua_State * L, int num_arg, Vector3 const & def)
 # /* Vector4 (Quaternion) */
 # /************************/
 
-void luaL_pushvector4(lua_State * L, Vector4 const & vec)
+void luaE_pushvector4(lua_State * L, Vector4 const & vec)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, vec.x);
@@ -138,7 +138,7 @@ void luaL_pushvector4(lua_State * L, Vector4 const & vec)
     lua_setfield(L, -2, "w");
 }
 
-Vector4 luaL_checkvector4(lua_State * L, int num_arg)
+Vector4 luaE_checkvector4(lua_State * L, int num_arg)
 {
     Vector4 result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
@@ -165,10 +165,10 @@ Vector4 luaL_checkvector4(lua_State * L, int num_arg)
     return result;
 }
 
-Vector4 luaL_optvector4(lua_State * L, int num_arg, Vector4 const & def)
+Vector4 luaE_optvector4(lua_State * L, int num_arg, Vector4 const & def)
 {
     if (lua_istable(L, num_arg)) {
-        return luaL_checkvector4(L, num_arg);
+        return luaE_checkvector4(L, num_arg);
     }
     return def;
 }
@@ -177,7 +177,7 @@ Vector4 luaL_optvector4(lua_State * L, int num_arg, Vector4 const & def)
 # /* Matrix */
 # /**********/
 
-void luaL_pushmatrix(lua_State * L, Matrix const & mat)
+void luaE_pushmatrix(lua_State * L, Matrix const & mat)
 {
     lua_createtable(L, 16, 0);
 
@@ -218,7 +218,7 @@ void luaL_pushmatrix(lua_State * L, Matrix const & mat)
     lua_rawseti(L, -2, 16);
 }
 
-Matrix luaL_checkmatrix(lua_State * L, int num_arg)
+Matrix luaE_checkmatrix(lua_State * L, int num_arg)
 {
     Matrix result = {0,};
     if (lua_objlen(L, num_arg) >= 16) {
@@ -266,7 +266,7 @@ Matrix luaL_checkmatrix(lua_State * L, int num_arg)
 # /* Color */
 # /*********/
 
-void luaL_pushcolor(lua_State * L, Color const & color)
+void luaE_pushcolor(lua_State * L, Color const & color)
 {
     lua_createtable(L, 0, 4);
     lua_pushinteger(L, color.r);
@@ -279,7 +279,7 @@ void luaL_pushcolor(lua_State * L, Color const & color)
     lua_setfield(L, -2, "a");
 }
 
-Color luaL_checkcolor(lua_State * L, int num_arg)
+Color luaE_checkcolor(lua_State * L, int num_arg)
 {
     Color result = {0,};
     auto const length = lua_objlen(L, num_arg);
@@ -316,13 +316,13 @@ Color luaL_checkcolor(lua_State * L, int num_arg)
     return result;
 }
 
-std::vector<Color> luaL_checkcolor_array(lua_State * L, int num_arg)
+std::vector<Color> luaE_checkcolor_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<Color> result(length);
     for (auto i = 0; i < length; ++i) {
         lua_rawgeti(L, num_arg, 1);
-        result[i] = luaL_checkcolor(L, lua_absindex(L, -1));
+        result[i] = luaE_checkcolor(L, lua_absindex(L, -1));
     }
     lua_pop(L, length);
     return result;
@@ -332,7 +332,7 @@ std::vector<Color> luaL_checkcolor_array(lua_State * L, int num_arg)
 # /* Rectangle2 */
 # /**************/
 
-void luaL_pushrectangle(lua_State * L, Rectangle2 const & rect)
+void luaE_pushrectangle(lua_State * L, Rectangle2 const & rect)
 {
     lua_createtable(L, 0, 4);
     lua_pushnumber(L, rect.x);
@@ -345,7 +345,7 @@ void luaL_pushrectangle(lua_State * L, Rectangle2 const & rect)
     lua_setfield(L, -2, "height");
 }
 
-Rectangle2 luaL_checkrectangle(lua_State * L, int num_arg)
+Rectangle2 luaE_checkrectangle(lua_State * L, int num_arg)
 {
     Rectangle2 result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
@@ -382,7 +382,7 @@ TBAG_LUA_USERDATA_DEFAULT_IMPL(Image, IMAGE, image)
 # /* Texture2D (Texture, TextureCubemap) */
 # /***************************************/
 
-void luaL_pushtexture2d(lua_State * L, Texture2D const & tex)
+void luaE_pushtexture2d(lua_State * L, Texture2D const & tex)
 {
     lua_createtable(L, 0, 5);
     lua_pushinteger(L, tex.id);
@@ -397,7 +397,7 @@ void luaL_pushtexture2d(lua_State * L, Texture2D const & tex)
     lua_setfield(L, -2, "format");
 }
 
-Texture2D luaL_checktexture2d(lua_State * L, int num_arg)
+Texture2D luaE_checktexture2d(lua_State * L, int num_arg)
 {
     Texture2D result = {0,};
     if (lua_objlen(L, num_arg) >= 5) {
@@ -432,28 +432,28 @@ Texture2D luaL_checktexture2d(lua_State * L, int num_arg)
 # /* RenderTexture2D (RenderTexture) */
 # /***********************************/
 
-void luaL_pushrendertexture2d(lua_State * L, RenderTexture2D const & tex)
+void luaE_pushrendertexture2d(lua_State * L, RenderTexture2D const & tex)
 {
     lua_createtable(L, 0, 5);
     lua_pushinteger(L, tex.id);
     lua_setfield(L, -2, "id");
-    luaL_pushtexture2d(L, tex.texture);
+    luaE_pushtexture2d(L, tex.texture);
     lua_setfield(L, -2, "texture");
-    luaL_pushtexture2d(L, tex.depth);
+    luaE_pushtexture2d(L, tex.depth);
     lua_setfield(L, -2, "depth");
     lua_pushboolean(L, tex.depthTexture?1:0);
     lua_setfield(L, -2, "depthTexture");
 }
 
-RenderTexture2D luaL_checkrendertexture2d(lua_State * L, int num_arg)
+RenderTexture2D luaE_checkrendertexture2d(lua_State * L, int num_arg)
 {
     RenderTexture2D result = {0,};
     lua_getfield(L, num_arg, "id");
     result.id = luaL_checkinteger(L, -1);
     lua_getfield(L, num_arg, "texture");
-    result.texture = luaL_checktexture2d(L, lua_absindex(L, -1));
+    result.texture = luaE_checktexture2d(L, lua_absindex(L, -1));
     lua_getfield(L, num_arg, "depth");
-    result.depth = luaL_checktexture2d(L, lua_absindex(L, -1));
+    result.depth = luaE_checktexture2d(L, lua_absindex(L, -1));
     lua_getfield(L, num_arg, "depthTexture");
     result.depthTexture = (lua_toboolean(L, -1) != 0);
     lua_pop(L, 4);
@@ -464,10 +464,10 @@ RenderTexture2D luaL_checkrendertexture2d(lua_State * L, int num_arg)
 # /* NPatchInfo */
 # /**************/
 
-void luaL_pushnpatchinfo(lua_State * L, NPatchInfo const & npatch)
+void luaE_pushnpatchinfo(lua_State * L, NPatchInfo const & npatch)
 {
     lua_createtable(L, 0, 6);
-    luaL_pushrectangle(L, npatch.sourceRec);
+    luaE_pushrectangle(L, npatch.sourceRec);
     lua_setfield(L, -2, "sourceRec");
     lua_pushinteger(L, npatch.left);
     lua_setfield(L, -2, "left");
@@ -481,12 +481,12 @@ void luaL_pushnpatchinfo(lua_State * L, NPatchInfo const & npatch)
     lua_setfield(L, -2, "type");
 }
 
-NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
+NPatchInfo luaE_checknpatchinfo(lua_State * L, int num_arg)
 {
     NPatchInfo result = {0,};
     if (lua_objlen(L, num_arg) >= 6) {
         lua_rawgeti(L, num_arg, 1);
-        result.sourceRec = luaL_checkrectangle(L, lua_absindex(L, -1));
+        result.sourceRec = luaE_checkrectangle(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 2);
         result.left = luaL_checkinteger(L, -1);
         lua_rawgeti(L, num_arg, 3);
@@ -500,7 +500,7 @@ NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
         lua_pop(L, 6);
     } else {
         lua_getfield(L, num_arg, "sourceRec");
-        result.sourceRec = luaL_checkrectangle(L, lua_absindex(L, -1));
+        result.sourceRec = luaE_checkrectangle(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "left");
         result.left = luaL_checkinteger(L, -1);
         lua_getfield(L, num_arg, "top");
@@ -522,31 +522,31 @@ NPatchInfo luaL_checknpatchinfo(lua_State * L, int num_arg)
 
 TBAG_LUA_USERDATA_DEFAULT_IMPL(CharInfo, CHARINFO, charinfo)
 
-void luaL_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int size)
+void luaE_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int size)
 {
     assert(char_infos != nullptr);
     assert(size >= 1);
 
     lua_createtable(L, size, 0);
     for (int i = 0; i < size; ++i) {
-        luaL_pushcharinfo(L, char_infos+i);
+        luaE_pushcharinfo(L, char_infos+i);
         lua_rawseti(L, -2, i+1);
     }
 }
 
-std::vector<CharInfo> luaL_checkcharinfo_array(lua_State * L, int num_arg)
+std::vector<CharInfo> luaE_checkcharinfo_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<CharInfo> result(length);
     for (auto i = 0; i < length; ++i) {
         lua_rawgeti(L, num_arg, 1);
-        result[i] = *luaL_checkcharinfo(L, lua_absindex(L, -1));
+        result[i] = *luaE_checkcharinfo(L, lua_absindex(L, -1));
     }
     lua_pop(L, length);
     return result;
 }
 
-std::vector<int> luaL_checkchars_array(lua_State * L, int num_arg)
+std::vector<int> luaE_checkchars_array(lua_State * L, int num_arg)
 {
     auto const length = lua_objlen(L, num_arg);
     std::vector<int> result(length);
@@ -568,14 +568,14 @@ TBAG_LUA_USERDATA_DEFAULT_IMPL(Font, FONT, font)
 # /* Camera3D (Camera) */
 # /*********************/
 
-void luaL_pushcamera3d(lua_State * L, Camera3D const & cam)
+void luaE_pushcamera3d(lua_State * L, Camera3D const & cam)
 {
     lua_createtable(L, 0, 5);
-    luaL_pushvector3(L, cam.position);
+    luaE_pushvector3(L, cam.position);
     lua_setfield(L, -2, "position");
-    luaL_pushvector3(L, cam.target);
+    luaE_pushvector3(L, cam.target);
     lua_setfield(L, -2, "target");
-    luaL_pushvector3(L, cam.up);
+    luaE_pushvector3(L, cam.up);
     lua_setfield(L, -2, "up");
     lua_pushnumber(L, cam.fovy);
     lua_setfield(L, -2, "fovy");
@@ -583,16 +583,16 @@ void luaL_pushcamera3d(lua_State * L, Camera3D const & cam)
     lua_setfield(L, -2, "type");
 }
 
-Camera3D luaL_checkcamera3d(lua_State * L, int num_arg)
+Camera3D luaE_checkcamera3d(lua_State * L, int num_arg)
 {
     Camera3D result = {0,};
     if (lua_objlen(L, num_arg) >= 5) {
         lua_rawgeti(L, num_arg, 1);
-        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.position = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 2);
-        result.target = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.target = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 3);
-        result.up = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.up = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 4);
         result.fovy = luaL_checknumber(L, -1);
         lua_rawgeti(L, num_arg, 5);
@@ -600,11 +600,11 @@ Camera3D luaL_checkcamera3d(lua_State * L, int num_arg)
         lua_pop(L, 5);
     } else {
         lua_getfield(L, num_arg, "position");
-        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.position = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "target");
-        result.target = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.target = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "up");
-        result.up = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.up = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "fovy");
         result.fovy = luaL_checknumber(L, -1);
         lua_getfield(L, num_arg, "type");
@@ -618,12 +618,12 @@ Camera3D luaL_checkcamera3d(lua_State * L, int num_arg)
 # /* Camera2D */
 # /************/
 
-void luaL_pushcamera2d(lua_State * L, Camera2D const & cam)
+void luaE_pushcamera2d(lua_State * L, Camera2D const & cam)
 {
     lua_createtable(L, 0, 4);
-    luaL_pushvector2(L, cam.offset);
+    luaE_pushvector2(L, cam.offset);
     lua_setfield(L, -2, "offset");
-    luaL_pushvector2(L, cam.target);
+    luaE_pushvector2(L, cam.target);
     lua_setfield(L, -2, "target");
     lua_pushnumber(L, cam.rotation);
     lua_setfield(L, -2, "rotation");
@@ -631,14 +631,14 @@ void luaL_pushcamera2d(lua_State * L, Camera2D const & cam)
     lua_setfield(L, -2, "zoom");
 }
 
-Camera2D luaL_checkcamera2d(lua_State * L, int num_arg)
+Camera2D luaE_checkcamera2d(lua_State * L, int num_arg)
 {
     Camera2D result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
         lua_rawgeti(L, num_arg, 1);
-        result.offset = luaL_checkvector2(L, lua_absindex(L, -1));
+        result.offset = luaE_checkvector2(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 2);
-        result.target = luaL_checkvector2(L, lua_absindex(L, -1));
+        result.target = luaE_checkvector2(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 3);
         result.rotation = luaL_checknumber(L, -1);
         lua_rawgeti(L, num_arg, 4);
@@ -646,9 +646,9 @@ Camera2D luaL_checkcamera2d(lua_State * L, int num_arg)
         lua_pop(L, 4);
     } else {
         lua_getfield(L, num_arg, "offset");
-        result.offset = luaL_checkvector2(L, lua_absindex(L, -1));
+        result.offset = luaE_checkvector2(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "target");
-        result.target = luaL_checkvector2(L, lua_absindex(L, -1));
+        result.target = luaE_checkvector2(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "rotation");
         result.rotation = luaL_checknumber(L, -1);
         lua_getfield(L, num_arg, "zoom");
@@ -662,29 +662,29 @@ Camera2D luaL_checkcamera2d(lua_State * L, int num_arg)
 # /* BoundingBox */
 # /***************/
 
-void luaL_pushboundingbox(lua_State * L, BoundingBox const & bbox)
+void luaE_pushboundingbox(lua_State * L, BoundingBox const & bbox)
 {
     lua_createtable(L, 0, 2);
-    luaL_pushvector3(L, bbox.min);
+    luaE_pushvector3(L, bbox.min);
     lua_setfield(L, -2, "min");
-    luaL_pushvector3(L, bbox.max);
+    luaE_pushvector3(L, bbox.max);
     lua_setfield(L, -2, "max");
 }
 
-BoundingBox luaL_checkboundingbox(lua_State * L, int num_arg)
+BoundingBox luaE_checkboundingbox(lua_State * L, int num_arg)
 {
     BoundingBox result = {0,};
     if (lua_objlen(L, num_arg) >= 2) {
         lua_rawgeti(L, num_arg, 1);
-        result.min = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.min = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 2);
-        result.max = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.max = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_pop(L, 2);
     } else {
         lua_getfield(L, num_arg, "position");
-        result.min = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.min = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "direction");
-        result.max = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.max = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_pop(L, 2);
     }
     return result;
@@ -700,7 +700,7 @@ TBAG_LUA_USERDATA_DEFAULT_IMPL(Mesh, MESH, mesh)
 # /* Shader */
 # /**********/
 
-void luaL_pushshader(lua_State * L, Shader const & shader)
+void luaE_pushshader(lua_State * L, Shader const & shader)
 {
     lua_createtable(L, 0, 2);
     lua_pushinteger(L, shader.id);
@@ -714,14 +714,14 @@ void luaL_pushshader(lua_State * L, Shader const & shader)
     lua_setfield(L, -2, "locs");
 }
 
-Shader luaL_checkshader(lua_State * L, int num_arg)
+Shader luaE_checkshader(lua_State * L, int num_arg)
 {
     Shader result = {0,};
     lua_getfield(L, num_arg, "id");
     result.id = luaL_checkinteger(L, lua_absindex(L, -1));
 
     lua_getfield(L, num_arg, "locs");
-    auto locs = luaL_checkinteger_array(L, lua_absindex(L, -1));
+    auto locs = luaE_checkinteger_array(L, lua_absindex(L, -1));
     auto min_size = locs.size();
     if (min_size > MAX_SHADER_LOCATIONS) {
         min_size = MAX_SHADER_LOCATIONS;
@@ -740,24 +740,24 @@ Shader luaL_checkshader(lua_State * L, int num_arg)
 # /* MaterialMap */
 # /***************/
 
-void luaL_pushmaterialmap(lua_State * L, MaterialMap const & materials)
+void luaE_pushmaterialmap(lua_State * L, MaterialMap const & materials)
 {
     lua_createtable(L, 0, 3);
-    luaL_pushtexture2d(L, materials.texture);
+    luaE_pushtexture2d(L, materials.texture);
     lua_setfield(L, -2, "texture");
-    luaL_pushcolor(L, materials.color);
+    luaE_pushcolor(L, materials.color);
     lua_setfield(L, -2, "color");
     lua_pushnumber(L, materials.value);
     lua_setfield(L, -2, "value");
 }
 
-MaterialMap luaL_checkmaterialmap(lua_State * L, int num_arg)
+MaterialMap luaE_checkmaterialmap(lua_State * L, int num_arg)
 {
     MaterialMap result = {0,};
     lua_getfield(L, num_arg, "texture");
-    result.texture = luaL_checktexture2d(L, lua_absindex(L, -1));
+    result.texture = luaE_checktexture2d(L, lua_absindex(L, -1));
     lua_getfield(L, num_arg, "color");
-    result.color = luaL_checkcolor(L, lua_absindex(L, -1));
+    result.color = luaE_checkcolor(L, lua_absindex(L, -1));
     lua_getfield(L, num_arg, "value");
     result.value = luaL_checknumber(L, lua_absindex(L, -1));
     lua_pop(L, 3);
@@ -805,29 +805,29 @@ TBAG_LUA_USERDATA_DEFAULT_IMPL(ModelAnimation, MODELANIMATION, modelanimation)
 # /* Ray */
 # /*******/
 
-void luaL_pushray(lua_State * L, Ray const & ray)
+void luaE_pushray(lua_State * L, Ray const & ray)
 {
     lua_createtable(L, 0, 2);
-    luaL_pushvector3(L, ray.position);
+    luaE_pushvector3(L, ray.position);
     lua_setfield(L, -2, "position");
-    luaL_pushvector3(L, ray.direction);
+    luaE_pushvector3(L, ray.direction);
     lua_setfield(L, -2, "direction");
 }
 
-Ray luaL_checkray(lua_State * L, int num_arg)
+Ray luaE_checkray(lua_State * L, int num_arg)
 {
     Ray result = {0,};
     if (lua_objlen(L, num_arg) >= 2) {
         lua_rawgeti(L, num_arg, 1);
-        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.position = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 2);
-        result.direction = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.direction = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_pop(L, 2);
     } else {
         lua_getfield(L, num_arg, "position");
-        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.position = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "direction");
-        result.direction = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.direction = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_pop(L, 2);
     }
     return result;
@@ -837,20 +837,20 @@ Ray luaL_checkray(lua_State * L, int num_arg)
 # /* RayHitInfo */
 # /**************/
 
-void luaL_pushrayhitinfo(lua_State * L, RayHitInfo const & info)
+void luaE_pushrayhitinfo(lua_State * L, RayHitInfo const & info)
 {
     lua_createtable(L, 0, 4);
     lua_pushboolean(L, info.hit);
     lua_setfield(L, -2, "hit");
     lua_pushnumber(L, info.distance);
     lua_setfield(L, -2, "distance");
-    luaL_pushvector3(L, info.position);
+    luaE_pushvector3(L, info.position);
     lua_setfield(L, -2, "position");
-    luaL_pushvector3(L, info.normal);
+    luaE_pushvector3(L, info.normal);
     lua_setfield(L, -2, "normal");
 }
 
-RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
+RayHitInfo luaE_checkrayhitinfo(lua_State * L, int num_arg)
 {
     RayHitInfo result = {0,};
     if (lua_objlen(L, num_arg) >= 4) {
@@ -859,9 +859,9 @@ RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
         lua_rawgeti(L, num_arg, 2);
         result.distance = luaL_checknumber(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 3);
-        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.position = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_rawgeti(L, num_arg, 4);
-        result.normal = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.normal = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_pop(L, 4);
     } else {
         lua_getfield(L, num_arg, "hit");
@@ -869,9 +869,9 @@ RayHitInfo luaL_checkrayhitinfo(lua_State * L, int num_arg)
         lua_getfield(L, num_arg, "distance");
         result.distance = luaL_checknumber(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "position");
-        result.position = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.position = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_getfield(L, num_arg, "normal");
-        result.normal = luaL_checkvector3(L, lua_absindex(L, -1));
+        result.normal = luaE_checkvector3(L, lua_absindex(L, -1));
         lua_pop(L, 4);
     }
     return result;
@@ -905,7 +905,7 @@ TBAG_LUA_USERDATA_DEFAULT_IMPL(AudioStream, AUDIOSTREAM, audiostream)
 # /* VrDeviceInfo */
 # /****************/
 
-void luaL_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info)
+void luaE_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info)
 {
     lua_createtable(L, 0, 10);
     lua_pushinteger(L, info.hResolution);
@@ -948,7 +948,7 @@ void luaL_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info)
     lua_setfield(L, -2, "chromaAbCorrection");
 }
 
-VrDeviceInfo luaL_checkvrdeviceinfo(lua_State * L, int num_arg)
+VrDeviceInfo luaE_checkvrdeviceinfo(lua_State * L, int num_arg)
 {
     VrDeviceInfo result = {0,};
     lua_getfield(L, num_arg, "hResolution");
@@ -969,7 +969,7 @@ VrDeviceInfo luaL_checkvrdeviceinfo(lua_State * L, int num_arg)
     result.interpupillaryDistance = luaL_checknumber(L, lua_absindex(L, -1));
 
     lua_getfield(L, num_arg, "lensDistortionValues");
-    auto lens_distortion_values = luaL_checknumber_array(L, lua_absindex(L, -1));
+    auto lens_distortion_values = luaE_checknumber_array(L, lua_absindex(L, -1));
     auto lens_distortion_values_size = lens_distortion_values.size();
     if (lens_distortion_values_size > 4) {
         lens_distortion_values_size = 4;
@@ -981,7 +981,7 @@ VrDeviceInfo luaL_checkvrdeviceinfo(lua_State * L, int num_arg)
     }
 
     lua_getfield(L, num_arg, "chromaAbCorrection");
-    auto chroma_ab_correction = luaL_checknumber_array(L, lua_absindex(L, -1));
+    auto chroma_ab_correction = luaE_checknumber_array(L, lua_absindex(L, -1));
     auto chroma_ab_correction_size = chroma_ab_correction.size();
     if (chroma_ab_correction_size > 4) {
         chroma_ab_correction_size = 4;
@@ -1078,7 +1078,7 @@ static int _HideWindow(lua_State * L)
 
 static int _SetWindowIcon(lua_State * L)
 {
-    SetWindowIcon(*luaL_checkimage(L, 1));
+    SetWindowIcon(*luaE_checkimage(L, 1));
     return 0;
 }
 
@@ -1207,7 +1207,7 @@ static int _DisableCursor(lua_State * L)
 
 static int _ClearBackground(lua_State * L)
 {
-    ClearBackground(luaL_checkcolor(L, 1));
+    ClearBackground(luaE_checkcolor(L, 1));
     return 0;
 }
 
@@ -1225,7 +1225,7 @@ static int _EndDrawing(lua_State * L)
 
 static int _BeginMode2D(lua_State * L)
 {
-    BeginMode2D(luaL_checkcamera2d(L, 1));
+    BeginMode2D(luaE_checkcamera2d(L, 1));
     return 0;
 }
 
@@ -1237,7 +1237,7 @@ static int _EndMode2D(lua_State * L)
 
 static int _BeginMode3D(lua_State * L)
 {
-    BeginMode3D(luaL_checkcamera3d(L, 1));
+    BeginMode3D(luaE_checkcamera3d(L, 1));
     return 0;
 }
 
@@ -1249,7 +1249,7 @@ static int _EndMode3D(lua_State * L)
 
 static int _BeginTextureMode(lua_State * L)
 {
-    BeginTextureMode(luaL_checkrendertexture2d(L, 1));
+    BeginTextureMode(luaE_checkrendertexture2d(L, 1));
     return 0;
 }
 
@@ -1261,19 +1261,19 @@ static int _EndTextureMode(lua_State * L)
 
 static int _GetMouseRay(lua_State * L)
 {
-    luaL_pushray(L, GetMouseRay(luaL_checkvector2(L, 1), luaL_checkcamera3d(L, 2)));
+    luaE_pushray(L, GetMouseRay(luaE_checkvector2(L, 1), luaE_checkcamera3d(L, 2)));
     return 1;
 }
 
 static int _GetWorldToScreen(lua_State * L)
 {
-    luaL_pushvector2(L, GetWorldToScreen(luaL_checkvector3(L, 1), luaL_checkcamera3d(L, 2)));
+    luaE_pushvector2(L, GetWorldToScreen(luaE_checkvector3(L, 1), luaE_checkcamera3d(L, 2)));
     return 1;
 }
 
 static int _GetCameraMatrix(lua_State * L)
 {
-    luaL_pushmatrix(L, GetCameraMatrix(luaL_checkcamera3d(L, 1)));
+    luaE_pushmatrix(L, GetCameraMatrix(luaE_checkcamera3d(L, 1)));
     return 1;
 }
 
@@ -1303,37 +1303,37 @@ static int _GetTime(lua_State * L)
 
 static int _ColorToInt(lua_State * L)
 {
-    lua_pushnumber(L, ColorToInt(luaL_checkcolor(L, 1)));
+    lua_pushnumber(L, ColorToInt(luaE_checkcolor(L, 1)));
     return 1;
 }
 
 static int _ColorNormalize(lua_State * L)
 {
-    luaL_pushvector4(L, ColorNormalize(luaL_checkcolor(L, 1)));
+    luaE_pushvector4(L, ColorNormalize(luaE_checkcolor(L, 1)));
     return 1;
 }
 
 static int _ColorToHSV(lua_State * L)
 {
-    luaL_pushvector3(L, ColorToHSV(luaL_checkcolor(L, 1)));
+    luaE_pushvector3(L, ColorToHSV(luaE_checkcolor(L, 1)));
     return 1;
 }
 
 static int _ColorFromHSV(lua_State * L)
 {
-    luaL_pushcolor(L, ColorFromHSV(luaL_checkvector3(L, 1)));
+    luaE_pushcolor(L, ColorFromHSV(luaE_checkvector3(L, 1)));
     return 1;
 }
 
 static int _GetColor(lua_State * L)
 {
-    luaL_pushcolor(L, GetColor(luaL_checkinteger(L, 1)));
+    luaE_pushcolor(L, GetColor(luaL_checkinteger(L, 1)));
     return 1;
 }
 
 static int _Fade(lua_State * L)
 {
-    luaL_pushcolor(L, Fade(luaL_checkcolor(L, 1), luaL_checknumber(L, 2)));
+    luaE_pushcolor(L, Fade(luaE_checkcolor(L, 1), luaL_checknumber(L, 2)));
     return 1;
 }
 
@@ -1357,7 +1357,7 @@ static int _SetTraceLogExit(lua_State * L)
 
 static int _SetTraceLogCallback(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
@@ -1627,7 +1627,7 @@ static int _GetMouseY(lua_State * L)
 
 static int _GetMousePosition(lua_State * L)
 {
-    luaL_pushvector2(L, GetMousePosition());
+    luaE_pushvector2(L, GetMousePosition());
     return 1;
 }
 
@@ -1669,7 +1669,7 @@ static int _GetTouchY(lua_State * L)
 
 static int _GetTouchPosition(lua_State * L)
 {
-    luaL_pushvector2(L, GetTouchPosition(luaL_checkinteger(L, 1)));
+    luaE_pushvector2(L, GetTouchPosition(luaL_checkinteger(L, 1)));
     return 1;
 }
 
@@ -1705,7 +1705,7 @@ static int _GetGestureHoldDuration(lua_State * L)
 
 static int _GetGestureDragVector(lua_State * L)
 {
-    luaL_pushvector2(L, GetGestureDragVector());
+    luaE_pushvector2(L, GetGestureDragVector());
     return 1;
 }
 
@@ -1717,7 +1717,7 @@ static int _GetGestureDragAngle(lua_State * L)
 
 static int _GetGesturePinchVector(lua_State * L)
 {
-    luaL_pushvector2(L, GetGesturePinchVector());
+    luaE_pushvector2(L, GetGesturePinchVector());
     return 1;
 }
 
@@ -1729,15 +1729,15 @@ static int _GetGesturePinchAngle(lua_State * L)
 
 static int _SetCameraMode(lua_State * L)
 {
-    SetCameraMode(luaL_checkcamera3d(L, 1), luaL_checkinteger(L, 2));
+    SetCameraMode(luaE_checkcamera3d(L, 1), luaL_checkinteger(L, 2));
     return 0;
 }
 
 static int _UpdateCamera(lua_State * L)
 {
-    auto cam = luaL_checkcamera3d(L, 1);
+    auto cam = luaE_checkcamera3d(L, 1);
     UpdateCamera(&cam);
-    luaL_pushcamera3d(L, cam);
+    luaE_pushcamera3d(L, cam);
     return 1;
 }
 
@@ -1778,14 +1778,14 @@ static int _DrawPixel(lua_State * L)
 {
     DrawPixel(luaL_checkinteger(L, 1),
               luaL_checkinteger(L, 2),
-              luaL_checkcolor(L, 3));
+              luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawPixelV(lua_State * L)
 {
-    DrawPixelV(luaL_checkvector2(L, 1),
-               luaL_checkcolor(L, 2));
+    DrawPixelV(luaE_checkvector2(L, 1),
+               luaE_checkcolor(L, 2));
     return 0;
 }
 
@@ -1795,33 +1795,33 @@ static int _DrawLine(lua_State * L)
              luaL_checkinteger(L, 2),
              luaL_checkinteger(L, 3),
              luaL_checkinteger(L, 4),
-             luaL_checkcolor(L, 5));
+             luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawLineV(lua_State * L)
 {
-    DrawLineV(luaL_checkvector2(L, 1),
-              luaL_checkvector2(L, 2),
-              luaL_checkcolor(L, 3));
+    DrawLineV(luaE_checkvector2(L, 1),
+              luaE_checkvector2(L, 2),
+              luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawLineEx(lua_State * L)
 {
-    DrawLineEx(luaL_checkvector2(L, 1),
-               luaL_checkvector2(L, 2),
+    DrawLineEx(luaE_checkvector2(L, 1),
+               luaE_checkvector2(L, 2),
                luaL_checknumber(L, 3),
-               luaL_checkcolor(L, 4));
+               luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawLineBezier(lua_State * L)
 {
-    DrawLineBezier(luaL_checkvector2(L, 1),
-                   luaL_checkvector2(L, 2),
+    DrawLineBezier(luaE_checkvector2(L, 1),
+                   luaE_checkvector2(L, 2),
                    luaL_checknumber(L, 3),
-                   luaL_checkcolor(L, 4));
+                   luaE_checkcolor(L, 4));
     return 0;
 }
 
@@ -1830,29 +1830,29 @@ static int _DrawCircle(lua_State * L)
     DrawCircle(luaL_checkinteger(L, 1),
                luaL_checkinteger(L, 2),
                luaL_checknumber(L, 3),
-               luaL_checkcolor(L, 4));
+               luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawCircleSector(lua_State * L)
 {
-    DrawCircleSector(luaL_checkvector2(L, 1),
+    DrawCircleSector(luaE_checkvector2(L, 1),
                      luaL_checknumber(L, 2),
                      luaL_checkinteger(L, 3),
                      luaL_checkinteger(L, 4),
                      luaL_checkinteger(L, 5),
-                     luaL_checkcolor(L, 6));
+                     luaE_checkcolor(L, 6));
     return 0;
 }
 
 static int _DrawCircleSectorLines(lua_State * L)
 {
-    DrawCircleSectorLines(luaL_checkvector2(L, 1),
+    DrawCircleSectorLines(luaE_checkvector2(L, 1),
                           luaL_checknumber(L, 2),
                           luaL_checkinteger(L, 3),
                           luaL_checkinteger(L, 4),
                           luaL_checkinteger(L, 5),
-                          luaL_checkcolor(L, 6));
+                          luaE_checkcolor(L, 6));
     return 0;
 }
 
@@ -1861,16 +1861,16 @@ static int _DrawCircleGradient(lua_State * L)
     DrawCircleGradient(luaL_checkinteger(L, 1),
                        luaL_checkinteger(L, 2),
                        luaL_checknumber(L, 3),
-                       luaL_checkcolor(L, 4),
-                       luaL_checkcolor(L, 5));
+                       luaE_checkcolor(L, 4),
+                       luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawCircleV(lua_State * L)
 {
-    DrawCircleV(luaL_checkvector2(L, 1),
+    DrawCircleV(luaE_checkvector2(L, 1),
                 luaL_checknumber(L, 2),
-                luaL_checkcolor(L, 3));
+                luaE_checkcolor(L, 3));
     return 0;
 }
 
@@ -1879,31 +1879,31 @@ static int _DrawCircleLines(lua_State * L)
     DrawCircleLines(luaL_checkinteger(L, 1),
                     luaL_checkinteger(L, 2),
                     luaL_checknumber(L, 3),
-                    luaL_checkcolor(L, 4));
+                    luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawRing(lua_State * L)
 {
-    DrawRing(luaL_checkvector2(L, 1),
+    DrawRing(luaE_checkvector2(L, 1),
              luaL_checknumber(L, 2),
              luaL_checknumber(L, 3),
              luaL_checkinteger(L, 4),
              luaL_checkinteger(L, 5),
              luaL_checkinteger(L, 6),
-             luaL_checkcolor(L, 7));
+             luaE_checkcolor(L, 7));
     return 0;
 }
 
 static int _DrawRingLines(lua_State * L)
 {
-    DrawRingLines(luaL_checkvector2(L, 1),
+    DrawRingLines(luaE_checkvector2(L, 1),
                   luaL_checknumber(L, 2),
                   luaL_checknumber(L, 3),
                   luaL_checkinteger(L, 4),
                   luaL_checkinteger(L, 5),
                   luaL_checkinteger(L, 6),
-                  luaL_checkcolor(L, 7));
+                  luaE_checkcolor(L, 7));
     return 0;
 }
 
@@ -1913,31 +1913,31 @@ static int _DrawRectangle(lua_State * L)
                   luaL_checkinteger(L, 2),
                   luaL_checkinteger(L, 3),
                   luaL_checkinteger(L, 4),
-                  luaL_checkcolor(L, 5));
+                  luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawRectangleV(lua_State * L)
 {
-    DrawRectangleV(luaL_checkvector2(L, 1),
-                   luaL_checkvector2(L, 2),
-                   luaL_checkcolor(L, 3));
+    DrawRectangleV(luaE_checkvector2(L, 1),
+                   luaE_checkvector2(L, 2),
+                   luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawRectangleRec(lua_State * L)
 {
-    DrawRectangleRec(luaL_checkrectangle(L, 1),
-                     luaL_checkcolor(L, 2));
+    DrawRectangleRec(luaE_checkrectangle(L, 1),
+                     luaE_checkcolor(L, 2));
     return 0;
 }
 
 static int _DrawRectanglePro(lua_State * L)
 {
-    DrawRectanglePro(luaL_checkrectangle(L, 1),
-                     luaL_checkvector2(L, 2),
+    DrawRectanglePro(luaE_checkrectangle(L, 1),
+                     luaE_checkvector2(L, 2),
                      luaL_checknumber(L, 3),
-                     luaL_checkcolor(L, 4));
+                     luaE_checkcolor(L, 4));
     return 0;
 }
 
@@ -1947,8 +1947,8 @@ static int _DrawRectangleGradientV(lua_State * L)
                            luaL_checkinteger(L, 2),
                            luaL_checkinteger(L, 3),
                            luaL_checkinteger(L, 4),
-                           luaL_checkcolor(L, 5),
-                           luaL_checkcolor(L, 6));
+                           luaE_checkcolor(L, 5),
+                           luaE_checkcolor(L, 6));
     return 0;
 }
 
@@ -1958,18 +1958,18 @@ static int _DrawRectangleGradientH(lua_State * L)
                            luaL_checkinteger(L, 2),
                            luaL_checkinteger(L, 3),
                            luaL_checkinteger(L, 4),
-                           luaL_checkcolor(L, 5),
-                           luaL_checkcolor(L, 6));
+                           luaE_checkcolor(L, 5),
+                           luaE_checkcolor(L, 6));
     return 0;
 }
 
 static int _DrawRectangleGradientEx(lua_State * L)
 {
-    DrawRectangleGradientEx(luaL_checkrectangle(L, 1),
-                            luaL_checkcolor(L, 2),
-                            luaL_checkcolor(L, 3),
-                            luaL_checkcolor(L, 4),
-                            luaL_checkcolor(L, 5));
+    DrawRectangleGradientEx(luaE_checkrectangle(L, 1),
+                            luaE_checkcolor(L, 2),
+                            luaE_checkcolor(L, 3),
+                            luaE_checkcolor(L, 4),
+                            luaE_checkcolor(L, 5));
     return 0;
 }
 
@@ -1979,101 +1979,101 @@ static int _DrawRectangleLines(lua_State * L)
                        luaL_checkinteger(L, 2),
                        luaL_checkinteger(L, 3),
                        luaL_checkinteger(L, 4),
-                       luaL_checkcolor(L, 5));
+                       luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawRectangleLinesEx(lua_State * L)
 {
-    DrawRectangleLinesEx(luaL_checkrectangle(L, 1),
+    DrawRectangleLinesEx(luaE_checkrectangle(L, 1),
                          luaL_checkinteger(L, 2),
-                         luaL_checkcolor(L, 3));
+                         luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawRectangleRounded(lua_State * L)
 {
-    DrawRectangleRounded(luaL_checkrectangle(L, 1),
+    DrawRectangleRounded(luaE_checkrectangle(L, 1),
                          luaL_checknumber(L, 2),
                          luaL_checkinteger(L, 3),
-                         luaL_checkcolor(L, 4));
+                         luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawRectangleRoundedLines(lua_State * L)
 {
-    DrawRectangleRoundedLines(luaL_checkrectangle(L, 1),
+    DrawRectangleRoundedLines(luaE_checkrectangle(L, 1),
                               luaL_checknumber(L, 2),
                               luaL_checkinteger(L, 3),
                               luaL_checkinteger(L, 4),
-                              luaL_checkcolor(L, 5));
+                              luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawTriangle(lua_State * L)
 {
-    DrawTriangle(luaL_checkvector2(L, 1),
-                 luaL_checkvector2(L, 2),
-                 luaL_checkvector2(L, 3),
-                 luaL_checkcolor(L, 4));
+    DrawTriangle(luaE_checkvector2(L, 1),
+                 luaE_checkvector2(L, 2),
+                 luaE_checkvector2(L, 3),
+                 luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawTriangleLines(lua_State * L)
 {
-    DrawTriangleLines(luaL_checkvector2(L, 1),
-                      luaL_checkvector2(L, 2),
-                      luaL_checkvector2(L, 3),
-                      luaL_checkcolor(L, 4));
+    DrawTriangleLines(luaE_checkvector2(L, 1),
+                      luaE_checkvector2(L, 2),
+                      luaE_checkvector2(L, 3),
+                      luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawPoly(lua_State * L)
 {
-    DrawPoly(luaL_checkvector2(L, 1),
+    DrawPoly(luaE_checkvector2(L, 1),
              luaL_checkinteger(L, 2),
              luaL_checknumber(L, 3),
              luaL_checknumber(L, 4),
-             luaL_checkcolor(L, 5));
+             luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawPolyEx(lua_State * L)
 {
-    DrawPolyEx(luaL_checkvector2_array(L, 1).data(),
+    DrawPolyEx(luaE_checkvector2_array(L, 1).data(),
                luaL_checkinteger(L, 2),
-               luaL_checkcolor(L, 3));
+               luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawPolyExLines(lua_State * L)
 {
-    DrawPolyExLines(luaL_checkvector2_array(L, 1).data(),
+    DrawPolyExLines(luaE_checkvector2_array(L, 1).data(),
                     luaL_checkinteger(L, 2),
-                    luaL_checkcolor(L, 3));
+                    luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _SetShapesTexture(lua_State * L)
 {
-    SetShapesTexture(luaL_checktexture2d(L, 1),
-                     luaL_checkrectangle(L, 2));
+    SetShapesTexture(luaE_checktexture2d(L, 1),
+                     luaE_checkrectangle(L, 2));
     return 0;
 }
 
 static int _CheckCollisionRecs(lua_State * L)
 {
-    auto const result = CheckCollisionRecs(luaL_checkrectangle(L, 1),
-                                           luaL_checkrectangle(L, 2));
+    auto const result = CheckCollisionRecs(luaE_checkrectangle(L, 1),
+                                           luaE_checkrectangle(L, 2));
     lua_pushboolean(L, result?1:0);
     return 1;
 }
 
 static int _CheckCollisionCircles(lua_State * L)
 {
-    auto const result = CheckCollisionCircles(luaL_checkvector2(L, 1),
+    auto const result = CheckCollisionCircles(luaE_checkvector2(L, 1),
                                               luaL_checknumber(L, 2),
-                                              luaL_checkvector2(L, 3),
+                                              luaE_checkvector2(L, 3),
                                               luaL_checknumber(L, 4));
     lua_pushboolean(L, result?1:0);
     return 1;
@@ -2081,33 +2081,33 @@ static int _CheckCollisionCircles(lua_State * L)
 
 static int _CheckCollisionCircleRec(lua_State * L)
 {
-    auto const result = CheckCollisionCircleRec(luaL_checkvector2(L, 1),
+    auto const result = CheckCollisionCircleRec(luaE_checkvector2(L, 1),
                                                 luaL_checknumber(L, 2),
-                                                luaL_checkrectangle(L, 3));
+                                                luaE_checkrectangle(L, 3));
     lua_pushboolean(L, result?1:0);
     return 1;
 }
 
 static int _GetCollisionRec(lua_State * L)
 {
-    auto const result = GetCollisionRec(luaL_checkrectangle(L, 1),
-                                        luaL_checkrectangle(L, 2));
-    luaL_pushrectangle(L, result);
+    auto const result = GetCollisionRec(luaE_checkrectangle(L, 1),
+                                        luaE_checkrectangle(L, 2));
+    luaE_pushrectangle(L, result);
     return 1;
 }
 
 static int _CheckCollisionPointRec(lua_State * L)
 {
-    auto const result = CheckCollisionPointRec(luaL_checkvector2(L, 1),
-                                               luaL_checkrectangle(L, 2));
+    auto const result = CheckCollisionPointRec(luaE_checkvector2(L, 1),
+                                               luaE_checkrectangle(L, 2));
     lua_pushboolean(L, result?1:0);
     return 1;
 }
 
 static int _CheckCollisionPointCircle(lua_State * L)
 {
-    auto const result = CheckCollisionPointCircle(luaL_checkvector2(L, 1),
-                                                  luaL_checkvector2(L, 2),
+    auto const result = CheckCollisionPointCircle(luaE_checkvector2(L, 1),
+                                                  luaE_checkvector2(L, 2),
                                                   luaL_checknumber(L, 3));
     lua_pushboolean(L, result?1:0);
     return 1;
@@ -2115,10 +2115,10 @@ static int _CheckCollisionPointCircle(lua_State * L)
 
 static int _CheckCollisionPointTriangle(lua_State * L)
 {
-    auto const result = CheckCollisionPointTriangle(luaL_checkvector2(L, 1),
-                                                    luaL_checkvector2(L, 2),
-                                                    luaL_checkvector2(L, 3),
-                                                    luaL_checkvector2(L, 4));
+    auto const result = CheckCollisionPointTriangle(luaE_checkvector2(L, 1),
+                                                    luaE_checkvector2(L, 2),
+                                                    luaE_checkvector2(L, 3),
+                                                    luaE_checkvector2(L, 4));
     lua_pushboolean(L, result?1:0);
     return 1;
 }
@@ -2130,21 +2130,21 @@ static int _CheckCollisionPointTriangle(lua_State * L)
 static int _LoadImage(lua_State * L)
 {
     auto const result = LoadImage(luaL_checkstring(L, 1));
-    luaL_pushimage(L, &result);
+    luaE_pushimage(L, &result);
     return 1;
 }
 
 static int _LoadImageEx(lua_State * L)
 {
-    auto colors = luaL_checkcolor_array(L, 1);
+    auto colors = luaE_checkcolor_array(L, 1);
     auto const result = LoadImageEx(colors.data(), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
-    luaL_pushimage(L, &result);
+    luaE_pushimage(L, &result);
     return 1;
 }
 
 static int _LoadImagePro(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
@@ -2155,70 +2155,70 @@ static int _LoadImageRaw(lua_State * L)
                                      luaL_checkinteger(L, 3),
                                      luaL_checkinteger(L, 4),
                                      luaL_checkinteger(L, 5));
-    luaL_pushimage(L, &result);
+    luaE_pushimage(L, &result);
     return 1;
 }
 
 static int _ExportImage(lua_State * L)
 {
-    ExportImage(*luaL_checkimage(L, 1), luaL_checkstring(L, 2));
+    ExportImage(*luaE_checkimage(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
 static int _ExportImageAsCode(lua_State * L)
 {
-    ExportImageAsCode(*luaL_checkimage(L, 1), luaL_checkstring(L, 2));
+    ExportImageAsCode(*luaE_checkimage(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
 static int _LoadTexture(lua_State * L)
 {
     auto const result = LoadTexture(luaL_checkstring(L, 1));
-    luaL_pushtexture2d(L, result);
+    luaE_pushtexture2d(L, result);
     return 1;
 }
 
 static int _LoadTextureFromImage(lua_State * L)
 {
-    luaL_pushtexture2d(L, LoadTextureFromImage(*luaL_checkimage(L, 1)));
+    luaE_pushtexture2d(L, LoadTextureFromImage(*luaE_checkimage(L, 1)));
     return 1;
 }
 
 static int _LoadTextureCubemap(lua_State * L)
 {
-    auto const tex = LoadTextureCubemap(*luaL_checkimage(L, 1), luaL_checkinteger(L, 2));
-    luaL_pushtexture2d(L, tex);
+    auto const tex = LoadTextureCubemap(*luaE_checkimage(L, 1), luaL_checkinteger(L, 2));
+    luaE_pushtexture2d(L, tex);
     return 1;
 }
 
 static int _LoadRenderTexture(lua_State * L)
 {
     auto tex = LoadRenderTexture(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
-    luaL_pushrendertexture2d(L, tex);
+    luaE_pushrendertexture2d(L, tex);
     return 1;
 }
 
 static int _UnloadImage(lua_State * L)
 {
-    UnloadImage(*luaL_checkimage(L, 1));
+    UnloadImage(*luaE_checkimage(L, 1));
     return 0;
 }
 
 static int _UnloadTexture(lua_State * L)
 {
-    UnloadTexture(luaL_checktexture2d(L, 1));
+    UnloadTexture(luaE_checktexture2d(L, 1));
     return 0;
 }
 
 static int _UnloadRenderTexture(lua_State * L)
 {
-    UnloadRenderTexture(luaL_checkrendertexture2d(L, 1));
+    UnloadRenderTexture(luaE_checkrendertexture2d(L, 1));
     return 0;
 }
 
 static int _GetImageData(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     assert(image != nullptr);
 
     auto const SIZE = image->width * image->height;
@@ -2228,7 +2228,7 @@ static int _GetImageData(lua_State * L)
 
     lua_createtable(L, SIZE, 0);
     for (int i = 0; i < SIZE; ++i) {
-        luaL_pushcolor(L, pixels[i]);
+        luaE_pushcolor(L, pixels[i]);
         lua_rawseti(L, -2, i+1);
     }
     free(pixels);
@@ -2237,7 +2237,7 @@ static int _GetImageData(lua_State * L)
 
 static int _GetImageDataNormalized(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     assert(image != nullptr);
 
     auto const SIZE = image->width * image->height;
@@ -2247,7 +2247,7 @@ static int _GetImageDataNormalized(lua_State * L)
 
     lua_createtable(L, SIZE, 0);
     for (int i = 0; i < SIZE; ++i) {
-        luaL_pushvector4(L, pixels[i]);
+        luaE_pushvector4(L, pixels[i]);
         lua_rawseti(L, -2, i+1);
     }
     free(pixels);
@@ -2264,147 +2264,147 @@ static int _GetPixelDataSize(lua_State * L)
 
 static int _GetTextureData(lua_State * L)
 {
-    auto const image = GetTextureData(luaL_checktexture2d(L, 1));
-    luaL_pushimage(L, &image);
+    auto const image = GetTextureData(luaE_checktexture2d(L, 1));
+    luaE_pushimage(L, &image);
     return 1;
 }
 
 static int _GetScreenData(lua_State * L)
 {
     auto const image = GetScreenData();
-    luaL_pushimage(L, &image);
+    luaE_pushimage(L, &image);
     return 1;
 }
 
 static int _UpdateTexture(lua_State * L)
 {
-    auto tex = luaL_checktexture2d(L, 1);
-    auto colors = luaL_checkcolor_array(L, 2);
+    auto tex = luaE_checktexture2d(L, 1);
+    auto colors = luaE_checkcolor_array(L, 2);
     UpdateTexture(tex, (void const *)colors.data());
     return 0;
 }
 
 static int _ImageCopy(lua_State * L)
 {
-    auto image = ImageCopy(*luaL_checkimage(L, 1));
-    luaL_pushimage(L, &image);
+    auto image = ImageCopy(*luaE_checkimage(L, 1));
+    luaE_pushimage(L, &image);
     return 1;
 }
 
 static int _ImageToPOT(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
-    ImageToPOT(image, luaL_checkcolor(L, 2));
-    luaL_pushimage(L, image);
+    auto * image = luaE_checkimage(L, 1);
+    ImageToPOT(image, luaE_checkcolor(L, 2));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageFormat(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageFormat(image, luaL_checkinteger(L, 2));
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageAlphaMask(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
-    ImageAlphaMask(image, *luaL_checkimage(L, 2));
-    luaL_pushimage(L, image);
+    auto * image = luaE_checkimage(L, 1);
+    ImageAlphaMask(image, *luaE_checkimage(L, 2));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageAlphaClear(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
-    ImageAlphaClear(image, luaL_checkcolor(L, 2), luaL_checknumber(L, 3));
-    luaL_pushimage(L, image);
+    auto * image = luaE_checkimage(L, 1);
+    ImageAlphaClear(image, luaE_checkcolor(L, 2), luaL_checknumber(L, 3));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageAlphaCrop(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageAlphaCrop(image, luaL_checknumber(L, 2));
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageAlphaPremultiply(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageAlphaPremultiply(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageCrop(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
-    ImageCrop(image, luaL_checkrectangle(L, 2));
-    luaL_pushimage(L, image);
+    auto * image = luaE_checkimage(L, 1);
+    ImageCrop(image, luaE_checkrectangle(L, 2));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageResize(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageResize(image, luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageResizeNN(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageResizeNN(image, luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageResizeCanvas(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageResizeCanvas(image,
                       luaL_checkinteger(L, 2),
                       luaL_checkinteger(L, 3),
                       luaL_checkinteger(L, 4),
                       luaL_checkinteger(L, 5),
-                      luaL_checkcolor(L, 6));
-    luaL_pushimage(L, image);
+                      luaE_checkcolor(L, 6));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageMipmaps(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageMipmaps(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageDither(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageDither(image,
                 luaL_checkinteger(L, 2),
                 luaL_checkinteger(L, 3),
                 luaL_checkinteger(L, 4),
                 luaL_checkinteger(L, 5));
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageExtractPalette(lua_State * L)
 {
     int extract_count = 0;
-    Color * pixels = ImageExtractPalette(*luaL_checkimage(L, 1), luaL_checkinteger(L, 2), &extract_count);
+    Color * pixels = ImageExtractPalette(*luaE_checkimage(L, 1), luaL_checkinteger(L, 2), &extract_count);
     assert(pixels != nullptr);
 
     lua_createtable(L, extract_count, 0);
     for (int i = 0; i < extract_count; ++i) {
-        luaL_pushcolor(L, pixels[i]);
+        luaE_pushcolor(L, pixels[i]);
         lua_rawseti(L, -2, i+1);
     }
     free(pixels);
@@ -2413,157 +2413,157 @@ static int _ImageExtractPalette(lua_State * L)
 
 static int _ImageText(lua_State * L)
 {
-    auto image = ImageText(luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaL_checkcolor(L, 3));
-    luaL_pushimage(L, &image);
+    auto image = ImageText(luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaE_checkcolor(L, 3));
+    luaE_pushimage(L, &image);
     return 1;
 }
 
 static int _ImageTextEx(lua_State * L)
 {
-    auto image = ImageTextEx(*luaL_checkfont(L, 1),
+    auto image = ImageTextEx(*luaE_checkfont(L, 1),
                              luaL_checkstring(L, 2),
                              luaL_checknumber(L, 3),
                              luaL_checknumber(L, 4),
-                             luaL_checkcolor(L, 5));
-    luaL_pushimage(L, &image);
+                             luaE_checkcolor(L, 5));
+    luaE_pushimage(L, &image);
     return 1;
 }
 
 static int _ImageDraw(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageDraw(image,
-              *luaL_checkimage(L, 2),
-              luaL_checkrectangle(L, 3),
-              luaL_checkrectangle(L, 4));
-    luaL_pushimage(L, image);
+              *luaE_checkimage(L, 2),
+              luaE_checkrectangle(L, 3),
+              luaE_checkrectangle(L, 4));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageDrawRectangle(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageDrawRectangle(image,
-                       luaL_checkrectangle(L, 2),
-                       luaL_checkcolor(L, 3));
-    luaL_pushimage(L, image);
+                       luaE_checkrectangle(L, 2),
+                       luaE_checkcolor(L, 3));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageDrawRectangleLines(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageDrawRectangleLines(image,
-                            luaL_checkrectangle(L, 2),
+                            luaE_checkrectangle(L, 2),
                             luaL_checkinteger(L, 3),
-                            luaL_checkcolor(L, 4));
-    luaL_pushimage(L, image);
+                            luaE_checkcolor(L, 4));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageDrawText(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageDrawText(image,
-                  luaL_checkvector2(L, 2),
+                  luaE_checkvector2(L, 2),
                   luaL_checkstring(L, 3),
                   luaL_checkinteger(L, 4),
-                  luaL_checkcolor(L, 5));
-    luaL_pushimage(L, image);
+                  luaE_checkcolor(L, 5));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageDrawTextEx(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageDrawTextEx(image,
-                    luaL_checkvector2(L, 2),
-                    *luaL_checkfont(L, 3),
+                    luaE_checkvector2(L, 2),
+                    *luaE_checkfont(L, 3),
                     luaL_checkstring(L, 4),
                     luaL_checknumber(L, 5),
                     luaL_checknumber(L, 6),
-                    luaL_checkcolor(L, 7));
-    luaL_pushimage(L, image);
+                    luaE_checkcolor(L, 7));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageFlipVertical(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageFlipVertical(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageFlipHorizontal(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageFlipHorizontal(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageRotateCW(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageRotateCW(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageRotateCCW(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageRotateCCW(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageColorTint(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
-    ImageColorTint(image, luaL_checkcolor(L, 2));
-    luaL_pushimage(L, image);
+    auto * image = luaE_checkimage(L, 1);
+    ImageColorTint(image, luaE_checkcolor(L, 2));
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageColorInvert(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageColorInvert(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageColorGrayscale(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageColorGrayscale(image);
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageColorContrast(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageColorContrast(image, luaL_checknumber(L, 2));
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageColorBrightness(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
+    auto * image = luaE_checkimage(L, 1);
     ImageColorBrightness(image, luaL_checkinteger(L, 2));
-    luaL_pushimage(L, image);
+    luaE_pushimage(L, image);
     return 1;
 }
 
 static int _ImageColorReplace(lua_State * L)
 {
-    auto * image = luaL_checkimage(L, 1);
-    ImageColorReplace(image, luaL_checkcolor(L, 2), luaL_checkcolor(L, 3));
-    luaL_pushimage(L, image);
+    auto * image = luaE_checkimage(L, 1);
+    ImageColorReplace(image, luaE_checkcolor(L, 2), luaE_checkcolor(L, 3));
+    luaE_pushimage(L, image);
     return 1;
 }
 
@@ -2571,8 +2571,8 @@ static int _GenImageColor(lua_State * L)
 {
     auto const result = GenImageColor(luaL_checkinteger(L, 1),
                                       luaL_checkinteger(L, 2),
-                                      luaL_checkcolor(L, 3));
-    luaL_pushimage(L, &result);
+                                      luaE_checkcolor(L, 3));
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2580,9 +2580,9 @@ static int _GenImageGradientV(lua_State * L)
 {
     auto const result = GenImageGradientV(luaL_checkinteger(L, 1),
                                           luaL_checkinteger(L, 2),
-                                          luaL_checkcolor(L, 3),
-                                          luaL_checkcolor(L, 4));
-    luaL_pushimage(L, &result);
+                                          luaE_checkcolor(L, 3),
+                                          luaE_checkcolor(L, 4));
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2590,9 +2590,9 @@ static int _GenImageGradientH(lua_State * L)
 {
     auto const result = GenImageGradientH(luaL_checkinteger(L, 1),
                                           luaL_checkinteger(L, 2),
-                                          luaL_checkcolor(L, 3),
-                                          luaL_checkcolor(L, 4));
-    luaL_pushimage(L, &result);
+                                          luaE_checkcolor(L, 3),
+                                          luaE_checkcolor(L, 4));
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2601,9 +2601,9 @@ static int _GenImageGradientRadial(lua_State * L)
     auto const result = GenImageGradientRadial(luaL_checkinteger(L, 1),
                                                luaL_checkinteger(L, 2),
                                                luaL_checknumber(L, 3),
-                                               luaL_checkcolor(L, 4),
-                                               luaL_checkcolor(L, 5));
-    luaL_pushimage(L, &result);
+                                               luaE_checkcolor(L, 4),
+                                               luaE_checkcolor(L, 5));
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2613,9 +2613,9 @@ static int _GenImageChecked(lua_State * L)
                                         luaL_checkinteger(L, 2),
                                         luaL_checkinteger(L, 3),
                                         luaL_checkinteger(L, 4),
-                                        luaL_checkcolor(L, 5),
-                                        luaL_checkcolor(L, 6));
-    luaL_pushimage(L, &result);
+                                        luaE_checkcolor(L, 5),
+                                        luaE_checkcolor(L, 6));
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2624,7 +2624,7 @@ static int _GenImageWhiteNoise(lua_State * L)
     auto const result = GenImageWhiteNoise(luaL_checkinteger(L, 1),
                                            luaL_checkinteger(L, 2),
                                            luaL_checknumber(L, 3));
-    luaL_pushimage(L, &result);
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2635,7 +2635,7 @@ static int _GenImagePerlinNoise(lua_State * L)
                                             luaL_checkinteger(L, 3),
                                             luaL_checkinteger(L, 4),
                                             luaL_checknumber(L, 5));
-    luaL_pushimage(L, &result);
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2644,7 +2644,7 @@ static int _GenImageCellular(lua_State * L)
     auto const result = GenImageCellular(luaL_checkinteger(L, 1),
                                          luaL_checkinteger(L, 2),
                                          luaL_checkinteger(L, 3));
-    luaL_pushimage(L, &result);
+    luaE_pushimage(L, &result);
     return 1;
 }
 
@@ -2656,81 +2656,81 @@ static int _GenTextureMipmaps(lua_State * L)
 
 static int _SetTextureFilter(lua_State * L)
 {
-    SetTextureFilter(luaL_checktexture2d(L, 1), luaL_checkinteger(L, 2));
+    SetTextureFilter(luaE_checktexture2d(L, 1), luaL_checkinteger(L, 2));
     return 0;
 }
 
 static int _SetTextureWrap(lua_State * L)
 {
-    SetTextureWrap(luaL_checktexture2d(L, 1), luaL_checkinteger(L, 2));
+    SetTextureWrap(luaE_checktexture2d(L, 1), luaL_checkinteger(L, 2));
     return 0;
 }
 
 static int _DrawTexture(lua_State * L)
 {
-    DrawTexture(luaL_checktexture2d(L, 1),
+    DrawTexture(luaE_checktexture2d(L, 1),
                 luaL_checkinteger(L, 2),
                 luaL_checkinteger(L, 3),
-                luaL_checkcolor(L, 4));
+                luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawTextureV(lua_State * L)
 {
-    DrawTextureV(luaL_checktexture2d(L, 1),
-                 luaL_checkvector2(L, 2),
-                 luaL_checkcolor(L, 3));
+    DrawTextureV(luaE_checktexture2d(L, 1),
+                 luaE_checkvector2(L, 2),
+                 luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawTextureEx(lua_State * L)
 {
-    DrawTextureEx(luaL_checktexture2d(L, 1),
-                  luaL_checkvector2(L, 2),
+    DrawTextureEx(luaE_checktexture2d(L, 1),
+                  luaE_checkvector2(L, 2),
                   luaL_checknumber(L, 3),
                   luaL_checknumber(L, 4),
-                  luaL_checkcolor(L, 5));
+                  luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawTextureRec(lua_State * L)
 {
-    DrawTextureRec(luaL_checktexture2d(L, 1),
-                   luaL_checkrectangle(L, 2),
-                   luaL_checkvector2(L, 3),
-                   luaL_checkcolor(L, 4));
+    DrawTextureRec(luaE_checktexture2d(L, 1),
+                   luaE_checkrectangle(L, 2),
+                   luaE_checkvector2(L, 3),
+                   luaE_checkcolor(L, 4));
     return 0;
 }
 
 static int _DrawTextureQuad(lua_State * L)
 {
-    DrawTextureQuad(luaL_checktexture2d(L, 1),
-                    luaL_checkvector2(L, 2),
-                    luaL_checkvector2(L, 3),
-                    luaL_checkrectangle(L, 4),
-                    luaL_checkcolor(L, 5));
+    DrawTextureQuad(luaE_checktexture2d(L, 1),
+                    luaE_checkvector2(L, 2),
+                    luaE_checkvector2(L, 3),
+                    luaE_checkrectangle(L, 4),
+                    luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawTexturePro(lua_State * L)
 {
-    DrawTexturePro(luaL_checktexture2d(L, 1),
-                   luaL_checkrectangle(L, 2),
-                   luaL_checkrectangle(L, 3),
-                   luaL_checkvector2(L, 4),
+    DrawTexturePro(luaE_checktexture2d(L, 1),
+                   luaE_checkrectangle(L, 2),
+                   luaE_checkrectangle(L, 3),
+                   luaE_checkvector2(L, 4),
                    luaL_checknumber(L, 5),
-                   luaL_checkcolor(L, 6));
+                   luaE_checkcolor(L, 6));
     return 0;
 }
 
 static int _DrawTextureNPatch(lua_State * L)
 {
-    DrawTextureNPatch(luaL_checktexture2d(L, 1),
-                      luaL_checknpatchinfo(L, 2),
-                      luaL_checkrectangle(L, 3),
-                      luaL_checkvector2(L, 4),
+    DrawTextureNPatch(luaE_checktexture2d(L, 1),
+                      luaE_checknpatchinfo(L, 2),
+                      luaE_checkrectangle(L, 3),
+                      luaE_checkvector2(L, 4),
                       luaL_checknumber(L, 5),
-                      luaL_checkcolor(L, 6));
+                      luaE_checkcolor(L, 6));
     return 0;
 }
 
@@ -2741,14 +2741,14 @@ static int _DrawTextureNPatch(lua_State * L)
 static int _GetFontDefault(lua_State * L)
 {
     auto result = GetFontDefault();
-    luaL_pushfont(L, &result);
+    luaE_pushfont(L, &result);
     return 1;
 }
 
 static int _LoadFont(lua_State * L)
 {
     auto result = LoadFont(luaL_checkstring(L, 1));
-    luaL_pushfont(L, &result);
+    luaE_pushfont(L, &result);
     return 1;
 }
 
@@ -2761,7 +2761,7 @@ static int _LoadFontEx(lua_State * L)
 
     std::vector<int> chars;
     if (lua_type(L, 3) == LUA_TTABLE) {
-        chars = luaL_checkchars_array(L, 3);
+        chars = luaE_checkchars_array(L, 3);
         if (!chars.empty()) {
             font_chars = chars.data();
             chars_count = chars.size();
@@ -2769,14 +2769,14 @@ static int _LoadFontEx(lua_State * L)
     }
 
     auto result = LoadFontEx(file_name, font_size, font_chars, chars_count);
-    luaL_pushfont(L, &result);
+    luaE_pushfont(L, &result);
     return 1;
 }
 
 static int _LoadFontFromImage(lua_State * L)
 {
-    auto result = LoadFontFromImage(*luaL_checkimage(L, 1), luaL_checkcolor(L, 2), luaL_checkinteger(L, 3));
-    luaL_pushfont(L, &result);
+    auto result = LoadFontFromImage(*luaE_checkimage(L, 1), luaE_checkcolor(L, 2), luaL_checkinteger(L, 3));
+    luaE_pushfont(L, &result);
     return 1;
 }
 
@@ -2791,7 +2791,7 @@ static int _LoadFontData(lua_State * L)
     std::vector<int> chars;
     int third_argument_type = lua_type(L, 3);
     if (third_argument_type == LUA_TTABLE) {
-        chars = luaL_checkchars_array(L, 3);
+        chars = luaE_checkchars_array(L, 3);
         if (!chars.empty()) {
             font_chars = chars.data();
             chars_count = chars.size();
@@ -2809,24 +2809,24 @@ static int _LoadFontData(lua_State * L)
         return 0;
     }
 
-    luaL_pushcharinfo_array(L, infos, chars_count);
+    luaE_pushcharinfo_array(L, infos, chars_count);
     return 1;
 }
 
 static int _GenImageFontAtlas(lua_State * L)
 {
-    auto chars = luaL_checkcharinfo_array(L, 1);
+    auto chars = luaE_checkcharinfo_array(L, 1);
     auto image = GenImageFontAtlas(chars.data(), chars.size(),
                                    luaL_checkinteger(L, 2),
                                    luaL_checkinteger(L, 3),
                                    luaL_checkinteger(L, 4));
-    luaL_pushimage(L, &image);
+    luaE_pushimage(L, &image);
     return 1;
 }
 
 static int _UnloadFont(lua_State * L)
 {
-    UnloadFont(*luaL_checkfont(L, 1));
+    UnloadFont(*luaE_checkfont(L, 1));
     return 0;
 }
 
@@ -2842,46 +2842,46 @@ static int _DrawText(lua_State * L)
              luaL_checkinteger(L, 2),
              luaL_checkinteger(L, 3),
              luaL_checkinteger(L, 4),
-             luaL_checkcolor(L, 5));
+             luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawTextEx(lua_State * L)
 {
-    DrawTextEx(*luaL_checkfont(L, 1),
+    DrawTextEx(*luaE_checkfont(L, 1),
                luaL_checkstring(L, 2),
-               luaL_checkvector2(L, 3),
+               luaE_checkvector2(L, 3),
                luaL_checknumber(L, 4),
                luaL_checknumber(L, 5),
-               luaL_checkcolor(L, 6));
+               luaE_checkcolor(L, 6));
     return 0;
 }
 
 static int _DrawTextRec(lua_State * L)
 {
-    DrawTextRec(*luaL_checkfont(L, 1),
+    DrawTextRec(*luaE_checkfont(L, 1),
                 luaL_checkstring(L, 2),
-                luaL_checkrectangle(L, 3),
+                luaE_checkrectangle(L, 3),
                 luaL_checknumber(L, 4),
                 luaL_checknumber(L, 5),
                 lua_toboolean(L, 6),
-                luaL_checkcolor(L, 7));
+                luaE_checkcolor(L, 7));
     return 0;
 }
 
 static int _DrawTextRecEx(lua_State * L)
 {
-    DrawTextRecEx(*luaL_checkfont(L, 1),
+    DrawTextRecEx(*luaE_checkfont(L, 1),
                   luaL_checkstring(L, 2),
-                  luaL_checkrectangle(L, 3),
+                  luaE_checkrectangle(L, 3),
                   luaL_checknumber(L, 4),
                   luaL_checknumber(L, 5),
                   lua_toboolean(L, 6),
-                  luaL_checkcolor(L, 7),
+                  luaE_checkcolor(L, 7),
                   luaL_checkinteger(L, 8),
                   luaL_checkinteger(L, 9),
-                  luaL_checkcolor(L, 10),
-                  luaL_checkcolor(L, 11));
+                  luaE_checkcolor(L, 10),
+                  luaE_checkcolor(L, 11));
     return 0;
 }
 
@@ -2893,7 +2893,7 @@ static int _MeasureText(lua_State * L)
 
 static int _MeasureTextEx(lua_State * L)
 {
-    luaL_pushvector2(L, MeasureTextEx(*luaL_checkfont(L, 1),
+    luaE_pushvector2(L, MeasureTextEx(*luaE_checkfont(L, 1),
                                       luaL_checkstring(L, 2),
                                       luaL_checknumber(L, 3),
                                       luaL_checknumber(L, 4)));
@@ -2902,85 +2902,85 @@ static int _MeasureTextEx(lua_State * L)
 
 static int _GetGlyphIndex(lua_State * L)
 {
-    lua_pushinteger(L, GetGlyphIndex(*luaL_checkfont(L, 1), luaL_checkinteger(L, 2)));
+    lua_pushinteger(L, GetGlyphIndex(*luaE_checkfont(L, 1), luaL_checkinteger(L, 2)));
     return 1;
 }
 
 static int _TextIsEqual(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextLength(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextSubtext(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextReplace(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextInsert(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextJoin(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextSplit(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextAppend(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextFindIndex(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextToUpper(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextToLower(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextToPascal(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _TextToInteger(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
@@ -2990,131 +2990,131 @@ static int _TextToInteger(lua_State * L)
 
 static int _DrawLine3D(lua_State * L)
 {
-    DrawLine3D(luaL_checkvector3(L, 1),
-               luaL_checkvector3(L, 2),
-               luaL_checkcolor(L, 3));
+    DrawLine3D(luaE_checkvector3(L, 1),
+               luaE_checkvector3(L, 2),
+               luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawCircle3D(lua_State * L)
 {
-    DrawCircle3D(luaL_checkvector3(L, 1),
+    DrawCircle3D(luaE_checkvector3(L, 1),
                  luaL_checknumber(L, 2),
-                 luaL_checkvector3(L, 3),
+                 luaE_checkvector3(L, 3),
                  luaL_checknumber(L, 4),
-                 luaL_checkcolor(L, 5));
+                 luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawCube(lua_State * L)
 {
-    DrawCube(luaL_checkvector3(L, 1),
+    DrawCube(luaE_checkvector3(L, 1),
              luaL_checknumber(L, 2),
              luaL_checknumber(L, 3),
              luaL_checknumber(L, 4),
-             luaL_checkcolor(L, 5));
+             luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawCubeV(lua_State * L)
 {
-    DrawCubeV(luaL_checkvector3(L, 1),
-              luaL_checkvector3(L, 2),
-              luaL_checkcolor(L, 3));
+    DrawCubeV(luaE_checkvector3(L, 1),
+              luaE_checkvector3(L, 2),
+              luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawCubeWires(lua_State * L)
 {
-    DrawCubeWires(luaL_checkvector3(L, 1),
+    DrawCubeWires(luaE_checkvector3(L, 1),
                   luaL_checknumber(L, 2),
                   luaL_checknumber(L, 3),
                   luaL_checknumber(L, 4),
-                  luaL_checkcolor(L, 5));
+                  luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawCubeWiresV(lua_State * L)
 {
-    DrawCubeWiresV(luaL_checkvector3(L, 1),
-                   luaL_checkvector3(L, 2),
-                   luaL_checkcolor(L, 3));
+    DrawCubeWiresV(luaE_checkvector3(L, 1),
+                   luaE_checkvector3(L, 2),
+                   luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawCubeTexture(lua_State * L)
 {
-    DrawCubeTexture(luaL_checktexture2d(L, 1),
-                    luaL_checkvector3(L, 2),
+    DrawCubeTexture(luaE_checktexture2d(L, 1),
+                    luaE_checkvector3(L, 2),
                     luaL_checknumber(L, 3),
                     luaL_checknumber(L, 4),
                     luaL_checknumber(L, 5),
-                    luaL_checkcolor(L, 6));
+                    luaE_checkcolor(L, 6));
     return 0;
 }
 
 static int _DrawSphere(lua_State * L)
 {
-    DrawSphere(luaL_checkvector3(L, 1),
+    DrawSphere(luaE_checkvector3(L, 1),
                luaL_checknumber(L, 2),
-               luaL_checkcolor(L, 3));
+               luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawSphereEx(lua_State * L)
 {
-    DrawSphereEx(luaL_checkvector3(L, 1),
+    DrawSphereEx(luaE_checkvector3(L, 1),
                  luaL_checknumber(L, 2),
                  luaL_checkinteger(L, 3),
                  luaL_checkinteger(L, 4),
-                 luaL_checkcolor(L, 5));
+                 luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawSphereWires(lua_State * L)
 {
-    DrawSphereWires(luaL_checkvector3(L, 1),
+    DrawSphereWires(luaE_checkvector3(L, 1),
                     luaL_checknumber(L, 2),
                     luaL_checkinteger(L, 3),
                     luaL_checkinteger(L, 4),
-                    luaL_checkcolor(L, 5));
+                    luaE_checkcolor(L, 5));
     return 0;
 }
 
 static int _DrawCylinder(lua_State * L)
 {
-    DrawCylinder(luaL_checkvector3(L, 1),
+    DrawCylinder(luaE_checkvector3(L, 1),
                  luaL_checknumber(L, 2),
                  luaL_checknumber(L, 3),
                  luaL_checknumber(L, 4),
                  luaL_checkinteger(L, 5),
-                 luaL_checkcolor(L, 6));
+                 luaE_checkcolor(L, 6));
     return 0;
 }
 
 static int _DrawCylinderWires(lua_State * L)
 {
-    DrawCylinderWires(luaL_checkvector3(L, 1),
+    DrawCylinderWires(luaE_checkvector3(L, 1),
                       luaL_checknumber(L, 2),
                       luaL_checknumber(L, 3),
                       luaL_checknumber(L, 4),
                       luaL_checkinteger(L, 5),
-                      luaL_checkcolor(L, 6));
+                      luaE_checkcolor(L, 6));
     return 0;
 }
 
 static int _DrawPlane(lua_State * L)
 {
-    DrawPlane(luaL_checkvector3(L, 1),
-              luaL_checkvector2(L, 2),
-              luaL_checkcolor(L, 3));
+    DrawPlane(luaE_checkvector3(L, 1),
+              luaE_checkvector2(L, 2),
+              luaE_checkcolor(L, 3));
     return 0;
 }
 
 static int _DrawRay(lua_State * L)
 {
-    DrawRay(luaL_checkray(L, 1),
-            luaL_checkcolor(L, 2));
+    DrawRay(luaE_checkray(L, 1),
+            luaE_checkcolor(L, 2));
     return 0;
 }
 
@@ -3127,27 +3127,27 @@ static int _DrawGrid(lua_State * L)
 
 static int _DrawGizmo(lua_State * L)
 {
-    DrawGizmo(luaL_checkvector3(L, 1));
+    DrawGizmo(luaE_checkvector3(L, 1));
     return 0;
 }
 
 static int _LoadModel(lua_State * L)
 {
     auto mesh = LoadModel(luaL_checkstring(L, 1));
-    luaL_pushmodel(L, &mesh);
+    luaE_pushmodel(L, &mesh);
     return 1;
 }
 
 static int _LoadModelFromMesh(lua_State * L)
 {
-    auto mesh = LoadModelFromMesh(*luaL_checkmesh(L, 1));
-    luaL_pushmodel(L, &mesh);
+    auto mesh = LoadModelFromMesh(*luaE_checkmesh(L, 1));
+    luaE_pushmodel(L, &mesh);
     return 1;
 }
 
 static int _UnloadModel(lua_State * L)
 {
-    UnloadModel(*luaL_checkmodel(L, 1));
+    UnloadModel(*luaE_checkmodel(L, 1));
     return 0;
 }
 
@@ -3211,7 +3211,7 @@ static int _LoadText(lua_State * L)
 
 static int _LoadShader(lua_State * L)
 {
-    luaL_pushshader(L, LoadShader(luaL_checkstring(L, 1), luaL_checkstring(L, 2)));
+    luaE_pushshader(L, LoadShader(luaL_checkstring(L, 1), luaL_checkstring(L, 2)));
     return 1;
 }
 
@@ -3219,31 +3219,31 @@ static int _LoadShaderCode(lua_State * L)
 {
     std::string vs_code = luaL_checkstring(L, 1);
     std::string fs_code = luaL_checkstring(L, 2);
-    luaL_pushshader(L, LoadShaderCode(&vs_code[0], &fs_code[0]));
+    luaE_pushshader(L, LoadShaderCode(&vs_code[0], &fs_code[0]));
     return 1;
 }
 
 static int _UnloadShader(lua_State * L)
 {
-    UnloadShader(luaL_checkshader(L, 1));
+    UnloadShader(luaE_checkshader(L, 1));
     return 0;
 }
 
 static int _GetShaderDefault(lua_State * L)
 {
-    luaL_pushshader(L, GetShaderDefault());
+    luaE_pushshader(L, GetShaderDefault());
     return 1;
 }
 
 static int _GetTextureDefault(lua_State * L)
 {
-    luaL_pushtexture2d(L, GetTextureDefault());
+    luaE_pushtexture2d(L, GetTextureDefault());
     return 1;
 }
 
 static int _GetShaderLocation(lua_State * L)
 {
-    lua_pushinteger(L, GetShaderLocation(luaL_checkshader(L, 1), luaL_checkstring(L, 2)));
+    lua_pushinteger(L, GetShaderLocation(luaE_checkshader(L, 1), luaL_checkstring(L, 2)));
     return 1;
 }
 
@@ -3261,72 +3261,72 @@ static int _SetShaderValueV(lua_State * L)
 
 static int _SetShaderValueMatrix(lua_State * L)
 {
-    SetShaderValueMatrix(luaL_checkshader(L, 1),
+    SetShaderValueMatrix(luaE_checkshader(L, 1),
                          luaL_checkinteger(L, 2),
-                         luaL_checkmatrix(L, 3));
+                         luaE_checkmatrix(L, 3));
     return 0;
 }
 
 static int _SetShaderValueTexture(lua_State * L)
 {
-    SetShaderValueTexture(luaL_checkshader(L, 1),
+    SetShaderValueTexture(luaE_checkshader(L, 1),
                           luaL_checkinteger(L, 2),
-                          luaL_checktexture2d(L, 3));
+                          luaE_checktexture2d(L, 3));
     return 0;
 }
 
 static int _SetMatrixProjection(lua_State * L)
 {
-    SetMatrixProjection(luaL_checkmatrix(L, 1));
+    SetMatrixProjection(luaE_checkmatrix(L, 1));
     return 0;
 }
 
 static int _SetMatrixModelview(lua_State * L)
 {
-    SetMatrixModelview(luaL_checkmatrix(L, 1));
+    SetMatrixModelview(luaE_checkmatrix(L, 1));
     return 0;
 }
 
 static int _GetMatrixModelview(lua_State * L)
 {
-    luaL_pushmatrix(L, GetMatrixModelview());
+    luaE_pushmatrix(L, GetMatrixModelview());
     return 1;
 }
 
 static int _GenTextureCubemap(lua_State * L)
 {
-    luaL_pushtexture2d(L, GenTextureCubemap(luaL_checkshader(L, 1),
-                                            luaL_checktexture2d(L, 2),
+    luaE_pushtexture2d(L, GenTextureCubemap(luaE_checkshader(L, 1),
+                                            luaE_checktexture2d(L, 2),
                                             luaL_checkinteger(L, 3)));
     return 1;
 }
 
 static int _GenTextureIrradiance(lua_State * L)
 {
-    luaL_pushtexture2d(L, GenTextureIrradiance(luaL_checkshader(L, 1),
-                                               luaL_checktexture2d(L, 2),
+    luaE_pushtexture2d(L, GenTextureIrradiance(luaE_checkshader(L, 1),
+                                               luaE_checktexture2d(L, 2),
                                                luaL_checkinteger(L, 3)));
     return 1;
 }
 
 static int _GenTexturePrefilter(lua_State * L)
 {
-    luaL_pushtexture2d(L, GenTexturePrefilter(luaL_checkshader(L, 1),
-                                              luaL_checktexture2d(L, 2),
+    luaE_pushtexture2d(L, GenTexturePrefilter(luaE_checkshader(L, 1),
+                                              luaE_checktexture2d(L, 2),
                                               luaL_checkinteger(L, 3)));
     return 1;
 }
 
 static int _GenTextureBRDF(lua_State * L)
 {
-    luaL_pushtexture2d(L, GenTextureBRDF(luaL_checkshader(L, 1),
+    luaE_pushtexture2d(L, GenTextureBRDF(luaE_checkshader(L, 1),
                                          luaL_checkinteger(L, 2)));
     return 1;
 }
 
 static int _BeginShaderMode(lua_State * L)
 {
-    BeginShaderMode(luaL_checkshader(L, 1));
+    BeginShaderMode(luaE_checkshader(L, 1));
     return 0;
 }
 
@@ -3365,28 +3365,28 @@ static int _EndScissorMode(lua_State * L)
 
 static int _GetVrDeviceInfo(lua_State * L)
 {
-    luaL_pushvrdeviceinfo(L, GetVrDeviceInfo(luaL_checkinteger(L, 1)));
+    luaE_pushvrdeviceinfo(L, GetVrDeviceInfo(luaL_checkinteger(L, 1)));
     return 1;
 }
 
 static int _InitVrSimulator(lua_State * L)
 {
-    InitVrSimulator(luaL_checkvrdeviceinfo(L, 1));
+    InitVrSimulator(luaE_checkvrdeviceinfo(L, 1));
     return 0;
 }
 
 static int _UpdateVrTracking(lua_State * L)
 {
-    auto cam = luaL_checkcamera3d(L, 1);
+    auto cam = luaE_checkcamera3d(L, 1);
     UpdateVrTracking(&cam);
-    luaL_pushcamera3d(L, cam);
+    luaE_pushcamera3d(L, cam);
     return 1;
 }
 
 static int _SetVrConfiguration(lua_State * L)
 {
     // SetVrConfiguration(VrDeviceInfo info, Shader distortion)
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
@@ -3451,105 +3451,105 @@ static int _SetMasterVolume(lua_State * L)
 static int _LoadWave(lua_State * L)
 {
     auto result = LoadWave(luaL_checkstring(L, 1));
-    luaL_pushwave(L, &result);
+    luaE_pushwave(L, &result);
     return 1;
 }
 
 static int _LoadWaveEx(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _LoadSound(lua_State * L)
 {
     auto result = LoadSound(luaL_checkstring(L, 1));
-    luaL_pushsound(L, &result);
+    luaE_pushsound(L, &result);
     return 1;
 }
 
 static int _LoadSoundFromWave(lua_State * L)
 {
-    auto result = LoadSoundFromWave(*luaL_checkwave(L, 1));
-    luaL_pushsound(L, &result);
+    auto result = LoadSoundFromWave(*luaE_checkwave(L, 1));
+    luaE_pushsound(L, &result);
     return 1;
 }
 
 static int _UpdateSound(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _UnloadWave(lua_State * L)
 {
-    UnloadWave(*luaL_checkwave(L, 1));
+    UnloadWave(*luaE_checkwave(L, 1));
     return 0;
 }
 
 static int _UnloadSound(lua_State * L)
 {
-    UnloadSound(*luaL_checksound(L, 1));
+    UnloadSound(*luaE_checksound(L, 1));
     return 0;
 }
 
 static int _ExportWave(lua_State * L)
 {
-    ExportWave(*luaL_checkwave(L, 1), luaL_checkstring(L, 2));
+    ExportWave(*luaE_checkwave(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
 static int _ExportWaveAsCode(lua_State * L)
 {
-    ExportWaveAsCode(*luaL_checkwave(L, 1), luaL_checkstring(L, 2));
+    ExportWaveAsCode(*luaE_checkwave(L, 1), luaL_checkstring(L, 2));
     return 0;
 }
 
 static int _PlaySound(lua_State * L)
 {
-    PlaySound(*luaL_checksound(L, 1));
+    PlaySound(*luaE_checksound(L, 1));
     return 0;
 }
 
 static int _PauseSound(lua_State * L)
 {
-    PauseSound(*luaL_checksound(L, 1));
+    PauseSound(*luaE_checksound(L, 1));
     return 0;
 }
 
 static int _ResumeSound(lua_State * L)
 {
-    ResumeSound(*luaL_checksound(L, 1));
+    ResumeSound(*luaE_checksound(L, 1));
     return 0;
 }
 
 static int _StopSound(lua_State * L)
 {
-    StopSound(*luaL_checksound(L, 1));
+    StopSound(*luaE_checksound(L, 1));
     return 0;
 }
 
 static int _IsSoundPlaying(lua_State * L)
 {
-    lua_pushboolean(L, IsSoundPlaying(*luaL_checksound(L, 1)));
+    lua_pushboolean(L, IsSoundPlaying(*luaE_checksound(L, 1)));
     return 1;
 }
 
 static int _SetSoundVolume(lua_State * L)
 {
-    SetSoundVolume(*luaL_checksound(L, 1), luaL_checknumber(L, 2));
+    SetSoundVolume(*luaE_checksound(L, 1), luaL_checknumber(L, 2));
     return 0;
 }
 
 static int _SetSoundPitch(lua_State * L)
 {
-    SetSoundPitch(*luaL_checksound(L, 1), luaL_checknumber(L, 2));
+    SetSoundPitch(*luaE_checksound(L, 1), luaL_checknumber(L, 2));
     return 0;
 }
 
 static int _WaveFormat(lua_State * L)
 {
-    WaveFormat(luaL_checkwave(L, 1),
+    WaveFormat(luaE_checkwave(L, 1),
                luaL_checkinteger(L, 2),
                luaL_checkinteger(L, 3),
                luaL_checkinteger(L, 4));
@@ -3558,14 +3558,14 @@ static int _WaveFormat(lua_State * L)
 
 static int _WaveCopy(lua_State * L)
 {
-    auto result = WaveCopy(*luaL_checkwave(L, 1));
-    luaL_pushwave(L, &result);
+    auto result = WaveCopy(*luaE_checkwave(L, 1));
+    luaE_pushwave(L, &result);
     return 1;
 }
 
 static int _WaveCrop(lua_State * L)
 {
-    WaveCrop(luaL_checkwave(L, 1),
+    WaveCrop(luaE_checkwave(L, 1),
              luaL_checkinteger(L, 2),
              luaL_checkinteger(L, 3));
     return 0;
@@ -3573,7 +3573,7 @@ static int _WaveCrop(lua_State * L)
 
 static int _GetWaveData(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
@@ -3582,146 +3582,146 @@ static int _LoadMusicStream(lua_State * L)
     auto result = LoadMusicStream(luaL_checkstring(L, 1));
     MusicWrapper wrapper = {0,};
     wrapper.music = result;
-    luaL_pushmusic(L, &wrapper);
+    luaE_pushmusic(L, &wrapper);
     return 1;
 }
 
 static int _UnloadMusicStream(lua_State * L)
 {
-    UnloadMusicStream(luaL_checkmusic(L, 1)->music);
+    UnloadMusicStream(luaE_checkmusic(L, 1)->music);
     return 0;
 }
 
 static int _PlayMusicStream(lua_State * L)
 {
-    PlayMusicStream(luaL_checkmusic(L, 1)->music);
+    PlayMusicStream(luaE_checkmusic(L, 1)->music);
     return 0;
 }
 
 static int _UpdateMusicStream(lua_State * L)
 {
-    UpdateMusicStream(luaL_checkmusic(L, 1)->music);
+    UpdateMusicStream(luaE_checkmusic(L, 1)->music);
     return 0;
 }
 
 static int _StopMusicStream(lua_State * L)
 {
-    StopMusicStream(luaL_checkmusic(L, 1)->music);
+    StopMusicStream(luaE_checkmusic(L, 1)->music);
     return 0;
 }
 
 static int _PauseMusicStream(lua_State * L)
 {
-    PauseMusicStream(luaL_checkmusic(L, 1)->music);
+    PauseMusicStream(luaE_checkmusic(L, 1)->music);
     return 0;
 }
 
 static int _ResumeMusicStream(lua_State * L)
 {
-    ResumeMusicStream(luaL_checkmusic(L, 1)->music);
+    ResumeMusicStream(luaE_checkmusic(L, 1)->music);
     return 0;
 }
 
 static int _IsMusicPlaying(lua_State * L)
 {
-    lua_pushboolean(L, IsMusicPlaying(luaL_checkmusic(L, 1)->music)?1:0);
+    lua_pushboolean(L, IsMusicPlaying(luaE_checkmusic(L, 1)->music)?1:0);
     return 1;
 }
 
 static int _SetMusicVolume(lua_State * L)
 {
-    SetMusicVolume(luaL_checkmusic(L, 1)->music, luaL_checknumber(L, 2));
+    SetMusicVolume(luaE_checkmusic(L, 1)->music, luaL_checknumber(L, 2));
     return 0;
 }
 
 static int _SetMusicPitch(lua_State * L)
 {
-    SetMusicPitch(luaL_checkmusic(L, 1)->music, luaL_checknumber(L, 2));
+    SetMusicPitch(luaE_checkmusic(L, 1)->music, luaL_checknumber(L, 2));
     return 0;
 }
 
 static int _SetMusicLoopCount(lua_State * L)
 {
-    SetMusicLoopCount(luaL_checkmusic(L, 1)->music, luaL_checkinteger(L, 2));
+    SetMusicLoopCount(luaE_checkmusic(L, 1)->music, luaL_checkinteger(L, 2));
     return 0;
 }
 
 static int _GetMusicTimeLength(lua_State * L)
 {
-    lua_pushnumber(L, GetMusicTimeLength(luaL_checkmusic(L, 1)->music));
+    lua_pushnumber(L, GetMusicTimeLength(luaE_checkmusic(L, 1)->music));
     return 1;
 }
 
 static int _GetMusicTimePlayed(lua_State * L)
 {
-    lua_pushnumber(L, GetMusicTimePlayed(luaL_checkmusic(L, 1)->music));
+    lua_pushnumber(L, GetMusicTimePlayed(luaE_checkmusic(L, 1)->music));
     return 1;
 }
 
 static int _InitAudioStream(lua_State * L)
 {
     auto result = InitAudioStream(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2), luaL_checkinteger(L, 3));
-    luaL_pushaudiostream(L, &result);
+    luaE_pushaudiostream(L, &result);
     return 1;
 }
 
 static int _UpdateAudioStream(lua_State * L)
 {
-    luaL_unsupport(L);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _CloseAudioStream(lua_State * L)
 {
-    CloseAudioStream(*luaL_checkaudiostream(L, 1));
+    CloseAudioStream(*luaE_checkaudiostream(L, 1));
     return 0;
 }
 
 static int _IsAudioBufferProcessed(lua_State * L)
 {
-    lua_pushboolean(L, IsAudioBufferProcessed(*luaL_checkaudiostream(L, 1))?1:0);
+    lua_pushboolean(L, IsAudioBufferProcessed(*luaE_checkaudiostream(L, 1))?1:0);
     return 1;
 }
 
 static int _PlayAudioStream(lua_State * L)
 {
-    PlayAudioStream(*luaL_checkaudiostream(L, 1));
+    PlayAudioStream(*luaE_checkaudiostream(L, 1));
     return 0;
 }
 
 static int _PauseAudioStream(lua_State * L)
 {
-    PauseAudioStream(*luaL_checkaudiostream(L, 1));
+    PauseAudioStream(*luaE_checkaudiostream(L, 1));
     return 0;
 }
 
 static int _ResumeAudioStream(lua_State * L)
 {
-    ResumeAudioStream(*luaL_checkaudiostream(L, 1));
+    ResumeAudioStream(*luaE_checkaudiostream(L, 1));
     return 0;
 }
 
 static int _IsAudioStreamPlaying(lua_State * L)
 {
-    lua_pushboolean(L, IsAudioStreamPlaying(*luaL_checkaudiostream(L, 1))?1:0);
+    lua_pushboolean(L, IsAudioStreamPlaying(*luaE_checkaudiostream(L, 1))?1:0);
     return 1;
 }
 
 static int _StopAudioStream(lua_State * L)
 {
-    StopAudioStream(*luaL_checkaudiostream(L, 1));
+    StopAudioStream(*luaE_checkaudiostream(L, 1));
     return 0;
 }
 
 static int _SetAudioStreamVolume(lua_State * L)
 {
-    SetAudioStreamVolume(*luaL_checkaudiostream(L, 1), luaL_checknumber(L, 2));
+    SetAudioStreamVolume(*luaE_checkaudiostream(L, 1), luaL_checknumber(L, 2));
     return 0;
 }
 
 static int _SetAudioStreamPitch(lua_State * L)
 {
-    SetAudioStreamPitch(*luaL_checkaudiostream(L, 1), luaL_checknumber(L, 2));
+    SetAudioStreamPitch(*luaE_checkaudiostream(L, 1), luaL_checknumber(L, 2));
     return 0;
 }
 
@@ -4246,12 +4246,12 @@ static luaL_Reg const __lua_lay_core[] = {
 #ifndef RAY_COLOR_SYMBOL
 #define RAY_COLOR_SYMBOL(L, s, r, g, b, a)      \
     do {                                        \
-        luaL_pushcolor(L, Color{r, g, b, a});   \
+        luaE_pushcolor(L, Color{r, g, b, a});   \
         lua_setfield(L, -2, #s);                \
     } while (false) /* -- END -- */
 #endif
 
-static void luaL_push_raylib_symbols(lua_State * L)
+static void luaE_push_raylib_symbols(lua_State * L)
 {
     RAY_FLOAT_SYMBOL(L, PI);
     RAY_FLOAT_SYMBOL(L, DEG2RAD);
@@ -4600,19 +4600,19 @@ bool luaopen_ray(lua_State * L)
 {
     luaL_register(L, lua_ray_name(), __lua_lay_core);
     {
-        luaL_push_raylib_symbols(L);
+        luaE_push_raylib_symbols(L);
 
         // clang-format off
-        luaL_register_metatable(L, METATABLE_IMAGE,          __lua_reg_image);
-        luaL_register_metatable(L, METATABLE_CHARINFO,       __lua_reg_charinfo);
-        luaL_register_metatable(L, METATABLE_FONT,           __lua_reg_font);
-        luaL_register_metatable(L, METATABLE_MESH,           __lua_reg_mesh);
-        luaL_register_metatable(L, METATABLE_MATERIAL,       __lua_reg_material);
-        luaL_register_metatable(L, METATABLE_MODEL,          __lua_reg_model);
-        luaL_register_metatable(L, METATABLE_MODELANIMATION, __lua_reg_modelanimation);
-        luaL_register_metatable(L, METATABLE_WAVE,           __lua_reg_wave);
-        luaL_register_metatable(L, METATABLE_SOUND,          __lua_reg_sound);
-        luaL_register_metatable(L, METATABLE_AUDIOSTREAM,    __lua_reg_audiostream);
+        luaE_register_metatable(L, METATABLE_IMAGE,          __lua_reg_image);
+        luaE_register_metatable(L, METATABLE_CHARINFO,       __lua_reg_charinfo);
+        luaE_register_metatable(L, METATABLE_FONT,           __lua_reg_font);
+        luaE_register_metatable(L, METATABLE_MESH,           __lua_reg_mesh);
+        luaE_register_metatable(L, METATABLE_MATERIAL,       __lua_reg_material);
+        luaE_register_metatable(L, METATABLE_MODEL,          __lua_reg_model);
+        luaE_register_metatable(L, METATABLE_MODELANIMATION, __lua_reg_modelanimation);
+        luaE_register_metatable(L, METATABLE_WAVE,           __lua_reg_wave);
+        luaE_register_metatable(L, METATABLE_SOUND,          __lua_reg_sound);
+        luaE_register_metatable(L, METATABLE_AUDIOSTREAM,    __lua_reg_audiostream);
         // clang-format on
     }
     lua_pop(L, 1);

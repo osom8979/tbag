@@ -29,28 +29,28 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 
-TBAG_API int luaL_unsupport(lua_State * L);
-TBAG_API void luaL_register_metatable(lua_State * L, char const * name, luaL_Reg const * l);
-TBAG_API void luadebug_printstack(lua_State * L);
+TBAG_API int  luaE_unsupport(lua_State * L);
+TBAG_API void luaE_register_metatable(lua_State * L, char const * name, luaL_Reg const * l);
+TBAG_API void luaE_printstack(lua_State * L);
 
 // clang-format off
-TBAG_API std::vector<lua_Integer> luaL_checkinteger_array(lua_State * L, int arg_num);
-TBAG_API std::vector<lua_Number>  luaL_checknumber_array (lua_State * L, int arg_num);
-TBAG_API std::vector<std::string> luaL_checkstring_array (lua_State * L, int arg_num);
+TBAG_API std::vector<lua_Integer> luaE_checkinteger_array(lua_State * L, int arg_num);
+TBAG_API std::vector<lua_Number>  luaE_checknumber_array (lua_State * L, int arg_num);
+TBAG_API std::vector<std::string> luaE_checkstring_array (lua_State * L, int arg_num);
 // clang-format on
 
 #ifndef TBAG_LUA_USERDATA_PROTO
 #define TBAG_LUA_USERDATA_PROTO(type, lower, api)                               \
-    api type * luaL_push##lower(lua_State * L, type const * src = nullptr);     \
-    api type * luaL_check##lower(lua_State * L, int num_arg);                   \
-    api type * luaL_opt##lower(lua_State * L, int num_arg, type * def);         \
+    api type * luaE_push##lower(lua_State * L, type const * src = nullptr);     \
+    api type * luaE_check##lower(lua_State * L, int num_arg);                   \
+    api type * luaE_opt##lower(lua_State * L, int num_arg, type * def);         \
     /* -- END -- */
 #endif
 
 #ifndef TBAG_LUA_USERDATA_IMPL
 #define TBAG_LUA_USERDATA_IMPL(type, name, upper, lower, api, more_regs)        \
     TBAG_CONSTEXPR static char const * const METATABLE_##upper = #name;         \
-    api type * luaL_push##lower(lua_State * L, type const * src)                \
+    api type * luaE_push##lower(lua_State * L, type const * src)                \
     {                                                                           \
         auto * result = (type*)lua_newuserdata(L, sizeof(type));                \
         assert(result != nullptr);                                              \
@@ -63,7 +63,7 @@ TBAG_API std::vector<std::string> luaL_checkstring_array (lua_State * L, int arg
         lua_setmetatable(L, -2);                                                \
         return result;                                                          \
     }                                                                           \
-    api type * luaL_check##lower(lua_State * L, int num_arg)                    \
+    api type * luaE_check##lower(lua_State * L, int num_arg)                    \
     {                                                                           \
         auto * result = (type*)luaL_checkudata(L, num_arg, METATABLE_##upper);  \
         if (result == nullptr) {                                                \
@@ -72,16 +72,16 @@ TBAG_API std::vector<std::string> luaL_checkstring_array (lua_State * L, int arg
         }                                                                       \
         return result;                                                          \
     }                                                                           \
-    api type * luaL_opt##lower(lua_State * L, int num_arg, type * def)          \
+    api type * luaE_opt##lower(lua_State * L, int num_arg, type * def)          \
     {                                                                           \
         if (lua_isuserdata(L, num_arg)) {                                       \
-            return luaL_check##lower(L, num_arg);                               \
+            return luaE_check##lower(L, num_arg);                               \
         }                                                                       \
         return def;                                                             \
     }                                                                           \
     static int _##name(lua_State * L)                                           \
     {                                                                           \
-        luaL_push##lower(L);                                                    \
+        luaE_push##lower(L);                                                    \
         return 1;                                                               \
     }                                                                           \
     static int _##name##_gc(lua_State * L)                                      \
