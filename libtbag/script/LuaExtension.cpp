@@ -117,15 +117,132 @@ std::vector<std::string> luaE_checkstring_array(lua_State * L, int arg_num)
     return result;
 }
 
+std::vector<luaL_Reg> mergeLuaRegister(luaL_Reg const * a, luaL_Reg const * b)
+{
+    std::vector<luaL_Reg> result;
+    while (a != nullptr && a->name != nullptr && a->func != nullptr) {
+        result.push_back(luaL_Reg{a->name, a->func});
+        ++a;
+    }
+    while (b != nullptr && b->name != nullptr && b->func != nullptr) {
+        result.push_back(luaL_Reg{b->name, b->func});
+        ++b;
+    }
+    result.push_back(luaL_Reg{nullptr, nullptr});
+    return result;
+}
+
 # /**************/
-# /* PosWrapper */
+# /* PodWrapper */
 # /**************/
 
-TBAG_LUA_USERDATA_DEFAULT_IMPL(BooleanWrapper , BOOLEANWRAPPER , booleanwrapper )
-TBAG_LUA_USERDATA_DEFAULT_IMPL(IntegerWrapper , INTEGERWRAPPER , integerwrapper )
-TBAG_LUA_USERDATA_DEFAULT_IMPL(UnsignedWrapper, UNSIGNEDWRAPPER, unsignedwrapper)
-TBAG_LUA_USERDATA_DEFAULT_IMPL(FloatWrapper   , FLOATWRAPPER   , floatwrapper   )
-TBAG_LUA_USERDATA_DEFAULT_IMPL(DoubleWrapper  , DOUBLEWRAPPER  , doublewrapper  )
+static int _BooleanWrapper_get(lua_State * L)
+{
+    auto * wrapper = luaE_checkbooleanwrapper(L, 1);
+    lua_pushboolean(L, wrapper->value);
+    return 1;
+}
+
+static int _BooleanWrapper_set(lua_State * L)
+{
+    auto * wrapper = luaE_checkbooleanwrapper(L, 1);
+    wrapper->value = luaL_checkinteger(L, 2);
+    return 0;
+}
+
+static luaL_Reg const __lua_reg_BooleanWrapper[] = {
+        { "get", _BooleanWrapper_get },
+        { "set", _BooleanWrapper_set },
+        { nullptr, nullptr }
+};
+
+static int _IntegerWrapper_get(lua_State * L)
+{
+    auto * wrapper = luaE_checkintegerwrapper(L, 1);
+    lua_pushboolean(L, wrapper->value);
+    return 1;
+}
+
+static int _IntegerWrapper_set(lua_State * L)
+{
+    auto * wrapper = luaE_checkintegerwrapper(L, 1);
+    wrapper->value = luaL_checkinteger(L, 2);
+    return 0;
+}
+
+static luaL_Reg const __lua_reg_IntegerWrapper[] = {
+        { "get", _IntegerWrapper_get },
+        { "set", _IntegerWrapper_set },
+        { nullptr, nullptr }
+};
+
+static int _UnsignedWrapper_get(lua_State * L)
+{
+    auto * wrapper = luaE_checkunsignedwrapper(L, 1);
+    lua_pushboolean(L, wrapper->value);
+    return 1;
+}
+
+static int _UnsignedWrapper_set(lua_State * L)
+{
+    auto * wrapper = luaE_checkunsignedwrapper(L, 1);
+    wrapper->value = luaL_checkinteger(L, 2);
+    return 0;
+}
+
+static luaL_Reg const __lua_reg_UnsignedWrapper[] = {
+        { "get", _UnsignedWrapper_get },
+        { "set", _UnsignedWrapper_set },
+        { nullptr, nullptr }
+};
+
+static int _FloatWrapper_get(lua_State * L)
+{
+    auto * wrapper = luaE_checkfloatwrapper(L, 1);
+    lua_pushboolean(L, wrapper->value);
+    return 1;
+}
+
+static int _FloatWrapper_set(lua_State * L)
+{
+    auto * wrapper = luaE_checkfloatwrapper(L, 1);
+    wrapper->value = luaL_checknumber(L, 2);
+    return 0;
+}
+
+static luaL_Reg const __lua_reg_FloatWrapper[] = {
+        { "get", _FloatWrapper_get },
+        { "set", _FloatWrapper_set },
+        { nullptr, nullptr }
+};
+
+static int _DoubleWrapper_get(lua_State * L)
+{
+    auto * wrapper = luaE_checkdoublewrapper(L, 1);
+    lua_pushboolean(L, wrapper->value);
+    return 1;
+}
+
+static int _DoubleWrapper_set(lua_State * L)
+{
+    auto * wrapper = luaE_checkdoublewrapper(L, 1);
+    wrapper->value = luaL_checknumber(L, 2);
+    return 0;
+}
+
+static luaL_Reg const __lua_reg_DoubleWrapper[] = {
+        { "get", _DoubleWrapper_get },
+        { "set", _DoubleWrapper_set },
+        { nullptr, nullptr }
+};
+
+// clang-format off
+TBAG_LUA_USERDATA_IMPL(BooleanWrapper , BooleanWrapper , BOOLEANWRAPPER , booleanwrapper , __lua_reg_BooleanWrapper )
+TBAG_LUA_USERDATA_IMPL(IntegerWrapper , IntegerWrapper , INTEGERWRAPPER , integerwrapper , __lua_reg_IntegerWrapper )
+TBAG_LUA_USERDATA_IMPL(UnsignedWrapper, UnsignedWrapper, UNSIGNEDWRAPPER, unsignedwrapper, __lua_reg_UnsignedWrapper)
+TBAG_LUA_USERDATA_IMPL(FloatWrapper   , FloatWrapper   , FLOATWRAPPER   , floatwrapper   , __lua_reg_FloatWrapper   )
+TBAG_LUA_USERDATA_IMPL(DoubleWrapper  , DoubleWrapper  , DOUBLEWRAPPER  , doublewrapper  , __lua_reg_DoubleWrapper  )
+// clang-format on
 
 } // namespace script
 

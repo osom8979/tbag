@@ -115,7 +115,7 @@ static int _SetStyle(lua_State * L)
 
 static int _Begin(lua_State * L)
 {
-    lua_pushboolean(L, Begin(luaL_checkstring(L, 1), nullptr, luaL_checkinteger(L, 2)));
+    lua_pushboolean(L, Begin(luaL_checkstring(L, 1), nullptr, luaL_optinteger(L, 2, 0)));
     return 1;
 }
 

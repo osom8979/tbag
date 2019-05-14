@@ -39,18 +39,21 @@ TBAG_API std::vector<lua_Number>  luaE_checknumber_array (lua_State * L, int arg
 TBAG_API std::vector<std::string> luaE_checkstring_array (lua_State * L, int arg_num);
 // clang-format on
 
+TBAG_API std::vector<luaL_Reg> mergeLuaRegister(luaL_Reg const * a, luaL_Reg const * b);
+
 #ifndef TBAG_LUA_USERDATA_PROTO
 #define TBAG_LUA_USERDATA_PROTO(type, lower, api)                               \
     api type * luaE_push##lower(lua_State * L, type const * src = nullptr);     \
     api type * luaE_check##lower(lua_State * L, int num_arg);                   \
     api type * luaE_opt##lower(lua_State * L, int num_arg, type * def);         \
+    api void   luaE_register_##lower(lua_State * L);                            \
     /* -- END -- */
 #endif
 
 #ifndef TBAG_LUA_USERDATA_IMPL
-#define TBAG_LUA_USERDATA_IMPL(type, name, upper, lower, api, more_regs)        \
+#define TBAG_LUA_USERDATA_IMPL(type, name, upper, lower, more_regs)             \
     TBAG_CONSTEXPR static char const * const METATABLE_##upper = #name;         \
-    api type * luaE_push##lower(lua_State * L, type const * src)                \
+    type * luaE_push##lower(lua_State * L, type const * src)                    \
     {                                                                           \
         auto * result = (type*)lua_newuserdata(L, sizeof(type));                \
         assert(result != nullptr);                                              \
@@ -63,7 +66,7 @@ TBAG_API std::vector<std::string> luaE_checkstring_array (lua_State * L, int arg
         lua_setmetatable(L, -2);                                                \
         return result;                                                          \
     }                                                                           \
-    api type * luaE_check##lower(lua_State * L, int num_arg)                    \
+    type * luaE_check##lower(lua_State * L, int num_arg)                        \
     {                                                                           \
         auto * result = (type*)luaL_checkudata(L, num_arg, METATABLE_##upper);  \
         if (result == nullptr) {                                                \
@@ -72,7 +75,7 @@ TBAG_API std::vector<std::string> luaE_checkstring_array (lua_State * L, int arg
         }                                                                       \
         return result;                                                          \
     }                                                                           \
-    api type * luaE_opt##lower(lua_State * L, int num_arg, type * def)          \
+    type * luaE_opt##lower(lua_State * L, int num_arg, type * def)              \
     {                                                                           \
         if (lua_isuserdata(L, num_arg)) {                                       \
             return luaE_check##lower(L, num_arg);                               \
@@ -96,14 +99,19 @@ TBAG_API std::vector<std::string> luaE_checkstring_array (lua_State * L, int arg
     static luaL_Reg const __lua_reg_##lower[] = {                               \
             { "__gc", _##name##_gc },                                           \
             { "__tostring", _##name##_tostring },                               \
-            more_regs                                                           \
             { nullptr, nullptr }                                                \
-    }; /* -- END -- */
+    };                                                                          \
+    void luaE_register_##lower(lua_State * L)                                   \
+    {                                                                           \
+        auto regs = mergeLuaRegister(__lua_reg_##lower, more_regs);             \
+        luaE_register_metatable(L, METATABLE_##upper,                           \
+                                (luaL_Reg const *)regs.data());                 \
+    } /* -- END -- */
 #endif
 
 #ifndef TBAG_LUA_USERDATA_DEFAULT_IMPL
 #define TBAG_LUA_USERDATA_DEFAULT_IMPL(type, upper, lower) \
-    TBAG_LUA_USERDATA_IMPL(type, type, upper, lower,,)
+    TBAG_LUA_USERDATA_IMPL(type, type, upper, lower, nullptr)
 #endif
 
 template <typename T>

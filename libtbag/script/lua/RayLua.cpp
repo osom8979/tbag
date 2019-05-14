@@ -893,7 +893,7 @@ TBAG_LUA_USERDATA_DEFAULT_IMPL(Sound, SOUND, sound)
 # /* Music */
 # /*********/
 
-TBAG_LUA_USERDATA_IMPL(MusicWrapper, Music, MUSIC, music, , )
+TBAG_LUA_USERDATA_IMPL(MusicWrapper, Music, MUSIC, music, nullptr)
 
 # /***************/
 # /* AudioStream */
@@ -4603,16 +4603,16 @@ bool luaopen_ray(lua_State * L)
         luaE_push_raylib_symbols(L);
 
         // clang-format off
-        luaE_register_metatable(L, METATABLE_IMAGE,          __lua_reg_image);
-        luaE_register_metatable(L, METATABLE_CHARINFO,       __lua_reg_charinfo);
-        luaE_register_metatable(L, METATABLE_FONT,           __lua_reg_font);
-        luaE_register_metatable(L, METATABLE_MESH,           __lua_reg_mesh);
-        luaE_register_metatable(L, METATABLE_MATERIAL,       __lua_reg_material);
-        luaE_register_metatable(L, METATABLE_MODEL,          __lua_reg_model);
-        luaE_register_metatable(L, METATABLE_MODELANIMATION, __lua_reg_modelanimation);
-        luaE_register_metatable(L, METATABLE_WAVE,           __lua_reg_wave);
-        luaE_register_metatable(L, METATABLE_SOUND,          __lua_reg_sound);
-        luaE_register_metatable(L, METATABLE_AUDIOSTREAM,    __lua_reg_audiostream);
+        luaE_register_image(L);
+        luaE_register_charinfo(L);
+        luaE_register_font(L);
+        luaE_register_mesh(L);
+        luaE_register_material(L);
+        luaE_register_model(L);
+        luaE_register_modelanimation(L);
+        luaE_register_wave(L);
+        luaE_register_sound(L);
+        luaE_register_audiostream(L);
         // clang-format on
     }
     lua_pop(L, 1);
