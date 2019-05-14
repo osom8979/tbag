@@ -227,7 +227,9 @@ TBAG_API void luaL_openlibs  (lua_State * L);
 // more compatibility
 // ------------------
 
-TBAG_API int  lua_absindex(lua_State * L, int i);
+TBAG_API int lua_absindex(lua_State * L, int i);
+TBAG_API int lua_isinteger(lua_State * L, int index);
+
 TBAG_API void luaL_setmetatable(lua_State * L, char const * tname);
 TBAG_API int  luaL_checkboolean(lua_State * L, int idx);
 TBAG_API int  luaL_optboolean(lua_State * L, int arg, int def);

@@ -758,6 +758,18 @@ int lua_absindex(lua_State * L, int i)
     return i;
 }
 
+int lua_isinteger(lua_State * L, int index)
+{
+    if (::lua_type(L, index) == LUA_TNUMBER) {
+        lua_Number n = ::lua_tonumber(L, index);
+        lua_Integer i = ::lua_tointeger(L, index);
+        if (i == n) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void luaL_setmetatable(lua_State * L, char const * tname)
 {
     ::luaL_checkstack(L, 1, "Not enough stack slots");
