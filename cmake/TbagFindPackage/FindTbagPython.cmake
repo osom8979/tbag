@@ -5,8 +5,8 @@
 #  TbagPython_FIND_VERSION
 
 macro (tabg_python__find_development_in_interpreter)
-    execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
-                            "import distutils.sysconfig as s; print(s.get_python_inc())"
+    execute_process (COMMAND "${Python_EXECUTABLE}" "-c"
+                             "import distutils.sysconfig as s; print(s.get_python_inc())"
             RESULT_VARIABLE __result
             OUTPUT_VARIABLE __output
             OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -16,8 +16,8 @@ macro (tabg_python__find_development_in_interpreter)
         message (FATAL "Python script error (INC): ${__result}")
     endif ()
 
-    execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
-                            "import distutils.sysconfig as s; print(s.get_config_var('LIBDIR'))"
+    execute_process (COMMAND "${Python_EXECUTABLE}" "-c"
+                             "import distutils.sysconfig as s; print(s.get_config_var('LIBDIR'))"
             RESULT_VARIABLE __result
             OUTPUT_VARIABLE __output
             OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -27,8 +27,8 @@ macro (tabg_python__find_development_in_interpreter)
         message (FATAL "Python script error (LIBDIR): ${__result}")
     endif ()
 
-    execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
-                            "import distutils.sysconfig as s; print(s.get_config_var('PYTHONFRAMEWORKPREFIX'))"
+    execute_process (COMMAND "${Python_EXECUTABLE}" "-c"
+                             "import distutils.sysconfig as s; print(s.get_config_var('PYTHONFRAMEWORKPREFIX'))"
             RESULT_VARIABLE __result
             OUTPUT_VARIABLE __output
             OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -38,8 +38,8 @@ macro (tabg_python__find_development_in_interpreter)
         message (FATAL "Python script error (base): ${__result}")
     endif ()
 
-    execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
-                            "import distutils.sysconfig as s; print(s.get_config_var('LDLIBRARY'))"
+    execute_process (COMMAND "${Python_EXECUTABLE}" "-c"
+                             "import distutils.sysconfig as s; print(s.get_config_var('LDLIBRARY'))"
             RESULT_VARIABLE __result
             OUTPUT_VARIABLE __output
             OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -53,8 +53,8 @@ macro (tabg_python__find_development_in_interpreter)
         message (FATAL "Python script error (LDLIBRARY): ${__result}")
     endif ()
 
-    execute_process(COMMAND "${Python_EXECUTABLE}" "-c"
-                            "import platform as p; print(p.python_version())"
+    execute_process (COMMAND "${Python_EXECUTABLE}" "-c"
+                             "import platform as p; print(p.python_version())"
             RESULT_VARIABLE __result
             OUTPUT_VARIABLE __output
             OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -97,6 +97,10 @@ macro (tabg_python__find_default)
         endif ()
     endforeach ()
 
+    if (NOT __python_quiet STREQUAL "QUIET")
+        set (__python_quiet REQUIRED)
+    endif ()
+
     if (__python_last)
         set (__original_cmake_find_framework ${CMAKE_FIND_FRAMEWORK})
         set (__original_python_find_registry ${Python_FIND_REGISTRY})
@@ -105,7 +109,7 @@ macro (tabg_python__find_default)
     endif ()
 
     if (__python_interpreter AND NOT Python_Interpreter_FOUND)
-        if (CMAKE_VERSION VERSION_LESS "3.12")
+        #if (CMAKE_VERSION VERSION_LESS "3.12")
             if (TbagPython_PYENV_NAME)
                 set (Python_ROOT_DIR "$ENV{HOME}/.pyenv/versions/${TbagPython_PYENV_NAME}")
                 set (Python_Interpreter_FOUND ON)
@@ -137,12 +141,19 @@ macro (tabg_python__find_default)
                     set (Python_VERSION_PATCH ${PYTHON_VERSION_PATCH})
                 endif ()
             endif ()
-        else ()
-            if (TbagPython_PYENV_NAME)
-                set (Python_ROOT_DIR "$ENV{HOME}/.pyenv/versions/${TbagPython_PYENV_NAME}")
-            endif ()
-            find_package (Python ${__python_quiet} ${TbagPython_FIND_VERSION} COMPONENTS Interpreter)
-        endif ()
+        #else ()
+        #    if (TbagPython_PYENV_NAME)
+        #        set (Python_ROOT_DIR "$ENV{HOME}/.pyenv/versions/${TbagPython_PYENV_NAME}")
+        #    endif ()
+        #    message (STATUS "[FindTbagPython] Python_ROOT_DIR: ${Python_ROOT_DIR}")
+        #    if ("${TbagPython_FIND_VERSION}" VERSION_LESS "3")
+        #        message (STATUS "[FindTbagPython] Find Python2")
+        #        find_package (Python2 ${__python_quiet} ${TbagPython_FIND_VERSION} COMPONENTS Interpreter)
+        #    else ()
+        #        message (STATUS "[FindTbagPython] Find Python3")
+        #        find_package (Python3 ${__python_quiet} ${TbagPython_FIND_VERSION} COMPONENTS Interpreter)
+        #    endif ()
+        #endif ()
     endif ()
 
     if (__python_development AND NOT Python_Development_FOUND)
