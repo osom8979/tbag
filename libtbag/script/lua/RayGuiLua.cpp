@@ -1802,7 +1802,7 @@ static int _GuiSaveIniSettingsToMemory(lua_State * L)
 #define RAYGUI_REGISTER(name) { #name, _##name }
 #endif
 
-static luaL_Reg const __lua_lay_gui[] = {
+static luaL_Reg const __lua_laygui[] = {
         // Raylib-ImGui.
         RAYGUI_REGISTER(GuiInitRay),
         RAYGUI_REGISTER(GuiUpdateRay),
@@ -2447,7 +2447,7 @@ static void luaL_push_raygui_symbols(lua_State * L)
 
 bool luaopen_raygui(lua_State * L)
 {
-    luaL_register(L, lua_raygui_name(), __lua_lay_gui);
+    luaL_register(L, lua_tbag_name(), __lua_laygui);
     {
         luaL_push_raygui_symbols(L);
     }

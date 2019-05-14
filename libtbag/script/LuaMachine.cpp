@@ -7,6 +7,7 @@
  */
 
 #include <libtbag/script/LuaMachine.hpp>
+#include <libtbag/script/LuaExtension.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
@@ -145,6 +146,9 @@ void LuaMachine::initDefault()
     initDefaultLuaCPath();
     initDefaultTbagTable();
 
+    if (!libtbag::script::luaopen_tbag(L)) {
+        tDLogW("LuaMachine::initDefault() Tbag bind failed.");
+    }
     if (!libtbag::script::lua::luaopen_ray(L)) {
         tDLogW("LuaMachine::initDefault() Ray bind failed.");
     }

@@ -3729,17 +3729,19 @@ static int _SetAudioStreamPitch(lua_State * L)
 #define RAY_REGISTER(name) { #name, _##name }
 #endif
 
-static luaL_Reg const __lua_lay_core[] = {
-        { METATABLE_IMAGE, _Image },
-        { METATABLE_CHARINFO, _CharInfo },
-        { METATABLE_FONT, _Font },
-        { METATABLE_MESH, _Mesh },
-        { METATABLE_MATERIAL, _Material },
-        { METATABLE_MODEL, _Model },
+static luaL_Reg const __lua_lay[] = {
+        // clang-format off
+        { METATABLE_IMAGE         , _Image          },
+        { METATABLE_CHARINFO      , _CharInfo       },
+        { METATABLE_FONT          , _Font           },
+        { METATABLE_MESH          , _Mesh           },
+        { METATABLE_MATERIAL      , _Material       },
+        { METATABLE_MODEL         , _Model          },
         { METATABLE_MODELANIMATION, _ModelAnimation },
-        { METATABLE_WAVE, _Wave },
-        { METATABLE_SOUND, _Sound },
-        { METATABLE_AUDIOSTREAM, _AudioStream },
+        { METATABLE_WAVE          , _Wave           },
+        { METATABLE_SOUND         , _Sound          },
+        { METATABLE_AUDIOSTREAM   , _AudioStream    },
+        // clang-format on
 
         // [CORE] Window-related functions
         RAY_REGISTER(InitWindow),
@@ -4598,7 +4600,7 @@ static void luaE_push_raylib_symbols(lua_State * L)
 
 bool luaopen_ray(lua_State * L)
 {
-    luaL_register(L, lua_ray_name(), __lua_lay_core);
+    luaL_register(L, lua_tbag_name(), __lua_lay);
     {
         luaE_push_raylib_symbols(L);
 

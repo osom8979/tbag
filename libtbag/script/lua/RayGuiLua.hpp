@@ -26,11 +26,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace script {
 namespace lua    {
 
-TBAG_CONSTEXPR char const * const lua_raygui_name() TBAG_NOEXCEPT
-{
-    return "gui";
-}
-
 TBAG_API bool luaopen_raygui(lua_State * L);
 
 } // namespace lua

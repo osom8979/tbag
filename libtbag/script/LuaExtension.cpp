@@ -244,6 +244,34 @@ TBAG_LUA_USERDATA_IMPL(FloatWrapper   , FloatWrapper   , FLOATWRAPPER   , floatw
 TBAG_LUA_USERDATA_IMPL(DoubleWrapper  , DoubleWrapper  , DOUBLEWRAPPER  , doublewrapper  , __lua_reg_DoubleWrapper  )
 // clang-format on
 
+static luaL_Reg const __lua_tbag[] = {
+        // clang-format off
+        { METATABLE_BOOLEANWRAPPER , _BooleanWrapper  },
+        { METATABLE_INTEGERWRAPPER , _IntegerWrapper  },
+        { METATABLE_UNSIGNEDWRAPPER, _UnsignedWrapper },
+        { METATABLE_FLOATWRAPPER   , _FloatWrapper    },
+        { METATABLE_DOUBLEWRAPPER  , _DoubleWrapper   },
+        // clang-format on
+
+        { nullptr, nullptr }
+};
+
+bool luaopen_tbag(lua_State * L)
+{
+    luaL_register(L, lua_tbag_name(), __lua_tbag);
+    {
+        // clang-format off
+        luaE_register_booleanwrapper(L);
+        luaE_register_integerwrapper(L);
+        luaE_register_unsignedwrapper(L);
+        luaE_register_floatwrapper(L);
+        luaE_register_doublewrapper(L);
+        // clang-format on
+    }
+    lua_pop(L, 1);
+    return true;
+}
+
 } // namespace script
 
 // --------------------

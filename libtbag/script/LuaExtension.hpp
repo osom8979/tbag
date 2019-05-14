@@ -29,6 +29,13 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 
+TBAG_CONSTEXPR char const * const LUA_TBAG_NAME = "tbag";
+
+TBAG_CONSTEXPR char const * const lua_tbag_name() TBAG_NOEXCEPT
+{
+    return LUA_TBAG_NAME;
+}
+
 TBAG_API int  luaE_unsupport(lua_State * L);
 TBAG_API void luaE_register_metatable(lua_State * L, char const * name, luaL_Reg const * l);
 TBAG_API void luaE_printstack(lua_State * L);
@@ -131,6 +138,8 @@ TBAG_LUA_USERDATA_PROTO(IntegerWrapper , integerwrapper , TBAG_API)
 TBAG_LUA_USERDATA_PROTO(UnsignedWrapper, unsignedwrapper, TBAG_API)
 TBAG_LUA_USERDATA_PROTO(FloatWrapper   , floatwrapper   , TBAG_API)
 TBAG_LUA_USERDATA_PROTO(DoubleWrapper  , doublewrapper  , TBAG_API)
+
+TBAG_API bool luaopen_tbag(lua_State * L);
 
 } // namespace script
 

@@ -12,35 +12,37 @@
  *   width = 800
  *   height = 450
  *
- *   ray.InitWindow(width, height, 'Basic window')
- *   gui.InitRayGui()
- *   ray.SetTargetFPS(60)
+ *   tbag.InitWindow(width, height, 'Basic window')
+ *   tbag.GuiInitRay()
+ *   tbag.SetTargetFPS(60)
  *
- *   gradient = ray.GenImageGradientV(400, 400, ray.RED, ray.BLUE);
- *   texture = ray.LoadTextureFromImage(gradient);
- *   ray.UnloadImage(gradient);
+ *   gradient = tbag.GenImageGradientV(400, 400, tbag.RED, tbag.BLUE);
+ *   texture = tbag.LoadTextureFromImage(gradient);
+ *   tbag.UnloadImage(gradient);
  *   gradient = nil
  *
- *   while not ray.WindowShouldClose() do
- *       gui.UpdateRayGui()
- *       if gui.Begin('Window') then
- *           gui.Text('Label')
+ *   while not tbag.WindowShouldClose() do
+ *       tbag.GuiUpdateRay()
+ *       if tbag.GuiBegin('Window') then
+ *           tbag.GuiText('Label')
  *       end
- *       gui.End()
+ *       tbag.GuiEnd()
  *
- *       ray.BeginDrawing()
- *       ray.ClearBackground({30, 30, 30})
- *       ray.DrawTexture(texture, 0, 0, ray.WHITE);
- *       ray.DrawCircleV({width/2, height/2}, 50, ray.RED);
- *       ray.DrawText('Basic window!', 10, 20, 20, {200, 200, 200});
- *       ray.EndDrawing()
+ *       tbag.GuiShowDemoWindow()
+ *
+ *       tbag.BeginDrawing()
+ *       tbag.ClearBackground({30, 30, 30})
+ *       tbag.DrawTexture(texture, 0, 0, tbag.WHITE);
+ *       tbag.DrawCircleV({width/2, height/2}, 50, tbag.RED);
+ *       tbag.DrawText('Basic window!', 10, 20, 20, {200, 200, 200});
+ *       tbag.EndDrawing()
  *   end
  *
- *   ray.UnloadTexture(texture);
+ *   tbag.UnloadTexture(texture);
  *   texture = nil
  *
- *   gui.ShutdownRayGui()
- *   ray.CloseWindow()
+ *   tbag.GuiShutdownRay()
+ *   tbag.CloseWindow()
  *  @endcode
  */
 
@@ -66,11 +68,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace script {
 namespace lua    {
-
-TBAG_CONSTEXPR char const * const lua_ray_name() TBAG_NOEXCEPT
-{
-    return "ray";
-}
 
 TBAG_API void luaE_pushvector2(lua_State * L, Vector2 const & vec);
 TBAG_API Vector2 luaE_checkvector2(lua_State * L, int num_arg);
