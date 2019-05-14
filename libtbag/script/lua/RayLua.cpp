@@ -455,7 +455,7 @@ RenderTexture2D luaE_checkrendertexture2d(lua_State * L, int num_arg)
     lua_getfield(L, num_arg, "depth");
     result.depth = luaE_checktexture2d(L, lua_absindex(L, -1));
     lua_getfield(L, num_arg, "depthTexture");
-    result.depthTexture = (lua_toboolean(L, -1) != 0);
+    result.depthTexture = (luaL_checkboolean(L, -1) != 0);
     lua_pop(L, 4);
     return result;
 }

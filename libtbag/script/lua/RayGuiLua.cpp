@@ -115,7 +115,12 @@ static int _GuiSetStyle(lua_State * L)
 
 static int _GuiBegin(lua_State * L)
 {
-    lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1), nullptr, luaL_optinteger(L, 2, 0)));
+    auto * wrapper = luaE_optbooleanwrapper(L, 2, nullptr);
+    if (wrapper == nullptr) {
+        lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1), nullptr, luaL_optinteger(L, 2, 0)));
+    } else {
+        lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1), &(wrapper->value), luaL_optinteger(L, 3, 0)));
+    }
     return 1;
 }
 
@@ -739,13 +744,17 @@ static int _GuiImageButton(lua_State * L)
 
 static int _GuiCheckbox(lua_State * L)
 {
-    //lua_pushboolean(L, GuiCheckbox(luaL_checkstring(L, 1), bool * v));
+    auto * wrapper = luaE_checkbooleanwrapper(L, 2);
+    lua_pushboolean(L, GuiCheckbox(luaL_checkstring(L, 1), &(wrapper->value)));
     return 1;
 }
 
 static int _GuiCheckboxFlags(lua_State * L)
 {
-    //bool GuiCheckboxFlags(char const * label, unsigned int * flags, unsigned int flags_value);
+    auto * wrapper = luaE_checkunsignedwrapper(L, 2);
+    lua_pushboolean(L, GuiCheckboxFlags(luaL_checkstring(L, 1),
+                                        &(wrapper->value),
+                                        luaL_checkinteger(L, 3)));
     return 0;
 }
 
