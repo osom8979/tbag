@@ -7,6 +7,9 @@
 
 #include <libtbag/script/lua/RayGuiLua.hpp>
 #include <libtbag/script/lua/RayLua.hpp>
+#include <libtbag/log/Log.hpp>
+
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -115,12 +118,13 @@ static int _GuiSetStyle(lua_State * L)
 
 static int _GuiBegin(lua_State * L)
 {
-    auto * wrapper = luaE_optbooleanwrapper(L, 2, nullptr);
-    if (wrapper == nullptr) {
-        lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1), nullptr, luaL_optinteger(L, 2, 0)));
-    } else {
-        lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1), &(wrapper->value), luaL_optinteger(L, 3, 0)));
+    if (lua_isboolean(L, 2)) {
+        bool p_open = luaL_checkboolean(L, 2);
+        lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1), &p_open, luaL_optinteger(L, 3, 0)));
+        lua_pushboolean(L, p_open);
+        return 2;
     }
+    lua_pushboolean(L, GuiBegin(luaL_checkstring(L, 1), nullptr, luaL_optinteger(L, 2, 0)));
     return 1;
 }
 
@@ -760,40 +764,50 @@ static int _GuiCheckboxFlags(lua_State * L)
 
 static int _GuiRadioButton(lua_State * L)
 {
-    //bool GuiRadioButton(char const * label, bool active);
-    //bool GuiRadioButton(char const * label, int * v, int v_button);
-    return 0;
+    if (lua_isboolean(L, 2)) {
+        lua_pushboolean(L, GuiRadioButton(luaL_checkstring(L, 1), luaL_checkboolean(L, 2)));
+    } else {
+        auto * wrapper = luaE_checkintegerwrapper(L, 2);
+        lua_pushboolean(L, GuiRadioButton(luaL_checkstring(L, 1),
+                                          &(wrapper->value),
+                                          luaL_checkinteger(L, 3)));
+    }
+    return 1;
 }
 
 static int _GuiProgressBar(lua_State * L)
 {
-    //void ProgressBar(float fraction, Vector2 const & size_arg = Vector2{-1,0}, char const * overlay = nullptr);
+    GuiProgressBar(luaL_checknumber(L, 1),
+                   luaE_optvector2(L, 2, Vector2{-1,0}),
+                   luaL_optstring(L, 3, nullptr));
     return 0;
 }
 
 static int _GuiBullet(lua_State * L)
 {
-    //void Bullet();
+    GuiBullet();
     return 0;
 }
 
 static int _GuiBeginCombo(lua_State * L)
 {
-    //bool BeginCombo(char const * label, char const * preview_value, ComboFlags flags = 0);
-    return 0;
+    lua_pushboolean(L, GuiBeginCombo(luaL_checkstring(L, 1),
+                                     luaL_checkstring(L, 2),
+                                     luaL_optinteger(L, 3, 0)));
+    return 1;
 }
 
 static int _GuiEndCombo(lua_State * L)
 {
-    //void EndCombo();
+    GuiEndCombo();
     return 0;
 }
 
 static int _GuiCombo(lua_State * L)
 {
-    //bool Combo(char const * label, int * current_item, char const * const items[], int items_count, int popup_max_height_in_items = -1);
-    //bool Combo(char const * label, int * current_item, char const * items_separated_by_zeros, int popup_max_height_in_items = -1);
-    //bool Combo(char const * label, int * current_item, bool(*items_getter)(void * data, int idx, char const ** out_text), void * data, int items_count, int popup_max_height_in_items = -1);
+    //bool Combo(luaL_checkstring(L, 1), int * current_item, char const * const items[], int items_count, int popup_max_height_in_items = -1);
+    //bool Combo(luaL_checkstring(L, 1), int * current_item, char const * items_separated_by_zeros, int popup_max_height_in_items = -1);
+    //bool Combo(luaL_checkstring(L, 1), int * current_item, bool(*items_getter)(void * data, int idx, char const ** out_text), void * data, int items_count, int popup_max_height_in_items = -1);
     return 0;
 }
 
@@ -1148,663 +1162,877 @@ static int _GuiListBoxHeader(lua_State * L)
 
 static int _GuiListBoxFooter(lua_State * L)
 {
-    //void ListBoxFooter();
+    GuiListBoxFooter();
     return 0;
+}
+
+static float _GuiPlotLines_values_getter(void * data, int idx)
+{
+    auto * L = (lua_State*)data;
+    assert(L != nullptr);
+
+    lua_pushvalue(L, 2); // Duplicate callback function.
+    lua_pushnumber(L, idx);
+    auto const CODE = lua_pcall(L, 1, 1, 0);
+
+    float result = 0.0f;
+    switch (CODE) {
+    case 0: // LUA_OK
+        result = luaL_checknumber(L, -1);
+        lua_pop(L, 1);
+        break;
+    case LUA_ERRRUN:
+        TBAG_FALLTHROUGH
+    case LUA_ERRMEM:
+        TBAG_FALLTHROUGH
+    case LUA_ERRERR:
+        TBAG_FALLTHROUGH
+    default:
+        char const * msg = luaL_checkstring(L, -1);
+        tDLogW("_GuiPlotLines_values_getter() lua_pcall() error({}): {}", CODE, msg);
+        lua_pop(L, 1);
+        break;
+    }
+
+    return result;
 }
 
 static int _GuiPlotLines(lua_State * L)
 {
-    //void PlotLines(char const * label, float const * values, int values_count, int values_offset = 0, char const * overlay_text = nullptr, float scale_min = FLT_MAX, float scale_max = FLT_MAX, Vector2 graph_size = Vector2{0,0}, int stride = sizeof(float));
-    //void PlotLines(char const * label, float(*values_getter)(void * data, int idx), void * data, int values_count, int values_offset = 0, char const * overlay_text = nullptr, float scale_min = FLT_MAX, float scale_max = FLT_MAX, Vector2 graph_size = Vector2{0,0});
+    char const * label = luaL_checkstring(L, 1);
+    assert(label != nullptr);
+
+    if (lua_isfunction(L, 2)) {
+        GuiPlotLines(label, &_GuiPlotLines_values_getter, (void*)L,
+                     luaL_checkinteger(L, 3),
+                     luaL_optinteger(L, 4, 0),
+                     luaL_optstring(L, 5, nullptr),
+                     luaL_optnumber(L, 6, FLT_MAX),
+                     luaL_optnumber(L, 7, FLT_MAX),
+                     luaE_optvector2(L, 8, Vector2{0,0}));
+    } else {
+        auto values_number = luaE_checknumber_array(L, 2);
+        auto values = std::vector<float>(values_number.begin(), values_number.end());
+
+        GuiPlotLines(label, values.data(), values.size(),
+                     luaL_optinteger(L, 3, 0),
+                     luaL_optstring(L, 4, nullptr),
+                     luaL_optnumber(L, 5, FLT_MAX),
+                     luaL_optnumber(L, 6, FLT_MAX),
+                     luaE_optvector2(L, 7, Vector2{0,0}),
+                     luaL_optinteger(L, 8, sizeof(float)));
+    }
     return 0;
 }
 
+static float _GuiPlotHistogram_values_getter(void * data, int idx)
+{
+    auto * L = (lua_State*)data;
+    assert(L != nullptr);
+
+    lua_pushvalue(L, 2); // Duplicate callback function.
+    lua_pushnumber(L, idx);
+    auto const CODE = lua_pcall(L, 1, 1, 0);
+
+    float result = 0.0f;
+    switch (CODE) {
+    case 0: // LUA_OK
+        result = luaL_checknumber(L, -1);
+        lua_pop(L, 1);
+        break;
+    case LUA_ERRRUN:
+        TBAG_FALLTHROUGH
+    case LUA_ERRMEM:
+        TBAG_FALLTHROUGH
+    case LUA_ERRERR:
+        TBAG_FALLTHROUGH
+    default:
+        char const * msg = luaL_checkstring(L, -1);
+        tDLogW("_GuiPlotHistogram_values_getter() lua_pcall() error({}): {}", CODE, msg);
+        lua_pop(L, 1);
+        break;
+    }
+
+    return result;
+}
+
+/**
+ * @code{.lua}
+ *  function saw(idx)
+ *      if idx % 2 == 0 then
+ *          return 1.0
+ *      else
+ *          return -1.0
+ *      end
+ *  end
+ *  -- ...
+ *  if tbag.GuiBegin('Window') then
+ *      tbag.GuiPlotHistogram('Histogram', saw, 70, 0, '', -1.0, 1.0, {0,80})
+ *  end
+ *  tbag.GuiEnd()
+ * @endcode
+ */
 static int _GuiPlotHistogram(lua_State * L)
 {
-    //void PlotHistogram(char const * label, float const * values, int values_count, int values_offset = 0, char const * overlay_text = nullptr, float scale_min = FLT_MAX, float scale_max = FLT_MAX, Vector2 graph_size = Vector2{0,0}, int stride = sizeof(float));
-    //void PlotHistogram(char const * label, float(*values_getter)(void * data, int idx), void * data, int values_count, int values_offset = 0, char const * overlay_text = nullptr, float scale_min = FLT_MAX, float scale_max = FLT_MAX, Vector2 graph_size = Vector2{0,0});
+    char const * label = luaL_checkstring(L, 1);
+    assert(label != nullptr);
+
+    if (lua_isfunction(L, 2)) {
+        GuiPlotHistogram(label, &_GuiPlotHistogram_values_getter, (void*)L,
+                         luaL_checkinteger(L, 3),
+                         luaL_optinteger(L, 4, 0),
+                         luaL_optstring(L, 5, nullptr),
+                         luaL_optnumber(L, 6, FLT_MAX),
+                         luaL_optnumber(L, 7, FLT_MAX),
+                         luaE_optvector2(L, 8, Vector2{0,0}));
+    } else {
+        auto values_number = luaE_checknumber_array(L, 2);
+        auto values = std::vector<float>(values_number.begin(), values_number.end());
+
+        GuiPlotHistogram(label, values.data(), values.size(),
+                         luaL_optinteger(L, 3, 0),
+                         luaL_optstring(L, 4, nullptr),
+                         luaL_optnumber(L, 5, FLT_MAX),
+                         luaL_optnumber(L, 6, FLT_MAX),
+                         luaE_optvector2(L, 7, Vector2{0,0}),
+                         luaL_optinteger(L, 8, sizeof(float)));
+    }
     return 0;
 }
 
-static int _GuiValue(lua_State * L)
+static int _GuiValueBool(lua_State * L)
 {
-    //void Value(char const * prefix, bool b);
-    //void Value(char const * prefix, int v);
-    //void Value(char const * prefix, unsigned int v);
-    //void Value(char const * prefix, float v, char const * float_format = nullptr);
+    GuiValue(luaL_checkstring(L, 1), luaL_checkboolean(L, 2));
+    return 0;
+}
+
+static int _GuiValueInt(lua_State * L)
+{
+    GuiValue(luaL_checkstring(L, 1), (int)luaL_checkinteger(L, 2));
+    return 0;
+}
+
+static int _GuiValueUnsigned(lua_State * L)
+{
+    GuiValue(luaL_checkstring(L, 1), (unsigned)luaL_checkinteger(L, 2));
+    return 0;
+}
+
+static int _GuiValueFloat(lua_State * L)
+{
+    GuiValue(luaL_checkstring(L, 1), (float)luaL_checknumber(L, 2), luaL_optstring(L, 3, nullptr));
     return 0;
 }
 
 static int _GuiBeginMainMenuBar(lua_State * L)
 {
-    //bool BeginMainMenuBar();
-    return 0;
+    lua_pushboolean(L, GuiBeginMainMenuBar());
+    return 1;
 }
 
 static int _GuiEndMainMenuBar(lua_State * L)
 {
-    //void EndMainMenuBar();
+    GuiEndMainMenuBar();
     return 0;
 }
 
 static int _GuiBeginMenuBar(lua_State * L)
 {
-    //bool BeginMenuBar();
-    return 0;
+    lua_pushboolean(L, GuiBeginMenuBar());
+    return 1;
 }
 
 static int _GuiEndMenuBar(lua_State * L)
 {
-    //void EndMenuBar();
+    GuiEndMenuBar();
     return 0;
 }
 
 static int _GuiBeginMenu(lua_State * L)
 {
-    //bool BeginMenu(char const * label, bool enabled = true);
-    return 0;
+    lua_pushboolean(L, GuiBeginMenu(luaL_checkstring(L, 1), luaL_optboolean(L, 2, 1)));
+    return 1;
 }
 
 static int _GuiEndMenu(lua_State * L)
 {
-    //void EndMenu();
+    GuiEndMenu();
     return 0;
 }
 
 static int _GuiMenuItem(lua_State * L)
 {
-    //bool MenuItem(char const * label, char const * shortcut = nullptr, bool selected = false, bool enabled = true);
-    //bool MenuItem(char const * label, char const * shortcut, bool * p_selected, bool enabled = true);
-    return 0;
+    lua_pushboolean(L, GuiMenuItem(luaL_checkstring(L, 1),
+                                   luaL_optstring(L, 2, nullptr),
+                                   luaL_optboolean(L, 3, 0),
+                                   luaL_optboolean(L, 4, 1)));
+    return 1;
+}
+
+static int _GuiMenuItem2(lua_State * L)
+{
+    bool p_selected = luaL_checkboolean(L, 3);
+    lua_pushboolean(L, GuiMenuItem(luaL_checkstring(L, 1),
+                                   luaL_checkstring(L, 2),
+                                   &p_selected,
+                                   luaL_optboolean(L, 4, 1)));
+    lua_pushboolean(L, p_selected);
+    return 2;
 }
 
 static int _GuiBeginTooltip(lua_State * L)
 {
-    //void BeginTooltip();
+    GuiBeginTooltip();
     return 0;
 }
 
 static int _GuiEndTooltip(lua_State * L)
 {
-    //void EndTooltip();
+    GuiEndTooltip();
     return 0;
 }
 
 static int _GuiSetTooltip(lua_State * L)
 {
-    //void SetTooltip(char const * text);
+    GuiSetTooltip(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _GuiOpenPopup(lua_State * L)
 {
-    //void OpenPopup(char const * str_id);
+    GuiOpenPopup(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _GuiBeginPopup(lua_State * L)
 {
-    //bool BeginPopup(char const * str_id, WindowFlags flags = 0);
+    lua_pushboolean(L, GuiBeginPopup(luaL_checkstring(L, 1), luaL_optinteger(L, 2, 0)));
     return 0;
 }
 
 static int _GuiBeginPopupContextItem(lua_State * L)
 {
-    //bool BeginPopupContextItem(char const * str_id = nullptr, int mouse_button = 1);
-    return 0;
+    lua_pushboolean(L, GuiBeginPopupContextItem(luaL_optstring(L, 1, nullptr), luaL_optinteger(L, 2, 1)));
+    return 1;
 }
 
 static int _GuiBeginPopupContextWindow(lua_State * L)
 {
-    //bool BeginPopupContextWindow(char const * str_id = nullptr, int mouse_button = 1, bool also_over_items = true);
-    return 0;
+    lua_pushboolean(L, GuiBeginPopupContextWindow(luaL_optstring(L, 1, nullptr),
+                                                  luaL_optinteger(L, 2, 1),
+                                                  luaL_optboolean(L, 3, 1)));
+    return 1;
 }
 
 static int _GuiBeginPopupContextVoid(lua_State * L)
 {
-    //bool BeginPopupContextVoid(char const * str_id = nullptr, int mouse_button = 1);
-    return 0;
+    lua_pushboolean(L, GuiBeginPopupContextVoid(luaL_optstring(L, 1, nullptr), luaL_optinteger(L, 2, 1)));
+    return 1;
 }
 
 static int _GuiBeginPopupModal(lua_State * L)
 {
-    //bool BeginPopupModal(char const * name, bool * p_open = nullptr, WindowFlags flags = 0);
-    return 0;
+    if (lua_isboolean(L, 2)) {
+        bool p_open = luaL_checkboolean(L, 2);
+        lua_pushboolean(L, GuiBeginPopupModal(luaL_checkstring(L, 1), &p_open, luaL_optinteger(L, 3, 0)));
+        lua_pushboolean(L, p_open);
+        return 2;
+    }
+
+    lua_pushboolean(L, GuiBeginPopupModal(luaL_checkstring(L, 1), nullptr, luaL_optinteger(L, 2, 0)));
+    return 1;
 }
 
 static int _GuiEndPopup(lua_State * L)
 {
-    //void EndPopup();
+    GuiEndPopup();
     return 0;
 }
 
 static int _GuiOpenPopupOnItemClick(lua_State * L)
 {
-    //bool OpenPopupOnItemClick(char const * str_id = nullptr, int mouse_button = 1);
-    return 0;
+    lua_pushboolean(L, GuiOpenPopupOnItemClick(luaL_optstring(L, 1, nullptr),
+                                               luaL_optinteger(L, 2, 1)));
+    return 1;
 }
 
 static int _GuiIsPopupOpen(lua_State * L)
 {
-    //bool IsPopupOpen(char const * str_id);
-    return 0;
+    lua_pushboolean(L, GuiIsPopupOpen(luaL_checkstring(L, 1)));
+    return 1;
 }
 
 static int _GuiCloseCurrentPopup(lua_State * L)
 {
-    //void CloseCurrentPopup();
+    GuiCloseCurrentPopup();
     return 0;
 }
 
 static int _GuiColumns(lua_State * L)
 {
-    //void Columns(int count = 1, char const * id = nullptr, bool border = true);
+    GuiColumns(luaL_optinteger(L, 1, 1),
+               luaL_optstring(L, 2, nullptr),
+               luaL_optboolean(L, 3, 1));
     return 0;
 }
 
 static int _GuiNextColumn(lua_State * L)
 {
-    //void NextColumn();
+    GuiNextColumn();
     return 0;
 }
 
 static int _GuiGetColumnIndex(lua_State * L)
 {
-    //int GetColumnIndex();
-    return 0;
+    lua_pushinteger(L, GuiGetColumnIndex());
+    return 1;
 }
 
 static int _GuiGetColumnWidth(lua_State * L)
 {
-    //float GetColumnWidth(int column_index = -1);
-    return 0;
+    lua_pushnumber(L, GuiGetColumnWidth(luaL_optinteger(L, 1, -1)));
+    return 1;
 }
 
 static int _GuiSetColumnWidth(lua_State * L)
 {
-    //void SetColumnWidth(int column_index, float width);
+    GuiSetColumnWidth(luaL_checkinteger(L, 1),
+                      luaL_checknumber(L, 2));
     return 0;
 }
 
 static int _GuiGetColumnOffset(lua_State * L)
 {
-    //float GetColumnOffset(int column_index = -1);
-    return 0;
+    lua_pushnumber(L, GuiGetColumnOffset(luaL_optinteger(L, 1, -1)));
+    return 1;
 }
 
 static int _GuiSetColumnOffset(lua_State * L)
 {
-    //void SetColumnOffset(int column_index, float offset_x);
+    GuiSetColumnOffset(luaL_checkinteger(L, 1),
+                       luaL_checknumber(L, 2));
     return 0;
 }
 
 static int _GuiGetColumnsCount(lua_State * L)
 {
-    //int GetColumnsCount();
-    return 0;
+    lua_pushinteger(L, GuiGetColumnsCount());
+    return 1;
 }
 
 static int _GuiBeginTabBar(lua_State * L)
 {
-    //bool BeginTabBar(char const * str_id, TabBarFlags flags = 0);
-    return 0;
+    lua_pushboolean(L, GuiBeginTabBar(luaL_checkstring(L, 1), luaL_optinteger(L, 2, 0)));
+    return 1;
 }
 
 static int _GuiEndTabBar(lua_State * L)
 {
-    //void EndTabBar();
+    GuiEndTabBar();
     return 0;
 }
 
 static int _GuiBeginTabItem(lua_State * L)
 {
-    //bool BeginTabItem(char const * label, bool * p_open = nullptr, TabItemFlags flags = 0);
-    return 0;
+    if (lua_isboolean(L, 2)) {
+        bool p_open = luaL_checkboolean(L, 2);
+        lua_pushboolean(L, GuiBeginTabItem(luaL_checkstring(L, 1), &p_open, luaL_optinteger(L, 3, 0)));
+        lua_pushboolean(L, p_open);
+        return 2;
+    }
+
+    lua_pushboolean(L, GuiBeginTabItem(luaL_checkstring(L, 1), nullptr, luaL_optinteger(L, 2, 0)));
+    return 1;
 }
 
 static int _GuiEndTabItem(lua_State * L)
 {
-    //void EndTabItem();
+    GuiEndTabItem();
     return 0;
 }
 
 static int _GuiSetTabItemClosed(lua_State * L)
 {
-    //void SetTabItemClosed(char const * tab_or_docked_window_label);
+    GuiSetTabItemClosed(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _GuiLogToTTY(lua_State * L)
 {
-    //void LogToTTY(int auto_open_depth = -1);
+    GuiLogToTTY(luaL_optinteger(L, 1, -1));
     return 0;
 }
 
 static int _GuiLogToFile(lua_State * L)
 {
-    //void LogToFile(int auto_open_depth = -1, char const * filename = nullptr);
+    GuiLogToFile(luaL_optinteger(L, 1, -1), luaL_optstring(L, 2, nullptr));
     return 0;
 }
 
 static int _GuiLogToClipboard(lua_State * L)
 {
-    //void LogToClipboard(int auto_open_depth = -1);
+    GuiLogToClipboard(luaL_optinteger(L, 1, -1));
     return 0;
 }
 
 static int _GuiLogFinish(lua_State * L)
 {
-    //void LogFinish();
+    GuiLogFinish();
     return 0;
 }
 
 static int _GuiLogButtons(lua_State * L)
 {
-    //void LogButtons();
+    GuiLogButtons();
     return 0;
 }
 
 static int _GuiLogText(lua_State * L)
 {
-    //void LogText(char const * text);
+    GuiLogText(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _GuiBeginDragDropSource(lua_State * L)
 {
-    //bool BeginDragDropSource(DragDropFlags flags = 0);
-    return 0;
+    lua_pushboolean(L, GuiBeginDragDropSource(luaL_optinteger(L, 1, 0)));
+    return 1;
 }
 
 static int _GuiSetDragDropPayload(lua_State * L)
 {
-    //bool SetDragDropPayload(char const * type, void const * data, size_t sz, Cond cond = 0);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _GuiEndDragDropSource(lua_State * L)
 {
-    //void EndDragDropSource();
+    GuiEndDragDropSource();
     return 0;
 }
 
 static int _GuiBeginDragDropTarget(lua_State * L)
 {
-    //bool BeginDragDropTarget();
+    lua_pushboolean(L, GuiBeginDragDropTarget());
     return 0;
 }
 
 static int _GuiAcceptDragDropPayload(lua_State * L)
 {
-    //Payload AcceptDragDropPayload(char const * type, DragDropFlags flags = 0);
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _GuiEndDragDropTarget(lua_State * L)
 {
-    //void EndDragDropTarget();
+    GuiEndDragDropTarget();
     return 0;
 }
 
 static int _GuiGetDragDropPayload(lua_State * L)
 {
-    //Payload GetDragDropPayload();
+    luaE_unsupport(L);
     return 0;
 }
 
 static int _GuiPushClipRect(lua_State * L)
 {
-    //void PushClipRect(Vector2 const & clip_rect_min, Vector2 const & clip_rect_max, bool intersect_with_current_clip_rect);
+    GuiPushClipRect(luaE_checkvector2(L, 1),
+                    luaE_checkvector2(L, 2),
+                    luaL_checkboolean(L, 3));
     return 0;
 }
 
 static int _GuiPopClipRect(lua_State * L)
 {
-    //void PopClipRect();
+    GuiPopClipRect();
     return 0;
 }
 
 static int _GuiSetItemDefaultFocus(lua_State * L)
 {
-    //void SetItemDefaultFocus();
+    GuiSetItemDefaultFocus();
     return 0;
 }
 
 static int _GuiSetKeyboardFocusHere(lua_State * L)
 {
-    //void SetKeyboardFocusHere(int offset = 0);
+    GuiSetKeyboardFocusHere(luaL_optinteger(L, 1, 0));
     return 0;
 }
 
 static int _GuiIsItemHovered(lua_State * L)
 {
-    //bool IsItemHovered(HoveredFlags flags = 0);
-    return 0;
+    lua_pushboolean(L, GuiIsItemHovered(luaL_optinteger(L, 1, 0)));
+    return 1;
 }
 
 static int _GuiIsItemActive(lua_State * L)
 {
-    //bool IsItemActive();
-    return 0;
+    lua_pushboolean(L, GuiIsItemActive());
+    return 1;
 }
 
 static int _GuiIsItemFocused(lua_State * L)
 {
-    //bool IsItemFocused();
-    return 0;
+    lua_pushboolean(L, GuiIsItemFocused());
+    return 1;
 }
 
 static int _GuiIsItemClicked(lua_State * L)
 {
-    //bool IsItemClicked(int mouse_button = 0);
-    return 0;
+    lua_pushboolean(L, GuiIsItemClicked(luaL_optinteger(L, 1, 0)));
+    return 1;
 }
 
 static int _GuiIsItemVisible(lua_State * L)
 {
-    //bool IsItemVisible();
-    return 0;
+    lua_pushboolean(L, GuiIsItemVisible());
+    return 1;
 }
 
 static int _GuiIsItemEdited(lua_State * L)
 {
-    //bool IsItemEdited();
-    return 0;
+    lua_pushboolean(L, GuiIsItemEdited());
+    return 1;
 }
 
 static int _GuiIsItemActivated(lua_State * L)
 {
-    //bool IsItemActivated();
-    return 0;
+    lua_pushboolean(L, GuiIsItemActivated());
+    return 1;
 }
 
 static int _GuiIsItemDeactivated(lua_State * L)
 {
-    //bool IsItemDeactivated();
-    return 0;
+    lua_pushboolean(L, GuiIsItemDeactivated());
+    return 1;
 }
 
 static int _GuiIsItemDeactivatedAfterEdit(lua_State * L)
 {
-    //bool IsItemDeactivatedAfterEdit();
-    return 0;
+    lua_pushboolean(L, GuiIsItemDeactivatedAfterEdit());
+    return 1;
 }
 
 static int _GuiIsAnyItemHovered(lua_State * L)
 {
-    //bool IsAnyItemHovered();
-    return 0;
+    lua_pushboolean(L, GuiIsAnyItemHovered());
+    return 1;
 }
 
 static int _GuiIsAnyItemActive(lua_State * L)
 {
-    //bool IsAnyItemActive();
-    return 0;
+    lua_pushboolean(L, GuiIsAnyItemActive());
+    return 1;
 }
 
 static int _GuiIsAnyItemFocused(lua_State * L)
 {
-    //bool IsAnyItemFocused();
-    return 0;
+    lua_pushboolean(L, GuiIsAnyItemFocused());
+    return 1;
 }
 
 static int _GuiGetItemRectMin(lua_State * L)
 {
-    //Vector2 GetItemRectMin();
-    return 0;
+    luaE_pushvector2(L, GuiGetItemRectMin());
+    return 1;
 }
 
 static int _GuiGetItemRectMax(lua_State * L)
 {
-    //Vector2 GetItemRectMax();
-    return 0;
+    luaE_pushvector2(L, GuiGetItemRectMax());
+    return 1;
 }
 
 static int _GuiGetItemRectSize(lua_State * L)
 {
-    //Vector2 GetItemRectSize();
-    return 0;
+    luaE_pushvector2(L, GuiGetItemRectSize());
+    return 1;
 }
 
 static int _GuiSetItemAllowOverlap(lua_State * L)
 {
-    //void SetItemAllowOverlap();
+    GuiSetItemAllowOverlap();
     return 0;
 }
 
 static int _GuiIsRectVisible(lua_State * L)
 {
-    //bool IsRectVisible(Vector2 const & size);
-    //bool IsRectVisible(Vector2 const & rect_min, Vector2 const & rect_max);
-    return 0;
+    if (lua_istable(L, 2)) {
+        lua_pushboolean(L, GuiIsRectVisible(luaE_checkvector2(L, 1), luaE_checkvector2(L, 2)));
+    } else {
+        lua_pushboolean(L, GuiIsRectVisible(luaE_checkvector2(L, 1)));
+    }
+    return 1;
 }
 
 static int _GuiGetTime(lua_State * L)
 {
-    //double GetTime();
-    return 0;
+    lua_pushnumber(L, GuiGetTime());
+    return 1;
 }
 
 static int _GuiGetFrameCount(lua_State * L)
 {
-    //int GetFrameCount();
-    return 0;
+    lua_pushinteger(L, GuiGetFrameCount());
+    return 1;
 }
 
 static int _GuiGetStyleColorName(lua_State * L)
 {
-    //char const * GetStyleColorName(Col idx);
-    return 0;
+    lua_pushstring(L, GuiGetStyleColorName(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiCalcTextSize(lua_State * L)
 {
-    //Vector2 CalcTextSize(char const * text, char const * text_end = nullptr, bool hide_text_after_double_hash = false, float wrap_width = -1.0f);
-    return 0;
+    luaE_pushvector2(L, GuiCalcTextSize(luaL_checkstring(L, 1),
+                                        luaL_optstring(L, 2, nullptr),
+                                        luaL_optboolean(L, 3, 0),
+                                        luaL_optnumber(L, 4, -1.0f)));
+    return 1;
 }
 
 static int _GuiCalcListClipping(lua_State * L)
 {
-    //void CalcListClipping(int items_count, float items_height, int * out_items_display_start, int * out_items_display_end);
-    return 0;
+    int out_items_display_start = 0;
+    int out_items_display_end = 0;
+    GuiCalcListClipping(luaL_checkinteger(L, 1),
+                        luaL_checknumber(L, 2),
+                        &out_items_display_start,
+                        &out_items_display_end);
+    lua_pushinteger(L, out_items_display_start);
+    lua_pushinteger(L, out_items_display_end);
+    return 2;
 }
 
 static int _GuiBeginChildFrame(lua_State * L)
 {
-    //bool BeginChildFrame(ID id, Vector2 const & size, WindowFlags flags = 0);
-    return 0;
+    lua_pushboolean(L, GuiBeginChildFrame(luaL_checkinteger(L, 1),
+                                          luaE_checkvector2(L, 2),
+                                          luaL_optinteger(L, 3, 0)));
+    return 1;
 }
 
 static int _GuiEndChildFrame(lua_State * L)
 {
-    //void EndChildFrame();
+    GuiEndChildFrame();
     return 0;
 }
 
 static int _GuiColorConvertU32ToFloat4(lua_State * L)
 {
-    //Vector4 ColorConvertU32ToFloat4(unsigned int in);
-    return 0;
+    luaE_pushvector4(L, GuiColorConvertU32ToFloat4(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiColorConvertFloat4ToU32(lua_State * L)
 {
-    //unsigned int ColorConvertFloat4ToU32(Vector4 const & in);
-    return 0;
+    lua_pushinteger(L, GuiColorConvertFloat4ToU32(luaE_checkvector4(L, 1)));
+    return 1;
 }
 
 static int _GuiColorConvertRGBtoHSV(lua_State * L)
 {
-    //void ColorConvertRGBtoHSV(float r, float g, float b, float & out_h, float & out_s, float & out_v);
-    return 0;
+    float out_h, out_s, out_v;
+    GuiColorConvertRGBtoHSV(luaL_checknumber(L, 1),
+                            luaL_checknumber(L, 2),
+                            luaL_checknumber(L, 3),
+                            out_h, out_s, out_v);
+    lua_pushnumber(L, out_h);
+    lua_pushnumber(L, out_s);
+    lua_pushnumber(L, out_v);
+    return 3;
 }
 
 static int _GuiColorConvertHSVtoRGB(lua_State * L)
 {
-    //void ColorConvertHSVtoRGB(float h, float s, float v, float & out_r, float & out_g, float & out_b);
-    return 0;
+    float out_r, out_g, out_b;
+    GuiColorConvertHSVtoRGB(luaL_checknumber(L, 1),
+                            luaL_checknumber(L, 2),
+                            luaL_checknumber(L, 3),
+                            out_r, out_g, out_b);
+    lua_pushnumber(L, out_r);
+    lua_pushnumber(L, out_g);
+    lua_pushnumber(L, out_b);
+    return 3;
 }
 
 static int _GuiGetKeyIndex(lua_State * L)
 {
-    //int GetKeyIndex(Key imgui_key);
-    return 0;
+    lua_pushinteger(L, GuiGetKeyIndex(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiIsKeyDown(lua_State * L)
 {
-    //bool IsKeyDown(int user_key_index);
-    return 0;
+    lua_pushboolean(L, GuiIsKeyDown(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiIsKeyPressed(lua_State * L)
 {
-    //bool IsKeyPressed(int user_key_index, bool repeat = true);
-    return 0;
+    lua_pushboolean(L, GuiIsKeyPressed(luaL_checkinteger(L, 1),
+                                       luaL_optboolean(L, 2, 1)));
+    return 1;
 }
 
 static int _GuiIsKeyReleased(lua_State * L)
 {
-    //bool IsKeyReleased(int user_key_index);
-    return 0;
+    lua_pushboolean(L, GuiIsKeyReleased(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiGetKeyPressedAmount(lua_State * L)
 {
-    //int GetKeyPressedAmount(int key_index, float repeat_delay, float rate);
-    return 0;
+    lua_pushinteger(L, GuiGetKeyPressedAmount(luaL_checkinteger(L, 1),
+                                              luaL_checknumber(L, 2),
+                                              luaL_checknumber(L, 3)));
+    return 1;
 }
 
 static int _GuiIsMouseDown(lua_State * L)
 {
-    //bool IsMouseDown(int button);
-    return 0;
+    lua_pushboolean(L, GuiIsMouseDown(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiIsAnyMouseDown(lua_State * L)
 {
-    //bool IsAnyMouseDown();
-    return 0;
+    lua_pushboolean(L, GuiIsAnyMouseDown());
+    return 1;
 }
 
 static int _GuiIsMouseClicked(lua_State * L)
 {
-    //bool IsMouseClicked(int button, bool repeat = false);
-    return 0;
+    lua_pushboolean(L, GuiIsMouseClicked(luaL_checkinteger(L, 1), luaL_optboolean(L, 2, 0)));
+    return 1;
 }
 
 static int _GuiIsMouseDoubleClicked(lua_State * L)
 {
-    //bool IsMouseDoubleClicked(int button);
-    return 0;
+    lua_pushboolean(L, GuiIsMouseDoubleClicked(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiIsMouseReleased(lua_State * L)
 {
-    //bool IsMouseReleased(int button);
-    return 0;
+    lua_pushboolean(L, GuiIsMouseReleased(luaL_checkinteger(L, 1)));
+    return 1;
 }
 
 static int _GuiIsMouseDragging(lua_State * L)
 {
-    //bool IsMouseDragging(int button = 0, float lock_threshold = -1.0f);
-    return 0;
+    lua_pushboolean(L, GuiIsMouseDragging(luaL_optinteger(L, 1, 0),
+                                          luaL_optnumber(L, 2, -1.0f)));
+    return 1;
 }
 
 static int _GuiIsMouseHoveringRect(lua_State * L)
 {
-    //bool IsMouseHoveringRect(Vector2 const & r_min, Vector2 const & r_max, bool clip = true);
-    return 0;
+    lua_pushboolean(L, GuiIsMouseHoveringRect(luaE_checkvector2(L, 1),
+                                              luaE_checkvector2(L, 2),
+                                              luaL_optboolean(L, 3, 1)));
+    return 1;
 }
 
 static int _GuiIsMousePosValid(lua_State * L)
 {
-    //bool IsMousePosValid(Vector2 const * mouse_pos = nullptr);
-    return 0;
+    if (lua_istable(L, 1)) {
+        auto const MOUSE_POS = luaE_checkvector2(L, 1);
+        lua_pushboolean(L, GuiIsMousePosValid(&MOUSE_POS));
+    } else {
+        lua_pushboolean(L, GuiIsMousePosValid());
+    }
+    return 1;
 }
 
 static int _GuiGetMousePos(lua_State * L)
 {
-    //Vector2 GetMousePos();
-    return 0;
+    luaE_pushvector2(L, GuiGetMousePos());
+    return 1;
 }
 
 static int _GuiGetMousePosOnOpeningCurrentPopup(lua_State * L)
 {
-    //Vector2 GetMousePosOnOpeningCurrentPopup();
-    return 0;
+    luaE_pushvector2(L, GuiGetMousePosOnOpeningCurrentPopup());
+    return 1;
 }
 
 static int _GuiGetMouseDragDelta(lua_State * L)
 {
-    //Vector2 GetMouseDragDelta(int button = 0, float lock_threshold = -1.0f);
-    return 0;
+    luaE_pushvector2(L, GuiGetMouseDragDelta(luaL_optinteger(L, 1, 0),
+                                             luaL_optnumber(L, 2, -1.0f)));
+    return 1;
 }
 
 static int _GuiResetMouseDragDelta(lua_State * L)
 {
-    //void ResetMouseDragDelta(int button = 0);
+    GuiResetMouseDragDelta(luaL_optinteger(L, 1, 0));
     return 0;
 }
 
 static int _GuiGetMouseCursor(lua_State * L)
 {
-    //MouseCursor GetMouseCursor();
-    return 0;
+    lua_pushinteger(L, GuiGetMouseCursor());
+    return 1;
 }
 
 static int _GuiSetMouseCursor(lua_State * L)
 {
-    //void SetMouseCursor(MouseCursor type);
+    GuiSetMouseCursor(luaL_checkinteger(L, 1));
     return 0;
 }
 
 static int _GuiCaptureKeyboardFromApp(lua_State * L)
 {
-    //void CaptureKeyboardFromApp(bool want_capture_keyboard_value = true);
+    GuiCaptureKeyboardFromApp(luaL_optboolean(L, 1, 1));
     return 0;
 }
 
 static int _GuiCaptureMouseFromApp(lua_State * L)
 {
-    //void CaptureMouseFromApp(bool want_capture_mouse_value = true);
+    GuiCaptureMouseFromApp(luaL_optboolean(L, 1, 1));
     return 0;
 }
 
 static int _GuiGetClipboardText(lua_State * L)
 {
-    //char const * GetClipboardText();
-    return 0;
+    lua_pushstring(L, GetClipboardText());
+    return 1;
 }
 
 static int _GuiSetClipboardText(lua_State * L)
 {
-    //void SetClipboardText(char const * text);
+    GuiSetClipboardText(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _GuiLoadIniSettingsFromDisk(lua_State * L)
 {
-    //void LoadIniSettingsFromDisk(char const * ini_filename);
+    GuiLoadIniSettingsFromDisk(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _GuiLoadIniSettingsFromMemory(lua_State * L)
 {
-    //void LoadIniSettingsFromMemory(char const * ini_data, size_t ini_size = 0);
+    GuiLoadIniSettingsFromMemory(luaL_checkstring(L, 1), luaL_optinteger(L, 2, 0));
     return 0;
 }
 
 static int _GuiSaveIniSettingsToDisk(lua_State * L)
 {
-    //void SaveIniSettingsToDisk(char const * ini_filename);
+    GuiSaveIniSettingsToDisk(luaL_checkstring(L, 1));
     return 0;
 }
 
 static int _GuiSaveIniSettingsToMemory(lua_State * L)
 {
-    // char const * SaveIniSettingsToMemory(size_t * out_ini_size = nullptr);
-    return 0;
+    size_t out_init_size = 0;
+    lua_pushstring(L, GuiSaveIniSettingsToMemory(&out_init_size));
+    lua_pushinteger(L, out_init_size);
+    return 2;
 }
 
 #ifndef RAYGUI_REGISTER
@@ -2039,7 +2267,10 @@ static luaL_Reg const __lua_laygui[] = {
         RAYGUI_REGISTER(GuiPlotHistogram),
 
         // Widgets: Value),
-        RAYGUI_REGISTER(GuiValue),
+        RAYGUI_REGISTER(GuiValueBool),
+        RAYGUI_REGISTER(GuiValueInt),
+        RAYGUI_REGISTER(GuiValueUnsigned),
+        RAYGUI_REGISTER(GuiValueFloat),
 
         // Widgets: Menus
         RAYGUI_REGISTER(GuiBeginMainMenuBar),
@@ -2049,6 +2280,7 @@ static luaL_Reg const __lua_laygui[] = {
         RAYGUI_REGISTER(GuiBeginMenu),
         RAYGUI_REGISTER(GuiEndMenu),
         RAYGUI_REGISTER(GuiMenuItem),
+        RAYGUI_REGISTER(GuiMenuItem2),
 
         // Tooltips
         RAYGUI_REGISTER(GuiBeginTooltip),

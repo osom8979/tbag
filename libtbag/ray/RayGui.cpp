@@ -118,7 +118,7 @@ void GuiUpdateRay()
     io.MouseDown[0] = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     io.MouseDown[1] = IsMouseButtonDown(MOUSE_RIGHT_BUTTON);
     io.MouseDown[2] = IsMouseButtonDown(MOUSE_MIDDLE_BUTTON);
-    io.MouseWheel = (float)GetMouseWheelMove();
+    io.MouseWheel += (float)GetMouseWheelMove();
 
     // clang-format off
     io.KeysDown[KEY_APOSTROPHE    ] = IsKeyDown(KEY_APOSTROPHE);
@@ -1776,7 +1776,7 @@ void GuiNextColumn()
     ImGui::NextColumn();
 }
 
-int GetColumnIndex()
+int GuiGetColumnIndex()
 {
     return ImGui::GetColumnIndex();
 }
@@ -1801,7 +1801,7 @@ void GuiSetColumnOffset(int column_index, float offset_x)
     ImGui::SetColumnOffset(column_index, offset_x);
 }
 
-int GetColumnsCount()
+int GuiGetColumnsCount()
 {
     return ImGui::GetColumnsCount();
 }
@@ -2015,12 +2015,12 @@ double GuiGetTime()
     return ImGui::GetTime();
 }
 
-int GetFrameCount()
+int GuiGetFrameCount()
 {
     return ImGui::GetFrameCount();
 }
 
-char const * GetStyleColorName(GuiCol idx)
+char const * GuiGetStyleColorName(GuiCol idx)
 {
     return ImGui::GetStyleColorName(idx);
 }
@@ -2065,7 +2065,7 @@ void GuiColorConvertHSVtoRGB(float h, float s, float v, float & out_r, float & o
     ImGui::ColorConvertHSVtoRGB(h, s, v, out_r, out_g, out_b);
 }
 
-int GetKeyIndex(GuiKey imgui_key)
+int GuiGetKeyIndex(GuiKey imgui_key)
 {
     return ImGui::GetKeyIndex(imgui_key);
 }
@@ -2085,7 +2085,7 @@ bool GuiIsKeyReleased(int user_key_index)
     return ImGui::IsKeyReleased(user_key_index);
 }
 
-int GetKeyPressedAmount(int key_index, float repeat_delay, float rate)
+int GuiGetKeyPressedAmount(int key_index, float repeat_delay, float rate)
 {
     return ImGui::GetKeyPressedAmount(key_index, repeat_delay, rate);
 }
@@ -2196,7 +2196,7 @@ void GuiSaveIniSettingsToDisk(char const * ini_filename)
     ImGui::SaveIniSettingsToDisk(ini_filename);
 }
 
-char const * SaveIniSettingsToMemory(size_t * out_ini_size)
+char const * GuiSaveIniSettingsToMemory(size_t * out_ini_size)
 {
     return ImGui::SaveIniSettingsToMemory(out_ini_size);
 }
