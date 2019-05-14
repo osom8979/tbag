@@ -765,6 +765,19 @@ void luaL_setmetatable(lua_State * L, char const * tname)
     ::lua_setmetatable(L, -2);
 }
 
+int luaL_checkboolean(lua_State * L, int idx)
+{
+    return ::lua_toboolean(L, idx);
+}
+
+int luaL_optboolean(lua_State * L, int arg, int def)
+{
+    if (::lua_type(L, arg) == LUA_TBOOLEAN) {
+        return ::lua_toboolean(L, arg);
+    }
+    return def;
+}
+
 } // namespace script
 
 // --------------------

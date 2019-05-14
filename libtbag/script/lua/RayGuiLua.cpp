@@ -128,7 +128,7 @@ static int _GuiEnd(lua_State * L)
 static int _GuiBeginChild(lua_State * L)
 {
     auto const size = luaE_optvector2(L, 2, Vector2{0, 0});
-    auto const border = luaL_optinteger(L, 3, 0);
+    auto const border = luaL_optboolean(L, 3, 0);
     auto const flags = luaL_optinteger(L, 4, 0);
     if (lua_isstring(L, lua_absindex(L, 1))) {
         lua_pushboolean(L, GuiBeginChild(luaL_checkstring(L, 1), size, border, flags));
@@ -215,8 +215,8 @@ static int _GuiSetNextWindowContentSize(lua_State * L)
 
 static int _GuiSetNextWindowCollapsed(lua_State * L)
 {
-    GuiSetNextWindowCollapsed(luaL_checkinteger(L, 1),
-                           luaL_optinteger(L, 2, 0));
+    GuiSetNextWindowCollapsed(luaL_checkboolean(L, 1),
+                              luaL_optinteger(L, 2, 0));
     return 0;
 }
 
@@ -255,9 +255,9 @@ static int _GuiSetWindowSize(lua_State * L)
 static int _GuiSetWindowCollapsed(lua_State * L)
 {
     if (lua_isstring(L, lua_absindex(L, 1))) {
-        GuiSetWindowCollapsed(luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaL_optinteger(L, 3, 0));
+        GuiSetWindowCollapsed(luaL_checkstring(L, 1), luaL_checkboolean(L, 2), luaL_optinteger(L, 3, 0));
     } else {
-        GuiSetWindowCollapsed(luaL_checkinteger(L, 1), luaL_optinteger(L, 2, 0));
+        GuiSetWindowCollapsed(luaL_checkboolean(L, 1), luaL_optinteger(L, 2, 0));
     }
     return 0;
 }
@@ -460,7 +460,7 @@ static int _GuiPopTextWrapPos(lua_State * L)
 
 static int _GuiPushAllowKeyboardFocus(lua_State * L)
 {
-    GuiPushAllowKeyboardFocus(luaL_checkinteger(L, 1));
+    GuiPushAllowKeyboardFocus(luaL_checkboolean(L, 1));
     return 0;
 }
 
@@ -472,7 +472,7 @@ static int _GuiPopAllowKeyboardFocus(lua_State * L)
 
 static int _GuiPushButtonRepeat(lua_State * L)
 {
-    GuiPushButtonRepeat(luaL_checkinteger(L, 1));
+    GuiPushButtonRepeat(luaL_checkboolean(L, 1));
     return 0;
 }
 

@@ -146,7 +146,7 @@ static int _BooleanWrapper_get(lua_State * L)
 static int _BooleanWrapper_set(lua_State * L)
 {
     auto * wrapper = luaE_checkbooleanwrapper(L, 1);
-    wrapper->value = luaL_checkinteger(L, 2);
+    wrapper->value = luaL_checkboolean(L, 2);
     return 0;
 }
 
@@ -159,7 +159,7 @@ static luaL_Reg const __lua_reg_BooleanWrapper[] = {
 static int _IntegerWrapper_get(lua_State * L)
 {
     auto * wrapper = luaE_checkintegerwrapper(L, 1);
-    lua_pushboolean(L, wrapper->value);
+    lua_pushinteger(L, wrapper->value);
     return 1;
 }
 
@@ -179,7 +179,7 @@ static luaL_Reg const __lua_reg_IntegerWrapper[] = {
 static int _UnsignedWrapper_get(lua_State * L)
 {
     auto * wrapper = luaE_checkunsignedwrapper(L, 1);
-    lua_pushboolean(L, wrapper->value);
+    lua_pushinteger(L, wrapper->value);
     return 1;
 }
 
@@ -199,7 +199,7 @@ static luaL_Reg const __lua_reg_UnsignedWrapper[] = {
 static int _FloatWrapper_get(lua_State * L)
 {
     auto * wrapper = luaE_checkfloatwrapper(L, 1);
-    lua_pushboolean(L, wrapper->value);
+    lua_pushnumber(L, wrapper->value);
     return 1;
 }
 
@@ -219,7 +219,7 @@ static luaL_Reg const __lua_reg_FloatWrapper[] = {
 static int _DoubleWrapper_get(lua_State * L)
 {
     auto * wrapper = luaE_checkdoublewrapper(L, 1);
-    lua_pushboolean(L, wrapper->value);
+    lua_pushnumber(L, wrapper->value);
     return 1;
 }
 
