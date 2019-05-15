@@ -316,6 +316,19 @@ void box_stride_update_from_type(ui32 const * dims, ui32 rank, btype type, ui32 
     box_stride_update(dims, rank, box_get_type_byte(type), stride);
 }
 
+ui32 * box_stride_malloc_and_update(ui32 const * dims, ui32 rank, ui32 element_byte) TBAG_NOEXCEPT
+{
+    ui32 * stride = box_stride_malloc(rank);
+    assert(dims != nullptr);
+    box_stride_update(dims, rank, element_byte, stride);
+    return stride;
+}
+
+ui32 * box_stride_malloc_and_update_from_type(ui32 const * dims, ui32 rank, btype type) TBAG_NOEXCEPT
+{
+    return box_stride_malloc_and_update(dims, rank, box_get_type_byte(type));
+}
+
 } // namespace details
 } // namespace box
 

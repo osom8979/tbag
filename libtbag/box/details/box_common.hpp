@@ -185,6 +185,8 @@ TBAG_API ui32 * box_stride_malloc(ui32 rank) TBAG_NOEXCEPT;
 TBAG_API void   box_stride_free(ui32 * dims) TBAG_NOEXCEPT;
 TBAG_API void   box_stride_update(ui32 const * dims, ui32 rank, ui32 element_byte, ui32 * stride) TBAG_NOEXCEPT;
 TBAG_API void   box_stride_update_from_type(ui32 const * dims, ui32 rank, btype type, ui32 * stride) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_stride_malloc_and_update(ui32 const * dims, ui32 rank, ui32 element_byte) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_stride_malloc_and_update_from_type(ui32 const * dims, ui32 rank, btype type) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

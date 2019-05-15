@@ -78,6 +78,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     box->total_byte = TOTAL_BYTE;
     box->total_size = box_dim_get_size(dims, rank);
     box->dims = dims;
+    box->stride_byte = box_stride_malloc_and_update_from_type(dims, rank, type);
     box->rank = rank;
     return E_SUCCESS;
 }
