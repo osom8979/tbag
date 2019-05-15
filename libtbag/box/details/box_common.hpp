@@ -132,7 +132,7 @@ struct box_data
     ui32 * dims;
 
     /** Number of entries between adjacent entries (for each per dimension). */
-    ui32 * stride;
+    ui32 * stride_byte;
 
     /** Number of dimensions. */
     ui32 rank;
@@ -180,6 +180,11 @@ TBAG_API ui32   box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
  */
 TBAG_API ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
+
+TBAG_API ui32 * box_stride_malloc(ui32 rank) TBAG_NOEXCEPT;
+TBAG_API void   box_stride_free(ui32 * dims) TBAG_NOEXCEPT;
+TBAG_API void   box_stride_update(ui32 const * dims, ui32 rank, ui32 element_byte, ui32 * stride) TBAG_NOEXCEPT;
+TBAG_API void   box_stride_update_from_type(ui32 const * dims, ui32 rank, btype type, ui32 * stride) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

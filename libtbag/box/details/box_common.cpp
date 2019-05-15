@@ -147,7 +147,7 @@ void box_clear(box_data * box) TBAG_NOEXCEPT
     box->total_byte = 0;
     box->total_size = 0;
     box->dims = nullptr;
-    box->stride = nullptr;
+    box->stride_byte = nullptr;
     box->rank = 0;
 }
 
@@ -250,8 +250,8 @@ ui32 box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
     assert(rank >= 1);
-    ui32 size = dims[0];
-    for (std::size_t i = 1; i < rank; ++i) {
+    auto size = dims[0];
+    for (auto i = 1; i < rank; ++i) {
         size *= dims[i];
     }
     return size;
@@ -282,9 +282,38 @@ ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEX
         index = (va_arg(ap2, ui32) + index) * (*dims);
     }
     assert(rank == 1);
-    index += va_arg(ap2, ui32); // add, 1st rank.
+    index += va_arg(ap2, ui32);
     va_end(ap2);
     return index;
+}
+
+ui32 * box_stride_malloc(ui32 rank) TBAG_NOEXCEPT
+{
+    return box_dim_malloc(rank);
+}
+
+void box_stride_free(ui32 * dims) TBAG_NOEXCEPT
+{
+    box_dim_free(dims);
+}
+
+void box_stride_update(ui32 const * dims, ui32 rank, ui32 element_byte, ui32 * stride) TBAG_NOEXCEPT
+{
+    assert(dims != nullptr);
+    assert(rank >= 1);
+
+    stride[rank-1] = element_byte;
+    --rank;
+
+    while (rank >= 1) {
+        stride[rank-1] = stride[rank] * dims[rank];
+        --rank;
+    }
+}
+
+void box_stride_update_from_type(ui32 const * dims, ui32 rank, btype type, ui32 * stride) TBAG_NOEXCEPT
+{
+    box_stride_update(dims, rank, box_get_type_byte(type), stride);
 }
 
 } // namespace details

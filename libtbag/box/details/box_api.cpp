@@ -49,10 +49,10 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     // clang-format off
     switch (device) {
     case BOX_DEVICE_CPU:  data = box_cpu_malloc(TOTAL_BYTE); break;
-    case BOX_DEVICE_CUDA: data = nullptr; break;
-    case BOX_DEVICE_CL:   data = nullptr; break;
-    case BOX_DEVICE_GLSL: data = nullptr; break;
-    case BOX_DEVICE_FBS:  data = nullptr; break;
+    case BOX_DEVICE_CUDA: data = /* TODO */ nullptr; break;
+    case BOX_DEVICE_CL:   data = /* TODO */ nullptr; break;
+    case BOX_DEVICE_GLSL: data = /* TODO */ nullptr; break;
+    case BOX_DEVICE_FBS:  data = /* TODO */ nullptr; break;
     case BOX_DEVICE_NONE:
         TBAG_FALLTHROUGH
     default:
@@ -76,6 +76,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     }
     box->data = data;
     box->total_byte = TOTAL_BYTE;
+    box->total_size = box_dim_get_size(dims, rank);
     box->dims = dims;
     box->rank = rank;
     return E_SUCCESS;
@@ -109,10 +110,10 @@ Err box_free(box_data * box) TBAG_NOEXCEPT
     // clang-format off
     switch (box->device) {
     case BOX_DEVICE_CPU:  box_cpu_free(box->data); break;
-    case BOX_DEVICE_CUDA: break;
-    case BOX_DEVICE_CL:   break;
-    case BOX_DEVICE_GLSL: break;
-    case BOX_DEVICE_FBS:  break;
+    case BOX_DEVICE_CUDA: /* TODO */ break;
+    case BOX_DEVICE_CL:   /* TODO */ break;
+    case BOX_DEVICE_GLSL: /* TODO */ break;
+    case BOX_DEVICE_FBS:  /* TODO */ break;
     case BOX_DEVICE_NONE:
         TBAG_FALLTHROUGH
     default:

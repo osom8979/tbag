@@ -24,9 +24,6 @@ TEST(box_common_test, Default)
     ASSERT_EQ(HEIGHT, dims1[0]);
     ASSERT_EQ(WIDTH, dims1[1]);
 
-    auto index = box_dim_get_index_args(dims1, 2, 1, 2);
-    ASSERT_EQ((1*WIDTH)+2, index);
-
     auto * dims2 = box_dim_malloc_args(2, HEIGHT, WIDTH);
     ASSERT_EQ(HEIGHT, dims2[0]);
     ASSERT_EQ(WIDTH, dims2[1]);
@@ -40,5 +37,45 @@ TEST(box_common_test, Default)
     box_dim_free(dims1);
     box_dim_free(dims2);
     box_dim_free(dims3);
+}
+
+TEST(box_common_test, box_dim_get_index_args)
+{
+    int const DEPTH = 1000;
+    int const HEIGHT = 100;
+    int const WIDTH = 10;
+
+    auto * dims1 = box_dim_malloc_args(2, HEIGHT, WIDTH);
+    ASSERT_NE(nullptr, dims1);
+    auto index1 = box_dim_get_index_args(dims1, 2, 1, 2);
+    ASSERT_EQ((1*WIDTH)+2, index1);
+    box_dim_free(dims1);
+
+    auto * dims2 = box_dim_malloc_args(3, DEPTH, HEIGHT, WIDTH);
+    ASSERT_NE(nullptr, dims1);
+    auto index2 = box_dim_get_index_args(dims2, 3, 3, 2, 1);
+    ASSERT_EQ((3*HEIGHT*WIDTH)+(2*WIDTH)+1, index2);
+    box_dim_free(dims2);
+}
+
+TEST(box_common_test, stride)
+{
+    int const DEPTH = 1000;
+    int const HEIGHT = 100;
+    int const WIDTH = 10;
+
+    auto * dims = box_dim_malloc_args(3, DEPTH, HEIGHT, WIDTH);
+    ASSERT_NE(nullptr, dims);
+
+    auto * stride = box_stride_malloc(3);
+    ASSERT_NE(nullptr, stride);
+
+    box_stride_update_from_type(dims, 3, BT_UINT64, stride);
+    ASSERT_EQ(8, stride[2]);
+    ASSERT_EQ(8*WIDTH, stride[1]);
+    ASSERT_EQ(8*WIDTH*HEIGHT, stride[0]);
+
+    box_stride_free(stride);
+    box_dim_free(dims);
 }
 
