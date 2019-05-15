@@ -39,11 +39,8 @@ TBAG_API bool box_exists_data(box_data const * box) TBAG_NOEXCEPT;
 TBAG_API Err  box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err  box_checked_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
-using box_memcpy_async_cb = void(*)(Err, void*, box_data const*, box_data*);
-
 TBAG_API Err box_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
-TBAG_API Err box_memcpy_async(box_data * dest, box_data const * src, void * user, box_memcpy_async_cb cb) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

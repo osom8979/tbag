@@ -10,7 +10,6 @@
 #include <libtbag/box/details/box_api.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/memory/Memory.hpp>
-#include <libtbag/box/details/box_dim.hpp>
 #include <libtbag/box/details/box_cpu.hpp>
 #include <libtbag/box/details/box_cuda.hpp>
 #include <libtbag/box/details/box_fbs.hpp>
@@ -173,13 +172,6 @@ Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
         return E_ILLARGS;
     }
     return box_memcpy(dest, src);
-}
-
-Err box_memcpy_async(box_data * dest, box_data const * src, void * user, box_memcpy_async_cb cb) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    return E_ENOSYS;
 }
 
 } // namespace details

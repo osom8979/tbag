@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 
 #include <cstdint>
+#include <cstdarg>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -114,10 +115,26 @@ struct box_data
     /** Real data byte. */
     ui32 total_byte;
 
-    /** Dimension data. */
+    /** Total number of entries. */
+    ui32 total_size;
+
+    /**
+     * Dimension data.
+     *
+     * @remarks
+     *  Example:
+     *  - Index: 0,1,2,3
+     *  - Tensor: batch,height,width,color
+     *  - 2D-Matrix: rows,cols
+     *  - 2D-Image: height,width
+     *  - Coordinate: w,z,y,x
+     */
     ui32 * dims;
 
-    /** Dimension data length. */
+    /** Number of entries between adjacent entries (for each per dimension). */
+    ui32 * stride;
+
+    /** Number of dimensions. */
     ui32 rank;
 
     /** User's data pointer. */
@@ -132,6 +149,37 @@ TBAG_API char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT;
 
 TBAG_API ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT;
 TBAG_API void box_clear(box_data * box) TBAG_NOEXCEPT;
+
+TBAG_API ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API void   box_dim_free(ui32 * dims) TBAG_NOEXCEPT;
+TBAG_API void   box_dim_set_args(ui32 * TBAG_RESTRICT dims, ui32 args_count, ...) TBAG_NOEXCEPT;
+TBAG_API void   box_dim_set_vargs(ui32 * TBAG_RESTRICT dims, ui32 args_count, va_list ap) TBAG_NOEXCEPT;
+TBAG_API void   box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API bool   box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT;
+TBAG_API ui32   box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
+
+/**
+ * The formula to obtain the index is as follows:
+ * calc 1rank index: x
+ * calc 2rank index: x + (y * width)
+ * calc 3rank index: x + (y * width) + (z * width * height)
+ * calc 4rank index: x + (y * width) + (z * width * height) + (w * width * height * depth)
+ * ...
+ *
+ * Therefore, it can be converted into the following formula:
+ * ...
+ * calc 4rank index: x + ((y + (z + (w * depth)) * height) * width)
+ * calc 3rank index: x + (y + (z * height)) * width
+ * calc 2rank index: x + (y * width)
+ * calc 1rank index: x
+ *
+ * Calculated from inside parentheses.
+ */
+TBAG_API ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box
