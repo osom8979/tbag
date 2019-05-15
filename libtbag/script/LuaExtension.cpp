@@ -33,6 +33,11 @@ int luaE_unsupport(lua_State * L)
     return luaL_error(L, "Unsupported operation error");
 }
 
+int luaE_argerror(lua_State * L)
+{
+    return luaL_error(L, "Illegal argument error");
+}
+
 void luaE_register_metatable(lua_State * L, char const * name, luaL_Reg const * l)
 {
     luaL_newmetatable(L, name);
@@ -115,6 +120,36 @@ std::vector<std::string> luaE_checkstring_array(lua_State * L, int arg_num)
         result[i] = luaL_checkstring(L, -1);
     }
     return result;
+}
+
+void luaE_pushinteger_array(lua_State * L, lua_Integer const * value, int size)
+{
+    assert(value != nullptr);
+    lua_createtable(L, size, 0);
+    for (int i = 0; i < size; ++i) {
+        lua_pushinteger(L, value[i]);
+        lua_rawseti(L, -2, i+1);
+    }
+}
+
+void luaE_pushnumber_array(lua_State * L, lua_Number const * value, int size)
+{
+    assert(value != nullptr);
+    lua_createtable(L, size, 0);
+    for (int i = 0; i < size; ++i) {
+        lua_pushnumber(L, value[i]);
+        lua_rawseti(L, -2, i+1);
+    }
+}
+
+void luaE_pushstring_array(lua_State * L, char const ** value, int size)
+{
+    assert(value != nullptr);
+    lua_createtable(L, size, 0);
+    for (int i = 0; i < size; ++i) {
+        lua_pushstring(L, value[i]);
+        lua_rawseti(L, -2, i+1);
+    }
 }
 
 std::vector<luaL_Reg> mergeLuaRegister(luaL_Reg const * a, luaL_Reg const * b)

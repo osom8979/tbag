@@ -36,14 +36,22 @@ TBAG_CONSTEXPR char const * const lua_tbag_name() TBAG_NOEXCEPT
     return LUA_TBAG_NAME;
 }
 
-TBAG_API int  luaE_unsupport(lua_State * L);
+TBAG_API int luaE_unsupport(lua_State * L);
+TBAG_API int luaE_argerror(lua_State * L);
+
 TBAG_API void luaE_register_metatable(lua_State * L, char const * name, luaL_Reg const * l);
 TBAG_API void luaE_printstack(lua_State * L);
 
 // clang-format off
 TBAG_API std::vector<lua_Integer> luaE_checkinteger_array(lua_State * L, int arg_num);
-TBAG_API std::vector<lua_Number>  luaE_checknumber_array (lua_State * L, int arg_num);
-TBAG_API std::vector<std::string> luaE_checkstring_array (lua_State * L, int arg_num);
+TBAG_API std::vector<lua_Number>  luaE_checknumber_array(lua_State * L, int arg_num);
+TBAG_API std::vector<std::string> luaE_checkstring_array(lua_State * L, int arg_num);
+// clang-format on
+
+// clang-format off
+TBAG_API void luaE_pushinteger_array(lua_State * L, lua_Integer const * value, int size);
+TBAG_API void luaE_pushnumber_array(lua_State * L, lua_Number const * value, int size);
+TBAG_API void luaE_pushstring_array(lua_State * L, char const ** value, int size);
 // clang-format on
 
 TBAG_API std::vector<luaL_Reg> mergeLuaRegister(luaL_Reg const * a, luaL_Reg const * b);
