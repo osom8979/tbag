@@ -1249,7 +1249,7 @@ void GuiEndCombo()
 }
 
 bool GuiCombo(char const * label, int * current_item, char const * const items[],
-           int items_count, int popup_max_height_in_items)
+              int items_count, int popup_max_height_in_items)
 {
     return ImGui::Combo(label, current_item, items, items_count, popup_max_height_in_items);
 }
@@ -1274,25 +1274,25 @@ bool GuiDragFloat(char const * label, float * v, float v_speed, float v_min, flo
 }
 
 bool GuiDragFloat2(char const * label, float v[2], float v_speed, float v_min, float v_max,
-                char const * format, float power)
+                   char const * format, float power)
 {
     return ImGui::DragFloat2(label, v, v_speed, v_min, v_max, format, power);
 }
 
 bool GuiDragFloat3(char const * label, float v[3], float v_speed, float v_min, float v_max,
-                char const * format, float power)
+                   char const * format, float power)
 {
     return ImGui::DragFloat3(label, v, v_speed, v_min, v_max, format, power);
 }
 
 bool GuiDragFloat4(char const * label, float v[4], float v_speed, float v_min, float v_max,
-                char const * format, float power)
+                   char const * format, float power)
 {
     return ImGui::DragFloat4(label, v, v_speed, v_min, v_max, format, power);
 }
 
 bool GuiDragFloatRange2(char const * label, float * v_current_min, float * v_current_max, float v_speed,
-                     float v_min, float v_max, char const * format, char const * format_max, float power)
+                        float v_min, float v_max, char const * format, char const * format_max, float power)
 {
     return ImGui::DragFloatRange2(label, v_current_min, v_current_max, v_speed,
                                   v_min, v_max, format, format_max, power);
@@ -1319,19 +1319,19 @@ bool GuiDragInt4(char const * label, int v[4], float v_speed, int v_min, int v_m
 }
 
 bool GuiDragIntRange2(char const * label, int * v_current_min, int * v_current_max,
-                   float v_speed, int v_min, int v_max, char const * format, char const * format_max)
+                      float v_speed, int v_min, int v_max, char const * format, char const * format_max)
 {
     return ImGui::DragIntRange2(label, v_current_min, v_current_max, v_speed, v_min, v_max, format, format_max);
 }
 
 bool GuiDragScalar(char const * label, GuiDataType data_type, void * v, float v_speed, const void * v_min,
-                const void * v_max, char const * format, float power)
+                   const void * v_max, char const * format, float power)
 {
     return ImGui::DragScalar(label, data_type, v, v_speed, v_min, v_max, format, power);
 }
 
 bool GuiDragScalarN(char const * label, GuiDataType data_type, void * v, int components, float v_speed,
-                 const void * v_min, const void * v_max, char const * format, float power)
+                    const void * v_min, const void * v_max, char const * format, float power)
 {
     return ImGui::DragScalarN(label, data_type, v, components, v_speed, v_min, v_max, format, power);
 }
@@ -1382,19 +1382,19 @@ bool GuiSliderInt4(char const * label, int v[4], int v_min, int v_max, char cons
 }
 
 bool GuiSliderScalar(char const * label, GuiDataType data_type, void * v, void const * v_min,
-                  void const * v_max, char const * format, float power)
+                     void const * v_max, char const * format, float power)
 {
     return ImGui::SliderScalar(label, data_type, v, v_min, v_max, format, power);
 }
 
 bool GuiSliderScalarN(char const * label, GuiDataType data_type, void * v, int components,
-                   const void * v_min, const void * v_max, char const * format, float power)
+                      const void * v_min, const void * v_max, char const * format, float power)
 {
     return ImGui::SliderScalarN(label, data_type, v, components, v_min, v_max, format, power);
 }
 
 bool GuiVSliderFloat(char const * label, Vector2 const & size, float * v, float v_min, float v_max,
-                  char const * format, float power)
+                     char const * format, float power)
 {
     return ImGui::VSliderFloat(label, size, v, v_min, v_max, format, power);
 }
@@ -1405,7 +1405,7 @@ bool GuiVSliderInt(char const * label, Vector2 const & size, int * v, int v_min,
 }
 
 bool GuiVSliderScalar(char const * label, Vector2 const & size, GuiDataType data_type, void * v,
-                   const void * v_min, const void * v_max, char const * format, float power)
+                      const void * v_min, const void * v_max, char const * format, float power)
 {
     return ImGui::VSliderScalar(label, size, data_type, v, v_min, v_max, format, power);
 }
@@ -1466,19 +1466,19 @@ bool GuiInputInt4(char const * label, int v[4], GuiInputTextFlags flags)
 }
 
 bool GuiInputDouble(char const * label, double * v, double step, double step_fast,
-                 char const * format, GuiInputTextFlags flags)
+                    char const * format, GuiInputTextFlags flags)
 {
     return ImGui::InputDouble(label, v, step, step_fast, format, flags);
 }
 
 bool GuiInputScalar(char const * label, GuiDataType data_type, void * v, void const * step,
-                 void const * step_fast, char const * format, GuiInputTextFlags flags)
+                    void const * step_fast, char const * format, GuiInputTextFlags flags)
 {
     return ImGui::InputScalar(label, data_type, v, step, step_fast, format, flags);
 }
 
 bool GuiInputScalarN(char const * label, GuiDataType data_type, void * v, int components, void const * step,
-                  void const * step_fast, char const * format, GuiInputTextFlags flags)
+                     void const * step_fast, char const * format, GuiInputTextFlags flags)
 {
     return ImGui::InputScalarN(label, data_type, v, components, step, step_fast, format, flags);
 }
@@ -1589,8 +1589,8 @@ bool GuiListBox(char const * label, int * current_item, char const * const items
 }
 
 bool GuiListBox(char const * label, int * current_item,
-             bool (*items_getter)(void * data, int idx, char const ** out_text),
-             void * data, int items_count, int height_in_items)
+                bool (*items_getter)(void * data, int idx, char const ** out_text),
+                void * data, int items_count, int height_in_items)
 {
     return ImGui::ListBox(label, current_item, items_getter, data, items_count, height_in_items);
 }
@@ -1611,31 +1611,31 @@ void GuiListBoxFooter()
 }
 
 void GuiPlotLines(char const * label, float const * values, int values_count, int values_offset,
-               char const * overlay_text, float scale_min, float scale_max, Vector2 graph_size, int stride)
+                  char const * overlay_text, float scale_min, float scale_max, Vector2 graph_size, int stride)
 {
     ImGui::PlotLines(label, values, values_count, values_offset, overlay_text,
                      scale_min, scale_max, graph_size, stride);
 }
 
 void GuiPlotLines(char const * label, float(*values_getter)(void * data, int idx), void * data,
-               int values_count, int values_offset, char const * overlay_text,
-               float scale_min, float scale_max, Vector2 graph_size)
+                  int values_count, int values_offset, char const * overlay_text,
+                  float scale_min, float scale_max, Vector2 graph_size)
 {
     ImGui::PlotLines(label, values_getter, data, values_count, values_offset,
                      overlay_text, scale_min, scale_max, graph_size);
 }
 
 void GuiPlotHistogram(char const * label, float const * values, int values_count, int values_offset,
-                   char const * overlay_text, float scale_min, float scale_max,
-                   Vector2 graph_size, int stride)
+                      char const * overlay_text, float scale_min, float scale_max,
+                      Vector2 graph_size, int stride)
 {
     ImGui::PlotHistogram(label, values, values_count, values_offset, overlay_text,
                          scale_min, scale_max, graph_size, stride);
 }
 
 void GuiPlotHistogram(char const * label, float(*values_getter)(void * data, int idx), void * data,
-                   int values_count, int values_offset, char const * overlay_text,
-                   float scale_min, float scale_max, Vector2 graph_size)
+                      int values_count, int values_offset, char const * overlay_text,
+                      float scale_min, float scale_max, Vector2 graph_size)
 {
     ImGui::PlotHistogram(label, values_getter, data, values_count, values_offset,
                          overlay_text, scale_min, scale_max, graph_size);

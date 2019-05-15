@@ -748,31 +748,35 @@ static int _GuiImageButton(lua_State * L)
 
 static int _GuiCheckbox(lua_State * L)
 {
-    auto * wrapper = luaE_checkbooleanwrapper(L, 2);
-    lua_pushboolean(L, GuiCheckbox(luaL_checkstring(L, 1), &(wrapper->value)));
-    return 1;
+    bool v = luaL_checkboolean(L, 2);
+    lua_pushboolean(L, GuiCheckbox(luaL_checkstring(L, 1), &v));
+    lua_pushboolean(L, v);
+    return 2;
 }
 
 static int _GuiCheckboxFlags(lua_State * L)
 {
-    auto * wrapper = luaE_checkunsignedwrapper(L, 2);
+    unsigned int flags = luaL_checkinteger(L, 2);
     lua_pushboolean(L, GuiCheckboxFlags(luaL_checkstring(L, 1),
-                                        &(wrapper->value),
+                                        &flags,
                                         luaL_checkinteger(L, 3)));
-    return 0;
+    lua_pushinteger(L, flags);
+    return 2;
 }
 
 static int _GuiRadioButton(lua_State * L)
 {
     if (lua_isboolean(L, 2)) {
         lua_pushboolean(L, GuiRadioButton(luaL_checkstring(L, 1), luaL_checkboolean(L, 2)));
+        return 1;
     } else {
-        auto * wrapper = luaE_checkintegerwrapper(L, 2);
+        int v = luaL_checkboolean(L, 2);
         lua_pushboolean(L, GuiRadioButton(luaL_checkstring(L, 1),
-                                          &(wrapper->value),
+                                          &v,
                                           luaL_checkinteger(L, 3)));
+        lua_pushinteger(L, v);
+        return 2;
     }
-    return 1;
 }
 
 static int _GuiProgressBar(lua_State * L)
@@ -803,361 +807,809 @@ static int _GuiEndCombo(lua_State * L)
     return 0;
 }
 
+static bool _GuiCombo_items_getter(void * data, int idx, char const ** out_text)
+{
+    auto * L = (lua_State*)data;
+    assert(L != nullptr);
+
+    lua_pushvalue(L, 3); // Duplicate callback function.
+    lua_pushnumber(L, idx);
+    auto const CODE = lua_pcall(L, 1, 2, 0);
+
+    bool result1 = false;
+    char const * result2 = nullptr;
+    switch (CODE) {
+    case 0: // LUA_OK
+        result1 = luaL_checkboolean(L, -2);
+        result2 = luaL_checkstring(L, -1);
+        lua_pop(L, 2);
+        break;
+    case LUA_ERRRUN:
+        TBAG_FALLTHROUGH
+    case LUA_ERRMEM:
+        TBAG_FALLTHROUGH
+    case LUA_ERRERR:
+        TBAG_FALLTHROUGH
+    default:
+        char const * msg = luaL_checkstring(L, -1);
+        tDLogW("_GuiCombo_items_getter() lua_pcall() error({}): {}", CODE, msg);
+        lua_pop(L, 1);
+        break;
+    }
+
+    if (result2) {
+        *out_text = result2;
+    }
+    return result1;
+}
+
 static int _GuiCombo(lua_State * L)
 {
-    //bool Combo(luaL_checkstring(L, 1), int * current_item, char const * const items[], int items_count, int popup_max_height_in_items = -1);
-    //bool Combo(luaL_checkstring(L, 1), int * current_item, char const * items_separated_by_zeros, int popup_max_height_in_items = -1);
-    //bool Combo(luaL_checkstring(L, 1), int * current_item, bool(*items_getter)(void * data, int idx, char const ** out_text), void * data, int items_count, int popup_max_height_in_items = -1);
-    return 0;
+    auto * label = luaL_checkstring(L, 1);
+    int current_item = luaL_checkinteger(L, 2);
+    if (lua_isfunction(L, 3)) {
+        lua_pushboolean(L, GuiCombo(label, &current_item, &_GuiCombo_items_getter, (void*)L,
+                                    luaL_checkinteger(L, 4),
+                                    luaL_optinteger(L, 4, -1)));
+    } else {
+        auto items_strings = luaE_checkstring_array(L, 3);
+        std::vector<char const *> items;
+        for (auto & item : items_strings) {
+            items.push_back(item.c_str());
+        }
+        lua_pushboolean(L, GuiCombo(label, &current_item, items.data(), items.size(), luaL_optinteger(L, 4, -1)));
+    }
+    lua_pushinteger(L, current_item);
+    return 2;
 }
 
 static int _GuiDragFloat(lua_State * L)
 {
-    //bool DragFloat(char const * label, float * v, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    float v = luaL_checknumber(L, 2);
+    lua_pushboolean(L, GuiDragFloat(luaL_checkstring(L, 1), &v,
+                                    luaL_optnumber(L, 3, 1.0f),
+                                    luaL_optnumber(L, 4, 0.0f),
+                                    luaL_optnumber(L, 5, 0.0f),
+                                    luaL_optstring(L, 6, "%.3f"),
+                                    luaL_optnumber(L, 7, 1.0f)));
+    lua_pushnumber(L, v);
+    return 2;
 }
 
 static int _GuiDragFloat2(lua_State * L)
 {
-    //bool DragFloat2(char const * label, float v[2], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[2];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    lua_pushboolean(L, GuiDragFloat2(luaL_checkstring(L, 1), v,
+                                     luaL_optnumber(L, 3, 1.0f),
+                                     luaL_optnumber(L, 4, 0.0f),
+                                     luaL_optnumber(L, 5, 0.0f),
+                                     luaL_optstring(L, 6, "%.3f"),
+                                     luaL_optnumber(L, 7, 1.0f)));
+    lua_Number v_result[2];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    luaE_pushnumber_array(L, v_result, 2);
+    return 2;
 }
 
 static int _GuiDragFloat3(lua_State * L)
 {
-    //bool DragFloat3(char const * label, float v[3], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[3];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    lua_pushboolean(L, GuiDragFloat3(luaL_checkstring(L, 1), v,
+                                     luaL_optnumber(L, 3, 1.0f),
+                                     luaL_optnumber(L, 4, 0.0f),
+                                     luaL_optnumber(L, 5, 0.0f),
+                                     luaL_optstring(L, 6, "%.3f"),
+                                     luaL_optnumber(L, 7, 1.0f)));
+    lua_Number v_result[3];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    luaE_pushnumber_array(L, v_result, 3);
+    return 2;
 }
 
 static int _GuiDragFloat4(lua_State * L)
 {
-    //bool DragFloat4(char const * label, float v[4], float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[4];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    v[3] = v_array[3];
+    lua_pushboolean(L, GuiDragFloat4(luaL_checkstring(L, 1), v,
+                                     luaL_optnumber(L, 3, 1.0f),
+                                     luaL_optnumber(L, 4, 0.0f),
+                                     luaL_optnumber(L, 5, 0.0f),
+                                     luaL_optstring(L, 6, "%.3f"),
+                                     luaL_optnumber(L, 7, 1.0f)));
+    lua_Number v_result[4];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    v_result[3] = v[3];
+    luaE_pushnumber_array(L, v_result, 4);
+    return 2;
 }
 
 static int _GuiDragFloatRange2(lua_State * L)
 {
-    //bool DragFloatRange2(char const * label, float * v_current_min, float * v_current_max, float v_speed = 1.0f, float v_min = 0.0f, float v_max = 0.0f, char const * format = "%.3f", char const * format_max = nullptr, float power = 1.0f);
-    return 0;
+    float v_current_min = luaL_checknumber(L, 2);
+    float v_current_max = luaL_checknumber(L, 3);
+    lua_pushboolean(L, GuiDragFloatRange2(luaL_checkstring(L, 1), &v_current_min, &v_current_max,
+                                          luaL_optnumber(L, 4, 1.0f),
+                                          luaL_optnumber(L, 5, 0.0f),
+                                          luaL_optnumber(L, 6, 0.0f),
+                                          luaL_optstring(L, 7, "%.3f"),
+                                          luaL_optstring(L, 8, nullptr),
+                                          luaL_optnumber(L, 9, 1.0f)));
+    lua_pushnumber(L, v_current_min);
+    lua_pushnumber(L, v_current_max);
+    return 3;
 }
 
 static int _GuiDragInt(lua_State * L)
 {
-    //bool DragInt(char const * label, int * v, float v_speed = 1.0f, int v_min = 0, int v_max = 0, char const * format = "%d");
-    return 0;
+    int v = luaL_checkinteger(L, 2);
+    lua_pushboolean(L, GuiDragInt(luaL_checkstring(L, 1), &v,
+                                  luaL_optnumber(L, 3, 1.0f),
+                                  luaL_optinteger(L, 4, 0),
+                                  luaL_optinteger(L, 5, 0),
+                                  luaL_optstring(L, 6, "%d")));
+    lua_pushinteger(L, v);
+    return 2;
 }
 
 static int _GuiDragInt2(lua_State * L)
 {
-    //bool DragInt2(char const * label, int v[2], float v_speed = 1.0f, int v_min = 0, int v_max = 0, char const * format = "%d");
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[2];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    lua_pushboolean(L, GuiDragInt2(luaL_checkstring(L, 1), v,
+                                   luaL_optnumber(L, 3, 1.0f),
+                                   luaL_optinteger(L, 4, 0),
+                                   luaL_optinteger(L, 5, 0),
+                                   luaL_optstring(L, 6, "%d")));
+    lua_Integer v_result[2];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    luaE_pushinteger_array(L, v_result, 2);
+    return 2;
 }
 
 static int _GuiDragInt3(lua_State * L)
 {
-    //bool DragInt3(char const * label, int v[3], float v_speed = 1.0f, int v_min = 0, int v_max = 0, char const * format = "%d");
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[3];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    lua_pushboolean(L, GuiDragInt3(luaL_checkstring(L, 1), v,
+                                   luaL_optnumber(L, 3, 1.0f),
+                                   luaL_optinteger(L, 4, 0),
+                                   luaL_optinteger(L, 5, 0),
+                                   luaL_optstring(L, 6, "%d")));
+    lua_Integer v_result[3];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    luaE_pushinteger_array(L, v_result, 3);
+    return 2;
 }
 
 static int _GuiDragInt4(lua_State * L)
 {
-    //bool DragInt4(char const * label, int v[4], float v_speed = 1.0f, int v_min = 0, int v_max = 0, char const * format = "%d");
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[4];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    v[3] = v_array[3];
+    lua_pushboolean(L, GuiDragInt4(luaL_checkstring(L, 1), v,
+                                   luaL_optnumber(L, 3, 1.0f),
+                                   luaL_optinteger(L, 4, 0),
+                                   luaL_optinteger(L, 5, 0),
+                                   luaL_optstring(L, 6, "%d")));
+    lua_Integer v_result[4];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    v_result[3] = v[3];
+    luaE_pushinteger_array(L, v_result, 4);
+    return 2;
 }
 
 static int _GuiDragIntRange2(lua_State * L)
 {
-    //bool DragIntRange2(char const * label, int * v_current_min, int * v_current_max, float v_speed = 1.0f, int v_min = 0, int v_max = 0, char const * format = "%d", char const * format_max = nullptr);
-    return 0;
-}
-
-static int _GuiDragScalar(lua_State * L)
-{
-    //bool DragScalar(char const * label, DataType data_type, void * v, float v_speed, void const * v_min = nullptr, void const * v_max = nullptr, char const * format = nullptr, float power = 1.0f);
-    return 0;
-}
-
-static int _GuiDragScalarN(lua_State * L)
-{
-    //bool DragScalarN(char const * label, DataType data_type, void * v, int components, float v_speed, void const * v_min = nullptr, void const * v_max = nullptr, char const * format = nullptr, float power = 1.0f);
-    return 0;
+    int v_current_min = luaL_checkinteger(L, 2);
+    int v_current_max = luaL_checkinteger(L, 3);
+    lua_pushboolean(L, GuiDragIntRange2(luaL_checkstring(L, 1), &v_current_min, &v_current_max,
+                                        luaL_optnumber(L, 4, 1.0f),
+                                        luaL_optinteger(L, 5, 0),
+                                        luaL_optinteger(L, 6, 0),
+                                        luaL_optstring(L, 7, "%d"),
+                                        luaL_optstring(L, 8, nullptr)));
+    lua_pushinteger(L, v_current_min);
+    lua_pushinteger(L, v_current_max);
+    return 3;
 }
 
 static int _GuiSliderFloat(lua_State * L)
 {
-    //bool SliderFloat(char const * label, float * v, float v_min, float v_max, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    float v = luaL_checknumber(L, 2);
+    lua_pushboolean(L, GuiSliderFloat(luaL_checkstring(L, 1), &v,
+                                      luaL_checknumber(L, 3),
+                                      luaL_checknumber(L, 4),
+                                      luaL_optstring(L, 5, "%.3f"),
+                                      luaL_optnumber(L, 6, 1.0f)));
+    lua_pushnumber(L, v);
+    return 2;
 }
 
 static int _GuiSliderFloat2(lua_State * L)
 {
-    //bool SliderFloat2(char const * label, float v[2], float v_min, float v_max, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[2];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    lua_pushboolean(L, GuiSliderFloat2(luaL_checkstring(L, 1), v,
+                                       luaL_checknumber(L, 3),
+                                       luaL_checknumber(L, 4),
+                                       luaL_optstring(L, 5, "%.3f"),
+                                       luaL_optnumber(L, 6, 1.0f)));
+    lua_Number v_result[2];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    luaE_pushnumber_array(L, v_result, 2);
+    return 2;
 }
 
 static int _GuiSliderFloat3(lua_State * L)
 {
-    //bool SliderFloat3(char const * label, float v[3], float v_min, float v_max, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[3];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    lua_pushboolean(L, GuiSliderFloat3(luaL_checkstring(L, 1), v,
+                                       luaL_checknumber(L, 3),
+                                       luaL_checknumber(L, 4),
+                                       luaL_optstring(L, 5, "%.3f"),
+                                       luaL_optnumber(L, 6, 1.0f)));
+    lua_Number v_result[3];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    luaE_pushnumber_array(L, v_result, 3);
+    return 2;
 }
 
 static int _GuiSliderFloat4(lua_State * L)
 {
-    //bool SliderFloat4(char const * label, float v[4], float v_min, float v_max, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[4];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    v[3] = v_array[3];
+    lua_pushboolean(L, GuiSliderFloat4(luaL_checkstring(L, 1), v,
+                                       luaL_checknumber(L, 3),
+                                       luaL_checknumber(L, 4),
+                                       luaL_optstring(L, 5, "%.3f"),
+                                       luaL_optnumber(L, 6, 1.0f)));
+    lua_Number v_result[4];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    v_result[3] = v[3];
+    luaE_pushnumber_array(L, v_result, 4);
+    return 2;
 }
 
 static int _GuiSliderAngle(lua_State * L)
 {
-    //bool SliderAngle(char const * label, float * v_rad, float v_degrees_min = -360.0f, float v_degrees_max = +360.0f, char const * format = "%.0f deg");
-    return 0;
+    float v_rad = luaL_checknumber(L, 2);
+    lua_pushboolean(L, GuiSliderAngle(luaL_checkstring(L, 1), &v_rad,
+                                      luaL_optnumber(L, 3, -360.0f),
+                                      luaL_optnumber(L, 4, +360.0f),
+                                      luaL_optstring(L, 5, "%.3f deg")));
+    lua_pushnumber(L, v_rad);
+    return 2;
 }
 
 static int _GuiSliderInt(lua_State * L)
 {
-    //bool SliderInt(char const * label, int * v, int v_min, int v_max, char const * format = "%d");
-    return 0;
+    int v = luaL_checkinteger(L, 2);
+    lua_pushboolean(L, GuiSliderInt(luaL_checkstring(L, 1), &v,
+                                    luaL_checkinteger(L, 3),
+                                    luaL_checkinteger(L, 4),
+                                    luaL_optstring(L, 5, "%d")));
+    lua_pushinteger(L, v);
+    return 2;
 }
 
 static int _GuiSliderInt2(lua_State * L)
 {
-    //bool SliderInt2(char const * label, int v[2], int v_min, int v_max, char const * format = "%d");
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[2];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    lua_pushboolean(L, GuiSliderInt2(luaL_checkstring(L, 1), v,
+                                     luaL_checkinteger(L, 3),
+                                     luaL_checkinteger(L, 4),
+                                     luaL_optstring(L, 5, "%d")));
+    lua_Integer v_result[2];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    luaE_pushinteger_array(L, v_result, 2);
+    return 2;
 }
 
 static int _GuiSliderInt3(lua_State * L)
 {
-    //bool SliderInt3(char const * label, int v[3], int v_min, int v_max, char const * format = "%d");
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[3];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    lua_pushboolean(L, GuiSliderInt3(luaL_checkstring(L, 1), v,
+                                     luaL_checkinteger(L, 3),
+                                     luaL_checkinteger(L, 4),
+                                     luaL_optstring(L, 5, "%d")));
+    lua_Integer v_result[3];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    luaE_pushinteger_array(L, v_result, 3);
+    return 2;
 }
 
 static int _GuiSliderInt4(lua_State * L)
 {
-    //bool SliderInt4(char const * label, int v[4], int v_min, int v_max, char const * format = "%d");
-    return 0;
-}
-
-static int _GuiSliderScalar(lua_State * L)
-{
-    //bool SliderScalar(char const * label, DataType data_type, void * v, void const * v_min, void const * v_max, char const * format = nullptr, float power = 1.0f);
-    return 0;
-}
-
-static int _GuiSliderScalarN(lua_State * L)
-{
-    //bool SliderScalarN(char const * label, DataType data_type, void * v, int components, void const * v_min, void const * v_max, char const * format = nullptr, float power = 1.0f);
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[4];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    v[3] = v_array[3];
+    lua_pushboolean(L, GuiSliderInt4(luaL_checkstring(L, 1), v,
+                                     luaL_checkinteger(L, 3),
+                                     luaL_checkinteger(L, 4),
+                                     luaL_optstring(L, 5, "%d")));
+    lua_Integer v_result[4];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    v_result[3] = v[3];
+    luaE_pushinteger_array(L, v_result, 4);
+    return 2;
 }
 
 static int _GuiVSliderFloat(lua_State * L)
 {
-    //bool VSliderFloat(char const * label, Vector2 const & size, float * v, float v_min, float v_max, char const * format = "%.3f", float power = 1.0f);
-    return 0;
+    float v = luaL_checknumber(L, 3);
+    lua_pushboolean(L, GuiVSliderFloat(luaL_checkstring(L, 1),
+                                       luaE_checkvector2(L, 2),
+                                       &v,
+                                       luaL_checknumber(L, 4),
+                                       luaL_checknumber(L, 5),
+                                       luaL_optstring(L, 6, "%.3f"),
+                                       luaL_optnumber(L, 7, 1.0f)));
+    lua_pushnumber(L, v);
+    return 2;
 }
 
 static int _GuiVSliderInt(lua_State * L)
 {
-    //bool VSliderInt(char const * label, Vector2 const & size, int * v, int v_min, int v_max, char const * format = "%d");
-    return 0;
-}
-
-static int _GuiVSliderScalar(lua_State * L)
-{
-    //bool VSliderScalar(char const * label, Vector2 const & size, DataType data_type, void * v, void const * v_min, void const * v_max, char const * format = nullptr, float power = 1.0f);
-    return 0;
+    int v = luaL_checkinteger(L, 3);
+    lua_pushboolean(L, GuiVSliderInt(luaL_checkstring(L, 1),
+                                     luaE_checkvector2(L, 2),
+                                     &v,
+                                     luaL_checkinteger(L, 4),
+                                     luaL_checkinteger(L, 5),
+                                     luaL_optstring(L, 6, "%d")));
+    lua_pushinteger(L, v);
+    return 2;
 }
 
 static int _GuiInputText(lua_State * L)
 {
-    //bool InputText(char const * label, char * buf, size_t buf_size, InputTextFlags flags = 0);
-    return 0;
+    std::vector<char> buffer(luaL_checkinteger(L, 2) + 1, '\0');
+    lua_pushboolean(L, GuiInputText(luaL_checkstring(L, 1),
+                                    buffer.data(), buffer.size(),
+                                    luaL_optinteger(L, 3, 0)));
+    lua_pushstring(L, buffer.data());
+    return 2;
 }
 
 static int _GuiInputTextMultiline(lua_State * L)
 {
-    //bool InputTextMultiline(char const * label, char * buf, size_t buf_size, Vector2 const & size = Vector2{0,0}, InputTextFlags flags = 0);
-    return 0;
+    std::vector<char> buffer(luaL_checkinteger(L, 2) + 1, '\0');
+    lua_pushboolean(L, GuiInputTextMultiline(luaL_checkstring(L, 1),
+                                             buffer.data(), buffer.size(),
+                                             luaE_optvector2(L, 3, Vector2{0,0}),
+                                             luaL_optinteger(L, 4, 0)));
+    lua_pushstring(L, buffer.data());
+    return 2;
 }
 
 static int _GuiInputTextWithHint(lua_State * L)
 {
-    //bool InputTextWithHint(char const * label, char const * hint, char * buf, size_t buf_size, InputTextFlags flags = 0);
-    return 0;
+    std::vector<char> buffer(luaL_checkinteger(L, 3) + 1, '\0');
+    lua_pushboolean(L, GuiInputTextWithHint(luaL_checkstring(L, 1),
+                                            luaL_checkstring(L, 2),
+                                            buffer.data(), buffer.size(),
+                                            luaL_optinteger(L, 4, 0)));
+    lua_pushstring(L, buffer.data());
+    return 2;
 }
 
 static int _GuiInputFloat(lua_State * L)
 {
-    //bool InputFloat(char const * label, float * v, float step = 0.0f, float step_fast = 0.0f, char const * format = "%.3f", InputTextFlags flags = 0);
-    return 0;
+    float v = luaL_checknumber(L, 2);
+    lua_pushboolean(L, GuiInputFloat(luaL_checkstring(L, 1), &v,
+                                     luaL_optnumber(L, 3, 0.0f),
+                                     luaL_optnumber(L, 4, 0.0f),
+                                     luaL_optstring(L, 5, "%.3f"),
+                                     luaL_optinteger(L, 6, 0)));
+    lua_pushnumber(L, v);
+    return 2;
 }
 
 static int _GuiInputFloat2(lua_State * L)
 {
-    //bool InputFloat2(char const * label, float v[2], char const * format = "%.3f", InputTextFlags flags = 0);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[2];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    lua_pushboolean(L, GuiInputFloat2(luaL_checkstring(L, 1), v,
+                                      luaL_optstring(L, 3, "%.3f"),
+                                      luaL_optinteger(L, 4, 0)));
+    lua_Number v_result[2];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    luaE_pushnumber_array(L, v_result, 2);
+    return 2;
 }
 
 static int _GuiInputFloat3(lua_State * L)
 {
-    //bool InputFloat3(char const * label, float v[3], char const * format = "%.3f", InputTextFlags flags = 0);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[3];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    lua_pushboolean(L, GuiInputFloat3(luaL_checkstring(L, 1), v,
+                                      luaL_optstring(L, 3, "%.3f"),
+                                      luaL_optinteger(L, 4, 0)));
+    lua_Number v_result[3];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    luaE_pushnumber_array(L, v_result, 3);
+    return 2;
 }
 
 static int _GuiInputFloat4(lua_State * L)
 {
-    //bool InputFloat4(char const * label, float v[4], char const * format = "%.3f", InputTextFlags flags = 0);
-    return 0;
+    auto v_array = luaE_checknumber_array(L, 2);
+    float v[4];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    v[3] = v_array[3];
+    lua_pushboolean(L, GuiInputFloat4(luaL_checkstring(L, 1), v,
+                                      luaL_optstring(L, 3, "%.3f"),
+                                      luaL_optinteger(L, 4, 0)));
+    lua_Number v_result[4];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    v_result[3] = v[3];
+    luaE_pushnumber_array(L, v_result, 4);
+    return 2;
 }
 
 static int _GuiInputInt(lua_State * L)
 {
-    //bool InputInt(char const * label, int * v, int step = 1, int step_fast = 100, InputTextFlags flags = 0);
-    return 0;
+    int v = luaL_checkinteger(L, 2);
+    lua_pushboolean(L, GuiInputInt(luaL_checkstring(L, 1), &v,
+                                   luaL_optinteger(L, 3, 1),
+                                   luaL_optinteger(L, 4, 100),
+                                   luaL_optinteger(L, 5, 0)));
+    lua_pushinteger(L, v);
+    return 2;
 }
 
 static int _GuiInputInt2(lua_State * L)
 {
-    //bool InputInt2(char const * label, int v[2], InputTextFlags flags = 0);
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[2];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    lua_pushboolean(L, GuiInputInt2(luaL_checkstring(L, 1), v, luaL_optinteger(L, 3, 0)));
+    lua_Integer v_result[2];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    luaE_pushinteger_array(L, v_result, 2);
+    return 2;
 }
 
 static int _GuiInputInt3(lua_State * L)
 {
-    //bool InputInt3(char const * label, int v[3], InputTextFlags flags = 0);
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[3];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    lua_pushboolean(L, GuiInputInt3(luaL_checkstring(L, 1), v, luaL_optinteger(L, 3, 0)));
+    lua_Integer v_result[3];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    luaE_pushinteger_array(L, v_result, 3);
+    return 2;
 }
 
 static int _GuiInputInt4(lua_State * L)
 {
-    //bool InputInt4(char const * label, int v[4], InputTextFlags flags = 0);
-    return 0;
+    auto v_array = luaE_checkinteger_array(L, 2);
+    int v[4];
+    v[0] = v_array[0];
+    v[1] = v_array[1];
+    v[2] = v_array[2];
+    v[3] = v_array[3];
+    lua_pushboolean(L, GuiInputInt4(luaL_checkstring(L, 1), v, luaL_optinteger(L, 3, 0)));
+    lua_Integer v_result[4];
+    v_result[0] = v[0];
+    v_result[1] = v[1];
+    v_result[2] = v[2];
+    v_result[3] = v[3];
+    luaE_pushinteger_array(L, v_result, 4);
+    return 2;
 }
 
 static int _GuiInputDouble(lua_State * L)
 {
-    //bool InputDouble(char const * label, double * v, double step = 0.0, double step_fast = 0.0, char const * format = "%.6f", InputTextFlags flags = 0);
-    return 0;
-}
-
-static int _GuiInputScalar(lua_State * L)
-{
-    //bool InputScalar(char const * label, DataType data_type, void * v, void const * step = nullptr, void const * step_fast = nullptr, char const * format = nullptr, InputTextFlags flags = 0);
-    return 0;
-}
-
-static int _GuiInputScalarN(lua_State * L)
-{
-    //bool InputScalarN(char const * label, DataType data_type, void * v, int components, void const * step = nullptr, void const * step_fast = nullptr, char const * format = nullptr, InputTextFlags flags = 0);
-    return 0;
+    double v = luaL_checknumber(L, 2);
+    lua_pushboolean(L, GuiInputDouble(luaL_checkstring(L, 1), &v,
+                                      luaL_optnumber(L, 3, 0.0f),
+                                      luaL_optnumber(L, 4, 0.0f),
+                                      luaL_optstring(L, 5, "%.6f"),
+                                      luaL_optinteger(L, 6, 0)));
+    lua_pushnumber(L, v);
+    return 2;
 }
 
 static int _GuiColorEdit3(lua_State * L)
 {
-    //bool ColorEdit3(char const * label, float col[3], ColorEditFlags flags = 0);
-    return 0;
+    auto col_vector3 = luaE_checkvector3(L, 2);
+    float col[3] = { col_vector3.x, col_vector3.y, col_vector3.z };
+    lua_pushboolean(L, GuiColorEdit3(luaL_checkstring(L, 1), col, luaL_optinteger(L, 3, 0)));
+    luaE_pushvector3(L, Vector3{col[0],col[1],col[2]});
+    return 2;
 }
 
 static int _GuiColorEdit4(lua_State * L)
 {
-    //bool ColorEdit4(char const * label, float col[4], ColorEditFlags flags = 0);
-    return 0;
+    auto col_vector4 = luaE_checkvector4(L, 2);
+    float col[4] = { col_vector4.x, col_vector4.y, col_vector4.z, col_vector4.w };
+    lua_pushboolean(L, GuiColorEdit4(luaL_checkstring(L, 1), col, luaL_optinteger(L, 3, 0)));
+    luaE_pushvector4(L, Vector4{col[0],col[1],col[2],col[3]});
+    return 2;
 }
 
 static int _GuiColorPicker3(lua_State * L)
 {
-    //bool ColorPicker3(char const * label, float col[3], ColorEditFlags flags = 0);
-    return 0;
+    auto col_vector3 = luaE_checkvector3(L, 2);
+    float col[3] = { col_vector3.x, col_vector3.y, col_vector3.z };
+    lua_pushboolean(L, GuiColorPicker3(luaL_checkstring(L, 1), col, luaL_optinteger(L, 3, 0)));
+    luaE_pushvector3(L, Vector3{col[0],col[1],col[2]});
+    return 2;
 }
 
 static int _GuiColorPicker4(lua_State * L)
 {
-    //bool ColorPicker4(char const * label, float col[4], ColorEditFlags flags = 0, float const * ref_col = nullptr);
-    return 0;
+    auto * label = luaL_checkstring(L, 1);
+    auto col_vector4 = luaE_checkvector4(L, 2);
+    float col[4] = { col_vector4.x, col_vector4.y, col_vector4.z, col_vector4.w };
+    auto flags = luaL_optinteger(L, 3, 0);
+    if (lua_istable(L, 4)) {
+        auto ref_col_vector4 = luaE_checkvector4(L, 4);
+        float ref_col[4] = { ref_col_vector4.x, ref_col_vector4.y, ref_col_vector4.z, ref_col_vector4.w };
+        lua_pushboolean(L, GuiColorPicker4(label, col, flags, ref_col));
+    } else {
+        lua_pushboolean(L, GuiColorPicker4(label, col, flags, nullptr));
+    }
+    luaE_pushvector4(L, Vector4{col[0],col[1],col[2],col[3]});
+    return 2;
 }
 
 static int _GuiColorButton(lua_State * L)
 {
-    //bool ColorButton(char const * desc_id, Vector4 const & col, ColorEditFlags flags = 0, Vector2 size = Vector2{0,0});
-    return 0;
+    lua_pushboolean(L, GuiColorButton(luaL_checkstring(L, 1),
+                                      luaE_checkvector4(L, 2),
+                                      luaL_optinteger(L, 3, 0),
+                                      luaE_optvector2(L, 4, Vector2{0,0})));
+    return 1;
 }
 
 static int _GuiSetColorEditOptions(lua_State * L)
 {
-    //void SetColorEditOptions(ColorEditFlags flags);
+    GuiSetColorEditOptions(luaL_checkinteger(L, 1));
     return 0;
 }
 
 static int _GuiTreeNode(lua_State * L)
 {
-    //bool TreeNode(char const * label);
-    //bool TreeNode(char const * str_id, char const * text);
-    return 0;
+    if (lua_isstring(L, 2)) {
+        lua_pushboolean(L, GuiTreeNode(luaL_checkstring(L, 1), luaL_checkstring(L, 2)));
+    } else {
+        lua_pushboolean(L, GuiTreeNode(luaL_checkstring(L, 1)));
+    }
+    return 1;
 }
 
 static int _GuiTreeNodeEx(lua_State * L)
 {
-    //bool TreeNodeEx(char const * label, TreeNodeFlags flags = 0);
-    //bool TreeNodeEx(char const * str_id, TreeNodeFlags flags, char const * text);
-    return 0;
+    if (lua_isstring(L, 3)) {
+        lua_pushboolean(L, GuiTreeNodeEx(luaL_checkstring(L, 1), luaL_checkinteger(L, 2), luaL_checkstring(L, 3)));
+    } else {
+        lua_pushboolean(L, GuiTreeNodeEx(luaL_checkstring(L, 1), luaL_optinteger(L, 2, 0)));
+    }
+    return 1;
 }
 
 static int _GuiTreePush(lua_State * L)
 {
-    //void TreePush(char const * str_id);
-    //void TreePush(void const * ptr_id = nullptr);
+    GuiTreePush(luaL_checkstring(L, 1));
+    return 0;
+}
+
+static int _GuiTreePushNull(lua_State * L)
+{
+    GuiTreePush();
     return 0;
 }
 
 static int _GuiTreePop(lua_State * L)
 {
-    //void TreePop();
+    GuiTreePop();
     return 0;
 }
 
 static int _GuiTreeAdvanceToLabelPos(lua_State * L)
 {
-    //void TreeAdvanceToLabelPos();
+    GuiTreeAdvanceToLabelPos();
     return 0;
 }
 
 static int _GuiGetTreeNodeToLabelSpacing(lua_State * L)
 {
-    //float GetTreeNodeToLabelSpacing();
-    return 0;
+    lua_pushnumber(L, GuiGetTreeNodeToLabelSpacing());
+    return 1;
 }
 
 static int _GuiSetNextTreeNodeOpen(lua_State * L)
 {
-    //void SetNextTreeNodeOpen(bool is_open, Cond cond = 0);
+    GuiSetNextTreeNodeOpen(luaL_checkboolean(L, 1), luaL_optinteger(L, 2, 0));
     return 0;
 }
 
 static int _GuiCollapsingHeader(lua_State * L)
 {
-    //bool CollapsingHeader(char const * label, TreeNodeFlags flags = 0);
-    //bool CollapsingHeader(char const * label, bool * p_open, TreeNodeFlags flags = 0);
-    return 0;
+    if (lua_isboolean(L, 2)) {
+        bool p_open = luaL_checkboolean(L, 2);
+        lua_pushboolean(L, GuiCollapsingHeader(luaL_checkstring(L, 1), &p_open, luaL_optinteger(L, 3, 0)));
+        lua_pushboolean(L, p_open);
+        return 2;
+    } else {
+        lua_pushboolean(L, GuiCollapsingHeader(luaL_checkstring(L, 1), luaL_optinteger(L, 2, 0)));
+        return 1;
+    }
 }
 
 static int _GuiSelectable(lua_State * L)
 {
-    //bool Selectable(char const * label, bool selected = false, SelectableFlags flags = 0, Vector2 const & size = Vector2{0,0});
-    //bool Selectable(char const * label, bool * p_selected, SelectableFlags flags = 0, Vector2 const & size = Vector2{0,0});
-    return 0;
+    lua_pushboolean(L, GuiSelectable(luaL_checkstring(L, 1),
+                                     luaL_optboolean(L, 2, 0),
+                                     luaL_optinteger(L, 3, 0),
+                                     luaE_optvector2(L, 4, Vector2{0,0})));
+    return 1;
+}
+
+static int _GuiSelectable2(lua_State * L)
+{
+    bool p_selected = luaL_checkboolean(L, 2);
+    lua_pushboolean(L, GuiSelectable(luaL_checkstring(L, 1),
+                                     &p_selected,
+                                     luaL_optinteger(L, 3, 0),
+                                     luaE_optvector2(L, 4, Vector2{0,0})));
+    lua_pushboolean(L, p_selected);
+    return 2;
+}
+
+static bool _GuiListBox_items_getter(void * data, int idx, char const ** out_text)
+{
+    auto * L = (lua_State*)data;
+    assert(L != nullptr);
+
+    lua_pushvalue(L, 2); // Duplicate callback function.
+    lua_pushnumber(L, idx);
+    auto const CODE = lua_pcall(L, 1, 2, 0);
+
+    bool result1 = false;
+    char const * result2 = nullptr;
+    switch (CODE) {
+    case 0: // LUA_OK
+        result1 = luaL_checkboolean(L, -2);
+        result2 = luaL_checkstring(L, -1);
+        lua_pop(L, 2);
+        break;
+    case LUA_ERRRUN:
+        TBAG_FALLTHROUGH
+    case LUA_ERRMEM:
+        TBAG_FALLTHROUGH
+    case LUA_ERRERR:
+        TBAG_FALLTHROUGH
+    default:
+        char const * msg = luaL_checkstring(L, -1);
+        tDLogW("_GuiListBox_items_getter() lua_pcall() error({}): {}", CODE, msg);
+        lua_pop(L, 1);
+        break;
+    }
+
+    if (result2) {
+        *out_text = result2;
+    }
+    return result1;
 }
 
 static int _GuiListBox(lua_State * L)
 {
-    //bool ListBox(char const * label, int * current_item, char const * const items[], int items_count, int height_in_items = -1);
-    //bool ListBox(char const * label, int * current_item, bool (*items_getter)(void * data, int idx, char const ** out_text), void * data, int items_count, int height_in_items = -1);
-    return 0;
+    char const * label = luaL_checkstring(L, 1);
+    assert(label != nullptr);
+    int current_item = luaL_checkinteger(L, 2);
+
+    if (lua_isfunction(L, 2)) {
+        lua_pushboolean(L, GuiListBox(label, &current_item, &_GuiListBox_items_getter, (void*)L,
+                                      luaL_checkinteger(L, 3),
+                                      luaL_optinteger(L, 4, -1)));
+        lua_pushinteger(L, current_item);
+        return 2;
+    } else {
+        auto items_strings = luaE_checkstring_array(L, 3);
+        std::vector<char const *> items;
+        for (auto & item : items_strings) {
+            items.push_back(item.c_str());
+        }
+
+        lua_pushboolean(L, GuiListBox(label, &current_item, items.data(), items.size(),
+                                      luaL_optinteger(L, 4, -1)));
+        lua_pushinteger(L, current_item);
+        return 2;
+    }
 }
 
 static int _GuiListBoxHeader(lua_State * L)
 {
-    //bool ListBoxHeader(char const * label, Vector2 const & size = Vector2{0,0});
-    //bool ListBoxHeader(char const * label, int items_count, int height_in_items = -1);
-    return 0;
+    if (lua_isinteger(L, 2)) {
+        lua_pushboolean(L, GuiListBoxHeader(luaL_checkstring(L, 1),
+                                            luaL_checkinteger(L, 2),
+                                            luaL_optinteger(L, 3, -1)));
+    } else {
+        lua_pushboolean(L, GuiListBoxHeader(luaL_checkstring(L, 1),
+                                            luaE_optvector2(L, 2, Vector2{0,0})));
+    }
+    return 1;
 }
 
 static int _GuiListBoxFooter(lua_State * L)
@@ -2201,8 +2653,6 @@ static luaL_Reg const __lua_laygui[] = {
         RAYGUI_REGISTER(GuiDragInt3),
         RAYGUI_REGISTER(GuiDragInt4),
         RAYGUI_REGISTER(GuiDragIntRange2),
-        RAYGUI_REGISTER(GuiDragScalar),
-        RAYGUI_REGISTER(GuiDragScalarN),
 
         // Widgets: Sliders
         RAYGUI_REGISTER(GuiSliderFloat),
@@ -2214,11 +2664,8 @@ static luaL_Reg const __lua_laygui[] = {
         RAYGUI_REGISTER(GuiSliderInt2),
         RAYGUI_REGISTER(GuiSliderInt3),
         RAYGUI_REGISTER(GuiSliderInt4),
-        RAYGUI_REGISTER(GuiSliderScalar),
-        RAYGUI_REGISTER(GuiSliderScalarN),
         RAYGUI_REGISTER(GuiVSliderFloat),
         RAYGUI_REGISTER(GuiVSliderInt),
-        RAYGUI_REGISTER(GuiVSliderScalar),
 
         // Widgets: Input with Keyboard
         RAYGUI_REGISTER(GuiInputText),
@@ -2233,8 +2680,6 @@ static luaL_Reg const __lua_laygui[] = {
         RAYGUI_REGISTER(GuiInputInt3),
         RAYGUI_REGISTER(GuiInputInt4),
         RAYGUI_REGISTER(GuiInputDouble),
-        RAYGUI_REGISTER(GuiInputScalar),
-        RAYGUI_REGISTER(GuiInputScalarN),
 
         // Widgets: Color Editor/Picker
         RAYGUI_REGISTER(GuiColorEdit3),
@@ -2248,6 +2693,7 @@ static luaL_Reg const __lua_laygui[] = {
         RAYGUI_REGISTER(GuiTreeNode),
         RAYGUI_REGISTER(GuiTreeNodeEx),
         RAYGUI_REGISTER(GuiTreePush),
+        RAYGUI_REGISTER(GuiTreePushNull),
         RAYGUI_REGISTER(GuiTreePop),
         RAYGUI_REGISTER(GuiTreeAdvanceToLabelPos),
         RAYGUI_REGISTER(GuiGetTreeNodeToLabelSpacing),
@@ -2256,6 +2702,7 @@ static luaL_Reg const __lua_laygui[] = {
 
         // Widgets: Selectables
         RAYGUI_REGISTER(GuiSelectable),
+        RAYGUI_REGISTER(GuiSelectable2),
 
         // Widgets: List Boxes
         RAYGUI_REGISTER(GuiListBox),

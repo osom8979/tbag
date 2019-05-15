@@ -525,8 +525,6 @@ TBAG_LUA_USERDATA_DEFAULT_IMPL(CharInfo, CHARINFO, charinfo)
 void luaE_pushcharinfo_array(lua_State * L, CharInfo * char_infos, int size)
 {
     assert(char_infos != nullptr);
-    assert(size >= 1);
-
     lua_createtable(L, size, 0);
     for (int i = 0; i < size; ++i) {
         luaE_pushcharinfo(L, char_infos+i);
