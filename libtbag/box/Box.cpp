@@ -79,6 +79,20 @@ void Box::reset()
     _data.reset();
 }
 
+Err Box::resize_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
+{
+    va_list ap;
+    va_start(ap, rank);
+    auto const CODE = resize_vargs(type, device, ext, rank, ap);
+    va_end(ap);
+    return CODE;
+}
+
+Err Box::resize_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
+{
+    return box_resize_vargs(_data.get(), type, device, ext, rank, ap);
+}
+
 } // namespace box
 
 // --------------------

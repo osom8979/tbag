@@ -29,11 +29,18 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
+TBAG_API void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT;
+TBAG_API void * box_data_malloc2(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT;
+TBAG_API void   box_data_free(bdev device, void * data) TBAG_NOEXCEPT;
+
 TBAG_API Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 const * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT;
 TBAG_API Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT;
 TBAG_API Err box_malloc_args(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API Err box_malloc_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 TBAG_API Err box_free(box_data * box) TBAG_NOEXCEPT;
+
+TBAG_API Err box_resize_args(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
 TBAG_API bool box_exists_data(box_data const * box) TBAG_NOEXCEPT;
 TBAG_API Err  box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;

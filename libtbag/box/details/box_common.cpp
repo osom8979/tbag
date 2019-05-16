@@ -155,10 +155,33 @@ void box_clear(box_data * box) TBAG_NOEXCEPT
     box->info_size = 0;
 }
 
+ui32 box_get_size_args(ui32 rank, ...) TBAG_NOEXCEPT
+{
+    assert(rank >= 1);
+    va_list ap;
+    va_start(ap, rank);
+    auto const SIZE = box_get_size_vargs(rank, ap);
+    va_end(ap);
+    return SIZE;
+}
+
+ui32 box_get_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    assert(rank >= 1);
+    va_list ap2;
+    va_copy(ap2, ap);
+    auto size = va_arg(ap2, ui32);
+    for (ui32 i = 1; i < rank; ++i) {
+        size *= va_arg(ap2, ui32);
+    }
+    va_end(ap2);
+    return size;
+}
+
 ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
 {
     assert(rank >= 1);
-    return (ui32*)tbMalloc(sizeof(ui32) * rank);
+    return (ui32*)tbMalloc(GET_TOTAL_DIMS_BYTE(rank));
 }
 
 ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT
@@ -250,6 +273,34 @@ bool box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 
     return true;
 }
 
+bool box_dim_is_equals_args(ui32 const * dims1, ui32 rank1, ui32 rank2, ...) TBAG_NOEXCEPT
+{
+    va_list ap;
+    va_start(ap, rank2);
+    auto const EQUALS = box_dim_is_equals_vargs(dims1, rank1, rank2, ap);
+    va_end(ap);
+    return EQUALS;
+}
+
+bool box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list ap) TBAG_NOEXCEPT
+{
+    assert(dims1 != nullptr);
+    if (rank1 != rank2) {
+        return false;
+    }
+    assert(rank1 == rank2);
+
+    va_list ap2;
+    va_copy(ap2, ap);
+    for (ui32 i = 0; i < rank1; ++i) {
+        if (dims1[i] != va_arg(ap2, ui32)) {
+            return false;
+        }
+    }
+    va_end(ap2);
+    return true;
+}
+
 ui32 box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
@@ -294,7 +345,7 @@ ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEX
 char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT
 {
     assert(info_size >= 1);
-    return (char*)tbMalloc(sizeof(char) * info_size);
+    return (char*)tbMalloc(GET_TOTAL_INFO_BYTE(info_size));
 }
 
 void box_info_free(char * info) TBAG_NOEXCEPT

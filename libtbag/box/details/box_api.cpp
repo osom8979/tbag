@@ -21,20 +21,73 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
+void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT
+{
+    assert(box_support_device(device));
+    assert(byte >= 1);
+
+    // clang-format off
+    switch (device) {
+    case BOX_DEVICE_CPU:  return box_cpu_malloc(byte);
+    case BOX_DEVICE_CUDA: /* TODO */ return nullptr;
+    case BOX_DEVICE_CL:   /* TODO */ return nullptr;
+    case BOX_DEVICE_GLSL: /* TODO */ return nullptr;
+    case BOX_DEVICE_FBS:  /* TODO */ return nullptr;
+    case BOX_DEVICE_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return nullptr;
+    }
+    // clang-format on
+}
+
+void * box_data_malloc2(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT
+{
+    assert(box_support_type(type));
+    assert(box_support_device(device));
+    assert(element_size >= 1);
+    return box_data_malloc(device, box_get_type_byte(type) * element_size);
+}
+
+void box_data_free(bdev device, void * data) TBAG_NOEXCEPT
+{
+    assert(box_support_device(device));
+    assert(data != nullptr);
+
+    // clang-format off
+    switch (device) {
+    case BOX_DEVICE_CPU:  box_cpu_free(data); break;
+    case BOX_DEVICE_CUDA: /* TODO */ break;
+    case BOX_DEVICE_CL:   /* TODO */ break;
+    case BOX_DEVICE_GLSL: /* TODO */ break;
+    case BOX_DEVICE_FBS:  /* TODO */ break;
+    case BOX_DEVICE_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+    }
+    // clang-format on
+}
+
 Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 const * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(dims != nullptr);
     assert(rank >= 1);
-    assert(dims_byte >= sizeof(ui32));
-    assert(dims_byte%sizeof(ui32) == 0);
-    assert(dims_byte >= rank*sizeof(ui32));
+    assert(CHECK_TOTAL_DIMS_BYTE(dims_byte));
+    assert(dims_byte >= GET_TOTAL_DIMS_BYTE(rank));
     assert(box_support_type(type));
     assert(box_support_device(device));
 
     auto * cloned_box_dims = box_dim_clone(dims, rank);
     assert(cloned_box_dims != nullptr);
-    return box_malloc_move_dims(box, type, device, ext, cloned_box_dims, dims_byte, rank);
+    auto const CODE = box_malloc_move_dims(box, type, device, ext, cloned_box_dims, dims_byte, rank);
+    if (isFailure(CODE)) {
+        box_dim_free(cloned_box_dims);
+    }
+    return CODE;
 }
 
 Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT
@@ -42,30 +95,19 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     assert(box != nullptr);
     assert(dims != nullptr);
     assert(rank >= 1);
-    assert(dims_byte >= sizeof(ui32));
-    assert(dims_byte%sizeof(ui32) == 0);
-    assert(dims_byte >= rank*sizeof(ui32));
+    assert(CHECK_TOTAL_DIMS_BYTE(dims_byte));
+    assert(dims_byte >= GET_TOTAL_DIMS_BYTE(rank));
     assert(box_support_type(type));
     assert(box_support_device(device));
 
-    auto const TOTAL_BYTE = box_get_type_byte(type) * box_dim_get_size(dims, rank);
-    assert(TOTAL_BYTE >= 1);
+    auto const SIZE = box_dim_get_size(dims, rank);
+    assert(SIZE >= 1);
 
-    void * data;
-    // clang-format off
-    switch (device) {
-    case BOX_DEVICE_CPU:  data = box_cpu_malloc(TOTAL_BYTE); break;
-    case BOX_DEVICE_CUDA: data = /* TODO */ nullptr; break;
-    case BOX_DEVICE_CL:   data = /* TODO */ nullptr; break;
-    case BOX_DEVICE_GLSL: data = /* TODO */ nullptr; break;
-    case BOX_DEVICE_FBS:  data = /* TODO */ nullptr; break;
-    case BOX_DEVICE_NONE:
-        TBAG_FALLTHROUGH
-    default:
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        return E_ILLARGS;
+    void * data = box_data_malloc2(type, device, SIZE);
+    if (data == nullptr) {
+        return E_BADALLOC;
     }
-    // clang-format on
+    assert(data != nullptr);
 
     box->type = type;
     box->device = device;
@@ -81,8 +123,8 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
         box->ext[3] = 0;
     }
     box->data = data;
-    box->total_data_byte = TOTAL_BYTE;
-    box->size = box_dim_get_size(dims, rank);
+    box->total_data_byte = box_get_type_byte(type) * SIZE;
+    box->size = SIZE;
     box->dims = dims;
     box->total_dims_byte = dims_byte;
     box->rank = rank;
@@ -107,33 +149,97 @@ Err box_malloc_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
 
     auto * dims = box_dim_malloc_vargs(rank, ap);
     assert(dims != nullptr);
-    return box_malloc_move_dims(box, type, device, ext, dims, (sizeof(ui32)*rank), rank);
+    auto const CODE = box_malloc_move_dims(box, type, device, ext, dims, GET_TOTAL_DIMS_BYTE(rank), rank);
+    if (isFailure(CODE)) {
+        box_dim_free(dims);
+    }
+    return CODE;
 }
 
 Err box_free(box_data * box) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
-
-    // clang-format off
-    switch (box->device) {
-    case BOX_DEVICE_CPU:  box_cpu_free(box->data); break;
-    case BOX_DEVICE_CUDA: /* TODO */ break;
-    case BOX_DEVICE_CL:   /* TODO */ break;
-    case BOX_DEVICE_GLSL: /* TODO */ break;
-    case BOX_DEVICE_FBS:  /* TODO */ break;
-    case BOX_DEVICE_NONE:
-        TBAG_FALLTHROUGH
-    default:
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        break;
+    if (box->data) {
+        box_data_free(box->device, box->data);
     }
-    // clang-format on
-
-    box_dim_free(box->dims);
+    if (box->dims) {
+        box_dim_free(box->dims);
+    }
     if (box->info) {
         box_info_free(box->info);
     }
     box_clear(box);
+    return E_SUCCESS;
+}
+
+Err box_resize_args(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT
+{
+    va_list ap;
+    va_start(ap, rank);
+    auto const CODE = box_resize_vargs(box, type, device, ext, rank, ap);
+    va_end(ap);
+    return CODE;
+}
+
+Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(rank >= 1);
+    assert(box_support_type(type));
+    assert(box_support_device(device));
+
+    if (box->data == nullptr && box->dims == nullptr) {
+        return box_malloc_vargs(box, type, device, ext, rank, ap);
+    }
+    if (box->device != device) {
+        box_free(box);
+        return box_malloc_vargs(box, type, device, ext, rank, ap);
+    }
+    assert(box->device == device);
+
+    if (box_dim_is_equals_vargs(box->dims, box->rank, rank, ap)) {
+        return E_SUCCESS;
+    }
+
+    if (box->total_dims_byte < GET_TOTAL_DIMS_BYTE(rank)) {
+        if (box->dims) {
+            box_dim_free(box->dims);
+        }
+        box->dims = box_dim_malloc_vargs(rank, ap);
+        box->total_dims_byte = GET_TOTAL_DIMS_BYTE(rank);
+        box->rank = rank;
+    } else {
+        box_dim_set_vargs(box->dims, rank, ap);
+        box->rank = rank;
+    }
+    assert(box->total_dims_byte >= GET_TOTAL_DIMS_BYTE(rank));
+    assert(box->dims != nullptr);
+    assert(box->rank == rank);
+    assert(box_dim_is_equals_vargs(box->dims, box->rank, rank, ap));
+
+    auto const SIZE = box_dim_get_size(box->dims, rank);
+    assert(SIZE >= 1);
+    auto const TOTAL_BYTE = box_get_type_byte(type) * SIZE;
+    assert(TOTAL_BYTE >= 1);
+
+    if (box->total_data_byte < TOTAL_BYTE) {
+        if (box->data) {
+            box_data_free(device, box->data);
+        }
+        box->data = box_data_malloc2(type, device, SIZE);
+        if (box->data == nullptr) {
+            box->total_data_byte = 0;
+            box->size = 0;
+            return E_BADALLOC;
+        }
+        box->total_data_byte = TOTAL_BYTE;
+        box->size = SIZE;
+    } else {
+        box->size = SIZE;
+    }
+    assert(box->total_data_byte >= TOTAL_BYTE);
+    assert(box->data != nullptr);
+    assert(box->size == SIZE);
     return E_SUCCESS;
 }
 
