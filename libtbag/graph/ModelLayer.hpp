@@ -16,7 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/container/Box.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <memory>
@@ -45,8 +46,6 @@ public:
 
 public:
     using Buffer = libtbag::util::Buffer;
-    using Box  = libtbag::container::Box;
-    using BagExs = std::vector<Box>;
     using Layers = std::vector<ModelLayer>;
 
 public:
@@ -63,15 +62,13 @@ public:
     {
     public:
         using Buffer = ModelLayer::Buffer;
-        using Box    = ModelLayer::Box;
-        using BagExs = ModelLayer::BagExs;
         using Layers = ModelLayer::Layers;
 
     public:
         friend class ModelLayer;
 
     protected:
-        int  _id       = UNKNOWN_ID;
+        int _id = UNKNOWN_ID;
         bool _complete = false;
 
     private:

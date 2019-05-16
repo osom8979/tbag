@@ -6,6 +6,7 @@
  * @date   2019-02-20 (Rename: Image -> ImageIO)
  */
 
+/*
 #include <libtbag/graphic/ImageIO.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/Path.hpp>
@@ -136,7 +137,7 @@ Err readImage(std::string const & path, ImageRgb24 & image)
             image[i].r = *(data + (channels * i) + 0);
             image[i].g = *(data + (channels * i) + 1);
             image[i].b = *(data + (channels * i) + 2);
-            /* image[i].a = *(data + (channels * i) + 3); */
+            // image[i].a = *(data + (channels * i) + 3);
         }
     } else {
         assert(false && "Inaccessible block.");
@@ -275,4 +276,4 @@ Err convert(ImageGray const & source, ImageRgb24 & destination)
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
-
+*/

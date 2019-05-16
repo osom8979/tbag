@@ -62,7 +62,7 @@ public:
     using Buffer      = libtbag::util::Buffer;
     using BoundingBox = libtbag::geometry::Recti;
     using Size        = libtbag::geometry::Sizei;
-    using ImageGray   = libtbag::graphic::ImageGray;
+//    using ImageGray   = libtbag::graphic::ImageGray;
     using CodePoints  = std::vector<int>;
 
 public:
@@ -119,8 +119,8 @@ public:
     Size calcSize(CodePoints const & code_points, int line_height = DEFAULT_LINE_HEIGHT) const;
 
 public:
-    Err draw(CodePoints const & code_points, ImageGray & bitmap, int line_height = DEFAULT_LINE_HEIGHT) const;
-    Err drawAscii(std::string const & ascii, ImageGray & bitmap, int line_height = DEFAULT_LINE_HEIGHT) const;
+//    Err draw(CodePoints const & code_points, ImageGray & bitmap, int line_height = DEFAULT_LINE_HEIGHT) const;
+//    Err drawAscii(std::string const & ascii, ImageGray & bitmap, int line_height = DEFAULT_LINE_HEIGHT) const;
 
 private:
     void drawAndUpdate(unsigned char * bitmap, int code_point, int ascent, float scale, int image_width, int & update_next_x) const;

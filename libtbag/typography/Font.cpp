@@ -261,45 +261,45 @@ TrueType::Size TrueType::calcSize(CodePoints const & code_points, int line_heigh
     return result;
 }
 
-Err TrueType::draw(CodePoints const & code_points, ImageGray & bitmap, int line_height) const
-{
-    if (code_points.empty() || line_height < 0) {
-        return E_ILLARGS;
-    }
-
-    assert(static_cast<bool>(_impl));
-
-    auto const SCALE      = _impl->getScale(line_height);
-    auto const VMETRICS   = _impl->getVerticalMetrics();
-    auto const ASCENT     = static_cast<int>(VMETRICS.ascent  * SCALE);
-    auto const DESCENT    = static_cast<int>(VMETRICS.descent * SCALE);
-    auto const SIZE       = code_points.size();
-    auto const IMAGE_SIZE = calcSize(code_points, line_height);
-
-    assert(SIZE >= 1);
-    assert(line_height > 0);
-    assert(IMAGE_SIZE.area() >= 1);
-
-    bitmap.resize(IMAGE_SIZE.width, IMAGE_SIZE.height);
-
-    int next_x = 0;
-    int next_y = 0;
-
-    // Draw first character.
-    drawAndUpdate(bitmap.data(), code_points[0], ASCENT, SCALE, IMAGE_SIZE.width, next_x);
-
-    for (std::size_t i = 1; i < SIZE; ++i) {
-        next_x += (_impl->getKernAdvance(code_points[i - 1], code_points[i]) * SCALE);
-        drawAndUpdate(bitmap.data(), code_points[i], ASCENT, SCALE, IMAGE_SIZE.width, next_x);
-    }
-
-    return E_SUCCESS;
-}
-
-Err TrueType::drawAscii(std::string const & ascii, ImageGray & bitmap, int line_height) const
-{
-    return draw(CodePoints(ascii.begin(), ascii.end()), bitmap, line_height);
-}
+//Err TrueType::draw(CodePoints const & code_points, ImageGray & bitmap, int line_height) const
+//{
+//    if (code_points.empty() || line_height < 0) {
+//        return E_ILLARGS;
+//    }
+//
+//    assert(static_cast<bool>(_impl));
+//
+//    auto const SCALE      = _impl->getScale(line_height);
+//    auto const VMETRICS   = _impl->getVerticalMetrics();
+//    auto const ASCENT     = static_cast<int>(VMETRICS.ascent  * SCALE);
+//    auto const DESCENT    = static_cast<int>(VMETRICS.descent * SCALE);
+//    auto const SIZE       = code_points.size();
+//    auto const IMAGE_SIZE = calcSize(code_points, line_height);
+//
+//    assert(SIZE >= 1);
+//    assert(line_height > 0);
+//    assert(IMAGE_SIZE.area() >= 1);
+//
+//    bitmap.resize(IMAGE_SIZE.width, IMAGE_SIZE.height);
+//
+//    int next_x = 0;
+//    int next_y = 0;
+//
+//    // Draw first character.
+//    drawAndUpdate(bitmap.data(), code_points[0], ASCENT, SCALE, IMAGE_SIZE.width, next_x);
+//
+//    for (std::size_t i = 1; i < SIZE; ++i) {
+//        next_x += (_impl->getKernAdvance(code_points[i - 1], code_points[i]) * SCALE);
+//        drawAndUpdate(bitmap.data(), code_points[i], ASCENT, SCALE, IMAGE_SIZE.width, next_x);
+//    }
+//
+//    return E_SUCCESS;
+//}
+//
+//Err TrueType::drawAscii(std::string const & ascii, ImageGray & bitmap, int line_height) const
+//{
+//    return draw(CodePoints(ascii.begin(), ascii.end()), bitmap, line_height);
+//}
 
 void TrueType::drawAndUpdate(unsigned char * bitmap, int code_point, int ascent, float scale, int image_width, int & update_next_x) const
 {
