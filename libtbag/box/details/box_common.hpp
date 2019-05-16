@@ -116,7 +116,7 @@ struct box_data
     ui32 total_byte;
 
     /** Total number of entries. */
-    ui32 total_size;
+    ui32 size;
 
     /**
      * Dimension data.
@@ -136,6 +136,12 @@ struct box_data
 
     /** Number of dimensions. */
     ui32 rank;
+
+    /** Extra information. */
+    char * info;
+
+    /** Extra information size. */
+    ui32 info_size;
 
     /** User's data pointer. */
     void * opaque;
@@ -187,6 +193,9 @@ TBAG_API void   box_stride_update(ui32 const * dims, ui32 rank, ui32 element_byt
 TBAG_API void   box_stride_update_from_type(ui32 const * dims, ui32 rank, btype type, ui32 * stride) TBAG_NOEXCEPT;
 TBAG_API ui32 * box_stride_malloc_and_update(ui32 const * dims, ui32 rank, ui32 element_byte) TBAG_NOEXCEPT;
 TBAG_API ui32 * box_stride_malloc_and_update_from_type(ui32 const * dims, ui32 rank, btype type) TBAG_NOEXCEPT;
+
+TBAG_API char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
+TBAG_API void   box_info_free(char * info) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

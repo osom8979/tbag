@@ -76,7 +76,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     }
     box->data = data;
     box->total_byte = TOTAL_BYTE;
-    box->total_size = box_dim_get_size(dims, rank);
+    box->size = box_dim_get_size(dims, rank);
     box->dims = dims;
     box->stride_byte = box_stride_malloc_and_update_from_type(dims, rank, type);
     box->rank = rank;
@@ -122,7 +122,15 @@ Err box_free(box_data * box) TBAG_NOEXCEPT
         break;
     }
     // clang-format on
+
     box_dim_free(box->dims);
+    box_stride_free(box->stride_byte);
+
+    if (box->info) {
+        box_info_free(box->info);
+    }
+
+    box_clear(box);
     return E_SUCCESS;
 }
 

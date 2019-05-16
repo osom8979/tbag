@@ -145,10 +145,12 @@ void box_clear(box_data * box) TBAG_NOEXCEPT
     box->ext[3] = 0;
     box->data = nullptr;
     box->total_byte = 0;
-    box->total_size = 0;
+    box->size = 0;
     box->dims = nullptr;
     box->stride_byte = nullptr;
     box->rank = 0;
+    box->info = nullptr;
+    box->info_size = 0;
 }
 
 ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
@@ -327,6 +329,18 @@ ui32 * box_stride_malloc_and_update(ui32 const * dims, ui32 rank, ui32 element_b
 ui32 * box_stride_malloc_and_update_from_type(ui32 const * dims, ui32 rank, btype type) TBAG_NOEXCEPT
 {
     return box_stride_malloc_and_update(dims, rank, box_get_type_byte(type));
+}
+
+char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT
+{
+    assert(info_size >= 1);
+    return (char*)tbMalloc(sizeof(char) * info_size);
+}
+
+void box_info_free(char * info) TBAG_NOEXCEPT
+{
+    assert(info != nullptr);
+    tbFree(info);
 }
 
 } // namespace details
