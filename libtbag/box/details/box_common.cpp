@@ -145,7 +145,7 @@ void box_clear(box_data * box) TBAG_NOEXCEPT
     box->ext[2] = 0;
     box->ext[3] = 0;
     box->data = nullptr;
-    box->total_byte = 0;
+    box->total_data_byte = 0;
     box->size = 0;
     box->dims = nullptr;
     box->total_dims_byte = 0;

@@ -81,7 +81,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
         box->ext[3] = 0;
     }
     box->data = data;
-    box->total_byte = TOTAL_BYTE;
+    box->total_data_byte = TOTAL_BYTE;
     box->size = box_dim_get_size(dims, rank);
     box->dims = dims;
     box->total_dims_byte = dims_byte;
@@ -166,9 +166,9 @@ Err box_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     assert(dest != nullptr);
     assert(src != nullptr);
     assert(dest != src);
-    assert(dest->total_byte == src->total_byte);
+    assert(dest->total_data_byte == src->total_data_byte);
     if (dest->device == BOX_DEVICE_CPU && src->device == BOX_DEVICE_CPU) {
-        box_cpu_memcpy(dest->data, src->data, src->total_byte);
+        box_cpu_memcpy(dest->data, src->data, src->total_data_byte);
         return E_SUCCESS;
     }
     return E_ENOSYS;
@@ -182,7 +182,7 @@ Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     if (!box_dim_is_equals(dest->dims, dest->rank, src->dims, src->rank)) {
         return E_ILLARGS;
     }
-    if (dest->total_byte != src->total_byte) {
+    if (dest->total_data_byte != src->total_data_byte) {
         return E_ILLARGS;
     }
     return box_memcpy(dest, src);

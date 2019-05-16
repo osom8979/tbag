@@ -113,7 +113,7 @@ struct box_data
     void * data;
 
     /** Real data byte. */
-    ui32 total_byte;
+    ui32 total_data_byte;
 
     /** Total number of entries. */
     ui32 size;
