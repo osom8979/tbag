@@ -131,8 +131,8 @@ struct box_data
      */
     ui32 * dims;
 
-    /** Number of entries between adjacent entries (for each per dimension). */
-    ui32 * stride_byte;
+    /** Dimension data byte. */
+    ui32 total_dims_byte;
 
     /** Number of dimensions. */
     ui32 rank;
@@ -140,11 +140,18 @@ struct box_data
     /** Extra information. */
     char * info;
 
+    /** Extra information data byte. */
+    ui32 total_info_byte;
+
     /** Extra information size. */
     ui32 info_size;
 
     /** User's data pointer. */
     void * opaque;
+};
+
+struct box_cursor
+{
 };
 
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
@@ -187,15 +194,9 @@ TBAG_API ui32   box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
 TBAG_API ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
-TBAG_API ui32 * box_stride_malloc(ui32 rank) TBAG_NOEXCEPT;
-TBAG_API void   box_stride_free(ui32 * dims) TBAG_NOEXCEPT;
-TBAG_API void   box_stride_update(ui32 const * dims, ui32 rank, ui32 element_byte, ui32 * stride) TBAG_NOEXCEPT;
-TBAG_API void   box_stride_update_from_type(ui32 const * dims, ui32 rank, btype type, ui32 * stride) TBAG_NOEXCEPT;
-TBAG_API ui32 * box_stride_malloc_and_update(ui32 const * dims, ui32 rank, ui32 element_byte) TBAG_NOEXCEPT;
-TBAG_API ui32 * box_stride_malloc_and_update_from_type(ui32 const * dims, ui32 rank, btype type) TBAG_NOEXCEPT;
-
 TBAG_API char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
 TBAG_API void   box_info_free(char * info) TBAG_NOEXCEPT;
+TBAG_API bool   box_info_assign(char * dest, ui32 dest_size, char const * src, ui32 src_size) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

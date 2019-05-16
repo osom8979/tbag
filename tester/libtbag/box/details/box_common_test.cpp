@@ -58,24 +58,3 @@ TEST(box_common_test, box_dim_get_index_args)
     box_dim_free(dims2);
 }
 
-TEST(box_common_test, stride)
-{
-    int const DEPTH = 1000;
-    int const HEIGHT = 100;
-    int const WIDTH = 10;
-
-    auto * dims = box_dim_malloc_args(3, DEPTH, HEIGHT, WIDTH);
-    ASSERT_NE(nullptr, dims);
-
-    auto * stride = box_stride_malloc(3);
-    ASSERT_NE(nullptr, stride);
-
-    box_stride_update_from_type(dims, 3, BT_UINT64, stride);
-    ASSERT_EQ(8, stride[2]);
-    ASSERT_EQ(8*WIDTH, stride[1]);
-    ASSERT_EQ(8*WIDTH*HEIGHT, stride[0]);
-
-    box_stride_free(stride);
-    box_dim_free(dims);
-}
-

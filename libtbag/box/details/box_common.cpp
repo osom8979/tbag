@@ -11,6 +11,7 @@
 #include <libtbag/memory/Memory.hpp>
 
 #include <cassert>
+#include <cstring>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -147,9 +148,10 @@ void box_clear(box_data * box) TBAG_NOEXCEPT
     box->total_byte = 0;
     box->size = 0;
     box->dims = nullptr;
-    box->stride_byte = nullptr;
+    box->total_dims_byte = 0;
     box->rank = 0;
     box->info = nullptr;
+    box->total_info_byte = 0;
     box->info_size = 0;
 }
 
@@ -289,48 +291,6 @@ ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEX
     return index;
 }
 
-ui32 * box_stride_malloc(ui32 rank) TBAG_NOEXCEPT
-{
-    return box_dim_malloc(rank);
-}
-
-void box_stride_free(ui32 * dims) TBAG_NOEXCEPT
-{
-    box_dim_free(dims);
-}
-
-void box_stride_update(ui32 const * dims, ui32 rank, ui32 element_byte, ui32 * stride) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    assert(rank >= 1);
-
-    stride[rank-1] = element_byte;
-    --rank;
-
-    while (rank >= 1) {
-        stride[rank-1] = stride[rank] * dims[rank];
-        --rank;
-    }
-}
-
-void box_stride_update_from_type(ui32 const * dims, ui32 rank, btype type, ui32 * stride) TBAG_NOEXCEPT
-{
-    box_stride_update(dims, rank, box_get_type_byte(type), stride);
-}
-
-ui32 * box_stride_malloc_and_update(ui32 const * dims, ui32 rank, ui32 element_byte) TBAG_NOEXCEPT
-{
-    ui32 * stride = box_stride_malloc(rank);
-    assert(dims != nullptr);
-    box_stride_update(dims, rank, element_byte, stride);
-    return stride;
-}
-
-ui32 * box_stride_malloc_and_update_from_type(ui32 const * dims, ui32 rank, btype type) TBAG_NOEXCEPT
-{
-    return box_stride_malloc_and_update(dims, rank, box_get_type_byte(type));
-}
-
 char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT
 {
     assert(info_size >= 1);
@@ -341,6 +301,19 @@ void box_info_free(char * info) TBAG_NOEXCEPT
 {
     assert(info != nullptr);
     tbFree(info);
+}
+
+bool box_info_assign(char * dest, ui32 dest_size, char const * src, ui32 src_size) TBAG_NOEXCEPT
+{
+    assert(dest != nullptr);
+    assert(dest_size >= 1);
+    assert(src != nullptr);
+    assert(src_size >= 1);
+    if (dest_size < src_size) {
+        return false;
+    }
+    memcpy(dest, src, src_size);
+    return true;
 }
 
 } // namespace details

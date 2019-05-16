@@ -21,24 +21,30 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
-Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
+Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 const * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(dims != nullptr);
     assert(rank >= 1);
+    assert(dims_byte >= sizeof(ui32));
+    assert(dims_byte%sizeof(ui32) == 0);
+    assert(dims_byte >= rank*sizeof(ui32));
     assert(box_support_type(type));
     assert(box_support_device(device));
 
     auto * cloned_box_dims = box_dim_clone(dims, rank);
     assert(cloned_box_dims != nullptr);
-    return box_malloc_move_dims(box, type, device, ext, cloned_box_dims, rank);
+    return box_malloc_move_dims(box, type, device, ext, cloned_box_dims, dims_byte, rank);
 }
 
-Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 * dims, ui32 rank) TBAG_NOEXCEPT
+Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(dims != nullptr);
     assert(rank >= 1);
+    assert(dims_byte >= sizeof(ui32));
+    assert(dims_byte%sizeof(ui32) == 0);
+    assert(dims_byte >= rank*sizeof(ui32));
     assert(box_support_type(type));
     assert(box_support_device(device));
 
@@ -78,7 +84,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     box->total_byte = TOTAL_BYTE;
     box->size = box_dim_get_size(dims, rank);
     box->dims = dims;
-    box->stride_byte = box_stride_malloc_and_update_from_type(dims, rank, type);
+    box->total_dims_byte = dims_byte;
     box->rank = rank;
     return E_SUCCESS;
 }
@@ -101,7 +107,7 @@ Err box_malloc_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
 
     auto * dims = box_dim_malloc_vargs(rank, ap);
     assert(dims != nullptr);
-    return box_malloc_move_dims(box, type, device, ext, dims, rank);
+    return box_malloc_move_dims(box, type, device, ext, dims, (sizeof(ui32)*rank), rank);
 }
 
 Err box_free(box_data * box) TBAG_NOEXCEPT
@@ -124,12 +130,9 @@ Err box_free(box_data * box) TBAG_NOEXCEPT
     // clang-format on
 
     box_dim_free(box->dims);
-    box_stride_free(box->stride_byte);
-
     if (box->info) {
         box_info_free(box->info);
     }
-
     box_clear(box);
     return E_SUCCESS;
 }
@@ -142,7 +145,8 @@ bool box_exists_data(box_data const * box) TBAG_NOEXCEPT
 
 Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
-    auto const CODE = box_malloc_copy_dims(dest, src->type, src->device, src->ext, src->dims, src->rank);
+    auto const CODE = box_malloc_copy_dims(dest, src->type, src->device, src->ext,
+                                           src->dims, src->total_dims_byte, src->rank);
     if (isFailure(CODE)) {
         return CODE;
     }
