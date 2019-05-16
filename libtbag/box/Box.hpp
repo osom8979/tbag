@@ -380,7 +380,7 @@ public:
         using namespace libtbag::box::details;
         auto const n = get_number_of_arguments(std::forward<Args>(args) ...);
         assert(0 <= COMPARE_AND(n) < rank());
-        return at_offset<T>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...) * getTypeByte());
+        return at_offset<T>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
     }
 
     template <typename T, typename ... Args>
@@ -390,7 +390,7 @@ public:
         using namespace libtbag::box::details;
         auto const n = get_number_of_arguments(std::forward<Args>(args) ...);
         assert(0 <= COMPARE_AND(n) < rank());
-        return at_offset<T>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...) * getTypeByte());
+        return at_offset<T>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
     }
 
     inline ui32 dim(ui32 i) const TBAG_NOEXCEPT
