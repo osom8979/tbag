@@ -335,12 +335,16 @@ public:
 public:
     inline bool isSupportType() const TBAG_NOEXCEPT
     { return libtbag::box::details::box_support_type(type()); }
+
     inline bool isSupportDevice() const TBAG_NOEXCEPT
     { return libtbag::box::details::box_support_device(device()); }
+
     inline char const * const getTypeName() const TBAG_NOEXCEPT
     { return libtbag::box::details::box_get_type_name(type()); }
+
     inline char const * const getDeviceName(bdev dev) const TBAG_NOEXCEPT
     { return libtbag::box::details::box_get_device_name(type()); }
+
     inline ui32 getTypeByte() const TBAG_NOEXCEPT
     { return libtbag::box::details::box_get_type_byte(type()); }
 
@@ -374,23 +378,17 @@ public:
     }
 
     template <typename T, typename ... Args>
-    T & at(Args && ... args) TBAG_NOEXCEPT
+    inline T & at(Args && ... args) TBAG_NOEXCEPT
     {
-        using namespace libtbag::tmp;
-        using namespace libtbag::box::details;
-        auto const n = get_number_of_arguments(std::forward<Args>(args) ...);
-        assert(0 <= COMPARE_AND(n) < rank());
-        return at_offset<T>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
+        return at_offset<T>(libtbag::box::details::box_dim_get_index_args(
+                dims(), libtbag::tmp::NumberOfTemplateArguments<Args ...>::value, std::forward<Args>(args) ...));
     }
 
     template <typename T, typename ... Args>
-    T const & at(Args && ... args) const TBAG_NOEXCEPT
+    inline T const & at(Args && ... args) const TBAG_NOEXCEPT
     {
-        using namespace libtbag::tmp;
-        using namespace libtbag::box::details;
-        auto const n = get_number_of_arguments(std::forward<Args>(args) ...);
-        assert(0 <= COMPARE_AND(n) < rank());
-        return at_offset<T>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
+        return at_offset<T>(libtbag::box::details::box_dim_get_index_args(
+                dims(), libtbag::tmp::NumberOfTemplateArguments<Args ...>::value, std::forward<Args>(args) ...));
     }
 
     inline ui32 dim(ui32 i) const TBAG_NOEXCEPT
