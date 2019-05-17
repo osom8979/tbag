@@ -165,3 +165,43 @@ TEST(box_api_test, SetAndGet)
     box_free(&box);
 }
 
+TEST(box_api_test, Clone)
+{
+    box_data box;
+    box_clear(&box);
+
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
+    ui32 i = 0;
+    for (i = 0; i < 24; ++i) {
+        box_data_set(&box, &i, BOX_TYPE_UINT32, BOX_DEVICE_CPU, i);
+    }
+
+    box_data box2;
+    box_clear(&box2);
+    ASSERT_EQ(E_SUCCESS, box_clone(&box2, &box));
+
+    ASSERT_EQ(box.type, box2.type);
+    ASSERT_EQ(box.device, box2.device);
+    ASSERT_EQ(box.ext[0], box2.ext[0]);
+    ASSERT_EQ(box.ext[1], box2.ext[1]);
+    ASSERT_EQ(box.ext[2], box2.ext[2]);
+    ASSERT_EQ(box.ext[3], box2.ext[3]);
+    ASSERT_NE(box.data, box2.data);
+    ASSERT_EQ(box.total_data_byte, box2.total_data_byte);
+    ASSERT_EQ(box.size, box2.size);
+    ASSERT_NE(box.dims, box2.dims);
+    ASSERT_EQ(box.total_dims_byte, box2.total_dims_byte);
+    ASSERT_EQ(box.rank, box2.rank);
+    for (i = 0; i < 24; ++i) {
+        ui32 box_data;
+        ui32 box2_data;
+        box_data_get(&box, &box_data, BOX_TYPE_UINT32, BOX_DEVICE_CPU, i);
+        box_data_get(&box2, &box2_data, BOX_TYPE_UINT32, BOX_DEVICE_CPU, i);
+        ASSERT_EQ(i, box_data);
+        ASSERT_EQ(i, box2_data);
+    }
+
+    box_free(&box);
+    box_free(&box2);
+}
+
