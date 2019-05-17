@@ -459,7 +459,6 @@ bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_i
     assert(stride >= 1);
     assert(begin >= 0);
     assert(end >= 0);
-    assert(index >= 0);
     assert(box->dims != nullptr);
     assert(box->rank >= 1);
     assert(dim_index < box->rank);
@@ -581,9 +580,7 @@ bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void *
 bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data) TBAG_NOEXCEPT
 {
     assert(parent_cursor != nullptr);
-    auto dim_index = parent_cursor->dim_index - 1;
-    assert(dim_index >= 0);
-    return box_cursor_init_sub(cursor, parent_cursor, data, dim_index);
+    return box_cursor_init_sub(cursor, parent_cursor, data, parent_cursor->dim_index+1);
 }
 
 bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor) TBAG_NOEXCEPT

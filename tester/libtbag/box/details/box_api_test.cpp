@@ -205,3 +205,48 @@ TEST(box_api_test, Clone)
     box_free(&box2);
 }
 
+TEST(box_api_test, box_cursor)
+{
+    box_data box;
+    box_clear(&box);
+
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
+    ui32 i = 0;
+    for (i = 0; i < 24; ++i) {
+        box_data_set(&box, &i, BOX_TYPE_UINT32, BOX_DEVICE_CPU, i);
+    }
+
+    i = 0;
+
+    int loop_counter0 = 0;
+    box_cursor cursor0;
+    ASSERT_TRUE(box_cursor_init(&cursor0, &box));
+    while (box_cursor_next(&cursor0)) {
+
+        int loop_counter1 = 0;
+        box_cursor cursor1;
+        ASSERT_TRUE(box_cursor_init_sub(&cursor1, &cursor0));
+        while (box_cursor_next(&cursor1)) {
+
+            int loop_counter2 = 0;
+            box_cursor cursor2;
+            ASSERT_TRUE(box_cursor_init_sub(&cursor2, &cursor1));
+
+            while (box_cursor_next(&cursor2)) {
+                auto * data = (ui32*)(cursor2.data);
+                ASSERT_NE(nullptr, data);
+                ASSERT_EQ(i, *data);
+                ++loop_counter2;
+                ++i;
+            }
+            ASSERT_EQ(2, loop_counter2);
+            ++loop_counter1;
+        }
+        ASSERT_EQ(3, loop_counter1);
+        ++loop_counter0;
+    }
+    ASSERT_EQ(4, loop_counter0);
+
+    box_free(&box);
+}
+
