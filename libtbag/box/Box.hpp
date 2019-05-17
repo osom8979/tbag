@@ -61,20 +61,12 @@ using si8  = libtbag::box::details::si8;
 using si16 = libtbag::box::details::si16;
 using si32 = libtbag::box::details::si32;
 using si64 = libtbag::box::details::si64;
-
 using ui8  = libtbag::box::details::ui8;
 using ui16 = libtbag::box::details::ui16;
 using ui32 = libtbag::box::details::ui32;
 using ui64 = libtbag::box::details::ui64;
-
 using fp32 = libtbag::box::details::fp32;
 using fp64 = libtbag::box::details::fp64;
-
-using btype = libtbag::box::details::btype;
-using bdev  = libtbag::box::details::bdev;
-
-using box_data   = libtbag::box::details::box_data;
-using box_cursor = libtbag::box::details::box_cursor;
 // clang-format on
 
 template <typename T, BoxTypeTable box_type>
@@ -188,18 +180,6 @@ inline bool isTypeEquals(BoxTypeTable type) TBAG_NOEXCEPT
     return type == getBoxType<T>();
 }
 
-template <typename T>
-TBAG_CONSTEXPR inline btype get_btype() TBAG_NOEXCEPT
-{
-    return static_cast<btype>(BoxTypeInfo<T>::value);
-}
-
-template <typename T>
-inline bool is_btype_equals(btype type) TBAG_NOEXCEPT
-{
-    return type == get_btype<T>();
-}
-
 /**
  * Box class prototype.
  *
@@ -230,6 +210,19 @@ public:
 
 public:
     using SharedBoxData = std::shared_ptr<box_data>;
+
+public:
+    template <typename T>
+    TBAG_CONSTEXPR inline static btype get_btype() TBAG_NOEXCEPT
+    {
+        return static_cast<btype>(BoxTypeInfo<T>::value);
+    }
+
+    template <typename T>
+    inline static bool is_btype_equals(btype type) TBAG_NOEXCEPT
+    {
+        return type == get_btype<T>();
+    }
 
 public:
     TBAG_CONSTEXPR static btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
