@@ -114,3 +114,21 @@ TEST(box_common_test, opaque)
     ASSERT_EQ(set_value8, set_value8);
 }
 
+TEST(box_common_test, box_dim_get_stride)
+{
+    ui32 dims1[2] = {10, 5};
+    ASSERT_EQ(5, box_dim_get_stride(dims1, 2, 0));
+    ASSERT_EQ(1, box_dim_get_stride(dims1, 2, 1));
+
+    ui32 dims2[3] = {10, 5, 3};
+    ASSERT_EQ(5*3, box_dim_get_stride(dims2, 3, 0));
+    ASSERT_EQ(3, box_dim_get_stride(dims2, 3, 1));
+    ASSERT_EQ(1, box_dim_get_stride(dims2, 3, 2));
+
+    ui32 dims3[4] = {15, 8, 5, 3};
+    ASSERT_EQ(8*5*3, box_dim_get_stride(dims3, 4, 0));
+    ASSERT_EQ(5*3, box_dim_get_stride(dims3, 4, 1));
+    ASSERT_EQ(3, box_dim_get_stride(dims3, 4, 2));
+    ASSERT_EQ(1, box_dim_get_stride(dims3, 4, 3));
+}
+

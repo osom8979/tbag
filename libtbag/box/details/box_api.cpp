@@ -260,29 +260,35 @@ bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT
     return box->dims != nullptr && box->total_dims_byte >= 1 && box->rank >= 1;
 }
 
-Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     assert(src != nullptr);
     assert(dest->data == nullptr);
-    auto const CODE = box_malloc_copy_dims(dest, src->type, src->device, src->ext,
-                                           src->dims, src->total_dims_byte, src->rank);
+    auto const CODE = box_malloc_copy_dims(dest, type, device, ext, src->dims, src->total_dims_byte, src->rank);
     if (isFailure(CODE)) {
         return CODE;
     }
-    return box_data_memcpy(dest, src);
+    return box_data_copy(dest, src);
 }
 
-void * box_data_ptr_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
+Err box_clone(box_data * dest, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT
 {
-    assert(box != nullptr);
-    return (void*)(((ui8*)(box->data)) + (box_get_type_byte(box->type)*offset));
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    return box_clone(dest, src->type, device, ext, src);
 }
 
-void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT
+Err box_clone(box_data * dest, btype type, box_data const * src) TBAG_NOEXCEPT
 {
-    assert(box != nullptr);
-    return (void const *)(((ui8 const *)(box->data)) + (box_get_type_byte(box->type)*offset));
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    return box_clone(dest, type, src->device, src->ext, src);
+}
+
+Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+{
+    return box_clone(dest, src->type, src->device, src->ext, src);
 }
 
 Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT
@@ -363,7 +369,7 @@ Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev 
     return box_data_get(box, data, data_type, data_device, box_dim_get_index_vargs(box->dims, rank, ap));
 }
 
-Err box_data_memcpy(box_data * box, void const * data, btype data_type, bdev data_device, ui32 size) TBAG_NOEXCEPT
+Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui32 size) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
@@ -387,7 +393,7 @@ Err box_data_memcpy(box_data * box, void const * data, btype data_type, bdev dat
     return E_ENOSYS;
 }
 
-Err box_data_memcpy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT
+Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     assert(src != nullptr);
@@ -404,14 +410,14 @@ Err box_data_memcpy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXC
     }
 
     assert(dest != src);
-    return box_data_memcpy(dest, src->data, src->type, src->device, size);
+    return box_data_copy(dest, src->data, src->type, src->device, size);
 }
 
-Err box_data_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     assert(src != nullptr);
-    return box_data_memcpy(dest, src, src->size);
+    return box_data_copy(dest, src, src->size);
 }
 
 } // namespace details

@@ -45,10 +45,10 @@ TBAG_API Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 cons
 TBAG_API bool box_exists_data(box_data const * box) TBAG_NOEXCEPT;
 TBAG_API bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT;
 
+TBAG_API Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;
+TBAG_API Err box_clone(box_data * dest, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;
+TBAG_API Err box_clone(box_data * dest, btype type, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
-
-TBAG_API void       * box_data_ptr_offset(box_data       * box, ui32 offset) TBAG_NOEXCEPT;
-TBAG_API void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT;
 
 TBAG_API Err box_data_set      (box_data * box, void const * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT;
 TBAG_API Err box_data_set_args (box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT;
@@ -58,9 +58,9 @@ TBAG_API Err box_data_get      (box_data const * box, void * data, btype data_ty
 TBAG_API Err box_data_get_args (box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
-TBAG_API Err box_data_memcpy(box_data * box, void const * data, btype data_type, bdev data_device, ui32 size) TBAG_NOEXCEPT;
-TBAG_API Err box_data_memcpy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT;
-TBAG_API Err box_data_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
+TBAG_API Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui32 size) TBAG_NOEXCEPT;
+TBAG_API Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT;
+TBAG_API Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

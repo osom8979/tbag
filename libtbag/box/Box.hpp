@@ -232,12 +232,6 @@ public:
     using SharedBoxData = std::shared_ptr<box_data>;
 
 public:
-    struct reshape_t { /* EMPTY. */ };
-
-public:
-    TBAG_CONSTEXPR static const reshape_t reshape_op = reshape_t{};
-
-public:
     TBAG_CONSTEXPR static btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
     TBAG_CONSTEXPR static btype const type_si8 () TBAG_NOEXCEPT { return get_btype<si8 >(); }
     TBAG_CONSTEXPR static btype const type_si16() TBAG_NOEXCEPT { return get_btype<si16>(); }
@@ -262,12 +256,27 @@ private:
 
 public:
     Box();
-    Box(std::nullptr_t) TBAG_NOEXCEPT;
-    Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-    Box(reshape_t, btype type, ui32 rank, ...);
+    explicit Box(std::nullptr_t) TBAG_NOEXCEPT;
+    explicit Box(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
+    explicit Box(btype type, ui32 rank, ...);
     Box(Box const & obj) TBAG_NOEXCEPT;
     Box(Box && obj) TBAG_NOEXCEPT;
     ~Box();
+
+public:
+    template <typename T, typename ... Args>
+    explicit Box(bdev device, ui64 const * ext, Args && ... args)
+            : Box(get_btype<typename libtbag::remove_cr<T>::type>(), device, ext,
+                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+                  std::forward<Args>(args) ...)
+    { /* EMPTY. */ }
+
+    template <typename T, typename ... Args>
+    explicit Box(Args && ... args)
+            : Box(get_btype<typename libtbag::remove_cr<T>::type>(),
+                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+                  std::forward<Args>(args) ...)
+    { /* EMPTY. */ }
 
 public:
     Box & operator =(Box const & obj) TBAG_NOEXCEPT;
@@ -300,25 +309,6 @@ public:
 
     inline box_data       & operator *()       TBAG_NOEXCEPT { return ref(); }
     inline box_data const & operator *() const TBAG_NOEXCEPT { return ref(); }
-
-public:
-    friend inline bool operator <(Box const & x, Box const & y) TBAG_NOEXCEPT
-    { return x.get() < y.get(); }
-
-    friend inline bool operator >(Box const & x, Box const & y) TBAG_NOEXCEPT
-    { return x.get() > y.get(); }
-
-    friend inline bool operator <=(Box const & x, Box const & y) TBAG_NOEXCEPT
-    { return x.get() <= y.get(); }
-
-    friend inline bool operator >=(Box const & x, Box const & y) TBAG_NOEXCEPT
-    { return x.get() >= y.get(); }
-
-    inline bool operator ==(Box const & obj) const TBAG_NOEXCEPT
-    { return get() == obj.get(); }
-
-    inline bool operator !=(Box const & obj) const TBAG_NOEXCEPT
-    { return get() != obj.get(); }
 
 public:
     void reset();

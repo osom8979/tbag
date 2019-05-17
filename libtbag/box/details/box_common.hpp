@@ -167,19 +167,6 @@ struct box_data
 #define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
     (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
 
-/**
- * Box container iterator cursor structure.
- *
- * @author zer0
- * @date   2019-05-16
- */
-struct box_cursor
-{
-    void * current_data;
-    ui32 step_byte;
-    ui32 step_count;
-};
-
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
 TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;
 
@@ -224,6 +211,7 @@ TBAG_API bool   box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * d
 TBAG_API bool   box_dim_is_equals_args(ui32 const * dims1, ui32 rank1, ui32 rank2, ...) TBAG_NOEXCEPT;
 TBAG_API bool   box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list ap) TBAG_NOEXCEPT;
 TBAG_API ui32   box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32   box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXCEPT;
 
 /**
  * The formula to obtain the index is as follows:
@@ -248,6 +236,67 @@ TBAG_API ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) 
 TBAG_API char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
 TBAG_API void   box_info_free(char * info) TBAG_NOEXCEPT;
 TBAG_API bool   box_info_assign(char * dest, ui32 dest_size, char const * src, ui32 src_size) TBAG_NOEXCEPT;
+TBAG_API bool   box_info_assign(char * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT;
+
+TBAG_API void       * box_data_ptr_offset(box_data       * box, ui32 offset) TBAG_NOEXCEPT;
+TBAG_API void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT;
+
+TBAG_API bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCEPT;
+
+/**
+ * Box container iterator cursor structure.
+ *
+ * @author zer0
+ * @date   2019-05-16
+ */
+struct box_cursor
+{
+    box_data * box;
+
+    void * data;
+    int dim_index;
+    int stride;
+
+    int begin;
+    int end;
+    int step;
+
+    int index;
+};
+
+TBAG_CONSTEXPR int const BOX_CURSOR_INIT_INDEX = -1;
+
+TBAG_API bool box_cursor_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
+                              int stride, int begin, int end, int step, int index) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
+                              int stride, int begin, int end, int step) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
+                              int stride, int begin, int end) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
+                              int stride, int begin) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
+                              int stride) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box) TBAG_NOEXCEPT;
+
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data, int dim_index,
+                                  int stride, int begin, int end, int step, int index) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data, int dim_index,
+                                  int stride, int begin, int end, int step) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data, int dim_index,
+                                  int stride, int begin, int end) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data, int dim_index,
+                                  int stride, int begin) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data, int dim_index,
+                                  int stride) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data,
+                                  int dim_index) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor, void * data) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor) TBAG_NOEXCEPT;
+
+TBAG_API bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

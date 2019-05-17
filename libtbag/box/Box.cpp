@@ -41,7 +41,7 @@ Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
     // EMPTY.
 }
 
-Box::Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...) : Box()
+Box::Box(btype type, bdev device, ui64 const * ext, ui32 rank, ...) : Box()
 {
     assert(_data);
 
@@ -55,7 +55,7 @@ Box::Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...) :
     }
 }
 
-Box::Box(reshape_t, btype type, ui32 rank, ...) : Box()
+Box::Box(btype type, ui32 rank, ...) : Box()
 {
     assert(_data);
 
