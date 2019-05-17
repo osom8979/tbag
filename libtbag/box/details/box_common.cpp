@@ -155,6 +155,25 @@ void box_clear(box_data * box) TBAG_NOEXCEPT
     box->info_size = 0;
 }
 
+// clang-format off
+void box_opaque_set(box_data * box, si8  v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_set(box_data * box, si16 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_set(box_data * box, si32 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_set(box_data * box, si64 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_set(box_data * box, ui8  v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_set(box_data * box, ui16 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_set(box_data * box, ui32 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_set(box_data * box, ui64 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
+void box_opaque_get(box_data const * box, si8  * v) TBAG_NOEXCEPT { *v = (si8 )(std::intptr_t)box->opaque; }
+void box_opaque_get(box_data const * box, si16 * v) TBAG_NOEXCEPT { *v = (si16)(std::intptr_t)box->opaque; }
+void box_opaque_get(box_data const * box, si32 * v) TBAG_NOEXCEPT { *v = (si32)(std::intptr_t)box->opaque; }
+void box_opaque_get(box_data const * box, si64 * v) TBAG_NOEXCEPT { *v = (si64)(std::intptr_t)box->opaque; }
+void box_opaque_get(box_data const * box, ui8  * v) TBAG_NOEXCEPT { *v = (ui8 )(std::intptr_t)box->opaque; }
+void box_opaque_get(box_data const * box, ui16 * v) TBAG_NOEXCEPT { *v = (ui16)(std::intptr_t)box->opaque; }
+void box_opaque_get(box_data const * box, ui32 * v) TBAG_NOEXCEPT { *v = (ui32)(std::intptr_t)box->opaque; }
+void box_opaque_get(box_data const * box, ui64 * v) TBAG_NOEXCEPT { *v = (ui64)(std::intptr_t)box->opaque; }
+// clang-format on
+
 ui32 box_get_size_args(ui32 rank, ...) TBAG_NOEXCEPT
 {
     assert(rank >= 1);

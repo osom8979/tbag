@@ -175,6 +175,9 @@ struct box_data
  */
 struct box_cursor
 {
+    void * current_data;
+    ui32 step_byte;
+    ui32 step_count;
 };
 
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
@@ -185,6 +188,25 @@ TBAG_API char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT;
 
 TBAG_API ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT;
 TBAG_API void box_clear(box_data * box) TBAG_NOEXCEPT;
+
+// clang-format off
+TBAG_API void box_opaque_set(box_data * box, si8  v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_set(box_data * box, si16 v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_set(box_data * box, si32 v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_set(box_data * box, si64 v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_set(box_data * box, ui8  v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_set(box_data * box, ui16 v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_set(box_data * box, ui32 v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_set(box_data * box, ui64 v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, si8  * v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, si16 * v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, si32 * v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, si64 * v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, ui8  * v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, ui16 * v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, ui32 * v) TBAG_NOEXCEPT;
+TBAG_API void box_opaque_get(box_data const * box, ui64 * v) TBAG_NOEXCEPT;
+// clang-format on
 
 TBAG_API ui32 box_get_size_args(ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API ui32 box_get_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;

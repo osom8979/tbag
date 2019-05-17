@@ -58,3 +58,59 @@ TEST(box_common_test, box_dim_get_index_args)
     box_dim_free(dims2);
 }
 
+TEST(box_common_test, opaque)
+{
+    box_data box;
+
+    si8  set_value1 = 1;
+    si16 set_value2 = 2;
+    si32 set_value3 = 3;
+    si64 set_value4 = 4;
+    ui8  set_value5 = 5;
+    ui16 set_value6 = 6;
+    ui32 set_value7 = 7;
+    ui64 set_value8 = 8;
+
+    si8  get_value1 = 0;
+    si16 get_value2 = 0;
+    si32 get_value3 = 0;
+    si64 get_value4 = 0;
+    ui8  get_value5 = 0;
+    ui16 get_value6 = 0;
+    ui32 get_value7 = 0;
+    ui64 get_value8 = 0;
+
+    box_opaque_set(&box, set_value1);
+    box_opaque_get(&box, &get_value1);
+
+    box_opaque_set(&box, set_value2);
+    box_opaque_get(&box, &get_value2);
+
+    box_opaque_set(&box, set_value3);
+    box_opaque_get(&box, &get_value3);
+
+    box_opaque_set(&box, set_value4);
+    box_opaque_get(&box, &get_value4);
+
+    box_opaque_set(&box, set_value5);
+    box_opaque_get(&box, &get_value5);
+
+    box_opaque_set(&box, set_value6);
+    box_opaque_get(&box, &get_value6);
+
+    box_opaque_set(&box, set_value7);
+    box_opaque_get(&box, &get_value7);
+
+    box_opaque_set(&box, set_value8);
+    box_opaque_get(&box, &get_value8);
+
+    ASSERT_EQ(set_value1, set_value1);
+    ASSERT_EQ(set_value2, set_value2);
+    ASSERT_EQ(set_value3, set_value3);
+    ASSERT_EQ(set_value4, set_value4);
+    ASSERT_EQ(set_value5, set_value5);
+    ASSERT_EQ(set_value6, set_value6);
+    ASSERT_EQ(set_value7, set_value7);
+    ASSERT_EQ(set_value8, set_value8);
+}
+
