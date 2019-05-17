@@ -181,7 +181,7 @@ ui32 box_get_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
 ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
 {
     assert(rank >= 1);
-    return (ui32*)tbMalloc(GET_TOTAL_DIMS_BYTE(rank));
+    return (ui32*)tbMalloc(GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
 }
 
 ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT
@@ -247,7 +247,15 @@ ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT
 {
     assert(src != nullptr);
     assert(rank >= 1);
-    ui32 * result = box_dim_malloc(rank);
+    return box_dim_clone_with_mem_size(src, rank, rank);
+}
+
+TBAG_API ui32 * box_dim_clone_with_mem_size(ui32 const * src, ui32 dims_size, ui32 rank) TBAG_NOEXCEPT
+{
+    assert(src != nullptr);
+    assert(rank >= 1);
+    assert(dims_size >= rank);
+    ui32 * result = box_dim_malloc(dims_size);
     assert(result != nullptr);
     box_dim_copy(result, src, rank);
     return result;
@@ -345,7 +353,7 @@ ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEX
 char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT
 {
     assert(info_size >= 1);
-    return (char*)tbMalloc(GET_TOTAL_INFO_BYTE(info_size));
+    return (char*)tbMalloc(GET_SIZE_TO_TOTAL_INFO_BYTE(info_size));
 }
 
 void box_info_free(char * info) TBAG_NOEXCEPT

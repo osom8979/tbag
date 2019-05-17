@@ -77,11 +77,11 @@ Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * e
     assert(dims != nullptr);
     assert(rank >= 1);
     assert(CHECK_TOTAL_DIMS_BYTE(dims_byte));
-    assert(dims_byte >= GET_TOTAL_DIMS_BYTE(rank));
+    assert(dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
     assert(box_support_type(type));
     assert(box_support_device(device));
 
-    auto * cloned_box_dims = box_dim_clone(dims, rank);
+    auto * cloned_box_dims = box_dim_clone_with_mem_size(dims, GET_TOTAL_DIMS_BYTE_TO_RANK(dims_byte), rank);
     assert(cloned_box_dims != nullptr);
     auto const CODE = box_malloc_move_dims(box, type, device, ext, cloned_box_dims, dims_byte, rank);
     if (isFailure(CODE)) {
@@ -96,7 +96,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     assert(dims != nullptr);
     assert(rank >= 1);
     assert(CHECK_TOTAL_DIMS_BYTE(dims_byte));
-    assert(dims_byte >= GET_TOTAL_DIMS_BYTE(rank));
+    assert(dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
     assert(box_support_type(type));
     assert(box_support_device(device));
 
@@ -149,7 +149,7 @@ Err box_malloc_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
 
     auto * dims = box_dim_malloc_vargs(rank, ap);
     assert(dims != nullptr);
-    auto const CODE = box_malloc_move_dims(box, type, device, ext, dims, GET_TOTAL_DIMS_BYTE(rank), rank);
+    auto const CODE = box_malloc_move_dims(box, type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
     if (isFailure(CODE)) {
         box_dim_free(dims);
     }
@@ -201,18 +201,23 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
         return E_SUCCESS;
     }
 
-    if (box->total_dims_byte < GET_TOTAL_DIMS_BYTE(rank)) {
+    if (box->total_dims_byte < GET_RANK_TO_TOTAL_DIMS_BYTE(rank)) {
         if (box->dims) {
             box_dim_free(box->dims);
         }
         box->dims = box_dim_malloc_vargs(rank, ap);
-        box->total_dims_byte = GET_TOTAL_DIMS_BYTE(rank);
+        if (box->dims == nullptr) {
+            box->total_dims_byte = 0;
+            box->rank = 0;
+            return E_BADALLOC;
+        }
+        box->total_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(rank);
         box->rank = rank;
     } else {
         box_dim_set_vargs(box->dims, rank, ap);
         box->rank = rank;
     }
-    assert(box->total_dims_byte >= GET_TOTAL_DIMS_BYTE(rank));
+    assert(box->total_dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
     assert(box->dims != nullptr);
     assert(box->rank == rank);
     assert(box_dim_is_equals_vargs(box->dims, box->rank, rank, ap));
@@ -246,7 +251,13 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
 bool box_exists_data(box_data const * box) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
-    return box->data != nullptr;
+    return box->data != nullptr && box->total_data_byte >= 1 && box->size >= 1;
+}
+
+bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    return box->dims != nullptr && box->total_dims_byte >= 1 && box->rank >= 1;
 }
 
 Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT

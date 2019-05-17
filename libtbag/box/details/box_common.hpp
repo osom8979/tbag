@@ -150,8 +150,10 @@ struct box_data
     void * opaque;
 };
 
-#define GET_TOTAL_INFO_BYTE(rank) (rank*sizeof(char))
-#define GET_TOTAL_DIMS_BYTE(rank) (rank*sizeof(ui32))
+#define GET_SIZE_TO_TOTAL_INFO_BYTE(size) (size*sizeof(char))
+#define GET_TOTAL_INFO_BYTE_TO_SIZE(byte) (byte/sizeof(char))
+#define GET_RANK_TO_TOTAL_DIMS_BYTE(rank) (rank*sizeof(ui32))
+#define GET_TOTAL_DIMS_BYTE_TO_RANK(byte) (byte/sizeof(ui32))
 #define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
     (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
 
@@ -179,6 +181,7 @@ TBAG_API void   box_dim_set_args(ui32 * TBAG_RESTRICT dims, ui32 args_count, ...
 TBAG_API void   box_dim_set_vargs(ui32 * TBAG_RESTRICT dims, ui32 args_count, va_list ap) TBAG_NOEXCEPT;
 TBAG_API void   box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
 TBAG_API ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_clone_with_mem_size(ui32 const * src, ui32 dims_size, ui32 rank) TBAG_NOEXCEPT;
 TBAG_API bool   box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT;
 TBAG_API bool   box_dim_is_equals_args(ui32 const * dims1, ui32 rank1, ui32 rank2, ...) TBAG_NOEXCEPT;
 TBAG_API bool   box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list ap) TBAG_NOEXCEPT;
