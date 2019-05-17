@@ -138,7 +138,7 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
 void box_clear(box_data * box) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
-    box->type = BOX_TYPE_NONE;
+    box->type = BT_NONE;
     box->device = BOX_DEVICE_NONE;
     box->ext[0] = 0;
     box->ext[1] = 0;

@@ -273,13 +273,13 @@ Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     return box_data_memcpy(dest, src);
 }
 
-void * box_data_get_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
+void * box_data_ptr_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     return (void*)(((ui8*)(box->data)) + (box_get_type_byte(box->type)*offset));
 }
 
-void const * box_data_get_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT
+void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     return (void const *)(((ui8 const *)(box->data)) + (box_get_type_byte(box->type)*offset));
@@ -293,7 +293,7 @@ Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_d
     assert(box_support_device(data_device));
 
     if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
-        box_cpu_set(box_data_get_offset(box, box_data_offset), box->type, data, data_type);
+        box_cpu_set(box_data_ptr_offset(box, box_data_offset), box->type, data, data_type);
         return E_SUCCESS;
     }
     return E_ENOSYS;
@@ -332,7 +332,7 @@ Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_d
     assert(box_support_device(data_device));
 
     if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
-        box_cpu_set(data, data_type, box_data_get_offset(box, box_data_offset), box->type);
+        box_cpu_set(data, data_type, box_data_ptr_offset(box, box_data_offset), box->type);
         return E_SUCCESS;
     }
     return E_ENOSYS;

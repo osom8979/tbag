@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/box/details/box_api.hpp>
 #include <libtbag/tmp/NumberOfArguments.hpp>
 
@@ -187,6 +188,18 @@ inline bool isTypeEquals(BoxTypeTable type) TBAG_NOEXCEPT
     return type == getBoxType<T>();
 }
 
+template <typename T>
+TBAG_CONSTEXPR inline btype get_btype() TBAG_NOEXCEPT
+{
+    return static_cast<btype>(BoxTypeInfo<T>::value);
+}
+
+template <typename T>
+inline bool is_btype_equals(btype type) TBAG_NOEXCEPT
+{
+    return type == get_btype<T>();
+}
+
 /**
  * Box class prototype.
  *
@@ -218,12 +231,40 @@ public:
 public:
     using SharedBoxData = std::shared_ptr<box_data>;
 
+public:
+    struct reshape_t { /* EMPTY. */ };
+
+public:
+    TBAG_CONSTEXPR static const reshape_t reshape_op = reshape_t{};
+
+public:
+    TBAG_CONSTEXPR static btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
+    TBAG_CONSTEXPR static btype const type_si8 () TBAG_NOEXCEPT { return get_btype<si8 >(); }
+    TBAG_CONSTEXPR static btype const type_si16() TBAG_NOEXCEPT { return get_btype<si16>(); }
+    TBAG_CONSTEXPR static btype const type_si32() TBAG_NOEXCEPT { return get_btype<si32>(); }
+    TBAG_CONSTEXPR static btype const type_si64() TBAG_NOEXCEPT { return get_btype<si64>(); }
+    TBAG_CONSTEXPR static btype const type_ui8 () TBAG_NOEXCEPT { return get_btype<ui8 >(); }
+    TBAG_CONSTEXPR static btype const type_ui16() TBAG_NOEXCEPT { return get_btype<ui16>(); }
+    TBAG_CONSTEXPR static btype const type_ui32() TBAG_NOEXCEPT { return get_btype<ui32>(); }
+    TBAG_CONSTEXPR static btype const type_ui64() TBAG_NOEXCEPT { return get_btype<ui64>(); }
+    TBAG_CONSTEXPR static btype const type_fp32() TBAG_NOEXCEPT { return get_btype<fp32>(); }
+    TBAG_CONSTEXPR static btype const type_fp64() TBAG_NOEXCEPT { return get_btype<fp64>(); }
+
+    TBAG_CONSTEXPR static btype const device_none() TBAG_NOEXCEPT { return BOX_DEVICE_NONE; }
+    TBAG_CONSTEXPR static btype const device_cpu () TBAG_NOEXCEPT { return BOX_DEVICE_CPU ; }
+    TBAG_CONSTEXPR static btype const device_cuda() TBAG_NOEXCEPT { return BOX_DEVICE_CUDA; }
+    TBAG_CONSTEXPR static btype const device_cl  () TBAG_NOEXCEPT { return BOX_DEVICE_CL  ; }
+    TBAG_CONSTEXPR static btype const device_glsl() TBAG_NOEXCEPT { return BOX_DEVICE_GLSL; }
+    TBAG_CONSTEXPR static btype const device_fbs () TBAG_NOEXCEPT { return BOX_DEVICE_FBS ; }
+
 private:
     SharedBoxData _data;
 
 public:
     Box();
     Box(std::nullptr_t) TBAG_NOEXCEPT;
+    Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...);
+    Box(reshape_t, btype type, ui32 rank, ...);
     Box(Box const & obj) TBAG_NOEXCEPT;
     Box(Box && obj) TBAG_NOEXCEPT;
     ~Box();
@@ -289,14 +330,16 @@ public:
     inline btype device() const TBAG_NOEXCEPT
     { return _data->device; }
 
+    inline ui64 const * ext() const TBAG_NOEXCEPT
+    { return _data->ext; }
     inline ui64 ext0() const TBAG_NOEXCEPT
-    { return _data->ext[0]; }
+    { return ext()[0]; }
     inline ui64 ext1() const TBAG_NOEXCEPT
-    { return _data->ext[1]; }
+    { return ext()[1]; }
     inline ui64 ext2() const TBAG_NOEXCEPT
-    { return _data->ext[2]; }
+    { return ext()[2]; }
     inline ui64 ext3() const TBAG_NOEXCEPT
-    { return _data->ext[3]; }
+    { return ext()[3]; }
 
 public:
     inline ui32 capacity() const TBAG_NOEXCEPT
@@ -320,16 +363,48 @@ public:
     { _data->opaque = v; }
 
 public:
-    Err resize_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-    Err resize_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
+    // clang-format off
+    inline bool is_none() const TBAG_NOEXCEPT { return type() == type_none(); }
+    inline bool is_si8 () const TBAG_NOEXCEPT { return type() == type_si8 (); }
+    inline bool is_si16() const TBAG_NOEXCEPT { return type() == type_si16(); }
+    inline bool is_si32() const TBAG_NOEXCEPT { return type() == type_si32(); }
+    inline bool is_si64() const TBAG_NOEXCEPT { return type() == type_si64(); }
+    inline bool is_ui8 () const TBAG_NOEXCEPT { return type() == type_ui8 (); }
+    inline bool is_ui16() const TBAG_NOEXCEPT { return type() == type_ui16(); }
+    inline bool is_ui32() const TBAG_NOEXCEPT { return type() == type_ui32(); }
+    inline bool is_ui64() const TBAG_NOEXCEPT { return type() == type_ui64(); }
+    inline bool is_fp32() const TBAG_NOEXCEPT { return type() == type_fp32(); }
+    inline bool is_fp64() const TBAG_NOEXCEPT { return type() == type_fp64(); }
+    // clang-format on
 
-    template <typename ... Args>
-    Err resize(btype type, bdev device, ui64 const * ext, Args && ... args) TBAG_NOEXCEPT
+public:
+    // clang-format off
+    inline bool is_device_none() const TBAG_NOEXCEPT { return device() == device_none(); }
+    inline bool is_device_cpu () const TBAG_NOEXCEPT { return device() == device_cpu (); }
+    inline bool is_device_cuda() const TBAG_NOEXCEPT { return device() == device_cuda(); }
+    inline bool is_device_cl  () const TBAG_NOEXCEPT { return device() == device_cl  (); }
+    inline bool is_device_glsl() const TBAG_NOEXCEPT { return device() == device_glsl(); }
+    inline bool is_device_fbs () const TBAG_NOEXCEPT { return device() == device_fbs (); }
+    // clang-format on
+
+public:
+    Err reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
+    Err reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
+    Err reshape_args(btype type, ui32 rank, ...);
+    Err reshape_vargs(btype type, ui32 rank, va_list ap);
+
+    template <typename T, typename ... Args>
+    Err reshape(bdev device, ui64 const * ext, Args && ... args) TBAG_NOEXCEPT
     {
-        using namespace libtbag::tmp;
-        using namespace libtbag::box::details;
-        auto const n = get_number_of_arguments(std::forward<Args>(args) ...);
-        return resize_args(type, device, ext, n, std::forward<Args>(args) ...);
+        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
+        return reshape_args(get_btype<T>(), device, ext, n, std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    Err reshape(Args && ... args) TBAG_NOEXCEPT
+    {
+        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
+        return reshape_args(get_btype<T>(), n, std::forward<Args>(args) ...);
     }
 
 public:
@@ -364,31 +439,51 @@ public:
     { return data(); }
 
     template <typename T>
-    inline T & at_offset(ui32 i) TBAG_NOEXCEPT
+    inline typename libtbag::remove_cr<T>::type & offset(ui32 i) TBAG_NOEXCEPT
     {
+        using ResultType = typename libtbag::remove_cr<T>::type;
+        assert(exists());
+        assert(is_btype_equals<ResultType>(type()));
         assert(0 <= COMPARE_AND(i) < size());
-        return *cast<T>()[i];
+        return *((ResultType*)libtbag::box::details::box_data_ptr_offset(get(), i));
     }
 
     template <typename T>
-    inline T const & at_offset(ui32 i) const TBAG_NOEXCEPT
+    inline typename libtbag::remove_cr<T>::type const & offset(ui32 i) const TBAG_NOEXCEPT
     {
+        using ResultType = typename libtbag::remove_cr<T>::type;
+        assert(exists());
+        assert(is_btype_equals<ResultType>(type()));
         assert(0 <= COMPARE_AND(i) < size());
-        return *cast<T>()[i];
+        return *((ResultType*)libtbag::box::details::box_data_ptr_offset(get(), i));
+    }
+
+    template <typename T>
+    inline typename libtbag::remove_cr<T>::type & operator [](ui32 i) TBAG_NOEXCEPT
+    { return offset<typename libtbag::remove_cr<T>::type>(i); }
+
+    template <typename T>
+    inline typename libtbag::remove_cr<T>::type const & operator [](ui32 i) const TBAG_NOEXCEPT
+    { return offset<typename libtbag::remove_cr<T>::type>(i); }
+
+    template <typename T, typename ... Args>
+    inline typename libtbag::remove_cr<T>::type & at(Args && ... args) TBAG_NOEXCEPT
+    {
+        using ResultType = typename libtbag::remove_cr<T>::type;
+        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
+        assert(n >= 1);
+        using namespace libtbag::box::details;
+        return offset<ResultType>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
     }
 
     template <typename T, typename ... Args>
-    inline T & at(Args && ... args) TBAG_NOEXCEPT
+    inline typename libtbag::remove_cr<T>::type const & at(Args && ... args) const TBAG_NOEXCEPT
     {
-        return at_offset<T>(libtbag::box::details::box_dim_get_index_args(
-                dims(), libtbag::tmp::NumberOfTemplateArguments<Args ...>::value, std::forward<Args>(args) ...));
-    }
-
-    template <typename T, typename ... Args>
-    inline T const & at(Args && ... args) const TBAG_NOEXCEPT
-    {
-        return at_offset<T>(libtbag::box::details::box_dim_get_index_args(
-                dims(), libtbag::tmp::NumberOfTemplateArguments<Args ...>::value, std::forward<Args>(args) ...));
+        using ResultType = typename libtbag::remove_cr<T>::type;
+        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
+        assert(n >= 1);
+        using namespace libtbag::box::details;
+        return offset<ResultType>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
     }
 
     inline ui32 dim(ui32 i) const TBAG_NOEXCEPT

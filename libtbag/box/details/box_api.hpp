@@ -47,8 +47,8 @@ TBAG_API bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT;
 
 TBAG_API Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
-TBAG_API void       * box_data_get_offset(box_data       * box, ui32 offset) TBAG_NOEXCEPT;
-TBAG_API void const * box_data_get_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT;
+TBAG_API void       * box_data_ptr_offset(box_data       * box, ui32 offset) TBAG_NOEXCEPT;
+TBAG_API void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT;
 
 TBAG_API Err box_data_set      (box_data * box, void const * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT;
 TBAG_API Err box_data_set_args (box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT;

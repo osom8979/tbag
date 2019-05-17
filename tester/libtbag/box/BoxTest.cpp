@@ -42,3 +42,7 @@ TEST(BoxTest, Default)
     ASSERT_EQ(b5_data, b6_data);
 }
 
+TEST(BoxTest, Resize)
+{
+}
+

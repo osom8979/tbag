@@ -10,6 +10,8 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <cassert>
+#include <cstdlib>
+
 #include <algorithm>
 #include <utility>
 
@@ -21,16 +23,50 @@ namespace box {
 
 using namespace libtbag::box::details;
 
-Box::Box() : _data(std::make_shared<box_data>())
+Box::Box() : _data(nullptr)
 {
-    assert(static_cast<bool>(_data));
-    box_clear(_data.get());
-    _data->opaque = nullptr;
+    auto * box = (box_data*)::malloc(sizeof(box_data));
+    assert(box != nullptr);
+    box_clear(box);
+    box->opaque = nullptr;
+
+    _data.reset(box, [](box_data * ptr){
+        box_free(ptr);
+        ::free(ptr);
+    });
 }
 
 Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
 {
     // EMPTY.
+}
+
+Box::Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...) : Box()
+{
+    assert(_data);
+
+    va_list ap;
+    va_start(ap, rank);
+    auto const CODE = reshape_vargs(type, device, ext, rank, ap);
+    va_end(ap);
+
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
+    }
+}
+
+Box::Box(reshape_t, btype type, ui32 rank, ...) : Box()
+{
+    assert(_data);
+
+    va_list ap;
+    va_start(ap, rank);
+    auto const CODE = reshape_vargs(type, rank, ap);
+    va_end(ap);
+
+    if (isFailure(CODE)) {
+        throw ErrException(CODE);
+    }
 }
 
 Box::Box(Box const & obj) TBAG_NOEXCEPT : Box(nullptr)
@@ -79,18 +115,40 @@ void Box::reset()
     _data.reset();
 }
 
-Err Box::resize_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
+Err Box::reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
 {
     va_list ap;
     va_start(ap, rank);
-    auto const CODE = resize_vargs(type, device, ext, rank, ap);
+    auto const CODE = reshape_vargs(type, device, ext, rank, ap);
     va_end(ap);
     return CODE;
 }
 
-Err Box::resize_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
+Err Box::reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
 {
     return box_resize_vargs(_data.get(), type, device, ext, rank, ap);
+}
+
+Err Box::reshape_args(btype type, ui32 rank, ...)
+{
+    va_list ap;
+    va_start(ap, rank);
+    auto const CODE = reshape_vargs(type, rank, ap);
+    va_end(ap);
+    return CODE;
+}
+
+Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
+{
+    btype reshape_device = device_cpu();
+    ui64 const * reshape_ext = nullptr;
+    if (exists()) {
+        if (!is_device_none()) {
+            reshape_device = device();
+        }
+        reshape_ext = ext();
+    }
+    return reshape_vargs(type, reshape_device, reshape_ext, rank, ap);
 }
 
 } // namespace box
