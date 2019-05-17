@@ -267,7 +267,7 @@ Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     if (isFailure(CODE)) {
         return CODE;
     }
-    return box_memcpy(dest, src);
+    return box_data_memcpy(dest, src);
 }
 
 Err box_checked_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
@@ -278,31 +278,145 @@ Err box_checked_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     return box_clone(dest, src);
 }
 
-Err box_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+void * box_data_get_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
 {
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    assert(dest != src);
-    assert(dest->total_data_byte == src->total_data_byte);
-    if (dest->device == BOX_DEVICE_CPU && src->device == BOX_DEVICE_CPU) {
-        box_cpu_memcpy(dest->data, src->data, src->total_data_byte);
+    assert(box != nullptr);
+    return (void*)(((ui8*)(box->data)) + (box_get_type_byte(box->type)*offset));
+}
+
+void const * box_data_get_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    return (void const *)(((ui8 const *)(box->data)) + (box_get_type_byte(box->type)*offset));
+}
+
+Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    assert(box_support_type(data_type));
+    assert(box_support_device(data_device));
+
+    if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
+        box_cpu_set(box_data_get_offset(box, box_data_offset), box->type, data, data_type);
         return E_SUCCESS;
     }
     return E_ENOSYS;
 }
 
-Err box_checked_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+Err box_data_set_args(box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    assert(box_support_type(data_type));
+    assert(box_support_device(data_device));
+    assert(rank >= 1);
+
+    va_list ap;
+    va_start(ap, rank);
+    auto const INDEX = box_dim_get_index_vargs(box->dims, rank, ap);
+    va_end(ap);
+    return box_data_set(box, data, data_type, data_device, INDEX);
+}
+
+Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    assert(box_support_type(data_type));
+    assert(box_support_device(data_device));
+    assert(rank >= 1);
+    return box_data_set(box, data, data_type, data_device, box_dim_get_index_vargs(box->dims, rank, ap));
+}
+
+Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    assert(box_support_type(data_type));
+    assert(box_support_device(data_device));
+
+    if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
+        box_cpu_set(data, data_type, box_data_get_offset(box, box_data_offset), box->type);
+        return E_SUCCESS;
+    }
+    return E_ENOSYS;
+}
+
+Err box_data_get_args(box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    assert(box_support_type(data_type));
+    assert(box_support_device(data_device));
+    assert(rank >= 1);
+
+    va_list ap;
+    va_start(ap, rank);
+    auto const INDEX = box_dim_get_index_vargs(box->dims, rank, ap);
+    va_end(ap);
+    return box_data_get(box, data, data_type, data_device, INDEX);
+}
+
+Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    assert(box_support_type(data_type));
+    assert(box_support_device(data_device));
+    assert(rank >= 1);
+    return box_data_get(box, data, data_type, data_device, box_dim_get_index_vargs(box->dims, rank, ap));
+}
+
+Err box_data_memcpy(box_data * box, void const * data, btype data_type, bdev data_device, ui32 size) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    assert(box->data != data);
+    assert(box_support_type(data_type));
+    assert(box_support_device(data_device));
+    assert(size >= 1);
+
+    if (box->size < size) {
+        return E_ILLARGS;
+    }
+
+    if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
+        if (box->type == data_type) {
+            box_cpu_memcpy(box->data, data, box_get_type_byte(data_type)*size);
+        } else {
+            box_cpu_element_copy(box->data, box->type, data, data_type, size);
+        }
+        return E_SUCCESS;
+    }
+    return E_ENOSYS;
+}
+
+Err box_data_memcpy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     assert(src != nullptr);
+    assert(size >= 1);
+
+    if (dest->size < size) {
+        return E_ILLARGS;
+    }
+    if (src->size < size) {
+        return E_ILLARGS;
+    }
+    if (dest == src) {
+        return E_SUCCESS;
+    }
+
     assert(dest != src);
-    if (!box_dim_is_equals(dest->dims, dest->rank, src->dims, src->rank)) {
-        return E_ILLARGS;
-    }
-    if (dest->total_data_byte != src->total_data_byte) {
-        return E_ILLARGS;
-    }
-    return box_memcpy(dest, src);
+    return box_data_memcpy(dest, src->data, src->type, src->device, size);
+}
+
+Err box_data_memcpy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+{
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    return box_data_memcpy(dest, src, src->size);
 }
 
 } // namespace details

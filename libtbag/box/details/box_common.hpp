@@ -97,6 +97,16 @@ TBAG_CONSTEXPR btype const BT_UINT64  = MAKE_BOX_TYPE(BOX_TYPE_PREFIX_UNSIGNED, 
 TBAG_CONSTEXPR btype const BT_FLOAT32 = MAKE_BOX_TYPE(BOX_TYPE_PREFIX_FLOATING, BOX_TYPE_SIZE_32BIT );
 TBAG_CONSTEXPR btype const BT_FLOAT64 = MAKE_BOX_TYPE(BOX_TYPE_PREFIX_FLOATING, BOX_TYPE_SIZE_64BIT );
 
+/**
+ * Box container information structure.
+ *
+ * @author zer0
+ * @date   2019-03-04
+ *
+ * @remarks
+ *  It is an alternative to the 1d vector container. @n
+ *  Therefore, the entire memory must be connected in one dimension.
+ */
 struct box_data
 {
     /** Data type. */
@@ -157,6 +167,12 @@ struct box_data
 #define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
     (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
 
+/**
+ * Box container iterator cursor structure.
+ *
+ * @author zer0
+ * @date   2019-05-16
+ */
 struct box_cursor
 {
 };

@@ -26,9 +26,11 @@ namespace details {
 
 TBAG_API void * box_cpu_malloc(ui32 byte_size) TBAG_NOEXCEPT;
 TBAG_API void   box_cpu_free(void * ptr) TBAG_NOEXCEPT;
-TBAG_API void   box_cpu_memcpy(void * TBAG_RESTRICT dest, void const * TBAG_RESTRICT src, ui32 size) TBAG_NOEXCEPT;
+TBAG_API void   box_cpu_memcpy(void * TBAG_RESTRICT dest, void const * TBAG_RESTRICT src, ui32 byte) TBAG_NOEXCEPT;
 TBAG_API void   box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
                                      void const * TBAG_RESTRICT src, btype src_type, ui32 size) TBAG_NOEXCEPT;
+TBAG_API void   box_cpu_set(void * TBAG_RESTRICT dest, btype dest_type,
+                            void const * TBAG_RESTRICT src, btype src_type) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box
