@@ -262,20 +262,15 @@ bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT
 
 Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    assert(dest->data == nullptr);
     auto const CODE = box_malloc_copy_dims(dest, src->type, src->device, src->ext,
                                            src->dims, src->total_dims_byte, src->rank);
     if (isFailure(CODE)) {
         return CODE;
     }
     return box_data_memcpy(dest, src);
-}
-
-Err box_checked_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
-{
-    if (box_exists_data(dest)) {
-        box_free(dest);
-    }
-    return box_clone(dest, src);
 }
 
 void * box_data_get_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
@@ -314,9 +309,9 @@ Err box_data_set_args(box_data * box, void const * data, btype data_type, bdev d
 
     va_list ap;
     va_start(ap, rank);
-    auto const INDEX = box_dim_get_index_vargs(box->dims, rank, ap);
+    auto const CODE = box_data_set_vargs(box, data, data_type, data_device, rank, ap);
     va_end(ap);
-    return box_data_set(box, data, data_type, data_device, INDEX);
+    return CODE;
 }
 
 Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT
@@ -353,9 +348,9 @@ Err box_data_get_args(box_data const * box, void * data, btype data_type, bdev d
 
     va_list ap;
     va_start(ap, rank);
-    auto const INDEX = box_dim_get_index_vargs(box->dims, rank, ap);
+    auto const CODE = box_data_get_vargs(box, data, data_type, data_device, rank, ap);
     va_end(ap);
-    return box_data_get(box, data, data_type, data_device, INDEX);
+    return CODE;
 }
 
 Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT
