@@ -291,7 +291,7 @@ Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     return box_clone(dest, src->type, src->device, src->ext, src);
 }
 
-Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT
+Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
@@ -305,7 +305,7 @@ Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_d
     return E_ENOSYS;
 }
 
-Err box_data_set_args(box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT
+Err box_data_set_args(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
@@ -315,22 +315,22 @@ Err box_data_set_args(box_data * box, void const * data, btype data_type, bdev d
 
     va_list ap;
     va_start(ap, rank);
-    auto const CODE = box_data_set_vargs(box, data, data_type, data_device, rank, ap);
+    auto const CODE = box_data_set_vargs(box, data, data_type, data_device, ext, rank, ap);
     va_end(ap);
     return CODE;
 }
 
-Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT
+Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
     assert(box_support_type(data_type));
     assert(box_support_device(data_device));
     assert(rank >= 1);
-    return box_data_set(box, data, data_type, data_device, box_dim_get_index_vargs(box->dims, rank, ap));
+    return box_data_set(box, data, data_type, data_device, ext, box_dim_get_index_vargs(box->dims, rank, ap));
 }
 
-Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT
+Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
@@ -344,7 +344,7 @@ Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_d
     return E_ENOSYS;
 }
 
-Err box_data_get_args(box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT
+Err box_data_get_args(box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
@@ -354,22 +354,22 @@ Err box_data_get_args(box_data const * box, void * data, btype data_type, bdev d
 
     va_list ap;
     va_start(ap, rank);
-    auto const CODE = box_data_get_vargs(box, data, data_type, data_device, rank, ap);
+    auto const CODE = box_data_get_vargs(box, data, data_type, data_device, ext, rank, ap);
     va_end(ap);
     return CODE;
 }
 
-Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT
+Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
     assert(box_support_type(data_type));
     assert(box_support_device(data_device));
     assert(rank >= 1);
-    return box_data_get(box, data, data_type, data_device, box_dim_get_index_vargs(box->dims, rank, ap));
+    return box_data_get(box, data, data_type, data_device, ext, box_dim_get_index_vargs(box->dims, rank, ap));
 }
 
-Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui32 size) TBAG_NOEXCEPT
+Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 size) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     assert(data != nullptr);
@@ -410,7 +410,7 @@ Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEP
     }
 
     assert(dest != src);
-    return box_data_copy(dest, src->data, src->type, src->device, size);
+    return box_data_copy(dest, src->data, src->type, src->device, src->ext, size);
 }
 
 Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT

@@ -50,15 +50,15 @@ TBAG_API Err box_clone(box_data * dest, btype device, ui64 const * ext, box_data
 TBAG_API Err box_clone(box_data * dest, btype type, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
-TBAG_API Err box_data_set      (box_data * box, void const * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT;
-TBAG_API Err box_data_set_args (box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API Err box_data_set      (box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT;
+TBAG_API Err box_data_set_args (box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
-TBAG_API Err box_data_get      (box_data const * box, void * data, btype data_type, bdev data_device, ui32 box_data_offset) TBAG_NOEXCEPT;
-TBAG_API Err box_data_get_args (box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev data_device, ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API Err box_data_get      (box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT;
+TBAG_API Err box_data_get_args (box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
-TBAG_API Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui32 size) TBAG_NOEXCEPT;
+TBAG_API Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 size) TBAG_NOEXCEPT;
 TBAG_API Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT;
 TBAG_API Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 

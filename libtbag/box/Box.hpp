@@ -274,18 +274,44 @@ public:
 
 public:
     template <typename T>
-    Box(std::initializer_list<T> const & items)
+    using init1d_t = std::initializer_list<T>;
+    template <typename T>
+    using init2d_t = std::initializer_list< std::initializer_list<T> >;
+    template <typename T>
+    using init3d_t = std::initializer_list< std::initializer_list< std::initializer_list<T> > >;
+
+public:
+    template <typename T>
+    explicit Box(btype type, bdev device, ui64 const * ext, init1d_t<T> const & items) : Box()
     {
+        ui32 const dim_1d = static_cast<ui32>(items.size());
+        auto const CODE = reshape_args(type, device, ext, 1, dim_1d);
+        if (isFailure(CODE)) {
+            throw ErrException(CODE);
+        }
     }
 
     template <typename T>
-    Box(std::initializer_list<std::initializer_list<T> > const & items)
+    explicit Box(btype type, bdev device, ui64 const * ext, init2d_t<T> const & items) : Box()
     {
+        ui32 const dim_1d = static_cast<ui32>(items.size());
+        ui32 const dim_2d = static_cast<ui32>(items[0].size());
+        auto const CODE = reshape_args(type, device, ext, 2, dim_1d, dim_2d);
+        if (isFailure(CODE)) {
+            throw ErrException(CODE);
+        }
     }
 
     template <typename T>
-    Box(std::initializer_list<std::initializer_list<std::initializer_list<T> > > const & items)
+    explicit Box(btype type, bdev device, ui64 const * ext, init3d_t<T> const & items) : Box()
     {
+        ui32 const dim_1d = static_cast<ui32>(items.size());
+        ui32 const dim_2d = static_cast<ui32>(items.begin()->size());
+        ui32 const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
+        auto const CODE = reshape_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
+        if (isFailure(CODE)) {
+            throw ErrException(CODE);
+        }
     }
 
 public:
@@ -405,6 +431,76 @@ public:
     {
         auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
         return reshape_args(get_btype<T>(), n, std::forward<Args>(args) ...);
+    }
+
+public:
+    template <typename T>
+    Err assign(bdev device, ui64 const * ext, init1d_t<T> const & items)
+    {
+        using DataType = typename libtbag::remove_cr<T>::type;
+        ui32 const dim_1d = static_cast<ui32>(items.size());
+        auto const type = get_btype<DataType>();
+        auto const code = reshape_args(type, device, ext, 1, dim_1d);
+        if (isFailure(code)) {
+            return code;
+        }
+
+        DataType * d = data();
+        for (auto & i : items) {
+            *d = static_cast<DataType>(*i);
+            ++d;
+        }
+        return E_SUCCESS;
+    }
+
+    template <typename T>
+    Err assign(bdev device, ui64 const * ext, init2d_t<T> const & items)
+    {
+        using DataType = typename libtbag::remove_cr<T>::type;
+        ui32 const dim_1d = static_cast<ui32>(items.size());
+        ui32 const dim_2d = static_cast<ui32>(items[0].size());
+        auto const type = get_btype<DataType>();
+        auto const code = reshape_args(type, device, ext, 2, dim_1d, dim_2d);
+        if (isFailure(code)) {
+            return code;
+        }
+
+        DataType * d = data();
+        for (auto & i1 : items) {
+            assert(i1.size() == dim_2d);
+            for (auto & i2 : *i1) {
+                *d = static_cast<DataType>(*i2);
+                ++d;
+            }
+        }
+        return E_SUCCESS;
+    }
+
+    template <typename T>
+    Err assign(bdev device, ui64 const * ext, init3d_t<T> const & items)
+    {
+        using DataType = typename libtbag::remove_cr<T>::type;
+        ui32 const dim_1d = static_cast<ui32>(items.size());
+        ui32 const dim_2d = static_cast<ui32>(items.begin()->size());
+        ui32 const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
+        auto const type = get_btype<DataType>();
+        auto const code = reshape_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
+        if (isFailure(code)) {
+            return code;
+        }
+
+        DataType * d = data();
+        for (auto & i1 : items) {
+            assert(i1.size() == dim_2d);
+            for (auto & i2 : *i1) {
+                assert(i2.size() == dim_3d);
+                for (auto & i3 : *i2) {
+                    *d = static_cast<DataType>(*i3);
+                    ++d;
+                }
+            }
+        }
+        return E_SUCCESS;
     }
 
 public:
