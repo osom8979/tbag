@@ -245,70 +245,62 @@ public:
     TBAG_CONSTEXPR static btype const device_glsl() TBAG_NOEXCEPT { return BOX_DEVICE_GLSL; }
     TBAG_CONSTEXPR static btype const device_fbs () TBAG_NOEXCEPT { return BOX_DEVICE_FBS ; }
 
+public:
+    struct reshape_t { /* EMPTY. */ };
+
+public:
+    TBAG_CONSTEXPR static reshape_t const reshape_op = reshape_t{};
+
 private:
     SharedBoxData _data;
 
 public:
     Box();
     explicit Box(std::nullptr_t) TBAG_NOEXCEPT;
-    explicit Box(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-    explicit Box(btype type, ui32 rank, ...);
+//    explicit Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...);
+//    explicit Box(reshape_t, btype type, ui32 rank, ...);
     Box(Box const & obj) TBAG_NOEXCEPT;
     Box(Box && obj) TBAG_NOEXCEPT;
     ~Box();
 
 public:
-    template <typename T, typename ... Args>
-    explicit Box(bdev device, ui64 const * ext, Args && ... args)
-            : Box(get_btype<typename libtbag::remove_cr<T>::type>(), device, ext,
-                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
-                  std::forward<Args>(args) ...)
-    { /* EMPTY. */ }
-
-    template <typename T, typename ... Args>
-    explicit Box(Args && ... args)
-            : Box(get_btype<typename libtbag::remove_cr<T>::type>(),
-                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
-                  std::forward<Args>(args) ...)
-    { /* EMPTY. */ }
-
-public:
-    template <typename T>
-    using init1d_t = std::initializer_list<T>;
-    template <typename T>
-    using init2d_t = std::initializer_list< std::initializer_list<T> >;
-    template <typename T>
-    using init3d_t = std::initializer_list< std::initializer_list< std::initializer_list<T> > >;
+//    template <typename T, typename ... Args>
+//    explicit Box(reshape_t, bdev device, ui64 const * ext, Args && ... args)
+//            : Box(get_btype<typename libtbag::remove_cr<T>::type>(), device, ext,
+//                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+//                  std::forward<Args>(args) ...)
+//    { /* EMPTY. */ }
+//
+//    template <typename T, typename ... Args>
+//    explicit Box(reshape_t, Args && ... args)
+//            : Box(get_btype<typename libtbag::remove_cr<T>::type>(),
+//                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+//                  std::forward<Args>(args) ...)
+//    { /* EMPTY. */ }
 
 public:
     template <typename T>
-    explicit Box(btype type, bdev device, ui64 const * ext, init1d_t<T> const & items) : Box()
+    Box(std::initializer_list<T> const & items) : Box()
     {
-        ui32 const dim_1d = static_cast<ui32>(items.size());
-        auto const CODE = reshape_args(type, device, ext, 1, dim_1d);
+        auto const CODE = assign<T>(items);
         if (isFailure(CODE)) {
             throw ErrException(CODE);
         }
     }
 
     template <typename T>
-    explicit Box(btype type, bdev device, ui64 const * ext, init2d_t<T> const & items) : Box()
+    Box(std::initializer_list< std::initializer_list<T> > const & items) : Box()
     {
-        ui32 const dim_1d = static_cast<ui32>(items.size());
-        ui32 const dim_2d = static_cast<ui32>(items[0].size());
-        auto const CODE = reshape_args(type, device, ext, 2, dim_1d, dim_2d);
+        auto const CODE = assign<T>(items);
         if (isFailure(CODE)) {
             throw ErrException(CODE);
         }
     }
 
     template <typename T>
-    explicit Box(btype type, bdev device, ui64 const * ext, init3d_t<T> const & items) : Box()
+    Box(std::initializer_list< std::initializer_list< std::initializer_list<T> > > const & items) : Box()
     {
-        ui32 const dim_1d = static_cast<ui32>(items.size());
-        ui32 const dim_2d = static_cast<ui32>(items.begin()->size());
-        ui32 const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
-        auto const CODE = reshape_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
+        auto const CODE = assign<T>(items);
         if (isFailure(CODE)) {
             throw ErrException(CODE);
         }
@@ -435,20 +427,35 @@ public:
 
 public:
     template <typename T>
+    using init1d_t = std::initializer_list<T>;
+    template <typename T>
+    using init2d_t = std::initializer_list< std::initializer_list<T> >;
+    template <typename T>
+    using init3d_t = std::initializer_list< std::initializer_list< std::initializer_list<T> > >;
+
+    template <typename T>
     Err assign(bdev device, ui64 const * ext, init1d_t<T> const & items)
     {
         using DataType = typename libtbag::remove_cr<T>::type;
-        ui32 const dim_1d = static_cast<ui32>(items.size());
+        auto const dim_1d = static_cast<ui32>(items.size());
         auto const type = get_btype<DataType>();
         auto const code = reshape_args(type, device, ext, 1, dim_1d);
         if (isFailure(code)) {
             return code;
         }
 
-        DataType * d = data();
-        for (auto & i : items) {
-            *d = static_cast<DataType>(*i);
-            ++d;
+        if (is_device_cpu() && type == device_cpu()) {
+            auto * d = cast<DataType>();
+            for (auto & i1 : items) {
+                *d = static_cast<DataType>(i1);
+                ++d;
+            }
+        } else {
+            ui32 offset = 0;
+            for (auto & i1 : items) {
+                libtbag::box::details::box_data_set(get(), &i1, type, device, ext, offset);
+                ++offset;
+            }
         }
         return E_SUCCESS;
     }
@@ -457,20 +464,31 @@ public:
     Err assign(bdev device, ui64 const * ext, init2d_t<T> const & items)
     {
         using DataType = typename libtbag::remove_cr<T>::type;
-        ui32 const dim_1d = static_cast<ui32>(items.size());
-        ui32 const dim_2d = static_cast<ui32>(items[0].size());
+        auto const dim_1d = static_cast<ui32>(items.size());
+        auto const dim_2d = static_cast<ui32>(items.begin()->size());
         auto const type = get_btype<DataType>();
         auto const code = reshape_args(type, device, ext, 2, dim_1d, dim_2d);
         if (isFailure(code)) {
             return code;
         }
 
-        DataType * d = data();
-        for (auto & i1 : items) {
-            assert(i1.size() == dim_2d);
-            for (auto & i2 : *i1) {
-                *d = static_cast<DataType>(*i2);
-                ++d;
+        if (is_device_cpu() && type == device_cpu()) {
+            auto * d = cast<DataType>();
+            for (auto & i1 : items) {
+                assert(i1.size() == dim_2d);
+                for (auto & i2 : i1) {
+                    *d = static_cast<DataType>(i2);
+                    ++d;
+                }
+            }
+        } else {
+            ui32 offset = 0;
+            for (auto & i1 : items) {
+                assert(i1.size() == dim_2d);
+                for (auto & i2 : i1) {
+                    libtbag::box::details::box_data_set(get(), &i2, type, device, ext, offset);
+                    ++offset;
+                }
             }
         }
         return E_SUCCESS;
@@ -480,27 +498,59 @@ public:
     Err assign(bdev device, ui64 const * ext, init3d_t<T> const & items)
     {
         using DataType = typename libtbag::remove_cr<T>::type;
-        ui32 const dim_1d = static_cast<ui32>(items.size());
-        ui32 const dim_2d = static_cast<ui32>(items.begin()->size());
-        ui32 const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
+        auto const dim_1d = static_cast<ui32>(items.size());
+        auto const dim_2d = static_cast<ui32>(items.begin()->size());
+        auto const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
         auto const type = get_btype<DataType>();
         auto const code = reshape_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
         if (isFailure(code)) {
             return code;
         }
 
-        DataType * d = data();
-        for (auto & i1 : items) {
-            assert(i1.size() == dim_2d);
-            for (auto & i2 : *i1) {
-                assert(i2.size() == dim_3d);
-                for (auto & i3 : *i2) {
-                    *d = static_cast<DataType>(*i3);
-                    ++d;
+        if (is_device_cpu() && type == device_cpu()) {
+            auto * d = cast<DataType>();
+            for (auto & i1 : items) {
+                assert(i1.size() == dim_2d);
+                for (auto & i2 : i1) {
+                    assert(i2.size() == dim_3d);
+                    for (auto & i3 : i2) {
+                        *d = static_cast<DataType>(i3);
+                        ++d;
+                    }
+                }
+            }
+        } else {
+            ui32 offset = 0;
+            for (auto & i1 : items) {
+                assert(i1.size() == dim_2d);
+                for (auto & i2 : i1) {
+                    assert(i2.size() == dim_3d);
+                    for (auto & i3 : i2) {
+                        libtbag::box::details::box_data_set(get(), &i3, type, device, ext, offset);
+                        ++offset;
+                    }
                 }
             }
         }
         return E_SUCCESS;
+    }
+
+    template <typename T>
+    Err assign(init1d_t<T> const & items)
+    {
+        return assign(device_cpu(), nullptr, items);
+    }
+
+    template <typename T>
+    Err assign(init2d_t<T> const & items)
+    {
+        return assign(device_cpu(), nullptr, items);
+    }
+
+    template <typename T>
+    Err assign(init3d_t<T> const & items)
+    {
+        return assign(device_cpu(), nullptr, items);
     }
 
 public:
@@ -528,11 +578,11 @@ public:
 
     template <typename T>
     inline T * cast() TBAG_NOEXCEPT
-    { return data(); }
+    { return static_cast<T*>(data()); }
 
     template <typename T>
     inline T const * cast() const TBAG_NOEXCEPT
-    { return data(); }
+    { return static_cast<T const *>(data()); }
 
     template <typename T>
     inline typename libtbag::remove_cr<T>::type & offset(ui32 i) TBAG_NOEXCEPT

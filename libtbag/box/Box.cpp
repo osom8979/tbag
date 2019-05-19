@@ -41,33 +41,33 @@ Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
     // EMPTY.
 }
 
-Box::Box(btype type, bdev device, ui64 const * ext, ui32 rank, ...) : Box()
-{
-    assert(_data);
-
-    va_list ap;
-    va_start(ap, rank);
-    auto const CODE = reshape_vargs(type, device, ext, rank, ap);
-    va_end(ap);
-
-    if (isFailure(CODE)) {
-        throw ErrException(CODE);
-    }
-}
-
-Box::Box(btype type, ui32 rank, ...) : Box()
-{
-    assert(_data);
-
-    va_list ap;
-    va_start(ap, rank);
-    auto const CODE = reshape_vargs(type, rank, ap);
-    va_end(ap);
-
-    if (isFailure(CODE)) {
-        throw ErrException(CODE);
-    }
-}
+//Box::Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...) : Box()
+//{
+//    assert(_data);
+//
+//    va_list ap;
+//    va_start(ap, rank);
+//    auto const CODE = reshape_vargs(type, device, ext, rank, ap);
+//    va_end(ap);
+//
+//    if (isFailure(CODE)) {
+//        throw ErrException(CODE);
+//    }
+//}
+//
+//Box::Box(reshape_t, btype type, ui32 rank, ...) : Box()
+//{
+//    assert(_data);
+//
+//    va_list ap;
+//    va_start(ap, rank);
+//    auto const CODE = reshape_vargs(type, rank, ap);
+//    va_end(ap);
+//
+//    if (isFailure(CODE)) {
+//        throw ErrException(CODE);
+//    }
+//}
 
 Box::Box(Box const & obj) TBAG_NOEXCEPT : Box(nullptr)
 {
