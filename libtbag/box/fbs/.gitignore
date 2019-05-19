@@ -1,0 +1,5 @@
+# GIT IGNORE FILE.
+
+*_generated.h
+*_d2s.h
+

@@ -1,0 +1,44 @@
+// tbag packet protocols.
+
+namespace libtbag.box.fbs;
+
+table  si8s { arr : [byte]  ; }
+table si16s { arr : [short] ; }
+table si32s { arr : [int]   ; }
+table si64s { arr : [long]  ; }
+table  ui8s { arr : [ubyte] ; }
+table ui16s { arr : [ushort]; }
+table ui32s { arr : [uint]  ; }
+table ui64s { arr : [ulong] ; }
+table fp32s { arr : [float] ; }
+table fp64s { arr : [double]; }
+
+union anys
+{
+     si8s,
+    si16s,
+    si32s,
+    si64s,
+     ui8s,
+    ui16s,
+    ui32s,
+    ui64s,
+    fp32s,
+    fp64s,
+}
+
+table box_fbs
+{
+    type   : short;
+    device : short;
+    ext0   : long;
+    ext1   : long;
+    ext2   : long;
+    ext3   : long;
+    data   : anys;
+    dims   : [uint];
+    info   : string;
+}
+
+root_type box_fbs;
+
