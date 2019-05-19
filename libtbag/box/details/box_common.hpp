@@ -237,6 +237,7 @@ TBAG_API char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
 TBAG_API void   box_info_free(char * info) TBAG_NOEXCEPT;
 TBAG_API bool   box_info_assign(char * dest, ui32 dest_size, char const * src, ui32 src_size) TBAG_NOEXCEPT;
 TBAG_API bool   box_info_assign(char * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT;
+TBAG_API bool   box_info_checked_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
 TBAG_API void       * box_data_ptr_offset(box_data       * box, ui32 offset) TBAG_NOEXCEPT;
 TBAG_API void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT;

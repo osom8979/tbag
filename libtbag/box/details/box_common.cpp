@@ -413,6 +413,53 @@ bool box_info_assign(char * dest, ui32 dest_size, char const * src) TBAG_NOEXCEP
     return box_info_assign(dest, dest_size, src, strlen(src));
 }
 
+bool box_info_checked_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+{
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    if (src->info == nullptr) {
+        if (dest->info) {
+            box_info_free(dest->info);
+            dest->info = nullptr;
+        }
+        dest->total_info_byte = 0;
+        dest->info_size = 0;
+        return true;
+    }
+
+    assert(src->info != nullptr);
+    assert(src->total_info_byte >= 1);
+    assert(src->info_size >= 1);
+    assert(src->info_size <= src->total_info_byte);
+
+    if (dest->info == nullptr) {
+        box_info_malloc(src->total_info_byte);
+        dest->total_info_byte = src->total_info_byte;
+        dest->info_size = 0;
+    } else {
+        assert(dest->info != nullptr);
+        if (dest->total_info_byte < src->info_size) {
+            box_info_free(dest->info);
+            if (box_info_malloc(src->total_info_byte)) {
+                dest->total_info_byte = src->total_info_byte;
+                dest->info_size = 0;
+            } else {
+                dest->total_info_byte = 0;
+                dest->info_size = 0;
+                return false;
+            }
+        }
+    }
+
+    assert(dest->info != nullptr);
+    assert(dest->total_info_byte >= src->info_size);
+    auto const RESULT = box_info_assign(dest->info, dest->total_info_byte, src->info, src->info_size);
+    if (RESULT) {
+        dest->info_size = src->info_size;
+    }
+    return RESULT;
+}
+
 void * box_data_ptr_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
 {
     assert(box != nullptr);

@@ -124,3 +124,25 @@ TEST(BoxTest, Assign)
     ASSERT_EQ(61, b3.at<si32>(1, 2, 1, 0));
 }
 
+TEST(BoxTest, AsType)
+{
+    Box b0 = {10, 20};
+    Box b1 = b0.asType<double>();
+
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_si32());
+    ASSERT_EQ(1, b0.rank());
+    ASSERT_EQ(2, b0.size());
+    ASSERT_EQ(2, b0.dim(0));
+    ASSERT_EQ(10, b0.at<si32>(0));
+    ASSERT_EQ(20, b0.at<si32>(1));
+
+    ASSERT_TRUE(b1.is_device_cpu());
+    ASSERT_TRUE(b1.is_fp64());
+    ASSERT_EQ(1, b1.rank());
+    ASSERT_EQ(2, b1.size());
+    ASSERT_EQ(2, b1.dim(0));
+    ASSERT_EQ(10.0, b1.at<fp64>(0));
+    ASSERT_EQ(20.0, b1.at<fp64>(1));
+}
+

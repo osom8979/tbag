@@ -356,6 +356,9 @@ public:
     inline ui32 const * dims() const TBAG_NOEXCEPT
     { return _data->dims; }
 
+    inline ui32 dims_capacity() const TBAG_NOEXCEPT
+    { return _data->total_dims_byte; }
+
     inline ui32 rank() const TBAG_NOEXCEPT
     { return _data->rank; }
 
@@ -432,6 +435,24 @@ public:
         return shape_args(get_btype<typename libtbag::remove_cr<T>::type>(),
                           libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
                           std::forward<Args>(args) ...);
+    }
+
+public:
+    Err copyFromData(Box const & box);
+    Err copyToData(Box & box) const;
+
+public:
+    Err copyFromInfo(Box const & box);
+    Err copyToInfo(Box & box) const;
+
+public:
+    Box clone() const;
+    Box asType(btype type) const;
+
+    template <typename T>
+    Box asType() const
+    {
+        return asType(get_btype<typename libtbag::remove_cr<T>::type>());
     }
 
 public:

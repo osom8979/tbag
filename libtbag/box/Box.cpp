@@ -163,6 +163,54 @@ Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
     return result;
 }
 
+Err Box::copyFromData(Box const & box)
+{
+    return box_data_copy(get(), box.get());
+}
+
+Err Box::copyToData(Box & box) const
+{
+    return box.copyFromData(*this);
+}
+
+Err Box::copyFromInfo(Box const & box)
+{
+    return box_info_checked_copy(get(), box.get()) ? E_SUCCESS : E_ECOPY;
+}
+
+Err Box::copyToInfo(Box & box) const
+{
+    return box.copyFromInfo(*this);
+}
+
+Box Box::clone() const
+{
+    Box result;
+    auto const CODE = box_clone(result.get(), get());
+    if (isFailure(CODE)) {
+        return Box(nullptr);
+    }
+    return result;
+}
+
+Box Box::asType(btype type) const
+{
+    Box result;
+    auto code = box_malloc_copy_dims(result.get(), type, device(), ext(), dims(), dims_capacity(), rank());
+    if (isFailure(code)) {
+        return Box(nullptr);
+    }
+    code = result.copyFromData(*this);
+    if (isFailure(code)) {
+        return Box(nullptr);
+    }
+    code = result.copyFromInfo(*this);
+    if (isFailure(code)) {
+        return Box(nullptr);
+    }
+    return result;
+}
+
 } // namespace box
 
 // --------------------
