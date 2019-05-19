@@ -306,6 +306,15 @@ public:
         }
     }
 
+    template <typename T>
+    Box(std::initializer_list< std::initializer_list< std::initializer_list< std::initializer_list<T> > > > const & items) : Box()
+    {
+        auto const CODE = assign<T>(items);
+        if (isFailure(CODE)) {
+            throw ErrException(CODE);
+        }
+    }
+
 public:
     Box & operator =(Box const & obj) TBAG_NOEXCEPT;
     Box & operator =(Box && obj) TBAG_NOEXCEPT;
@@ -429,9 +438,11 @@ public:
     template <typename T>
     using init1d_t = std::initializer_list<T>;
     template <typename T>
-    using init2d_t = std::initializer_list< std::initializer_list<T> >;
+    using init2d_t = std::initializer_list< init1d_t<T> >;
     template <typename T>
-    using init3d_t = std::initializer_list< std::initializer_list< std::initializer_list<T> > >;
+    using init3d_t = std::initializer_list< init2d_t<T> >;
+    template <typename T>
+    using init4d_t = std::initializer_list< init3d_t<T> >;
 
     template <typename T>
     Err assign(bdev device, ui64 const * ext, init1d_t<T> const & items)
@@ -536,22 +547,60 @@ public:
     }
 
     template <typename T>
-    Err assign(init1d_t<T> const & items)
+    Err assign(bdev device, ui64 const * ext, init4d_t<T> const & items)
     {
-        return assign(device_cpu(), nullptr, items);
+        using DataType = typename libtbag::remove_cr<T>::type;
+        auto const dim_1d = static_cast<ui32>(items.size());
+        auto const dim_2d = static_cast<ui32>(items.begin()->size());
+        auto const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
+        auto const dim_4d = static_cast<ui32>(items.begin()->begin()->begin()->size());
+        auto const type = get_btype<DataType>();
+        auto const code = reshape_args(type, device, ext, 4, dim_1d, dim_2d, dim_3d, dim_4d);
+        if (isFailure(code)) {
+            return code;
+        }
+
+        if (is_device_cpu() && type == device_cpu()) {
+            auto * d = cast<DataType>();
+            for (auto & i1 : items) {
+                assert(i1.size() == dim_2d);
+                for (auto & i2 : i1) {
+                    assert(i2.size() == dim_3d);
+                    for (auto & i3 : i2) {
+                        assert(i3.size() == dim_4d);
+                        for (auto & i4 : i3) {
+                            *d = static_cast<DataType>(i4);
+                            ++d;
+                        }
+                    }
+                }
+            }
+        } else {
+            ui32 offset = 0;
+            for (auto & i1 : items) {
+                assert(i1.size() == dim_2d);
+                for (auto & i2 : i1) {
+                    assert(i2.size() == dim_3d);
+                    for (auto & i3 : i2) {
+                        assert(i3.size() == dim_4d);
+                        for (auto & i4 : i3) {
+                            libtbag::box::details::box_data_set(get(), &i4, type, device, ext, offset);
+                            ++offset;
+                        }
+                    }
+                }
+            }
+        }
+        return E_SUCCESS;
     }
 
-    template <typename T>
-    Err assign(init2d_t<T> const & items)
-    {
-        return assign(device_cpu(), nullptr, items);
-    }
-
-    template <typename T>
-    Err assign(init3d_t<T> const & items)
-    {
-        return assign(device_cpu(), nullptr, items);
-    }
+public:
+    // clang-format off
+    template <typename T> Err assign(init1d_t<T> const & items) { return assign(device_cpu(), nullptr, items); }
+    template <typename T> Err assign(init2d_t<T> const & items) { return assign(device_cpu(), nullptr, items); }
+    template <typename T> Err assign(init3d_t<T> const & items) { return assign(device_cpu(), nullptr, items); }
+    template <typename T> Err assign(init4d_t<T> const & items) { return assign(device_cpu(), nullptr, items); }
+    // clang-format on
 
 public:
     inline bool isSupportType() const TBAG_NOEXCEPT

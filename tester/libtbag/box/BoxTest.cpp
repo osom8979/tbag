@@ -81,5 +81,28 @@ TEST(BoxTest, Assign)
     ASSERT_EQ(40.0f, b2.at<fp64>(1, 1, 0));
     ASSERT_EQ(50.0f, b2.at<fp64>(2, 0, 0));
     ASSERT_EQ(60.0f, b2.at<fp64>(2, 1, 0));
+
+    Box b3 = {{{{10},{20}},{{30},{40}},{{50},{60}}},
+              {{{11},{21}},{{31},{41}},{{51},{61}}}};
+    ASSERT_TRUE(b3.is_device_cpu());
+    ASSERT_TRUE(b3.is_si32());
+    ASSERT_EQ(4, b3.rank());
+    ASSERT_EQ(12, b3.size());
+    ASSERT_EQ(2, b3.dim(0));
+    ASSERT_EQ(3, b3.dim(1));
+    ASSERT_EQ(2, b3.dim(2));
+    ASSERT_EQ(1, b3.dim(3));
+    ASSERT_EQ(10, b3.at<si32>(0, 0, 0, 0));
+    ASSERT_EQ(20, b3.at<si32>(0, 0, 1, 0));
+    ASSERT_EQ(30, b3.at<si32>(0, 1, 0, 0));
+    ASSERT_EQ(40, b3.at<si32>(0, 1, 1, 0));
+    ASSERT_EQ(50, b3.at<si32>(0, 2, 0, 0));
+    ASSERT_EQ(60, b3.at<si32>(0, 2, 1, 0));
+    ASSERT_EQ(11, b3.at<si32>(1, 0, 0, 0));
+    ASSERT_EQ(21, b3.at<si32>(1, 0, 1, 0));
+    ASSERT_EQ(31, b3.at<si32>(1, 1, 0, 0));
+    ASSERT_EQ(41, b3.at<si32>(1, 1, 1, 0));
+    ASSERT_EQ(51, b3.at<si32>(1, 2, 0, 0));
+    ASSERT_EQ(61, b3.at<si32>(1, 2, 1, 0));
 }
 
