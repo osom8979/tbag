@@ -25,6 +25,7 @@
 #include <cassert>
 
 #include <type_traits>
+#include <initializer_list>
 #include <memory>
 
 // -------------------
@@ -270,6 +271,22 @@ public:
                   libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
                   std::forward<Args>(args) ...)
     { /* EMPTY. */ }
+
+public:
+    template <typename T>
+    Box(std::initializer_list<T> const & items)
+    {
+    }
+
+    template <typename T>
+    Box(std::initializer_list<std::initializer_list<T> > const & items)
+    {
+    }
+
+    template <typename T>
+    Box(std::initializer_list<std::initializer_list<std::initializer_list<T> > > const & items)
+    {
+    }
 
 public:
     Box & operator =(Box const & obj) TBAG_NOEXCEPT;

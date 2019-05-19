@@ -433,20 +433,30 @@ bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCE
     return (min <= COMPARE_AND(pivot) <= max);
 }
 
-bool box_cursor_index_check(int begin, int end, int step) TBAG_NOEXCEPT
+int box_index_abs(int dim_size, int index) TBAG_NOEXCEPT
+{
+    assert(dim_size >= 1);
+    if (index >= 0) {
+        assert(index < dim_size);
+        return index;
+    }
+    assert(index < 0);
+    assert(-index <= dim_size);
+    return dim_size + index;
+}
+
+bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT
 {
     if (begin < end) {
         if (step <= 0) {
             return false;
         }
-        assert(step > 0);
     } else {
         if (step >= 0) {
             return false;
         }
-        assert(step < 0);
     }
-    return (abs(end - begin) % abs(step) == 0);
+    return true;
 }
 
 bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
@@ -473,7 +483,7 @@ bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_i
     cursor->step = step;
     cursor->index = index;
 
-    return box_cursor_index_check(begin, end, step);
+    return box_index_check(begin, end, step);
 }
 
 bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,

@@ -132,3 +132,13 @@ TEST(box_common_test, box_dim_get_stride)
     ASSERT_EQ(1, box_dim_get_stride(dims3, 4, 3));
 }
 
+TEST(box_common_test, box_index_abs)
+{
+    ASSERT_EQ(0, box_index_abs(10, 0));
+    ASSERT_EQ(1, box_index_abs(10, 1));
+    ASSERT_EQ(5, box_index_abs(10, 5));
+    ASSERT_EQ(9, box_index_abs(10, -1));
+    ASSERT_EQ(8, box_index_abs(10, -2));
+    ASSERT_EQ(0, box_index_abs(10, -10));
+}
+

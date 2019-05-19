@@ -266,7 +266,9 @@ struct box_cursor
 
 TBAG_CONSTEXPR int const BOX_CURSOR_INIT_INDEX = -1;
 
-TBAG_API bool box_cursor_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
+TBAG_API int  box_index_abs(int dim_size, int index) TBAG_NOEXCEPT;
+TBAG_API bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
+
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
                               int stride, int begin, int end, int step, int index) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data * box, void * data, int dim_index,
