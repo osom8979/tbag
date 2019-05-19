@@ -14,6 +14,8 @@
 #include <libtbag/box/details/box_cuda.hpp>
 #include <libtbag/box/details/box_fbs.hpp>
 
+#include <cstring>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -191,11 +193,30 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
     if (box->data == nullptr && box->dims == nullptr) {
         return box_malloc_vargs(box, type, device, ext, rank, ap);
     }
-    if (box->device != device) {
-        box_free(box);
+
+    ui64 resize_ext[BOX_EXT_SIZE] = {0,};
+    if (ext) {
+        memcpy(resize_ext, ext, sizeof(ui64)*BOX_EXT_SIZE);
+    }
+    if (box->device != device ||
+            box->ext[0] != resize_ext[0] ||
+            box->ext[1] != resize_ext[1] ||
+            box->ext[2] != resize_ext[2] ||
+            box->ext[3] != resize_ext[3]) {
+        if (box->data) {
+            box_data_free(box->device, box->data);
+        }
+        if (box->dims) {
+            box_dim_free(box->dims);
+        }
         return box_malloc_vargs(box, type, device, ext, rank, ap);
     }
+
     assert(box->device == device);
+    assert(box->ext[0] == resize_ext[0]);
+    assert(box->ext[1] == resize_ext[1]);
+    assert(box->ext[2] == resize_ext[2]);
+    assert(box->ext[3] == resize_ext[3]);
 
     if (box_dim_is_equals_vargs(box->dims, box->rank, rank, ap)) {
         return E_SUCCESS;
@@ -242,6 +263,7 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
     } else {
         box->size = SIZE;
     }
+    box->type = type;
     assert(box->total_data_byte >= TOTAL_BYTE);
     assert(box->data != nullptr);
     assert(box->size == SIZE);

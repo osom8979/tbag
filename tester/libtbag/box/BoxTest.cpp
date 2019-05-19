@@ -42,6 +42,24 @@ TEST(BoxTest, Default)
     ASSERT_EQ(b5_data, b6_data);
 }
 
+TEST(BoxTest, Reshape)
+{
+    auto b0 = Box::shape<int>(2, 3);
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_si32());
+    ASSERT_EQ(2, b0.rank());
+    ASSERT_EQ(2*3, b0.size());
+    ASSERT_EQ(2, b0.dim(0));
+    ASSERT_EQ(3, b0.dim(1));
+
+    b0.reshape<double>(2);
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_fp64());
+    ASSERT_EQ(1, b0.rank());
+    ASSERT_EQ(2, b0.size());
+    ASSERT_EQ(2, b0.dim(0));
+}
+
 TEST(BoxTest, Assign)
 {
     Box b0 = {10, 20};

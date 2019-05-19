@@ -41,34 +41,6 @@ Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
     // EMPTY.
 }
 
-//Box::Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...) : Box()
-//{
-//    assert(_data);
-//
-//    va_list ap;
-//    va_start(ap, rank);
-//    auto const CODE = reshape_vargs(type, device, ext, rank, ap);
-//    va_end(ap);
-//
-//    if (isFailure(CODE)) {
-//        throw ErrException(CODE);
-//    }
-//}
-//
-//Box::Box(reshape_t, btype type, ui32 rank, ...) : Box()
-//{
-//    assert(_data);
-//
-//    va_list ap;
-//    va_start(ap, rank);
-//    auto const CODE = reshape_vargs(type, rank, ap);
-//    va_end(ap);
-//
-//    if (isFailure(CODE)) {
-//        throw ErrException(CODE);
-//    }
-//}
-
 Box::Box(Box const & obj) TBAG_NOEXCEPT : Box(nullptr)
 {
     (*this) = obj;
@@ -124,11 +96,6 @@ Err Box::reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
     return CODE;
 }
 
-Err Box::reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
-{
-    return box_resize_vargs(_data.get(), type, device, ext, rank, ap);
-}
-
 Err Box::reshape_args(btype type, ui32 rank, ...)
 {
     va_list ap;
@@ -136,6 +103,11 @@ Err Box::reshape_args(btype type, ui32 rank, ...)
     auto const CODE = reshape_vargs(type, rank, ap);
     va_end(ap);
     return CODE;
+}
+
+Err Box::reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
+{
+    return box_resize_vargs(_data.get(), type, device, ext, rank, ap);
 }
 
 Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
@@ -149,6 +121,46 @@ Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
         reshape_ext = ext();
     }
     return reshape_vargs(type, reshape_device, reshape_ext, rank, ap);
+}
+
+Box Box::shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
+{
+    va_list ap;
+    va_start(ap, rank);
+    auto result = shape_vargs(type, device, ext, rank, ap);
+    va_end(ap);
+    return result;
+}
+
+Box Box::shape_args(btype type, ui32 rank, ...)
+{
+    va_list ap;
+    va_start(ap, rank);
+    auto result = shape_vargs(type, rank, ap);
+    va_end(ap);
+    return result;
+}
+
+Box Box::shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
+{
+    Box result;
+    assert(result);
+    auto const CODE = result.reshape_vargs(type, device, ext, rank, ap);
+    if (isFailure(CODE)) {
+        return Box(nullptr);
+    }
+    return result;
+}
+
+Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
+{
+    Box result;
+    assert(result);
+    auto const CODE = result.reshape_vargs(type, rank, ap);
+    if (isFailure(CODE)) {
+        return Box(nullptr);
+    }
+    return result;
 }
 
 } // namespace box

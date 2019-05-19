@@ -245,38 +245,15 @@ public:
     TBAG_CONSTEXPR static btype const device_glsl() TBAG_NOEXCEPT { return BOX_DEVICE_GLSL; }
     TBAG_CONSTEXPR static btype const device_fbs () TBAG_NOEXCEPT { return BOX_DEVICE_FBS ; }
 
-public:
-    struct reshape_t { /* EMPTY. */ };
-
-public:
-    TBAG_CONSTEXPR static reshape_t const reshape_op = reshape_t{};
-
 private:
     SharedBoxData _data;
 
 public:
     Box();
     explicit Box(std::nullptr_t) TBAG_NOEXCEPT;
-//    explicit Box(reshape_t, btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-//    explicit Box(reshape_t, btype type, ui32 rank, ...);
     Box(Box const & obj) TBAG_NOEXCEPT;
     Box(Box && obj) TBAG_NOEXCEPT;
     ~Box();
-
-public:
-//    template <typename T, typename ... Args>
-//    explicit Box(reshape_t, bdev device, ui64 const * ext, Args && ... args)
-//            : Box(get_btype<typename libtbag::remove_cr<T>::type>(), device, ext,
-//                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
-//                  std::forward<Args>(args) ...)
-//    { /* EMPTY. */ }
-//
-//    template <typename T, typename ... Args>
-//    explicit Box(reshape_t, Args && ... args)
-//            : Box(get_btype<typename libtbag::remove_cr<T>::type>(),
-//                  libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
-//                  std::forward<Args>(args) ...)
-//    { /* EMPTY. */ }
 
 public:
     template <typename T>
@@ -416,12 +393,12 @@ public:
 
 public:
     Err reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-    Err reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
     Err reshape_args(btype type, ui32 rank, ...);
+    Err reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
     Err reshape_vargs(btype type, ui32 rank, va_list ap);
 
     template <typename T, typename ... Args>
-    Err reshape(bdev device, ui64 const * ext, Args && ... args) TBAG_NOEXCEPT
+    Err reshapeEx(bdev device, ui64 const * ext, Args && ... args) TBAG_NOEXCEPT
     {
         auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
         return reshape_args(get_btype<T>(), device, ext, n, std::forward<Args>(args) ...);
@@ -432,6 +409,29 @@ public:
     {
         auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
         return reshape_args(get_btype<T>(), n, std::forward<Args>(args) ...);
+    }
+
+public:
+    static Box shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
+    static Box shape_args(btype type, ui32 rank, ...);
+    static Box shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
+    static Box shape_vargs(btype type, ui32 rank, va_list ap);
+
+    template <typename T, typename ... Args>
+    static Box shapeEx(bdev device, ui64 const * ext, Args && ... args)
+    {
+        return shape_args(get_btype<typename libtbag::remove_cr<T>::type>(),
+                          device, ext,
+                          libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+                          std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    static Box shape(Args && ... args)
+    {
+        return shape_args(get_btype<typename libtbag::remove_cr<T>::type>(),
+                          libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+                          std::forward<Args>(args) ...);
     }
 
 public:
