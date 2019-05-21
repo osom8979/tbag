@@ -32,27 +32,32 @@ Linux)
     ;;
 esac
 
-if [[ ! -h "liblua$LIB_SUFFIX" ]]; then
-    ln -s "libtbag$LIB_SUFFIX" "liblua$LIB_SUFFIX"
+if [[ ! -f "$PREFIX/bin/tpot$EXE_SUFFIX" ]]; then
+    echo "Not found $PREFIX/bin/tpot$EXE_SUFFIX"
+    exit 1
 fi
-if [[ ! -h "luajit" ]]; then
-    ln -s "tpot" "luajit"
-fi
-if [[ ! -d "$WORKING_DIR/storage/luarocks" ]]; then
-    mkdir -p "$WORKING_DIR/storage/luarocks"
+if [[ ! -f "$PREFIX/lib/libtbag$LIB_SUFFIX" ]]; then
+    echo "Not found $PREFIX/lib/libtbag$LIB_SUFFIX"
+    exit 1
 fi
 
-INSTALL_DIR="$WORKING_DIR/storage/luarocks"
-INCLUDE_DIR="$WORKING_DIR/external/local/include"
-LIBRARY_DIR="$WORKING_DIR"
+if [[ ! -h "$PREFIX/lib/liblua$LIB_SUFFIX" ]]; then
+    ln -s "$PREFIX/lib/libtbag$LIB_SUFFIX" "$PREFIX/lib/liblua$LIB_SUFFIX"
+fi
+if [[ ! -h "$PREFIX/bin/luajit$EXE_SUFFIX" ]]; then
+    ln -s "$PREFIX/bin/tpot$EXE_SUFFIX" "$PREFIX/bin/luajit$EXE_SUFFIX"
+fi
+
+INSTALL_DIR=$LUAROCKS_PREFIX
+LIBRARY_DIR=$PREFIX/lib
 
 cd "$SOURCE_DIR"
 ./configure --prefix=$INSTALL_DIR \
-    --with-lua=$WORKING_DIR \
-    --with-lua-bin=$WORKING_DIR \
-    --with-lua-include=$INCLUDE_DIR \
-    --with-lua-lib=$LIBRARY_DIR \
-    --with-lua-interpreter=tpot \
+    --with-lua=$PREFIX \
+    --with-lua-bin=$PREFIX/bin \
+    --with-lua-include=$PREFIX/include \
+    --with-lua-lib=$PREFIX/lib \
+    --with-lua-interpreter=$PREFIX/bin/luajit$EXE_SUFFIX \
     --rocks-tree=$INSTALL_DIR \
     --force-config
 make

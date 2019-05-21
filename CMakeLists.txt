@@ -51,6 +51,8 @@ tbag_config__set_option (DISABLE_TDLOG                OFF) ## Disable tbag defau
 tbag_config__set_option (DISABLE_LUAJIT_EXE_FLAGS     OFF) ## Disable LuaJIT Embedding flags if apple.
 tbag_config__set_option (DISABLE_DEFAULT_TPOT_LUAJIT  OFF) ## Do not use the default TpoT mode as LuaJIT.
 
+tbag_config__set_option (INSTALL_WITH_FAKE_LUAJIT ON) ## Install fake LuaJIT.
+
 ## Configure settings.
 if (USE_CCACHE)
     tbag_config__use_ccache ()
@@ -203,6 +205,22 @@ tbag_project (tea-bag
 ## libtbag-cmake build packages.
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
          DESTINATION "share/libtbag")
+
+if (INSTALL_WITH_FAKE_LUAJIT)
+    install (CODE "execute_process (COMMAND ${CMAKE_COMMAND} -E create_symlink
+                  \"${CMAKE_INSTALL_PREFIX}/bin/tpot${CMAKE_EXECUTABLE_SUFFIX}\"
+                  \"${CMAKE_INSTALL_PREFIX}/bin/luajit${CMAKE_EXECUTABLE_SUFFIX}\")")
+    install (CODE "execute_process (COMMAND ${CMAKE_COMMAND} -E create_symlink
+                  \"${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}tbag${CMAKE_SHARED_LIBRARY_SUFFIX}\"
+                  \"${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}lua${CMAKE_SHARED_LIBRARY_SUFFIX}\")")
+    install (FILES "${PROJECT_BINARY_DIR}/external/local/include/lauxlib.h"
+                   "${PROJECT_BINARY_DIR}/external/local/include/lua.h"
+                   "${PROJECT_BINARY_DIR}/external/local/include/lua.hpp"
+                   "${PROJECT_BINARY_DIR}/external/local/include/luaconf.h"
+                   "${PROJECT_BINARY_DIR}/external/local/include/luajit.h"
+                   "${PROJECT_BINARY_DIR}/external/local/include/lualib.h"
+             DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+endif ()
 
 ## Packaging.
 set (CPACK_SYSTEM_NAME                  "${CMAKE_SYSTEM_NAME}")

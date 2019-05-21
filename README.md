@@ -93,6 +93,7 @@ The main build options you will want to configure are as follows:
 * `DISABLE_TDLOG`: Disable tbag default logger.
 * `DISABLE_LUAJIT_EXE_FLAGS`: Disable LuaJIT Embedding flags if apple.
 * `DISABLE_DEFAULT_TPOT_LUAJIT`: Do not use the default TpoT mode as LuaJIT.
+* `INSTALL_WITH_FAKE_LUAJIT`: Install fake LuaJIT.
 
 ## Tpot
 
