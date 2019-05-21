@@ -503,8 +503,9 @@ bool Storage::appendLuaRocksPath()
 {
     auto const LUA_SHORT_VERSION = _impl->lua.getLuaVersion().toShortString();
     auto const PATH = asset().get(LAYOUT_LUAROCKS) / "share" / "lua" / LUA_SHORT_VERSION;
-    auto const CANONICAL_PATH = (PATH / LUA_PATH_MARK ".lua").getCanonicalString();
-    return _impl->lua.appendLuaPath(CANONICAL_PATH);
+    auto const CANONICAL_PATH1 = (PATH / LUA_PATH_MARK ".lua").getCanonicalString();
+    auto const CANONICAL_PATH2 = (PATH / LUA_PATH_MARK / "init.lua").getCanonicalString();
+    return _impl->lua.appendLuaPath(CANONICAL_PATH1) && _impl->lua.appendLuaPath(CANONICAL_PATH2);
 }
 
 bool Storage::appendLuaRocksCPath()
