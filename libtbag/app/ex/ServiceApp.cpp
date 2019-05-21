@@ -119,13 +119,35 @@ void ServiceApp::installVerboseOptions()
 
 void ServiceApp::installConfigOptions(ConfigScope scope)
 {
+    installConfigOptions(scope, std::string());
+}
+
+void ServiceApp::installConfigOptions(ConfigScope scope, std::string const & global_path)
+{
+    installConfigOptions(scope, std::string(), global_path);
+}
+
+void ServiceApp::installConfigOptions(ConfigScope scope, std::string const & home_path, std::string const & global_path)
+{
+    installConfigOptions(scope, std::string(), home_path, global_path);
+}
+
+void ServiceApp::installConfigOptions(ConfigScope scope,
+                                      std::string const & exe_path,
+                                      std::string const & home_path,
+                                      std::string const & global_path)
+{
     using namespace libtbag::string;
     auto config = getConfig().lock();
     assert(static_cast<bool>(config));
 
-    std::string const GLOBAL_PATH = config->getFilePath(DefaultXmlModel::Scope::GLOBAL).getString();
-    std::string const   HOME_PATH = config->getFilePath(DefaultXmlModel::Scope::HOME  ).getString();
-    std::string const  LOCAL_PATH = config->getFilePath(DefaultXmlModel::Scope::EXE   ).getString();
+    auto const GLOBAL = config->getFilePath(DefaultXmlModel::Scope::GLOBAL).getString();
+    auto const HOME   = config->getFilePath(DefaultXmlModel::Scope::HOME).getString();
+    auto const LOCAL  = config->getFilePath(DefaultXmlModel::Scope::EXE).getString();
+
+    std::string const GLOBAL_PATH = global_path.empty() ? GLOBAL : global_path;
+    std::string const HOME_PATH = home_path.empty() ? HOME : home_path;
+    std::string const LOCAL_PATH = exe_path.empty() ? LOCAL : exe_path;
 
     std::string const DEFAULT_DECORATE = " [DEFAULT]";
     std::string global_help = "Use the global resource. The path is ";

@@ -52,16 +52,27 @@ TpotMain::TpotMain(int argc, char ** argv, char ** envs)
     // EMPTY.
 }
 
-TpotMain::TpotMain(std::string const & service_name, std::string const & config_name, std::string const & synopsis,
+TpotMain::TpotMain(std::string const & service_name,
+                   std::string const & config_name,
+                   std::string const & synopsis,
                    int argc, char ** argv, char ** envs)
         : TpotMain(service_name, config_name, synopsis, libtbag::util::getTbagVersion(),
-                   DefaultApp::ConfigScope::EXE, Pots(), std::string(), argc, argv, envs)
+                   DefaultApp::ConfigScope::EXE, std::string(), std::string(), std::string(),
+                   Pots(), std::string(), argc, argv, envs)
 {
     // EMPTY.
 }
 
-TpotMain::TpotMain(std::string const & service_name, std::string const & config_name, std::string const & synopsis,
-                   Version const & version, DefaultApp::ConfigScope scope, Pots const & pots, std::string const & default_app,
+TpotMain::TpotMain(std::string const & service_name,
+                   std::string const & config_name,
+                   std::string const & synopsis,
+                   Version const & version,
+                   DefaultApp::ConfigScope scope,
+                   std::string const & local_scope_config_path,
+                   std::string const & home_scope_config_path,
+                   std::string const & global_scope_config_path,
+                   Pots const & pots,
+                   std::string const & default_app,
                    int argc, char ** argv, char ** envs)
         : _default_app(default_app)
 {
@@ -82,6 +93,9 @@ TpotMain::TpotMain(std::string const & service_name, std::string const & config_
     _params.service_name = service_name;
     _params.version = version;
     _params.scope = scope;
+    _params.local_scope_config_path = local_scope_config_path;
+    _params.home_scope_config_path = home_scope_config_path;
+    _params.global_scope_config_path = global_scope_config_path;
     _params.options_cb = std::bind(&TpotMain::onOptions, this, _1);
     _params.properties_cb = std::bind(&TpotMain::onInfo, this, _1);
     _params.std_signal = std::bind(&TpotMain::onTerminateSignal, this, _1);

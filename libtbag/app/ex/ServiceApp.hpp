@@ -120,6 +120,12 @@ protected:
     void installHelpOptions();
     void installVerboseOptions();
     void installConfigOptions(ConfigScope scope = ConfigScope::EXE);
+    void installConfigOptions(ConfigScope scope, std::string const & global_path);
+    void installConfigOptions(ConfigScope scope, std::string const & home_path, std::string const & global_path);
+    void installConfigOptions(ConfigScope scope,
+                              std::string const & exe_path,
+                              std::string const & home_path,
+                              std::string const & global_path);
 
     void installVersionOptions(Version const & version);
     void installVersionOptions(int major, int minor = 0, int patch = 0);

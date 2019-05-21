@@ -191,6 +191,9 @@ public:
          * Default config scope.
          */
         ConfigScope scope = ConfigScope::EXE;
+        std::string local_scope_config_path;
+        std::string home_scope_config_path;
+        std::string global_scope_config_path;
 
         /**
          * Edit command-line options.

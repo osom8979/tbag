@@ -206,7 +206,10 @@ public:
         }
 
         if (_params.install_config) {
-            installConfigOptions(_params.scope);
+            installConfigOptions(_params.scope,
+                                 _params.local_scope_config_path,
+                                 _params.home_scope_config_path,
+                                 _params.global_scope_config_path);
         }
 
         if (_params.install_help) {
