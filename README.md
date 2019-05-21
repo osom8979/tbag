@@ -50,6 +50,7 @@ Tea-bag is Third party extension utility project.
 - gperftools 2.7 (BSD 3-Clause license)
 - nng 1.1.1 (MIT license)
 - glfw 3.3 (zlib license)
+- wslay master-4a937cd (MIT license)
 
 ## Resources
 
