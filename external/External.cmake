@@ -531,4 +531,57 @@ else ()
 endif ()
 add_custom_target (wslay DEPENDS ${wslay_EXT_LIBRARIES})
 
+#########
+## H2O ##
+#########
+
+set (h2o_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/h2o")
+set (h2o_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (h2o_EXT_HEADER       "${h2o_EXT_INCLUDE_DIR}/h2o/h2o.h")
+set (h2o_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}h2o${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (h2o_EXT_LIBRARIES    "${h2o_EXT_STATIC_LIB}")
+exists_files (h2o_EXT_EXISTS ${h2o_EXT_LIBRARIES} ${h2o_EXT_HEADER})
+
+if (h2o_EXT_EXISTS)
+    message (STATUS "Skip external/h2o (Exists: ${h2o_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/h2o")
+    ExternalProject_Add (h2o_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${h2o_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DWITH_BUNDLED_SSL=OFF"
+                       "-DWITH_MRUBY=OFF"
+                       "-DZLIB_INCLUDE_DIRS=${zlib_EXT_INCLUDE_DIR}"
+                       "-DZLIB_LIBRARIES=${zlib_EXT_LIBRARIES}"
+                       "-DZLIB_FOUND=TRUE"
+                       "-DOPENSSL_FOUN=TRUE"
+                       "-DOPENSSL_INCLUDE_DIR=${ressl_EXT_INCLUDE_DIR}"
+                       "-DOPENSSL_CRYPTO_LIBRARY=${ressl_crypto_EXT_STATIC_LIB}"
+                       "-DOPENSSL_SSL_LIBRARY=${ressl_ssl_EXT_STATIC_LIB}"
+                       "-DOPENSSL_LIBRARIES=${ressl_EXT_LIBRARIES}"
+                       "-DOPENSSL_VERSION=${ressl_EXT_VERSION_STR}"
+                       "-DWSLAY_FOUND=TRUE"
+                       "-DWSLAY_INCLUDE_DIR=${wslay_EXT_INCLUDE_DIR}"
+                       "-DWSLAY_LIBRARIES=${wslay_EXT_LIBRARIES}"
+                       "-DLIBUV_FOUND=TRUE"
+                       "-DLIBUV_INCLUDE_DIR=${uv_EXT_INCLUDE_DIR}"
+                       "-DLIBUV_LIBRARIES=${uv_EXT_LIBRARIES}"
+            #--Output lh2oing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1
+            DEPENDS wslay zlib ressl uv)
+    fake_output_library (h2o_ext_output h2o_ext ${h2o_EXT_LIBRARIES})
+endif ()
+add_custom_target (h2o DEPENDS ${h2o_EXT_LIBRARIES})
+
 
