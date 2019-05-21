@@ -496,3 +496,39 @@ else ()
 endif ()
 add_custom_target (glfw DEPENDS ${glfw_EXT_LIBRARIES})
 
+###########
+## WSLAY ##
+###########
+
+set (wslay_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/wslay")
+set (wslay_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (wslay_EXT_HEADER       "${wslay_EXT_INCLUDE_DIR}/wslay/wslay.h")
+set (wslay_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}wslay${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (wslay_EXT_LIBRARIES    "${wslay_EXT_STATIC_LIB}")
+exists_files (wslay_EXT_EXISTS ${wslay_EXT_LIBRARIES} ${wslay_EXT_HEADER})
+
+if (wslay_EXT_EXISTS)
+    message (STATUS "Skip external/wslay (Exists: ${wslay_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/wslay")
+    ExternalProject_Add (wslay_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${wslay_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output lwslaying-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (wslay_ext_output wslay_ext ${wslay_EXT_LIBRARIES})
+endif ()
+add_custom_target (wslay DEPENDS ${wslay_EXT_LIBRARIES})
+
+
