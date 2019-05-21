@@ -63,6 +63,25 @@ public:
              int argc, char ** argv, char ** envs);
     virtual ~TpotMain();
 
+public:
+    template <typename PotT, typename Functor, typename ... Args>
+    static void insertDynamicPot(libtbag::tpot::TpotMain::Pots & pots, Functor func, Args && ... args)
+    {
+        auto pot = std::make_shared<libtbag::tpot::details::DynamicPot>(
+                PotT::name(),
+                PotT::remarks(),
+                PotT::help(),
+                std::bind(func, std::forward<Args>(args) ...));
+        pots.insert(std::make_pair(std::string(PotT::name()), pot));
+    }
+
+    template <typename PotT, typename ... Args>
+    static void insertBasePot(libtbag::tpot::TpotMain::Pots & pots, Args && ... args)
+    {
+        auto shared_pot = std::make_shared<PotT>(std::forward<Args>(args) ...);
+        pots.insert(std::make_pair(std::string(shared_pot->getName()), shared_pot));
+    }
+
 private:
     void createDefaultLogger();
 
