@@ -14,6 +14,7 @@
 
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/MainArguments.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -745,22 +746,15 @@ int LuaPot::onMain()
     }
     auto const ARGS_SIZE = original_args.size();
 
-    std::vector<char*> argv;
-    argv.push_back(&(arg0[0]));
-    for (std::size_t i = 0; i < ARGS_SIZE; ++i) {
-        argv.push_back(&(original_args[i][0]));
-    }
-    argv.push_back(nullptr);
-    assert(!argv.empty());
-
     if (!storage().lua().isInitialized()) {
         storage().lua().initDefault();
         tDLogN("LuaPot::onMain() The LuaPot app is forces a lua machine to initialize.");
     }
 
+    libtbag::string::MainArguments main_args(arg0, original_args);
     tDLogIfD(params().verbose && !original_args.empty(), "LuaPot::onMain() Passed arguments: {}",
              libtbag::string::mergeTokens(original_args));
-    return LuaPotBackend(static_cast<int>(argv.size()), argv.data(), params().storage->lua.state()).run();
+    return LuaPotBackend(main_args.argc(), main_args.argv(), params().storage->lua.state()).run();
 }
 
 } // namespace apps
