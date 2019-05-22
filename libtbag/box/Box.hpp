@@ -238,12 +238,11 @@ public:
     TBAG_CONSTEXPR static btype const type_fp32() TBAG_NOEXCEPT { return get_btype<fp32>(); }
     TBAG_CONSTEXPR static btype const type_fp64() TBAG_NOEXCEPT { return get_btype<fp64>(); }
 
-    TBAG_CONSTEXPR static btype const device_none() TBAG_NOEXCEPT { return BOX_DEVICE_NONE; }
-    TBAG_CONSTEXPR static btype const device_cpu () TBAG_NOEXCEPT { return BOX_DEVICE_CPU ; }
-    TBAG_CONSTEXPR static btype const device_cuda() TBAG_NOEXCEPT { return BOX_DEVICE_CUDA; }
-    TBAG_CONSTEXPR static btype const device_cl  () TBAG_NOEXCEPT { return BOX_DEVICE_CL  ; }
-    TBAG_CONSTEXPR static btype const device_glsl() TBAG_NOEXCEPT { return BOX_DEVICE_GLSL; }
-    TBAG_CONSTEXPR static btype const device_fbs () TBAG_NOEXCEPT { return BOX_DEVICE_FBS ; }
+    TBAG_CONSTEXPR static btype const device_none() TBAG_NOEXCEPT { return libtbag::box::details::BD_NONE; }
+    TBAG_CONSTEXPR static btype const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }
+    TBAG_CONSTEXPR static btype const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
+    TBAG_CONSTEXPR static btype const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }
+    TBAG_CONSTEXPR static btype const device_glsl() TBAG_NOEXCEPT { return libtbag::box::details::BD_GLSL; }
 
 private:
     SharedBoxData _data;
@@ -391,7 +390,6 @@ public:
     inline bool is_device_cuda() const TBAG_NOEXCEPT { return device() == device_cuda(); }
     inline bool is_device_cl  () const TBAG_NOEXCEPT { return device() == device_cl  (); }
     inline bool is_device_glsl() const TBAG_NOEXCEPT { return device() == device_glsl(); }
-    inline bool is_device_fbs () const TBAG_NOEXCEPT { return device() == device_fbs (); }
     // clang-format on
 
 public:

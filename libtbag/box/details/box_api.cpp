@@ -30,12 +30,11 @@ void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT
 
     // clang-format off
     switch (device) {
-    case BOX_DEVICE_CPU:  return box_cpu_malloc(byte);
-    case BOX_DEVICE_CUDA: /* TODO */ return nullptr;
-    case BOX_DEVICE_CL:   /* TODO */ return nullptr;
-    case BOX_DEVICE_GLSL: /* TODO */ return nullptr;
-    case BOX_DEVICE_FBS:  /* TODO */ return nullptr;
-    case BOX_DEVICE_NONE:
+    case BD_CPU:  return box_cpu_malloc(byte);
+    case BD_CUDA: /* TODO */ return nullptr;
+    case BD_CL:   /* TODO */ return nullptr;
+    case BD_GLSL: /* TODO */ return nullptr;
+    case BD_NONE:
         TBAG_FALLTHROUGH
     default:
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
@@ -59,12 +58,11 @@ void box_data_free(bdev device, void * data) TBAG_NOEXCEPT
 
     // clang-format off
     switch (device) {
-    case BOX_DEVICE_CPU:  box_cpu_free(data); break;
-    case BOX_DEVICE_CUDA: /* TODO */ break;
-    case BOX_DEVICE_CL:   /* TODO */ break;
-    case BOX_DEVICE_GLSL: /* TODO */ break;
-    case BOX_DEVICE_FBS:  /* TODO */ break;
-    case BOX_DEVICE_NONE:
+    case BD_CPU:  box_cpu_free(data); break;
+    case BD_CUDA: /* TODO */ break;
+    case BD_CL:   /* TODO */ break;
+    case BD_GLSL: /* TODO */ break;
+    case BD_NONE:
         TBAG_FALLTHROUGH
     default:
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
@@ -194,9 +192,9 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
         return box_malloc_vargs(box, type, device, ext, rank, ap);
     }
 
-    ui64 resize_ext[BOX_EXT_SIZE] = {0,};
+    ui64 resize_ext[BOX_EXTENSION_SIZE] = {0,};
     if (ext) {
-        memcpy(resize_ext, ext, sizeof(ui64)*BOX_EXT_SIZE);
+        memcpy(resize_ext, ext, sizeof(ui64)*BOX_EXTENSION_SIZE);
     }
     if (box->device != device ||
             box->ext[0] != resize_ext[0] ||
@@ -320,7 +318,7 @@ Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_d
     assert(box_support_type(data_type));
     assert(box_support_device(data_device));
 
-    if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
+    if (box->device == BD_CPU && data_device == BD_CPU) {
         box_cpu_set(box_data_ptr_offset(box, box_data_offset), box->type, data, data_type);
         return E_SUCCESS;
     }
@@ -359,7 +357,7 @@ Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_d
     assert(box_support_type(data_type));
     assert(box_support_device(data_device));
 
-    if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
+    if (box->device == BD_CPU && data_device == BD_CPU) {
         box_cpu_set(data, data_type, box_data_ptr_offset(box, box_data_offset), box->type);
         return E_SUCCESS;
     }
@@ -404,7 +402,7 @@ Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_
         return E_ILLARGS;
     }
 
-    if (box->device == BOX_DEVICE_CPU && data_device == BOX_DEVICE_CPU) {
+    if (box->device == BD_CPU && data_device == BD_CPU) {
         if (box->type == data_type) {
             box_cpu_memcpy(box->data, data, box_get_type_byte(data_type)*size);
         } else {

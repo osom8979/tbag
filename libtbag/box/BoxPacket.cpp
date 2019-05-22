@@ -45,6 +45,7 @@ TBAG_POP_MACRO(max);
 #endif // defined(TBAG_COMP_MSVC)
 
 #include <libtbag/box/BoxPacket.hpp>
+#include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
@@ -301,7 +302,7 @@ public:
 
         auto const type = packet->type();
         auto const device = packet->device();
-        ui64 ext[BOX_EXT_SIZE];
+        ui64 ext[BOX_EXTENSION_SIZE];
         ext[0] = packet->ext0();
         ext[1] = packet->ext1();
         ext[2] = packet->ext2();

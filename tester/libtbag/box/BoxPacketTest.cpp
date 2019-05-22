@@ -17,15 +17,15 @@ TEST(BoxPacketTest, Default)
     box_data box;
     box_clear(&box);
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
     for (i = 0; i < 24; ++i) {
-        box_data_set(&box, &i, BT_INT32, BOX_DEVICE_CPU, nullptr, i);
+        box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, ((si32*)box.data)[i]);
     }
 
     ASSERT_EQ(BT_INT32, box.type);
-    ASSERT_EQ(BOX_DEVICE_CPU, box.device);
+    ASSERT_EQ(BD_CPU, box.device);
     ASSERT_EQ(0, box.ext[0]);
     ASSERT_EQ(0, box.ext[1]);
     ASSERT_EQ(0, box.ext[2]);
@@ -68,11 +68,11 @@ TEST(BoxPacketTest, Default)
 
     for (i = 0; i < 24; ++i) {
         si32 box_data;
-        box_data_get(&box, &box_data, BT_INT32, BOX_DEVICE_CPU, nullptr, i);
+        box_data_get(&box, &box_data, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, box_data);
 
         si32 box2_data;
-        box_data_get(&box2, &box2_data, BT_INT32, BOX_DEVICE_CPU, nullptr, i);
+        box_data_get(&box2, &box2_data, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, box2_data);
         ASSERT_EQ(i, ((si32*)box2.data)[i]);
     }

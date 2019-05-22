@@ -70,13 +70,12 @@ bool box_support_device(bdev dev) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (dev) {
-    case BOX_DEVICE_NONE: return false;
-    case BOX_DEVICE_CPU:  return true;
-    case BOX_DEVICE_CUDA: return false;
-    case BOX_DEVICE_CL:   return false;
-    case BOX_DEVICE_GLSL: return false;
-    case BOX_DEVICE_FBS:  return false;
-    default:              return false;
+    case BD_NONE: return false;
+    case BD_CPU:  return true;
+    case BD_CUDA: return false;
+    case BD_CL:   return false;
+    case BD_GLSL: return false;
+    default:      return false;
     }
     // clang-format on
 }
@@ -105,13 +104,12 @@ char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (dev) {
-    case BOX_DEVICE_CPU:  return "CPU";
-    case BOX_DEVICE_CUDA: return "CUDA";
-    case BOX_DEVICE_CL:   return "CL";
-    case BOX_DEVICE_GLSL: return "GLSL";
-    case BOX_DEVICE_FBS:  return "FBS";
-    case BOX_DEVICE_NONE: return "NONE";
-    default:              return "UNKNOWN";
+    case BD_CPU:  return "CPU";
+    case BD_CUDA: return "CUDA";
+    case BD_CL:   return "CL";
+    case BD_GLSL: return "GLSL";
+    case BD_NONE: return "NONE";
+    default:      return "UNKNOWN";
     }
     // clang-format on
 }
@@ -140,7 +138,7 @@ void box_clear(box_data * box) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
     box->type = BT_NONE;
-    box->device = BOX_DEVICE_NONE;
+    box->device = BD_NONE;
     box->ext[0] = 0;
     box->ext[1] = 0;
     box->ext[2] = 0;
