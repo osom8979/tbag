@@ -53,6 +53,12 @@ tbag_config__set_option (DISABLE_DEFAULT_TPOT_LUAJIT  OFF) ## Do not use the def
 
 tbag_config__set_option (INSTALL_WITH_FAKE_LUAJIT ON) ## Install fake LuaJIT.
 
+## Install prefix.
+if (CMAKE_INSTALL_PREFIX)
+    set (TBAG_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+    add_definitions ("-DTBAG_INSTALL_PREFIX=\"${TBAG_INSTALL_PREFIX}\"")
+endif ()
+
 ## Configure settings.
 if (USE_CCACHE)
     tbag_config__use_ccache ()
@@ -186,14 +192,6 @@ check_type_size ("long long" LONG_LONG)
 set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
 set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")
 configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
-
-set (LUAROCKS_INSTALL_NAME "luarocks_install.sh")
-set (LUAROCKS_INSTALL_SOURCE "${PROJECT_SOURCE_DIR}/script/${LUAROCKS_INSTALL_NAME}")
-set (LUAROCKS_INSTALL_DESTINATION "${PROJECT_BINARY_DIR}/${LUAROCKS_INSTALL_NAME}")
-if (NOT EXISTS "${LUAROCKS_INSTALL_DESTINATION}")
-    file (COPY "${LUAROCKS_INSTALL_SOURCE}" DESTINATION "${PROJECT_BINARY_DIR}")
-    message (STATUS "Copy ${LUAROCKS_INSTALL_DESTINATION}")
-endif ()
 
 ## Run project.
 tbag_flags__set_install_rpath () # [WARNING] Do not change the calling sequence.

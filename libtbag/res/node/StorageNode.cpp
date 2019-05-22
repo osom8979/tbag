@@ -517,8 +517,7 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
             }
             storage.appendLuaPath();
             if (prop.luarocks.exists) {
-                storage.appendLuaRocksPath();
-                storage.appendLuaRocksCPath();
+                storage.appendLuaRocksPrefix();
             }
         }
         if (!prop.lua.name.empty()) {

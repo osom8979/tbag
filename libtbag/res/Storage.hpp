@@ -284,8 +284,7 @@ public:
     std::vector<std::string> getLuaFilenames() const;
 
 public:
-    bool appendLuaRocksPath();
-    bool appendLuaRocksCPath();
+    bool appendLuaRocksPrefix();
 
 public:
     std::string getInfo() const;

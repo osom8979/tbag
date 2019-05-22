@@ -15,6 +15,8 @@
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/script/lua/RayGuiLua.hpp>
 
+#include <libtbag/config-ex.h>
+
 #include <cassert>
 #include <cstring>
 #include <cstdarg>
@@ -28,6 +30,15 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace script {
+
+TBAG_CONSTEXPR static char const * const __get_tbag_install_prefix() TBAG_NOEXCEPT
+{
+#if defined(TBAG_INSTALL_PREFIX)
+    return TBAG_INSTALL_PREFIX;
+#else
+    return "/usr/local";
+#endif
+}
 
 LuaMachine::LuaMachine() : _state(nullptr)
 {
@@ -144,6 +155,7 @@ void LuaMachine::initDefault()
     initDefaultOpenLibraries();
     initDefaultLuaPath();
     initDefaultLuaCPath();
+    appendPrefix(__get_tbag_install_prefix());
     initDefaultTbagTable();
 
     if (!libtbag::script::luaopen_tbag(L)) {
@@ -292,6 +304,27 @@ bool LuaMachine::appendLuaCPath(std::string const & path)
     }
 }
 
+bool LuaMachine::appendPrefix(std::string const & prefix)
+{
+    bool result = true;
+
+    auto const LUA_SHORT_VERSION = getLuaVersion().toShortString();
+    auto const PREFIX_PATH = libtbag::filesystem::Path(prefix);
+    auto const SCRIPT_PREFIX = PREFIX_PATH / "share" / "lua" / LUA_SHORT_VERSION;
+    auto const MODULE_PREFIX = PREFIX_PATH / "lib" / "lua" / LUA_SHORT_VERSION;
+
+    auto const SCRIPT_PATH1 = SCRIPT_PREFIX / LUA_PATH_MARK ".lua";
+    result &= appendLuaPath(SCRIPT_PATH1.getCanonicalString());
+
+    auto const SCRIPT_PATH2 = SCRIPT_PREFIX / LUA_PATH_MARK / "init.lua";
+    result &= appendLuaPath(SCRIPT_PATH2.getCanonicalString());
+
+    auto const MODULE_PATH1 = MODULE_PREFIX / (std::string(LUA_PATH_MARK)+LUA_MODULE_SUFFIX);
+    result &= appendLuaCPath(MODULE_PATH1.getCanonicalString());
+
+    return result;
+}
+
 std::string LuaMachine::getTbagVersion() const
 {
     auto * L = _state.get();
@@ -356,12 +389,12 @@ std::string LuaMachine::findScriptPath(std::string const & filename, bool includ
     return std::string();
 }
 
-LuaMachine::Version LuaMachine::getLuaVersion() const
+LuaMachine::Version LuaMachine::getLuaVersion()
 {
     return Version((LUA_VERSION_NUM/100), (LUA_VERSION_NUM%100));
 }
 
-LuaMachine::Version LuaMachine::getLuaJITVersion() const
+LuaMachine::Version LuaMachine::getLuaJITVersion()
 {
     return Version(LUAJIT_VERSION_NUM, 10000, 100, 1);
 }

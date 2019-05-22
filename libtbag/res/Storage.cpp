@@ -499,21 +499,9 @@ std::vector<std::string> Storage::getLuaFilenames() const
     return getFilenames(LAYOUT_LUA);
 }
 
-bool Storage::appendLuaRocksPath()
+bool Storage::appendLuaRocksPrefix()
 {
-    auto const LUA_SHORT_VERSION = _impl->lua.getLuaVersion().toShortString();
-    auto const PATH = asset().get(LAYOUT_LUAROCKS) / "share" / "lua" / LUA_SHORT_VERSION;
-    auto const CANONICAL_PATH1 = (PATH / LUA_PATH_MARK ".lua").getCanonicalString();
-    auto const CANONICAL_PATH2 = (PATH / LUA_PATH_MARK / "init.lua").getCanonicalString();
-    return _impl->lua.appendLuaPath(CANONICAL_PATH1) && _impl->lua.appendLuaPath(CANONICAL_PATH2);
-}
-
-bool Storage::appendLuaRocksCPath()
-{
-    auto const LUA_SHORT_VERSION = _impl->lua.getLuaVersion().toShortString();
-    auto const PATH = asset().get(LAYOUT_LUAROCKS) / "lib" / "lua" / LUA_SHORT_VERSION;
-    auto const CANONICAL_PATH = (PATH / (std::string(LUA_PATH_MARK)+LUA_MODULE_SUFFIX)).getCanonicalString();
-    return _impl->lua.appendLuaCPath(CANONICAL_PATH);
+    return _impl->lua.appendPrefix(asset().get(LAYOUT_LUAROCKS));
 }
 
 std::string Storage::getInfo() const

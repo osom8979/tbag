@@ -117,6 +117,9 @@ public:
     bool appendLuaCPath(std::string const & path);
 
 public:
+    bool appendPrefix(std::string const & prefix);
+
+public:
     std::string getTbagVersion() const;
     bool isInitialized() const;
 
@@ -128,8 +131,8 @@ public:
     std::string findScriptPath(std::string const & filename, bool include_working = true) const;
 
 public:
-    Version getLuaVersion() const;
-    Version getLuaJITVersion() const;
+    static Version getLuaVersion();
+    static Version getLuaJITVersion();
 
 public:
     // clang-format off
