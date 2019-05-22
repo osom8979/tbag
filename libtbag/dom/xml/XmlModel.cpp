@@ -117,10 +117,12 @@ XmlModel::Path XmlModel::getHomeDir() const
 
 XmlModel::Path XmlModel::getGlobalDir() const
 {
-#if defined(TBAG_PLATFORM_WINDOWS)
+#if defined(TBAG_INSTALL_PREFIX)
+    return Path(TBAG_INSTALL_PREFIX);
+#elif defined(TBAG_PLATFORM_WINDOWS)
     return Path("C:\\Program Files");
 #else
-    return Path("/etc");
+    return Path("/usr/local");
 #endif
 }
 
