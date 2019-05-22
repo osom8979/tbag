@@ -138,7 +138,6 @@ void StorageNode::setup()
 
     // clang-format off
     prop.env.name      = VAL_DEFAULT_ENV_NAME;
-    prop.config.gui    = VAL_DEFAULT_CONFIG_GUI;
     prop.module.ext    = VAL_DEFAULT_MODULE_EXT;
     prop.text.name     = VAL_DEFAULT_TEXT_NAME;
     prop.sqlite.name   = VAL_DEFAULT_SQLITE_NAME;
@@ -238,7 +237,6 @@ void StorageNode::readElement(Element const & element, std::string const & tag, 
         layout.text = text(*child);
         optAttr(*child, ATT_ABSOLUTE, layout.abs);
         optAttr(*child, ATT_RAW     , layout.raw);
-        optAttr(*child, ATT_GUI     , layout.gui);
     } else {
         layout.exists = false;
     }
@@ -347,7 +345,6 @@ void StorageNode::addNewElement(Element & element, std::string const & tag, Prop
             text(child, layout.text);
             setAttr(child, ATT_ABSOLUTE, layout.abs);
             setAttr(child, ATT_RAW     , layout.raw);
-            setAttr(child, ATT_GUI     , layout.gui);
         });
     }
 }
@@ -494,9 +491,7 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
     // clang-format on
 
     if (prop.config.exists) {
-        if (!prop.config.gui.empty()) {
-            storage->config_gui = prop.config.gui;
-        }
+        // EMPTY.
     }
     if (prop.module.exists) {
         storage.setModuleExtension(prop.module.ext);

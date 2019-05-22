@@ -73,8 +73,7 @@ namespace node {
  *     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *
  *     <!-- Contains simple 'group(filename)'/'key'/'value' information for configuration. -->
- *     <!-- If 'gui' attribute is exists, Configuration file to use in GUI mode.           -->
- *     <config gui='gui.xml'>dir</config>
+ *     <config>dir</config>
  *
  *     <!-- A set of dynamic modules. (e.g. '*.dll' files)          -->
  *     <!-- If 'ext' attribute is exists, File extension filtering. -->
@@ -149,14 +148,12 @@ public:
     TBAG_CONSTEXPR static char const * const ATT_DEFAULT    = "default";
     TBAG_CONSTEXPR static char const * const ATT_SYSTEM     = "system";
     TBAG_CONSTEXPR static char const * const ATT_AUTO_CLEAR = "autoclear";
-    TBAG_CONSTEXPR static char const * const ATT_GUI        = "gui";
     TBAG_CONSTEXPR static char const * const ATT_INIT       = "init";
 
     TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
     TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
 
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_ENV_NAME      = "default.xml";
-    TBAG_CONSTEXPR static char const * const VAL_DEFAULT_CONFIG_GUI    = "gui.xml";
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_MODULE_EXT    = ".so";
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_TEXT_NAME     = "en.xml";
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_SQLITE_NAME   = "default.sqlite";
@@ -189,7 +186,7 @@ public:
 
         struct cfg_layout : public def_layout
         {
-            str gui;
+            // EMPTY.
         };
 
         struct mod_layout : public def_layout
