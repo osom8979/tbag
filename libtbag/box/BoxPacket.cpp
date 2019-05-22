@@ -111,6 +111,12 @@ public:
         }
     }
 
+    Impl(Options const & options, std::size_t capacity) : Impl(capacity)
+    {
+        parser.opts.strict_json = options.strict_json;
+        parser.opts.indent_step = options.indent_step;
+    }
+
     ~Impl()
     {
         // EMPTY.
@@ -194,6 +200,12 @@ public:
 
 BoxPacketBuilder::BoxPacketBuilder(std::size_t capacity)
         : _impl(std::make_unique<Impl>(capacity))
+{
+    assert(static_cast<bool>(_impl));
+}
+
+BoxPacketBuilder::BoxPacketBuilder(Options const & options, std::size_t capacity)
+        : _impl(std::make_unique<Impl>(options, capacity))
 {
     assert(static_cast<bool>(_impl));
 }
@@ -403,6 +415,12 @@ Err BoxPacketParser::parse(char const * buffer,
 
 BoxPacket::BoxPacket(std::size_t capacity)
         : BoxPacketBuilder(capacity), BoxPacketParser()
+{
+    // EMPTY.
+}
+
+BoxPacket::BoxPacket(Options const & options, std::size_t capacity)
+        : BoxPacketBuilder(options, capacity), BoxPacketParser()
 {
     // EMPTY.
 }

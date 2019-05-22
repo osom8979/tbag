@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/3rd/jsoncpp/json.h>
 #include <libtbag/box/BoxPacket.hpp>
+#include <iterator>
 
 using namespace libtbag;
 using namespace libtbag::box;
@@ -94,18 +95,20 @@ TEST(BoxPacketTest, ToJson)
         ASSERT_EQ(i, ((si32*)box.data)[i]);
     }
 
-    BoxPacket packet;
+    BoxPacket packet(BoxPacket::Options{});
     ASSERT_EQ(E_SUCCESS, packet.build(&box));
-    ASSERT_FALSE(packet.toJsonString().empty());
+    auto const text = packet.toJsonString();
+    ASSERT_FALSE(text.empty());
+    // std::cout << text << std::endl;
 
-    // Json::Value root;
-    // Json::Reader reader;
-    // ASSERT_TRUE(reader.parse(packet.toJsonString(), root));
-    // ASSERT_TRUE(root["dims"].isArray());
-    // ASSERT_EQ(3, root["dims"].size());
-    // ASSERT_EQ(4, root["dims"][0].asInt());
-    // ASSERT_EQ(3, root["dims"][1].asInt());
-    // ASSERT_EQ(2, root["dims"][2].asInt());
+    Json::Value root;
+    Json::Reader reader;
+    ASSERT_TRUE(reader.parse(packet.toJsonString(), root));
+    ASSERT_TRUE(root["dims"].isArray());
+    ASSERT_EQ(3, root["dims"].size());
+    ASSERT_EQ(4, root["dims"][0].asInt());
+    ASSERT_EQ(3, root["dims"][1].asInt());
+    ASSERT_EQ(2, root["dims"][2].asInt());
 
     box_free(&box);
 }

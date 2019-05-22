@@ -58,6 +58,24 @@ public:
     using Buffer = libtbag::util::Buffer;
 
 public:
+    struct Options
+    {
+        /**
+         * 'strict_json' adds "quotes" around field names if true.
+         */
+        bool strict_json = true;
+
+        /**
+         * If 'ident_step' is 0, no indentation will be generated.
+         * if it is less than 0, no linefeeds will be generated either.
+         */
+        int indent_step = -1;
+
+        Options() { /* EMPTY. */ }
+        ~Options() { /* EMPTY. */ }
+    };
+
+public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_BUILDER_CAPACITY = 1 * MEGA_BYTE_TO_BYTE;
 
 private:
@@ -65,6 +83,7 @@ private:
 
 public:
     BoxPacketBuilder(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    BoxPacketBuilder(Options const & options, std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
     virtual ~BoxPacketBuilder();
 
 public:
@@ -127,6 +146,7 @@ class TBAG_API BoxPacket : public BoxPacketBuilder, public BoxPacketParser
 {
 public:
     BoxPacket(std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
+    BoxPacket(Options const & options, std::size_t capacity = DEFAULT_BUILDER_CAPACITY);
     virtual ~BoxPacket();
 };
 
