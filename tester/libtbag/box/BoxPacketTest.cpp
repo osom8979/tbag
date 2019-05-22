@@ -6,6 +6,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <libtbag/3rd/jsoncpp/json.h>
 #include <libtbag/box/BoxPacket.hpp>
 
 using namespace libtbag;
@@ -79,5 +80,33 @@ TEST(BoxPacketTest, Default)
 
     box_free(&box);
     box_free(&box2);
+}
+
+TEST(BoxPacketTest, ToJson)
+{
+    box_data box;
+    box_clear(&box);
+
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
+    ui32 i = 0;
+    for (i = 0; i < 24; ++i) {
+        box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
+        ASSERT_EQ(i, ((si32*)box.data)[i]);
+    }
+
+    BoxPacket packet;
+    ASSERT_EQ(E_SUCCESS, packet.build(&box));
+    ASSERT_FALSE(packet.toJsonString().empty());
+
+    // Json::Value root;
+    // Json::Reader reader;
+    // ASSERT_TRUE(reader.parse(packet.toJsonString(), root));
+    // ASSERT_TRUE(root["dims"].isArray());
+    // ASSERT_EQ(3, root["dims"].size());
+    // ASSERT_EQ(4, root["dims"][0].asInt());
+    // ASSERT_EQ(3, root["dims"][1].asInt());
+    // ASSERT_EQ(2, root["dims"][2].asInt());
+
+    box_free(&box);
 }
 
