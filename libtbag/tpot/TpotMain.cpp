@@ -74,7 +74,7 @@ TpotMain::TpotMain(std::string const & service_name,
                    Pots const & pots,
                    std::string const & default_app,
                    int argc, char ** argv, char ** envs)
-        : _default_app(default_app)
+        : _default_app(default_app), _help_app()
 {
     using namespace std::placeholders;
     _params.argc = argc;
@@ -146,6 +146,7 @@ void TpotMain::onOptions(HelpCommander & commander)
     commander.insert("tlog", [&](Arguments const & args){
         createDefaultLogger();
     }, "Enable tbag log");
+    commander.insertDefault("help-app", &_help_app, "", "Print a help message for the application.", "{app}");
 }
 
 void TpotMain::onInfo(Element const & element)
@@ -163,6 +164,10 @@ int TpotMain::onRun(RunnerParams const & params)
 {
     if (params.verbose) {
         printParamsInfo(params);
+    }
+
+    if (!_help_app.empty()) {
+        return _manager.help(_help_app, params.verbose);
     }
 
     if (!_default_app.empty()) {

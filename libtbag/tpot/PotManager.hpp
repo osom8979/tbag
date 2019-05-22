@@ -88,6 +88,7 @@ public:
     std::string getRemarks() const;
 
 public:
+    int help(std::string const & app_name, bool verbose);
     int runOrLutjit(RunnerParams const & params);
     int run(RunnerParams const & params);
     int run(RunnerParams const & params, std::string const & default_mode);

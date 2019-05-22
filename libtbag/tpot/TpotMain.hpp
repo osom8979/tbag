@@ -47,6 +47,7 @@ public:
 
 private:
     std::string _default_app;
+    std::string _help_app;
     DefaultApp  _app;
     Params      _params;
     PotManager  _manager;

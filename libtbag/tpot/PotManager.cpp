@@ -123,6 +123,34 @@ std::string PotManager::getRemarks() const
     return ss.str();
 }
 
+int PotManager::help(std::string const & app_name, bool verbose)
+{
+    if (app_name.empty()) {
+        if (verbose) {
+            std::cerr << "Empty application name." << std::endl;
+        }
+        return EXIT_FAILURE;
+    }
+
+    auto itr = _pots.find(app_name);
+    if (itr == _pots.end()) {
+        if (verbose) {
+            std::cerr << "Not found application: " << app_name << std::endl;
+        }
+        return EXIT_FAILURE;
+    }
+
+    auto const message = itr->second->getHelp();
+    if (message == nullptr) {
+        if (verbose) {
+            std::cerr << "Empty help message." << std::endl;
+        }
+    } else {
+        std::cout << message << std::endl;
+    }
+    return EXIT_SUCCESS;
+}
+
 int PotManager::runOrLutjit(RunnerParams const & params)
 {
     return run(params, libtbag::tpot::apps::LuaPot::name());
