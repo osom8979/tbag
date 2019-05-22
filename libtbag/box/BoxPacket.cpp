@@ -45,16 +45,12 @@ TBAG_POP_MACRO(max);
 #endif // defined(TBAG_COMP_MSVC)
 
 #include <libtbag/box/BoxPacket.hpp>
-
-#include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
-//#include <libtbag/filesystem/File.hpp>
-//#include <libtbag/filesystem/Path.hpp>
-//#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
-//#include <cassert>
-//#include <algorithm>
-//#include <utility>
+#include <cassert>
+#include <algorithm>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -71,29 +67,28 @@ using FlatBufferParser  = flatbuffers::Parser;
 using StringOffset       = flatbuffers::Offset<flatbuffers::String>;
 using StringOffsetVector = flatbuffers::Vector<StringOffset>;
 
-inline static anys get_anys(btype type) TBAG_NOEXCEPT
+inline static AnyArr convertBtypeToAnyArr(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BT_NONE   : return anys_NONE;
-    case BT_INT8   : return anys_si8s;
-    case BT_UINT8  : return anys_si16s;
-    case BT_INT16  : return anys_si32s;
-    case BT_UINT16 : return anys_si64s;
-    case BT_INT32  : return anys_ui8s;
-    case BT_UINT32 : return anys_ui16s;
-    case BT_INT64  : return anys_ui32s;
-    case BT_UINT64 : return anys_ui64s;
-    case BT_FLOAT32: return anys_fp32s;
-    case BT_FLOAT64: return anys_fp64s;
-    default:
-        return anys_NONE;
+    case BT_NONE   : return AnyArr_NONE;
+    case BT_INT8   : return AnyArr_ByteArr;
+    case BT_INT16  : return AnyArr_ShortArr;
+    case BT_INT32  : return AnyArr_IntArr;
+    case BT_INT64  : return AnyArr_LongArr;
+    case BT_UINT8  : return AnyArr_UbyteArr;
+    case BT_UINT16 : return AnyArr_UshortArr;
+    case BT_UINT32 : return AnyArr_UintArr;
+    case BT_UINT64 : return AnyArr_UlongArr;
+    case BT_FLOAT32: return AnyArr_FloatArr;
+    case BT_FLOAT64: return AnyArr_DoubleArr;
+    default:         return AnyArr_NONE;
     }
     // clang-format on
 }
 
 /**
- * FlatBuffer builder implementation.
+ * FlatBuffer builder implementation for BoxPacketBuilder.
  *
  * @author zer0
  * @date   2018-10-24
@@ -160,30 +155,30 @@ public:
 
     Err build(box_data const * box)
     {
-        auto type = get_anys(box->type);
+        auto const ANY_TYPE = convertBtypeToAnyArr(box->type);
         clear();
-        finish(Createbox_fbs(builder, box->type, box->device,
-                             box->ext[0], box->ext[1], box->ext[2], box->ext[3],
-                             type, create_anys(type, box->data, box->size),
-                             builder.CreateVector(box->dims, (size_t)box->rank),
-                             builder.CreateString(box->info, box->info_size)));
+        finish(CreateBoxFbs(builder, box->type, box->device,
+                            box->ext[0], box->ext[1], box->ext[2], box->ext[3],
+                            ANY_TYPE, createAnyArr(ANY_TYPE, box->data, box->size),
+                            builder.CreateVector(box->dims, (size_t)box->rank),
+                            builder.CreateString(box->info, box->info_size)));
         return E_SUCCESS;
     }
 
-    flatbuffers::Offset<void> create_anys(anys value_type, void const * data, ui32 size)
+    flatbuffers::Offset<void> createAnyArr(AnyArr any_type, void const * data, ui32 size)
     {
         // clang-format off
-        switch (value_type) {
-        case anys_si8s : return Createsi8s (builder, builder.CreateVector(( si8 const *)data, size)).Union();
-        case anys_si16s: return Createsi16s(builder, builder.CreateVector((si16 const *)data, size)).Union();
-        case anys_si32s: return Createsi32s(builder, builder.CreateVector((si32 const *)data, size)).Union();
-        case anys_si64s: return Createsi64s(builder, builder.CreateVector((si64 const *)data, size)).Union();
-        case anys_ui8s : return Createui8s (builder, builder.CreateVector(( ui8 const *)data, size)).Union();
-        case anys_ui16s: return Createui16s(builder, builder.CreateVector((ui16 const *)data, size)).Union();
-        case anys_ui32s: return Createui32s(builder, builder.CreateVector((ui32 const *)data, size)).Union();
-        case anys_ui64s: return Createui64s(builder, builder.CreateVector((ui64 const *)data, size)).Union();
-        case anys_fp32s: return Createfp32s(builder, builder.CreateVector((fp32 const *)data, size)).Union();
-        case anys_fp64s: return Createfp64s(builder, builder.CreateVector((fp64 const *)data, size)).Union();
+        switch (any_type) {
+        case AnyArr_ByteArr  : return CreateByteArr  (builder, builder.CreateVector(( si8 const *)data, size)).Union();
+        case AnyArr_ShortArr : return CreateShortArr (builder, builder.CreateVector((si16 const *)data, size)).Union();
+        case AnyArr_IntArr   : return CreateIntArr   (builder, builder.CreateVector((si32 const *)data, size)).Union();
+        case AnyArr_LongArr  : return CreateLongArr  (builder, builder.CreateVector((si64 const *)data, size)).Union();
+        case AnyArr_UbyteArr : return CreateUbyteArr (builder, builder.CreateVector(( ui8 const *)data, size)).Union();
+        case AnyArr_UshortArr: return CreateUshortArr(builder, builder.CreateVector((ui16 const *)data, size)).Union();
+        case AnyArr_UintArr  : return CreateUintArr  (builder, builder.CreateVector((ui32 const *)data, size)).Union();
+        case AnyArr_UlongArr : return CreateUlongArr (builder, builder.CreateVector((ui64 const *)data, size)).Union();
+        case AnyArr_FloatArr : return CreateFloatArr (builder, builder.CreateVector((fp32 const *)data, size)).Union();
+        case AnyArr_DoubleArr: return CreateDoubleArr(builder, builder.CreateVector((fp64 const *)data, size)).Union();
         default: break;
         }
         // clang-format on
@@ -192,11 +187,12 @@ public:
     }
 };
 
-// -------------------------------
-// BoxPacketBuilder implementation
-// -------------------------------
+// ----------------
+// BoxPacketBuilder
+// ----------------
 
-BoxPacketBuilder::BoxPacketBuilder(std::size_t capacity) : _impl(std::make_unique<Impl>(capacity))
+BoxPacketBuilder::BoxPacketBuilder(std::size_t capacity)
+        : _impl(std::make_unique<Impl>(capacity))
 {
     assert(static_cast<bool>(_impl));
 }
@@ -248,7 +244,7 @@ BoxPacketBuilder::Buffer BoxPacketBuilder::toBuffer() const
 }
 
 /**
- * FlatBuffer parser implementation.
+ * FlatBuffer parser implementation for BoxPacketParser.
  *
  * @author zer0
  * @date   2018-10-24
@@ -280,7 +276,7 @@ public:
         assert(box != nullptr);
 
         Verifier verifier((uint8_t const *)buffer, size);
-        auto const VERIFY_RESULT = Verifybox_fbsBuffer(verifier);
+        auto const VERIFY_RESULT = VerifyBoxFbsBuffer(verifier);
 
 #if defined(FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE)
         std::size_t const COMPUTED_SIZE = verifier.GetComputedSize();
@@ -292,13 +288,13 @@ public:
             return std::make_pair(E_VERIFIER, COMPUTED_SIZE);
         }
 
-        auto const * packet = Getbox_fbs(buffer);
+        auto const * packet = GetBoxFbs(buffer);
         auto const data_type = packet->data_type();
-        if (!(anys_MIN <= COMPARE_AND(data_type) <= anys_MAX)) {
+        if (!(AnyArr_MIN <= COMPARE_AND(data_type) <= AnyArr_MAX)) {
             return std::make_pair(E_ENOMSG, COMPUTED_SIZE);
         }
 
-        if (!Verifyanys(verifier, packet->data(), data_type)) {
+        if (!VerifyAnyArr(verifier, packet->data(), data_type)) {
             // Use 'Parsing error' to distinguish it from 'Verifier error' at the top.
             return std::make_pair(E_PARSING, COMPUTED_SIZE);
         }
@@ -311,33 +307,10 @@ public:
         ext[2] = packet->ext2();
         ext[3] = packet->ext3();
 
-        auto const * table = packet->data();
-        void const * data_ptr = nullptr;
-        ui32 data_size = 0;
-
-        // clang-format off
-        switch (data_type) {
-        case anys_si8s :  data_ptr = get_table_data((libtbag::box::fbs::si8s  const *)table, &data_size);
-        case anys_si16s:  data_ptr = get_table_data((libtbag::box::fbs::si16s const *)table, &data_size);
-        case anys_si32s:  data_ptr = get_table_data((libtbag::box::fbs::si32s const *)table, &data_size);
-        case anys_si64s:  data_ptr = get_table_data((libtbag::box::fbs::si64s const *)table, &data_size);
-        case anys_ui8s :  data_ptr = get_table_data((libtbag::box::fbs::ui8s  const *)table, &data_size);
-        case anys_ui16s:  data_ptr = get_table_data((libtbag::box::fbs::ui16s const *)table, &data_size);
-        case anys_ui32s:  data_ptr = get_table_data((libtbag::box::fbs::ui32s const *)table, &data_size);
-        case anys_ui64s:  data_ptr = get_table_data((libtbag::box::fbs::ui64s const *)table, &data_size);
-        case anys_fp32s:  data_ptr = get_table_data((libtbag::box::fbs::fp32s const *)table, &data_size);
-        case anys_fp64s:  data_ptr = get_table_data((libtbag::box::fbs::fp64s const *)table, &data_size);
-        case anys_NONE:
-            TBAG_FALLTHROUGH
-        default:
-            TBAG_INACCESSIBLE_BLOCK_ASSERT();
-        }
-        // clang-format on
-
         auto const * dims = packet->dims()->data();
         auto const dims_size = packet->dims()->size();
 
-        auto const info = packet->info()->data();
+        auto const * info = packet->info()->data();
         auto const info_size = packet->info()->size();
 
         auto code = box_malloc_copy_dims(box, type, device, ext, dims,
@@ -347,34 +320,60 @@ public:
             return std::make_pair(code, COMPUTED_SIZE);
         }
 
-        code = box_data_copy(box, data_ptr, type, device, ext, data_size);
-        if (isFailure(code)) {
-            return std::make_pair(code, COMPUTED_SIZE);
-        }
+        auto const * fbs_table = packet->data();
+        void const * data_ptr = nullptr;
+        ui32 data_size = 0;
 
-        box->info = box_info_malloc(info_size);
-        box->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(info_size);
-        box->info_size = info_size;
-        if (!box_info_assign(box->info, box->total_info_byte, info, info_size)) {
-            code = E_ESET;
+        // clang-format off
+        switch (data_type) {
+        case AnyArr_ByteArr  : update_data((ByteArr   const *)fbs_table, (si8 *)box->data); break;
+        case AnyArr_ShortArr : update_data((ShortArr  const *)fbs_table, (si16*)box->data); break;
+        case AnyArr_IntArr   : update_data((IntArr    const *)fbs_table, (si32*)box->data); break;
+        case AnyArr_LongArr  : update_data((LongArr   const *)fbs_table, (si64*)box->data); break;
+        case AnyArr_UbyteArr : update_data((UbyteArr  const *)fbs_table, (ui8 *)box->data); break;
+        case AnyArr_UshortArr: update_data((UshortArr const *)fbs_table, (ui16*)box->data); break;
+        case AnyArr_UintArr  : update_data((UintArr   const *)fbs_table, (ui32*)box->data); break;
+        case AnyArr_UlongArr : update_data((UlongArr  const *)fbs_table, (ui64*)box->data); break;
+        case AnyArr_FloatArr : update_data((FloatArr  const *)fbs_table, (fp32*)box->data); break;
+        case AnyArr_DoubleArr: update_data((DoubleArr const *)fbs_table, (fp64*)box->data); break;
+        case AnyArr_NONE:
+            TBAG_FALLTHROUGH
+        default:
+            TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        }
+        // clang-format on
+
+        if (info_size >= 1) {
+            assert(info != nullptr);
+            box->info = box_info_malloc(info_size);
+            box->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(info_size);
+            box->info_size = info_size;
+            if (!box_info_assign(box->info, box->total_info_byte, info, info_size)) {
+                code = E_ESET;
+            }
         }
         return std::make_pair(code, COMPUTED_SIZE);
     }
 
-    template <typename T>
-    void const * get_table_data(T table, ui32 * data_size) const
+    template <typename FlatT, typename DataT>
+    void update_data(FlatT table, DataT * data) const
     {
         assert(table != nullptr);
-        *data_size = table->arr()->size();
-        return table->arr()->data();
+        auto * arr = table->arr();
+        assert(arr != nullptr);
+        auto const SIZE = arr->size();
+        for (std::size_t i = 0; i < SIZE; ++i) {
+            data[i] = arr->Get(i);
+        }
     }
 };
 
-// ------------------------------
-// BoxPacketParser implementation
-// ------------------------------
+// ---------------
+// BoxPacketParser
+// ---------------
 
-BoxPacketParser::BoxPacketParser() : _impl(std::make_unique<Impl>(this))
+BoxPacketParser::BoxPacketParser()
+        : _impl(std::make_unique<Impl>(this))
 {
     assert(_impl);
 }
@@ -384,7 +383,10 @@ BoxPacketParser::~BoxPacketParser()
     // EMPTY.
 }
 
-Err BoxPacketParser::parse(char const * buffer, std::size_t size, box_data * box, std::size_t * computed_size)
+Err BoxPacketParser::parse(char const * buffer,
+                           std::size_t size,
+                           box_data * box,
+                           std::size_t * computed_size)
 {
     assert(_impl);
     auto result = _impl->parse(buffer, size, box);
@@ -394,11 +396,12 @@ Err BoxPacketParser::parse(char const * buffer, std::size_t size, box_data * box
     return result.first;
 }
 
-// ------------------------
-// BoxPacket implementation
-// ------------------------
+// ---------
+// BoxPacket
+// ---------
 
-BoxPacket::BoxPacket(std::size_t capacity) : BoxPacketBuilder(capacity), BoxPacketParser()
+BoxPacket::BoxPacket(std::size_t capacity)
+        : BoxPacketBuilder(capacity), BoxPacketParser()
 {
     // EMPTY.
 }

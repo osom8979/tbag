@@ -17,7 +17,7 @@ TEST(box_api_test, Default)
     box_data box;
     box_clear(&box);
 
-    ASSERT_EQ(E_SUCCESS, box_malloc_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box_malloc_args(&box, BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
     ASSERT_TRUE(box_exists_data(&box));
     ASSERT_TRUE(box_exists_dims(&box));
     ASSERT_NE(nullptr, box.data);
@@ -41,7 +41,7 @@ TEST(box_api_test, Resize)
     box_data box;
     box_clear(&box);
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 3, 3));
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 3, 3));
     ASSERT_TRUE(box_exists_data(&box));
     ASSERT_TRUE(box_exists_dims(&box));
     ASSERT_NE(nullptr, box.data);
@@ -56,7 +56,7 @@ TEST(box_api_test, Resize)
     auto const total_dims_byte = box.total_dims_byte;
 
     // Down size.
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 2, 2, 2));
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BOX_DEVICE_CPU, nullptr, 2, 2, 2));
     ASSERT_TRUE(box_exists_data(&box));
     ASSERT_TRUE(box_exists_dims(&box));
     ASSERT_EQ(data, box.data);
@@ -67,7 +67,7 @@ TEST(box_api_test, Resize)
     ASSERT_EQ(total_dims_byte, box.total_dims_byte);
 
     // Up size.
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_FLOAT64, BOX_DEVICE_CPU, nullptr, 4, 4, 4, 4, 4));
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_FLOAT64, BOX_DEVICE_CPU, nullptr, 4, 4, 4, 4, 4));
     ASSERT_TRUE(box_exists_data(&box));
     ASSERT_TRUE(box_exists_dims(&box));
     // ASSERT_NE(data, box.data); // Can be assigned to the same address.
@@ -93,7 +93,7 @@ TEST(box_api_test, SetAndGet)
     box_data box;
     box_clear(&box);
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
     ui32 * data = (ui32*)box.data;
     ASSERT_NE(nullptr, data);
 
@@ -104,57 +104,57 @@ TEST(box_api_test, SetAndGet)
     }
 
     i = 0;
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 1);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 0);
-    box_data_set_args(&box, &setter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 1);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 0);
+    box_data_set_args(&box, &setter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 1);
 
     ui32 getter[24] = {0,};
     i = 0;
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 1);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 0);
-    box_data_get_args(&box, &getter[i++], BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 0, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 1, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 0, 2, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 0, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 1, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 1, 2, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 0, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 1, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 2, 2, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 0, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 1, 1);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 0);
+    box_data_get_args(&box, &getter[i++], BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 3, 2, 1);
 
     for (i = 0; i < 24; ++i) {
         ASSERT_EQ(i, setter[i]);
@@ -170,10 +170,10 @@ TEST(box_api_test, Clone)
     box_data box;
     box_clear(&box);
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
     for (i = 0; i < 24; ++i) {
-        box_data_set(&box, &i, BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, i);
+        box_data_set(&box, &i, BT_INT32, BOX_DEVICE_CPU, nullptr, i);
     }
 
     box_data box2;
@@ -193,10 +193,10 @@ TEST(box_api_test, Clone)
     ASSERT_EQ(box.total_dims_byte, box2.total_dims_byte);
     ASSERT_EQ(box.rank, box2.rank);
     for (i = 0; i < 24; ++i) {
-        ui32 box_data;
-        ui32 box2_data;
-        box_data_get(&box, &box_data, BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, i);
-        box_data_get(&box2, &box2_data, BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, i);
+        si32 box_data;
+        si32 box2_data;
+        box_data_get(&box, &box_data, BT_INT32, BOX_DEVICE_CPU, nullptr, i);
+        box_data_get(&box2, &box2_data, BT_INT32, BOX_DEVICE_CPU, nullptr, i);
         ASSERT_EQ(i, box_data);
         ASSERT_EQ(i, box2_data);
     }
@@ -210,10 +210,10 @@ TEST(box_api_test, box_cursor)
     box_data box;
     box_clear(&box);
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BOX_TYPE_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BOX_DEVICE_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
     for (i = 0; i < 24; ++i) {
-        box_data_set(&box, &i, BOX_TYPE_UINT32, BOX_DEVICE_CPU, nullptr, i);
+        box_data_set(&box, &i, BT_INT32, BOX_DEVICE_CPU, nullptr, i);
     }
 
     i = 0;

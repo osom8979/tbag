@@ -20,9 +20,5 @@ TEST(LuaMachineTest, Default)
     ASSERT_EQ(0, lua._gettop());
     ASSERT_EQ(getTbagVersion().toString(), lua.getTbagVersion());
     ASSERT_EQ(0, lua._gettop());
-    ASSERT_EQ(LuaMachine::getDefaultLuaPath(), lua.getLuaPath());
-    ASSERT_EQ(0, lua._gettop());
-    ASSERT_EQ(LuaMachine::getDefaultLuaCPath(), lua.getLuaCPath());
-    ASSERT_EQ(0, lua._gettop());
 }
 

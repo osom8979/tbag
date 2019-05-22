@@ -34,34 +34,34 @@ STATIC_ASSERT_CHECK_SIZEOF(ui64 , 8);
 STATIC_ASSERT_CHECK_SIZEOF(fp32 , 4);
 STATIC_ASSERT_CHECK_SIZEOF(fp64 , 8);
 
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_NONE   , BT_NONE   );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_INT8   , BT_INT8   );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_INT16  , BT_INT16  );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_INT32  , BT_INT32  );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_INT64  , BT_INT64  );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_UINT8  , BT_UINT8  );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_UINT16 , BT_UINT16 );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_UINT32 , BT_UINT32 );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_UINT64 , BT_UINT64 );
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_FLOAT32, BT_FLOAT32);
-STATIC_ASSERT_CHECK_IS_EQUALS(BOX_TYPE_FLOAT64, BT_FLOAT64);
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_NONE   , BT_NONE   );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT8   , BT_INT8   );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT16  , BT_INT16  );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT32  , BT_INT32  );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT64  , BT_INT64  );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT8  , BT_UINT8  );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT16 , BT_UINT16 );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT32 , BT_UINT32 );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT64 , BT_UINT64 );
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_FLOAT32, BT_FLOAT32);
+STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_FLOAT64, BT_FLOAT64);
 
 bool box_support_type(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BOX_TYPE_NONE:    return false;
-    case BOX_TYPE_INT8:    return true;
-    case BOX_TYPE_INT16:   return true;
-    case BOX_TYPE_INT32:   return true;
-    case BOX_TYPE_INT64:   return true;
-    case BOX_TYPE_UINT8:   return true;
-    case BOX_TYPE_UINT16:  return true;
-    case BOX_TYPE_UINT32:  return true;
-    case BOX_TYPE_UINT64:  return true;
-    case BOX_TYPE_FLOAT32: return true;
-    case BOX_TYPE_FLOAT64: return true;
-    default:               return false;
+    case BT_NONE:    return false;
+    case BT_INT8:    return true;
+    case BT_INT16:   return true;
+    case BT_INT32:   return true;
+    case BT_INT64:   return true;
+    case BT_UINT8:   return true;
+    case BT_UINT16:  return true;
+    case BT_UINT32:  return true;
+    case BT_UINT64:  return true;
+    case BT_FLOAT32: return true;
+    case BT_FLOAT64: return true;
+    default:         return false;
     }
     // clang-format on
 }
@@ -85,18 +85,18 @@ char const * const box_get_type_name(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BOX_TYPE_NONE:    return "NONE";
-    case BOX_TYPE_INT8:    return "INT8";
-    case BOX_TYPE_INT16:   return "INT16";
-    case BOX_TYPE_INT32:   return "INT32";
-    case BOX_TYPE_INT64:   return "INT64";
-    case BOX_TYPE_UINT8:   return "UINT8";
-    case BOX_TYPE_UINT16:  return "UINT16";
-    case BOX_TYPE_UINT32:  return "UINT32";
-    case BOX_TYPE_UINT64:  return "UINT64";
-    case BOX_TYPE_FLOAT32: return "FLOAT32";
-    case BOX_TYPE_FLOAT64: return "FLOAT64";
-    default:               return "UNKNOWN";
+    case BT_NONE:    return "NONE";
+    case BT_INT8:    return "INT8";
+    case BT_INT16:   return "INT16";
+    case BT_INT32:   return "INT32";
+    case BT_INT64:   return "INT64";
+    case BT_UINT8:   return "UINT8";
+    case BT_UINT16:  return "UINT16";
+    case BT_UINT32:  return "UINT32";
+    case BT_UINT64:  return "UINT64";
+    case BT_FLOAT32: return "FLOAT32";
+    case BT_FLOAT64: return "FLOAT64";
+    default:         return "UNKNOWN";
     }
     // clang-format on
 }
@@ -120,18 +120,18 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BOX_TYPE_NONE:    return 0;
-    case BOX_TYPE_INT8:    return sizeof(si8);
-    case BOX_TYPE_INT16:   return sizeof(si16);
-    case BOX_TYPE_INT32:   return sizeof(si32);
-    case BOX_TYPE_INT64:   return sizeof(si64);
-    case BOX_TYPE_UINT8:   return sizeof(ui8);
-    case BOX_TYPE_UINT16:  return sizeof(ui16);
-    case BOX_TYPE_UINT32:  return sizeof(ui32);
-    case BOX_TYPE_UINT64:  return sizeof(ui64);
-    case BOX_TYPE_FLOAT32: return sizeof(fp32);
-    case BOX_TYPE_FLOAT64: return sizeof(fp64);
-    default:               return 0;
+    case BT_NONE:    return 0;
+    case BT_INT8:    return sizeof(si8);
+    case BT_INT16:   return sizeof(si16);
+    case BT_INT32:   return sizeof(si32);
+    case BT_INT64:   return sizeof(si64);
+    case BT_UINT8:   return sizeof(ui8);
+    case BT_UINT16:  return sizeof(ui16);
+    case BT_UINT32:  return sizeof(ui32);
+    case BT_UINT64:  return sizeof(ui64);
+    case BT_FLOAT32: return sizeof(fp32);
+    case BT_FLOAT64: return sizeof(fp64);
+    default:         return 0;
     }
     // clang-format on
 }
