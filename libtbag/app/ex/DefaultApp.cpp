@@ -83,13 +83,10 @@ public:
 
         virtual void load(Element const & element) override
         {
-            char const * xml_string = element.GetText();
-            if (xml_string != nullptr) {
-                if (impl->isEnableVerbose()) {
-                    std::cout << "Load <values> XML" << std::endl;
-                }
-                resource.readString(xml_string);
+            if (impl->isEnableVerbose()) {
+                std::cout << "Load <values> XML" << std::endl;
             }
+            resource.readElement(element);
         }
     };
 
@@ -113,15 +110,12 @@ public:
 
         virtual void load(Element const & element) override
         {
-            char const * xml_string = element.GetText();
-            if (xml_string != nullptr) {
-                if (impl->isEnableVerbose()) {
-                    std::cout << "Load <properties> XML" << std::endl;
-                }
-                assert(impl != nullptr);
-                if (impl->_params.properties_cb) {
-                    impl->_params.properties_cb(element);
-                }
+            if (impl->isEnableVerbose()) {
+                std::cout << "Load <properties> XML" << std::endl;
+            }
+            assert(impl != nullptr);
+            if (impl->_params.properties_cb) {
+                impl->_params.properties_cb(element);
             }
         }
     };
