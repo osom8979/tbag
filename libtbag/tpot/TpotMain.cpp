@@ -13,6 +13,8 @@
 
 #include <cstdlib>
 #include <sstream>
+#include <algorithm>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -76,7 +78,6 @@ TpotMain::TpotMain(std::string const & service_name,
                    int argc, char ** argv, char ** envs)
         : _default_app(default_app), _help_app()
 {
-    using namespace std::placeholders;
     _params.argc = argc;
     _params.argv = argv;
     _params.envs = envs;
@@ -96,9 +97,7 @@ TpotMain::TpotMain(std::string const & service_name,
     _params.local_scope_config_path = local_scope_config_path;
     _params.home_scope_config_path = home_scope_config_path;
     _params.global_scope_config_path = global_scope_config_path;
-    _params.options_cb = std::bind(&TpotMain::onOptions, this, _1);
-    _params.properties_cb = std::bind(&TpotMain::onInfo, this, _1);
-    _params.std_signal = std::bind(&TpotMain::onTerminateSignal, this, _1);
+    updateDefaultCallbacks();
 
     if (pots.empty()) {
         _manager.registerDefaultPots();
@@ -106,17 +105,64 @@ TpotMain::TpotMain(std::string const & service_name,
         _manager.pots() = pots;
     }
 
-    COMMENT("Update Remarks") {
-        std::stringstream ss;
-        ss << std::endl << _manager.getRemarks()
-           << libtbag::app::ex::ServiceApp::getDefaultRemarks();
-        _params.remarks = ss.str();
+    _params.remarks.clear();
+    appendManagerRemarks();
+}
+
+TpotMain::TpotMain(Params const & params, std::string const & default_app,
+                   bool append_manager_remarks, bool update_default_callbacks)
+        : TpotMain(params, Pots(), default_app, append_manager_remarks)
+{
+    // EMPTY.
+}
+
+TpotMain::TpotMain(Params const & params, Pots const & pots, std::string const & default_app,
+                   bool append_manager_remarks, bool update_default_callbacks)
+        : _default_app(default_app), _help_app(), _params(params)
+{
+    if (pots.empty()) {
+        _manager.registerDefaultPots();
+    } else {
+        _manager.pots() = pots;
+    }
+    if (append_manager_remarks) {
+        appendManagerRemarks();
+    }
+    if (update_default_callbacks) {
+        updateDefaultCallbacks();
     }
 }
 
 TpotMain::~TpotMain()
 {
     // EMPTY.
+}
+
+void TpotMain::appendManagerRemarks()
+{
+    appendManagerRemarks(_params);
+}
+
+void TpotMain::appendManagerRemarks(Params & params)
+{
+    std::stringstream ss;
+    ss << std::endl << _manager.getRemarks()
+       << libtbag::app::ex::ServiceApp::getDefaultRemarks();
+    params.remarks += ss.str();
+}
+
+void TpotMain::updateDefaultCallbacks()
+{
+    using namespace std::placeholders;
+    if (!_params.options_cb) {
+        _params.options_cb = std::bind(&TpotMain::onOptions, this, _1);
+    }
+    if (!_params.properties_cb) {
+        _params.properties_cb = std::bind(&TpotMain::onInfo, this, _1);
+    }
+    if (!_params.std_signal) {
+        _params.std_signal = std::bind(&TpotMain::onTerminateSignal, this, _1);
+    }
 }
 
 void TpotMain::createDefaultLogger()
@@ -143,10 +189,11 @@ void TpotMain::onTerminateSignal(int signum)
 void TpotMain::onOptions(HelpCommander & commander)
 {
     using namespace libtbag::string;
+    commander.insertDefault("help-app", &_help_app, std::string(),
+                            "Print a help message for the application.", "{app}");
     commander.insert("tlog", [&](Arguments const & args){
         createDefaultLogger();
     }, "Enable tbag log");
-    commander.insertDefault("help-app", &_help_app, "", "Print a help message for the application.", "{app}");
 }
 
 void TpotMain::onInfo(Element const & element)
