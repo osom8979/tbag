@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/3rd/tinyxml2/tinyxml2.h>
 
 #include <string>
 #include <vector>
@@ -52,6 +53,12 @@ public:
     TBAG_CONSTEXPR static char const * const getAttributeName  () TBAG_NOEXCEPT { return ATTRIBUTE_NAME;    }
 
 public:
+    using Document = tinyxml2::XMLDocument;
+    using Printer  = tinyxml2::XMLPrinter;
+    using Element  = tinyxml2::XMLElement;
+    using Node     = tinyxml2::XMLNode;
+
+public:
     using Map = std::unordered_map<std::string, std::string>;
 
 private:
@@ -62,9 +69,9 @@ private:
 
 public:
     Resource();
-    explicit Resource(std::string const & root);
-    explicit Resource(std::string const & root, std::string const & tag);
-    explicit Resource(std::string const & root, std::string const & tag, std::string const & attr);
+    Resource(std::string const & root);
+    Resource(std::string const & root, std::string const & tag);
+    Resource(std::string const & root, std::string const & tag, std::string const & attr);
     Resource(Resource const & obj);
     Resource(Resource && obj) TBAG_NOEXCEPT;
     virtual ~Resource();
@@ -103,6 +110,8 @@ public:
 public:
     bool readFile(std::string const & path);
     bool readString(std::string const & xml);
+    bool readDocument(Document const & document);
+    bool readElement(Element const & element);
 
 public:
     bool saveFile(std::string const & path) const;
@@ -206,23 +215,18 @@ public:
     std::string const & at(std::string const & key) const;
 
 public:
-    static Map readMapFromXmlString(std::string const & xml,
-                                    std::string const & root,
-                                    std::string const & tag,
-                                    std::string const & attr);
-    static Map readMapFromXmlFile(std::string const & path,
-                                  std::string const & root,
-                                  std::string const & tag,
+    static Map readMapFromXmlString(std::string const & xml, std::string const & root,
+                                    std::string const & tag, std::string const & attr);
+    static Map readMapFromXmlFile(std::string const & path, std::string const & root,
+                                  std::string const & tag, std::string const & attr);
+    static Map readFromXmlDocument(Document const & doc, std::string const & root,
+                                   std::string const & tag, std::string const & attr);
+    static Map readFromXmlElement(Element const & elem, std::string const & tag,
                                   std::string const & attr);
-    static bool saveToXmlFile(std::string const & path,
-                              std::string const & root,
-                              std::string const & tag,
-                              std::string const & attr,
-                              Map const & map);
-    static std::string getXmlString(std::string const & root,
-                                    std::string const & tag,
-                                    std::string const & attr,
-                                    Map const & map);
+    static bool saveToXmlFile(std::string const & path, std::string const & root,
+                              std::string const & tag, std::string const & attr, Map const & map);
+    static std::string getXmlString(std::string const & root, std::string const & tag,
+                                    std::string const & attr, Map const & map);
 
 public:
     static Resource createFromXmlString(std::string const & xml,

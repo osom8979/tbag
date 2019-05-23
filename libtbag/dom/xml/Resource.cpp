@@ -8,7 +8,6 @@
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
-#include <libtbag/3rd/tinyxml2/tinyxml2.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -16,46 +15,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace dom {
 namespace xml {
-
-// ----------------------------
-/* inline */ namespace __impl {
-// ----------------------------
-
-// TinyXML2 operators.
-using Document = tinyxml2::XMLDocument;
-using Printer  = tinyxml2::XMLPrinter;
-using Element  = tinyxml2::XMLElement;
-using Node     = tinyxml2::XMLNode;
-
-static Resource::Map readFromXmlDocument(Document const & doc,
-                                         std::string const & root_name,
-                                         std::string const & tag,
-                                         std::string const & attribute)
-{
-    Element const * root = doc.FirstChildElement(root_name.c_str());
-    if (root == nullptr) {
-        return Resource::Map();
-    }
-
-    Element const * cursor = root->FirstChildElement(tag.c_str());
-    Resource::Map map;
-
-    while (cursor != nullptr) {
-        map.insert(std::make_pair(std::string(cursor->Attribute(attribute.c_str()))
-                , std::string(cursor->GetText())));
-        cursor = cursor->NextSiblingElement(tag.c_str());
-    }
-
-    return map;
-}
-
-// ------------------
-} // namespace __impl
-// ------------------
-
-// ------------------------
-// Resource implementation.
-// ------------------------
 
 Resource::Resource() : Resource(getRootTagName())
 {
@@ -152,13 +111,25 @@ std::vector<std::string> Resource::keys() const
 bool Resource::readFile(std::string const & path)
 {
     _map = readMapFromXmlFile(path, _root, _tag, _attr);
-    return (_map.empty() == false);
+    return !_map.empty();
 }
 
 bool Resource::readString(std::string const & xml)
 {
     _map = readMapFromXmlString(xml, _root, _tag, _attr);
-    return (_map.empty() == false);
+    return !_map.empty();
+}
+
+bool Resource::readDocument(Document const & document)
+{
+    _map = readFromXmlDocument(document, _root, _tag, _attr);
+    return !_map.empty();
+}
+
+bool Resource::readElement(Element const & element)
+{
+    _map = readFromXmlElement(element, _tag, _attr);
+    return !_map.empty();
 }
 
 bool Resource::saveFile(std::string const & path) const
@@ -229,45 +200,60 @@ std::string const & Resource::at(std::string const & key) const
     return _map.at(key);
 }
 
-// ---------------
-// static methods.
-// ---------------
-
-Resource::Map Resource::readMapFromXmlString(std::string const & xml,
-                                             std::string const & root,
-                                             std::string const & tag,
-                                             std::string const & attr)
+Resource::Map Resource::readMapFromXmlString(std::string const & xml, std::string const & root,
+                                             std::string const & tag, std::string const & attr)
 {
-    __impl::Document doc;
+    Document doc;
     if (doc.Parse(xml.c_str()) == tinyxml2::XML_NO_ERROR) {
-        return __impl::readFromXmlDocument(doc, root, tag, attr);
+        return readFromXmlDocument(doc, root, tag, attr);
     }
     return Map();
 }
 
-Resource::Map Resource::readMapFromXmlFile(std::string const & path,
-                                           std::string const & root,
-                                           std::string const & tag,
-                                           std::string const & attr)
+Resource::Map Resource::readMapFromXmlFile(std::string const & path, std::string const & root,
+                                           std::string const & tag, std::string const & attr)
 {
-    __impl::Document doc;
+    Document doc;
     if (doc.LoadFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
-        return __impl::readFromXmlDocument(doc, root, tag, attr);
+        return readFromXmlDocument(doc, root, tag, attr);
     }
     return Map();
 }
 
-bool Resource::saveToXmlFile(std::string const & path,
-                             std::string const & root,
-                             std::string const & tag,
-                             std::string const & attr,
-                             Map const & map)
+Resource::Map Resource::readFromXmlDocument(Document const & doc, std::string const & root,
+                                            std::string const & tag, std::string const & attr)
 {
-    __impl::Document doc;
-    __impl::Node * node = doc.InsertFirstChild(doc.NewElement(root.c_str()));
+    auto const * elem = doc.FirstChildElement(root.c_str());
+    if (elem == nullptr) {
+        return Map();
+    }
+    return readFromXmlElement(*elem, tag, attr);
+}
+
+Resource::Map Resource::readFromXmlElement(Element const & elem, std::string const & tag, std::string const & attr)
+{
+    Resource::Map map;
+    auto const * child_elem = elem.FirstChildElement(tag.c_str());
+    while (child_elem != nullptr) {
+        auto const * name = child_elem->Attribute(attr.c_str());
+        auto const * text = child_elem->GetText();
+        if (name == nullptr || text == nullptr) {
+            break;
+        }
+        map.insert(std::make_pair(std::string(name) , std::string(text)));
+        child_elem = child_elem->NextSiblingElement(tag.c_str());
+    }
+    return map;
+}
+
+bool Resource::saveToXmlFile(std::string const & path, std::string const & root,
+                             std::string const & tag, std::string const & attr, Map const & map)
+{
+    Document doc;
+    Node * node = doc.InsertFirstChild(doc.NewElement(root.c_str()));
 
     for (auto & cursor : map) {
-        __impl::Element * element = doc.NewElement(tag.c_str());
+        Element * element = doc.NewElement(tag.c_str());
         element->SetAttribute(attr.c_str(), cursor.first.c_str());
         element->SetText(cursor.second.c_str());
         node->InsertEndChild(element);
@@ -276,22 +262,20 @@ bool Resource::saveToXmlFile(std::string const & path,
     return (doc.SaveFile(path.c_str(), isCompactXmlFile()) == tinyxml2::XML_NO_ERROR);
 }
 
-std::string Resource::getXmlString(std::string const & root,
-                                   std::string const & tag,
-                                   std::string const & attr,
-                                   Map const & map)
+std::string Resource::getXmlString(std::string const & root, std::string const & tag,
+                                   std::string const & attr, Map const & map)
 {
-    __impl::Document doc;
-    __impl::Node * node = doc.InsertFirstChild(doc.NewElement(root.c_str()));
+    Document doc;
+    Node * node = doc.InsertFirstChild(doc.NewElement(root.c_str()));
 
     for (auto & cursor : map) {
-        __impl::Element * element = doc.NewElement(tag.c_str());
+        Element * element = doc.NewElement(tag.c_str());
         element->SetAttribute(attr.c_str(), cursor.first.c_str());
         element->SetText(cursor.second.c_str());
         node->InsertEndChild(element);
     }
 
-    __impl::Printer printer;
+    Printer printer;
     if (doc.Accept(&printer)) {
         return std::string(printer.CStr(), printer.CStr() + printer.CStrSize());
     } else {
