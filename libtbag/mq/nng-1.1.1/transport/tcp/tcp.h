@@ -1,0 +1,6 @@
+#ifndef NNG_TRANSPORT_TCP_TCP_H
+#define NNG_TRANSPORT_TCP_TCP_H
+
+// EMPTY.
+
+#endif // NNG_TRANSPORT_TCP_TCP_H

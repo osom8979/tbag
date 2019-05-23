@@ -7,6 +7,38 @@
 
 // [WARNING] Don't change the order of including.
 #include <nng/nng.h>
+
+// nng-protocol
+#include <nng/protocol/bus0/bus.h>
+#ifndef nng_pair_open
+#define nng_pair_open // Don't use this macro.
+#endif
+#ifndef nng_pair_open_raw
+#define nng_pair_open_raw // Don't use this macro.
+#endif
+#include <nng/protocol/pair0/pair.h>
+#include <nng/protocol/pair1/pair.h>
+#include <nng/protocol/pipeline0/pull.h>
+#include <nng/protocol/pipeline0/push.h>
+#include <nng/protocol/pubsub0/pub.h>
+#include <nng/protocol/pubsub0/sub.h>
+#include <nng/protocol/reqrep0/rep.h>
+#include <nng/protocol/reqrep0/req.h>
+#include <nng/protocol/survey0/respond.h>
+#include <nng/protocol/survey0/survey.h>
+
+// nng-supplemental
+#include <nng/supplemental/http/http.h>
+#include <nng/supplemental/tls/tls.h>
+#include <nng/supplemental/util/options.h>
+#include <nng/supplemental/util/platform.h>
+
+// nng-transport
+#include <nng/transport/inproc/inproc.h>
+#include <nng/transport/ipc/ipc.h>
+#include <nng/transport/tcp/tcp.h>
+#include <nng/transport/ws/websocket.h>
+
 #include <libtbag/mq/NngBypass.hpp>
 
 // -------------------
@@ -949,6 +981,661 @@ char const * nng_version()
 {
     return ::nng_version();
 }
+
+# /************/
+# /* protocol */
+# /************/
+
+int nng_bus0_open(nng_socket * v0)
+{
+    return ::nng_bus0_open(v0);
+}
+
+int nng_bus0_open_raw(nng_socket * v0)
+{
+    return ::nng_bus0_open_raw(v0);
+}
+
+int nng_pair0_open(nng_socket * v0)
+{
+    return ::nng_pair0_open(v0);
+}
+
+int nng_pair0_open_raw(nng_socket * v0)
+{
+    return ::nng_pair0_open_raw(v0);
+}
+
+int nng_pair1_open(nng_socket * v0)
+{
+    return ::nng_pair1_open(v0);
+}
+
+int nng_pair1_open_raw(nng_socket * v0)
+{
+    return ::nng_pair1_open_raw(v0);
+}
+
+int nng_pull0_open(nng_socket * v0)
+{
+    return ::nng_pull0_open(v0);
+}
+
+int nng_pull0_open_raw(nng_socket * v0)
+{
+    return ::nng_pull0_open_raw(v0);
+}
+
+int nng_push0_open(nng_socket * v0)
+{
+    return ::nng_push0_open(v0);
+}
+
+int nng_push0_open_raw(nng_socket * v0)
+{
+    return ::nng_push0_open_raw(v0);
+}
+
+int nng_pub0_open(nng_socket * v0)
+{
+    return ::nng_pub0_open(v0);
+}
+
+int nng_pub0_open_raw(nng_socket * v0)
+{
+    return ::nng_pub0_open_raw(v0);
+}
+
+int nng_sub0_open(nng_socket * v0)
+{
+    return ::nng_sub0_open(v0);
+}
+
+int nng_sub0_open_raw(nng_socket * v0)
+{
+    return ::nng_sub0_open_raw(v0);
+}
+
+int nng_rep0_open(nng_socket * v0)
+{
+    return ::nng_rep0_open(v0);
+}
+
+int nng_rep0_open_raw(nng_socket * v0)
+{
+    return ::nng_rep0_open_raw(v0);
+}
+
+int nng_req0_open(nng_socket * v0)
+{
+    return ::nng_req0_open(v0);
+}
+
+int nng_req0_open_raw(nng_socket * v0)
+{
+    return ::nng_req0_open_raw(v0);
+}
+
+int nng_respondent0_open(nng_socket * v0)
+{
+    return ::nng_respondent0_open(v0);
+}
+
+int nng_respondent0_open_raw(nng_socket * v0)
+{
+    return ::nng_respondent0_open_raw(v0);
+}
+
+int nng_surveyor0_open(nng_socket * v0)
+{
+    return ::nng_surveyor0_open(v0);
+}
+
+int nng_surveyor0_open_raw(nng_socket * v0)
+{
+    return ::nng_surveyor0_open_raw(v0);
+}
+
+# /*********************/
+# /* supplemental/http */
+# /*********************/
+
+int nng_http_req_alloc(nng_http_req ** v0, nng_url const * v1)
+{
+    return ::nng_http_req_alloc(v0, v1);
+}
+
+void nng_http_req_free(nng_http_req * v0)
+{
+    ::nng_http_req_free(v0);
+}
+
+char const * nng_http_req_get_method(nng_http_req * v0)
+{
+    return ::nng_http_req_get_method(v0);
+}
+
+char const * nng_http_req_get_version(nng_http_req * v0)
+{
+    return ::nng_http_req_get_version(v0);
+}
+
+char const * nng_http_req_get_uri(nng_http_req * v0)
+{
+    return ::nng_http_req_get_uri(v0);
+}
+
+int nng_http_req_set_header(nng_http_req * v0, char const * v1, char const * v2)
+{
+    return ::nng_http_req_set_header(v0, v1, v2);
+}
+
+int nng_http_req_add_header(nng_http_req * v0, char const * v1, char const * v2)
+{
+    return ::nng_http_req_add_header(v0, v1, v2);
+}
+
+int nng_http_req_del_header(nng_http_req * v0, char const * v1)
+{
+    return ::nng_http_req_del_header(v0, v1);
+}
+
+char const * nng_http_req_get_header(nng_http_req * v0, char const * v1)
+{
+    return ::nng_http_req_get_header(v0, v1);
+}
+
+int nng_http_req_set_method(nng_http_req * v0, char const * v1)
+{
+    return ::nng_http_req_set_method(v0, v1);
+}
+
+int nng_http_req_set_version(nng_http_req * v0, char const * v1)
+{
+    return ::nng_http_req_set_version(v0, v1);
+}
+
+int nng_http_req_set_uri(nng_http_req * v0, char const * v1)
+{
+    return ::nng_http_req_set_uri(v0, v1);
+}
+
+int nng_http_req_set_data(nng_http_req * v0, void const * v1, size_t v2)
+{
+    return ::nng_http_req_set_data(v0, v1, v2);
+}
+
+int nng_http_req_copy_data(nng_http_req * v0, void const * v1, size_t v2)
+{
+    return ::nng_http_req_copy_data(v0, v1, v2);
+}
+
+void nng_http_req_get_data(nng_http_req * v0, void ** v1, size_t * v2)
+{
+    ::nng_http_req_get_data(v0, v1, v2);
+}
+
+int nng_http_res_alloc(nng_http_res ** v0)
+{
+    return ::nng_http_res_alloc(v0);
+}
+
+int nng_http_res_alloc_error(nng_http_res ** v0, uint16_t v1)
+{
+    return ::nng_http_res_alloc_error(v0, v1);
+}
+
+void nng_http_res_free(nng_http_res * v0)
+{
+    ::nng_http_res_free(v0);
+}
+
+uint16_t nng_http_res_get_status(nng_http_res * v0)
+{
+    return ::nng_http_res_get_status(v0);
+}
+
+int nng_http_res_set_status(nng_http_res * v0, uint16_t v1)
+{
+    return ::nng_http_res_set_status(v0, v1);
+}
+
+char const * nng_http_res_get_reason(nng_http_res * v0)
+{
+    return ::nng_http_res_get_reason(v0);
+}
+
+int nng_http_res_set_reason(nng_http_res * v0, char const * v1)
+{
+    return ::nng_http_res_set_reason(v0, v1);
+}
+
+int nng_http_res_set_header(nng_http_res * v0, char const * v1, char const * v2)
+{
+    return ::nng_http_res_set_header(v0, v1, v2);
+}
+
+int nng_http_res_add_header(nng_http_res * v0, char const * v1, char const * v2)
+{
+    return ::nng_http_res_add_header(v0, v1, v2);
+}
+
+int nng_http_res_del_header(nng_http_res * v0, char const * v1)
+{
+    return ::nng_http_res_del_header(v0, v1);
+}
+
+char const * nng_http_res_get_header(nng_http_res * v0, char const * v1)
+{
+    return ::nng_http_res_get_header(v0, v1);
+}
+
+int nng_http_res_set_version(nng_http_res * v0, char const * v1)
+{
+    return ::nng_http_res_set_version(v0, v1);
+}
+
+char const * nng_http_res_get_version(nng_http_res * v0)
+{
+    return ::nng_http_res_get_version(v0);
+}
+
+void nng_http_res_get_data(nng_http_res * v0, void ** v1, size_t * v2)
+{
+    ::nng_http_res_get_data(v0, v1, v2);
+}
+
+int nng_http_res_set_data(nng_http_res * v0, void const * v1, size_t v2)
+{
+    return ::nng_http_res_set_data(v0, v1, v2);
+}
+
+int nng_http_res_copy_data(nng_http_res * v0, void const * v1, size_t v2)
+{
+    return ::nng_http_res_copy_data(v0, v1, v2);
+}
+
+void nng_http_conn_close(nng_http_conn * v0)
+{
+    ::nng_http_conn_close(v0);
+}
+
+void nng_http_conn_read(nng_http_conn * v0, nng_aio * v1)
+{
+    ::nng_http_conn_read(v0, v1);
+}
+
+void nng_http_conn_read_all(nng_http_conn * v0, nng_aio * v1)
+{
+    ::nng_http_conn_read_all(v0, v1);
+}
+
+void nng_http_conn_write(nng_http_conn * v0, nng_aio * v1)
+{
+    ::nng_http_conn_write(v0, v1);
+}
+
+void nng_http_conn_write_all(nng_http_conn * v0, nng_aio * v1)
+{
+    ::nng_http_conn_write_all(v0, v1);
+}
+
+void nng_http_conn_write_req(nng_http_conn * v0, nng_http_req * v1, nng_aio * v2)
+{
+    ::nng_http_conn_write_req(v0, v1, v2);
+}
+
+void nng_http_conn_write_res(nng_http_conn * v0, nng_http_res * v1, nng_aio * v2)
+{
+    ::nng_http_conn_write_res(v0, v1, v2);
+}
+
+void nng_http_conn_read_req(nng_http_conn * v0, nng_http_req * v1, nng_aio * v2)
+{
+    ::nng_http_conn_read_req(v0, v1, v2);
+}
+
+void nng_http_conn_read_res(nng_http_conn * v0, nng_http_res * v1, nng_aio * v2)
+{
+    ::nng_http_conn_read_res(v0, v1, v2);
+}
+
+void nng_http_req_reset(nng_http_req * v0)
+{
+    ::nng_http_req_reset(v0);
+}
+
+void nng_http_res_reset(nng_http_res * v0)
+{
+    ::nng_http_res_reset(v0);
+}
+
+int nng_http_handler_alloc(nng_http_handler ** v0, char const * v1, void (*v2)(nng_aio *))
+{
+    return ::nng_http_handler_alloc(v0, v1, v2);
+}
+
+void nng_http_handler_free(nng_http_handler * v0)
+{
+    ::nng_http_handler_free(v0);
+}
+
+int nng_http_handler_alloc_file(nng_http_handler ** v0, char const * v1, char const * v2)
+{
+    return ::nng_http_handler_alloc_file(v0, v1, v2);
+}
+
+int nng_http_handler_alloc_static(nng_http_handler ** v0, char const * v1, void const * v2, size_t v3, char const * v4)
+{
+    return ::nng_http_handler_alloc_static(v0, v1, v2, v3, v4);
+}
+
+int nng_http_handler_alloc_redirect(nng_http_handler ** v0, char const * v1, uint16_t v2, char const * v3)
+{
+    return ::nng_http_handler_alloc_redirect(v0, v1, v2, v3);
+}
+
+int nng_http_handler_alloc_directory(nng_http_handler ** v0, char const * v1, char const * v2)
+{
+    return ::nng_http_handler_alloc_directory(v0, v1, v2);
+}
+
+int nng_http_handler_set_method(nng_http_handler * v0, char const * v1)
+{
+    return ::nng_http_handler_set_method(v0, v1);
+}
+
+int nng_http_handler_set_host(nng_http_handler * v0, char const * v1)
+{
+    return ::nng_http_handler_set_host(v0, v1);
+}
+
+int nng_http_handler_collect_body(nng_http_handler * v0, bool v1, size_t v2)
+{
+    return ::nng_http_handler_collect_body(v0, v1, v2);
+}
+
+int nng_http_handler_set_tree(nng_http_handler * v0)
+{
+    return ::nng_http_handler_set_tree(v0);
+}
+
+int nng_http_handler_set_data(nng_http_handler * v0, void * v1, void (*v2)(void *))
+{
+    return ::nng_http_handler_set_data(v0, v1, v2);
+}
+
+void * nng_http_handler_get_data(nng_http_handler * v0)
+{
+    return ::nng_http_handler_get_data(v0);
+}
+
+int nng_http_server_hold(nng_http_server ** v0, nng_url const * v1)
+{
+    return ::nng_http_server_hold(v0, v1);
+}
+
+void nng_http_server_release(nng_http_server * v0)
+{
+    ::nng_http_server_release(v0);
+}
+
+int nng_http_server_start(nng_http_server * v0)
+{
+    return ::nng_http_server_start(v0);
+}
+
+void nng_http_server_stop(nng_http_server * v0)
+{
+    ::nng_http_server_stop(v0);
+}
+
+int nng_http_server_add_handler(nng_http_server * v0, nng_http_handler * v1)
+{
+    return ::nng_http_server_add_handler(v0, v1);
+}
+
+int nng_http_server_del_handler(nng_http_server * v0, nng_http_handler * v1)
+{
+    return ::nng_http_server_del_handler(v0, v1);
+}
+
+int nng_http_server_set_tls(nng_http_server * v0, struct nng_tls_config * v1)
+{
+    return ::nng_http_server_set_tls(v0, v1);
+}
+
+int nng_http_server_get_tls(nng_http_server * v0, struct nng_tls_config ** v1)
+{
+    return ::nng_http_server_get_tls(v0, v1);
+}
+
+int nng_http_server_set_error_page(nng_http_server * v0, uint16_t v1, char const * v2)
+{
+    return ::nng_http_server_set_error_page(v0, v1, v2);
+}
+
+int nng_http_server_set_error_file(nng_http_server * v0, uint16_t v1, char const * v2)
+{
+    return ::nng_http_server_set_error_file(v0, v1, v2);
+}
+
+int nng_http_server_res_error(nng_http_server * v0, nng_http_res * v1)
+{
+    return ::nng_http_server_res_error(v0, v1);
+}
+
+int nng_http_hijack(nng_http_conn * v0)
+{
+    return ::nng_http_hijack(v0);
+}
+
+int nng_http_client_alloc(nng_http_client ** v0, nng_url const * v1)
+{
+    return ::nng_http_client_alloc(v0, v1);
+}
+
+void nng_http_client_free(nng_http_client * v0)
+{
+    ::nng_http_client_free(v0);
+}
+
+int nng_http_client_set_tls(nng_http_client * v0, struct nng_tls_config * v1)
+{
+    return ::nng_http_client_set_tls(v0, v1);
+}
+
+int nng_http_client_get_tls(nng_http_client * v0, struct nng_tls_config ** v1)
+{
+    return ::nng_http_client_get_tls(v0, v1);
+}
+
+void nng_http_client_connect(nng_http_client * v0, nng_aio * v1)
+{
+    ::nng_http_client_connect(v0, v1);
+}
+
+void nng_http_conn_transact(nng_http_conn * v0, nng_http_req * v1, nng_http_res * v2, nng_aio * v3)
+{
+    ::nng_http_conn_transact(v0, v1, v2, v3);
+}
+
+void nng_http_client_transact(nng_http_client * v0, nng_http_req * v1, nng_http_res * v2, nng_aio * v3)
+{
+    ::nng_http_client_transact(v0, v1, v2, v3);
+}
+
+# /********************/
+# /* supplemental/tls */
+# /********************/
+
+int nng_tls_config_alloc(nng_tls_config ** v0, nng_tls_mode v1)
+{
+    return ::nng_tls_config_alloc(v0, v1);
+}
+
+void nng_tls_config_hold(nng_tls_config * v0)
+{
+    ::nng_tls_config_hold(v0);
+}
+
+void nng_tls_config_free(nng_tls_config * v0)
+{
+    ::nng_tls_config_free(v0);
+}
+
+int nng_tls_config_server_name(nng_tls_config * v0, char const * v1)
+{
+    return ::nng_tls_config_server_name(v0, v1);
+}
+
+int nng_tls_config_ca_chain(nng_tls_config * v0, char const * v1, char const * v2)
+{
+    return ::nng_tls_config_ca_chain(v0, v1, v2);
+}
+
+int nng_tls_config_own_cert(nng_tls_config * v0, char const * v1, char const * v2, char const * v3)
+{
+    return ::nng_tls_config_own_cert(v0, v1, v2, v3);
+}
+
+int nng_tls_config_key(nng_tls_config * v0, const uint8_t * v1, size_t v2)
+{
+    return ::nng_tls_config_key(v0, v1, v2);
+}
+
+int nng_tls_config_pass(nng_tls_config * v0, char const * v1)
+{
+    return ::nng_tls_config_pass(v0, v1);
+}
+
+int nng_tls_config_auth_mode(nng_tls_config * v0, nng_tls_auth_mode v1)
+{
+    return ::nng_tls_config_auth_mode(v0, v1);
+}
+
+int nng_tls_config_ca_file(nng_tls_config * v0, char const * v1)
+{
+    return ::nng_tls_config_ca_file(v0, v1);
+}
+
+int nng_tls_config_cert_key_file(nng_tls_config * v0, char const * v1, char const * v2)
+{
+    return ::nng_tls_config_cert_key_file(v0, v1, v2);
+}
+
+# /*********************/
+# /* supplemental/util */
+# /*********************/
+
+int nng_opts_parse(int argc, char * const * argv,
+                   nng_optspec const * opts,
+                   int * val,
+                   char ** optarg,
+                   int * optidx)
+{
+    return ::nng_opts_parse(argc, argv, opts, val, optarg, optidx);
+}
+
+nng_time nng_clock()
+{
+    return ::nng_clock();
+}
+
+void nng_msleep(nng_duration v0)
+{
+    ::nng_msleep(v0);
+}
+
+int nng_thread_create(nng_thread ** v0, void (*v1)(void *), void * v2)
+{
+    return ::nng_thread_create(v0, v1, v2);
+}
+
+void nng_thread_destroy(nng_thread * v0)
+{
+    ::nng_thread_destroy(v0);
+}
+
+int nng_mtx_alloc(nng_mtx ** v0)
+{
+    return ::nng_mtx_alloc(v0);
+}
+
+void nng_mtx_free(nng_mtx * v0)
+{
+    ::nng_mtx_free(v0);
+}
+
+void nng_mtx_lock(nng_mtx * v0)
+{
+    ::nng_mtx_lock(v0);
+}
+
+void nng_mtx_unlock(nng_mtx * v0)
+{
+    ::nng_mtx_unlock(v0);
+}
+
+int nng_cv_alloc(nng_cv ** v0, nng_mtx * v1)
+{
+    return ::nng_cv_alloc(v0, v1);
+}
+
+void nng_cv_free(nng_cv * v0)
+{
+    ::nng_cv_free(v0);
+}
+
+void nng_cv_wait(nng_cv * v0)
+{
+    ::nng_cv_wait(v0);
+}
+
+int nng_cv_until(nng_cv * v0, nng_time v1)
+{
+    return ::nng_cv_until(v0, v1);
+}
+
+void nng_cv_wake(nng_cv * v0)
+{
+    ::nng_cv_wake(v0);
+}
+
+void nng_cv_wake1(nng_cv * v0)
+{
+    ::nng_cv_wake1(v0);
+}
+
+uint32_t nng_random()
+{
+    return ::nng_random();
+}
+
+//int nng_inproc_register()
+//{
+//    return ::nng_inproc_register();
+//}
+//
+//int nng_ipc_register()
+//{
+//    return ::nng_ipc_register();
+//}
+//
+//int nng_tcp_register()
+//{
+//    return ::nng_tcp_register();
+//}
+//
+//int nng_ws_register()
+//{
+//    return ::nng_ws_register();
+//}
+//
+//int nng_wss_register()
+//{
+//    return ::nng_wss_register();
+//}
 
 } // namespace mq
 

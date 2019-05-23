@@ -194,3 +194,9 @@ nng_tls_config_free(nng_tls_config *cfg)
 {
 	NNI_ARG_UNUSED(cfg);
 }
+
+void
+nng_tls_config_hold(nng_tls_config *cfg)
+{
+    NNI_ARG_UNUSED(cfg);
+}

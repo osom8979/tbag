@@ -17,6 +17,37 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/mq/nng-1.1.1/nng.h>
 
+// nng-protocol
+#include <libtbag/mq/nng-1.1.1/protocol/bus0/bus.h>
+#ifndef nng_pair_open
+#define nng_pair_open // Don't use this macro.
+#endif
+#ifndef nng_pair_open_raw
+#define nng_pair_open_raw // Don't use this macro.
+#endif
+#include <libtbag/mq/nng-1.1.1/protocol/pair0/pair.h>
+#include <libtbag/mq/nng-1.1.1/protocol/pair1/pair.h>
+#include <libtbag/mq/nng-1.1.1/protocol/pipeline0/pull.h>
+#include <libtbag/mq/nng-1.1.1/protocol/pipeline0/push.h>
+#include <libtbag/mq/nng-1.1.1/protocol/pubsub0/pub.h>
+#include <libtbag/mq/nng-1.1.1/protocol/pubsub0/sub.h>
+#include <libtbag/mq/nng-1.1.1/protocol/reqrep0/rep.h>
+#include <libtbag/mq/nng-1.1.1/protocol/reqrep0/req.h>
+#include <libtbag/mq/nng-1.1.1/protocol/survey0/respond.h>
+#include <libtbag/mq/nng-1.1.1/protocol/survey0/survey.h>
+
+// nng-supplemental
+#include <libtbag/mq/nng-1.1.1/supplemental/http/http.h>
+#include <libtbag/mq/nng-1.1.1/supplemental/tls/tls.h>
+#include <libtbag/mq/nng-1.1.1/supplemental/util/options.h>
+#include <libtbag/mq/nng-1.1.1/supplemental/util/platform.h>
+
+// nng-transport
+#include <libtbag/mq/nng-1.1.1/transport/inproc/inproc.h>
+#include <libtbag/mq/nng-1.1.1/transport/ipc/ipc.h>
+#include <libtbag/mq/nng-1.1.1/transport/tcp/tcp.h>
+#include <libtbag/mq/nng-1.1.1/transport/ws/websocket.h>
+
 #include <cstdbool>
 #include <cstddef>
 #include <cstdint>
@@ -232,6 +263,178 @@ TBAG_API void nng_url_free(nng_url *);
 TBAG_API int  nng_url_clone(nng_url **, const nng_url *);
 
 TBAG_API char const * nng_version();
+
+# /************/
+# /* protocol */
+# /************/
+
+TBAG_API int nng_bus0_open(nng_socket *);
+TBAG_API int nng_bus0_open_raw(nng_socket *);
+
+TBAG_API int nng_pair0_open(nng_socket *);
+TBAG_API int nng_pair0_open_raw(nng_socket *);
+
+TBAG_API int nng_pair1_open(nng_socket *);
+TBAG_API int nng_pair1_open_raw(nng_socket *);
+
+TBAG_API int nng_pull0_open(nng_socket *);
+TBAG_API int nng_pull0_open_raw(nng_socket *);
+
+TBAG_API int nng_push0_open(nng_socket *);
+TBAG_API int nng_push0_open_raw(nng_socket *);
+
+TBAG_API int nng_pub0_open(nng_socket *);
+TBAG_API int nng_pub0_open_raw(nng_socket *);
+
+TBAG_API int nng_sub0_open(nng_socket *);
+TBAG_API int nng_sub0_open_raw(nng_socket *);
+
+TBAG_API int nng_rep0_open(nng_socket *);
+TBAG_API int nng_rep0_open_raw(nng_socket *);
+
+TBAG_API int nng_req0_open(nng_socket *);
+TBAG_API int nng_req0_open_raw(nng_socket *);
+
+TBAG_API int nng_respondent0_open(nng_socket *);
+TBAG_API int nng_respondent0_open_raw(nng_socket *);
+
+TBAG_API int nng_surveyor0_open(nng_socket *);
+TBAG_API int nng_surveyor0_open_raw(nng_socket *);
+
+# /*********************/
+# /* supplemental/http */
+# /*********************/
+
+TBAG_API int          nng_http_req_alloc(nng_http_req **, nng_url const *);
+TBAG_API void         nng_http_req_free(nng_http_req *);
+TBAG_API char const * nng_http_req_get_method(nng_http_req *);
+TBAG_API char const * nng_http_req_get_version(nng_http_req *);
+TBAG_API char const * nng_http_req_get_uri(nng_http_req *);
+TBAG_API int          nng_http_req_set_header(nng_http_req *, char const *, char const *);
+TBAG_API int          nng_http_req_add_header(nng_http_req *, char const *, char const *);
+TBAG_API int          nng_http_req_del_header(nng_http_req *, char const *);
+TBAG_API char const * nng_http_req_get_header(nng_http_req *, char const *);
+TBAG_API int          nng_http_req_set_method(nng_http_req *, char const *);
+TBAG_API int          nng_http_req_set_version(nng_http_req *, char const *);
+TBAG_API int          nng_http_req_set_uri(nng_http_req *, char const *);
+TBAG_API int          nng_http_req_set_data(nng_http_req *, void const *, size_t);
+TBAG_API int          nng_http_req_copy_data(nng_http_req *, void const *, size_t);
+TBAG_API void         nng_http_req_get_data(nng_http_req *, void **, size_t *);
+
+TBAG_API int          nng_http_res_alloc(nng_http_res **);
+TBAG_API int          nng_http_res_alloc_error(nng_http_res **, uint16_t);
+TBAG_API void         nng_http_res_free(nng_http_res *);
+TBAG_API uint16_t     nng_http_res_get_status(nng_http_res *);
+TBAG_API int          nng_http_res_set_status(nng_http_res *, uint16_t);
+TBAG_API char const * nng_http_res_get_reason(nng_http_res *);
+TBAG_API int          nng_http_res_set_reason(nng_http_res *, char const *);
+TBAG_API int          nng_http_res_set_header(nng_http_res *, char const *, char const *);
+TBAG_API int          nng_http_res_add_header(nng_http_res *, char const *, char const *);
+TBAG_API int          nng_http_res_del_header(nng_http_res *, char const *);
+TBAG_API char const * nng_http_res_get_header(nng_http_res *, char const *);
+TBAG_API int          nng_http_res_set_version(nng_http_res *, char const *);
+TBAG_API char const * nng_http_res_get_version(nng_http_res *);
+TBAG_API void         nng_http_res_get_data(nng_http_res *, void **, size_t *);
+TBAG_API int          nng_http_res_set_data(nng_http_res *, void const *, size_t);
+TBAG_API int          nng_http_res_copy_data(nng_http_res *, void const *, size_t);
+
+TBAG_API void nng_http_conn_close(nng_http_conn *);
+TBAG_API void nng_http_conn_read(nng_http_conn *, nng_aio *);
+TBAG_API void nng_http_conn_read_all(nng_http_conn *, nng_aio *);
+TBAG_API void nng_http_conn_write(nng_http_conn *, nng_aio *);
+TBAG_API void nng_http_conn_write_all(nng_http_conn *, nng_aio *);
+TBAG_API void nng_http_conn_write_req(nng_http_conn *, nng_http_req *, nng_aio *);
+TBAG_API void nng_http_conn_write_res(nng_http_conn *, nng_http_res *, nng_aio *);
+TBAG_API void nng_http_conn_read_req(nng_http_conn *, nng_http_req *, nng_aio *);
+TBAG_API void nng_http_conn_read_res(nng_http_conn *, nng_http_res *, nng_aio *);
+TBAG_API void nng_http_req_reset(nng_http_req *);
+TBAG_API void nng_http_res_reset(nng_http_res *);
+
+TBAG_API int    nng_http_handler_alloc(nng_http_handler **, char const *, void (*)(nng_aio *));
+TBAG_API void   nng_http_handler_free(nng_http_handler *);
+TBAG_API int    nng_http_handler_alloc_file(nng_http_handler **, char const *, char const *);
+TBAG_API int    nng_http_handler_alloc_static(nng_http_handler **, char const *, void const *, size_t, char const *);
+TBAG_API int    nng_http_handler_alloc_redirect(nng_http_handler **, char const *, uint16_t, char const *);
+TBAG_API int    nng_http_handler_alloc_directory(nng_http_handler **, char const *, char const *);
+TBAG_API int    nng_http_handler_set_method(nng_http_handler *, char const *);
+TBAG_API int    nng_http_handler_set_host(nng_http_handler *, char const *);
+TBAG_API int    nng_http_handler_collect_body(nng_http_handler *, bool, size_t);
+TBAG_API int    nng_http_handler_set_tree(nng_http_handler *);
+TBAG_API int    nng_http_handler_set_data(nng_http_handler *, void *, void (*)(void *));
+TBAG_API void * nng_http_handler_get_data(nng_http_handler *);
+
+TBAG_API int  nng_http_server_hold(nng_http_server **, nng_url const *);
+TBAG_API void nng_http_server_release(nng_http_server *);
+TBAG_API int  nng_http_server_start(nng_http_server *);
+TBAG_API void nng_http_server_stop(nng_http_server *);
+TBAG_API int  nng_http_server_add_handler(nng_http_server *, nng_http_handler *);
+TBAG_API int  nng_http_server_del_handler(nng_http_server *, nng_http_handler *);
+TBAG_API int  nng_http_server_set_tls(nng_http_server *, struct nng_tls_config *);
+TBAG_API int  nng_http_server_get_tls(nng_http_server *, struct nng_tls_config **);
+TBAG_API int  nng_http_server_set_error_page(nng_http_server *, uint16_t, char const *);
+TBAG_API int  nng_http_server_set_error_file(nng_http_server *, uint16_t, char const *);
+TBAG_API int  nng_http_server_res_error(nng_http_server *, nng_http_res *);
+TBAG_API int  nng_http_hijack(nng_http_conn *);
+
+TBAG_API int  nng_http_client_alloc(nng_http_client **, nng_url const *);
+TBAG_API void nng_http_client_free(nng_http_client *);
+TBAG_API int  nng_http_client_set_tls(nng_http_client *, struct nng_tls_config *);
+TBAG_API int  nng_http_client_get_tls(nng_http_client *, struct nng_tls_config **);
+TBAG_API void nng_http_client_connect(nng_http_client *, nng_aio *);
+TBAG_API void nng_http_conn_transact(nng_http_conn *, nng_http_req *, nng_http_res *, nng_aio *);
+TBAG_API void nng_http_client_transact(nng_http_client *, nng_http_req *, nng_http_res *, nng_aio *);
+
+# /********************/
+# /* supplemental/tls */
+# /********************/
+
+TBAG_API int  nng_tls_config_alloc(nng_tls_config **, nng_tls_mode);
+TBAG_API void nng_tls_config_hold(nng_tls_config *);
+TBAG_API void nng_tls_config_free(nng_tls_config *);
+TBAG_API int  nng_tls_config_server_name(nng_tls_config *, const char *);
+TBAG_API int  nng_tls_config_ca_chain(nng_tls_config *, const char *, const char *);
+TBAG_API int  nng_tls_config_own_cert(nng_tls_config *, const char *, const char *, const char *);
+TBAG_API int  nng_tls_config_key(nng_tls_config *, const uint8_t *, size_t);
+TBAG_API int  nng_tls_config_pass(nng_tls_config *, const char *);
+TBAG_API int  nng_tls_config_auth_mode(nng_tls_config *, nng_tls_auth_mode);
+TBAG_API int  nng_tls_config_ca_file(nng_tls_config *, const char *);
+TBAG_API int  nng_tls_config_cert_key_file(nng_tls_config *, const char *, const char *);
+
+# /*********************/
+# /* supplemental/util */
+# /*********************/
+
+TBAG_API int nng_opts_parse(int argc, char * const * argv,
+                            nng_optspec const * opts,
+                            int * val,
+                            char ** optarg,
+                            int * optidx);
+
+TBAG_API nng_time nng_clock();
+TBAG_API void     nng_msleep(nng_duration);
+TBAG_API int      nng_thread_create(nng_thread **, void (*)(void *), void *);
+TBAG_API void     nng_thread_destroy(nng_thread *);
+TBAG_API int      nng_mtx_alloc(nng_mtx **);
+TBAG_API void     nng_mtx_free(nng_mtx *);
+TBAG_API void     nng_mtx_lock(nng_mtx *);
+TBAG_API void     nng_mtx_unlock(nng_mtx *);
+TBAG_API int      nng_cv_alloc(nng_cv **, nng_mtx *);
+TBAG_API void     nng_cv_free(nng_cv *);
+TBAG_API void     nng_cv_wait(nng_cv *);
+TBAG_API int      nng_cv_until(nng_cv *, nng_time);
+TBAG_API void     nng_cv_wake(nng_cv *);
+TBAG_API void     nng_cv_wake1(nng_cv *);
+TBAG_API uint32_t nng_random();
+
+# /*************/
+# /* transport */
+# /*************/
+
+//TBAG_API int nng_inproc_register();
+//TBAG_API int nng_ipc_register();
+//TBAG_API int nng_tcp_register();
+//TBAG_API int nng_ws_register();
+//TBAG_API int nng_wss_register();
 
 } // namespace mq
 
