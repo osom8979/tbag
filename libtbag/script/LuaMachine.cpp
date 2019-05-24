@@ -12,8 +12,10 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/string/StringUtils.hpp>
+
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/script/lua/RayGuiLua.hpp>
+#include <libtbag/script/lua/LogLua.hpp>
 
 #include <libtbag/config-ex.h>
 
@@ -166,6 +168,9 @@ void LuaMachine::initDefault()
     }
     if (!libtbag::script::lua::luaopen_raygui(L)) {
         tDLogW("LuaMachine::initDefault() RayGui bind failed.");
+    }
+    if (!libtbag::script::lua::luaopen_log(L)) {
+        tDLogW("LuaMachine::initDefault() Log bind failed.");
     }
 }
 
