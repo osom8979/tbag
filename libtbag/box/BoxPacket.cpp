@@ -280,7 +280,7 @@ public:
     }
 
 public:
-    std::pair<Err, std::size_t> parse(char const * buffer, std::size_t size, box_data * box)
+    std::pair<Err, std::size_t> parse(char const * buffer, std::size_t size, box_data * box) const
     {
         using namespace flatbuffers;
         assert(_parent != nullptr);
@@ -396,10 +396,8 @@ BoxPacketParser::~BoxPacketParser()
     // EMPTY.
 }
 
-Err BoxPacketParser::parse(char const * buffer,
-                           std::size_t size,
-                           box_data * box,
-                           std::size_t * computed_size)
+Err BoxPacketParser::parse(char const * buffer, std::size_t size,
+                           box_data * box, std::size_t * computed_size) const
 {
     assert(_impl);
     auto result = _impl->parse(buffer, size, box);

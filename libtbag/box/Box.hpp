@@ -18,6 +18,8 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/box/details/box_api.hpp>
 #include <libtbag/tmp/NumberOfArguments.hpp>
+#include <libtbag/box/BoxPacket.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -705,6 +707,13 @@ public:
         assert(0 <= COMPARE_AND(i) < rank());
         return *(dims() + i);
     }
+
+public:
+    Err encode(BoxPacketBuilder & builder);
+    Err encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer);
+    Err decode(char const * buffer, std::size_t size, BoxPacketParser const & parser,
+               std::size_t * computed_size = nullptr);
+    Err decode(char const * buffer, std::size_t size, std::size_t * computed_size = nullptr);
 };
 
 } // namespace box

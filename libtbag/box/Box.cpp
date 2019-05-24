@@ -211,6 +211,32 @@ Box Box::asType(btype type) const
     return result;
 }
 
+Err Box::encode(BoxPacketBuilder & builder)
+{
+    return builder.build(_data.get());
+}
+
+Err Box::encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer)
+{
+    auto const CODE = encode(builder);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+    buffer.assign(builder.point(), builder.point() + builder.size());
+    return E_SUCCESS;
+}
+
+Err Box::decode(char const * buffer, std::size_t size, BoxPacketParser const & parser, std::size_t * computed_size)
+{
+    return parser.parse(buffer, size, _data.get(), computed_size);
+}
+
+Err Box::decode(char const * buffer, std::size_t size, std::size_t * computed_size)
+{
+    BoxPacketParser parser;
+    return decode(buffer, size, parser, computed_size);
+}
+
 } // namespace box
 
 // --------------------
