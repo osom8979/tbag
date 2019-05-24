@@ -181,6 +181,23 @@ public:
     // clang-format on
 
 public:
+    Path getLayout(std::string const & name)
+    { return asset().get(name); }
+
+public:
+    // clang-format off
+    Path getLayoutEnv     () { return getLayout(LAYOUT_ENV     ); }
+    Path getLayoutConfig  () { return getLayout(LAYOUT_CONFIG  ); }
+    Path getLayoutModule  () { return getLayout(LAYOUT_MODULE  ); }
+    Path getLayoutText    () { return getLayout(LAYOUT_TEXT    ); }
+    Path getLayoutSqlite  () { return getLayout(LAYOUT_SQLITE  ); }
+    Path getLayoutTemp    () { return getLayout(LAYOUT_TEMP    ); }
+    Path getLayoutKeystore() { return getLayout(LAYOUT_KEYSTORE); }
+    Path getLayoutLua     () { return getLayout(LAYOUT_LUA     ); }
+    Path getLayoutLuaRocks() { return getLayout(LAYOUT_LUAROCKS); }
+    // clang-format on
+
+public:
     std::vector<std::string> getFilenames(std::string const & key) const;
 
 public:
