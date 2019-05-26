@@ -19,43 +19,98 @@ namespace lua    {
 
 using namespace libtbag::log;
 
+TBAG_CONSTEXPR static int const MAX_PACKED_ARGS_SIZE = fmt::ArgList::MAX_PACKED_ARGS-1;
+TBAG_CONSTEXPR static int const MIN_LOG_ARGS_SIZE = 3;
+
 static int _Log(lua_State * L)
 {
-    int const top = lua_gettop(L);
-    if (top < 4) {
-        return luaL_error(L, "More than 4 arguments are required.");
-    }
-
-    using ArgFormatter = fmt::ArgFormatter<char>;
-    using BasicFormatter = fmt::BasicFormatter<char, ArgFormatter>;
-    using MakeValue = fmt::internal::MakeValue<BasicFormatter>;
-    using Value = fmt::internal::Value;
+    using BasicFormatter = fmt::BasicFormatter<char>;
     using ArgList = fmt::ArgList;
-    using ArgArray = fmt::internal::ArgArray<ArgList::MAX_PACKED_ARGS>;
-    if ((top-3) >= ArgList::MAX_PACKED_ARGS) {
-        return luaL_error(L, "(top-2) >= ArgList::MAX_PACKED_ARGS");
+    using ArgArray = fmt::internal::ArgArray<MAX_PACKED_ARGS_SIZE>;
+    using ArgArrayType = typename ArgArray::Type;
+
+    int const top = lua_gettop(L);
+    if (top < MIN_LOG_ARGS_SIZE) {
+        return luaL_error(L, "More than 3 arguments are required.");
+    }
+    if ((top-MIN_LOG_ARGS_SIZE) > MAX_PACKED_ARGS_SIZE) {
+        return luaL_error(L, "The number of arguments is too large.");
     }
 
     char const * NAME = luaL_checkstring(L, 1);
     auto const SEVERITY = libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 2));
-    char const * format_text = luaL_checkstring(L, 3);
+    char const * FORMAT = luaL_checkstring(L, 3);
+    if (top == MIN_LOG_ARGS_SIZE) {
+        tLog(NAME, SEVERITY, FORMAT);
+        return 0;
+    }
 
-    Value values[ArgList::MAX_PACKED_ARGS];
-    for (int i = 4; i <= top; ++i) {
-        if (lua_isinteger(L, i)) {
-            values[i] = ArgArray::make<BasicFormatter>(luaL_checkinteger(L, i));
-        } else if (lua_isboolean(L, i)) {
-            values[i] = ArgArray::make<BasicFormatter>(luaL_checkboolean(L, i));
-        } else if (lua_isnumber(L, i)) {
-            values[i] = ArgArray::make<BasicFormatter>(luaL_checknumber(L, i));
-        } else if (lua_isstring(L, i)) {
-            values[i] = ArgArray::make<BasicFormatter>(luaL_checkstring(L, i));
+    uint64_t types = 0;
+    ArgArrayType array = {0,};
+    int next_lua_arg_index = MIN_LOG_ARGS_SIZE + 1;
+    int insert_index = 0;
+
+    for (; next_lua_arg_index <= top; ++next_lua_arg_index) {
+        auto const current_type = lua_type(L, next_lua_arg_index);
+        switch (current_type) {
+        case LUA_TNONE:
+            break;
+
+        case LUA_TNIL:
+            break;
+
+        case LUA_TBOOLEAN:
+            COMMENT("Lua boolean type") {
+                bool value = luaL_checkboolean(L, next_lua_arg_index);
+                types |= (fmt::internal::make_type(value) << (4*insert_index));
+                array[insert_index] = ArgArray::make<BasicFormatter>(value);
+            }
+            ++insert_index;
+            break;
+
+        case LUA_TLIGHTUSERDATA:
+            break;
+
+        case LUA_TNUMBER:
+            if (lua_isinteger(L, next_lua_arg_index)) {
+                int value = luaL_checkinteger(L, next_lua_arg_index);
+                types |= (fmt::internal::make_type(value) << (4*insert_index));
+                array[insert_index] = ArgArray::make<BasicFormatter>(value);
+            } else {
+                double value = luaL_checknumber(L, next_lua_arg_index);
+                types |= (fmt::internal::make_type(value) << (4*insert_index));
+                array[insert_index] = ArgArray::make<BasicFormatter>(value);
+            }
+            ++insert_index;
+            break;
+
+        case LUA_TSTRING:
+            COMMENT("") {
+                char const * value = luaL_checkstring(L, next_lua_arg_index);
+                types |= (fmt::internal::make_type(value) << (4*insert_index));
+                array[insert_index] = ArgArray::make<BasicFormatter>(value);
+                ++insert_index;
+            }
+            break;
+
+        case LUA_TTABLE:
+            break;
+
+        case LUA_TFUNCTION:
+            break;
+
+        case LUA_TUSERDATA:
+            break;
+
+        case LUA_TTHREAD:
+            break;
+
+        default:
+            return luaL_error(L, "Unknown lua type.");
         }
     }
 
-    auto const MESSAGE = ::fmt::format(format_text, ArgList(top-2, values));
-    tLog(NAME, SEVERITY, MESSAGE);
-
+    tLog(NAME, SEVERITY, fmt::format(FORMAT, ArgList(types, array)));
     return 0;
 }
 
