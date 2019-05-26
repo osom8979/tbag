@@ -20,7 +20,7 @@ namespace lua    {
 
 using namespace libtbag::log;
 
-static int _Log(lua_State * L)
+static int _log(lua_State * L)
 {
     char const * name = luaL_checkstring(L, 1);
     auto const severity = libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 2));
@@ -29,12 +29,97 @@ static int _Log(lua_State * L)
     return 0;
 }
 
+//Logger * createRawStdoutLogger(std::string const & name, bool mutex = true, bool auto_flush = false);
+//Logger * createColorStdoutLogger(std::string const & name, bool mutex = true, bool auto_flush = false);
+//Logger * createStdoutLogger(std::string const & name, MakeType type = MakeType::DEFAULT,
+//                            bool mutex = true, bool auto_flush = false);
+//Logger * createFileLogger(std::string const & name, std::string const & path,
+//                          MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
+//Logger * createRotateFileLogger(std::string const & name, std::string const & path,
+//                                std::size_t max_size = MEGA_BYTE_TO_BYTE,
+//                                std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
+//                                MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
+
+//Logger * createDefaultRawStdoutLogger(bool mutex = true, bool auto_flush = false);
+//Logger * createDefaultColorStdoutLogger(bool mutex = true, bool auto_flush = false);
+//Logger * createDefaultStdoutLogger(bool mutex = true, bool auto_flush = false);
+//Logger * createDefaultFileLogger(std::string const & path, bool mutex = true, bool auto_flush = false);
+//Logger * createDefaultRotateFileLogger(std::string const & path,
+//                                       std::size_t max_size = MEGA_BYTE_TO_BYTE,
+//                                       std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
+//                                       bool mutex = true, bool auto_flush = false);
+
+static int _removeLogger(lua_State * L)
+{
+    lua_pushboolean(L, removeLogger(luaL_checkstring(L, 1)));
+    return 1;
+}
+
+static int _removeDefaultLogger(lua_State * L)
+{
+    lua_pushboolean(L, removeDefaultLogger());
+    return 1;
+}
+
+//Logger * getLogger(std::string const & name);
+//Logger * getDefaultLogger();
+
+static int _existsLogger(lua_State * L)
+{
+    lua_pushboolean(L, existsLogger(luaL_checkstring(L, 1)));
+    return 1;
+}
+
+static int _setSeverity(lua_State * L)
+{
+    setSeverity(luaL_checkstring(L, 1),
+                libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 2)));
+    return 0;
+}
+
+static int _setDefaultSeverity(lua_State * L)
+{
+    setDefaultSeverity(libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 1)));
+    return 0;
+}
+
+static int _setLevel(lua_State * L)
+{
+    setLevel(luaL_checkstring(L, 1), luaL_checkinteger(L, 2));
+    return 0;
+}
+
+static int _setDefaultLevel(lua_State * L)
+{
+    setDefaultLevel(luaL_checkinteger(L, 1));
+    return 0;
+}
+
+static int _getSeverity(lua_State * L)
+{
+    lua_pushinteger(L, getSeverity(luaL_checkstring(L, 1)).getLevel());
+    return 1;
+}
+
+static int _getDefaultSeverity(lua_State * L)
+{
+    lua_pushinteger(L, getDefaultSeverity().getLevel());
+    return 1;
+}
+
 #ifndef LOG_REGISTER
 #define LOG_REGISTER(name) { #name, _##name }
 #endif
 
 static luaL_Reg const __lua_log[] = {
-        LOG_REGISTER(Log),
+        LOG_REGISTER(log),
+        LOG_REGISTER(existsLogger),
+        LOG_REGISTER(setSeverity),
+        LOG_REGISTER(setDefaultSeverity),
+        LOG_REGISTER(setLevel),
+        LOG_REGISTER(setDefaultLevel),
+        LOG_REGISTER(getSeverity),
+        LOG_REGISTER(getDefaultSeverity),
         { nullptr, nullptr }
 };
 
