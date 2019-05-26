@@ -157,14 +157,14 @@ bool LogXmlNode::parseMutex(std::string const & value)
 LogXmlNode::Severity LogXmlNode::parseSeverity(std::string const & value)
 {
     // clang-format off
-    static Severity const S_EMERGENCY = libtbag::log::level::    EMERGENCY_SEVERITY;
-    static Severity const S_ALERT     = libtbag::log::level::        ALERT_SEVERITY;
-    static Severity const S_CRITICAL  = libtbag::log::level::     CRITICAL_SEVERITY;
-    static Severity const S_ERROR     = libtbag::log::level::        ERROR_SEVERITY;
-    static Severity const S_WARNING   = libtbag::log::level::      WARNING_SEVERITY;
-    static Severity const S_MOTICE    = libtbag::log::level::       NOTICE_SEVERITY;
-    static Severity const S_INFO      = libtbag::log::level::INFORMATIONAL_SEVERITY;
-    static Severity const S_DEBUG     = libtbag::log::level::        DEBUG_SEVERITY;
+    static Severity const S_EMERGENCY = libtbag::log::level::EMERGENCY_SEVERITY;
+    static Severity const S_ALERT     = libtbag::log::level::ALERT_SEVERITY;
+    static Severity const S_CRITICAL  = libtbag::log::level::CRITICAL_SEVERITY;
+    static Severity const S_ERROR     = libtbag::log::level::ERROR_SEVERITY;
+    static Severity const S_WARNING   = libtbag::log::level::WARNING_SEVERITY;
+    static Severity const S_MOTICE    = libtbag::log::level::NOTICE_SEVERITY;
+    static Severity const S_INFO      = libtbag::log::level::INFO_SEVERITY;
+    static Severity const S_DEBUG     = libtbag::log::level::DEBUG_SEVERITY;
     // clang-format on
 
     std::string const UPPER_VALUE = string::upper(value);

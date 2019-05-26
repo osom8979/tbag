@@ -50,11 +50,11 @@ private:
 
 public:
     // clang-format off
-    LogMsgPacket() : _severity(level::INFORMATIONAL_SEVERITY), _message()
+    LogMsgPacket() : _severity(level::INFO_SEVERITY), _message()
     { /* EMPTY. */ }
     LogMsgPacket(Severity const & severity) : _severity(severity), _message()
     { /* EMPTY. */ }
-    LogMsgPacket(String const & msg) : _severity(level::INFORMATIONAL_SEVERITY), _message(msg)
+    LogMsgPacket(String const & msg) : _severity(level::INFO_SEVERITY), _message(msg)
     { /* EMPTY. */ }
     LogMsgPacket(Severity const & severity, String const & msg) : _severity(severity), _message(msg)
     { /* EMPTY. */ }

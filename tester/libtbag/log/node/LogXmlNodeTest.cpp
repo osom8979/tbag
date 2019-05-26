@@ -29,15 +29,15 @@ TEST(LogXmlNodeTest, Parse)
     ASSERT_FALSE(LogXmlNode::parseMutex(LogXmlNode::MUTEX_OFF));
     ASSERT_FALSE(LogXmlNode::parseMutex(""));
 
-    static Severity const S_OFF       = libtbag::log::level::          OFF_SEVERITY;
-    static Severity const S_EMERGENCY = libtbag::log::level::    EMERGENCY_SEVERITY;
-    static Severity const S_ALERT     = libtbag::log::level::        ALERT_SEVERITY;
-    static Severity const S_CRITICAL  = libtbag::log::level::     CRITICAL_SEVERITY;
-    static Severity const S_ERROR     = libtbag::log::level::        ERROR_SEVERITY;
-    static Severity const S_WARNING   = libtbag::log::level::      WARNING_SEVERITY;
-    static Severity const S_MOTICE    = libtbag::log::level::       NOTICE_SEVERITY;
-    static Severity const S_INFO      = libtbag::log::level::INFORMATIONAL_SEVERITY;
-    static Severity const S_DEBUG     = libtbag::log::level::        DEBUG_SEVERITY;
+    static Severity const S_OFF       = libtbag::log::level::OFF_SEVERITY;
+    static Severity const S_EMERGENCY = libtbag::log::level::EMERGENCY_SEVERITY;
+    static Severity const S_ALERT     = libtbag::log::level::ALERT_SEVERITY;
+    static Severity const S_CRITICAL  = libtbag::log::level::CRITICAL_SEVERITY;
+    static Severity const S_ERROR     = libtbag::log::level::ERROR_SEVERITY;
+    static Severity const S_WARNING   = libtbag::log::level::WARNING_SEVERITY;
+    static Severity const S_MOTICE    = libtbag::log::level::NOTICE_SEVERITY;
+    static Severity const S_INFO      = libtbag::log::level::INFO_SEVERITY;
+    static Severity const S_DEBUG     = libtbag::log::level::DEBUG_SEVERITY;
 
     ASSERT_EQ(S_OFF      , LogXmlNode::parseSeverity(S_OFF      .getText()));
     ASSERT_EQ(S_EMERGENCY, LogXmlNode::parseSeverity(S_EMERGENCY.getText()));

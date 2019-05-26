@@ -15,12 +15,14 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 namespace mgr {
 
-Logger::Logger() : _sink(new ::libtbag::log::sink::NullSink()), _generator(), _severity(level::INFORMATIONAL_SEVERITY)
+Logger::Logger() : _sink(new ::libtbag::log::sink::NullSink()),
+                   _generator(), _severity(level::INFO_SEVERITY)
 {
     // EMPTY.
 }
 
-Logger::Logger(SinkType * sink, MakeType type) : _sink(sink), _generator(type), _severity(level::INFORMATIONAL_SEVERITY)
+Logger::Logger(SinkType * sink, MakeType type)
+        : _sink(sink), _generator(type), _severity(level::INFO_SEVERITY)
 {
     // EMPTY.
 }
@@ -32,14 +34,14 @@ Logger::~Logger()
 
 void Logger::write(Severity const & severity, String const & message)
 {
-    if (static_cast<bool>(_sink) && _severity.isContain(severity)) {
+    if (_sink && _severity.isContain(severity)) {
         _sink->safeWrite(_generator.make(LogMsgPacket(severity, message)));
     }
 }
 
 void Logger::flush()
 {
-    if (static_cast<bool>(_sink)) {
+    if (_sink) {
         _sink->safeFlush();
     }
 }

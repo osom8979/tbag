@@ -39,10 +39,10 @@ static luaL_Reg const __lua_log[] = {
 };
 
 #ifndef LOG_INT_SYMBOL
-#define LOG_INT_SYMBOL(L, s)                                            \
-    do {                                                                \
-        lua_pushinteger(L, (int(s)/libtbag::log::level::LEVEL_STEP));   \
-        lua_setfield(L, -2, #s);                                        \
+#define LOG_INT_SYMBOL(L, s)        \
+    do {                            \
+        lua_pushinteger(L, int(s)); \
+        lua_setfield(L, -2, #s);    \
     } while (false) /* -- END -- */
 #endif
 

@@ -78,7 +78,7 @@ PacketGenerator::String PacketGenerator::makeDefaultColor(LogMsgPacket const & p
         ss << tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
     } else if (level <= NOTICE_SEVERITY) {
         ss << tces::DISPLAY_ATTRIBUTE_FG_GREEN;
-    } else if (level <= INFORMATIONAL_SEVERITY) {
+    } else if (level <= INFO_SEVERITY) {
         ss << tces::DISPLAY_ATTRIBUTE_FG_GREEN;
     } else if (level <= DEBUG_SEVERITY) {
         ss << tces::DISPLAY_ATTRIBUTE_FG_BLUE;

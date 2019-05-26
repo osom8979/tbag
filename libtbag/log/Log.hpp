@@ -55,7 +55,7 @@ Severity const  CRITICAL_SEVERITY = ::libtbag::log::level::CRITICAL_SEVERITY;
 Severity const     ERROR_SEVERITY = ::libtbag::log::level::ERROR_SEVERITY;
 Severity const   WARNING_SEVERITY = ::libtbag::log::level::WARNING_SEVERITY;
 Severity const    NOTICE_SEVERITY = ::libtbag::log::level::NOTICE_SEVERITY;
-Severity const      INFO_SEVERITY = ::libtbag::log::level::INFORMATIONAL_SEVERITY;
+Severity const      INFO_SEVERITY = ::libtbag::log::level::INFO_SEVERITY;
 Severity const     DEBUG_SEVERITY = ::libtbag::log::level::DEBUG_SEVERITY;
 
 TBAG_CONSTEXPR std::size_t const DEFAULT_LOG_FILE_COUNT = ::libtbag::log::sink::RotateFileSink<>::getDefaultMaxHistory();
