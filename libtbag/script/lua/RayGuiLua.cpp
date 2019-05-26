@@ -3133,7 +3133,7 @@ static void luaL_push_raygui_symbols(lua_State * L)
     RAYGUI_INT_SYMBOL(L, GuiMouseCursor_COUNT);
 }
 
-bool luaopen_raygui(lua_State * L)
+bool luaE_open_raygui(lua_State * L)
 {
     luaL_register(L, lua_tbag_name(), __lua_laygui);
     {

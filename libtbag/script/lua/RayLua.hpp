@@ -152,7 +152,7 @@ TBAG_LUA_USERDATA_PROTO(AudioStream, audiostream, TBAG_API)
 TBAG_API void luaE_pushvrdeviceinfo(lua_State * L, VrDeviceInfo const & info);
 TBAG_API VrDeviceInfo luaE_checkvrdeviceinfo(lua_State * L, int num_arg);
 
-TBAG_API bool luaopen_ray(lua_State * L);
+TBAG_API bool luaE_open_ray(lua_State * L);
 
 } // namespace lua
 } // namespace script

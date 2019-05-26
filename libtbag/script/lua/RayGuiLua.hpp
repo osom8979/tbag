@@ -26,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace script {
 namespace lua    {
 
-TBAG_API bool luaopen_raygui(lua_State * L);
+TBAG_API bool luaE_open_raygui(lua_State * L);
 
 } // namespace lua
 } // namespace script

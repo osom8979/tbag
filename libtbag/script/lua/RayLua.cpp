@@ -4596,7 +4596,7 @@ static void luaE_push_raylib_symbols(lua_State * L)
     RAY_INT_SYMBOL(L, NPT_3PATCH_HORIZONTAL);
 }
 
-bool luaopen_ray(lua_State * L)
+bool luaE_open_ray(lua_State * L)
 {
     luaL_register(L, lua_tbag_name(), __lua_lay);
     {

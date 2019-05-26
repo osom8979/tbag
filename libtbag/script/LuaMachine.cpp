@@ -16,6 +16,7 @@
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/script/lua/RayGuiLua.hpp>
 #include <libtbag/script/lua/LogLua.hpp>
+#include <libtbag/script/lua/StringLua.hpp>
 
 #include <libtbag/config-ex.h>
 
@@ -163,14 +164,17 @@ void LuaMachine::initDefault()
     if (!libtbag::script::luaopen_tbag(L)) {
         tDLogW("LuaMachine::initDefault() Tbag bind failed.");
     }
-    if (!libtbag::script::lua::luaopen_ray(L)) {
+    if (!libtbag::script::lua::luaE_open_ray(L)) {
         tDLogW("LuaMachine::initDefault() Ray bind failed.");
     }
-    if (!libtbag::script::lua::luaopen_raygui(L)) {
+    if (!libtbag::script::lua::luaE_open_raygui(L)) {
         tDLogW("LuaMachine::initDefault() RayGui bind failed.");
     }
-    if (!libtbag::script::lua::luaopen_log(L)) {
+    if (!libtbag::script::lua::luaE_open_log(L)) {
         tDLogW("LuaMachine::initDefault() Log bind failed.");
+    }
+    if (!libtbag::script::lua::luaE_open_string(L)) {
+        tDLogW("LuaMachine::initDefault() String bind failed.");
     }
 }
 
