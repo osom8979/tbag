@@ -57,11 +57,11 @@ std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
             break;
 
         case LUA_TBOOLEAN:
-            COMMENT("Lua boolean type") {
+            BLOCK_DO("Lua boolean type") {
                 bool value = luaL_checkboolean(L, next_lua_arg_index);
                 types |= (fmt::internal::make_type(value) << (4*insert_index));
                 array[insert_index] = ArgArray::make<BasicFormatter>(value);
-            }
+            } BLOCK_END();
             ++insert_index;
             break;
 
@@ -82,12 +82,12 @@ std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
             break;
 
         case LUA_TSTRING:
-            COMMENT("") {
+            BLOCK_DO("Lua string type") {
                 char const * value = luaL_checkstring(L, next_lua_arg_index);
                 types |= (fmt::internal::make_type(value) << (4*insert_index));
                 array[insert_index] = ArgArray::make<BasicFormatter>(value);
-                ++insert_index;
-            }
+            } BLOCK_END();
+            ++insert_index;
             break;
 
         case LUA_TTABLE:

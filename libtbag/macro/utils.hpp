@@ -33,17 +33,17 @@
 
 #define VERSION_SEPARATOR "."
 
-// ---------------
-// Compare macros.
-// ---------------
+// --------------
+// Compare macros
+// --------------
 
 #define COMPARE_AND(x)      (x) && (x)
 #define COMPARE_OR(x)       (x) || (x)
 #define RANGE_OR(min, max)  (min) || (max)
 
-// --------------
-// Remove macros.
-// --------------
+// -------------
+// Remove macros
+// -------------
 
 #define UNUSED_PARAM(x)
 #define NAMELESS(x)
@@ -51,6 +51,11 @@
 #define IMPORTANT(x)
 #define STEP(n,x)
 #define BRACE(x)
+
+#define BLOCK_DO(x)     do
+#define BLOCK_END(x)    while (false)
+#define BLOCK_OPEN(x)   BLOCK_DO(x) {
+#define BLOCK_CLOSE(x)  } BLOCK_END(x);
 
 #ifndef REMOVE_UNUSED_DECLARATION
 /** Remove unused declaration warning. */
