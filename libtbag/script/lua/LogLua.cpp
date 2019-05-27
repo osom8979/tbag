@@ -22,32 +22,108 @@ using namespace libtbag::log;
 
 static int _log(lua_State * L)
 {
-    char const * name = luaL_checkstring(L, 1);
-    auto const severity = libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 2));
-    auto const text = libtbag::script::lua::luaE_checkfformat(L, 3);
-    tLog(name, severity, text);
+    tLog(luaL_checkstring(L, 1),
+         libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 2)),
+         luaE_checkfformat(L, 3));
     return 0;
 }
 
-//Logger * createRawStdoutLogger(std::string const & name, bool mutex = true, bool auto_flush = false);
-//Logger * createColorStdoutLogger(std::string const & name, bool mutex = true, bool auto_flush = false);
-//Logger * createStdoutLogger(std::string const & name, MakeType type = MakeType::DEFAULT,
-//                            bool mutex = true, bool auto_flush = false);
-//Logger * createFileLogger(std::string const & name, std::string const & path,
-//                          MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
-//Logger * createRotateFileLogger(std::string const & name, std::string const & path,
-//                                std::size_t max_size = MEGA_BYTE_TO_BYTE,
-//                                std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
-//                                MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
+static int _logm(lua_State * L)
+{
+    tLogM(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
 
-//Logger * createDefaultRawStdoutLogger(bool mutex = true, bool auto_flush = false);
-//Logger * createDefaultColorStdoutLogger(bool mutex = true, bool auto_flush = false);
-//Logger * createDefaultStdoutLogger(bool mutex = true, bool auto_flush = false);
-//Logger * createDefaultFileLogger(std::string const & path, bool mutex = true, bool auto_flush = false);
-//Logger * createDefaultRotateFileLogger(std::string const & path,
-//                                       std::size_t max_size = MEGA_BYTE_TO_BYTE,
-//                                       std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
-//                                       bool mutex = true, bool auto_flush = false);
+static int _loga(lua_State * L)
+{
+    tLogA(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
+
+static int _logc(lua_State * L)
+{
+    tLogC(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
+
+static int _loge(lua_State * L)
+{
+    tLogE(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
+
+static int _logw(lua_State * L)
+{
+    tLogW(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
+
+static int _logn(lua_State * L)
+{
+    tLogN(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
+
+static int _logi(lua_State * L)
+{
+    tLogI(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
+
+static int _logd(lua_State * L)
+{
+    tLogD(luaL_checkstring(L, 1), luaE_checkfformat(L, 2));
+    return 0;
+}
+
+static int _createRawStdoutLogger(lua_State * L)
+{
+    lua_pushboolean(L, createRawStdoutLogger(luaL_checkstring(L, 1),
+                                             luaL_optboolean(L, 2, true),
+                                             luaL_optboolean(L, 3, false)) != nullptr);
+    return 1;
+}
+
+static int _createColorStdoutLogger(lua_State * L)
+{
+    lua_pushboolean(L, createColorStdoutLogger(luaL_checkstring(L, 1),
+                                               luaL_optboolean(L, 2, true),
+                                               luaL_optboolean(L, 3, false)) != nullptr);
+    return 1;
+}
+
+TBAG_CONSTEXPR static int DEFAULT_MAKE_TYPE = static_cast<int>(MakeType::DEFAULT);
+
+static int _createStdoutLogger(lua_State * L)
+{
+    lua_pushboolean(L, createStdoutLogger(luaL_checkstring(L, 1),
+                                          static_cast<MakeType>(luaL_optinteger(L, 2, DEFAULT_MAKE_TYPE)),
+                                          luaL_optboolean(L, 3, true),
+                                          luaL_optboolean(L, 4, false)) != nullptr);
+    return 1;
+}
+
+static int _createFileLogger(lua_State * L)
+{
+    lua_pushboolean(L, createFileLogger(luaL_checkstring(L, 1),
+                                        luaL_checkstring(L, 2),
+                                        static_cast<MakeType>(luaL_optinteger(L, 3, DEFAULT_MAKE_TYPE)),
+                                        luaL_optboolean(L, 4, true),
+                                        luaL_optboolean(L, 5, false)) != nullptr);
+    return 1;
+}
+
+static int _createRotateFileLogger(lua_State * L)
+{
+    lua_pushboolean(L, createRotateFileLogger(luaL_checkstring(L, 1),
+                                              luaL_checkstring(L, 2),
+                                              luaL_optinteger(L, 3, MEGA_BYTE_TO_BYTE),
+                                              luaL_optinteger(L, 4, DEFAULT_LOG_FILE_COUNT),
+                                              static_cast<MakeType>(luaL_optinteger(L, 5, DEFAULT_MAKE_TYPE)),
+                                              luaL_optboolean(L, 6, true),
+                                              luaL_optboolean(L, 7, false)) != nullptr);
+    return 1;
+}
 
 static int _removeLogger(lua_State * L)
 {
@@ -60,9 +136,6 @@ static int _removeDefaultLogger(lua_State * L)
     lua_pushboolean(L, removeDefaultLogger());
     return 1;
 }
-
-//Logger * getLogger(std::string const & name);
-//Logger * getDefaultLogger();
 
 static int _existsLogger(lua_State * L)
 {
@@ -113,6 +186,19 @@ static int _getDefaultSeverity(lua_State * L)
 
 static luaL_Reg const __lua_log[] = {
         LOG_REGISTER(log),
+        LOG_REGISTER(logm),
+        LOG_REGISTER(loga),
+        LOG_REGISTER(logc),
+        LOG_REGISTER(loge),
+        LOG_REGISTER(logw),
+        LOG_REGISTER(logn),
+        LOG_REGISTER(logi),
+        LOG_REGISTER(logd),
+        LOG_REGISTER(createRawStdoutLogger),
+        LOG_REGISTER(createColorStdoutLogger),
+        LOG_REGISTER(createStdoutLogger),
+        LOG_REGISTER(createFileLogger),
+        LOG_REGISTER(createRotateFileLogger),
         LOG_REGISTER(existsLogger),
         LOG_REGISTER(setSeverity),
         LOG_REGISTER(setDefaultSeverity),
@@ -123,25 +209,43 @@ static luaL_Reg const __lua_log[] = {
         { nullptr, nullptr }
 };
 
-#ifndef LOG_INT_SYMBOL
-#define LOG_INT_SYMBOL(L, s)        \
+#ifndef LOG_STRING_SYMBOL
+#define LOG_STRING_SYMBOL(L, s, v)  \
     do {                            \
-        lua_pushinteger(L, int(s)); \
+        lua_pushstring(L, v);       \
         lua_setfield(L, -2, #s);    \
     } while (false) /* -- END -- */
 #endif
 
+#ifndef LOG_INT_SYMBOL
+#define LOG_INT_SYMBOL(L, s, v)     \
+    do {                            \
+        lua_pushinteger(L, int(v)); \
+        lua_setfield(L, -2, #s);    \
+    } while (false) /* -- END -- */
+#endif
+
+#ifndef LOG_INT_SYMBOL2
+#define LOG_INT_SYMBOL2(L, s) LOG_INT_SYMBOL(L, s, int(s))
+#endif
+
 static void luaL_push_log_symbols(lua_State * L)
 {
-    LOG_INT_SYMBOL(L, OFF_SEVERITY);
-    LOG_INT_SYMBOL(L, EMERGENCY_SEVERITY);
-    LOG_INT_SYMBOL(L, ALERT_SEVERITY);
-    LOG_INT_SYMBOL(L, CRITICAL_SEVERITY);
-    LOG_INT_SYMBOL(L, ERROR_SEVERITY);
-    LOG_INT_SYMBOL(L, WARNING_SEVERITY);
-    LOG_INT_SYMBOL(L, NOTICE_SEVERITY);
-    LOG_INT_SYMBOL(L, INFO_SEVERITY);
-    LOG_INT_SYMBOL(L, DEBUG_SEVERITY);
+    LOG_STRING_SYMBOL(L, DEFAULT_LOGGER_NAME, TBAG_DEFAULT_LOGGER_NAME);
+
+    LOG_INT_SYMBOL(L, MAKETYPE_DEFAULT      , MakeType::DEFAULT);
+    LOG_INT_SYMBOL(L, MAKETYPE_DEFAULT_COLOR, MakeType::DEFAULT_COLOR);
+    LOG_INT_SYMBOL(L, MAKETYPE_RAW          , MakeType::RAW);
+
+    LOG_INT_SYMBOL2(L, OFF_SEVERITY);
+    LOG_INT_SYMBOL2(L, EMERGENCY_SEVERITY);
+    LOG_INT_SYMBOL2(L, ALERT_SEVERITY);
+    LOG_INT_SYMBOL2(L, CRITICAL_SEVERITY);
+    LOG_INT_SYMBOL2(L, ERROR_SEVERITY);
+    LOG_INT_SYMBOL2(L, WARNING_SEVERITY);
+    LOG_INT_SYMBOL2(L, NOTICE_SEVERITY);
+    LOG_INT_SYMBOL2(L, INFO_SEVERITY);
+    LOG_INT_SYMBOL2(L, DEBUG_SEVERITY);
 }
 
 bool luaE_open_log(lua_State * L)
