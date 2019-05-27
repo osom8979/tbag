@@ -60,16 +60,16 @@ struct FunctionalProcess : public FunctionalHandle<ProcessType>
     virtual ~FunctionalProcess()
     { /* EMPTY. */ }
 
-    virtual void onExit(int64_t exit_status, int term_signal) override
+    virtual void onExit(int64_t code, int signal) override
     {
         exit = true;
-        exit_status = exit_status;
-        term_signal = term_signal;
+        exit_status = code;
+        term_signal = signal;
 
         if (exit_cb) {
-            exit_cb(exit_status, term_signal);
+            exit_cb(code, signal);
         } else {
-            Parent::onExit(exit_status, term_signal);
+            Parent::onExit(code, signal);
         }
     }
 };
