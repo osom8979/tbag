@@ -237,6 +237,30 @@ std::string Environments::convert(std::string const & source,
     return temp;
 }
 
+std::vector<std::string> Environments::toStrings(std::string const & delimiter) const
+{
+    std::vector<std::string> result;
+    std::size_t const SIZE = _flags.size();
+    for (std::size_t i = 0; i < SIZE; ++i) {
+        auto & flag = _flags.at(i);
+        auto const key_exists = !flag.key.empty();
+        auto const val_exists = !flag.value.empty();
+        if (key_exists && val_exists) {
+            result.push_back(flag.key + delimiter + flag.value);
+        } else if (!key_exists && val_exists) {
+            result.push_back(flag.value);
+        } else if (key_exists && !val_exists) {
+            result.push_back(flag.key);
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> Environments::toStrings() const
+{
+    return toStrings(DEFAULT_DELIMITER);
+}
+
 std::size_t Environments::getEnvsSize(char ** envs)
 {
     if ((*envs) == nullptr) {

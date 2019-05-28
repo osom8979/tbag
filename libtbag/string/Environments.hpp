@@ -116,6 +116,10 @@ public:
     std::string convert(std::string const & source, std::string const & regex_prefix, std::string const & regex_suffix) const;
 
 public:
+    std::vector<std::string> toStrings(std::string const & delimiter) const;
+    std::vector<std::string> toStrings() const;
+
+public:
     static std::size_t getEnvsSize(char ** envs);
 
 public:
