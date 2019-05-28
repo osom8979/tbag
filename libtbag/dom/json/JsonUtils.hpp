@@ -27,7 +27,9 @@ namespace dom  {
 namespace json {
 
 TBAG_API bool parse(std::string const & json, Json::Value & result);
-TBAG_API std::string write(Json::Value const & value);
+TBAG_API std::string writeFast(Json::Value const & value);
+TBAG_API std::string writeStyled(Json::Value const & value);
+TBAG_API std::string write(Json::Value const & value, bool fast = false);
 
 TBAG_API bool exists(Json::Value const & value, std::string const & key);
 

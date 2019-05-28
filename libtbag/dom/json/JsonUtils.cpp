@@ -24,12 +24,30 @@ bool parse(std::string const & json, Json::Value & result)
     }
 }
 
-std::string write(Json::Value const & value)
+std::string writeFast(Json::Value const & value)
 {
     try {
         return Json::FastWriter().write(value);
     } catch (...) {
         return std::string();
+    }
+}
+
+std::string writeStyled(Json::Value const & value)
+{
+    try {
+        return Json::StyledWriter().write(value);
+    } catch (...) {
+        return std::string();
+    }
+}
+
+std::string write(Json::Value const & value, bool fast)
+{
+    if (fast) {
+        return writeFast(value);
+    } else {
+        return writeStyled(value);
     }
 }
 
