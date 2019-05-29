@@ -226,6 +226,7 @@ public:
 
     std::vector<std::string> getConfigFilenames() const;
     std::vector<std::string> getConfigKeys(std::string const & filename) const;
+    Resource::Map getConfigMap(std::string const & filename) const;
 
     void removeConfig(std::string const & filename);
     void removeAllConfig();

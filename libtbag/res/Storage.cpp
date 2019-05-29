@@ -259,6 +259,18 @@ std::vector<std::string> Storage::getConfigKeys(std::string const & filename) co
     return result;
 }
 
+Storage::Resource::Map Storage::getConfigMap(std::string const & filename) const
+{
+    Resource::Map result;
+    if (asset().exists(LAYOUT_CONFIG)) {
+        Resource res;
+        if (res.readFile(asset().get(LAYOUT_CONFIG) / filename)) {
+            return res.map();
+        }
+    }
+    return result;
+}
+
 void Storage::removeConfig(std::string const & filename)
 {
     if (asset().exists(LAYOUT_CONFIG)) {
