@@ -414,7 +414,6 @@ bool box_info_assign(char * dest, ui32 dest_size, char const * src) TBAG_NOEXCEP
 bool box_info_checked_assign(box_data * dest, char const * src, ui32 src_size) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
-    assert(src != nullptr);
     if (src == nullptr || src_size == 0) {
         if (dest->info && dest->total_info_byte >= 1) {
             dest->info[0] = '\0';
