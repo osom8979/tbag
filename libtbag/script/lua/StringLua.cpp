@@ -110,7 +110,7 @@ std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
     return fmt::format(format_text, ArgList(types, array));
 }
 
-int _Format(lua_State * L)
+int _format(lua_State * L)
 {
     lua_pushstring(L, luaE_checkfformat(L, 1).c_str());
     return 1;
@@ -121,7 +121,7 @@ int _Format(lua_State * L)
 #endif
 
 static luaL_Reg const __lua_string[] = {
-        STRING_REGISTER(Format),
+        STRING_REGISTER(format),
         { nullptr, nullptr }
 };
 
