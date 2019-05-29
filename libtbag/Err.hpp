@@ -27,76 +27,83 @@ NAMESPACE_LIBTBAG_OPEN
 #ifndef TBAG_ERROR_INFO_MAP
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX) \
     /* Common error codes (Success Anyway). */ \
-    _TBAG_XX(_SUCCESS  , "No error"                ) \
-    _TBAG_XX(_WARNING  , "Success, but warning"    ) \
-    _TBAG_XX(_RETRY    , "Retry might succeed"     ) \
-    _TBAG_XX(_CONTINUE , "Wait for the next"       ) \
-    _TBAG_XX(_ASYNCREQ , "Async request"           ) \
-    _TBAG_XX(_ENQASYNC , "Enqueue and async"       ) \
+    _TBAG_XX(_SUCCESS   , "No error"                       ) \
+    _TBAG_XX(_WARNING   , "Success, but warning"           ) \
+    _TBAG_XX(_RETRY     , "Retry might succeed"            ) \
+    _TBAG_XX(_CONTINUE  , "Wait for the next"              ) \
+    _TBAG_XX(_ASYNCREQ  , "Async request"                  ) \
+    _TBAG_XX(_ENQASYNC  , "Enqueue and async"              ) \
     /* Common error codes. */ \
-    _TBAG_XX(_ILLARGS  , "Illegal arguments"       ) \
-    _TBAG_XX(_ILLSTATE , "Illegal state"           ) \
-    _TBAG_XX(_EOPEN    , "Open error"              ) \
-    _TBAG_XX(_ECLOSE   , "Close error"             ) \
-    _TBAG_XX(_EGET     , "Getter error"            ) \
-    _TBAG_XX(_ESET     , "Setter error"            ) \
-    _TBAG_XX(_ECREATE  , "Create error"            ) \
-    _TBAG_XX(_EINDEX   , "Index error"             ) \
-    _TBAG_XX(_ALREADY  , "Already state"           ) \
-    _TBAG_XX(_SAMEOBJ  , "Same object"             ) \
-    _TBAG_XX(_BADALLOC , "Bad allocation"          ) \
-    _TBAG_XX(_OORANGE  , "Out of range"            ) \
-    _TBAG_XX(_NULLPTR  , "Null pointer exception"  ) \
-    _TBAG_XX(_EBUFFER  , "Empty buffer"            ) \
-    _TBAG_XX(_EQUEUE   , "Empty queue"             ) \
-    _TBAG_XX(_NREADY   , "Not ready"               ) \
-    _TBAG_XX(_UNSUPOP  , "Unsupported operation"   ) \
-    _TBAG_XX(_EINIT    , "Initialize error"        ) \
-    _TBAG_XX(_RDERR    , "Unknown Read error"      ) \
-    _TBAG_XX(_WRERR    , "Unknown Write error"     ) \
-    _TBAG_XX(_SHUTDOWN , "Shutdown error"          ) \
-    _TBAG_XX(_ENFOUND  , "Not found error"         ) \
-    _TBAG_XX(_TIMEOUT  , "Timeout error"           ) \
-    _TBAG_XX(_PARSING  , "Parsing error"           ) \
-    _TBAG_XX(_DECODE   , "Decode error"            ) \
-    _TBAG_XX(_ENCODE   , "Encode error"            ) \
-    _TBAG_XX(_VERIFIER , "Verifier error"          ) \
-    _TBAG_XX(_EXPIRED  , "Expired object error"    ) \
-    _TBAG_XX(_INSERT   , "Insert error"            ) \
-    _TBAG_XX(_ERASE    , "Erase error"             ) \
-    _TBAG_XX(_CLOSING  , "Closing object"          ) \
-    _TBAG_XX(_CLOSED   , "Closed object"           ) \
-    _TBAG_XX(_EQUERY   , "Query error"             ) \
-    _TBAG_XX(_SMALLBUF , "Buffer size is small"    ) \
-    _TBAG_XX(_KEYGEN   , "Key generator error"     ) \
-    _TBAG_XX(_UNKEXCP  , "Unknown exception"       ) \
-    _TBAG_XX(_UNKSIG   , "Unknown signal"          ) \
-    _TBAG_XX(_ECOPY    , "Copy error"              ) \
-    _TBAG_XX(_EPUSH    , "Push error"              ) \
-    _TBAG_XX(_EPOP     , "Pop error"               ) \
-    _TBAG_XX(_ESEND    , "Send error"              ) \
-    _TBAG_XX(_ERECV    , "Recv error"              ) \
-    _TBAG_XX(_INACCES  , "Inaccessible error"      ) \
-    _TBAG_XX(_HTTP_1XX , "Informational (HTTP 1xx)") \
-    _TBAG_XX(_HTTP_3XX , "Redirection (HTTP 3xx)"  ) \
-    _TBAG_XX(_HTTP_4XX , "Client Error (HTTP 4xx)" ) \
-    _TBAG_XX(_HTTP_5XX , "Server Error (HTTP 5xx)" ) \
-    _TBAG_XX(_EXITPROC , "Exit process"            ) \
-    _TBAG_XX(_EXCHANGE , "Error exchange"          ) \
+    _TBAG_XX(_ILLARGS   , "Illegal arguments"              ) \
+    _TBAG_XX(_ILLSTATE  , "Illegal state"                  ) \
+    _TBAG_XX(_EOPEN     , "Open error"                     ) \
+    _TBAG_XX(_ECLOSE    , "Close error"                    ) \
+    _TBAG_XX(_EGET      , "Getter error"                   ) \
+    _TBAG_XX(_ESET      , "Setter error"                   ) \
+    _TBAG_XX(_ECREATE   , "Create error"                   ) \
+    _TBAG_XX(_EINDEX    , "Index error"                    ) \
+    _TBAG_XX(_ALREADY   , "Already state"                  ) \
+    _TBAG_XX(_SAMEOBJ   , "Same object"                    ) \
+    _TBAG_XX(_BADALLOC  , "Bad allocation"                 ) \
+    _TBAG_XX(_OORANGE   , "Out of range"                   ) \
+    _TBAG_XX(_NULLPTR   , "Null pointer exception"         ) \
+    _TBAG_XX(_EBUFFER   , "Empty buffer"                   ) \
+    _TBAG_XX(_EQUEUE    , "Empty queue"                    ) \
+    _TBAG_XX(_NREADY    , "Not ready"                      ) \
+    _TBAG_XX(_UNSUPOP   , "Unsupported operation"          ) \
+    _TBAG_XX(_EINIT     , "Initialize error"               ) \
+    _TBAG_XX(_RDERR     , "Unknown Read error"             ) \
+    _TBAG_XX(_WRERR     , "Unknown Write error"            ) \
+    _TBAG_XX(_EREADONLY , "Read only error"                ) \
+    _TBAG_XX(_EWRITEONLY, "Write only error"               ) \
+    _TBAG_XX(_ECRYPTO   , "Cryptographic error"            ) \
+    _TBAG_XX(_EPEERAUTH , "Peer could not be authenticated") \
+    _TBAG_XX(_EAMBIGUOUS, "Ambiguous option"               ) \
+    _TBAG_XX(_EBADTYPE  , "Incorrect type"                 ) \
+    _TBAG_XX(_EINTERNAL , "Internal error detected"        ) \
+    _TBAG_XX(_SHUTDOWN  , "Shutdown error"                 ) \
+    _TBAG_XX(_ENFOUND   , "Not found error"                ) \
+    _TBAG_XX(_TIMEOUT   , "Timeout error"                  ) \
+    _TBAG_XX(_PARSING   , "Parsing error"                  ) \
+    _TBAG_XX(_DECODE    , "Decode error"                   ) \
+    _TBAG_XX(_ENCODE    , "Encode error"                   ) \
+    _TBAG_XX(_VERIFIER  , "Verifier error"                 ) \
+    _TBAG_XX(_EXPIRED   , "Expired object error"           ) \
+    _TBAG_XX(_INSERT    , "Insert error"                   ) \
+    _TBAG_XX(_ERASE     , "Erase error"                    ) \
+    _TBAG_XX(_CLOSING   , "Closing object"                 ) \
+    _TBAG_XX(_CLOSED    , "Closed object"                  ) \
+    _TBAG_XX(_EQUERY    , "Query error"                    ) \
+    _TBAG_XX(_SMALLBUF  , "Buffer size is small"           ) \
+    _TBAG_XX(_KEYGEN    , "Key generator error"            ) \
+    _TBAG_XX(_UNKEXCP   , "Unknown exception"              ) \
+    _TBAG_XX(_UNKSIG    , "Unknown signal"                 ) \
+    _TBAG_XX(_ECOPY     , "Copy error"                     ) \
+    _TBAG_XX(_EPUSH     , "Push error"                     ) \
+    _TBAG_XX(_EPOP      , "Pop error"                      ) \
+    _TBAG_XX(_ESEND     , "Send error"                     ) \
+    _TBAG_XX(_ERECV     , "Recv error"                     ) \
+    _TBAG_XX(_INACCES   , "Inaccessible error"             ) \
+    _TBAG_XX(_HTTP_1XX  , "Informational (HTTP 1xx)"       ) \
+    _TBAG_XX(_HTTP_3XX  , "Redirection (HTTP 3xx)"         ) \
+    _TBAG_XX(_HTTP_4XX  , "Client Error (HTTP 4xx)"        ) \
+    _TBAG_XX(_HTTP_5XX  , "Server Error (HTTP 5xx)"        ) \
+    _TBAG_XX(_EXITPROC  , "Exit process"                   ) \
+    _TBAG_XX(_EXCHANGE  , "Error exchange"                 ) \
     /* SSL */ \
-    _TBAG_XX(_SSL      , "SSL library error"          ) \
-    _TBAG_XX(_SSL_NONE , "SSL I/O operation completed") \
-    _TBAG_XX(_SSLWREAD , "SSL want read"              ) \
-    _TBAG_XX(_SSLEREAD , "SSL empty read buffer"      ) \
-    _TBAG_XX(_SSLWWRITE, "SSL want write"             ) \
-    _TBAG_XX(_SSLEWRITE, "SSL empty write buffer"     ) \
-    _TBAG_XX(_SSLWX509 , "SSL want x509 loopup"       ) \
+    _TBAG_XX(_SSL       , "SSL library error"          ) \
+    _TBAG_XX(_SSL_NONE  , "SSL I/O operation completed") \
+    _TBAG_XX(_SSLWREAD  , "SSL want read"              ) \
+    _TBAG_XX(_SSLEREAD  , "SSL empty read buffer"      ) \
+    _TBAG_XX(_SSLWWRITE , "SSL want write"             ) \
+    _TBAG_XX(_SSLEWRITE , "SSL empty write buffer"     ) \
+    _TBAG_XX(_SSLWX509  , "SSL want x509 loopup"       ) \
     /* OpenCL */ \
-    _TBAG_XX(_OPENCL   , "OpenCL error"            ) \
+    _TBAG_XX(_OPENCL   , "OpenCL error") \
     /* CUDA */ \
-    _TBAG_XX(_CUDA     , "CUDA error"              ) \
+    _TBAG_XX(_CUDA     , "CUDA error") \
     /* LMDB */ \
-    _TBAG_XX(_LMDB     , "LMDB error"              ) \
+    _TBAG_XX(_LMDB     , "LMDB error") \
     /* Locale */ \
     _TBAG_XX(_LOCALE_CONVERTER_ERROR, "UConverter error")  \
     /* Network */ \
@@ -227,6 +234,39 @@ TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
 
 TBAG_CONSTEXPR Err const E_UNKNOWN_PROCESS_ID = E_EBADF;
+
+// NNG (nng_errno_enum)
+TBAG_CONSTEXPR Err const E_NNG_EINTR        = E_EINTR        ;
+TBAG_CONSTEXPR Err const E_NNG_ENOMEM       = E_ENOMEM       ;
+TBAG_CONSTEXPR Err const E_NNG_EINVAL       = E_EINVAL       ;
+TBAG_CONSTEXPR Err const E_NNG_EBUSY        = E_EBUSY        ;
+TBAG_CONSTEXPR Err const E_NNG_ETIMEDOUT    = E_ETIMEDOUT    ;
+TBAG_CONSTEXPR Err const E_NNG_ECONNREFUSED = E_ECONNREFUSED ;
+TBAG_CONSTEXPR Err const E_NNG_ECLOSED      = E_CLOSED       ;
+TBAG_CONSTEXPR Err const E_NNG_EAGAIN       = E_EAGAIN       ;
+TBAG_CONSTEXPR Err const E_NNG_ENOTSUP      = E_ENOTSUP      ;
+TBAG_CONSTEXPR Err const E_NNG_EADDRINUSE   = E_EADDRINUSE   ;
+TBAG_CONSTEXPR Err const E_NNG_ESTATE       = E_ILLSTATE     ;
+TBAG_CONSTEXPR Err const E_NNG_ENOENT       = E_ENOENT       ;
+TBAG_CONSTEXPR Err const E_NNG_EPROTO       = E_EPROTO       ;
+TBAG_CONSTEXPR Err const E_NNG_EUNREACHABLE = E_EHOSTUNREACH ;
+TBAG_CONSTEXPR Err const E_NNG_EADDRINVAL   = E_EADDRNOTAVAIL;
+TBAG_CONSTEXPR Err const E_NNG_EPERM        = E_EPERM        ;
+TBAG_CONSTEXPR Err const E_NNG_EMSGSIZE     = E_EMSGSIZE     ;
+TBAG_CONSTEXPR Err const E_NNG_ECONNABORTED = E_ECONNABORTED ;
+TBAG_CONSTEXPR Err const E_NNG_ECONNRESET   = E_ECONNRESET   ;
+TBAG_CONSTEXPR Err const E_NNG_ECANCELED    = E_ECANCELED    ;
+TBAG_CONSTEXPR Err const E_NNG_ENOFILES     = E_EMFILE       ;
+TBAG_CONSTEXPR Err const E_NNG_ENOSPC       = E_ENOSPC       ;
+TBAG_CONSTEXPR Err const E_NNG_EEXIST       = E_EEXIST       ;
+TBAG_CONSTEXPR Err const E_NNG_EREADONLY    = E_EREADONLY    ;
+TBAG_CONSTEXPR Err const E_NNG_EWRITEONLY   = E_EWRITEONLY   ;
+TBAG_CONSTEXPR Err const E_NNG_ECRYPTO      = E_ECRYPTO      ;
+TBAG_CONSTEXPR Err const E_NNG_EPEERAUTH    = E_EPEERAUTH    ;
+TBAG_CONSTEXPR Err const E_NNG_ENOARG       = E_ILLARGS      ;
+TBAG_CONSTEXPR Err const E_NNG_EAMBIGUOUS   = E_EAMBIGUOUS   ;
+TBAG_CONSTEXPR Err const E_NNG_EBADTYPE     = E_EBADTYPE     ;
+TBAG_CONSTEXPR Err const E_NNG_EINTERNAL    = E_EINTERNAL    ;
 
 inline int toInt(Err code) TBAG_NOEXCEPT { return static_cast<int>(code); }
 inline Err toErr(int code) TBAG_NOEXCEPT { return static_cast<Err>(code); }

@@ -1637,6 +1637,53 @@ uint32_t nng_random()
 //    return ::nng_wss_register();
 //}
 
+# /*************/
+# /* extension */
+# /*************/
+
+Err nng_code_err(int code)
+{
+    // clang-format off
+    switch (code) {
+    case 0:                 return E_SUCCESS;
+    case NNG_EINTR:         return E_NNG_EINTR;
+    case NNG_ENOMEM:        return E_NNG_ENOMEM;
+    case NNG_EINVAL:        return E_NNG_EINVAL;
+    case NNG_EBUSY:         return E_NNG_EBUSY;
+    case NNG_ETIMEDOUT:     return E_NNG_ETIMEDOUT;
+    case NNG_ECONNREFUSED:  return E_NNG_ECONNREFUSED;
+    case NNG_ECLOSED:       return E_NNG_ECLOSED;
+    case NNG_EAGAIN:        return E_NNG_EAGAIN;
+    case NNG_ENOTSUP:       return E_NNG_ENOTSUP;
+    case NNG_EADDRINUSE:    return E_NNG_EADDRINUSE;
+    case NNG_ESTATE:        return E_NNG_ESTATE;
+    case NNG_ENOENT:        return E_NNG_ENOENT;
+    case NNG_EPROTO:        return E_NNG_EPROTO;
+    case NNG_EUNREACHABLE:  return E_NNG_EUNREACHABLE;
+    case NNG_EADDRINVAL:    return E_NNG_EADDRINVAL;
+    case NNG_EPERM:         return E_NNG_EPERM;
+    case NNG_EMSGSIZE:      return E_NNG_EMSGSIZE;
+    case NNG_ECONNABORTED:  return E_NNG_ECONNABORTED;
+    case NNG_ECONNRESET:    return E_NNG_ECONNRESET;
+    case NNG_ECANCELED:     return E_NNG_ECANCELED;
+    case NNG_ENOFILES:      return E_NNG_ENOFILES;
+    case NNG_ENOSPC:        return E_NNG_ENOSPC;
+    case NNG_EEXIST:        return E_NNG_EEXIST;
+    case NNG_EREADONLY:     return E_NNG_EREADONLY;
+    case NNG_EWRITEONLY:    return E_NNG_EWRITEONLY;
+    case NNG_ECRYPTO:       return E_NNG_ECRYPTO;
+    case NNG_EPEERAUTH:     return E_NNG_EPEERAUTH;
+    case NNG_ENOARG:        return E_NNG_ENOARG;
+    case NNG_EAMBIGUOUS:    return E_NNG_EAMBIGUOUS;
+    case NNG_EBADTYPE:      return E_NNG_EBADTYPE;
+    case NNG_EINTERNAL:     return E_NNG_EINTERNAL;
+    case NNG_ESYSERR:       return E_UNKNOWN; // System error flag.
+    case NNG_ETRANERR:      return E_UNKNOWN; // Transport error flag.
+    default:                return E_UNKNOWN;
+    }
+    // clang-format on
+}
+
 } // namespace mq
 
 // --------------------

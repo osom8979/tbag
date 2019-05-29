@@ -52,6 +52,8 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <libtbag/Err.hpp>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -435,6 +437,12 @@ TBAG_API uint32_t nng_random();
 //TBAG_API int nng_tcp_register();
 //TBAG_API int nng_ws_register();
 //TBAG_API int nng_wss_register();
+
+# /*************/
+# /* extension */
+# /*************/
+
+TBAG_API Err nng_code_err(int code);
 
 } // namespace mq
 
