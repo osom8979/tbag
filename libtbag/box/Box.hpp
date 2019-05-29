@@ -29,6 +29,7 @@
 #include <type_traits>
 #include <initializer_list>
 #include <memory>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -393,6 +394,24 @@ public:
     inline bool is_device_cl  () const TBAG_NOEXCEPT { return device() == device_cl  (); }
     inline bool is_device_glsl() const TBAG_NOEXCEPT { return device() == device_glsl(); }
     // clang-format on
+
+public:
+    inline char * info() TBAG_NOEXCEPT
+    { return _data->info; }
+
+    inline char const * info() const TBAG_NOEXCEPT
+    { return _data->info; }
+
+    inline ui32 info_capacity() const TBAG_NOEXCEPT
+    { return _data->total_info_byte; }
+
+    inline ui32 info_size() const TBAG_NOEXCEPT
+    { return _data->info_size; }
+
+public:
+    Err assignInfo(char const * info, ui32 size);
+    Err assignInfo(std::string const & info);
+    std::string getInfoString() const;
 
 public:
     Err reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);

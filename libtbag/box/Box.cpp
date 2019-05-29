@@ -87,6 +87,24 @@ void Box::reset()
     _data.reset();
 }
 
+Err Box::assignInfo(char const * info, ui32 size)
+{
+    return box_info_checked_assign(_data.get(), info, size) ? E_SUCCESS : E_ECOPY;
+}
+
+Err Box::assignInfo(std::string const & info)
+{
+    return assignInfo(info.c_str(), static_cast<ui32>(info.size()));
+}
+
+std::string Box::getInfoString() const
+{
+    if (_data->info == nullptr) {
+        return std::string();
+    }
+    return std::string(_data->info, _data->info + _data->info_size);
+}
+
 Err Box::reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
 {
     va_list ap;
@@ -175,7 +193,7 @@ Err Box::copyToData(Box & box) const
 
 Err Box::copyFromInfo(Box const & box)
 {
-    return box_info_checked_copy(get(), box.get()) ? E_SUCCESS : E_ECOPY;
+    return box_info_checked_assign(get(), box.get()) ? E_SUCCESS : E_ECOPY;
 }
 
 Err Box::copyToInfo(Box & box) const
