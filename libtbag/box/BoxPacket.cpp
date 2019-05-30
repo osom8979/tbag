@@ -186,10 +186,12 @@ public:
         case AnyArr_UlongArr : return CreateUlongArr (builder, builder.CreateVector((ui64 const *)data, size)).Union();
         case AnyArr_FloatArr : return CreateFloatArr (builder, builder.CreateVector((fp32 const *)data, size)).Union();
         case AnyArr_DoubleArr: return CreateDoubleArr(builder, builder.CreateVector((fp64 const *)data, size)).Union();
-        default: break;
+        case AnyArr_NONE:
+            TBAG_FALLTHROUGH
+        default:
+            break;
         }
         // clang-format on
-        TBAG_INACCESSIBLE_BLOCK_ASSERT();
         return flatbuffers::Offset<void>();
     }
 };

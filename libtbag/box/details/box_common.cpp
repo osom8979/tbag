@@ -422,20 +422,17 @@ bool box_info_checked_assign(box_data * dest, char const * src, ui32 src_size) T
         return true;
     }
 
+    if (dest->info != nullptr && dest->total_info_byte < src_size) {
+        box_info_free(dest->info);
+        dest->info = nullptr;
+        dest->total_info_byte = 0;
+        dest->size = 0;
+    }
     if (dest->info == nullptr) {
-        box_info_malloc(src_size);
-        dest->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
-    } else {
+        dest->info = box_info_malloc(src_size);
         assert(dest->info != nullptr);
-        if (dest->total_info_byte < src_size) {
-            box_info_free(dest->info);
-            if (!box_info_malloc(src_size)) {
-                dest->total_info_byte = 0;
-                dest->info_size = 0;
-                return false;
-            }
-            dest->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
-        }
+        dest->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
+        assert(dest->total_info_byte >= 1);
     }
 
     assert(dest->info != nullptr);
