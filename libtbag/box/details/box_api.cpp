@@ -440,6 +440,62 @@ Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     return box_data_copy(dest, src, src->size);
 }
 
+void * box_data_ptr_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    return box_data_ptr_offset_raw(box->data, box->type, offset);
+}
+
+void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    return box_data_ptr_offset_raw((void const *)box->data, box->type, offset);
+}
+
+bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(data != nullptr);
+    return box_data_check_address_raw(box->data, box->size, box->type, data);
+}
+
+bool box_info_checked_assign(box_data * dest, char const * src, ui32 src_size) TBAG_NOEXCEPT
+{
+    assert(dest != nullptr);
+    if (src == nullptr || src_size == 0) {
+        if (dest->info && dest->total_info_byte >= 1) {
+            dest->info[0] = '\0';
+        }
+        dest->info_size = 0;
+        return true;
+    }
+
+    if (dest->info != nullptr && dest->total_info_byte < src_size) {
+        box_info_free(dest->info);
+        dest->info = nullptr;
+        dest->total_info_byte = 0;
+        dest->size = 0;
+    }
+    if (dest->info == nullptr) {
+        dest->info = box_info_malloc(src_size);
+        assert(dest->info != nullptr);
+        dest->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
+        assert(dest->total_info_byte >= 1);
+    }
+
+    assert(dest->info != nullptr);
+    assert(dest->total_info_byte >= GET_SIZE_TO_TOTAL_INFO_BYTE(src_size));
+    auto const CODE = box_info_assign(dest->info, GET_TOTAL_INFO_BYTE_TO_SIZE(dest->total_info_byte), src, src_size);
+    assert(CODE);
+    dest->info_size = src_size;
+    return true;
+}
+
+bool box_info_checked_assign(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+{
+    return box_info_checked_assign(dest, src->info, src->info_size);
+}
+
 } // namespace details
 } // namespace box
 

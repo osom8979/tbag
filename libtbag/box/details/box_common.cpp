@@ -411,60 +411,23 @@ bool box_info_assign(char * dest, ui32 dest_size, char const * src) TBAG_NOEXCEP
     return box_info_assign(dest, dest_size, src, strlen(src));
 }
 
-bool box_info_checked_assign(box_data * dest, char const * src, ui32 src_size) TBAG_NOEXCEPT
+void * box_data_ptr_offset_raw(void * data, btype type, ui32 offset) TBAG_NOEXCEPT
 {
-    assert(dest != nullptr);
-    if (src == nullptr || src_size == 0) {
-        if (dest->info && dest->total_info_byte >= 1) {
-            dest->info[0] = '\0';
-        }
-        dest->info_size = 0;
-        return true;
-    }
-
-    if (dest->info != nullptr && dest->total_info_byte < src_size) {
-        box_info_free(dest->info);
-        dest->info = nullptr;
-        dest->total_info_byte = 0;
-        dest->size = 0;
-    }
-    if (dest->info == nullptr) {
-        dest->info = box_info_malloc(src_size);
-        assert(dest->info != nullptr);
-        dest->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
-        assert(dest->total_info_byte >= 1);
-    }
-
-    assert(dest->info != nullptr);
-    assert(dest->total_info_byte >= GET_SIZE_TO_TOTAL_INFO_BYTE(src_size));
-    auto const CODE = box_info_assign(dest->info, GET_TOTAL_INFO_BYTE_TO_SIZE(dest->total_info_byte), src, src_size);
-    assert(CODE);
-    dest->info_size = src_size;
-    return true;
+    assert(data != nullptr);
+    return (void*)(((ui8*)data) + (box_get_type_byte(type)*offset));
 }
 
-bool box_info_checked_assign(box_data * dest, box_data const * src) TBAG_NOEXCEPT
+void const * box_data_ptr_offset_raw(void const * data, btype type, ui32 offset) TBAG_NOEXCEPT
 {
-    return box_info_checked_assign(dest, src->info, src->info_size);
+    assert(data != nullptr);
+    return (void const *)(((ui8 const *)data) + (box_get_type_byte(type)*offset));
 }
 
-void * box_data_ptr_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
+bool box_data_check_address_raw(void const * data_begin, ui32 size, btype type, void const * check_data) TBAG_NOEXCEPT
 {
-    assert(box != nullptr);
-    return (void*)(((ui8*)(box->data)) + (box_get_type_byte(box->type)*offset));
-}
-
-void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    return (void const *)(((ui8 const *)(box->data)) + (box_get_type_byte(box->type)*offset));
-}
-
-bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCEPT
-{
-    auto const min = (std::intptr_t)box->data;
-    auto const max = ((std::intptr_t)(box->data)) + (((box->size)-1) * box_get_type_byte(box->type));
-    auto const pivot = (std::intptr_t)data;
+    auto const min = (std::intptr_t)data_begin;
+    auto const max = ((std::intptr_t)data_begin) + ((size-1) * box_get_type_byte(type));
+    auto const pivot = (std::intptr_t)check_data;
     return (min <= COMPARE_AND(pivot) <= max);
 }
 
@@ -644,7 +607,8 @@ bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT
 
         auto const next_offset_byte = cursor->stride * cursor->step * box_get_type_byte(cursor->box->type);
         cursor->data = (void*) (((ui8*)(cursor->data)) + next_offset_byte);
-        if (!box_data_check_address(cursor->box, cursor->data)) {
+
+        if (!box_data_check_address_raw(cursor->box->data, cursor->box->size, cursor->box->type, cursor->data)) {
             return false;
         }
     }
