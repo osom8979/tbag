@@ -229,12 +229,12 @@ Box Box::asType(btype type) const
     return result;
 }
 
-Err Box::encode(BoxPacketBuilder & builder)
+Err Box::encode(BoxPacketBuilder & builder) const
 {
     return builder.build(_data.get());
 }
 
-Err Box::encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer)
+Err Box::encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer) const
 {
     auto const CODE = encode(builder);
     if (isFailure(CODE)) {

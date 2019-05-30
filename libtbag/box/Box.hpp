@@ -728,8 +728,8 @@ public:
     }
 
 public:
-    Err encode(BoxPacketBuilder & builder);
-    Err encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer);
+    Err encode(BoxPacketBuilder & builder) const;
+    Err encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer) const;
     Err decode(char const * buffer, std::size_t size, BoxPacketParser const & parser,
                std::size_t * computed_size = nullptr);
     Err decode(char const * buffer, std::size_t size, std::size_t * computed_size = nullptr);
