@@ -212,6 +212,8 @@ public:
     using box_data   = libtbag::box::details::box_data;
     using box_cursor = libtbag::box::details::box_cursor;
 
+    using Buffer = libtbag::util::Buffer;
+
 public:
     using SharedBoxData = std::shared_ptr<box_data>;
 
@@ -409,9 +411,12 @@ public:
     { return _data->info_size; }
 
 public:
-    Err assignInfo(char const * info, ui32 size);
-    Err assignInfo(std::string const & info);
+    Err setInfo(char const * info, ui32 size);
+    Err setInfo(std::string const & info);
+    Err setInfo(Buffer const & info);
+
     std::string getInfoString() const;
+    Buffer getInfoBuffer() const;
 
 public:
     Err reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
@@ -729,10 +734,14 @@ public:
 
 public:
     Err encode(BoxPacketBuilder & builder) const;
-    Err encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer) const;
+    Err encode(BoxPacketBuilder & builder, Buffer & buffer) const;
+    Err encode(Buffer & buffer) const;
+
+public:
     Err decode(char const * buffer, std::size_t size, BoxPacketParser const & parser,
                std::size_t * computed_size = nullptr);
     Err decode(char const * buffer, std::size_t size, std::size_t * computed_size = nullptr);
+    Err decode(Buffer const & buffer, std::size_t * computed_size = nullptr);
 };
 
 } // namespace box

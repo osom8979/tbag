@@ -87,14 +87,19 @@ void Box::reset()
     _data.reset();
 }
 
-Err Box::assignInfo(char const * info, ui32 size)
+Err Box::setInfo(char const * info, ui32 size)
 {
     return box_info_checked_assign(_data.get(), info, size) ? E_SUCCESS : E_ECOPY;
 }
 
-Err Box::assignInfo(std::string const & info)
+Err Box::setInfo(std::string const & info)
 {
-    return assignInfo(info.c_str(), static_cast<ui32>(info.size()));
+    return setInfo(info.c_str(), static_cast<ui32>(info.size()));
+}
+
+Err Box::setInfo(Buffer const & info)
+{
+    return setInfo(info.data(), static_cast<ui32>(info.size()));
 }
 
 std::string Box::getInfoString() const
@@ -103,6 +108,14 @@ std::string Box::getInfoString() const
         return std::string();
     }
     return std::string(_data->info, _data->info + _data->info_size);
+}
+
+Box::Buffer Box::getInfoBuffer() const
+{
+    if (_data->info == nullptr) {
+        return Buffer();
+    }
+    return Buffer(_data->info, _data->info + _data->info_size);
 }
 
 Err Box::reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
@@ -234,7 +247,7 @@ Err Box::encode(BoxPacketBuilder & builder) const
     return builder.build(_data.get());
 }
 
-Err Box::encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer) const
+Err Box::encode(BoxPacketBuilder & builder, Buffer & buffer) const
 {
     auto const CODE = encode(builder);
     if (isFailure(CODE)) {
@@ -242,6 +255,12 @@ Err Box::encode(BoxPacketBuilder & builder, libtbag::util::Buffer & buffer) cons
     }
     buffer.assign(builder.point(), builder.point() + builder.size());
     return E_SUCCESS;
+}
+
+Err Box::encode(Buffer & buffer) const
+{
+    BoxPacketBuilder builder;
+    return encode(builder, buffer);
 }
 
 Err Box::decode(char const * buffer, std::size_t size, BoxPacketParser const & parser, std::size_t * computed_size)
@@ -253,6 +272,11 @@ Err Box::decode(char const * buffer, std::size_t size, std::size_t * computed_si
 {
     BoxPacketParser parser;
     return decode(buffer, size, parser, computed_size);
+}
+
+Err Box::decode(Buffer const & buffer, std::size_t * computed_size)
+{
+    return decode(buffer.data(), buffer.size(), computed_size);
 }
 
 } // namespace box

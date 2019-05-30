@@ -122,6 +122,14 @@ TEST(BoxTest, Assign)
     ASSERT_EQ(41, b3.at<si32>(1, 1, 1, 0));
     ASSERT_EQ(51, b3.at<si32>(1, 2, 0, 0));
     ASSERT_EQ(61, b3.at<si32>(1, 2, 1, 0));
+
+    Box b4 = {{10}};
+    ASSERT_TRUE(b4.is_device_cpu());
+    ASSERT_TRUE(b4.is_si32());
+    ASSERT_EQ(2, b4.rank());
+    ASSERT_EQ(1, b4.size());
+    ASSERT_EQ(1, b4.dim(0));
+    ASSERT_EQ(1, b4.dim(1));
 }
 
 TEST(BoxTest, AsType)
@@ -144,5 +152,58 @@ TEST(BoxTest, AsType)
     ASSERT_EQ(2, b1.dim(0));
     ASSERT_EQ(10.0, b1.at<fp64>(0));
     ASSERT_EQ(20.0, b1.at<fp64>(1));
+}
+
+TEST(BoxTest, Info)
+{
+    std::string const INFO = "TEST";
+    Box box = {{0}};
+    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    ASSERT_EQ(INFO.size(), box.info_capacity());
+    ASSERT_EQ(INFO.size(), box.info_size());
+    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    ASSERT_EQ(INFO, box.getInfoString());
+}
+
+TEST(BoxTest, EncodeDecode)
+{
+    std::string const INFO = "{TEMP STRING}";
+    Box box = {{11, 22}};
+    ASSERT_TRUE(box.is_device_cpu());
+    ASSERT_TRUE(box.is_si32());
+    ASSERT_EQ(2, box.rank());
+    ASSERT_EQ(2, box.size());
+    ASSERT_EQ(1, box.dim(0));
+    ASSERT_EQ(2, box.dim(1));
+    ASSERT_EQ(11, box.offset<si32>(0));
+    ASSERT_EQ(22, box.offset<si32>(1));
+    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    ASSERT_EQ(INFO.size(), box.info_capacity());
+    ASSERT_EQ(INFO.size(), box.info_size());
+    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    ASSERT_EQ(INFO, box.getInfoString());
+
+    Box::Buffer buffer;
+    ASSERT_EQ(E_SUCCESS, box.encode(buffer));
+    ASSERT_FALSE(buffer.empty());
+    auto const ENCODE_BUFFER_SIZE = buffer.size();
+
+    Box box2;
+    std::size_t computed_size = 0;
+    ASSERT_EQ(E_SUCCESS, box2.decode(buffer, &computed_size));
+    ASSERT_EQ(ENCODE_BUFFER_SIZE, computed_size);
+    ASSERT_TRUE(box2.is_device_cpu());
+    ASSERT_TRUE(box2.is_si32());
+    ASSERT_EQ(2, box2.rank());
+    ASSERT_EQ(2, box2.size());
+    ASSERT_EQ(1, box2.dim(0));
+    ASSERT_EQ(2, box2.dim(1));
+    ASSERT_EQ(11, box2.offset<si32>(0));
+    ASSERT_EQ(22, box2.offset<si32>(1));
+    ASSERT_EQ(E_SUCCESS, box2.setInfo(INFO));
+    ASSERT_EQ(INFO.size(), box2.info_capacity());
+    ASSERT_EQ(INFO.size(), box2.info_size());
+    ASSERT_EQ(E_SUCCESS, box2.setInfo(INFO));
+    ASSERT_EQ(INFO, box2.getInfoString());
 }
 
