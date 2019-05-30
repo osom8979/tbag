@@ -475,6 +475,13 @@ TBAG_API bool GuiInitRay();
 TBAG_API void GuiUpdateRay();
 TBAG_API void GuiShutdownRay();
 
+TBAG_API void GuiSetDefaultIniPath(char const * path);
+TBAG_API void GuiSetDefaultLogPath(char const * path);
+TBAG_API void GuiClearFonts();
+TBAG_API int  GuiGetRegisteredFontCount();
+TBAG_API bool GuiAddKoreanFontFromFileTTF(char const * font_path, float size_pixels);
+TBAG_API bool GuiSetDefaultFont(int index);
+
 // Demo, Debug, Information
 TBAG_API void GuiShowDemoWindow(bool * p_open = nullptr);
 TBAG_API void GuiShowAboutWindow(bool * p_open = nullptr);

@@ -10,6 +10,9 @@
 #include <libtbag/ray/RayGui.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/log/Log.hpp>
+#include <libtbag/typography/font/Ngc.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -17,6 +20,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,18 +28,63 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace ray {
 
+TBAG_CONSTEXPR static float const DEFAULT_FONT_SIZE_PIXEL = 13.0f * 1.0f;
+
 struct RayGui final : private Noncopyable
 {
-    Texture font_texture;
+    using Buffer = libtbag::util::Buffer;
 
-    RayGui()
+    Texture proggyclean_font_texture;
+
+    Buffer  ngcn_buffer;
+    Texture ngcn_font_texture;
+
+    RayGui(ImGuiIO & io)
     {
-        // EMPTY.
+        COMMENT("[0] ProggyClean TTF") {
+            unsigned char * pixels;
+            int width, height;
+
+            io.Fonts->AddFontDefault();
+            io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+            auto font_image = LoadImagePro(pixels, width, height, UNCOMPRESSED_R8G8B8A8);
+            proggyclean_font_texture = LoadTextureFromImage(font_image);
+            UnloadImage(font_image);
+        }
+
+        COMMENT("[1] NanumGothicCoding Normal TTF") {
+            unsigned char * pixels;
+            int width, height;
+            float pixel_size = DEFAULT_FONT_SIZE_PIXEL;
+
+            ImFontConfig config;
+            snprintf(config.Name, IM_ARRAYSIZE(config.Name), "NanumGothicCoding.ttf, %dpx", (int)pixel_size);
+            config.FontDataOwnedByAtlas = false;
+            config.OversampleH = 1;
+            config.OversampleV = 1;
+            config.PixelSnapH = true;
+
+            ngcn_buffer = libtbag::typography::font::getNgcNormal();
+            io.Fonts->AddFontFromMemoryTTF((void*)ngcn_buffer.data(), ngcn_buffer.size(),
+                                           DEFAULT_FONT_SIZE_PIXEL, &config,
+                                           io.Fonts->GetGlyphRangesKorean());
+            io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+            auto font_image = LoadImagePro(pixels, width, height, UNCOMPRESSED_R8G8B8A8);
+            ngcn_font_texture = LoadTextureFromImage(font_image);
+            UnloadImage(font_image);
+        }
+
+        // Default;
+        io.FontDefault = io.Fonts->Fonts[1];
+        io.Fonts->TexID = reinterpret_cast<ImTextureID>(ngcn_font_texture.id);
     }
 
     ~RayGui()
     {
-        // EMPTY.
+        UnloadTexture(proggyclean_font_texture);
+        UnloadTexture(ngcn_font_texture);
     }
 };
 
@@ -50,11 +99,11 @@ bool GuiInitRay()
     ImGuiContext * context = ImGui::CreateContext();
     assert(context != nullptr);
 
-    // User data configuration.
-    auto * user = new RayGui();
-    assert(user != nullptr);
-
     ImGuiIO & io = ImGui::GetIO();
+
+    // User data configuration.
+    auto * user = new RayGui(io);
+    assert(user != nullptr);
     io.UserData = (void*)user;
 
     // Keyboard input configuration.
@@ -84,19 +133,6 @@ bool GuiInitRay()
     // Rendering configuration.
     io.DisplaySize.x = (float)GetScreenWidth();
     io.DisplaySize.y = (float)GetScreenHeight();
-
-    {
-        io.Fonts->AddFontDefault();
-
-        unsigned char * pixels;
-        int width, height;
-        io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-
-        auto font_image = LoadImagePro(pixels, width, height, UNCOMPRESSED_R8G8B8A8);
-        user->font_texture = LoadTextureFromImage(font_image);
-        io.Fonts->TexID = reinterpret_cast<ImTextureID>(user->font_texture.id);
-        UnloadImage(font_image);
-    }
 
     ImGui::StyleColorsDark();
     // ImGui::StyleColorsClassic();
@@ -257,7 +293,6 @@ void GuiShutdownRay()
 
     auto * user = (RayGui*)io.UserData;
     assert(user != nullptr);
-    UnloadTexture(user->font_texture);
     delete user;
 
     io.UserData = nullptr;
@@ -266,6 +301,51 @@ void GuiShutdownRay()
     SetEndDrawingCallback(nullptr);
     ImGui_ImplOpenGL3_Shutdown();
     ImGui::DestroyContext();
+}
+
+void GuiSetDefaultIniPath(char const * path)
+{
+    ImGuiIO & io = ImGui::GetIO();
+    io.IniFilename = path;
+}
+
+void GuiSetDefaultLogPath(char const * path)
+{
+    ImGuiIO & io = ImGui::GetIO();
+    io.LogFilename = path;
+}
+
+void GuiClearFonts()
+{
+    ImGuiIO & io = ImGui::GetIO();
+    io.Fonts->Clear();
+}
+
+int GuiGetRegisteredFontCount()
+{
+    ImGuiIO & io = ImGui::GetIO();
+    return io.Fonts->Fonts.Size;
+}
+
+bool GuiAddKoreanFontFromFileTTF(char const * font_path, float size_pixels)
+{
+    ImGuiIO & io = ImGui::GetIO();
+    ImFont * font = io.Fonts->AddFontFromFileTTF(font_path, size_pixels, nullptr,
+                                                 io.Fonts->GetGlyphRangesKorean());
+    return (font != nullptr);
+}
+
+bool GuiSetDefaultFont(int index)
+{
+    ImGuiIO & io = ImGui::GetIO();
+    if (0 <= COMPARE_AND(index) < io.Fonts->Fonts.Size) {
+        tDLogI("GuiSetImGuiFont() Update font[{}]: {}", index, io.Fonts->Fonts[index]->GetDebugName());
+        io.FontDefault = io.Fonts->Fonts[index];
+        return true;
+    } else {
+        tDLogE("GuiSetImGuiFont() Out of index: {}/{}", index, io.Fonts->Fonts.Size);
+        return false;
+    }
 }
 
 #ifndef STATIC_ASSERT_CHECK_IS_EQUALS_FOR_IMGUI
