@@ -168,7 +168,7 @@ public:
                             box->ext[0], box->ext[1], box->ext[2], box->ext[3],
                             ANY_TYPE, createAnyArr(ANY_TYPE, box->data, box->size),
                             builder.CreateVector(box->dims, (size_t)box->rank),
-                            builder.CreateString(box->info, box->info_size)));
+                            builder.CreateVector(box->info, box->info_size)));
         return E_SUCCESS;
     }
 
@@ -282,7 +282,7 @@ public:
     }
 
 public:
-    std::pair<Err, std::size_t> parse(char const * buffer, std::size_t size, box_data * box) const
+    std::pair<Err, std::size_t> parse(void const * buffer, std::size_t size, box_data * box) const
     {
         using namespace flatbuffers;
         assert(_parent != nullptr);
@@ -398,7 +398,7 @@ BoxPacketParser::~BoxPacketParser()
     // EMPTY.
 }
 
-Err BoxPacketParser::parse(char const * buffer, std::size_t size,
+Err BoxPacketParser::parse(void const * buffer, std::size_t size,
                            box_data * box, std::size_t * computed_size) const
 {
     assert(_impl);

@@ -67,8 +67,9 @@ TBAG_API void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBA
 
 TBAG_API bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCEPT;
 
-TBAG_API bool box_info_checked_assign(box_data * dest, char const * src, ui32 src_size) TBAG_NOEXCEPT;
+TBAG_API bool box_info_checked_assign(box_data * dest, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT;
 TBAG_API bool box_info_checked_assign(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
+TBAG_API bool box_info_checked_assign_string(box_data * dest, char const * src) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

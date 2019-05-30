@@ -131,7 +131,7 @@ public:
     virtual ~BoxPacketParser();
 
 public:
-    Err parse(char const * buffer, std::size_t size, box_data * box, std::size_t * computed_size) const;
+    Err parse(void const * buffer, std::size_t size, box_data * box, std::size_t * computed_size) const;
 };
 
 /**

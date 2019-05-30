@@ -381,19 +381,19 @@ ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEX
     return index;
 }
 
-char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT
+ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT
 {
     assert(info_size >= 1);
-    return (char*)tbMalloc(GET_SIZE_TO_TOTAL_INFO_BYTE(info_size));
+    return (ui8*)tbMalloc(GET_SIZE_TO_TOTAL_INFO_BYTE(info_size));
 }
 
-void box_info_free(char * info) TBAG_NOEXCEPT
+void box_info_free(ui8 * info) TBAG_NOEXCEPT
 {
     assert(info != nullptr);
     tbFree(info);
 }
 
-bool box_info_assign(char * dest, ui32 dest_size, char const * src, ui32 src_size) TBAG_NOEXCEPT
+bool box_info_assign(ui8 * dest, ui32 dest_size, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     assert(dest_size >= 1);
@@ -406,9 +406,9 @@ bool box_info_assign(char * dest, ui32 dest_size, char const * src, ui32 src_siz
     return true;
 }
 
-bool box_info_assign(char * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT
+bool box_info_assign_string(ui8 * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT
 {
-    return box_info_assign(dest, dest_size, src, strlen(src));
+    return box_info_assign(dest, dest_size, (ui8 const *)src, strlen(src)*sizeof(char));
 }
 
 void * box_data_ptr_offset_raw(void * data, btype type, ui32 offset) TBAG_NOEXCEPT

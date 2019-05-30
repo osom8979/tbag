@@ -459,7 +459,7 @@ bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCE
     return box_data_check_address_raw(box->data, box->size, box->type, data);
 }
 
-bool box_info_checked_assign(box_data * dest, char const * src, ui32 src_size) TBAG_NOEXCEPT
+bool box_info_checked_assign(box_data * dest, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     if (src == nullptr || src_size == 0) {
@@ -493,7 +493,16 @@ bool box_info_checked_assign(box_data * dest, char const * src, ui32 src_size) T
 
 bool box_info_checked_assign(box_data * dest, box_data const * src) TBAG_NOEXCEPT
 {
+    assert(dest != nullptr);
+    assert(src != nullptr);
     return box_info_checked_assign(dest, src->info, src->info_size);
+}
+
+bool box_info_checked_assign_string(box_data * dest, char const * src) TBAG_NOEXCEPT
+{
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    return box_info_checked_assign(dest, (ui8 const *)src, strlen(src)*sizeof(char));
 }
 
 } // namespace details

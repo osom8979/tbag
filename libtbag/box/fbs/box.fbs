@@ -37,7 +37,7 @@ table BoxFbs
     ext3   : long;
     data   : AnyArr;
     dims   : [uint];
-    info   : string;
+    info   : [ubyte];
 }
 
 root_type BoxFbs;

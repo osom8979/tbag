@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/box/details/box_api.hpp>
+#include <cstring>
 
 using namespace libtbag;
 using namespace libtbag::box;
@@ -259,30 +260,30 @@ TEST(box_api_test, box_info)
     ASSERT_EQ(0, box.info_size);
 
     char const test_info_data[] = "INFORMATION";
-    auto const test_info_data_length = sizeof(test_info_data)/sizeof(test_info_data[0]);
-    ASSERT_TRUE(box_info_checked_assign(&box, test_info_data, test_info_data_length));
+    auto const test_info_data_length = strlen(test_info_data)*sizeof(char);
+    ASSERT_TRUE(box_info_checked_assign_string(&box, test_info_data));
     ASSERT_NE(nullptr, box.info);
     ASSERT_EQ(test_info_data_length, box.total_info_byte);
     ASSERT_EQ(test_info_data_length, box.info_size);
-    ASSERT_STREQ(test_info_data, box.info);
+    ASSERT_EQ(0, strncmp(test_info_data, (char const *)box.info, test_info_data_length));
 
     char const test_info_data_long[] = "MORE_TEST_INFORMATION";
-    auto const test_info_data_long_length = sizeof(test_info_data_long)/sizeof(test_info_data_long[0]);
-    ASSERT_TRUE(box_info_checked_assign(&box, test_info_data_long, test_info_data_long_length));
+    auto const test_info_data_long_length = strlen(test_info_data_long)*sizeof(char);
+    ASSERT_TRUE(box_info_checked_assign_string(&box, test_info_data_long));
     ASSERT_NE(nullptr, box.info);
     ASSERT_EQ(test_info_data_long_length, box.total_info_byte);
     ASSERT_EQ(test_info_data_long_length, box.info_size);
-    ASSERT_STREQ(test_info_data_long, box.info);
+    ASSERT_EQ(0, strncmp(test_info_data_long, (char const *)box.info, test_info_data_long_length));
 
     auto const * prev_box_info = box.info;
     char const test_info_data_short[] = "INF";
-    auto const test_info_data_short_length = sizeof(test_info_data_short)/sizeof(test_info_data_short[0]);
-    ASSERT_TRUE(box_info_checked_assign(&box, test_info_data_short, test_info_data_short_length));
+    auto const test_info_data_short_length = strlen(test_info_data_short)*sizeof(char);
+    ASSERT_TRUE(box_info_checked_assign_string(&box, test_info_data_short));
     ASSERT_NE(nullptr, box.info);
     ASSERT_EQ(prev_box_info, box.info);
     ASSERT_EQ(test_info_data_long_length, box.total_info_byte);
     ASSERT_EQ(test_info_data_short_length, box.info_size);
-    ASSERT_STREQ(test_info_data_short, box.info);
+    ASSERT_EQ(0, strncmp(test_info_data_short, (char const *)box.info, test_info_data_short_length));
 
     box_free(&box);
 }

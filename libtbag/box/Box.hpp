@@ -398,10 +398,10 @@ public:
     // clang-format on
 
 public:
-    inline char * info() TBAG_NOEXCEPT
+    inline ui8 * info() TBAG_NOEXCEPT
     { return _data->info; }
 
-    inline char const * info() const TBAG_NOEXCEPT
+    inline ui8 const * info() const TBAG_NOEXCEPT
     { return _data->info; }
 
     inline ui32 info_capacity() const TBAG_NOEXCEPT
@@ -411,7 +411,7 @@ public:
     { return _data->info_size; }
 
 public:
-    Err setInfo(char const * info, ui32 size);
+    Err setInfo(ui8 const * info, ui32 size);
     Err setInfo(std::string const & info);
     Err setInfo(Buffer const & info);
 
@@ -738,9 +738,9 @@ public:
     Err encode(Buffer & buffer) const;
 
 public:
-    Err decode(char const * buffer, std::size_t size, BoxPacketParser const & parser,
+    Err decode(void const * buffer, std::size_t size, BoxPacketParser const & parser,
                std::size_t * computed_size = nullptr);
-    Err decode(char const * buffer, std::size_t size, std::size_t * computed_size = nullptr);
+    Err decode(void const * buffer, std::size_t size, std::size_t * computed_size = nullptr);
     Err decode(Buffer const & buffer, std::size_t * computed_size = nullptr);
 };
 

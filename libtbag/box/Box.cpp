@@ -87,19 +87,19 @@ void Box::reset()
     _data.reset();
 }
 
-Err Box::setInfo(char const * info, ui32 size)
+Err Box::setInfo(ui8 const * info, ui32 size)
 {
     return box_info_checked_assign(_data.get(), info, size) ? E_SUCCESS : E_ECOPY;
 }
 
 Err Box::setInfo(std::string const & info)
 {
-    return setInfo(info.c_str(), static_cast<ui32>(info.size()));
+    return setInfo((ui8 const *)info.c_str(), static_cast<ui32>(info.size()));
 }
 
 Err Box::setInfo(Buffer const & info)
 {
-    return setInfo(info.data(), static_cast<ui32>(info.size()));
+    return setInfo((ui8 const *)info.data(), static_cast<ui32>(info.size()));
 }
 
 std::string Box::getInfoString() const
@@ -263,12 +263,12 @@ Err Box::encode(Buffer & buffer) const
     return encode(builder, buffer);
 }
 
-Err Box::decode(char const * buffer, std::size_t size, BoxPacketParser const & parser, std::size_t * computed_size)
+Err Box::decode(void const * buffer, std::size_t size, BoxPacketParser const & parser, std::size_t * computed_size)
 {
     return parser.parse(buffer, size, _data.get(), computed_size);
 }
 
-Err Box::decode(char const * buffer, std::size_t size, std::size_t * computed_size)
+Err Box::decode(void const * buffer, std::size_t size, std::size_t * computed_size)
 {
     BoxPacketParser parser;
     return decode(buffer, size, parser, computed_size);

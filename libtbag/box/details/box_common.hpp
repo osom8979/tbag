@@ -162,7 +162,7 @@ struct box_data
     ui32 rank;
 
     /** Extra information. */
-    char * info;
+    ui8 * info;
 
     /** Extra information data byte. */
     ui32 total_info_byte;
@@ -174,8 +174,8 @@ struct box_data
     void * opaque;
 };
 
-#define GET_SIZE_TO_TOTAL_INFO_BYTE(size) (size*sizeof(char))
-#define GET_TOTAL_INFO_BYTE_TO_SIZE(byte) (byte/sizeof(char))
+#define GET_SIZE_TO_TOTAL_INFO_BYTE(size) (size*sizeof(ui8))
+#define GET_TOTAL_INFO_BYTE_TO_SIZE(byte) (byte/sizeof(ui8))
 #define GET_RANK_TO_TOTAL_DIMS_BYTE(rank) (rank*sizeof(ui32))
 #define GET_TOTAL_DIMS_BYTE_TO_RANK(byte) (byte/sizeof(ui32))
 #define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
@@ -247,10 +247,10 @@ TBAG_API ui32   box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index)
 TBAG_API ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
-TBAG_API char * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
-TBAG_API void   box_info_free(char * info) TBAG_NOEXCEPT;
-TBAG_API bool   box_info_assign(char * dest, ui32 dest_size, char const * src, ui32 src_size) TBAG_NOEXCEPT;
-TBAG_API bool   box_info_assign(char * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT;
+TBAG_API ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
+TBAG_API void  box_info_free(ui8 * info) TBAG_NOEXCEPT;
+TBAG_API bool  box_info_assign(ui8 * dest, ui32 dest_size, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT;
+TBAG_API bool  box_info_assign_string(ui8 * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT;
 
 TBAG_API void       * box_data_ptr_offset_raw(void       * data, btype type, ui32 offset) TBAG_NOEXCEPT;
 TBAG_API void const * box_data_ptr_offset_raw(void const * data, btype type, ui32 offset) TBAG_NOEXCEPT;
