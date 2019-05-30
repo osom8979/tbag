@@ -184,6 +184,11 @@ bool NngSocket::isRaw() const
     return _impl->raw;
 }
 
+bool NngSocket::isOpened() const
+{
+    return exists();
+}
+
 Err NngSocket::listen(char const * url, nng_listener * lp, int flags)
 {
     assert(_impl);

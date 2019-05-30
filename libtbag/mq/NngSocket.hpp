@@ -146,6 +146,7 @@ public:
 
 public:
     bool isRaw() const;
+    bool isOpened() const;
 
 public:
     Err listen(char const * url, nng_listener * lp = nullptr, int flags = 0);
