@@ -102,7 +102,7 @@ char const * const NngSocket::getSocketTypeName(SocketType type) TBAG_NOEXCEPT
 
 NngSocket::NngSocket() : _impl(nullptr)
 {
-    assert(static_cast<bool>(_impl));
+    // EMPTY.
 }
 
 NngSocket::NngSocket(NngSocket const & obj) TBAG_NOEXCEPT : _impl(nullptr)
