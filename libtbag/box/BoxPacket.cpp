@@ -328,9 +328,7 @@ public:
         auto const * info = packet->info()->data();
         auto const info_size = packet->info()->size();
 
-        auto code = box_malloc_copy_dims(box, type, device, ext, dims,
-                                         GET_RANK_TO_TOTAL_DIMS_BYTE(dims_size),
-                                         dims_size);
+        auto code = box_resize(box, type, device, ext, dims_size, dims);
         if (isFailure(code)) {
             return std::make_pair(code, COMPUTED_SIZE);
         }
@@ -352,7 +350,7 @@ public:
         case AnyArr_FloatArr : update_data((FloatArr  const *)fbs_table, (fp32*)box->data); break;
         case AnyArr_DoubleArr: update_data((DoubleArr const *)fbs_table, (fp64*)box->data); break;
         case AnyArr_NONE:
-            TBAG_FALLTHROUGH
+            break;
         default:
             TBAG_INACCESSIBLE_BLOCK_ASSERT();
         }
@@ -360,12 +358,8 @@ public:
 
         if (info_size >= 1) {
             assert(info != nullptr);
-            box->info = box_info_malloc(info_size);
-            box->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(info_size);
-            box->info_size = info_size;
-            if (!box_info_assign(box->info, box->total_info_byte, info, info_size)) {
-                code = E_ESET;
-            }
+            auto const result = box_info_checked_assign(box, info, info_size);
+            assert(result);
         }
         return std::make_pair(code, COMPUTED_SIZE);
     }

@@ -183,13 +183,47 @@ Err box_resize_args(box_data * box, btype type, bdev device, ui64 const * ext, u
 
 Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
+    if (rank <= BOX_TEMP_DIM_STACK_SIZE) {
+        ui32 dims[BOX_TEMP_DIM_STACK_SIZE];
+        box_dim_set_vargs(dims, rank, ap);
+        return box_resize(box, type, device, ext, rank, dims);
+    } else {
+        assert(rank > BOX_TEMP_DIM_STACK_SIZE);
+        ui32 * dims = box_dim_malloc(rank);
+        assert(dims != nullptr);
+        box_dim_set_vargs(dims, rank, ap);
+        auto const code = box_resize(box, type, device, ext, rank, dims);
+        box_dim_free(dims);
+        return code;
+    }
+}
+
+Err box_resize(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims) TBAG_NOEXCEPT
+{
     assert(box != nullptr);
-    assert(rank >= 1);
+    if (rank == 0) {
+        box->type = type;
+        box->device = device;
+        if (ext != nullptr) {
+            box->ext[0] = ext[0];
+            box->ext[1] = ext[1];
+            box->ext[2] = ext[2];
+            box->ext[3] = ext[3];
+        } else {
+            box->ext[0] = 0;
+            box->ext[1] = 0;
+            box->ext[2] = 0;
+            box->ext[3] = 0;
+        }
+        box->size = 0;
+        box->rank = 0;
+        return E_SUCCESS;
+    }
+
     assert(box_support_type(type));
     assert(box_support_device(device));
-
     if (box->data == nullptr && box->dims == nullptr) {
-        return box_malloc_vargs(box, type, device, ext, rank, ap);
+        return box_malloc_copy_dims(box, type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
     }
 
     ui64 resize_ext[BOX_EXTENSION_SIZE] = {0,};
@@ -207,7 +241,7 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
         if (box->dims) {
             box_dim_free(box->dims);
         }
-        return box_malloc_vargs(box, type, device, ext, rank, ap);
+        return box_malloc_copy_dims(box, type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
     }
 
     assert(box->device == device);
@@ -216,7 +250,7 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
     assert(box->ext[2] == resize_ext[2]);
     assert(box->ext[3] == resize_ext[3]);
 
-    if (box_dim_is_equals_vargs(box->dims, box->rank, rank, ap)) {
+    if (box_dim_is_equals(box->dims, box->rank, dims, rank)) {
         return E_SUCCESS;
     }
 
@@ -224,22 +258,18 @@ Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, 
         if (box->dims) {
             box_dim_free(box->dims);
         }
-        box->dims = box_dim_malloc_vargs(rank, ap);
-        if (box->dims == nullptr) {
-            box->total_dims_byte = 0;
-            box->rank = 0;
-            return E_BADALLOC;
-        }
+        box->dims = box_dim_clone(dims, rank);
+        assert(box->dims != nullptr);
         box->total_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(rank);
         box->rank = rank;
     } else {
-        box_dim_set_vargs(box->dims, rank, ap);
+        box_dim_copy(box->dims, dims, rank);
         box->rank = rank;
     }
     assert(box->total_dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
     assert(box->dims != nullptr);
     assert(box->rank == rank);
-    assert(box_dim_is_equals_vargs(box->dims, box->rank, rank, ap));
+    assert(box_dim_is_equals(box->dims, box->rank, dims, rank));
 
     auto const SIZE = box_dim_get_size(box->dims, rank);
     assert(SIZE >= 1);

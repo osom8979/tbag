@@ -41,6 +41,7 @@ TBAG_API Err box_free(box_data * box) TBAG_NOEXCEPT;
 
 TBAG_API Err box_resize_args (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API Err box_resize      (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims) TBAG_NOEXCEPT;
 
 TBAG_API bool box_exists_data(box_data const * box) TBAG_NOEXCEPT;
 TBAG_API bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT;

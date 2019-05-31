@@ -181,6 +181,8 @@ struct box_data
 #define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
     (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
 
+#define BOX_TEMP_DIM_STACK_SIZE 16
+
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
 TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;
 
