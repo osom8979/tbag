@@ -31,18 +31,15 @@ struct NngSocket::Impl : private Noncopyable
 private:
     nng_socket _socket;
     SocketType _type;
-    bool _raw;
     bool _opened;
 
 public:
     inline nng_socket socket() const TBAG_NOEXCEPT { return _socket; }
     inline SocketType   type() const TBAG_NOEXCEPT { return _type;   }
-    inline bool          raw() const TBAG_NOEXCEPT { return _raw;    }
     inline bool       opened() const TBAG_NOEXCEPT { return _opened; }
 
 public:
-    Impl(SocketType type, bool raw) : _socket(), _type(SocketType::ST_NONE),
-                                      _raw(false), _opened(false)
+    Impl(SocketType type, bool raw) : _socket(), _type(SocketType::ST_NONE), _opened(false)
     {
         auto const CODE = open(type, raw);
         if (isFailure(CODE)) {
@@ -98,7 +95,6 @@ public:
 
         if (code == 0) {
             _type = type;
-            _raw = raw;
             _opened = true;
         }
         return nng_code_err(code);
@@ -106,11 +102,11 @@ public:
 
     Err close()
     {
-        if (_opened) {
-            _opened = false;
-            return nng_code_err(nng_close(_socket));
+        if (!_opened) {
+            return E_ILLSTATE;
         }
-        return E_ILLSTATE;
+        _opened = false;
+        return nng_code_err(nng_close(_socket));
     }
 };
 
@@ -228,12 +224,6 @@ char const * const NngSocket::getTypeName() const
     return getSocketTypeName(_impl->type());
 }
 
-bool NngSocket::isRaw() const
-{
-    assert(exists());
-    return _impl->raw();
-}
-
 bool NngSocket::isOpened() const
 {
     return _impl && _impl->opened();
@@ -245,16 +235,16 @@ nng_socket NngSocket::getSocket() const
     return _impl->socket();
 }
 
-Err NngSocket::listen(char const * url, nng_listener * lp, int flags)
+Err NngSocket::listen(std::string const & url, nng_listener * lp, int flags)
 {
     assert(exists());
-    return nng_code_err(nng_listen(getSocket(), url, lp, flags));
+    return nng_code_err(nng_listen(getSocket(), url.c_str(), lp, flags));
 }
 
-Err NngSocket::dial(char const * url, nng_dialer * lp, int flags)
+Err NngSocket::dial(std::string const & url, nng_dialer * lp, int flags)
 {
     assert(exists());
-    return nng_code_err(nng_dial(getSocket(), url, lp, flags));
+    return nng_code_err(nng_dial(getSocket(), url.c_str(), lp, flags));
 }
 
 Err NngSocket::send(void * data, size_t size, int flags)
@@ -269,52 +259,218 @@ Err NngSocket::recv(void * data, size_t * size, int flags)
     return nng_code_err(nng_recv(getSocket(), data, size, flags));
 }
 
-Err NngSocket::setRecvTimeout(nng_duration ms)
+Err NngSocket::setopt(std::string const & key, bool value)
 {
     assert(exists());
-    return nng_code_err(nng_setopt_ms(getSocket(), NNG_OPT_RECVTIMEO, ms));
+    return nng_code_err(nng_setopt_bool(getSocket(), key.c_str(), value));
 }
 
-Err NngSocket::setSendTimeout(nng_duration ms)
+Err NngSocket::setopt(std::string const & key, int value)
 {
     assert(exists());
-    return nng_code_err(nng_setopt_ms(getSocket(), NNG_OPT_SENDTIMEO, ms));
+    return nng_code_err(nng_setopt_int(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::setopt(std::string const & key, size_t value)
+{
+    assert(exists());
+    return nng_code_err(nng_setopt_size(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::setopt(std::string const & key, uint64_t value)
+{
+    assert(exists());
+    return nng_code_err(nng_setopt_uint64(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::setopt(std::string const & key, std::string const & value)
+{
+    assert(exists());
+    return nng_code_err(nng_setopt_string(getSocket(), key.c_str(), value.c_str()));
+}
+
+Err NngSocket::setopt(std::string const & key, void * value)
+{
+    assert(exists());
+    return nng_code_err(nng_setopt_ptr(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::getopt(std::string const & key, bool * value) const
+{
+    assert(exists());
+    return nng_code_err(nng_getopt_bool(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::getopt(std::string const & key, int * value) const
+{
+    assert(exists());
+    return nng_code_err(nng_getopt_int(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::getopt(std::string const & key, size_t * value) const
+{
+    assert(exists());
+    return nng_code_err(nng_getopt_size(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::getopt(std::string const & key, uint64_t * value) const
+{
+    assert(exists());
+    return nng_code_err(nng_getopt_uint64(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::getopt(std::string const & key, std::string & value) const
+{
+    assert(exists());
+    char * buffer = nullptr;
+    auto const code = nng_getopt_string(getSocket(), key.c_str(), &buffer);
+    if (buffer != nullptr) {
+        assert(code == 0);
+        value.assign(buffer);
+        nng_strfree(buffer);
+    }
+    return nng_code_err(code);
+}
+
+Err NngSocket::getopt(std::string const & key, void ** value) const
+{
+    assert(exists());
+    return nng_code_err(nng_getopt_ptr(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::setopt_duration(std::string const & key, nng_duration value)
+{
+    assert(exists());
+    return nng_code_err(nng_setopt_ms(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::getopt_duration(std::string const & key, nng_duration * value) const
+{
+    assert(exists());
+    return nng_code_err(nng_getopt_ms(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::setRecvTimeout(nng_duration ms)
+{
+    return setopt_duration(NNG_OPT_RECVTIMEO, ms);
 }
 
 Err NngSocket::getRecvTimeout(nng_duration * ms) const
 {
-    assert(exists());
-    return nng_code_err(nng_getopt_ms(getSocket(), NNG_OPT_RECVTIMEO, ms));
+    return getopt_duration(NNG_OPT_RECVTIMEO, ms);
+}
+
+Err NngSocket::setSendTimeout(nng_duration ms)
+{
+    return setopt_duration(NNG_OPT_SENDTIMEO, ms);
 }
 
 Err NngSocket::getSendTimeout(nng_duration * ms) const
 {
-    assert(exists());
-    return nng_code_err(nng_getopt_ms(getSocket(), NNG_OPT_SENDTIMEO, ms));
+    return getopt_duration(NNG_OPT_SENDTIMEO, ms);
 }
 
-Err NngSocket::setRecvBuffer(int size)
+Err NngSocket::setRecvNumberOfMessages(int size)
 {
-    assert(exists());
-    return nng_code_err(nng_setopt_int(getSocket(), NNG_OPT_RECVBUF, size));
+    return setopt(NNG_OPT_RECVBUF, size);
 }
 
-Err NngSocket::setSendBuffer(int size)
+Err NngSocket::getRecvNumberOfMessages(int * size) const
 {
-    assert(exists());
-    return nng_code_err(nng_setopt_int(getSocket(), NNG_OPT_SENDBUF, size));
+    return getopt(NNG_OPT_RECVBUF, size);
 }
 
-Err NngSocket::getRecvBuffer(int * size) const
+Err NngSocket::setSendNumberOfMessages(int size)
 {
-    assert(exists());
-    return nng_code_err(nng_getopt_int(getSocket(), NNG_OPT_RECVBUF, size));
+    return setopt(NNG_OPT_SENDBUF, size);
 }
 
-Err NngSocket::getSendBuffer(int * size) const
+Err NngSocket::getSendNumberOfMessages(int * size) const
 {
-    assert(exists());
-    return nng_code_err(nng_getopt_int(getSocket(), NNG_OPT_SENDBUF, size));
+    return getopt(NNG_OPT_SENDBUF, size);
+}
+
+Err NngSocket::setRecvMaxSize(std::size_t size)
+{
+    return setopt(NNG_OPT_RECVMAXSZ, size);
+}
+
+Err NngSocket::getRecvMaxSize(std::size_t * size) const
+{
+    return getopt(NNG_OPT_RECVMAXSZ, size);
+}
+
+Err NngSocket::setReconnectTimeMin(nng_duration ms)
+{
+    return setopt_duration(NNG_OPT_RECONNMINT, ms);
+}
+
+Err NngSocket::getReconnectTimeMin(nng_duration * ms) const
+{
+    return getopt_duration(NNG_OPT_RECONNMINT, ms);
+}
+
+Err NngSocket::setReconnectTimeMax(nng_duration ms)
+{
+    return setopt_duration(NNG_OPT_RECONNMAXT, ms);
+}
+
+Err NngSocket::getReconnectTimeMax(nng_duration * ms) const
+{
+    return getopt_duration(NNG_OPT_RECONNMAXT, ms);
+}
+
+Err NngSocket::setSocketName(std::string const & name)
+{
+    if (name.size() >= SOCKNAME_MAX_LENGTH) {
+        return E_ILLARGS;
+    }
+    return setopt(NNG_OPT_SOCKNAME, name);
+}
+
+Err NngSocket::getSocketName(std::string & name) const
+{
+    return getopt(NNG_OPT_SOCKNAME, name);
+}
+
+Err NngSocket::setMaxTTL(int size)
+{
+    return setopt(NNG_OPT_MAXTTL, size);
+}
+
+Err NngSocket::getMaxTTL(int * size) const
+{
+    return getopt(NNG_OPT_MAXTTL, size);
+}
+
+Err NngSocket::getRaw(bool * mode) const
+{
+    return getopt(NNG_OPT_RAW, mode);
+}
+
+Err NngSocket::getUrl(std::string & url) const
+{
+    return getopt(NNG_OPT_URL, url);
+}
+
+Err NngSocket::getProtocolNumber(int * number) const
+{
+    return getopt(NNG_OPT_PROTO, number);
+}
+
+Err NngSocket::getPeerProtocolNumber(int * number) const
+{
+    return getopt(NNG_OPT_PEER, number);
+}
+
+Err NngSocket::getProtocolName(std::string & name) const
+{
+    return getopt(NNG_OPT_PROTONAME, name);
+}
+
+Err NngSocket::getPeerProtocolName(std::string & name) const
+{
+    return getopt(NNG_OPT_PEERNAME, name);
 }
 
 } // namespace mq
