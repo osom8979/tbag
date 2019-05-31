@@ -37,7 +37,8 @@ class TBAG_API NngSocket
 public:
     enum class SocketType
     {
-        ST_BUS0 = 0,
+        ST_NONE = 0,
+        ST_BUS0,
         ST_PAIR0,
         ST_PAIR1,
         ST_PULL0,
@@ -54,24 +55,7 @@ public:
     static char const * const getSocketTypeName(SocketType type) TBAG_NOEXCEPT;
 
 public:
-    /**
-     * NngSocket::Impl class prototype.
-     *
-     * @author zer0
-     * @date   2019-05-29
-     *
-     */
-    struct TBAG_API Impl TBAG_FINAL
-    {
-        nng_socket  socket;
-        SocketType  type;
-        bool        raw;
-
-        Impl(SocketType t, bool r);
-        ~Impl();
-    };
-
-public:
+    struct Impl;
     using SharedImpl = std::shared_ptr<Impl>;
 
 private:
@@ -116,29 +100,11 @@ public:
     inline Impl const & operator *() const TBAG_NOEXCEPT { return ref(); }
 
 public:
-    friend inline bool operator <(NngSocket const & x, NngSocket const & y) TBAG_NOEXCEPT
-    { return x.get() < y.get(); }
-
-    friend inline bool operator >(NngSocket const & x, NngSocket const & y) TBAG_NOEXCEPT
-    { return x.get() > y.get(); }
-
-    friend inline bool operator <=(NngSocket const & x, NngSocket const & y) TBAG_NOEXCEPT
-    { return x.get() <= y.get(); }
-
-    friend inline bool operator >=(NngSocket const & x, NngSocket const & y) TBAG_NOEXCEPT
-    { return x.get() >= y.get(); }
-
-    inline bool operator ==(NngSocket const & obj) const TBAG_NOEXCEPT
-    { return get() == obj.get(); }
-
-    inline bool operator !=(NngSocket const & obj) const TBAG_NOEXCEPT
-    { return get() != obj.get(); }
-
-public:
     void reset();
 
 public:
     Err open(SocketType type, bool raw = false);
+    Err close();
 
 public:
     SocketType getType() const;
@@ -147,6 +113,9 @@ public:
 public:
     bool isRaw() const;
     bool isOpened() const;
+
+public:
+    nng_socket getSocket() const;
 
 public:
     Err listen(char const * url, nng_listener * lp = nullptr, int flags = 0);

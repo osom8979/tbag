@@ -19,62 +19,100 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace mq {
 
-// ---------------
-// NngSocket::Impl
-// ---------------
-
-NngSocket::Impl::Impl(SocketType t, bool r)
-        : type(t), raw(r)
+/**
+ * NngSocket::Impl class prototype.
+ *
+ * @author zer0
+ * @date   2019-05-29
+ *
+ */
+struct NngSocket::Impl : private Noncopyable
 {
-    int code = 0;
+private:
+    nng_socket _socket;
+    SocketType _type;
+    bool _raw;
+    bool _opened;
 
-    // clang-format off
-    if (raw) {
-        switch (type) {
-        case SocketType::ST_BUS0:        code = nng_bus0_open_raw       (&socket); break;
-        case SocketType::ST_PAIR0:       code = nng_pair0_open_raw      (&socket); break;
-        case SocketType::ST_PAIR1:       code = nng_pair1_open_raw      (&socket); break;
-        case SocketType::ST_PULL0:       code = nng_pull0_open_raw      (&socket); break;
-        case SocketType::ST_PUSH0:       code = nng_push0_open_raw      (&socket); break;
-        case SocketType::ST_PUB0:        code = nng_pub0_open_raw       (&socket); break;
-        case SocketType::ST_SUB0:        code = nng_sub0_open_raw       (&socket); break;
-        case SocketType::ST_REP0:        code = nng_rep0_open_raw       (&socket); break;
-        case SocketType::ST_REQ0:        code = nng_req0_open_raw       (&socket); break;
-        case SocketType::ST_RESPONDENT0: code = nng_respondent0_open_raw(&socket); break;
-        case SocketType::ST_SURVEYOR0:   code = nng_surveyor0_open_raw  (&socket); break;
-        default:
-            TBAG_INACCESSIBLE_BLOCK_ASSERT();
-            throw ErrException(E_ILLARGS);
-        }
-    } else {
-        switch (type) {
-        case SocketType::ST_BUS0:        code = nng_bus0_open       (&socket); break;
-        case SocketType::ST_PAIR0:       code = nng_pair0_open      (&socket); break;
-        case SocketType::ST_PAIR1:       code = nng_pair1_open      (&socket); break;
-        case SocketType::ST_PULL0:       code = nng_pull0_open      (&socket); break;
-        case SocketType::ST_PUSH0:       code = nng_push0_open      (&socket); break;
-        case SocketType::ST_PUB0:        code = nng_pub0_open       (&socket); break;
-        case SocketType::ST_SUB0:        code = nng_sub0_open       (&socket); break;
-        case SocketType::ST_REP0:        code = nng_rep0_open       (&socket); break;
-        case SocketType::ST_REQ0:        code = nng_req0_open       (&socket); break;
-        case SocketType::ST_RESPONDENT0: code = nng_respondent0_open(&socket); break;
-        case SocketType::ST_SURVEYOR0:   code = nng_surveyor0_open  (&socket); break;
-        default:
-            TBAG_INACCESSIBLE_BLOCK_ASSERT();
-            throw ErrException(E_ILLARGS);
+public:
+    inline nng_socket socket() const TBAG_NOEXCEPT { return _socket; }
+    inline SocketType   type() const TBAG_NOEXCEPT { return _type;   }
+    inline bool          raw() const TBAG_NOEXCEPT { return _raw;    }
+    inline bool       opened() const TBAG_NOEXCEPT { return _opened; }
+
+public:
+    Impl(SocketType type, bool raw) : _socket(), _type(SocketType::ST_NONE),
+                                      _raw(false), _opened(false)
+    {
+        auto const CODE = open(type, raw);
+        if (isFailure(CODE)) {
+            throw ErrException(CODE);
         }
     }
-    // clang-format on
 
-    if (code != 0) {
-        throw ErrException(nng_code_err(code));
+    ~Impl()
+    {
+        close();
     }
-}
 
-NngSocket::Impl::~Impl()
-{
-    nng_close(socket);
-}
+    Err open(SocketType type, bool raw)
+    {
+        // clang-format off
+        int code = 0;
+        if (raw) {
+            switch (type) {
+            case SocketType::ST_BUS0:        code = nng_bus0_open_raw       (&_socket); break;
+            case SocketType::ST_PAIR0:       code = nng_pair0_open_raw      (&_socket); break;
+            case SocketType::ST_PAIR1:       code = nng_pair1_open_raw      (&_socket); break;
+            case SocketType::ST_PULL0:       code = nng_pull0_open_raw      (&_socket); break;
+            case SocketType::ST_PUSH0:       code = nng_push0_open_raw      (&_socket); break;
+            case SocketType::ST_PUB0:        code = nng_pub0_open_raw       (&_socket); break;
+            case SocketType::ST_SUB0:        code = nng_sub0_open_raw       (&_socket); break;
+            case SocketType::ST_REP0:        code = nng_rep0_open_raw       (&_socket); break;
+            case SocketType::ST_REQ0:        code = nng_req0_open_raw       (&_socket); break;
+            case SocketType::ST_RESPONDENT0: code = nng_respondent0_open_raw(&_socket); break;
+            case SocketType::ST_SURVEYOR0:   code = nng_surveyor0_open_raw  (&_socket); break;
+            default:
+                TBAG_INACCESSIBLE_BLOCK_ASSERT();
+                return E_ILLARGS;
+            }
+        } else {
+            switch (type) {
+            case SocketType::ST_BUS0:        code = nng_bus0_open       (&_socket); break;
+            case SocketType::ST_PAIR0:       code = nng_pair0_open      (&_socket); break;
+            case SocketType::ST_PAIR1:       code = nng_pair1_open      (&_socket); break;
+            case SocketType::ST_PULL0:       code = nng_pull0_open      (&_socket); break;
+            case SocketType::ST_PUSH0:       code = nng_push0_open      (&_socket); break;
+            case SocketType::ST_PUB0:        code = nng_pub0_open       (&_socket); break;
+            case SocketType::ST_SUB0:        code = nng_sub0_open       (&_socket); break;
+            case SocketType::ST_REP0:        code = nng_rep0_open       (&_socket); break;
+            case SocketType::ST_REQ0:        code = nng_req0_open       (&_socket); break;
+            case SocketType::ST_RESPONDENT0: code = nng_respondent0_open(&_socket); break;
+            case SocketType::ST_SURVEYOR0:   code = nng_surveyor0_open  (&_socket); break;
+            default:
+                TBAG_INACCESSIBLE_BLOCK_ASSERT();
+                return E_ILLARGS;
+            }
+        }
+        // clang-format on
+
+        if (code == 0) {
+            _type = type;
+            _raw = raw;
+            _opened = true;
+        }
+        return nng_code_err(code);
+    }
+
+    Err close()
+    {
+        if (_opened) {
+            _opened = false;
+            return nng_code_err(nng_close(_socket));
+        }
+        return E_ILLSTATE;
+    }
+};
 
 // ---------
 // NngSocket
@@ -84,6 +122,7 @@ char const * const NngSocket::getSocketTypeName(SocketType type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
+    case SocketType::ST_NONE:        return "NONE"       ;
     case SocketType::ST_BUS0:        return "BUS0"       ;
     case SocketType::ST_PAIR0:       return "PAIR0"      ;
     case SocketType::ST_PAIR1:       return "PAIR1"      ;
@@ -166,99 +205,116 @@ Err NngSocket::open(SocketType type, bool raw)
     return E_SUCCESS;
 }
 
+Err NngSocket::close()
+{
+    if (_impl && _impl->opened()) {
+        auto const CODE = _impl->close();
+        assert(!_impl->opened());
+        _impl.reset();
+        return CODE;
+    }
+    return E_ILLSTATE;
+}
+
 NngSocket::SocketType NngSocket::getType() const
 {
-    assert(_impl);
-    return _impl->type;
+    assert(exists());
+    return _impl->type();
 }
 
 char const * const NngSocket::getTypeName() const
 {
-    assert(_impl);
-    return getSocketTypeName(_impl->type);
+    assert(exists());
+    return getSocketTypeName(_impl->type());
 }
 
 bool NngSocket::isRaw() const
 {
-    assert(_impl);
-    return _impl->raw;
+    assert(exists());
+    return _impl->raw();
 }
 
 bool NngSocket::isOpened() const
 {
-    return exists();
+    return _impl && _impl->opened();
+}
+
+nng_socket NngSocket::getSocket() const
+{
+    assert(exists());
+    return _impl->socket();
 }
 
 Err NngSocket::listen(char const * url, nng_listener * lp, int flags)
 {
-    assert(_impl);
-    return nng_code_err(nng_listen(_impl->socket, url, lp, flags));
+    assert(exists());
+    return nng_code_err(nng_listen(getSocket(), url, lp, flags));
 }
 
 Err NngSocket::dial(char const * url, nng_dialer * lp, int flags)
 {
-    assert(_impl);
-    return nng_code_err(nng_dial(_impl->socket, url, lp, flags));
+    assert(exists());
+    return nng_code_err(nng_dial(getSocket(), url, lp, flags));
 }
 
 Err NngSocket::send(void * data, size_t size, int flags)
 {
-    assert(_impl);
-    return nng_code_err(nng_send(_impl->socket, data, size, flags));
+    assert(exists());
+    return nng_code_err(nng_send(getSocket(), data, size, flags));
 }
 
 Err NngSocket::recv(void * data, size_t * size, int flags)
 {
-    assert(_impl);
-    return nng_code_err(nng_recv(_impl->socket, data, size, flags));
+    assert(exists());
+    return nng_code_err(nng_recv(getSocket(), data, size, flags));
 }
 
 Err NngSocket::setRecvTimeout(nng_duration ms)
 {
-    assert(_impl);
-    return nng_code_err(nng_setopt_ms(_impl->socket, NNG_OPT_RECVTIMEO, ms));
+    assert(exists());
+    return nng_code_err(nng_setopt_ms(getSocket(), NNG_OPT_RECVTIMEO, ms));
 }
 
 Err NngSocket::setSendTimeout(nng_duration ms)
 {
-    assert(_impl);
-    return nng_code_err(nng_setopt_ms(_impl->socket, NNG_OPT_SENDTIMEO, ms));
+    assert(exists());
+    return nng_code_err(nng_setopt_ms(getSocket(), NNG_OPT_SENDTIMEO, ms));
 }
 
 Err NngSocket::getRecvTimeout(nng_duration * ms) const
 {
-    assert(_impl);
-    return nng_code_err(nng_getopt_ms(_impl->socket, NNG_OPT_RECVTIMEO, ms));
+    assert(exists());
+    return nng_code_err(nng_getopt_ms(getSocket(), NNG_OPT_RECVTIMEO, ms));
 }
 
 Err NngSocket::getSendTimeout(nng_duration * ms) const
 {
-    assert(_impl);
-    return nng_code_err(nng_getopt_ms(_impl->socket, NNG_OPT_SENDTIMEO, ms));
+    assert(exists());
+    return nng_code_err(nng_getopt_ms(getSocket(), NNG_OPT_SENDTIMEO, ms));
 }
 
 Err NngSocket::setRecvBuffer(int size)
 {
-    assert(_impl);
-    return nng_code_err(nng_setopt_int(_impl->socket, NNG_OPT_RECVBUF, size));
+    assert(exists());
+    return nng_code_err(nng_setopt_int(getSocket(), NNG_OPT_RECVBUF, size));
 }
 
 Err NngSocket::setSendBuffer(int size)
 {
-    assert(_impl);
-    return nng_code_err(nng_setopt_int(_impl->socket, NNG_OPT_SENDBUF, size));
+    assert(exists());
+    return nng_code_err(nng_setopt_int(getSocket(), NNG_OPT_SENDBUF, size));
 }
 
 Err NngSocket::getRecvBuffer(int * size) const
 {
-    assert(_impl);
-    return nng_code_err(nng_getopt_int(_impl->socket, NNG_OPT_RECVBUF, size));
+    assert(exists());
+    return nng_code_err(nng_getopt_int(getSocket(), NNG_OPT_RECVBUF, size));
 }
 
 Err NngSocket::getSendBuffer(int * size) const
 {
-    assert(_impl);
-    return nng_code_err(nng_getopt_int(_impl->socket, NNG_OPT_SENDBUF, size));
+    assert(exists());
+    return nng_code_err(nng_getopt_int(getSocket(), NNG_OPT_SENDBUF, size));
 }
 
 } // namespace mq
