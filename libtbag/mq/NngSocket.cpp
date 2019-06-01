@@ -277,12 +277,6 @@ Err NngSocket::setopt(std::string const & key, size_t value)
     return nng_code_err(nng_setopt_size(getSocket(), key.c_str(), value));
 }
 
-Err NngSocket::setopt(std::string const & key, uint64_t value)
-{
-    assert(exists());
-    return nng_code_err(nng_setopt_uint64(getSocket(), key.c_str(), value));
-}
-
 Err NngSocket::setopt(std::string const & key, std::string const & value)
 {
     assert(exists());
@@ -313,12 +307,6 @@ Err NngSocket::getopt(std::string const & key, size_t * value) const
     return nng_code_err(nng_getopt_size(getSocket(), key.c_str(), value));
 }
 
-Err NngSocket::getopt(std::string const & key, uint64_t * value) const
-{
-    assert(exists());
-    return nng_code_err(nng_getopt_uint64(getSocket(), key.c_str(), value));
-}
-
 Err NngSocket::getopt(std::string const & key, std::string & value) const
 {
     assert(exists());
@@ -336,6 +324,18 @@ Err NngSocket::getopt(std::string const & key, void ** value) const
 {
     assert(exists());
     return nng_code_err(nng_getopt_ptr(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::setopt_uint64(std::string const & key, uint64_t value)
+{
+    assert(exists());
+    return nng_code_err(nng_setopt_uint64(getSocket(), key.c_str(), value));
+}
+
+Err NngSocket::getopt_uint64(std::string const & key, uint64_t * value) const
+{
+    assert(exists());
+    return nng_code_err(nng_getopt_uint64(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::setopt_duration(std::string const & key, nng_duration value)

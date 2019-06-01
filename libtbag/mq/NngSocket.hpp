@@ -136,16 +136,17 @@ public:
     Err setopt(std::string const & key, bool value);
     Err setopt(std::string const & key, int value);
     Err setopt(std::string const & key, size_t value);
-    Err setopt(std::string const & key, uint64_t value);
     Err setopt(std::string const & key, std::string const & value);
     Err setopt(std::string const & key, void * value);
 
     Err getopt(std::string const & key, bool * value) const;
     Err getopt(std::string const & key, int * value) const;
     Err getopt(std::string const & key, size_t * value) const;
-    Err getopt(std::string const & key, uint64_t * value) const;
     Err getopt(std::string const & key, std::string & value) const;
     Err getopt(std::string const & key, void ** value) const;
+
+    Err setopt_uint64(std::string const & key, uint64_t value);
+    Err getopt_uint64(std::string const & key, uint64_t * value) const;
 
     Err setopt_duration(std::string const & key, nng_duration value = DURATION_DEFAULT);
     Err getopt_duration(std::string const & key, nng_duration * value) const;
