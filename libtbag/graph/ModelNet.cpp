@@ -349,31 +349,6 @@ public:
     }
 
 public:
-    Err toData(Buffer & output) const
-    {
-        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
-            if (_layers[n]) {
-                Buffer current_data;
-                auto const CODE = _layers[n].toData(current_data);
-                if (isSuccess(CODE)) {
-                    // TODO: Output append
-                }
-            }
-        }
-        return E_SUCCESS;
-    }
-
-    Err fromData(Buffer const & input)
-    {
-        for (Digraph::NodeIt n(_graph); n != lemon::INVALID; ++n) {
-            if (_layers[n]) {
-                _layers[n].fromData(input);
-            }
-        }
-        return E_SUCCESS;
-    }
-
-public:
     std::string toString() const
     {
         bool first_node  = true;
@@ -421,9 +396,9 @@ public:
     }
 };
 
-// ------------------------
-// ModelNet implementation.
-// ------------------------
+// --------
+// ModelNet
+// --------
 
 ModelNet::ModelNet() TBAG_NOEXCEPT : _impl(std::make_shared<Impl>(this))
 {
@@ -597,22 +572,6 @@ Err ModelNet::backward()
 {
     if (exists()) {
         return _impl->backward();
-    }
-    return E_NREADY;
-}
-
-Err ModelNet::toData(Buffer & output) const
-{
-    if (exists()) {
-        return _impl->toData(output);
-    }
-    return E_NREADY;
-}
-
-Err ModelNet::fromData(Buffer const & input)
-{
-    if (exists()) {
-        return _impl->fromData(input);
     }
     return E_NREADY;
 }

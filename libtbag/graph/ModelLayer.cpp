@@ -18,9 +18,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graph {
 
-// ------------------------------------
-// ModelLayer::LogLayer implementation.
-// ------------------------------------
+// --------------------
+// ModelLayer::LogLayer
+// --------------------
 
 ModelLayer::LogLayer::LogLayer(bool verbose) : LayerBase("LogLayer"), _verbose(verbose)
 {
@@ -184,18 +184,6 @@ Err ModelLayer::backward(Layers const & input)
 {
     assert(exists());
     return _base->backward(input);
-}
-
-Err ModelLayer::toData(Buffer & output) const
-{
-    assert(exists());
-    return _base->toData(output);
-}
-
-Err ModelLayer::fromData(Buffer const & input)
-{
-    assert(exists());
-    return _base->fromData(input);
 }
 
 std::string ModelLayer::get(std::string const & key) const

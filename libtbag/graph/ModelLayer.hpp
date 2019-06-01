@@ -45,7 +45,6 @@ public:
     friend class ModelNet;
 
 public:
-    using Buffer = libtbag::util::Buffer;
     using Layers = std::vector<ModelLayer>;
 
 public:
@@ -61,7 +60,6 @@ public:
     class LayerBase : public Noncopyable
     {
     public:
-        using Buffer = ModelLayer::Buffer;
         using Layers = ModelLayer::Layers;
 
     public:
@@ -94,10 +92,6 @@ public:
     public:
         virtual Err  forward(Layers const & input) { return E_SUCCESS; }
         virtual Err backward(Layers const & input) { return E_SUCCESS; }
-
-    public:
-        virtual Err toData(Buffer & output) const { return E_SUCCESS; }
-        virtual Err fromData(Buffer const & input) { return E_SUCCESS; }
 
     public:
         virtual std::string get(std::string const & key) const { return std::string(); }
@@ -212,10 +206,6 @@ public:
 public:
     Err  forward(Layers const & input);
     Err backward(Layers const & input);
-
-public:
-    Err toData(Buffer & output) const;
-    Err fromData(Buffer const & input);
 
 public:
     std::string get(std::string const & key) const;

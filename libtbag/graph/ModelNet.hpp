@@ -45,7 +45,6 @@ public:
     using SharedImpl = std::shared_ptr<Impl>;
 
 public:
-    using Buffer = libtbag::util::Buffer;
     using Layers = std::vector<ModelLayer>;
 
 private:
@@ -105,10 +104,6 @@ public:
 public:
     Err forward();
     Err backward();
-
-public:
-    Err toData(Buffer & output) const;
-    Err fromData(Buffer const & input);
 
 public:
     std::string toString() const;
