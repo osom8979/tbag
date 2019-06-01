@@ -50,6 +50,7 @@ tbag_config__set_option (USE_RTTI   OFF) ## Enable RTTI flag.
 tbag_config__set_option (DISABLE_TDLOG                OFF) ## Disable tbag default logger.
 tbag_config__set_option (DISABLE_LUAJIT_EXE_FLAGS     OFF) ## Disable LuaJIT Embedding flags if apple.
 tbag_config__set_option (DISABLE_DEFAULT_TPOT_LUAJIT  OFF) ## Do not use the default TpoT mode as LuaJIT.
+tbag_config__set_option (DISABLE_TESTER               OFF) ## Do not build the tester target.
 
 tbag_config__set_option (INSTALL_WITH_FAKE_LUAJIT ON) ## Install fake LuaJIT.
 
@@ -194,12 +195,17 @@ set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
 set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")
 configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
 
+set (TBAG_BUILD_PROJECTS libtbag tpot)
+if (NOT DISABLE_TESTER)
+    set (TBAG_BUILD_PROJECTS ${TBAG_BUILD_PROJECTS} tools/libtbshare tools/tbproc tester)
+endif ()
+
 ## Run project.
 tbag_flags__set_install_rpath () # [WARNING] Do not change the calling sequence.
 tbag_project (tea-bag
         ROOT "${CMAKE_SOURCE_DIR}"
         LANG C CXX CXXPCH
-        PROJ libtbag tpot tools/libtbshare tools/tbproc tester)
+        PROJ ${TBAG_BUILD_PROJECTS})
 
 ## libtbag-cmake build packages.
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
