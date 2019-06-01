@@ -74,6 +74,16 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
+TBAG_CONSTEXPR char const       BYTE_LOWER_CHAR = 'b';
+TBAG_CONSTEXPR char const  KILO_BYTE_LOWER_CHAR = 'k';
+TBAG_CONSTEXPR char const  MEGA_BYTE_LOWER_CHAR = 'm';
+TBAG_CONSTEXPR char const  GIGA_BYTE_LOWER_CHAR = 'g';
+TBAG_CONSTEXPR char const  TERA_BYTE_LOWER_CHAR = 't';
+TBAG_CONSTEXPR char const  PETA_BYTE_LOWER_CHAR = 'p';
+TBAG_CONSTEXPR char const   EXA_BYTE_LOWER_CHAR = 'e';
+TBAG_CONSTEXPR char const ZETTA_BYTE_LOWER_CHAR = 'z';
+TBAG_CONSTEXPR char const YOTTA_BYTE_LOWER_CHAR = 'y';
+
 /**
  * @defgroup __DOXYGEN_GROUP__BYTE__ Byte.
  * @brief Unit of digital information.
@@ -90,6 +100,10 @@ TBAG_CONSTEXPR uint64_t const  PETA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 5>::val
 TBAG_CONSTEXPR uint64_t const   EXA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 6>::value;
 TBAG_CONSTEXPR uint64_t const ZETTA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 7>::value;
 TBAG_CONSTEXPR uint64_t const YOTTA_BYTE_TO_BYTE = tmp::Power<BYTE_UNIT, 8>::value;
+
+/**
+ * @}
+ */
 
 TBAG_CONSTEXPR uint64_t const SECONDS_TO_MILLISECONDS = 1000;
 TBAG_CONSTEXPR uint64_t const SECONDS_TO_MICROSECONDS = 1000 * SECONDS_TO_MILLISECONDS;
@@ -108,10 +122,6 @@ TBAG_CONSTEXPR uint64_t const MILLISECONDS_TO_NANOSECONDS_INTEGER  = (int)MILLIS
 TBAG_CONSTEXPR uint64_t const MINUTE_TO_SECONDS = 60;
 TBAG_CONSTEXPR uint64_t const HOUR_TO_SECONDS   = 60 * MINUTE_TO_SECONDS;
 TBAG_CONSTEXPR uint64_t const DAY_TO_SECONDS    = 24 * HOUR_TO_SECONDS;
-
-/**
- * @}
- */
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

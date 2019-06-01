@@ -250,6 +250,8 @@ inline T toValue(std::string const & str, T default_value = T(), int base = 10)
     return default_value;
 }
 
+TBAG_API std::size_t toByteSize(std::string const & str);
+
 } // namespace string
 
 // --------------------
