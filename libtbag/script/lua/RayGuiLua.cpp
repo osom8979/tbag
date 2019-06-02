@@ -9,6 +9,10 @@
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <libtbag/ray/RayGui.hpp>
+#include <libtbag/ray/RayGuiExtension.hpp>
+#include <libtbag/ray/RayGuiNodes.hpp>
+
 #include <cassert>
 
 // -------------------
@@ -41,6 +45,12 @@ static int _GuiShutdownRay(lua_State * L)
 static int _GuiShowDemoWindow(lua_State * L)
 {
     GuiShowDemoWindow();
+    return 0;
+}
+
+static int _GuiShowDemoNodes(lua_State * L)
+{
+    GuiShowDemoNodes();
     return 0;
 }
 
@@ -2499,6 +2509,7 @@ static luaL_Reg const __lua_laygui[] = {
 
         // Demo, Debug, Information
         RAYGUI_REGISTER(GuiShowDemoWindow),
+        RAYGUI_REGISTER(GuiShowDemoNodes),
         RAYGUI_REGISTER(GuiShowAboutWindow),
         RAYGUI_REGISTER(GuiShowMetricsWindow),
         RAYGUI_REGISTER(GuiShowStyleEditor),

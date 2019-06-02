@@ -15,7 +15,6 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/ray/RayGui.hpp>
 #include <libtbag/script/LuaBypass.hpp>
 #include <libtbag/script/LuaExtension.hpp>
 
