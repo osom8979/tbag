@@ -54,6 +54,7 @@ tbag_modules__apply_dep_miniz       ()
 tbag_modules__apply_dep_pugixml     ()
 tbag_modules__apply_dep_tmxlite     ()
 tbag_modules__apply_dep_imgui       ()
+tbag_modules__apply_dep_imnodes     ()
 tbag_modules__apply_dep_raylib      ()
 
 tbag_modules__check_opengl ()

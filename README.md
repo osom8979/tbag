@@ -32,6 +32,7 @@ Tea-bag is Third party extension utility project.
 - pugixml 1.9 (MIT license)
 - tmxlite master-591dd03 (zlib license)
 - imgui 1.70 (MIT license)
+- imnodes master-fc8ca3e (MIT license)
 - raylib 2.5-dev (zlib license)
 
 ## External target

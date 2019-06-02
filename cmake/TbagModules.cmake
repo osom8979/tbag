@@ -587,6 +587,12 @@ macro (tbag_modules__apply_dep_imgui)
     tbag_modules__add_whole_archive ($<TARGET_FILE:imgui>)
 endmacro ()
 
+macro (tbag_modules__apply_dep_imnodes)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES imnodes)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/imnodes)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:imnodes>)
+endmacro ()
+
 macro (tbag_modules__apply_dep_raygui)
     list (APPEND TBAG_PROJECT_DEPENDENCIES raygui)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/raygui)

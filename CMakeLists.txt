@@ -112,6 +112,7 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/pugixml)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/tmxlite)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/raylib)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/imgui)
+add_subdirectory (${CMAKE_SOURCE_DIR}/dep/imnodes)
 
 ## CI Preset.
 if (RUN_TRAVIS)
