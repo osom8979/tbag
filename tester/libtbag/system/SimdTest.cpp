@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/system/Simd.hpp>
+#include <algorithm>
 
 using namespace libtbag;
 using namespace libtbag::system;
