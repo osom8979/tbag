@@ -260,7 +260,7 @@ macro (tbag_modules__data_to_string __target __output_path __name __source_path 
                                      "-DSOURCE_PATH=${__source_path}"
                                      "-DHEX_MODE=${__hex_mode}"
                                      -P "${TBAG_SCRIPT_DIR}/TbagData2String.cmake"
-            DEPENDS ${__text_path}
+            DEPENDS ${__source_path}
             COMMENT "Data to String: ${__output_path}" VERBATIM)
     add_custom_target (${__target} SOURCES "${__output_path}")
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
@@ -287,7 +287,7 @@ macro (tbag_modules__data_to_7z_to_string __target __output_path __name __source
                                      "-DSOURCE_PATH=${__7zip_output_temp_path}"
                                      "-DHEX_MODE=ON"
                                      -P "${TBAG_SCRIPT_DIR}/TbagData2String.cmake"
-            DEPENDS ${__text_path}
+            DEPENDS ${__source_path}
             WORKING_DIRECTORY "${__text_path_dir}"
             COMMENT "Data to 7zip to String: ${__output_path}" VERBATIM)
     add_custom_target (${__target} SOURCES "${__output_path}")
