@@ -147,10 +147,6 @@ void GuiUpdateRay()
 {
     ImGuiIO & io = ImGui::GetIO();
 
-    io.DeltaTime = 1.0f/60.0f;              // set the time elapsed since the previous frame (in seconds)
-    io.DisplaySize.x = 1920.0f;             // set the current display width
-    io.DisplaySize.y = 1280.0f;             // set the current display height here
-
     io.MouseDown[0] = IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     io.MouseDown[1] = IsMouseButtonDown(MOUSE_RIGHT_BUTTON);
     io.MouseDown[2] = IsMouseButtonDown(MOUSE_MIDDLE_BUTTON);

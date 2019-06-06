@@ -3,6 +3,9 @@
  * @brief  Tmx class prototype.
  * @author zer0
  * @date   2019-05-29
+ *
+ * @see <https://doc.mapeditor.org/en/stable/reference/tmx-map-format/>
+ * @see <https://doc.mapeditor.org/en/stable/reference/json-map-format/>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_TILED_TMX_HPP__
@@ -16,85 +19,53 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
+#include <string>
+#include <vector>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace tiled {
 
-struct Map
+struct Property
 {
-    /** The TMX format version. Was "1.0" so far, and will be incremented to match minor Tiled releases. */
-    TBAG_CONSTEXPR static char const * const ATT_VERSION = "version";
-
-    /** The Tiled version used to save the file (since Tiled 1.0.1). May be a date (for snapshot builds). */
-    TBAG_CONSTEXPR static char const * const ATT_TILEDVERSION = "tiledversion";
-
-    /** Map orientation. Tiled supports "orthogonal", "isometric", "staggered" and "hexagonal" (since 0.11). */
-    TBAG_CONSTEXPR static char const * const ATT_ORIENTATION  = "orientation";
+    /** The name of the property. */
+    TBAG_CONSTEXPR static char const * const ATT_NAME = "name";
 
     /**
-     * The order in which tiles on tile layers are rendered.
-     * Valid values are right-down (the default), right-up, left-down and left-up.
-     * In all cases, the map is drawn row-by-row. (only supported for orthogonal maps at the moment)
+     * The type of the property.
+     * Can be string (default), int, float, bool, color or file
+     * (since 0.16, with color and file added in 0.17).
      */
-    TBAG_CONSTEXPR static char const * const ATT_RENDERORDER = "renderorder";
+    TBAG_CONSTEXPR static char const * const ATT_TYPE = "type";
 
-    /** The map width in tiles. */
-    TBAG_CONSTEXPR static char const * const ATT_WIDTH = "width";
+    /** The value of the property. */
+    TBAG_CONSTEXPR static char const * const ATT_VALUE = "value";
 
-    /** The map height in tiles. */
-    TBAG_CONSTEXPR static char const * const ATT_HEIGHT = "height";
-
-    /** The width of a tile. */
-    TBAG_CONSTEXPR static char const * const ATT_TILEWIDTH = "tilewidth";
-
-    /** The height of a tile. */
-    TBAG_CONSTEXPR static char const * const ATT_TILEHEIGHT = "tileheight";
-
-    /**
-     * Only for hexagonal maps.
-     * Determines the width or height (depending on the staggered axis)
-     * of the tile's edge, in pixels.
-     */
-    TBAG_CONSTEXPR static char const * const ATT_HEXSIDELENGTH = "hexsidelength";
-
-    /**
-     * For staggered and hexagonal maps,
-     * determines which axis ("x" or "y") is staggered. (since 0.11)
-     */
-    TBAG_CONSTEXPR static char const * const ATT_STAGGERAXIS = "staggeraxis";
-
-    /**
-     * For staggered and hexagonal maps,
-     * determines whether the "even" or "odd" indexes along the staggered axis are shifted. (since 0.11)
-     */
-    TBAG_CONSTEXPR static char const * const ATT_STAGGERINDEX = "staggerindex";
-
-    /** The background color of the map.
-     * (optional, may include alpha value since 0.15 in the form #AARRGGBB)
-     */
-    TBAG_CONSTEXPR static char const * const ATT_BACKGROUNDCOLOR = "backgroundcolor";
-
-    /**
-     * Stores the next available ID for new layers.
-     * This number is stored to prevent reuse of the same ID after layers have been removed. (since 1.2)
-     */
-    TBAG_CONSTEXPR static char const * const ATT_NEXTLAYERID = "nextlayerid";
-
-    /**
-     * Stores the next available ID for new objects.
-     * This number is stored to prevent reuse of the same ID after objects have been removed. (since 0.11)
-     */
-    TBAG_CONSTEXPR static char const * const ATT_NEXTOBJECTID = "nextobjectid";
+    std::string name;
+    std::string type;
+    std::string value;
 };
+
+using Properties = std::vector<Property>;
 
 struct Tileset
 {
-    /** The first global tile ID of this tileset (this global ID maps to the first tile in this tileset). */
+    /**
+     * The first global tile ID of this tileset
+     * (this global ID maps to the first tile in this tileset).
+     */
     TBAG_CONSTEXPR static char const * const ATT_FIRSTGID = "firstgid";
 
-    /** If this tileset is stored in an external TSX (Tile Set XML) file, this attribute refers to that file. That TSX file has the same structure as the <tileset> element described here. (There is the firstgid attribute missing and this source attribute is also not there. These two attributes are kept in the TMX map, since they are map specific.) */
+    /**
+     * If this tileset is stored in an external TSX (Tile Set XML) file,
+     * this attribute refers to that file.
+     * That TSX file has the same structure as the <tileset> element described here.
+     *
+     * (There is the firstgid attribute missing and this source attribute is also not there.
+     * These two attributes are kept in the TMX map, since they are map specific.)
+     */
     TBAG_CONSTEXPR static char const * const ATT_SOURCE = "source";
 
     /** The name of this tileset. */
@@ -106,17 +77,50 @@ struct Tileset
     /** The (maximum) height of the tiles in this tileset. */
     TBAG_CONSTEXPR static char const * const ATT_TILEHEIGHT = "tileheight";
 
-    /** The spacing in pixels between the tiles in this tileset (applies to the tileset image). */
+    /**
+     * The spacing in pixels between the tiles in this tileset
+     * (applies to the tileset image).
+     */
     TBAG_CONSTEXPR static char const * const ATT_SPACING = "spacing";
 
-    /** The margin around the tiles in this tileset (applies to the tileset image). */
+    /**
+     * The margin around the tiles in this tileset
+     * (applies to the tileset image).
+     */
     TBAG_CONSTEXPR static char const * const ATT_MARGIN = "margin";
 
     /** The number of tiles in this tileset (since 0.13) */
     TBAG_CONSTEXPR static char const * const ATT_TILECOUNT = "tilecount";
 
-    /** The number of tile columns in the tileset. For image collection tilesets it is editable and is used when displaying the tileset. (since 0.15) */
+    /**
+     * The number of tile columns in the tileset.
+     * For image collection tilesets it is editable and is used when displaying the tileset.
+     * (since 0.15)
+     */
     TBAG_CONSTEXPR static char const * const ATT_COLUMNS = "columns";
+
+    //grid 	object 	See <grid> (optional)
+    //image 	string 	Image used for tiles in this set
+    //imagewidth 	int 	Width of source image in pixels
+    //imageheight 	int 	Height of source image in pixels
+    //terrains 	array 	Array of Terrains (optional)
+    //tileoffset 	object 	See <tileoffset> (optional)
+    //tiles 	array 	Array of Tiles (optional)
+    //transparentcolor 	string 	Hex-formatted color (#RRGGBB) (optional)
+    //type 	string 	tileset (for tileset files, since 1.0)
+    //wangsets 	array 	Array of Wang sets (since 1.1.5)
+
+    int firstgid = 0;
+    std::string name;
+    std::string source;
+    int tile_width = 0;
+    int tile_height = 0;
+    int spacing = 0;
+    int margin = 0;
+    int tile_count = 0;
+    int columns = 0;
+
+    Properties properties;
 };
 
 struct TileOffset
@@ -256,22 +260,39 @@ struct WangTile
 
 struct Layer
 {
-    /** Unique ID of the layer. Each layer that added to a map gets a unique id. Even if a layer is deleted, no layer ever gets the same ID. Can not be changed in Tiled. (since Tiled 1.2) */
+    /**
+     * Unique ID of the layer.
+     * Each layer that added to a map gets a unique id.
+     * Even if a layer is deleted, no layer ever gets the same ID.
+     * Can not be changed in Tiled. (since Tiled 1.2)
+     */
     TBAG_CONSTEXPR static char const * const ATT_ID = "id";
 
     /** The name of the layer. */
     TBAG_CONSTEXPR static char const * const ATT_NAME = "name";
 
-    /** The x coordinate of the layer in tiles. Defaults to 0 and can not be changed in Tiled. */
+    /**
+     * The x coordinate of the layer in tiles.
+     * Defaults to 0 and can not be changed in Tiled.
+     */
     TBAG_CONSTEXPR static char const * const ATT_X = "x";
 
-    /** The y coordinate of the layer in tiles. Defaults to 0 and can not be changed in Tiled. */
+    /**
+     * The y coordinate of the layer in tiles.
+     * Defaults to 0 and can not be changed in Tiled.
+     */
     TBAG_CONSTEXPR static char const * const ATT_Y = "y";
 
-    /** The width of the layer in tiles. Always the same as the map width for fixed-size maps. */
+    /**
+     * The width of the layer in tiles.
+     * Always the same as the map width for fixed-size maps.
+     */
     TBAG_CONSTEXPR static char const * const ATT_WIDTH = "width";
 
-    /** The height of the layer in tiles. Always the same as the map height for fixed-size maps. */
+    /**
+     * The height of the layer in tiles.
+     * Always the same as the map height for fixed-size maps.
+     */
     TBAG_CONSTEXPR static char const * const ATT_HEIGHT = "height";
 
     /** The opacity of the layer as a value from 0 to 1. Defaults to 1. */
@@ -286,6 +307,8 @@ struct Layer
     /** Rendering offset for this layer in pixels. Defaults to 0. (since 0.14) */
     TBAG_CONSTEXPR static char const * const ATT_OFFSETY = "offsety";
 };
+
+using Layers = std::vector<Layer>;
 
 struct Data
 {
@@ -496,20 +519,162 @@ struct Group
     TBAG_CONSTEXPR static char const * const ATT_VISIBLE = "visible";
 };
 
-struct Properties
+/**
+ * Example:@n
+ * @code{.xml}
+ *  <?xml version="1.0" encoding="UTF-8"?>
+ *  <map version="1.2"
+ *       tiledversion="1.2.3"
+ *       orientation="orthogonal"
+ *       renderorder="right-down"
+ *       width="100"
+ *       height="100"
+ *       tilewidth="32"
+ *       tileheight="32"
+ *       infinite="0"
+ *       nextlayerid="2"
+ *       nextobjectid="1">
+ *    <!-- ... -->
+ *  </map>
+ * @endcode
+ */
+struct Map
 {
-};
+    /**
+     * The TMX format version.
+     * Was "1.0" so far, and will be incremented to match minor Tiled releases.
+     */
+    TBAG_CONSTEXPR static char const * const ATT_VERSION = "version";
 
-struct Property
-{
-    /** The name of the property. */
-    TBAG_CONSTEXPR static char const * const ATT_NAME = "name";
+    /**
+     * The Tiled version used to save the file (since Tiled 1.0.1).
+     * May be a date (for snapshot builds).
+     */
+    TBAG_CONSTEXPR static char const * const ATT_TILEDVERSION = "tiledversion";
 
-    /** The type of the property. Can be string (default), int, float, bool, color or file (since 0.16, with color and file added in 0.17). */
-    TBAG_CONSTEXPR static char const * const ATT_TYPE = "type";
+    /**
+     * Map orientation.
+     * Tiled supports "orthogonal", "isometric", "staggered" and "hexagonal"
+     * (since 0.11).
+     */
+    TBAG_CONSTEXPR static char const * const ATT_ORIENTATION = "orientation";
+    TBAG_CONSTEXPR static char const * const VAL_ORTHOGONAL  = "orthogonal";
+    TBAG_CONSTEXPR static char const * const VAL_ISOMETRIC   = "isometric";
+    TBAG_CONSTEXPR static char const * const VAL_STAGGERED   = "staggered";
+    TBAG_CONSTEXPR static char const * const VAL_HEXAGONAL   = "hexagonal";
 
-    /** The value of the property. */
-    TBAG_CONSTEXPR static char const * const ATT_VALUE = "value";
+    /**
+     * The order in which tiles on tile layers are rendered.
+     * Valid values are right-down (the default), right-up, left-down and left-up.
+     * In all cases, the map is drawn row-by-row.
+     * (only supported for orthogonal maps at the moment)
+     */
+    TBAG_CONSTEXPR static char const * const ATT_RENDERORDER = "renderorder";
+    TBAG_CONSTEXPR static char const * const VAL_RIGHT_DOWN  = "right-down";
+    TBAG_CONSTEXPR static char const * const VAL_RIGHT_UP    = "right-up";
+    TBAG_CONSTEXPR static char const * const VAL_LEFT_DOWN   = "left-down";
+    TBAG_CONSTEXPR static char const * const VAL_LEFT_UP     = "left-up";
+
+    /** The map width in tiles. */
+    TBAG_CONSTEXPR static char const * const ATT_WIDTH = "width";
+
+    /** The map height in tiles. */
+    TBAG_CONSTEXPR static char const * const ATT_HEIGHT = "height";
+
+    /** The width of a tile. */
+    TBAG_CONSTEXPR static char const * const ATT_TILEWIDTH = "tilewidth";
+
+    /** The height of a tile. */
+    TBAG_CONSTEXPR static char const * const ATT_TILEHEIGHT = "tileheight";
+
+    /**
+     * Only for hexagonal maps.
+     * Determines the width or height (depending on the staggered axis)
+     * of the tile's edge, in pixels.
+     */
+    TBAG_CONSTEXPR static char const * const ATT_HEXSIDELENGTH = "hexsidelength";
+
+    /**
+     * For staggered and hexagonal maps,
+     * determines which axis ("x" or "y") is staggered.
+     * (since 0.11)
+     */
+    TBAG_CONSTEXPR static char const * const ATT_STAGGERAXIS = "staggeraxis";
+
+    /**
+     * For staggered and hexagonal maps,
+     * determines whether the "even" or "odd" indexes along the staggered axis are shifted.
+     * (since 0.11)
+     */
+    TBAG_CONSTEXPR static char const * const ATT_STAGGERINDEX = "staggerindex";
+
+    /** The background color of the map.
+     * (optional, may include alpha value since 0.15 in the form #AARRGGBB)
+     */
+    TBAG_CONSTEXPR static char const * const ATT_BACKGROUNDCOLOR = "backgroundcolor";
+
+    /**
+     * Stores the next available ID for new layers.
+     * This number is stored to prevent reuse of the same ID after layers have been removed.
+     * (since 1.2)
+     */
+    TBAG_CONSTEXPR static char const * const ATT_NEXTLAYERID = "nextlayerid";
+
+    /**
+     * Stores the next available ID for new objects.
+     * This number is stored to prevent reuse of the same ID after objects have been removed.
+     * (since 0.11)
+     */
+    TBAG_CONSTEXPR static char const * const ATT_NEXTOBJECTID = "nextobjectid";
+
+    /**
+     * Whether the map has infinite dimensions. (Boolean)
+     */
+    TBAG_CONSTEXPR static char const * const ATT_INFINITE = "infinite";
+
+    enum class Orientation
+    {
+        ORTHOGONAL,
+        ISOMETRIC,
+        STAGGERED,
+        HEXAGONAL,
+    };
+
+    enum class RenderOrder
+    {
+        RIGHT_DOWN,
+        RIGHT_UP,
+        LEFT_DOWN,
+        LEFT_UP,
+    };
+
+    enum class StaggerAxis
+    {
+        X, Y,
+    };
+
+    enum class StaggerIndex
+    {
+        ODD, EVEN,
+    };
+
+    std::string version;
+    std::string tiled_version;
+    Orientation orientation = Orientation::ORTHOGONAL;
+    RenderOrder render_order = RenderOrder::RIGHT_DOWN;
+    int width = 0;
+    int height = 0;
+    int tile_width = 0;
+    int tile_height = 0;
+    int hexside_length = 0;
+    StaggerAxis stagger_axis = StaggerAxis::X;
+    StaggerIndex stagger_index = StaggerIndex::ODD;
+    std::string background_color;
+    int next_layer_id = 0;
+    int next_object_id = 0;
+    bool infinite = false;
+
+    Properties properties;
 };
 
 /**
@@ -517,8 +682,6 @@ struct Property
  *
  * @author zer0
  * @date   2019-05-29
- *
- * @see <https://doc.mapeditor.org/en/stable/reference/tmx-map-format/>
  */
 class TBAG_API Tmx
 {
