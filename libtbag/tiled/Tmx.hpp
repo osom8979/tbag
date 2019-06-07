@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -608,7 +609,8 @@ struct Map
      */
     TBAG_CONSTEXPR static char const * const ATT_STAGGERINDEX = "staggerindex";
 
-    /** The background color of the map.
+    /**
+     * The background color of the map.
      * (optional, may include alpha value since 0.15 in the form #AARRGGBB)
      */
     TBAG_CONSTEXPR static char const * const ATT_BACKGROUNDCOLOR = "backgroundcolor";
@@ -685,6 +687,8 @@ struct Map
  */
 class TBAG_API Tmx
 {
+public:
+
 public:
     Tmx();
     Tmx(Tmx const & obj);

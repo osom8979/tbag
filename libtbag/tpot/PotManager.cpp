@@ -11,7 +11,8 @@
 #include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/string/Format.hpp>
 
-#include <libtbag/tpot/apps/DemoPot.hpp>
+#include <libtbag/tpot/apps/BuilderPot.hpp>
+#include <libtbag/tpot/apps/GamePot.hpp>
 #include <libtbag/tpot/apps/LuaPot.hpp>
 
 #include <cassert>
@@ -95,7 +96,8 @@ std::size_t PotManager::registerDefaultPots()
 #ifndef __INSERT_NEW_POT
 #define __INSERT_NEW_POT(t) if (insertPot(t::name(), std::make_shared<t>())) { count++; }
 #endif
-    __INSERT_NEW_POT(DemoPot)
+    __INSERT_NEW_POT(BuilderPot)
+    __INSERT_NEW_POT(GamePot)
     __INSERT_NEW_POT(LuaPot)
 #undef __INSERT_NEW_POT
     return count;
