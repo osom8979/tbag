@@ -48,12 +48,6 @@ static int _GuiShowDemoWindow(lua_State * L)
     return 0;
 }
 
-static int _GuiShowDemoNodes(lua_State * L)
-{
-    GuiShowDemoNodes();
-    return 0;
-}
-
 static int _GuiShowAboutWindow(lua_State * L)
 {
     GuiShowAboutWindow();
@@ -2509,7 +2503,6 @@ static luaL_Reg const __lua_laygui[] = {
 
         // Demo, Debug, Information
         RAYGUI_REGISTER(GuiShowDemoWindow),
-        RAYGUI_REGISTER(GuiShowDemoNodes),
         RAYGUI_REGISTER(GuiShowAboutWindow),
         RAYGUI_REGISTER(GuiShowMetricsWindow),
         RAYGUI_REGISTER(GuiShowStyleEditor),
