@@ -181,6 +181,8 @@ TBAG_API void GuiNodesSaveEditorStateToDisk(RayGuiNodes const & editor, char con
 TBAG_API void GuiNodesLoadCurrentEditorStateFromDisk(char const * file_name);
 TBAG_API void GuiNodesLoadEditorStateFromDisk(RayGuiNodes & editor, char const * file_name);
 
+TBAG_API void GuiNodesShowDemoWindow(bool * p_open = nullptr);
+
 } // namespace ray
 
 // --------------------

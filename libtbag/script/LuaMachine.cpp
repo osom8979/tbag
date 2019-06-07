@@ -15,6 +15,7 @@
 
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/script/lua/RayGuiLua.hpp>
+#include <libtbag/script/lua/RayGuiNodesLua.hpp>
 #include <libtbag/script/lua/LogLua.hpp>
 #include <libtbag/script/lua/StringLua.hpp>
 
@@ -169,6 +170,9 @@ void LuaMachine::initDefault()
     }
     if (!libtbag::script::lua::luaE_open_raygui(L)) {
         tDLogW("LuaMachine::initDefault() RayGui bind failed.");
+    }
+    if (!libtbag::script::lua::luaE_open_rayguinodes(L)) {
+        tDLogW("LuaMachine::initDefault() RayGuiNodes bind failed.");
     }
     if (!libtbag::script::lua::luaE_open_log(L)) {
         tDLogW("LuaMachine::initDefault() Log bind failed.");

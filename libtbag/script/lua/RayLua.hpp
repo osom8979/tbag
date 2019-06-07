@@ -3,47 +3,6 @@
  * @brief  RayLua class prototype.
  * @author zer0
  * @date   2019-04-27
- *
- * @remarks
- *  Example:
- *  @code{.lua}
- *   -- Core - Basic window
- *
- *   width = 800
- *   height = 450
- *
- *   tbag.InitWindow(width, height, 'Basic window')
- *   tbag.GuiInitRay()
- *   tbag.SetTargetFPS(60)
- *
- *   gradient = tbag.GenImageGradientV(400, 400, tbag.RED, tbag.BLUE);
- *   texture = tbag.LoadTextureFromImage(gradient);
- *   tbag.UnloadImage(gradient);
- *   gradient = nil
- *
- *   while not tbag.WindowShouldClose() do
- *       tbag.GuiUpdateRay()
- *       if tbag.GuiBegin('Window') then
- *           tbag.GuiText('Label')
- *       end
- *       tbag.GuiEnd()
- *
- *       tbag.GuiShowDemoWindow()
- *
- *       tbag.BeginDrawing()
- *       tbag.ClearBackground({30, 30, 30})
- *       tbag.DrawTexture(texture, 0, 0, tbag.WHITE);
- *       tbag.DrawCircleV({width/2, height/2}, 50, tbag.RED);
- *       tbag.DrawText('Basic window!', 10, 20, 20, {200, 200, 200});
- *       tbag.EndDrawing()
- *   end
- *
- *   tbag.UnloadTexture(texture);
- *   texture = nil
- *
- *   tbag.GuiShutdownRay()
- *   tbag.CloseWindow()
- *  @endcode
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_SCRIPT_LUA_RAYLUA_HPP__

@@ -354,11 +354,18 @@ static int _GuiNodesLoadEditorStateFromDisk(lua_State * L)
     return 0;
 }
 
+static int _GuiNodesShowDemoWindow(lua_State * L)
+{
+    GuiNodesShowDemoWindow();
+    return 0;
+}
+
 #ifndef RAYGUINODES_REGISTER
 #define RAYGUINODES_REGISTER(name) { #name, _##name }
 #endif
 
 static luaL_Reg const __lua_layguinodes[] = {
+        { METATABLE_GUINODES, _GuiNodes },
         RAYGUINODES_REGISTER(GuiNodesEditorContextSet),
         RAYGUINODES_REGISTER(GuiNodesInitialize),
         RAYGUINODES_REGISTER(GuiNodesShutdown),
@@ -392,6 +399,7 @@ static luaL_Reg const __lua_layguinodes[] = {
         RAYGUINODES_REGISTER(GuiNodesSaveEditorStateToDisk),
         RAYGUINODES_REGISTER(GuiNodesLoadCurrentEditorStateFromDisk),
         RAYGUINODES_REGISTER(GuiNodesLoadEditorStateFromDisk),
+        RAYGUINODES_REGISTER(GuiNodesShowDemoWindow),
         { nullptr, nullptr }
 };
 
@@ -432,6 +440,7 @@ bool luaE_open_rayguinodes(lua_State * L)
     luaL_register(L, lua_tbag_name(), __lua_layguinodes);
     {
         luaL_push_rayguinodes_symbols(L);
+        luaE_register_guinodes(L);
     }
     lua_pop(L, 1);
     return true;

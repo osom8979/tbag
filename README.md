@@ -119,6 +119,7 @@ height = 450
 tbag.SetConfigFlags(tbag.FLAG_WINDOW_RESIZABLE);
 tbag.InitWindow(width, height, 'Basic window')
 tbag.GuiInitRay()
+tbag.GuiNodesInitialize()
 tbag.SetTargetFPS(60)
 
 gradient = tbag.GenImageGradientV(400, 400, tbag.RED, tbag.BLUE);
@@ -134,6 +135,7 @@ while not tbag.WindowShouldClose() do
     tbag.GuiEnd()
 
     tbag.GuiShowDemoWindow()
+    tbag.GuiNodesShowDemoWindow()
 
     tbag.BeginDrawing()
     tbag.ClearBackground({30, 30, 30})
@@ -147,6 +149,7 @@ end
 tbag.UnloadTexture(texture);
 texture = nil
 
+tbag.GuiNodesShutdown()
 tbag.GuiShutdownRay()
 tbag.CloseWindow()
 ```

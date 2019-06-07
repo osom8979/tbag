@@ -14,6 +14,7 @@
 #include <cassert>
 #include <algorithm>
 #include <utility>
+#include <unordered_map>
 
 #include <imgui.h>
 #include <imnodes.h>
@@ -323,6 +324,178 @@ void GuiNodesLoadCurrentEditorStateFromDisk(char const * file_name)
 void GuiNodesLoadEditorStateFromDisk(RayGuiNodes & editor, char const * file_name)
 {
     imnodes::LoadEditorStateFromDisk(editor.get()->context, file_name);
+}
+
+/**
+ * Demo implementation
+ *
+ * @author zer0
+ * @date   2019-06-07
+ *
+ */
+class GuiNodeDemo
+{
+public:
+    struct Color3
+    {
+        float data[3] = {0, 0, 0};
+    };
+
+    struct Link
+    {
+        int start = 0;
+        int end = 0;
+    };
+
+    using LinkMap = std::unordered_map<int, Link>;
+
+private:
+    int _current_id = 0;
+    std::unordered_map<int, Link> _links;
+
+    float _number1 = 0.0f;
+    float _number2 = 1.0f;
+    Color3 _color;
+
+public:
+    GuiNodeDemo()
+    {
+        imnodes::SetNodePos(0, ImVec2(100.0f, 100.0f));
+        imnodes::SetNodePos(1, ImVec2(300.0f, 300.0f));
+    }
+
+    ~GuiNodeDemo()
+    {
+        // EMPTY.
+    }
+
+public:
+    inline static int make_id(int node, int attribute) TBAG_NOEXCEPT
+    {
+        return (node << 16) | attribute;
+    }
+
+public:
+    void show(bool * p_open = nullptr)
+    {
+        ImGui::Begin("Simple node example", p_open);
+        ImGui::Text("X -- delete selected link");
+        imnodes::BeginNodeEditor();
+
+        {
+            int const DRAGFLOAT_NODE_ID = 0;
+            float const NODE_WIDTH = 150.0f;
+
+            imnodes::BeginNode(DRAGFLOAT_NODE_ID);
+            imnodes::Name("Drag float");
+
+            // input attributes should all be unique among each other
+            imnodes::BeginInputAttribute(make_id(DRAGFLOAT_NODE_ID, 0));
+            ImGui::Text("input");
+            imnodes::EndAttribute();
+            ImGui::Spacing();
+
+            {
+                // If you don't want a a pin drawn on a node UI element, just
+                // don't call Begin(Input|Output)Attribute before and after your
+                // UI element!
+                const float label_width = ImGui::CalcTextSize("number").x;
+                ImGui::Text("number");
+                ImGui::PushItemWidth(NODE_WIDTH - label_width - 6.0f);
+                ImGui::SameLine();
+                ImGui::DragFloat("##hidelabel", &_number1, 0.01f);
+                ImGui::PopItemWidth();
+            }
+
+            {
+                imnodes::BeginOutputAttribute(make_id(DRAGFLOAT_NODE_ID, 2));
+                const float label_width = ImGui::CalcTextSize("output").x;
+                ImGui::Indent(NODE_WIDTH - label_width - 1.5f);
+                ImGui::Text("output");
+                imnodes::EndAttribute();
+            }
+
+            imnodes::EndNode();
+        }
+
+        {
+            int const BIG_NODE_ID = 1;
+            float const NODE_WIDTH = 200.0f;
+            imnodes::BeginNode(BIG_NODE_ID);
+            imnodes::Name("Big node");
+
+            imnodes::BeginInputAttribute(make_id(BIG_NODE_ID, 0));
+            ImGui::Text("input1");
+            imnodes::EndAttribute();
+
+            ImGui::Spacing();
+
+            imnodes::BeginInputAttribute(make_id(BIG_NODE_ID, 1));
+            ImGui::Text("input2");
+            imnodes::EndAttribute();
+
+            {
+                imnodes::BeginOutputAttribute(make_id(BIG_NODE_ID, 2));
+                const float label_width = ImGui::CalcTextSize("number").x;
+                ImGui::PushItemWidth(NODE_WIDTH - label_width - 6.0f);
+                ImGui::DragFloat("number", &_number2, 0.01f);
+                ImGui::PopItemWidth();
+                imnodes::EndAttribute();
+            }
+            ImGui::Spacing();
+            {
+                imnodes::BeginOutputAttribute(make_id(BIG_NODE_ID, 3));
+                const float label_width = ImGui::CalcTextSize("color").x;
+                ImGui::PushItemWidth(NODE_WIDTH - label_width - 6.0f);
+                ImGui::ColorEdit3("color", _color.data);
+                ImGui::PopItemWidth();
+                imnodes::EndAttribute();
+            }
+            ImGui::Spacing();
+            {
+                imnodes::BeginOutputAttribute(make_id(BIG_NODE_ID, 5));
+                const float label_width = ImGui::CalcTextSize("output1").x;
+                ImGui::Indent(NODE_WIDTH - label_width - 1.5f);
+                ImGui::Text("output1");
+                imnodes::EndAttribute();
+            }
+            ImGui::Spacing();
+            {
+                imnodes::BeginOutputAttribute(make_id(BIG_NODE_ID, 6));
+                const float label_width = ImGui::CalcTextSize("output2").x;
+                ImGui::Indent(NODE_WIDTH - label_width - 1.5f);
+                ImGui::Text("output2");
+                imnodes::EndAttribute();
+            }
+
+            imnodes::EndNode();
+        }
+
+        for (auto const & cursor : _links) {
+            imnodes::Link(cursor.first, cursor.second.start, cursor.second.end);
+        }
+        imnodes::EndNodeEditor();
+
+        int link_start = 0;
+        int link_end = 0;
+        if (imnodes::IsLinkCreated(&link_start, &link_end)) {
+            _links.insert(std::make_pair(_current_id++, Link{link_start, link_end}));
+        }
+
+        int link_id = 0;
+        if (imnodes::IsLinkSelected(&link_id)) {
+            if (ImGui::IsKeyReleased(KEY_X)) {
+                _links.erase(link_id);
+            }
+        }
+        ImGui::End();
+    }
+};
+
+void GuiNodesShowDemoWindow(bool * p_open)
+{
+    static GuiNodeDemo demo_window;
+    demo_window.show(p_open);
 }
 
 } // namespace ray
