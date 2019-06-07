@@ -6,10 +6,14 @@ function rename_symbol {
 }
 
 echo 'Remove QueryPerformanceCounter declaration.'
-sed -i .tmp -e 's/^    \(int __stdcall QueryPerformanceCounter(.*\)/    \/\/\1/g' gestures.h
+for i in gestures.h physac.h; do
+sed -i .tmp -e 's/^    \(int __stdcall QueryPerformanceCounter(.*\)/    \/\/\1/g' $i
+done
 
 echo 'Remove QueryPerformanceFrequency declaration.'
-sed -i .tmp -e 's/^    \(int __stdcall QueryPerformanceFrequency(.*\)/    \/\/\1/g' gestures.h
+for i in gestures.h physac.h; do
+sed -i .tmp -e 's/^    \(int __stdcall QueryPerformanceFrequency(.*\)/    \/\/\1/g' $i
+done
 
 echo 'Remove FormatText macro.'
 sed -i .tmp -e 's/\(#define FormatText.*\)/\/\/\1/g' raylib.h
@@ -20,8 +24,8 @@ sed -i .tmp -e 's/\(#define SubText.*\)/\/\/\1/g' raylib.h
 echo 'Remove ShowWindow macro.'
 sed -i .tmp -e 's/\(#define ShowWindow.*\)/\/\/\1/g' raylib.h
 
-echo 'Rename symbol suffix: BITMAPINFOHEADER -> BITMAPINFOHEADER_'
-find . -name '*.c' -or -name '*.h' | xargs sed -i .tmp -e 's/BITMAPINFOHEADER\([^_]\)/BITMAPINFOHEADER_\1/g'
+#echo 'Rename symbol suffix: BITMAPINFOHEADER -> BITMAPINFOHEADER_'
+#find . -name '*.c' -or -name '*.h' | xargs sed -i .tmp -e 's/BITMAPINFOHEADER\([^_]\)/BITMAPINFOHEADER_\1/g'
 
 rename_symbol Rectangle       Rectangle2
 rename_symbol UnhideWindow    UnhideWindow_
