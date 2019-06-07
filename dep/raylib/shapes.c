@@ -59,7 +59,7 @@
 // Global Variables Definition
 //----------------------------------------------------------------------------------
 static Texture2D texShapes = { 0 };
-static Rectangle recTexShapes = { 0 };
+static Rectangle2 recTexShapes = { 0 };
 
 //----------------------------------------------------------------------------------
 // Module specific Functions Declaration
@@ -589,17 +589,17 @@ void DrawRectangle(int posX, int posY, int width, int height, Color color)
 // NOTE: On OpenGL 3.3 and ES2 we use QUADS to avoid drawing order issues (view rlglDraw)
 void DrawRectangleV(Vector2 position, Vector2 size, Color color)
 {
-    DrawRectanglePro((Rectangle){ position.x, position.y, size.x, size.y }, (Vector2){ 0.0f, 0.0f }, 0.0f, color);
+    DrawRectanglePro((Rectangle2){ position.x, position.y, size.x, size.y }, (Vector2){ 0.0f, 0.0f }, 0.0f, color);
 }
 
 // Draw a color-filled rectangle
-void DrawRectangleRec(Rectangle rec, Color color)
+void DrawRectangleRec(Rectangle2 rec, Color color)
 {
     DrawRectanglePro(rec, (Vector2){ 0.0f, 0.0f }, 0.0f, color);
 }
 
 // Draw a color-filled rectangle with pro parameters
-void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color)
+void DrawRectanglePro(Rectangle2 rec, Vector2 origin, float rotation, Color color)
 {
     rlEnableTexture(GetShapesTexture().id);
 
@@ -633,19 +633,19 @@ void DrawRectanglePro(Rectangle rec, Vector2 origin, float rotation, Color color
 // NOTE: Gradient goes from bottom (color1) to top (color2)
 void DrawRectangleGradientV(int posX, int posY, int width, int height, Color color1, Color color2)
 {
-    DrawRectangleGradientEx((Rectangle){ (float)posX, (float)posY, (float)width, (float)height }, color1, color2, color2, color1);
+    DrawRectangleGradientEx((Rectangle2){ (float)posX, (float)posY, (float)width, (float)height }, color1, color2, color2, color1);
 }
 
 // Draw a horizontal-gradient-filled rectangle
 // NOTE: Gradient goes from bottom (color1) to top (color2)
 void DrawRectangleGradientH(int posX, int posY, int width, int height, Color color1, Color color2)
 {
-    DrawRectangleGradientEx((Rectangle){ (float)posX, (float)posY, (float)width, (float)height }, color1, color1, color2, color2);
+    DrawRectangleGradientEx((Rectangle2){ (float)posX, (float)posY, (float)width, (float)height }, color1, color1, color2, color2);
 }
 
 // Draw a gradient-filled rectangle
 // NOTE: Colors refer to corners, starting at top-lef corner and counter-clockwise
-void DrawRectangleGradientEx(Rectangle rec, Color col1, Color col2, Color col3, Color col4)
+void DrawRectangleGradientEx(Rectangle2 rec, Color col1, Color col2, Color col3, Color col4)
 {
     rlEnableTexture(GetShapesTexture().id);
 
@@ -703,7 +703,7 @@ void DrawRectangleLines(int posX, int posY, int width, int height, Color color)
 }
 
 // Draw rectangle outline with extended parameters
-void DrawRectangleLinesEx(Rectangle rec, int lineThick, Color color)
+void DrawRectangleLinesEx(Rectangle2 rec, int lineThick, Color color)
 {
     if (lineThick > rec.width || lineThick > rec.height)
     {
@@ -718,7 +718,7 @@ void DrawRectangleLinesEx(Rectangle rec, int lineThick, Color color)
 }
 
 // Draw rectangle with rounded edges
-void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color color)
+void DrawRectangleRounded(Rectangle2 rec, float roundness, int segments, Color color)
 {
     // Not a rounded rectangle
     if ((roundness <= 0.0f) || (rec.width < 1) || (rec.height < 1 ))
@@ -815,7 +815,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
             }
         }
 
-        // [2] Upper Rectangle
+        // [2] Upper Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(recTexShapes.x/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[0].x, point[0].y);
@@ -826,7 +826,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((recTexShapes.x + recTexShapes.width)/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[1].x, point[1].y);
 
-        // [4] Right Rectangle
+        // [4] Right Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(recTexShapes.x/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[2].x, point[2].y);
@@ -837,7 +837,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((recTexShapes.x + recTexShapes.width)/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[3].x, point[3].y);
 
-        // [6] Bottom Rectangle
+        // [6] Bottom Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(recTexShapes.x/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[11].x, point[11].y);
@@ -848,7 +848,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((recTexShapes.x + recTexShapes.width)/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[10].x, point[10].y);
 
-        // [8] Left Rectangle
+        // [8] Left Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(recTexShapes.x/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[7].x, point[7].y);
@@ -859,7 +859,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlTexCoord2f((recTexShapes.x + recTexShapes.width)/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[8].x, point[8].y);
 
-        // [9] Middle Rectangle
+        // [9] Middle Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlTexCoord2f(recTexShapes.x/texShapes.width, recTexShapes.y/texShapes.height);
         rlVertex2f(point[8].x, point[8].y);
@@ -891,7 +891,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
             }
         }
 
-        // [2] Upper Rectangle
+        // [2] Upper Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[0].x, point[0].y);
         rlVertex2f(point[8].x, point[8].y);
@@ -900,7 +900,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[0].x, point[0].y);
         rlVertex2f(point[9].x, point[9].y);
 
-        // [4] Right Rectangle
+        // [4] Right Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[9].x, point[9].y);
         rlVertex2f(point[10].x, point[10].y);
@@ -909,7 +909,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[9].x, point[9].y);
         rlVertex2f(point[3].x, point[3].y);
 
-        // [6] Bottom Rectangle
+        // [6] Bottom Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[11].x, point[11].y);
         rlVertex2f(point[5].x, point[5].y);
@@ -918,7 +918,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[11].x, point[11].y);
         rlVertex2f(point[4].x, point[4].y);
 
-        // [8] Left Rectangle
+        // [8] Left Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[7].x, point[7].y);
         rlVertex2f(point[6].x, point[6].y);
@@ -927,7 +927,7 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
         rlVertex2f(point[7].x, point[7].y);
         rlVertex2f(point[11].x, point[11].y);
 
-        // [9] Middle Rectangle
+        // [9] Middle Rectangle2
         rlColor4ub(color.r, color.g, color.b, color.a);
         rlVertex2f(point[8].x, point[8].y);
         rlVertex2f(point[11].x, point[11].y);
@@ -940,14 +940,14 @@ void DrawRectangleRounded(Rectangle rec, float roundness, int segments, Color co
 }
 
 // Draw rectangle with rounded edges outline
-void DrawRectangleRoundedLines(Rectangle rec, float roundness, int segments, int lineThick, Color color)
+void DrawRectangleRoundedLines(Rectangle2 rec, float roundness, int segments, int lineThick, Color color)
 {
     if (lineThick < 0) lineThick = 0;
 
     // Not a rounded rectangle
     if (roundness <= 0.0f)
     {
-        DrawRectangleLinesEx((Rectangle){rec.x-lineThick, rec.y-lineThick, rec.width+2*lineThick, rec.height+2*lineThick}, lineThick, color);
+        DrawRectangleLinesEx((Rectangle2){rec.x-lineThick, rec.y-lineThick, rec.width+2*lineThick, rec.height+2*lineThick}, lineThick, color);
         return;
     }
 
@@ -1307,7 +1307,7 @@ void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color col
 }
 
 // Define default texture used to draw shapes
-void SetShapesTexture(Texture2D texture, Rectangle source)
+void SetShapesTexture(Texture2D texture, Rectangle2 source)
 {
     texShapes = texture;
     recTexShapes = source;
@@ -1318,7 +1318,7 @@ void SetShapesTexture(Texture2D texture, Rectangle source)
 //----------------------------------------------------------------------------------
 
 // Check if point is inside rectangle
-bool CheckCollisionPointRec(Vector2 point, Rectangle rec)
+bool CheckCollisionPointRec(Vector2 point, Rectangle2 rec)
 {
     bool collision = false;
 
@@ -1352,7 +1352,7 @@ bool CheckCollisionPointTriangle(Vector2 point, Vector2 p1, Vector2 p2, Vector2 
 }
 
 // Check collision between two rectangles
-bool CheckCollisionRecs(Rectangle rec1, Rectangle rec2)
+bool CheckCollisionRecs(Rectangle2 rec1, Rectangle2 rec2)
 {
     bool collision = false;
 
@@ -1379,7 +1379,7 @@ bool CheckCollisionCircles(Vector2 center1, float radius1, Vector2 center2, floa
 
 // Check collision between circle and rectangle
 // NOTE: Reviewed version to take into account corner limit case
-bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
+bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle2 rec)
 {
     int recCenterX = (int)(rec.x + rec.width/2.0f);
     int recCenterY = (int)(rec.y + rec.height/2.0f);
@@ -1400,9 +1400,9 @@ bool CheckCollisionCircleRec(Vector2 center, float radius, Rectangle rec)
 }
 
 // Get collision rectangle for two rectangles collision
-Rectangle GetCollisionRec(Rectangle rec1, Rectangle rec2)
+Rectangle2 GetCollisionRec(Rectangle2 rec1, Rectangle2 rec2)
 {
-    Rectangle retRec = { 0, 0, 0, 0 };
+    Rectangle2 retRec = { 0, 0, 0, 0 };
 
     if (CheckCollisionRecs(rec1, rec2))
     {
@@ -1487,12 +1487,12 @@ static Texture2D GetShapesTexture(void)
     {
 #if defined(SUPPORT_FONT_TEXTURE)
         texShapes = GetFontDefault().texture;           // Use font texture white character
-        Rectangle rec = GetFontDefault().chars[95].rec;
+        Rectangle2 rec = GetFontDefault().chars[95].rec;
         // NOTE: We setup a 1px padding on char rectangle to avoid texture bleeding on MSAA filtering
-        recTexShapes = (Rectangle){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 };
+        recTexShapes = (Rectangle2){ rec.x + 1, rec.y + 1, rec.width - 2, rec.height - 2 };
 #else
         texShapes = GetTextureDefault();                // Use default white texture
-        recTexShapes = (Rectangle){ 0.0f, 0.0f, 1.0f, 1.0f };
+        recTexShapes = (Rectangle2){ 0.0f, 0.0f, 1.0f, 1.0f };
 #endif
     }
 

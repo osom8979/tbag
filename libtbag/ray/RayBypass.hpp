@@ -203,8 +203,6 @@ TBAG_API void DrawRectangleRoundedLines(Rectangle2 rec, float roundness, int seg
 TBAG_API void DrawTriangle(Vector2 v1, Vector2 v2, Vector2 v3, Color color);
 TBAG_API void DrawTriangleLines(Vector2 v1, Vector2 v2, Vector2 v3, Color color);
 TBAG_API void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color color);
-TBAG_API void DrawPolyEx(Vector2 * points, int num_points, Color color);
-TBAG_API void DrawPolyExLines(Vector2 * points, int num_points, Color color);
 
 TBAG_API void SetShapesTexture(Texture2D texture, Rectangle2 source);
 
@@ -434,8 +432,7 @@ TBAG_API void EndBlendMode();
 TBAG_API void BeginScissorMode(int x, int y, int width, int height);
 TBAG_API void EndScissorMode();
 
-TBAG_API VrDeviceInfo GetVrDeviceInfo(int vr_device_type);
-TBAG_API void InitVrSimulator(VrDeviceInfo info);
+TBAG_API void InitVrSimulator();
 TBAG_API void UpdateVrTracking(Camera * camera);
 TBAG_API void CloseVrSimulator();
 TBAG_API bool IsVrSimulatorReady();

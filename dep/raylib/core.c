@@ -366,7 +366,7 @@ typedef struct {
     pthread_t threadId;                         // Event reading thread id
     int fd;                                     // File descriptor to the device it is assigned to
     int eventNum;                               // Number of 'event<N>' device
-    Rectangle absRange;                         // Range of values for absolute pointing devices (touchscreens)
+    Rectangle2 absRange;                         // Range of values for absolute pointing devices (touchscreens)
     int touchSlot;                              // Hold the touch slot number of the currently being sent multitouch block
     bool isMouse;                               // True if device supports relative X Y movements
     bool isTouch;                               // True if device supports absolute X Y movements and has BTN_TOUCH
@@ -454,7 +454,7 @@ extern void UnloadDefaultFont(void);        // [Module: text] Unloads default fo
 static bool InitGraphicsDevice(int width, int height);  // Initialize graphics device
 static void SetupFramebuffer(int width, int height);    // Setup main framebuffer
 static void SetupViewport(int width, int height);       // Set viewport for a provided width and height
-static void SwapBuffers(void);                          // Copy back buffer to front buffers
+static void SwapBuffers_(void);                          // Copy back buffer to front buffers
 
 static void InitTimer(void);                            // Initialize timer
 static void Wait(float ms);                             // Wait for some milliseconds (stop program execution)
@@ -657,7 +657,7 @@ void InitWindow(int width, int height, const char *title)
 }
 
 // Close window and unload OpenGL context
-void CloseWindow(void)
+void CloseWindow_(void)
 {
 #if defined(SUPPORT_GIF_RECORDING)
     if (gifRecording)
@@ -879,7 +879,7 @@ void SetWindowSize(int width, int height)
 }
 
 // Show the window
-void UnhideWindow(void)
+void UnhideWindow_(void)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwShowWindow(window);
@@ -1044,7 +1044,7 @@ void SetClipboardText(const char *text)
 }
 
 // Show mouse cursor
-void ShowCursor(void)
+void ShowCursor_(void)
 {
 #if defined(PLATFORM_DESKTOP)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -1132,6 +1132,10 @@ void BeginDrawing(void)
                                         // NOTE: Not required with OpenGL 3.3+
 }
 
+static void (*end_drawing_callback)(void) = NULL;
+void SetEndDrawingCallback(void(*cb)(void))
+{ end_drawing_callback = cb; }
+
 // End canvas drawing and swap buffers (double buffering)
 void EndDrawing(void)
 {
@@ -1159,14 +1163,16 @@ void EndDrawing(void)
         if (((gifFramesCounter/15)%2) == 1)
         {
             DrawCircle(30, screenHeight - 20, 10, RED);
-            DrawText("RECORDING", 50, screenHeight - 25, 10, MAROON);
+            DrawText_("RECORDING", 50, screenHeight - 25, 10, MAROON);
         }
 
         rlglDraw();                 // Draw RECORDING message
     }
 #endif
 
-    SwapBuffers();                  // Copy back buffer to front buffer
+    if (end_drawing_callback) { end_drawing_callback(); }
+
+    SwapBuffers_();                  // Copy back buffer to front buffer
     PollInputEvents();              // Poll user events
 
     // Frame time control system
@@ -3565,7 +3571,7 @@ static void PollInputEvents(void)
 }
 
 // Copy back buffer to front buffers
-static void SwapBuffers(void)
+static void SwapBuffers_(void)
 {
 #if defined(PLATFORM_DESKTOP) || defined(PLATFORM_WEB)
     glfwSwapBuffers(window);
@@ -4338,7 +4344,7 @@ static void ProcessKeyboard(void)
     // Check screen capture key (raylib key: KEY_F12)
     if (currentKeyState[301] == 1)
     {
-        TakeScreenshot(FormatText("screenshot%03i.png", screenshotCounter));
+        TakeScreenshot(TextFormat("screenshot%03i.png", screenshotCounter));
         screenshotCounter++;
     }
 #endif
@@ -4982,7 +4988,7 @@ static void LogoAnimation(void)
 
                 DrawRectangle(screenWidth/2 - 112, screenHeight/2 - 112, 224, 224, Fade(RAYWHITE, alpha));
 
-                DrawText(TextSubtext("raylib", 0, lettersCount), screenWidth/2 - 44, screenHeight/2 + 48, 50, Fade(BLACK, alpha));
+                DrawText_(TextSubtext("raylib", 0, lettersCount), screenWidth/2 - 44, screenHeight/2 + 48, 50, Fade(BLACK, alpha));
             }
 
         EndDrawing();

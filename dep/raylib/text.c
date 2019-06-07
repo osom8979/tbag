@@ -75,7 +75,7 @@
 //----------------------------------------------------------------------------------
 #if defined(SUPPORT_DEFAULT_FONT)
 static Font defaultFont;        // Default font provided by raylib
-// NOTE: defaultFont is loaded on InitWindow and disposed on CloseWindow [module: core]
+// NOTE: defaultFont is loaded on InitWindow and disposed on CloseWindow_ [module: core]
 #endif
 
 //----------------------------------------------------------------------------------
@@ -205,7 +205,7 @@ extern void LoadDefaultFont(void)
     //------------------------------------------------------------------------------
 
     // Allocate space for our characters info data
-    // NOTE: This memory should be freed at end! --> CloseWindow()
+    // NOTE: This memory should be freed at end! --> CloseWindow_()
     defaultFont.chars = (CharInfo *)RL_MALLOC(defaultFont.charsCount*sizeof(CharInfo));
 
     int currentLine = 0;
@@ -283,7 +283,7 @@ Font LoadFont(const char *fileName)
     else
 #endif
     {
-        Image image = LoadImage(fileName);
+        Image image = LoadImage_(fileName);
         if (image.data != NULL) font = LoadFontFromImage(image, MAGENTA, DEFAULT_FIRST_CHAR);
         UnloadImage(image);
     }
@@ -341,7 +341,7 @@ Font LoadFontFromImage(Image image, Color key, int firstChar)
     // We allocate a temporal arrays for chars data measures,
     // once we get the actual number of chars, we copy data to a sized arrays
     int tempCharValues[MAX_FONTCHARS];
-    Rectangle tempCharRecs[MAX_FONTCHARS];
+    Rectangle2 tempCharRecs[MAX_FONTCHARS];
 
     Color *pixels = GetImageData(image);
 
@@ -716,7 +716,7 @@ void DrawFPS(int posX, int posY)
     }
 
     // NOTE: We have rounding errors every frame, so it oscillates a lot
-    DrawText(TextFormat("%2i FPS", fps), posX, posY, 20, LIME);
+    DrawText_(TextFormat("%2i FPS", fps), posX, posY, 20, LIME);
 }
 
 // Returns next codepoint in a UTF8 encoded `text` scanning until '\0' is found. When a invalid UTF8 byte is encountered we exit as soon
@@ -813,7 +813,7 @@ int GetNextCodepoint(const char* text, int* count)
 // Draw text (using default font)
 // NOTE: fontSize work like in any drawing program but if fontSize is lower than font-base-size, then font-base-size is used
 // NOTE: chars spacing is proportional to fontSize
-void DrawText(const char *text, int posX, int posY, int fontSize, Color color)
+void DrawText_(const char *text, int posX, int posY, int fontSize, Color color)
 {
     // Check if default font has been loaded
     if (GetFontDefault().texture.id != 0)
@@ -824,13 +824,13 @@ void DrawText(const char *text, int posX, int posY, int fontSize, Color color)
         if (fontSize < defaultFontSize) fontSize = defaultFontSize;
         int spacing = fontSize/defaultFontSize;
 
-        DrawTextEx(GetFontDefault(), text, position, (float)fontSize, (float)spacing, color);
+        DrawTextEx_(GetFontDefault(), text, position, (float)fontSize, (float)spacing, color);
     }
 }
 
 // Draw text using Font
 // NOTE: chars spacing is NOT proportional to fontSize
-void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
+void DrawTextEx_(Font font, const char *text, Vector2 position, float fontSize, float spacing, Color tint)
 {
     int length = strlen(text);
     int textOffsetY = 0;        // Required for line break!
@@ -863,7 +863,7 @@ void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, f
             if (letter != ' ')
             {
                 DrawTexturePro(font.texture, font.chars[index].rec,
-                           (Rectangle){ position.x + textOffsetX + font.chars[index].offsetX*scaleFactor,
+                           (Rectangle2){ position.x + textOffsetX + font.chars[index].offsetX*scaleFactor,
                                         position.y + textOffsetY + font.chars[index].offsetY*scaleFactor,
                                         font.chars[index].rec.width*scaleFactor,
                                         font.chars[index].rec.height*scaleFactor }, (Vector2){ 0, 0 }, 0.0f, tint);
@@ -876,13 +876,13 @@ void DrawTextEx(Font font, const char *text, Vector2 position, float fontSize, f
 }
 
 // Draw text using font inside rectangle limits
-void DrawTextRec(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint)
+void DrawTextRec(Font font, const char *text, Rectangle2 rec, float fontSize, float spacing, bool wordWrap, Color tint)
 {
     DrawTextRecEx(font, text, rec, fontSize, spacing, wordWrap, tint, 0, 0, WHITE, WHITE);
 }
 
 // Draw text using font inside rectangle limits with support for text selection
-void DrawTextRecEx(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint,
+void DrawTextRecEx(Font font, const char *text, Rectangle2 rec, float fontSize, float spacing, bool wordWrap, Color tint,
                    int selectStart, int selectLength, Color selectText, Color selectBack)
 {
     int length = strlen(text);
@@ -986,7 +986,7 @@ void DrawTextRecEx(Font font, const char *text, Rectangle rec, float fontSize, f
                 bool isGlyphSelected = false;
                 if ((selectStart >= 0) && (k >= selectStart) && (k < (selectStart + selectLength)))
                 {
-                    Rectangle strec = {rec.x + textOffsetX-1, rec.y + textOffsetY, glyphWidth, font.baseSize*scaleFactor };
+                    Rectangle2 strec = {rec.x + textOffsetX-1, rec.y + textOffsetY, glyphWidth, font.baseSize*scaleFactor };
                     DrawRectangleRec(strec, selectBack);
                     isGlyphSelected = true;
                 }
@@ -995,7 +995,7 @@ void DrawTextRecEx(Font font, const char *text, Rectangle rec, float fontSize, f
                 if ((letter != ' ') && (letter != '\t'))
                 {
                     DrawTexturePro(font.texture, font.chars[index].rec,
-                      (Rectangle){ rec.x + textOffsetX + font.chars[index].offsetX*scaleFactor,
+                      (Rectangle2){ rec.x + textOffsetX + font.chars[index].offsetX*scaleFactor,
                                    rec.y + textOffsetY + font.chars[index].offsetY*scaleFactor,
                                    font.chars[index].rec.width*scaleFactor,
                                    font.chars[index].rec.height*scaleFactor }, (Vector2){ 0, 0 }, 0.0f,
@@ -1493,7 +1493,7 @@ static Font LoadBMFont(const char *fileName)
 
     TraceLog(LOG_DEBUG, "[%s] Font texture loading path: %s", fileName, texPath);
 
-    Image imFont = LoadImage(texPath);
+    Image imFont = LoadImage_(texPath);
 
     if (imFont.format == UNCOMPRESSED_GRAYSCALE)
     {
@@ -1526,7 +1526,7 @@ static Font LoadBMFont(const char *fileName)
 
         // Save data properly in sprite font
         font.chars[i].value = charId;
-        font.chars[i].rec = (Rectangle){ (float)charX, (float)charY, (float)charWidth, (float)charHeight };
+        font.chars[i].rec = (Rectangle2){ (float)charX, (float)charY, (float)charWidth, (float)charHeight };
         font.chars[i].offsetX = charOffsetX;
         font.chars[i].offsetY = charOffsetY;
         font.chars[i].advanceX = charAdvanceX;

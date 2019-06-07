@@ -788,16 +788,6 @@ void DrawPoly(Vector2 center, int sides, float radius, float rotation, Color col
     ::DrawPoly(center, sides, radius, rotation, color);
 }
 
-void DrawPolyEx(Vector2 * points, int num_points, Color color)
-{
-    ::DrawPolyEx(points, num_points, color);
-}
-
-void DrawPolyExLines(Vector2 * points, int num_points, Color color)
-{
-    ::DrawPolyExLines(points, num_points, color);
-}
-
 void SetShapesTexture(Texture2D texture, Rectangle2 source)
 {
     ::SetShapesTexture(texture, source);
@@ -1756,14 +1746,9 @@ void EndScissorMode()
     ::EndScissorMode();
 }
 
-VrDeviceInfo GetVrDeviceInfo(int vr_device_type)
+void InitVrSimulator()
 {
-    return ::GetVrDeviceInfo(vr_device_type);
-}
-
-void InitVrSimulator(VrDeviceInfo info)
-{
-    ::InitVrSimulator(info);
+    ::InitVrSimulator();
 }
 
 void UpdateVrTracking(Camera * camera)

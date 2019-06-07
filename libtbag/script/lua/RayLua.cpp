@@ -2036,22 +2036,6 @@ static int _DrawPoly(lua_State * L)
     return 0;
 }
 
-static int _DrawPolyEx(lua_State * L)
-{
-    DrawPolyEx(luaE_checkvector2_array(L, 1).data(),
-               luaL_checkinteger(L, 2),
-               luaE_checkcolor(L, 3));
-    return 0;
-}
-
-static int _DrawPolyExLines(lua_State * L)
-{
-    DrawPolyExLines(luaE_checkvector2_array(L, 1).data(),
-                    luaL_checkinteger(L, 2),
-                    luaE_checkcolor(L, 3));
-    return 0;
-}
-
 static int _SetShapesTexture(lua_State * L)
 {
     SetShapesTexture(luaE_checktexture2d(L, 1),
@@ -3361,15 +3345,9 @@ static int _EndScissorMode(lua_State * L)
     return 0;
 }
 
-static int _GetVrDeviceInfo(lua_State * L)
-{
-    luaE_pushvrdeviceinfo(L, GetVrDeviceInfo(luaL_checkinteger(L, 1)));
-    return 1;
-}
-
 static int _InitVrSimulator(lua_State * L)
 {
-    InitVrSimulator(luaE_checkvrdeviceinfo(L, 1));
+    InitVrSimulator();
     return 0;
 }
 
@@ -3924,8 +3902,6 @@ static luaL_Reg const __lua_lay[] = {
         RAY_REGISTER(DrawTriangle),
         RAY_REGISTER(DrawTriangleLines),
         RAY_REGISTER(DrawPoly),
-        RAY_REGISTER(DrawPolyEx),
-        RAY_REGISTER(DrawPolyExLines),
         RAY_REGISTER(SetShapesTexture),
 
         // [SHAPES] Basic shapes collision detection functions
@@ -4156,7 +4132,6 @@ static luaL_Reg const __lua_lay[] = {
         RAY_REGISTER(EndScissorMode),
 
         // [SHADERS] VR control functions
-        RAY_REGISTER(GetVrDeviceInfo), // [DEPRECATED]
         RAY_REGISTER(InitVrSimulator),
         RAY_REGISTER(CloseVrSimulator),
         RAY_REGISTER(UpdateVrTracking),

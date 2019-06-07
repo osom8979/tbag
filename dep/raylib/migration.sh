@@ -33,6 +33,8 @@ rename_symbol FormatText      TextFormat
 rename_symbol SubText         TextSubtext
 rename_symbol ShowWindow      UnhideWindow_
 rename_symbol GetCurrentTime  GetCurrentTime_
+rename_symbol CloseWindow     CloseWindow_
+rename_symbol ShowCursor      ShowCursor_
 
 echo "Rename symbol: {far,near} -> {far_,near_}"
 for i in raymath.h rlgl.h; do

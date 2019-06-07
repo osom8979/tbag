@@ -183,7 +183,7 @@ static Image LoadASTC(const char *fileName);  // Load ASTC file
 //----------------------------------------------------------------------------------
 
 // Load image from file into CPU memory (RAM)
-Image LoadImage(const char *fileName)
+Image LoadImage_(const char *fileName)
 {
     Image image = { 0 };
 
@@ -390,7 +390,7 @@ Texture2D LoadTexture(const char *fileName)
 {
     Texture2D texture = { 0 };
 
-    Image image = LoadImage(fileName);
+    Image image = LoadImage_(fileName);
 
     if (image.data != NULL)
     {
@@ -1216,8 +1216,8 @@ TextureCubemap LoadTextureCubemap(Image image, int layoutType)
         int size = cubemap.width;
 
         Image faces = { 0 };                // Vertical column image
-        Rectangle faceRecs[6] = { 0 };      // Face source rectangles
-        for (int i = 0; i < 6; i++) faceRecs[i] = (Rectangle){ 0, 0, size, size };
+        Rectangle2 faceRecs[6] = { 0 };      // Face source rectangles
+        for (int i = 0; i < 6; i++) faceRecs[i] = (Rectangle2){ 0, 0, size, size };
 
         if (layoutType == CUBEMAP_LINE_VERTICAL)
         {
@@ -1258,7 +1258,7 @@ TextureCubemap LoadTextureCubemap(Image image, int layoutType)
             // TODO: Image formating does not work with compressed textures!
         }
 
-        for (int i = 0; i < 6; i++) ImageDraw(&faces, image, faceRecs[i], (Rectangle){ 0, size*i, size, size });
+        for (int i = 0; i < 6; i++) ImageDraw(&faces, image, faceRecs[i], (Rectangle2){ 0, size*i, size, size });
 
         cubemap.id = rlLoadTextureCubemap(faces.data, size, faces.format);
         if (cubemap.id == 0) TraceLog(LOG_WARNING, "Cubemap image could not be loaded.");
@@ -1272,7 +1272,7 @@ TextureCubemap LoadTextureCubemap(Image image, int layoutType)
 
 // Crop an image to area defined by a rectangle
 // NOTE: Security checks are performed in case rectangle goes out of bounds
-void ImageCrop(Image *image, Rectangle crop)
+void ImageCrop(Image *image, Rectangle2 crop)
 {
     // Security checks to make sure cropping rectangle is inside margins
     if ((crop.x + crop.width) > image->width)
@@ -1344,7 +1344,7 @@ void ImageAlphaCrop(Image *image, float threshold)
         }
     }
 
-    Rectangle crop = { xMin, yMin, (xMax + 1) - xMin, (yMax + 1) - yMin };
+    Rectangle2 crop = { xMin, yMin, (xMax + 1) - xMin, (yMax + 1) - yMin };
 
     RL_FREE(pixels);
 
@@ -1421,8 +1421,8 @@ void ImageResizeCanvas(Image *image, int newWidth,int newHeight, int offsetX, in
         {
             Image imTemp = GenImageColor(newWidth, newHeight, color);
 
-            Rectangle srcRec = { 0.0f, 0.0f, (float)image->width, (float)image->height };
-            Rectangle dstRec = { (float)offsetX, (float)offsetY, (float)srcRec.width, (float)srcRec.height };
+            Rectangle2 srcRec = { 0.0f, 0.0f, (float)image->width, (float)image->height };
+            Rectangle2 dstRec = { (float)offsetX, (float)offsetY, (float)srcRec.width, (float)srcRec.height };
 
             ImageDraw(&imTemp, *image, srcRec, dstRec);
             ImageFormat(&imTemp, image->format);
@@ -1431,15 +1431,15 @@ void ImageResizeCanvas(Image *image, int newWidth,int newHeight, int offsetX, in
         }
         else if ((newWidth < image->width) && (newHeight < image->height))
         {
-            Rectangle crop = { (float)offsetX, (float)offsetY, newWidth, newHeight };
+            Rectangle2 crop = { (float)offsetX, (float)offsetY, newWidth, newHeight };
             ImageCrop(image, crop);
         }
         else    // One side is bigger and the other is smaller
         {
             Image imTemp = GenImageColor(newWidth, newHeight, color);
 
-            Rectangle srcRec = { 0.0f, 0.0f, (float)image->width, (float)image->height };
-            Rectangle dstRec = { (float)offsetX, (float)offsetY, (float)newWidth, (float)newHeight };
+            Rectangle2 srcRec = { 0.0f, 0.0f, (float)image->width, (float)image->height };
+            Rectangle2 dstRec = { (float)offsetX, (float)offsetY, (float)newWidth, (float)newHeight };
 
             if (newWidth < image->width)
             {
@@ -1703,7 +1703,7 @@ Color *ImageExtractPalette(Image image, int maxPaletteSize, int *extractCount)
 
 // Draw an image (source) within an image (destination)
 // TODO: Feel this function could be simplified...
-void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec)
+void ImageDraw(Image *dst, Image src, Rectangle2 srcRec, Rectangle2 dstRec)
 {
     bool cropRequired = false;
 
@@ -1752,7 +1752,7 @@ void ImageDraw(Image *dst, Image src, Rectangle srcRec, Rectangle dstRec)
     if (cropRequired)
     {
         // Crop destination rectangle if out of bounds
-        Rectangle crop = { 0, 0, dstRec.width, dstRec.height };
+        Rectangle2 crop = { 0, 0, dstRec.width, dstRec.height };
         ImageCrop(&srcCopy, crop);
     }
 
@@ -1872,7 +1872,7 @@ Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Co
 
             if ((unsigned char)text[i] != ' ')
             {
-                ImageDraw(&imText, imFont, letter.rec, (Rectangle){ (float)(posX + letter.offsetX),
+                ImageDraw(&imText, imFont, letter.rec, (Rectangle2){ (float)(posX + letter.offsetX),
                     (float)letter.offsetY, (float)letter.rec.width, (float)letter.rec.height });
             }
 
@@ -1898,20 +1898,20 @@ Image ImageTextEx(Font font, const char *text, float fontSize, float spacing, Co
 }
 
 // Draw rectangle within an image
-void ImageDrawRectangle(Image *dst, Rectangle rec, Color color)
+void ImageDrawRectangle(Image *dst, Rectangle2 rec, Color color)
 {
     Image imRec = GenImageColor((int)rec.width, (int)rec.height, color);
-    ImageDraw(dst, imRec, (Rectangle){ 0, 0, rec.width, rec.height }, rec);
+    ImageDraw(dst, imRec, (Rectangle2){ 0, 0, rec.width, rec.height }, rec);
     UnloadImage(imRec);
 }
 
 // Draw rectangle lines within an image
-void ImageDrawRectangleLines(Image *dst, Rectangle rec, int thick, Color color)
+void ImageDrawRectangleLines(Image *dst, Rectangle2 rec, int thick, Color color)
 {
-    ImageDrawRectangle(dst, (Rectangle){ rec.x, rec.y, rec.width, thick }, color);
-    ImageDrawRectangle(dst, (Rectangle){ rec.x, rec.y + thick, thick, rec.height - thick*2 }, color);
-    ImageDrawRectangle(dst, (Rectangle){ rec.x + rec.width - thick, rec.y + thick, thick, rec.height - thick*2 }, color);
-    ImageDrawRectangle(dst, (Rectangle){ rec.x, rec.height - thick, rec.width, thick }, color);
+    ImageDrawRectangle(dst, (Rectangle2){ rec.x, rec.y, rec.width, thick }, color);
+    ImageDrawRectangle(dst, (Rectangle2){ rec.x, rec.y + thick, thick, rec.height - thick*2 }, color);
+    ImageDrawRectangle(dst, (Rectangle2){ rec.x + rec.width - thick, rec.y + thick, thick, rec.height - thick*2 }, color);
+    ImageDrawRectangle(dst, (Rectangle2){ rec.x, rec.height - thick, rec.width, thick }, color);
 }
 
 // Draw text (default font) within an image (destination)
@@ -1926,8 +1926,8 @@ void ImageDrawTextEx(Image *dst, Vector2 position, Font font, const char *text, 
 {
     Image imText = ImageTextEx(font, text, fontSize, spacing, color);
 
-    Rectangle srcRec = { 0.0f, 0.0f, (float)imText.width, (float)imText.height };
-    Rectangle dstRec = { position.x, position.y, (float)imText.width, (float)imText.height };
+    Rectangle2 srcRec = { 0.0f, 0.0f, (float)imText.width, (float)imText.height };
+    Rectangle2 dstRec = { position.x, position.y, (float)imText.width, (float)imText.height };
 
     ImageDraw(dst, imText, srcRec, dstRec);
 
@@ -2563,17 +2563,17 @@ void DrawTextureV(Texture2D texture, Vector2 position, Color tint)
 // Draw a Texture2D with extended parameters
 void DrawTextureEx(Texture2D texture, Vector2 position, float rotation, float scale, Color tint)
 {
-    Rectangle sourceRec = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
-    Rectangle destRec = { position.x, position.y, (float)texture.width*scale, (float)texture.height*scale };
+    Rectangle2 sourceRec = { 0.0f, 0.0f, (float)texture.width, (float)texture.height };
+    Rectangle2 destRec = { position.x, position.y, (float)texture.width*scale, (float)texture.height*scale };
     Vector2 origin = { 0.0f, 0.0f };
 
     DrawTexturePro(texture, sourceRec, destRec, origin, rotation, tint);
 }
 
 // Draw a part of a texture (defined by a rectangle)
-void DrawTextureRec(Texture2D texture, Rectangle sourceRec, Vector2 position, Color tint)
+void DrawTextureRec(Texture2D texture, Rectangle2 sourceRec, Vector2 position, Color tint)
 {
-    Rectangle destRec = { position.x, position.y, (float)fabs(sourceRec.width), (float)fabs(sourceRec.height) };
+    Rectangle2 destRec = { position.x, position.y, (float)fabs(sourceRec.width), (float)fabs(sourceRec.height) };
     Vector2 origin = { 0.0f, 0.0f };
 
     DrawTexturePro(texture, sourceRec, destRec, origin, 0.0f, tint);
@@ -2582,9 +2582,9 @@ void DrawTextureRec(Texture2D texture, Rectangle sourceRec, Vector2 position, Co
 // Draw texture quad with tiling and offset parameters
 // NOTE: Tiling and offset should be provided considering normalized texture values [0..1]
 // i.e tiling = { 1.0f, 1.0f } refers to all texture, offset = { 0.5f, 0.5f } moves texture origin to center
-void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle quad, Color tint)
+void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangle2 quad, Color tint)
 {
-    Rectangle source = { offset.x*texture.width, offset.y*texture.height, tiling.x*texture.width, tiling.y*texture.height };
+    Rectangle2 source = { offset.x*texture.width, offset.y*texture.height, tiling.x*texture.width, tiling.y*texture.height };
     Vector2 origin = { 0.0f, 0.0f };
 
     DrawTexturePro(texture, source, quad, origin, 0.0f, tint);
@@ -2592,7 +2592,7 @@ void DrawTextureQuad(Texture2D texture, Vector2 tiling, Vector2 offset, Rectangl
 
 // Draw a part of a texture (defined by a rectangle) with 'pro' parameters
 // NOTE: origin is relative to destination rectangle size
-void DrawTexturePro(Texture2D texture, Rectangle sourceRec, Rectangle destRec, Vector2 origin, float rotation, Color tint)
+void DrawTexturePro(Texture2D texture, Rectangle2 sourceRec, Rectangle2 destRec, Vector2 origin, float rotation, Color tint)
 {
     // Check if texture is valid
     if (texture.id > 0)
@@ -2643,7 +2643,7 @@ void DrawTexturePro(Texture2D texture, Rectangle sourceRec, Rectangle destRec, V
 }
 
 // Draws a texture (or part of it) that stretches or shrinks nicely using n-patch info
-void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle destRec, Vector2 origin, float rotation, Color tint)
+void DrawTextureNPatch(Texture2D texture, NPatchInfo nPatchInfo, Rectangle2 destRec, Vector2 origin, float rotation, Color tint)
 {
     if (texture.id > 0)
     {

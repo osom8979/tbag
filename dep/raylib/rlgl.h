@@ -1127,7 +1127,7 @@ void rlEnd(void)
 
     // TODO: Make sure normals count match vertex count... if normals support is added in a future... :P
 
-    // NOTE: Depth increment is dependant on rlOrtho(): z-near and z-far values,
+    // NOTE: Depth increment is dependant on rlOrtho(): z-near_ and z-far_ values,
     // as well as depth buffer bit-depth (16bit or 24bit or 32bit)
     // Correct increment formula would be: depthInc = (zfar - znear)/pow(2, bits)
     currentDepth += (1.0f/20000.0f);
