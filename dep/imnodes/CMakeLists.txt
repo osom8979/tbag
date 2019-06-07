@@ -11,7 +11,7 @@ endif ()
 enable_language (CXX)
 project (imnodes)
 
-set (SRCS ImNodes.cpp)
+set (SRCS imnodes.cpp)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     add_compile_options (/w)
