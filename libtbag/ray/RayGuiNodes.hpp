@@ -22,8 +22,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace ray {
 
-TBAG_API void GuiShowDemoNodes(bool * p_open = nullptr);
-
 } // namespace ray
 
 // --------------------
