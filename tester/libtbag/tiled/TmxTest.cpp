@@ -7,13 +7,14 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/tiled/Tmx.hpp>
+#include <libtbag/util/TestUtils.hpp>
 
 using namespace libtbag;
 using namespace libtbag::tiled;
 
 TEST(TmxTest, Default)
 {
-    Tmx object;
-    ASSERT_TRUE(true);
+    TEST_DEFAULT_CONSTRUCTOR(Tmx, obj1)
+    TEST_DEFAULT_ASSIGNMENT(Tmx, obj2)
 }
 
