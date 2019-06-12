@@ -395,7 +395,7 @@ std::string generateSelfSignedCertificate(
 
     ASN1_INTEGER_set(X509_get_serialNumber(x509.get()), serial_number);
 
-    if (!X509_set_issuer_name(x509.get(), X509_REQ_get_subject_name(x509_req))) {
+    if (!X509_set_issuer_name(x509.get(), X509_REQ_get_subject_name(x509_req.get()))) {
         return std::string();
     }
     if (!X509_gmtime_adj(X509_get_notBefore(x509.get()), 0)) {
@@ -404,7 +404,7 @@ std::string generateSelfSignedCertificate(
     if (!X509_time_adj_ex(X509_get_notAfter(x509.get()), days, 0, nullptr)) {
         return std::string();
     }
-    if (!X509_set_subject_name(x509.get(), X509_REQ_get_subject_name(x509_req))) {
+    if (!X509_set_subject_name(x509.get(), X509_REQ_get_subject_name(x509_req.get()))) {
         return std::string();
     }
 
