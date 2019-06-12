@@ -45,10 +45,10 @@ macro (tbag_modules__apply_default)
     #list (APPEND TBAG_PROJECT_DEFINITIONS  ${__tbag_project_upper_name})
     list  (APPEND TBAG_PROJECT_INCLUDE_DIRS ${TBAG_PROJECT_CONST_DIR_PATH})
 
-    if (UNIX AND APPLE AND IS_DIRECTORY "${THIRD_PREFIX}")
-        list (APPEND TBAG_PROJECT_LDFLAGS "-Wl,-rpath,${THIRD_PREFIX}/lib"
-                                          "-Wl,-rpath,${THIRD_PREFIX}/Library/Frameworks")
-    endif ()
+    #if (UNIX AND APPLE AND IS_DIRECTORY "${THIRD_PREFIX}")
+    #    list (APPEND TBAG_PROJECT_LDFLAGS "-Wl,-rpath,${THIRD_PREFIX}/lib"
+    #                                      "-Wl,-rpath,${THIRD_PREFIX}/Library/Frameworks")
+    #endif ()
 endmacro ()
 
 macro (tbag_modules__apply_name __name)
@@ -131,6 +131,12 @@ macro (tbag_modules__apply_pch __original_pch)
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${TbagProjectPCH_NAME})
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_BINARY_DIR})
     list (APPEND TBAG_PROJECT_CXXFLAGS -include ${TbagProjectPCH_COPY_PATH})
+endmacro ()
+
+macro (tbag_modules__add_rpath __dir)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        list (APPEND TBAG_PROJECT_LDFLAGS "-Wl,-rpath,${__dir}")
+    endif ()
 endmacro ()
 
 macro (tbag_modules__add_whole_archive __lib_name)
@@ -235,7 +241,7 @@ macro (tbag_modules__apply_thread)
     if (CMAKE_USE_WIN32_THREADS_INIT)
     endif ()
     if (CMAKE_USE_PTHREADS_INIT)
-        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread) # -pthread
     endif ()
     if (CMAKE_HP_PTHREADS_INIT)
     endif ()
