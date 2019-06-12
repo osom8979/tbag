@@ -3168,7 +3168,7 @@ typedef struct tagMSG *LPMSG;
 #include <windows.h>
 
 /* Type required by some unused function...  */
-typedef struct tagBITMAPINFOHEADER {
+typedef struct tagBITMAPINFOHEADER_ {
   DWORD biSize;
   LONG  biWidth;
   LONG  biHeight;
@@ -3180,7 +3180,7 @@ typedef struct tagBITMAPINFOHEADER {
   LONG  biYPelsPerMeter;
   DWORD biClrUsed;
   DWORD biClrImportant;
-} BITMAPINFOHEADER, *PBITMAPINFOHEADER;
+} BITMAPINFOHEADER_, *PBITMAPINFOHEADER_;
 
 #include <objbase.h>
 #include <mmreg.h>
