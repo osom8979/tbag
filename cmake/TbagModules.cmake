@@ -611,7 +611,7 @@ macro (tbag_modules__apply_dep_raylib)
     tbag_modules__add_whole_archive ($<TARGET_FILE:raylib>)
 
     if (WIN32)
-        list (APPEND TBAG_PROJECT_LDFLAGS gdi32.lib)
+        list (APPEND TBAG_PROJECT_LDFLAGS gdi32.lib Winmm.lib)
     elseif (UNIX)
         if (APPLE)
             list (APPEND TBAG_PROJECT_LDFLAGS -ObjC
