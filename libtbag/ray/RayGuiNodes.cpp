@@ -327,11 +327,10 @@ void GuiNodesLoadEditorStateFromDisk(RayGuiNodes & editor, char const * file_nam
 }
 
 /**
- * Demo implementation
+ * GuiNodeDemo implementation
  *
  * @author zer0
  * @date   2019-06-07
- *
  */
 class GuiNodeDemo
 {
@@ -345,13 +344,18 @@ public:
     {
         int start = 0;
         int end = 0;
+
+        Link(int s = 0, int e = 0) : start(s), end(e)
+        { /* EMPTY. */ }
+        ~Link()
+        { /* EMPTY. */ }
     };
 
     using LinkMap = std::unordered_map<int, Link>;
 
 private:
     int _current_id = 0;
-    std::unordered_map<int, Link> _links;
+    LinkMap _links;
 
     float _number1 = 0.0f;
     float _number2 = 1.0f;
@@ -479,7 +483,8 @@ public:
         int link_start = 0;
         int link_end = 0;
         if (imnodes::IsLinkCreated(&link_start, &link_end)) {
-            _links.insert(std::make_pair(_current_id++, Link{link_start, link_end}));
+            LinkMap::value_type value(_current_id++, Link(link_start, link_end));
+            _links.insert(value);
         }
 
         int link_id = 0;
