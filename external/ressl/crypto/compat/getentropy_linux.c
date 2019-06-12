@@ -1,4 +1,4 @@
-/*	$OpenBSD: getentropy_linux.c,v 1.42 2016/04/19 20:20:24 tj Exp $	*/
+/*	$OpenBSD: getentropy_linux.c,v 1.46 2018/11/20 08:04:28 deraadt Exp $	*/
 
 /*
  * Copyright (c) 2014 Theo de Raadt <deraadt@openbsd.org>
@@ -73,8 +73,7 @@
 
 int	getentropy(void *buf, size_t len);
 
-static int gotdata(char *buf, size_t len);
-#ifdef SYS_getrandom
+#if defined(SYS_getrandom) && defined(GRND_NONBLOCK)
 static int getentropy_getrandom(void *buf, size_t len);
 #endif
 static int getentropy_urandom(void *buf, size_t len);
@@ -94,15 +93,18 @@ getentropy(void *buf, size_t len)
 		return (-1);
 	}
 
-#ifdef SYS_getrandom
+#if defined(SYS_getrandom) && defined(GRND_NONBLOCK)
 	/*
-	 * Try descriptor-less getrandom()
+	 * Try descriptor-less getrandom(), in non-blocking mode.
+	 *
+	 * The design of Linux getrandom is broken.  It has an
+	 * uninitialized phase coupled with blocking behaviour, which
+	 * is unacceptable from within a library at boot time without
+	 * possible recovery. See http://bugs.python.org/issue26839#msg267745
 	 */
 	ret = getentropy_getrandom(buf, len);
 	if (ret != -1)
 		return (ret);
-	if (errno != ENOSYS)
-		return (-1);
 #endif
 
 	/*
@@ -156,7 +158,7 @@ getentropy(void *buf, size_t len)
 	 *     - Do the best under the circumstances....
 	 *
 	 * This code path exists to bring light to the issue that Linux
-	 * does not provide a failsafe API for entropy collection.
+	 * still does not provide a failsafe API for entropy collection.
 	 *
 	 * We hope this demonstrates that Linux should either retain their
 	 * sysctl ABI, or consider providing a new failsafe API which
@@ -174,23 +176,7 @@ getentropy(void *buf, size_t len)
 	return (ret);
 }
 
-/*
- * Basic sanity checking; wish we could do better.
- */
-static int
-gotdata(char *buf, size_t len)
-{
-	char	any_set = 0;
-	size_t	i;
-
-	for (i = 0; i < len; ++i)
-		any_set |= buf[i];
-	if (any_set == 0)
-		return (-1);
-	return (0);
-}
-
-#ifdef SYS_getrandom
+#if defined(SYS_getrandom) && defined(GRND_NONBLOCK)
 static int
 getentropy_getrandom(void *buf, size_t len)
 {
@@ -199,7 +185,7 @@ getentropy_getrandom(void *buf, size_t len)
 	if (len > 256)
 		return (-1);
 	do {
-		ret = syscall(SYS_getrandom, buf, len, 0);
+		ret = syscall(SYS_getrandom, buf, len, GRND_NONBLOCK);
 	} while (ret == -1 && errno == EINTR);
 
 	if (ret != len)
@@ -258,10 +244,8 @@ start:
 		i += ret;
 	}
 	close(fd);
-	if (gotdata(buf, len) == 0) {
-		errno = save_errno;
-		return (0);		/* satisfied */
-	}
+	errno = save_errno;
+	return (0);		/* satisfied */
 nodevrandom:
 	errno = EIO;
 	return (-1);
@@ -289,10 +273,8 @@ getentropy_sysctl(void *buf, size_t len)
 			goto sysctlfailed;
 		i += chunk;
 	}
-	if (gotdata(buf, len) == 0) {
-		errno = save_errno;
-		return (0);			/* satisfied */
-	}
+	errno = save_errno;
+	return (0);			/* satisfied */
 sysctlfailed:
 	errno = EIO;
 	return (-1);
@@ -538,10 +520,6 @@ getentropy_fallback(void *buf, size_t len)
 	}
 	explicit_bzero(&ctx, sizeof ctx);
 	explicit_bzero(results, sizeof results);
-	if (gotdata(buf, len) == 0) {
-		errno = save_errno;
-		return (0);		/* satisfied */
-	}
-	errno = EIO;
-	return (-1);
+	errno = save_errno;
+	return (0);		/* satisfied */
 }

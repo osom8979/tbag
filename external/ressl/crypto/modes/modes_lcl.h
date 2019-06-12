@@ -1,4 +1,4 @@
-/* $OpenBSD: modes_lcl.h,v 1.9 2016/11/04 13:56:05 miod Exp $ */
+/* $OpenBSD: modes_lcl.h,v 1.10 2016/12/21 15:49:29 jsing Exp $ */
 /* ====================================================================
  * Copyright (c) 2010 The OpenSSL Project.  All rights reserved.
  *
@@ -45,14 +45,16 @@ typedef unsigned char u8;
 			asm ("bswapl %0"		\
 			: "+r"(ret));	ret;		})
 # elif (defined(__arm__) || defined(__arm)) && !defined(__STRICT_ALIGNMENT)
-#  define BSWAP8(x) ({	u32 lo=(u64)(x)>>32,hi=(x);	\
+#  if (__ARM_ARCH >= 6)
+#   define BSWAP8(x) ({	u32 lo=(u64)(x)>>32,hi=(x);	\
 			asm ("rev %0,%0; rev %1,%1"	\
 			: "+r"(hi),"+r"(lo));		\
 			(u64)hi<<32|lo;			})
-#  define BSWAP4(x) ({	u32 ret;			\
+#   define BSWAP4(x) ({	u32 ret;			\
 			asm ("rev %0,%1"		\
 			: "=r"(ret) : "r"((u32)(x)));	\
 			ret;				})
+#  endif
 # endif
 #endif
 #endif

@@ -1,4 +1,4 @@
-/* $OpenBSD: bio_ssl.c,v 1.25 2017/01/26 12:44:52 beck Exp $ */
+/* $OpenBSD: bio_ssl.c,v 1.29 2018/08/24 20:30:21 tb Exp $ */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -85,7 +85,7 @@ typedef struct bio_ssl_st {
 	time_t last_time;
 } BIO_SSL;
 
-static BIO_METHOD methods_sslp = {
+static const BIO_METHOD methods_sslp = {
 	.type = BIO_TYPE_SSL,
 	.name = "ssl",
 	.bwrite = ssl_write,
@@ -97,7 +97,7 @@ static BIO_METHOD methods_sslp = {
 	.callback_ctrl = ssl_callback_ctrl,
 };
 
-BIO_METHOD *
+const BIO_METHOD *
 BIO_f_ssl(void)
 {
 	return (&methods_sslp);
@@ -110,7 +110,7 @@ ssl_new(BIO *bi)
 
 	bs = calloc(1, sizeof(BIO_SSL));
 	if (bs == NULL) {
-		SSLerror(ERR_R_MALLOC_FAILURE);
+		SSLerrorx(ERR_R_MALLOC_FAILURE);
 		return (0);
 	}
 	bi->init = 0;
@@ -568,7 +568,9 @@ BIO_ssl_copy_session_id(BIO *t, BIO *f)
 	if ((((BIO_SSL *)t->ptr)->ssl == NULL) ||
 	    (((BIO_SSL *)f->ptr)->ssl == NULL))
 		return (0);
-	SSL_copy_session_id(((BIO_SSL *)t->ptr)->ssl, ((BIO_SSL *)f->ptr)->ssl);
+	if (!SSL_copy_session_id(((BIO_SSL *)t->ptr)->ssl,
+	    ((BIO_SSL *)f->ptr)->ssl))
+		return (0);
 	return (1);
 }
 

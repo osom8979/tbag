@@ -1,4 +1,4 @@
-/* $OpenBSD: d1_lib.c,v 1.39 2017/01/26 06:32:58 jsing Exp $ */
+/* $OpenBSD: d1_lib.c,v 1.42 2017/04/10 17:27:33 jsing Exp $ */
 /*
  * DTLS implementation written by Nagendra Modadugu
  * (nagendra@cs.stanford.edu) for the OpenSSL project 2005.
@@ -191,11 +191,8 @@ dtls1_free(SSL *s)
 	pqueue_free(s->d1->sent_messages);
 	pqueue_free(D1I(s)->buffered_app_data.q);
 
-	explicit_bzero(s->d1->internal, sizeof(*s->d1->internal));
-	free(s->d1->internal);
-
-	explicit_bzero(s->d1, sizeof(*s->d1));
-	free(s->d1);
+	freezero(s->d1->internal, sizeof(*s->d1->internal));
+	freezero(s->d1, sizeof(*s->d1));
 
 	s->d1 = NULL;
 }
@@ -406,7 +403,7 @@ dtls1_check_timeout_num(SSL *s)
 
 	if (D1I(s)->timeout.num_alerts > DTLS1_TMO_ALERT_COUNT) {
 		/* fail the connection, enough alerts have been sent */
-		SSLerror(SSL_R_READ_TIMEOUT_EXPIRED);
+		SSLerror(s, SSL_R_READ_TIMEOUT_EXPIRED);
 		return -1;
 	}
 

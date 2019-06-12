@@ -1,4 +1,4 @@
-/* $OpenBSD: p12_key.c,v 1.24 2016/11/05 13:02:34 miod Exp $ */
+/* $OpenBSD: p12_key.c,v 1.26 2017/05/02 03:59:45 deraadt Exp $ */
 /* Written by Dr Stephen N Henson (steve@openssl.org) for the OpenSSL
  * project 1999.
  */
@@ -88,10 +88,7 @@ PKCS12_key_gen_asc(const char *pass, int passlen, unsigned char *salt,
 	    id, iter, n, out, md_type);
 	if (ret <= 0)
 		return 0;
-	if (unipass) {
-		explicit_bzero(unipass, uniplen);
-		free(unipass);
-	}
+	freezero(unipass, uniplen);
 	return ret;
 }
 

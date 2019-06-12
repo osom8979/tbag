@@ -1,4 +1,4 @@
-/* $OpenBSD: ssl_both.c,v 1.4 2017/01/26 12:16:13 beck Exp $ */
+/* $OpenBSD: ssl_both.c,v 1.15 2019/03/25 16:35:48 jsing Exp $ */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -146,7 +146,7 @@ ssl3_do_write(SSL *s, int type)
 		 * Should not be done for 'Hello Request's, but in that case
 		 * we'll ignore the result anyway.
 		 */
-		tls1_finish_mac(s,
+		tls1_transcript_record(s,
 		    (unsigned char *)&s->internal->init_buf->data[s->internal->init_off], ret);
 
 	if (ret == s->internal->init_num) {
@@ -166,10 +166,12 @@ ssl3_do_write(SSL *s, int type)
 int
 ssl3_send_finished(SSL *s, int a, int b, const char *sender, int slen)
 {
-	unsigned char *p;
+	CBB cbb, finished;
 	int md_len;
 
-	if (s->internal->state == a) {
+	memset(&cbb, 0, sizeof(cbb));
+
+	if (S3I(s)->hs.state == a) {
 		md_len = TLS1_FINISH_MAC_LENGTH;
 		OPENSSL_assert(md_len <= EVP_MAX_MD_SIZE);
 
@@ -189,14 +191,23 @@ ssl3_send_finished(SSL *s, int a, int b, const char *sender, int slen)
 			S3I(s)->previous_server_finished_len = md_len;
 		}
 
-		p = ssl3_handshake_msg_start(s, SSL3_MT_FINISHED);
-		memcpy(p, S3I(s)->tmp.finish_md, md_len);
-		ssl3_handshake_msg_finish(s, md_len);
+		if (!ssl3_handshake_msg_start(s, &cbb, &finished,
+		    SSL3_MT_FINISHED))
+                        goto err;
+		if (!CBB_add_bytes(&finished, S3I(s)->tmp.finish_md, md_len))
+			goto err;
+		if (!ssl3_handshake_msg_finish(s, &cbb))
+			goto err;
 
-		s->internal->state = b;
+		S3I(s)->hs.state = b;
 	}
 
 	return (ssl3_handshake_write(s));
+
+ err:
+	CBB_cleanup(&cbb);
+
+	return (-1);
 }
 
 /*
@@ -213,10 +224,10 @@ ssl3_take_mac(SSL *s)
 	 * If no new cipher setup return immediately: other functions will
 	 * set the appropriate error.
 	 */
-	if (S3I(s)->tmp.new_cipher == NULL)
+	if (S3I(s)->hs.new_cipher == NULL)
 		return;
 
-	if (s->internal->state & SSL_ST_CONNECT) {
+	if (S3I(s)->hs.state & SSL_ST_CONNECT) {
 		sender = TLS_MD_SERVER_FINISH_CONST;
 		slen = TLS_MD_SERVER_FINISH_CONST_SIZE;
 	} else {
@@ -244,7 +255,7 @@ ssl3_get_finished(SSL *s, int a, int b)
 	/* If this occurs, we have missed a message */
 	if (!S3I(s)->change_cipher_spec) {
 		al = SSL_AD_UNEXPECTED_MESSAGE;
-		SSLerror(SSL_R_GOT_A_FIN_BEFORE_A_CCS);
+		SSLerror(s, SSL_R_GOT_A_FIN_BEFORE_A_CCS);
 		goto f_err;
 	}
 	S3I(s)->change_cipher_spec = 0;
@@ -253,7 +264,7 @@ ssl3_get_finished(SSL *s, int a, int b)
 
 	if (n < 0) {
 		al = SSL_AD_DECODE_ERROR;
-		SSLerror(SSL_R_BAD_DIGEST_LENGTH);
+		SSLerror(s, SSL_R_BAD_DIGEST_LENGTH);
 		goto f_err;
 	}
 
@@ -262,13 +273,13 @@ ssl3_get_finished(SSL *s, int a, int b)
 	if (S3I(s)->tmp.peer_finish_md_len != md_len ||
 	    CBS_len(&cbs) != md_len) {
 		al = SSL_AD_DECODE_ERROR;
-		SSLerror(SSL_R_BAD_DIGEST_LENGTH);
+		SSLerror(s, SSL_R_BAD_DIGEST_LENGTH);
 		goto f_err;
 	}
 
 	if (!CBS_mem_equal(&cbs, S3I(s)->tmp.peer_finish_md, CBS_len(&cbs))) {
 		al = SSL_AD_DECRYPT_ERROR;
-		SSLerror(SSL_R_DIGEST_CHECK_FAILED);
+		SSLerror(s, SSL_R_DIGEST_CHECK_FAILED);
 		goto f_err;
 	}
 
@@ -300,19 +311,44 @@ f_err:
 int
 ssl3_send_change_cipher_spec(SSL *s, int a, int b)
 {
-	unsigned char *p;
+	size_t outlen;
+	CBB cbb;
 
-	if (s->internal->state == a) {
-		p = (unsigned char *)s->internal->init_buf->data;
-		*p = SSL3_MT_CCS;
-		s->internal->init_num = 1;
+	memset(&cbb, 0, sizeof(cbb));
+
+	if (S3I(s)->hs.state == a) {
+		if (!CBB_init_fixed(&cbb, s->internal->init_buf->data,
+		    s->internal->init_buf->length))
+			goto err;
+		if (!CBB_add_u8(&cbb, SSL3_MT_CCS))
+			goto err;
+		if (!CBB_finish(&cbb, NULL, &outlen))
+			goto err;
+
+		if (outlen > INT_MAX)
+			goto err;
+
+		s->internal->init_num = (int)outlen;
 		s->internal->init_off = 0;
 
-		s->internal->state = b;
+		if (SSL_IS_DTLS(s)) {
+			D1I(s)->handshake_write_seq =
+			    D1I(s)->next_handshake_write_seq;
+			dtls1_set_message_header_int(s, SSL3_MT_CCS, 0,
+			    D1I(s)->handshake_write_seq, 0, 0);
+			dtls1_buffer_message(s, 1);
+		}
+
+		S3I(s)->hs.state = b;
 	}
 
 	/* SSL3_ST_CW_CHANGE_B */
-	return (ssl3_do_write(s, SSL3_RT_CHANGE_CIPHER_SPEC));
+	return ssl3_record_write(s, SSL3_RT_CHANGE_CIPHER_SPEC);
+
+ err:
+	CBB_cleanup(&cbb);
+
+	return -1;
 }
 
 static int
@@ -342,60 +378,56 @@ ssl3_add_cert(CBB *cbb, X509 *x)
 }
 
 int
-ssl3_output_cert_chain(SSL *s, CBB *cbb, X509 *x)
+ssl3_output_cert_chain(SSL *s, CBB *cbb, CERT_PKEY *cpk)
 {
-	int no_chain = 0;
+	X509_STORE_CTX *xs_ctx = NULL;
+	STACK_OF(X509) *chain;
 	CBB cert_list;
+	X509 *x;
 	int ret = 0;
 	int i;
 
 	if (!CBB_add_u24_length_prefixed(cbb, &cert_list))
 		goto err;
 
-	if ((s->internal->mode & SSL_MODE_NO_AUTO_CHAIN) || s->ctx->extra_certs)
-		no_chain = 1;
+	/* Send an empty certificate list when no certificate is available. */
+	if (cpk == NULL)
+		goto done;
 
-	/* TLSv1 sends a chain with nothing in it, instead of an alert. */
-	if (x != NULL) {
-		if (no_chain) {
-			if (!ssl3_add_cert(&cert_list, x))
-				goto err;
-		} else {
-			X509_STORE_CTX xs_ctx;
+	if ((chain = cpk->chain) == NULL)
+		chain = s->ctx->extra_certs;
 
-			if (!X509_STORE_CTX_init(&xs_ctx, s->ctx->cert_store,
-			    x, NULL)) {
-				SSLerror(ERR_R_X509_LIB);
-				goto err;
-			}
-			X509_verify_cert(&xs_ctx);
-
-			/* Don't leave errors in the queue. */
-			ERR_clear_error();
-			for (i = 0; i < sk_X509_num(xs_ctx.chain); i++) {
-				x = sk_X509_value(xs_ctx.chain, i);
-				if (!ssl3_add_cert(&cert_list, x)) {
-					X509_STORE_CTX_cleanup(&xs_ctx);
-					goto err;
-				}
-			}
-			X509_STORE_CTX_cleanup(&xs_ctx);
+	if (chain != NULL || (s->internal->mode & SSL_MODE_NO_AUTO_CHAIN)) {
+		if (!ssl3_add_cert(&cert_list, cpk->x509))
+			goto err;
+	} else {
+		if ((xs_ctx = X509_STORE_CTX_new()) == NULL)
+			goto err;
+		if (!X509_STORE_CTX_init(xs_ctx, s->ctx->cert_store,
+		    cpk->x509, NULL)) {
+			SSLerror(s, ERR_R_X509_LIB);
+			goto err;
 		}
+		X509_verify_cert(xs_ctx);
+		ERR_clear_error();
+		chain = xs_ctx->chain;
 	}
 
-	/* Thawte special :-) */
-	for (i = 0; i < sk_X509_num(s->ctx->extra_certs); i++) {
-		x = sk_X509_value(s->ctx->extra_certs, i);
+	for (i = 0; i < sk_X509_num(chain); i++) {
+		x = sk_X509_value(chain, i);
 		if (!ssl3_add_cert(&cert_list, x))
 			goto err;
 	}
 
+ done:
 	if (!CBB_flush(cbb))
 		goto err;
 
 	ret = 1;
 
  err:
+	X509_STORE_CTX_free(xs_ctx);
+
 	return (ret);
 }
 
@@ -419,7 +451,7 @@ ssl3_get_message(SSL *s, int st1, int stn, int mt, long max, int *ok)
 		S3I(s)->tmp.reuse_message = 0;
 		if ((mt >= 0) && (S3I(s)->tmp.message_type != mt)) {
 			al = SSL_AD_UNEXPECTED_MESSAGE;
-			SSLerror(SSL_R_UNEXPECTED_MESSAGE);
+			SSLerror(s, SSL_R_UNEXPECTED_MESSAGE);
 			goto f_err;
 		}
 		*ok = 1;
@@ -431,7 +463,7 @@ ssl3_get_message(SSL *s, int st1, int stn, int mt, long max, int *ok)
 	p = (unsigned char *)s->internal->init_buf->data;
 
 	/* s->internal->init_num < 4 */
-	if (s->internal->state == st1) {
+	if (S3I(s)->hs.state == st1) {
 		int skip_message;
 
 		do {
@@ -471,29 +503,29 @@ ssl3_get_message(SSL *s, int st1, int stn, int mt, long max, int *ok)
 
 		if ((mt >= 0) && (*p != mt)) {
 			al = SSL_AD_UNEXPECTED_MESSAGE;
-			SSLerror(SSL_R_UNEXPECTED_MESSAGE);
+			SSLerror(s, SSL_R_UNEXPECTED_MESSAGE);
 			goto f_err;
 		}
 
 		CBS_init(&cbs, p, 4);
 		if (!CBS_get_u8(&cbs, &u8) ||
 		    !CBS_get_u24(&cbs, &l)) {
-			SSLerror(ERR_R_BUF_LIB);
+			SSLerror(s, ERR_R_BUF_LIB);
 			goto err;
 		}
 		S3I(s)->tmp.message_type = u8;
 
 		if (l > (unsigned long)max) {
 			al = SSL_AD_ILLEGAL_PARAMETER;
-			SSLerror(SSL_R_EXCESSIVE_MESSAGE_SIZE);
+			SSLerror(s, SSL_R_EXCESSIVE_MESSAGE_SIZE);
 			goto f_err;
 		}
 		if (l && !BUF_MEM_grow_clean(s->internal->init_buf, l + 4)) {
-			SSLerror(ERR_R_BUF_LIB);
+			SSLerror(s, ERR_R_BUF_LIB);
 			goto err;
 		}
 		S3I(s)->tmp.message_size = l;
-		s->internal->state = stn;
+		S3I(s)->hs.state = stn;
 
 		s->internal->init_msg = s->internal->init_buf->data + 4;
 		s->internal->init_num = 0;
@@ -521,7 +553,7 @@ ssl3_get_message(SSL *s, int st1, int stn, int mt, long max, int *ok)
 
 	/* Feed this message into MAC computation. */
 	if (s->internal->mac_packet) {
-		tls1_finish_mac(s, (unsigned char *)s->internal->init_buf->data,
+		tls1_transcript_record(s, (unsigned char *)s->internal->init_buf->data,
 		    s->internal->init_num + 4);
 
 		if (s->internal->msg_callback)
@@ -557,8 +589,6 @@ ssl_cert_type(X509 *x, EVP_PKEY *pkey)
 	i = pk->type;
 	if (i == EVP_PKEY_RSA) {
 		ret = SSL_PKEY_RSA_ENC;
-	} else if (i == EVP_PKEY_DSA) {
-		ret = SSL_PKEY_DSA_SIGN;
 	} else if (i == EVP_PKEY_EC) {
 		ret = SSL_PKEY_ECC;
 	} else if (i == NID_id_GostR3410_2001 ||
@@ -666,20 +696,20 @@ ssl3_setup_read_buffer(SSL *s)
 
 	align = (-SSL3_RT_HEADER_LENGTH) & (SSL3_ALIGN_PAYLOAD - 1);
 
-	if (s->s3->rbuf.buf == NULL) {
+	if (S3I(s)->rbuf.buf == NULL) {
 		len = SSL3_RT_MAX_PLAIN_LENGTH +
 		    SSL3_RT_MAX_ENCRYPTED_OVERHEAD + headerlen + align;
 		if ((p = malloc(len)) == NULL)
 			goto err;
-		s->s3->rbuf.buf = p;
-		s->s3->rbuf.len = len;
+		S3I(s)->rbuf.buf = p;
+		S3I(s)->rbuf.len = len;
 	}
 
-	s->internal->packet = &(s->s3->rbuf.buf[0]);
+	s->internal->packet = &(S3I(s)->rbuf.buf[0]);
 	return 1;
 
 err:
-	SSLerror(ERR_R_MALLOC_FAILURE);
+	SSLerror(s, ERR_R_MALLOC_FAILURE);
 	return 0;
 }
 
@@ -696,7 +726,7 @@ ssl3_setup_write_buffer(SSL *s)
 
 	align = (-SSL3_RT_HEADER_LENGTH) & (SSL3_ALIGN_PAYLOAD - 1);
 
-	if (s->s3->wbuf.buf == NULL) {
+	if (S3I(s)->wbuf.buf == NULL) {
 		len = s->max_send_fragment +
 		    SSL3_RT_SEND_MAX_ENCRYPTED_OVERHEAD + headerlen + align;
 		if (!(s->internal->options & SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS))
@@ -705,14 +735,14 @@ ssl3_setup_write_buffer(SSL *s)
 
 		if ((p = malloc(len)) == NULL)
 			goto err;
-		s->s3->wbuf.buf = p;
-		s->s3->wbuf.len = len;
+		S3I(s)->wbuf.buf = p;
+		S3I(s)->wbuf.len = len;
 	}
 
 	return 1;
 
 err:
-	SSLerror(ERR_R_MALLOC_FAILURE);
+	SSLerror(s, ERR_R_MALLOC_FAILURE);
 	return 0;
 }
 
@@ -729,15 +759,15 @@ ssl3_setup_buffers(SSL *s)
 int
 ssl3_release_write_buffer(SSL *s)
 {
-	free(s->s3->wbuf.buf);
-	s->s3->wbuf.buf = NULL;
+	free(S3I(s)->wbuf.buf);
+	S3I(s)->wbuf.buf = NULL;
 	return 1;
 }
 
 int
 ssl3_release_read_buffer(SSL *s)
 {
-	free(s->s3->rbuf.buf);
-	s->s3->rbuf.buf = NULL;
+	free(S3I(s)->rbuf.buf);
+	S3I(s)->rbuf.buf = NULL;
 	return 1;
 }

@@ -1,13 +1,15 @@
-cmake_minimum_required (VERSION 2.8.8)
+cmake_minimum_required (VERSION 3.0)
 include(CheckFunctionExists)
+include(CheckSymbolExists)
 include(CheckLibraryExists)
 include(CheckIncludeFiles)
 include(CheckTypeSize)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
 include(cmake_export_symbol)
+include(GNUInstallDirs)
 
-project (LibreSSL C)
+project (LibreSSL C ASM)
 
 enable_testing()
 
@@ -26,11 +28,18 @@ string(STRIP ${TLS_VERSION} TLS_VERSION)
 string(REPLACE ":" "." TLS_VERSION ${TLS_VERSION})
 string(REGEX REPLACE "\\..*" "" TLS_MAJOR_VERSION ${TLS_VERSION})
 
+option(LIBRESSL_SKIP_INSTALL "Skip installation" ${LIBRESSL_SKIP_INSTALL})
+option(LIBRESSL_APPS "Build apps" OFF)
+option(LIBRESSL_TESTS "Build tests" OFF)
 option(ENABLE_ASM "Enable assembly" ON)
 option(ENABLE_EXTRATESTS "Enable extra tests that may be unreliable on some platforms" OFF)
 option(ENABLE_NC "Enable installing TLS-enabled nc(1)" OFF)
-option(ENABLE_VSTEST "Enable test on Visual Studio" OFF)
 set(OPENSSLDIR ${OPENSSLDIR} CACHE PATH "Set the default openssl directory" FORCE)
+
+if(NOT LIBRESSL_SKIP_INSTALL)
+	set( ENABLE_LIBRESSL_INSTALL ON )
+endif(NOT LIBRESSL_SKIP_INSTALL)
+
 
 set(BUILD_NC true)
 
@@ -40,6 +49,7 @@ endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
 	add_definitions(-DHAVE_ATTRIBUTE__BOUNDED__)
+	add_definitions(-DHAVE_ATTRIBUTE__DEAD__)
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
@@ -47,32 +57,37 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 	add_definitions(-D_BSD_SOURCE)
 	add_definitions(-D_POSIX_SOURCE)
 	add_definitions(-D_GNU_SOURCE)
+	set(PLATFORM_LIBS ${PLATFORM_LIBS} pthread)
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "MINGW")
+if(WIN32 OR (CMAKE_SYSTEM_NAME MATCHES "MINGW"))
 	set(BUILD_NC false)
+	add_definitions(-D_GNU_SOURCE)
+	add_definitions(-D_POSIX)
+	add_definitions(-D_POSIX_SOURCE)
+	add_definitions(-D__USE_MINGW_ANSI_STDIO)
 endif()
 
-if(WIN32)
-	set(BUILD_NC false)
-endif()
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall")
 
 if(CMAKE_SYSTEM_NAME MATCHES "HP-UX")
 	if(CMAKE_C_COMPILER MATCHES "gcc")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=gnu99 -fno-strict-aliasing")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -fno-strict-aliasing")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mlp64")
 	else()
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O2 +DD64 +Otype_safety=off")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} +DD64 +Otype_safety=off")
 	endif()
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_XOPEN_SOURCE=600 -D__STRICT_ALIGNMENT")
+	set(PLATFORM_LIBS ${PLATFORM_LIBS} pthread)
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=gnu99 -fno-strict-aliasing")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -fno-strict-aliasing")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__EXTENSIONS__")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_XOPEN_SOURCE=600")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DBSD_COMP")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic -m64")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpic")
+	set(PLATFORM_LIBS ${PLATFORM_LIBS} nsl socket)
 endif()
 
 add_definitions(-DLIBRESSL_INTERNAL)
@@ -91,8 +106,9 @@ if(WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 	add_definitions(-D_CRT_DEPRECATED_NO_WARNINGS)
 	add_definitions(-D_REENTRANT -D_POSIX_THREAD_SAFE_FUNCTIONS)
-	add_definitions(-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0501)
+	add_definitions(-DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600)
 	add_definitions(-DCPPFLAGS -DOPENSSL_NO_SPEED -DNO_SYSLOG -DNO_CRYPT)
+	set(PLATFORM_LIBS ${PLATFORM_LIBS} ws2_32)
 endif()
 
 if(MSVC)
@@ -100,20 +116,23 @@ if(MSVC)
 	message(STATUS "Using [${CMAKE_C_COMPILER_ID}] compiler")
 	if(CMAKE_C_COMPILER_ID MATCHES "MSVC")
 		set(MSVC_DISABLED_WARNINGS_LIST
-			"C4057" # C4057: 'initializing' : 'unsigned char *' differs in
-		        	# indirection to slightly different base types from 'char [2]'
-			"C4100" # 'exarg' : unreferenced formal parameter
+			"C4018" # 'expression' : signed/unsigned mismatch
+			"C4057" # 'operator' : 'identifier1' indirection to
+		        	# slightly different base types from 'identifier2'
+			"C4100" # 'identifier' : unreferenced formal parameter
 			"C4127" # conditional expression is constant
-			"C4242" # 'function' : conversion from 'int' to 'uint8_t',
-			        # possible loss of data
-			"C4244" # 'function' : conversion from 'int' to 'uint8_t',
-			        # possible loss of data
-			"C4267" # conversion from 'size_t' to 'some type that is almost
-				# certainly safe to convert a size_t to'.
+			"C4146" # unary minus operator applied to unsigned type,
+				# result still unsigned
+			"C4244" # 'argument' : conversion from 'type1' to 'type2',
+				# possible loss of data
+			"C4245" # 'conversion' : conversion from 'type1' to 'type2',
+				# signed/unsigned mismatch
+			"C4267" # 'var' : conversion from 'size_t' to 'type',
+				# possible loss of data
+			"C4389" # 'operator' : signed/unsigned mismatch
 			"C4706" # assignment within conditional expression
-			"C4820" # 'bytes' bytes padding added after construct 'member_name'
-			"C4996" # 'read': The POSIX name for this item is deprecated. Instead,
-			        # use the ISO C++ conformant name: _read.
+			"C4996" # The POSIX name for this item is deprecated.
+				# Instead, use the ISO C and C++ conformant name
 		)
 	elseif(CMAKE_C_COMPILER_ID MATCHES "Intel")
 		add_definitions(-D_CRT_SUPPRESS_RESTRICT)
@@ -142,11 +161,6 @@ endif()
 check_function_exists(asprintf HAVE_ASPRINTF)
 if(HAVE_ASPRINTF)
 	add_definitions(-DHAVE_ASPRINTF)
-endif()
-
-check_function_exists(inet_pton HAVE_INET_PTON)
-if(HAVE_INET_PTON)
-	add_definitions(-DHAVE_INET_PTON)
 endif()
 
 check_function_exists(reallocarray HAVE_REALLOCARRAY)
@@ -219,6 +233,31 @@ if(HAVE_GETENTROPY)
 	add_definitions(-DHAVE_GETENTROPY)
 endif()
 
+check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
+if(HAVE_GETPAGESIZE)
+	add_definitions(-DHAVE_GETPAGESIZE)
+endif()
+
+check_function_exists(getprogname HAVE_GETPROGNAME)
+if(HAVE_GETPROGNAME)
+	add_definitions(-DHAVE_GETPROGNAME)
+endif()
+
+check_function_exists(syslog_r HAVE_SYSLOG_R)
+if(HAVE_SYSLOG_R)
+	add_definitions(-DHAVE_SYSLOG_R)
+endif()
+
+check_function_exists(syslog HAVE_SYSLOG)
+if(HAVE_SYSLOG)
+	add_definitions(-DHAVE_SYSLOG)
+endif()
+
+check_symbol_exists(timespecsub sys/time.h HAVE_TIMESPECSUB)
+if(HAVE_TIMESPECSUB)
+	add_definitions(-DHAVE_TIMESPECSUB)
+endif()
+
 check_function_exists(timingsafe_bcmp HAVE_TIMINGSAFE_BCMP)
 if(HAVE_TIMINGSAFE_BCMP)
 	add_definitions(-DHAVE_TIMINGSAFE_BCMP)
@@ -243,66 +282,80 @@ if(ENABLE_ASM)
 	if("${CMAKE_C_COMPILER_ABI}" STREQUAL "ELF")
 		if("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "(x86_64|amd64)")
 			set(HOST_ASM_ELF_X86_64 true)
+		elseif("${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm")
+			set(HOST_ASM_ELF_ARMV4 true)
 		elseif(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "i386")
 			set(HOST_ASM_ELF_X86_64 true)
 		endif()
 	elseif(APPLE AND "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
 		set(HOST_ASM_MACOSX_X86_64 true)
+	elseif(MSVC AND "${CMAKE_GENERATOR}" MATCHES "Win64" AND FALSE)
+		# XXX Disabled for now, CMake's MASM support seems to either never
+		# build supply ASM or build it with the C compiler in a mode where it
+		# does not parse correctly. It might be easier to get NASM support working.
+		set(HOST_ASM_MASM_X86_64 true)
+		ENABLE_LANGUAGE(ASM_MASM)
+	elseif(CMAKE_SYSTEM_NAME MATCHES "MINGW" AND "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+		set(HOST_ASM_MINGW64_X86_64 true)
 	endif()
 endif()
 
-if(NOT (CMAKE_SYSTEM_NAME MATCHES "(Darwin|CYGWIN)"))
-	set(BUILD_SHARED true)
-endif()
-
-# USE_SHARED builds applications (e.g. openssl) using shared LibreSSL.
-# By default, applications use LibreSSL static library to avoid dependencies.
-# USE_SHARED isn't set by default; use -DUSE_SHARED=ON with CMake to enable.
-# Can be helpful for debugging; don't use for public releases.
-if(NOT BUILD_SHARED)
-	set(USE_SHARED off)
-endif()
-
-if(USE_SHARED)
-	set(OPENSSL_LIBS tls-shared ssl-shared crypto-shared)
-else()
-	set(OPENSSL_LIBS tls ssl crypto)
-endif()
-
-if(CMAKE_HOST_WIN32)
-	set(OPENSSL_LIBS ${OPENSSL_LIBS} ws2_32)
-endif()
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+	# Check if we need -lrt to get clock_gettime on Linux
 	check_library_exists(rt clock_gettime "time.h" HAVE_CLOCK_GETTIME)
 	if (HAVE_CLOCK_GETTIME)
-		set(OPENSSL_LIBS ${OPENSSL_LIBS} rt)
+		set(PLATFORM_LIBS ${PLATFORM_LIBS} rt)
 	endif()
+else()
+	# Otherwise, simply check if it exists
+	check_function_exists(clock_gettime HAVE_CLOCK_GETTIME)
 endif()
-if(CMAKE_SYSTEM_NAME MATCHES "HP-UX")
-	set(OPENSSL_LIBS ${OPENSSL_LIBS} pthread)
-endif()
-if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
-	set(OPENSSL_LIBS ${OPENSSL_LIBS} nsl socket)
+if(HAVE_CLOCK_GETTIME)
+	add_definitions(-DHAVE_CLOCK_GETTIME)
 endif()
 
 check_type_size(time_t SIZEOF_TIME_T)
 if(SIZEOF_TIME_T STREQUAL "4")
 	set(SMALL_TIME_T true)
+	add_definitions(-DSMALL_TIME_T)
 	message(WARNING " ** Warning, this system is unable to represent times past 2038\n"
 	                " ** It will behave incorrectly when handling valid RFC5280 dates")
 endif()
 add_definitions(-DSIZEOF_TIME_T=${SIZEOF_TIME_T})
 
+set(OPENSSL_LIBS tls ssl crypto ${PLATFORM_LIBS})
+
 add_subdirectory(crypto)
 add_subdirectory(ssl)
-#add_subdirectory(apps)
+#if(LIBRESSL_APPS)
+#	add_subdirectory(apps)
+#endif()
 add_subdirectory(tls)
 add_subdirectory(include)
 #if(NOT MSVC)
 #	add_subdirectory(man)
 #endif()
-#if(NOT MSVC OR ENABLE_VSTEST)
+# Tests require the openssl executable and are unavailable when building shared libraries
+#if(LIBRESSL_APPS AND LIBRESSL_TESTS)
 #	add_subdirectory(tests)
+#endif()
+
+#if(NOT MSVC)
+#	# Create pkgconfig files.
+#	set(prefix      ${CMAKE_INSTALL_PREFIX})
+#	set(exec_prefix \${prefix})
+#	set(libdir      \${exec_prefix}/${CMAKE_INSTALL_LIBDIR})
+#	set(includedir  \${prefix}/include)
+#	string(REGEX REPLACE ";" " -l" PLATFORM_LDADD ";${PLATFORM_LIBS}")
+#	file(STRINGS    "VERSION" VERSION LIMIT_COUNT 1)
+#	file(GLOB       OPENSSL_PKGCONFIGS "*.pc.in")
+#	foreach(file ${OPENSSL_PKGCONFIGS})
+#		get_filename_component(filename ${file} NAME)
+#		string(REPLACE ".in" "" new_file "${filename}")
+#		configure_file(${filename} pkgconfig/${new_file} @ONLY)
+#	endforeach()
+#	install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig
+#		DESTINATION ${CMAKE_INSTALL_LIBDIR})
 #endif()
 
 configure_file(

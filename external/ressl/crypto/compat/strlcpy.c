@@ -1,7 +1,7 @@
-/*	$OpenBSD: strlcpy.c,v 1.13 2015/08/31 02:53:57 guenther Exp $	*/
+/*	$OpenBSD: strlcpy.c,v 1.16 2019/01/25 00:19:25 millert Exp $	*/
 
 /*
- * Copyright (c) 1998, 2015 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1998, 2015 Todd C. Miller <millert@openbsd.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

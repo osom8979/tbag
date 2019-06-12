@@ -37,7 +37,7 @@ Tea-bag is Third party extension utility project.
 
 ## External target
 
-- libressl 2.5.1 (Dual license; OpenSSL & SSLeay)
+- libressl 2.9.2 (Dual license; OpenSSL & SSLeay)
 - zlib 1.2.11 (zlib license)
 - libuv 1.22.0 (MIT license)
 - freetype 2.9.1 (FreeType License)

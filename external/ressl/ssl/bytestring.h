@@ -1,4 +1,4 @@
-/*	$OpenBSD: bytestring.h,v 1.14 2015/06/19 00:23:36 doug Exp $	*/
+/*	$OpenBSD: bytestring.h,v 1.17 2018/08/16 18:39:37 jsing Exp $	*/
 /*
  * Copyright (c) 2014, Google Inc.
  *
@@ -394,6 +394,12 @@ int CBB_finish(CBB *cbb, uint8_t **out_data, size_t *out_len);
 int CBB_flush(CBB *cbb);
 
 /*
+ * CBB_discard_child discards the current unflushed child of |cbb|. Neither the
+ * child's contents nor the length prefix will be included in the output.
+ */
+void CBB_discard_child(CBB *cbb);
+
+/*
  * CBB_add_u8_length_prefixed sets |*out_contents| to a new child of |cbb|. The
  * data written to |*out_contents| will be prefixed in |cbb| with an 8-bit
  * length. It returns one on success or zero on error.
@@ -454,6 +460,12 @@ int CBB_add_u16(CBB *cbb, size_t value);
  * returns one on success and zero otherwise.
  */
 int CBB_add_u24(CBB *cbb, size_t value);
+
+/*
+ * CBB_add_u32 appends a 32-bit, big-endian number from |value| to |cbb|. It
+ * returns one on success and zero otherwise.
+ */
+int CBB_add_u32(CBB *cbb, size_t value);
 
 /*
  * CBB_add_asn1_uint64 writes an ASN.1 INTEGER into |cbb| using |CBB_add_asn1|

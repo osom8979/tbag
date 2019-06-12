@@ -1,4 +1,4 @@
-/* $OpenBSD: v3_info.c,v 1.24 2016/12/30 15:54:49 jsing Exp $ */
+/* $OpenBSD: v3_info.c,v 1.26 2018/05/19 10:37:02 tb Exp $ */
 /* Written by Dr Stephen N Henson (steve@openssl.org) for the OpenSSL
  * project 1999.
  */
@@ -293,7 +293,7 @@ err:
 }
 
 int
-i2a_ACCESS_DESCRIPTION(BIO *bp, ACCESS_DESCRIPTION* a)
+i2a_ACCESS_DESCRIPTION(BIO *bp, const ACCESS_DESCRIPTION* a)
 {
 	i2a_ASN1_OBJECT(bp, a->method);
 	return 2;

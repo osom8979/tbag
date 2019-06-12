@@ -1,4 +1,4 @@
-/*	$OpenBSD: arc4random_uniform.c,v 1.1 2014/07/12 13:24:54 deraadt Exp $	*/
+/*	$OpenBSD: arc4random_uniform.c,v 1.3 2019/01/20 02:59:07 bcook Exp $	*/
 
 /*
  * Copyright (c) 2008, Damien Miller <djm@openbsd.org>
@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/types.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 /*

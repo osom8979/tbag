@@ -1,4 +1,4 @@
-/* $OpenBSD: eng_cnf.c,v 1.13 2015/02/11 03:19:37 doug Exp $ */
+/* $OpenBSD: eng_cnf.c,v 1.15 2018/04/14 07:18:37 tb Exp $ */
 /* Written by Stephen Henson (steve@openssl.org) for the OpenSSL
  * project 2001.
  */
@@ -200,8 +200,7 @@ err:
 			    "section=%s, name=%s, value=%s",
 			    ecmd->section, ecmd->name, ecmd->value);
 	}
-	if (e)
-		ENGINE_free(e);
+	ENGINE_free(e);
 	return ret;
 }
 

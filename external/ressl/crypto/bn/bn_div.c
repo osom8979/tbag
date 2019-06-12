@@ -1,4 +1,4 @@
-/* $OpenBSD: bn_div.c,v 1.24 2017/01/21 10:38:29 beck Exp $ */
+/* $OpenBSD: bn_div.c,v 1.25 2017/01/29 17:49:22 beck Exp $ */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -89,7 +89,7 @@
 	    q;					\
 	})
 #  define REMAINDER_IS_ALREADY_CALCULATED
-#  elif defined(__x86_64)
+#  elif defined(__x86_64) && defined(_LP64)
    /*
     * Same story here, but it's 128-bit by 64-bit division. Wow!
     *					<appro@fy.chalmers.se>
