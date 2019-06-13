@@ -57,7 +57,7 @@ public:
 public:
     struct Callback
     {
-        using Looper   = RenderingLoop<TimeUnit>;
+        using Looper = RenderingLoop<TimeUnit>;
 
         virtual void onStart (Looper &) { /* EMPTY. */ }
         virtual void onEnd   (Looper &) { /* EMPTY. */ }
