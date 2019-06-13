@@ -9,10 +9,12 @@ find .     -name "*.cpp"     \
         -o -name "*.py"      \
         -o -name "*.simd"    \
         -o -name "*.cmake" | \
-    grep -v dep/      | \
-    grep -v build/    | \
-    grep -v 3rd/      | \
-    grep -v external/ | \
+    grep -v dep/           | \
+    grep -v build/         | \
+    grep -v dom/jsoncpp/   | \
+    grep -v dom/tinyxml2/  | \
+    grep -v string/fmt/    | \
+    grep -v external/      | \
     egrep -v "cmake-build-.*/" | \
     xargs wc -l | \
     tail -1
