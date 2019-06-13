@@ -15,8 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/3rd/fmt/format.h>
-#include <libtbag/3rd/fmt/ostream.h>
+
+#include <libtbag/string/fmt/format.h>
+#include <libtbag/string/fmt/ostream.h>
 
 #include <cstdarg>
 #include <string>

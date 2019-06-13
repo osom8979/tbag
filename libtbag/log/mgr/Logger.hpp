@@ -21,8 +21,8 @@
 #include <libtbag/log/msg/PacketGenerator.hpp>
 #include <libtbag/log/msg/LogMsgPacket.hpp>
 
-#include <libtbag/3rd/fmt/format.h>
-#include <libtbag/3rd/fmt/ostream.h>
+#include <libtbag/string/fmt/format.h>
+#include <libtbag/string/fmt/ostream.h>
 
 #include <string>
 #include <memory>

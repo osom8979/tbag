@@ -19,6 +19,7 @@ namespace lua    {
 
 std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
 {
+#if 0
     TBAG_CONSTEXPR static int const MAX_PACKED_ARGS_SIZE = fmt::ArgList::MAX_PACKED_ARGS-1;
 
     using BasicFormatter = fmt::BasicFormatter<char>;
@@ -108,6 +109,8 @@ std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
         }
     }
     return fmt::format(format_text, ArgList(types, array));
+#endif
+    return std::string();
 }
 
 int _format(lua_State * L)
