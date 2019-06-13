@@ -7,6 +7,9 @@
  * @date   2019-05-19 (Move: libtbag::proto::BoxPacket -> libtbag::box::BoxPacket)
  */
 
+#include <libtbag/config.h>
+#include <libtbag/predef.hpp>
+
 #if defined(TBAG_COMP_MSVC)
 # if defined(min)
 TBAG_PUSH_MACRO(min);
