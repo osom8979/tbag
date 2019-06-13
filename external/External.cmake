@@ -496,4 +496,39 @@ else ()
 endif ()
 add_custom_target (glfw DEPENDS ${glfw_EXT_LIBRARIES})
 
+#############
+## SQLITE3 ##
+#############
+
+set (sqlite3_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/sqlite3")
+set (sqlite3_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (sqlite3_EXT_HEADER       "${sqlite3_EXT_INCLUDE_DIR}/sqlite3.h")
+set (sqlite3_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}sqlite3${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (sqlite3_EXT_LIBRARIES    "${sqlite3_EXT_STATIC_LIB}")
+exists_files (sqlite3_EXT_EXISTS ${sqlite3_EXT_LIBRARIES} ${sqlite3_EXT_HEADER})
+
+if (sqlite3_EXT_EXISTS)
+    message (STATUS "Skip external/sqlite3 (Exists: ${sqlite3_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/sqlite3")
+    ExternalProject_Add (sqlite3_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${sqlite3_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output lsqlite3ing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (sqlite3_ext_output sqlite3_ext ${sqlite3_EXT_LIBRARIES})
+endif ()
+add_custom_target (sqlite3 DEPENDS ${sqlite3_EXT_LIBRARIES})
+
 

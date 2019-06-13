@@ -830,6 +830,12 @@ macro (tbag_modules__apply_ext_raylib)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_ext_sqlite3)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES sqlite3)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${sqlite3_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${sqlite3_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

@@ -23,7 +23,6 @@ tbag_modules__append_definitions (
         JSON_DLL_BUILD
         TINYXML2_EXPORT
         LMDB_EXPORT_API
-        SQLITE_EXPORT_API
         GL_SILENCE_DEPRECATION)
 
 ## Thread settings.
@@ -41,6 +40,7 @@ tbag_modules__apply_ext_lzma     ()
 tbag_modules__apply_ext_archive  ()
 tbag_modules__apply_ext_nng      ()
 tbag_modules__apply_ext_glfw     ()
+tbag_modules__apply_ext_sqlite3  ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
