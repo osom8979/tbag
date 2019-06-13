@@ -451,7 +451,7 @@ weekday::weekday(unsigned wd) NOEXCEPT
 CONSTCD11
 inline
 weekday::weekday(date::weekday wd) NOEXCEPT
-    : wd_(to_iso_encoding(static_cast<unsigned>(wd)))
+    : wd_(wd.iso_encoding())
     {}
 
 CONSTCD11
@@ -607,7 +607,10 @@ inline
 year
 year::min() NOEXCEPT
 {
-    using namespace std::chrono;
+    using std::chrono::seconds;
+    using std::chrono::minutes;
+    using std::chrono::hours;
+    using std::chrono::duration_cast;
     static_assert(sizeof(seconds)*CHAR_BIT >= 41, "seconds may overflow");
     static_assert(sizeof(hours)*CHAR_BIT >= 30, "hours may overflow");
     return sizeof(minutes)*CHAR_BIT < 34 ?
@@ -620,7 +623,10 @@ inline
 year
 year::max() NOEXCEPT
 {
-    using namespace std::chrono;
+    using std::chrono::seconds;
+    using std::chrono::minutes;
+    using std::chrono::hours;
+    using std::chrono::duration_cast;
     static_assert(sizeof(seconds)*CHAR_BIT >= 41, "seconds may overflow");
     static_assert(sizeof(hours)*CHAR_BIT >= 30, "hours may overflow");
     return sizeof(minutes)*CHAR_BIT < 34 ?
@@ -713,7 +719,7 @@ inline
 std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, const year& y)
 {
-    date::detail::save_stream<CharT, Traits> _(os);
+    date::detail::save_ostream<CharT, Traits> _(os);
     os.fill('0');
     os.flags(std::ios::dec | std::ios::internal);
     os.width(4 + (y < year{0}));
@@ -875,7 +881,7 @@ inline
 std::basic_ostream<CharT, Traits>&
 operator<<(std::basic_ostream<CharT, Traits>& os, const weeknum& wn)
 {
-    date::detail::save_stream<CharT, Traits> _(os);
+    date::detail::save_ostream<CharT, Traits> _(os);
     os << 'W';
     os.fill('0');
     os.flags(std::ios::dec | std::ios::right);
@@ -1017,7 +1023,7 @@ year_lastweek::weeknum() const NOEXCEPT
     const auto y = date::year{static_cast<int>(y_)};
     const auto s0 = sys_days((y-years{1})/12/date::thu[date::last]);
     const auto s1 = sys_days(y/12/date::thu[date::last]);
-    return iso_week::weeknum(date::trunc<weeks>(s1-s0).count());
+    return iso_week::weeknum(static_cast<unsigned>(date::trunc<weeks>(s1-s0).count()));
 }
 
 CONSTCD11 inline bool year_lastweek::ok() const NOEXCEPT {return y_.ok();}
@@ -1314,7 +1320,7 @@ inline
 year_lastweek_weekday::operator sys_days() const NOEXCEPT
 {
     return sys_days(date::year{static_cast<int>(y_)}/date::dec/date::thu[date::last])
-         + (mon - thu) - (mon - wd_);
+         + (sun - thu) - (sun - wd_);
 }
 
 CONSTCD14
@@ -1322,7 +1328,7 @@ inline
 year_lastweek_weekday::operator local_days() const NOEXCEPT
 {
     return local_days(date::year{static_cast<int>(y_)}/date::dec/date::thu[date::last])
-         + (mon - thu) - (mon - wd_);
+         + (sun - thu) - (sun - wd_);
 }
 
 CONSTCD11
@@ -1505,7 +1511,8 @@ year_weeknum_weekday::from_days(days d) NOEXCEPT
         --y;
         start = sys_days((y - date::years{1})/date::dec/date::thu[date::last]) + (mon-thu);
     }
-    const auto wn = iso_week::weeknum(date::trunc<weeks>(dp - start).count() + 1);
+    const auto wn = iso_week::weeknum(
+                       static_cast<unsigned>(date::trunc<weeks>(dp - start).count() + 1));
     return {iso_week::year(static_cast<int>(y)), wn, wd};
 }
 
@@ -1608,7 +1615,7 @@ inline
 year_weeknum
 operator/(const year& y, int wn) NOEXCEPT
 {
-    return y/weeknum(wn);
+    return y/weeknum(static_cast<unsigned>(wn));
 }
 
 CONSTCD11

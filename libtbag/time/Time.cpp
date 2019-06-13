@@ -10,7 +10,7 @@
 #include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
-#include <libtbag/3rd/date/date.h>
+#include <date/date.h>
 
 #include <cassert>
 #include <cstring>
@@ -241,7 +241,7 @@ int getSubSeconds(std::chrono::system_clock::time_point const & time)
 
 int getWeek(std::chrono::system_clock::time_point const & time)
 {
-    return static_cast<unsigned>(date::weekday(date::floor<date::days>(time)));
+    return date::weekday(date::floor<date::days>(time)).c_encoding();
 }
 
 std::string getWeekString(std::chrono::system_clock::time_point const & time)

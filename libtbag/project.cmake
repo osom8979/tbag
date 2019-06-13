@@ -5,8 +5,8 @@ include (TbagModules)
 tbag_modules__apply_default ()
 
 tbag_modules__update_c_family_subdir_objects (
-        3rd/date 3rd/demangle 3rd/entt 3rd/fmt 3rd/imgui 3rd/jsoncpp 3rd/lmdb
-        3rd/lmdbxx 3rd/sol2 3rd/sqlite3 3rd/sqlite_orm 3rd/tinyxml2
+        3rd/demangle 3rd/entt 3rd/fmt 3rd/imgui 3rd/jsoncpp 3rd/lmdb
+        3rd/lmdbxx 3rd/sol2 3rd/sqlite_orm 3rd/tinyxml2
         algorithm animation app archive bitwise box codec common
         container crypto database debug dom dummy filesystem flow
         functional game geometry gpu graph graphic http id io iterator
@@ -41,6 +41,7 @@ tbag_modules__apply_ext_archive  ()
 tbag_modules__apply_ext_nng      ()
 tbag_modules__apply_ext_glfw     ()
 tbag_modules__apply_ext_sqlite3  ()
+tbag_modules__apply_ext_date     ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()

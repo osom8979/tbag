@@ -531,4 +531,43 @@ else ()
 endif ()
 add_custom_target (sqlite3 DEPENDS ${sqlite3_EXT_LIBRARIES})
 
+##########
+## DATE ##
+##########
+
+set (date_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/date")
+set (date_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (date_EXT_HEADER       "${date_EXT_INCLUDE_DIR}/date/date.h")
+set (date_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}tz${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (date_EXT_LIBRARIES    "${date_EXT_STATIC_LIB}")
+exists_files (date_EXT_EXISTS ${date_EXT_LIBRARIES} ${date_EXT_HEADER})
+
+if (date_EXT_EXISTS)
+    message (STATUS "Skip external/date (Exists: ${date_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/date")
+    ExternalProject_Add (date_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${date_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DUSE_SYSTEM_TZ_DB=ON"
+                       "-DUSE_TZ_DB_IN_DOT=OFF"
+                       "-DENABLE_DATE_TESTING=OFF"
+                       "-DDISABLE_STRING_VIEW=OFF"
+            #--Output ldateing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (date_ext_output date_ext ${date_EXT_LIBRARIES})
+endif ()
+add_custom_target (date DEPENDS ${date_EXT_LIBRARIES})
+
 
