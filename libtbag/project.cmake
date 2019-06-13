@@ -65,11 +65,6 @@ set (BOX_D2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/box/fbs/box_d2s.h")
 tbag_modules__build_dep_flatc_cpp (box_fbs "${BOX_FBS_SRC}")
 tbag_modules__data_to_string (box_d2s "${BOX_D2S_PATH}" box "${BOX_FBS_SRC}" OFF)
 
-set (MSG_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/msg.fbs")
-set (MSG_D2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/proto/fbs/msg_d2s.h")
-tbag_modules__build_dep_flatc_cpp (msg_fbs "${MSG_FBS_SRC}")
-tbag_modules__data_to_string (msg_d2s "${MSG_D2S_PATH}" msg "${MSG_FBS_SRC}" OFF)
-
 ## Nanum Gothic Coding Normal (NGCN)
 set (NGCN_SRC "${CMAKE_SOURCE_DIR}/libtbag/typography/font/ngc/NanumGothicCoding.ttf")
 set (NGCN_D2S "${CMAKE_SOURCE_DIR}/libtbag/typography/font/ngc/ngcn.h.inl")
