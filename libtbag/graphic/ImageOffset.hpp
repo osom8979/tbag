@@ -17,7 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#include <libtbag/3rd/tinyxml2/tinyxml2.h>
+#include <libtbag/dom/tinyxml2/tinyxml2.h>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/macro/compiler.hpp>
 #include <libtbag/iterator/IteratorBypass.hpp>

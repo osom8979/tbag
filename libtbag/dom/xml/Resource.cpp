@@ -204,7 +204,7 @@ Resource::Map Resource::readMapFromXmlString(std::string const & xml, std::strin
                                              std::string const & tag, std::string const & attr)
 {
     Document doc;
-    if (doc.Parse(xml.c_str()) == tinyxml2::XML_NO_ERROR) {
+    if (doc.Parse(xml.c_str()) == tinyxml2::XML_SUCCESS) {
         return readFromXmlDocument(doc, root, tag, attr);
     }
     return Map();
@@ -214,7 +214,7 @@ Resource::Map Resource::readMapFromXmlFile(std::string const & path, std::string
                                            std::string const & tag, std::string const & attr)
 {
     Document doc;
-    if (doc.LoadFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
+    if (doc.LoadFile(path.c_str()) == tinyxml2::XML_SUCCESS) {
         return readFromXmlDocument(doc, root, tag, attr);
     }
     return Map();
@@ -259,7 +259,7 @@ bool Resource::saveToXmlFile(std::string const & path, std::string const & root,
         node->InsertEndChild(element);
     }
 
-    return (doc.SaveFile(path.c_str(), isCompactXmlFile()) == tinyxml2::XML_NO_ERROR);
+    return (doc.SaveFile(path.c_str(), isCompactXmlFile()) == tinyxml2::XML_SUCCESS);
 }
 
 std::string Resource::getXmlString(std::string const & root, std::string const & tag,

@@ -432,7 +432,7 @@ LogXmlNode::Logger * LogXmlNode::createLogger(LogInfo const & info, Environments
 int createLoggerWithXmlConfigPath(std::string const & path)
 {
     tinyxml2::XMLDocument doc;
-    if (doc.LoadFile(path.c_str()) != tinyxml2::XML_NO_ERROR) {
+    if (doc.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS) {
         return false;
     }
 
@@ -446,7 +446,7 @@ int createLoggerWithXmlConfigPath(std::string const & path)
 int createLoggerWithXmlString(std::string const & xml)
 {
     tinyxml2::XMLDocument doc;
-    if (doc.Parse(xml.c_str(), xml.size()) != tinyxml2::XML_NO_ERROR) {
+    if (doc.Parse(xml.c_str(), xml.size()) != tinyxml2::XML_SUCCESS) {
         return false;
     }
 

@@ -27,7 +27,7 @@ static Err queryText(XmlHelper::Element const * node,
                      Predicated predicated)
 {
     BaseType temp = 0;
-    if (predicated(&temp) != tinyxml2::XML_NO_ERROR) {
+    if (predicated(&temp) != tinyxml2::XML_SUCCESS) {
         result = default_value;
         return E_EQUERY;
     }
@@ -70,7 +70,7 @@ static Err queryAttribute(XmlHelper::Element const & element,
                           BaseType default_value)
 {
     BaseType temp;
-    if (element.QueryAttribute(key.c_str(), &temp) != tinyxml2::XML_NO_ERROR) {
+    if (element.QueryAttribute(key.c_str(), &temp) != tinyxml2::XML_SUCCESS) {
         result = default_value;
         return E_EQUERY;
     }

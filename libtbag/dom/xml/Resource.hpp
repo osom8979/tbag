@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/3rd/tinyxml2/tinyxml2.h>
+#include <libtbag/dom/tinyxml2/tinyxml2.h>
 
 #include <string>
 #include <vector>

@@ -94,7 +94,7 @@ Err Tmx::loadFromFile(std::string const & path)
 Err Tmx::loadFromXmlString(std::string const & xml)
 {
     Document doc;
-    if (doc.Parse(xml.c_str()) != tinyxml2::XML_NO_ERROR) {
+    if (doc.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS) {
         return E_PARSING;
     }
     return loadFromXmlDocument(doc);

@@ -142,7 +142,7 @@ bool ImageOffset::loadFromMemory(std::string const & xml)
     using namespace libtbag::dom::xml;
 
     Document doc;
-    if (doc.Parse(xml.c_str()) != tinyxml2::XML_NO_ERROR) {
+    if (doc.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS) {
         return false;
     }
 

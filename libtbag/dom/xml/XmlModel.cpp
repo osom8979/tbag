@@ -200,7 +200,7 @@ bool XmlModel::save(Path const & path) const
         }
     }
     doc.InsertFirstChild(root);
-    return doc.SaveFile(path.getString().c_str(), false) == tinyxml2::XML_NO_ERROR;
+    return doc.SaveFile(path.getString().c_str(), false) == tinyxml2::XML_SUCCESS;
 }
 
 bool XmlModel::load()
@@ -217,7 +217,7 @@ bool XmlModel::load(Path const & path)
 {
     using namespace tinyxml2;
     Document doc;
-    if (doc.LoadFile(path.getString().c_str()) != tinyxml2::XML_NO_ERROR) {
+    if (doc.LoadFile(path.getString().c_str()) != tinyxml2::XML_SUCCESS) {
         return false;
     }
 

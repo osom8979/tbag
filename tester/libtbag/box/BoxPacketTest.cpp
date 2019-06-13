@@ -6,7 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/3rd/jsoncpp/json.h>
+#include <libtbag/dom/jsoncpp/json.h>
 #include <libtbag/box/BoxPacket.hpp>
 #include <iterator>
 

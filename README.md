@@ -20,9 +20,6 @@ Tea-bag is Third party extension utility project.
 - simdpp 2.1 (Boost Software License, Version 1.0)
 - stb master-e6afb9c (Public Domain or MIT license)
 - demangle (google-glog) 0.3.4 (BSD 3-clause license)
-- fmt 5.3.0 (BSD 2-clause license)
-- jsoncpp 1.7.7 (MIT license)
-- tinyxml2 3.0.0 (zlib license)
 - lemon 1.3.1 (Boost Software License, Version 1.0)
 - lfds 7.1.1 (Public domain)
 - imgui 1.70 (MIT license)
@@ -48,6 +45,12 @@ Tea-bag is Third party extension utility project.
 - sqlite 3.28.0 (Public Domain)
 - date master-27d1e1e (MIT license)
 - lmdb bbc15ab (The OpenLDAP Public License)
+
+## Inline libraries
+
+- fmt 5.3.0 (BSD 2-clause license)
+- jsoncpp 1.8.4 (MIT license)
+- tinyxml2 7.0.1 (zlib license)
 
 ## Resources
 

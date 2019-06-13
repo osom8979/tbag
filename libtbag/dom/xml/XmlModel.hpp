@@ -19,7 +19,7 @@
 #include <libtbag/Type.hpp>
 
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/3rd/tinyxml2/tinyxml2.h>
+#include <libtbag/dom/tinyxml2/tinyxml2.h>
 #include <libtbag/dom/xml/XmlHelper.hpp>
 
 #include <map>
@@ -86,7 +86,7 @@ public:
         bool loadFile(std::string const & path)
         {
             Document doc;
-            if (doc.LoadFile(path.c_str()) == tinyxml2::XML_NO_ERROR) {
+            if (doc.LoadFile(path.c_str()) == tinyxml2::XML_SUCCESS) {
                 Element const * root = doc.FirstChildElement(name().c_str());
                 if (root != nullptr) {
                     load(*root);
@@ -105,7 +105,7 @@ public:
             }
             save(*element);
             doc.InsertFirstChild(element);
-            return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_NO_ERROR;
+            return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_SUCCESS;
         }
     };
 

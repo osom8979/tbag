@@ -5,7 +5,6 @@ include (TbagModules)
 tbag_modules__apply_default ()
 
 tbag_modules__update_c_family_subdir_objects (
-        3rd/jsoncpp 3rd/tinyxml2
         algorithm animation app archive bitwise box codec common
         container crypto database debug dom dummy filesystem flow
         functional game geometry gpu graph graphic http id io iterator

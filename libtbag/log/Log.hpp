@@ -25,7 +25,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Unit.hpp>
 
-#include <libtbag/3rd/tinyxml2/tinyxml2.h>
+#include <libtbag/dom/tinyxml2/tinyxml2.h>
 #include <libtbag/pattern/Singleton.hpp>
 #include <libtbag/log/level/Severity.hpp>
 #include <libtbag/log/mgr/Logger.hpp>
