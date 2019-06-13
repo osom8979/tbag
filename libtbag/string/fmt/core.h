@@ -155,15 +155,16 @@
 # define FMT_BEGIN_NAMESPACE namespace fmt { FMT_INLINE_NAMESPACE v5 {
 #endif
 
-#if !defined(FMT_HEADER_ONLY) && defined(_WIN32)
-# ifdef FMT_EXPORT
-#  define FMT_API __declspec(dllexport)
-# elif defined(FMT_SHARED)
-#  define FMT_API __declspec(dllimport)
-# endif
-#endif
+//#if !defined(FMT_HEADER_ONLY) && defined(_WIN32)
+//# ifdef FMT_EXPORT
+//#  define FMT_API __declspec(dllexport)
+//# elif defined(FMT_SHARED)
+//#  define FMT_API __declspec(dllimport)
+//# endif
+//#endif
 #ifndef FMT_API
-# define FMT_API
+#include <libtbag/predef.hpp>
+#define FMT_API TBAG_API
 #endif
 
 #ifndef FMT_ASSERT
