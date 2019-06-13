@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/script/LuaMachine.hpp>
 #include <libtbag/util/Version.hpp>
+#include <libtbag/log/Log.hpp>
 
 using namespace libtbag;
 using namespace libtbag::script;
@@ -15,10 +16,25 @@ using namespace libtbag::util;
 
 TEST(LuaMachineTest, Default)
 {
+    libtbag::log::SeverityGuard guard;
     LuaMachine lua;
     lua.initDefault();
     ASSERT_EQ(0, lua._gettop());
     ASSERT_EQ(getTbagVersion().toString(), lua.getTbagVersion());
     ASSERT_EQ(0, lua._gettop());
+}
+
+TEST(LuaMachineTest, StringLua_format)
+{
+    libtbag::log::SeverityGuard guard;
+    LuaMachine lua;
+    lua.initDefault();
+    char const * const TEST_SCRIPT = "text = tbag.format('Format: {}, {}, {}, {}', 'haha', 100, 1.9, true)";
+    char const * const RESULT_TEXT = "Format: haha, 100, 1.9, true";
+    ASSERT_TRUE(lua.runScript(TEST_SCRIPT));
+
+    lua._getglobal("text");
+    ASSERT_STREQ(RESULT_TEXT, lua._tostring(-1));
+    lua._pop(1);
 }
 
