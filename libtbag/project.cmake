@@ -5,8 +5,7 @@ include (TbagModules)
 tbag_modules__apply_default ()
 
 tbag_modules__update_c_family_subdir_objects (
-        3rd/demangle 3rd/entt 3rd/fmt 3rd/imgui 3rd/jsoncpp 3rd/lmdb
-        3rd/lmdbxx 3rd/sol2 3rd/sqlite_orm 3rd/tinyxml2
+        3rd/fmt 3rd/jsoncpp 3rd/lmdb 3rd/tinyxml2
         algorithm animation app archive bitwise box codec common
         container crypto database debug dom dummy filesystem flow
         functional game geometry gpu graph graphic http id io iterator
@@ -54,6 +53,7 @@ tbag_modules__apply_dep_lfds        ()
 tbag_modules__apply_dep_imgui       ()
 tbag_modules__apply_dep_imnodes     ()
 tbag_modules__apply_dep_raylib      ()
+tbag_modules__apply_dep_demangle    ()
 
 tbag_modules__check_opengl ()
 tbag_modules__apply_opengl ()

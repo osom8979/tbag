@@ -35,9 +35,7 @@
 // Note that we only have partial C++0x support yet.
 
 #include <stdio.h>  // for NULL
-#include <libtbag/3rd/demangle/demangle.hpp>
-
-namespace google {
+#include "demangle.h"
 
 typedef struct {
   const char *abbrev;
@@ -1300,6 +1298,4 @@ bool Demangle(const char *mangled, char *out, int out_size) {
   InitState(&state, mangled, out, out_size);
   return ParseTopLevelMangledName(&state) && !state.overflowed;
 }
-
-} // namespace google
 

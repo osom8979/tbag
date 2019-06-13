@@ -7,8 +7,9 @@
 
 #include <libtbag/debug/st/StFrame.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/3rd/demangle/demangle.hpp>
 #include <libtbag/string/StringUtils.hpp>
+
+#include <demangle.h>
 
 #include <cstring>
 #include <cstdlib>
@@ -93,7 +94,7 @@ std::string StFrame::toAddressString() const
 
 void StFrame::demangleAssign(char const * symbol, std::size_t symbol_size)
 {
-    if (google::Demangle(symbol, source, static_cast<int>(SOURCE_MEM_SIZE))) {
+    if (::Demangle(symbol, source, static_cast<int>(SOURCE_MEM_SIZE))) {
         return;
     }
 

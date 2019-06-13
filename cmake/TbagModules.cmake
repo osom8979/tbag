@@ -626,6 +626,12 @@ macro (tbag_modules__apply_dep_raylib)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_dep_demangle)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES demangle)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/dep/demangle)
+    tbag_modules__add_whole_archive ($<TARGET_FILE:demangle>)
+endmacro ()
+
 ## -------------------
 ## External libraries.
 ## -------------------
