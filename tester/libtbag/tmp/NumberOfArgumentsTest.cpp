@@ -43,3 +43,16 @@ TEST(NumberOfArgumentsTest, ParameterPack)
     ASSERT_EQ(2, NumberOfArgumentsTest_Argument2(ss.str(), ss.str()));
 }
 
+template <typename ... Args>
+static int NumberOfArgumentsTest_SizeOf(Args && ... args) TBAG_NOEXCEPT
+{
+    return sizeof...(Args);
+}
+
+TEST(NumberOfArgumentsTest, SizeOf)
+{
+    ASSERT_EQ(1, NumberOfArgumentsTest_SizeOf(1));
+    ASSERT_EQ(2, NumberOfArgumentsTest_SizeOf("test", "string"));
+    ASSERT_EQ(3, NumberOfArgumentsTest_SizeOf("test", "string", 100));
+}
+
