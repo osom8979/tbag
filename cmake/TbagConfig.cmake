@@ -477,8 +477,10 @@ macro (tbag_config __path)
     tbag_config__check_compiler ()
     tbag_config__check_platform ()
     tbag_config__check_opengles ()
-    tbag_config__check_macos_version ()
     tbag_config__check_cpu_architecture ()
+    if (TBAG_MACOSX)
+        tbag_config__check_macos_version ()
+    endif ()
 endmacro ()
 
 ## ----------

@@ -26,7 +26,7 @@ addons:
       - cmake-data
       - curl
       - unzip
-      - g++-5
+      - g++-7
       - ocl-icd-opencl-dev
       - libglu1-mesa-dev
       - libudev-dev
@@ -37,10 +37,10 @@ before_install:
   #- sudo add-apt-repository --yes ppa:ubuntu-toolchain-r/test
   #- sudo add-apt-repository --yes ppa:george-edison55/precise-backports
   #- sudo apt-get -qq update
-  #- sudo apt-get install -y git cmake cmake-data curl unzip g++-5
+  #- sudo apt-get install -y git cmake cmake-data curl unzip g++-7
   - export TPARTY_HOME=$HOME/tparty
   - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
-  - export CXX=g++-5
+  - export CXX=g++-7
 
 script:
   - if [[ ! -d cmake_build ]]; then mkdir cmake_build; fi
