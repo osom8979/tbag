@@ -570,4 +570,38 @@ else ()
 endif ()
 add_custom_target (date DEPENDS ${date_EXT_LIBRARIES})
 
+##########
+## LMDB ##
+##########
+
+set (lmdb_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/lmdb")
+set (lmdb_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (lmdb_EXT_HEADER       "${lmdb_EXT_INCLUDE_DIR}/lmdb.h")
+set (lmdb_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}lmdb${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (lmdb_EXT_LIBRARIES    "${lmdb_EXT_STATIC_LIB}")
+exists_files (lmdb_EXT_EXISTS ${lmdb_EXT_LIBRARIES} ${lmdb_EXT_HEADER})
+
+if (lmdb_EXT_EXISTS)
+    message (STATUS "Skip external/lmdb (Exists: ${lmdb_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/lmdb")
+    ExternalProject_Add (lmdb_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${lmdb_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output llmdbing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (lmdb_ext_output lmdb_ext ${lmdb_EXT_LIBRARIES})
+endif ()
+add_custom_target (lmdb DEPENDS ${lmdb_EXT_LIBRARIES})
 

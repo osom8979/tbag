@@ -16,7 +16,6 @@ Tea-bag is Third party extension utility project.
 - gtest 1.7.0 (BSD 3-clause license)
 - http-parser 2.8.1 (MIT license)
 - icu4c 57.1 (ICU license; http://source.icu-project.org/repos/icu/icu/trunk/LICENSE)
-- lmdb bbc15ab (The OpenLDAP Public License)
 - minizip 1.1 (zlib license)
 - simdpp 2.1 (Boost Software License, Version 1.0)
 - stb master-e6afb9c (Public Domain or MIT license)
@@ -48,6 +47,7 @@ Tea-bag is Third party extension utility project.
 - glfw 3.3 (zlib license)
 - sqlite 3.28.0 (Public Domain)
 - date master-27d1e1e (MIT license)
+- lmdb bbc15ab (The OpenLDAP Public License)
 
 ## Resources
 

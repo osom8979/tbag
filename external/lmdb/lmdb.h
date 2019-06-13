@@ -160,7 +160,7 @@
 #define _LMDB_H_
 
 #include <sys/types.h>
-#include <libtbag/3rd/lmdb/lmdb_export.h>
+#include "lmdb_export.h"
 
 #ifdef __cplusplus
 extern "C" {
