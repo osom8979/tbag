@@ -21,7 +21,7 @@ list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include (TbagConfig)
 tbag_config ("${PROJECT_SOURCE_DIR}/INFORMATION")
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+if (TBAG_MSVC)
     ##set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4146") ## unary minus operator applied to unsigned type, result still unsigned.
     ##set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244") ## conversion from 'type1' to 'type2', possible loss of data.
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251") ## class 'type' needs to have dll-interface to be used by clients of class 'type2'.
@@ -34,9 +34,9 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w")      ## Disables all compiler warnings.
     add_definitions (-D_CRT_SECURE_NO_WARNINGS)
     add_definitions (-D_SCL_SECURE_NO_WARNINGS)
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+elseif (TBAG_CLANG)
     set  (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-delete-non-virtual-dtor")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+elseif (TBAG_GCC)
     #set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG") ## Default
     set  (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 endif ()
@@ -46,6 +46,9 @@ tbag_config__set_option (USE_CCACHE  ON) ## Enable ccache compile.
 tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compiler.
 tbag_config__set_option (USE_PCH    OFF) ## Enable PCH compile.
 tbag_config__set_option (USE_RTTI   OFF) ## Enable RTTI flag.
+
+tbag_config__set_option (USE_MSAN OFF) ## Enable MemorySanitizer if clang compiler.
+tbag_config__set_option (USE_ASAN OFF) ## Enable AddressSanitizer if clang compiler.
 
 tbag_config__set_option (DISABLE_TDLOG                OFF) ## Disable tbag default logger.
 tbag_config__set_option (DISABLE_LUAJIT_EXE_FLAGS     OFF) ## Disable LuaJIT Embedding flags if apple.
@@ -64,10 +67,22 @@ endif ()
 if (USE_CCACHE)
     tbag_config__use_ccache ()
 endif ()
-if (USE_GOLD AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if (USE_GOLD AND TBAG_GCC)
     set (CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -fuse-ld=gold")
     set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold")
 endif ()
+if (USE_MSAN)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=memory")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=memory")
+    if (TBAG_MACOSX)
+        message (WARNING "MemorySanitizer is not supported on macOS.")
+    endif ()
+endif ()
+if (USE_ASAN)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+endif ()
+
 tbag_config__find_thread ()
 tbag_config__default_generate_c_header ()
 

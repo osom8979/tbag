@@ -13,6 +13,24 @@ include (TbagPreview)
 ## Environment
 ## -----------
 
+#/// Build Configuration.
+macro (tbag_config__check_build_configuration)
+    set (TBAG_DEBUG          0)
+    set (TBAG_RELEASE        0)
+    set (TBAG_RELWITHDEBINFO 0)
+    set (TBAG_MINSIZEREL     0)
+
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set (TBAG_DEBUG 1)
+    elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+        set (TBAG_RELEASE 1)
+    elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+        set (TBAG_RELWITHDEBINFO 1)
+    elseif (CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+        set (TBAG_MINSIZEREL 1)
+    endif ()
+endmacro ()
+
 #/// Check compiler.
 macro (tbag_config__check_compiler)
     set (TBAG_GCC        0)
@@ -453,6 +471,14 @@ macro (tbag_config __path)
 
     # C/C++ flags.
     tbag_flags__default_setup ()
+
+    # Environment.
+    tbag_config__check_build_configuration ()
+    tbag_config__check_compiler ()
+    tbag_config__check_platform ()
+    tbag_config__check_opengles ()
+    tbag_config__check_macos_version ()
+    tbag_config__check_cpu_architecture ()
 endmacro ()
 
 ## ----------
