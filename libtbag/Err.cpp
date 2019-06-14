@@ -144,10 +144,12 @@ static libtbag::Err convertSystemErrorToErr(int system_error)
 // ------------------
 
 #include <libtbag/log/Log.hpp>
-
 #include <uv.h>
 
-//UV_ERRNO_MAP
+// Symbol check.
+#define _XX(name, _) static_assert(UV_##name && static_cast<int>(libtbag::Err::E_##name), "");
+UV_ERRNO_MAP(_XX)
+#undef _XX
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

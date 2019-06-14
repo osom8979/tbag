@@ -127,7 +127,6 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_ENOSR          ,  "No STREAM resources"                                  ) \
     _TBAG_XX(_ENOSTR         ,  "Not a STREAM"                                         ) \
     _TBAG_XX(_ENOTRECOVERABLE,  "State not recoverable"                                ) \
-    _TBAG_XX(_ENOTTY         ,  "Inappropriate I/O control operation"                  ) \
     _TBAG_XX(_EOPNOTSUPP     ,  "Operation not supported on socket"                    ) \
     _TBAG_XX(_EOVERFLOW      ,  "Value too large to be stored in data type"            ) \
     _TBAG_XX(_EOWNERDEAD     ,  "Previous owner died"                                  ) \
@@ -209,6 +208,10 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_UV_XX(_EOF             , "End of file"                           ) \
     _TBAG_UV_XX(_ENXIO           , "No such device or address"             ) \
     _TBAG_UV_XX(_EMLINK          , "Too many links"                        ) \
+    _TBAG_UV_XX(_EHOSTDOWN       , "Host is down"                          ) \
+    _TBAG_UV_XX(_EREMOTEIO       , "Remote I/O error"                      ) \
+    _TBAG_UV_XX(_ENOTTY          , "Inappropriate ioctl for device"        ) \
+    _TBAG_UV_XX(_EFTYPE          , "Inappropriate file type or format"     ) \
     /* -- END -- */
 #endif
 
