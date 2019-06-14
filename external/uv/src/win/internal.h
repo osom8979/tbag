@@ -61,10 +61,15 @@ extern UV_THREAD_LOCAL int uv__crt_assert_enabled;
  * TCP
  */
 
+typedef enum {
+  UV__IPC_SOCKET_XFER_NONE = 0,
+  UV__IPC_SOCKET_XFER_TCP_CONNECTION,
+  UV__IPC_SOCKET_XFER_TCP_SERVER
+} uv__ipc_socket_xfer_type_t;
+
 typedef struct {
   WSAPROTOCOL_INFOW socket_info;
   uint32_t delayed_error;
-  uint32_t flags; /* Either zero or UV_HANDLE_CONNECTION. */
 } uv__ipc_socket_xfer_info_t;
 
 int uv_tcp_listen(uv_tcp_t* handle, int backlog, uv_connection_cb cb);
@@ -89,8 +94,11 @@ void uv_tcp_endgame(uv_loop_t* loop, uv_tcp_t* handle);
 
 int uv__tcp_xfer_export(uv_tcp_t* handle,
                         int pid,
+                        uv__ipc_socket_xfer_type_t* xfer_type,
                         uv__ipc_socket_xfer_info_t* xfer_info);
-int uv__tcp_xfer_import(uv_tcp_t* tcp, uv__ipc_socket_xfer_info_t* xfer_info);
+int uv__tcp_xfer_import(uv_tcp_t* tcp,
+                        uv__ipc_socket_xfer_type_t xfer_type,
+                        uv__ipc_socket_xfer_info_t* xfer_info);
 
 
 /*
@@ -263,6 +271,14 @@ __declspec(noreturn) void uv_fatal_error(const int errorno, const char* syscall)
 int uv__getpwuid_r(uv_passwd_t* pwd);
 int uv__convert_utf16_to_utf8(const WCHAR* utf16, int utf16len, char** utf8);
 int uv__convert_utf8_to_utf16(const char* utf8, int utf8len, WCHAR** utf16);
+
+typedef int (WINAPI *uv__peersockfunc)(SOCKET, struct sockaddr*, int*);
+
+int uv__getsockpeername(const uv_handle_t* handle,
+                        uv__peersockfunc func,
+                        struct sockaddr* name,
+                        int* namelen,
+                        int delayed_error);
 
 
 /*

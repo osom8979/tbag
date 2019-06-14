@@ -40,6 +40,7 @@
 #include "uv.h"
 #include "uv/tree.h"
 #include "queue.h"
+#include "strscpy.h"
 
 #if EDOM > 0
 # define UV__ERR(x) (-(x))
@@ -102,6 +103,7 @@ enum {
 
   /* Only used by uv_udp_t handles. */
   UV_HANDLE_UDP_PROCESSING              = 0x01000000,
+  UV_HANDLE_UDP_CONNECTED               = 0x02000000,
 
   /* Only used by uv_pipe_t handles. */
   UV_HANDLE_NON_OVERLAPPED_PIPE         = 0x01000000,
@@ -141,6 +143,14 @@ int uv__udp_bind(uv_udp_t* handle,
                  unsigned int  addrlen,
                  unsigned int flags);
 
+int uv__udp_connect(uv_udp_t* handle,
+                    const struct sockaddr* addr,
+                    unsigned int addrlen);
+
+int uv__udp_disconnect(uv_udp_t* handle);
+
+int uv__udp_is_connected(uv_udp_t* handle);
+
 int uv__udp_send(uv_udp_send_t* req,
                  uv_udp_t* handle,
                  const uv_buf_t bufs[],
@@ -164,8 +174,15 @@ void uv__fs_poll_close(uv_fs_poll_t* handle);
 
 int uv__getaddrinfo_translate_error(int sys_err);    /* EAI_* error. */
 
+enum uv__work_kind {
+  UV__WORK_CPU,
+  UV__WORK_FAST_IO,
+  UV__WORK_SLOW_IO
+};
+
 void uv__work_submit(uv_loop_t* loop,
                      struct uv__work *w,
+                     enum uv__work_kind kind,
                      void (*work)(struct uv__work *w),
                      void (*done)(struct uv__work *w, int status));
 
@@ -176,6 +193,8 @@ size_t uv__count_bufs(const uv_buf_t bufs[], unsigned int nbufs);
 int uv__socket_sockopt(uv_handle_t* handle, int optname, int* value);
 
 void uv__fs_scandir_cleanup(uv_fs_t* req);
+void uv__fs_readdir_cleanup(uv_fs_t* req);
+uv_dirent_type_t uv__fs_get_dirent_type(uv__dirent_t* dent);
 
 int uv__next_timeout(const uv_loop_t* loop);
 void uv__run_timers(uv_loop_t* loop);

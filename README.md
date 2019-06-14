@@ -30,7 +30,7 @@ Tea-bag is Third party extension utility project.
 
 - libressl 2.9.2 (Dual license; OpenSSL & SSLeay)
 - zlib 1.2.11 (zlib license)
-- libuv 1.22.0 (MIT license)
+- libuv 1.29.1 (MIT license)
 - freetype 2.9.1 (FreeType License)
 - LuaJIT 2.0.5 (MIT license)
   - LuaDist/LuaJIT-CMakeLists.txt 2.0.3 (MIT license)

@@ -164,7 +164,7 @@ void uv_console_init(void) {
                                        OPEN_EXISTING,
                                        0,
                                        0);
-  if (uv__tty_console_handle != NULL) {
+  if (uv__tty_console_handle != INVALID_HANDLE_VALUE) {
     QueueUserWorkItem(uv__tty_console_resize_message_loop_thread,
                       NULL,
                       WT_EXECUTELONGFUNCTION);
@@ -172,9 +172,12 @@ void uv_console_init(void) {
 }
 
 
-int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, uv_file fd, int readable) {
+int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, uv_file fd, int unused) {
+  BOOL readable;
+  DWORD NumberOfEvents;
   HANDLE handle;
   CONSOLE_SCREEN_BUFFER_INFO screen_buffer_info;
+  (void)unused;
 
   uv__once_init();
   handle = (HANDLE) uv__get_osfhandle(fd);
@@ -199,6 +202,7 @@ int uv_tty_init(uv_loop_t* loop, uv_tty_t* tty, uv_file fd, int readable) {
     fd = -1;
   }
 
+  readable = GetNumberOfConsoleInputEvents(handle, &NumberOfEvents);
   if (!readable) {
     /* Obtain the screen buffer info with the output handle. */
     if (!GetConsoleScreenBufferInfo(handle, &screen_buffer_info)) {
@@ -356,6 +360,8 @@ int uv_tty_set_mode(uv_tty_t* tty, uv_tty_mode_t mode) {
     }
   } else {
     was_reading = 0;
+    alloc_cb = NULL;
+    read_cb = NULL;
   }
 
   uv_sem_wait(&uv_tty_output_lock);
@@ -379,12 +385,6 @@ int uv_tty_set_mode(uv_tty_t* tty, uv_tty_mode_t mode) {
   }
 
   return 0;
-}
-
-
-int uv_is_tty(uv_file file) {
-  DWORD result;
-  return GetConsoleMode((HANDLE) _get_osfhandle(file), &result) != 0;
 }
 
 
@@ -735,8 +735,9 @@ void uv_process_tty_read_raw_req(uv_loop_t* loop, uv_tty_t* handle,
 
       /* Ignore keyup events, unless the left alt key was held and a valid
        * unicode character was emitted. */
-      if (!KEV.bKeyDown && !(((KEV.dwControlKeyState & LEFT_ALT_PRESSED) ||
-          KEV.wVirtualKeyCode==VK_MENU) && KEV.uChar.UnicodeChar != 0)) {
+      if (!KEV.bKeyDown &&
+          (KEV.wVirtualKeyCode != VK_MENU ||
+           KEV.uChar.UnicodeChar == 0)) {
         continue;
       }
 
@@ -793,8 +794,9 @@ void uv_process_tty_read_raw_req(uv_loop_t* loop, uv_tty_t* handle,
         if (KEV.uChar.UnicodeChar >= 0xDC00 &&
             KEV.uChar.UnicodeChar < 0xE000) {
           /* UTF-16 surrogate pair */
-          WCHAR utf16_buffer[2] = { handle->tty.rd.last_utf16_high_surrogate,
-                                    KEV.uChar.UnicodeChar};
+          WCHAR utf16_buffer[2];
+          utf16_buffer[0] = handle->tty.rd.last_utf16_high_surrogate;
+          utf16_buffer[1] = KEV.uChar.UnicodeChar;
           char_len = WideCharToMultiByte(CP_UTF8,
                                          0,
                                          utf16_buffer,
@@ -943,20 +945,15 @@ void uv_process_tty_read_line_req(uv_loop_t* loop, uv_tty_t* handle,
       handle->read_cb((uv_stream_t*) handle,
                       uv_translate_sys_error(GET_REQ_ERROR(req)),
                       &buf);
-    } else {
-      /* The read was cancelled, or whatever we don't care */
-      handle->read_cb((uv_stream_t*) handle, 0, &buf);
     }
-
   } else {
-    if (!(handle->flags & UV_HANDLE_CANCELLATION_PENDING)) {
+    if (!(handle->flags & UV_HANDLE_CANCELLATION_PENDING) &&
+        req->u.io.overlapped.InternalHigh != 0) {
       /* Read successful. TODO: read unicode, convert to utf-8 */
       DWORD bytes = req->u.io.overlapped.InternalHigh;
       handle->read_cb((uv_stream_t*) handle, bytes, &buf);
-    } else {
-      handle->flags &= ~UV_HANDLE_CANCELLATION_PENDING;
-      handle->read_cb((uv_stream_t*) handle, 0, &buf);
     }
+    handle->flags &= ~UV_HANDLE_CANCELLATION_PENDING;
   }
 
   /* Wait for more input events. */
@@ -1035,6 +1032,7 @@ int uv_tty_read_stop(uv_tty_t* handle) {
     /* Cancel raw read. Write some bullshit event to force the console wait to
      * return. */
     memset(&record, 0, sizeof record);
+    record.EventType = FOCUS_EVENT;
     if (!WriteConsoleInputW(handle->handle, &record, 1, &written)) {
       return GetLastError();
     }
@@ -2181,13 +2179,13 @@ void uv_process_tty_write_req(uv_loop_t* loop, uv_tty_t* handle,
 
 void uv_tty_close(uv_tty_t* handle) {
   assert(handle->u.fd == -1 || handle->u.fd > 2);
+  if (handle->flags & UV_HANDLE_READING)
+    uv_tty_read_stop(handle);
+
   if (handle->u.fd == -1)
     CloseHandle(handle->handle);
   else
     close(handle->u.fd);
-
-  if (handle->flags & UV_HANDLE_READING)
-    uv_tty_read_stop(handle);
 
   handle->u.fd = -1;
   handle->handle = INVALID_HANDLE_VALUE;

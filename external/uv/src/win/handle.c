@@ -139,7 +139,6 @@ void uv_close(uv_handle_t* handle, uv_close_cb cb) {
     case UV_FS_POLL:
       uv__fs_poll_close((uv_fs_poll_t*) handle);
       uv__handle_closing(handle);
-      uv_want_endgame(loop, handle);
       return;
 
     default:
@@ -156,4 +155,8 @@ int uv_is_closing(const uv_handle_t* handle) {
 
 uv_os_fd_t uv_get_osfhandle(int fd) {
   return uv__get_osfhandle(fd);
+}
+
+int uv_open_osfhandle(uv_os_fd_t os_fd) {
+  return _open_osfhandle((intptr_t) os_fd, 0);
 }
