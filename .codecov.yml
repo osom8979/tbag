@@ -1,0 +1,16 @@
+# Codecov Config.
+
+coverage:
+  range: 70..100
+  round: down
+  precision: 2
+
+ignore:
+  - 'build'
+  - 'cmake-build-*'
+  - 'external'
+  - 'dep'
+  - 'libtbag/dom/jsoncpp'
+  - 'libtbag/dom/tinyxml2'
+  - 'libtbag/string/fmt'
+
