@@ -11,11 +11,19 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
-#if !defined(TBAG_PLATFORM_WINDOWS)
-# include <sys/types.h>
-# include <sys/stat.h>
-#endif
+#include <libtbag/config-ex.h>
 
+#if !defined(TBAG_PLATFORM_WINDOWS)
+#include <sys/types.h>
+#include <sys/stat.h>
+#endif
+#if defined(HAVE_SYS_UIO_H)
+#include <sys/uio.h>
+#endif
+#if defined(HAVE_UNISTD_H)
+#include <unistd.h>
+#endif
+#include <errno.h>
 #include <uv.h>
 
 // -------------------
@@ -431,8 +439,81 @@ bool close(ufile file)
     return ERROR_CODE == 0;
 }
 
+int __read_foreach(ufile file, binf const * infos, std::size_t infos_size, int64_t offset)
+{
+    int total_result = 0;
+    for (std::size_t i = 0; i < infos_size; ++i) {
+        uv_buf_t buf;
+        buf.base = (char*)infos[i].buffer;
+        buf.len = infos[i].size;
+        uv_fs_t req = {0,};
+        auto result = uv_fs_read(nullptr, &req, file, &buf, 1U, offset, nullptr);
+        if (result >= 0) {
+            offset += infos[i].size;
+            total_result += result;
+        } else {
+            return result;
+        }
+        uv_fs_req_cleanup(&req);
+    }
+    return total_result;
+}
+
+int __read_direct(ufile file, binf const * infos, std::size_t infos_size, int64_t offset)
+{
+    if (infos == nullptr || infos_size == 0) {
+        return UV_EINVAL;
+    }
+
+#if defined(HAVE_PREADV_FUNC) || (defined(HAVE_READV_FUNC) && defined(HAVE_UNISTD_H))
+    int result = -1;
+    std::vector<iovec> iovec_bufs;
+    iovec_bufs.resize(infos_size);
+    for (std::size_t i = 0; i < infos_size; ++i) {
+        iovec_bufs[i].iov_base = (infos + i)->buffer;
+        iovec_bufs[i].iov_len  = (infos + i)->size;
+    }
+
+# if defined(HAVE_PREADV_FUNC)
+    result = preadv(file, &iovec_bufs[0], infos_size, offset);
+# elif defined(HAVE_READV_FUNC) && defined(HAVE_UNISTD_H)
+    result = lseek(file, offset, SEEK_SET);
+    if (result == -1) {
+        return uv_translate_sys_error(errno);
+    }
+    result = readv(file, &iovec_bufs[0], iovec_bufs.size());
+# else
+    return UV_UNKNOWN;
+# endif
+
+    if (result == -1) {
+        return uv_translate_sys_error(errno);
+    }
+#else
+    return __read_foreach(file, infos, infos_size, offset);
+#endif // defined(HAVE_PREADV_FUNC) || (defined(HAVE_READV_FUNC) && defined(HAVE_UNISTD_H))
+}
+
+#if defined(__DragonFly__)      || \
+    defined(__FreeBSD__)        || \
+    defined(__FreeBSD_kernel__) || \
+    defined(__OpenBSD__)        || \
+    defined(__NetBSD__)
+# /* -- EMPTY -- */
+#else
+# if (UV_VERSION_MAJOR > 1) || (UV_VERSION_MINOR > 22)
+#  define __UV_ERROR__HAVE_PREADV
+# endif
+#endif
+
 int read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset)
 {
+#if defined(__UV_ERROR__HAVE_PREADV)
+    if (infos_size >= 2) {
+        return __read_direct(file, infos, infos_size, offset);
+    }
+#endif
+
     std::vector<uv_buf_t> uv_infos;
     uv_infos.resize(infos_size);
     for (std::size_t i = 0; i < infos_size; ++i) {

@@ -147,6 +147,8 @@ static libtbag::Err convertSystemErrorToErr(int system_error)
 
 #include <uv.h>
 
+//UV_ERRNO_MAP
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

@@ -175,6 +175,7 @@ check_include_file (sys/sysctl.h   HAVE_SYS_SYSCTL_H)
 check_include_file (sys/statvfs.h  HAVE_SYS_STATVFS_H)
 check_include_file (sys/mman.h     HAVE_SYS_MMAN_H)
 check_include_file (sys/types.h    HAVE_SYS_TYPES_H)
+check_include_file (sys/uio.h      HAVE_SYS_UIO_H)
 check_include_file (unistd.h       HAVE_UNISTD_H)
 check_include_file (dlfcn.h        HAVE_DLFCN_H)
 check_include_file (execinfo.h     HAVE_EXECINFO_H)
@@ -199,6 +200,17 @@ if (WIN32 AND HAVE_OBJBASE_H)
         #pragma comment(lib, \"ole32.lib\")
         int main() { return ::CoInitializeEx(NULL, COINIT_MULTITHREADED) == S_OK ? 0 : 1; }
         " HAVE_COINITIALIZEEX_FUNC)
+endif ()
+
+if (HAVE_SYS_UIO_H)
+    check_c_source_compiles ("
+        #include <sys/uio.h>
+        void main() { preadv(0, NULL, 0, 0); }
+        " HAVE_PREADV_FUNC)
+    check_c_source_compiles ("
+        #include <sys/uio.h>
+        void main() { readv(0, NULL, 0); }
+        " HAVE_READV_FUNC)
 endif ()
 
 ## Type checker.

@@ -207,6 +207,21 @@ TBAG_API bool close(ufile file);
 /**
  * Read or write data into multiple buffers.
  *
+ * @warning
+ *  This method is provided as a way to avoid bugs. @n
+ *  Direct use is not recommended.
+ *
+ * @see <https://linux.die.net/man/2/preadv>
+ * @see <https://linux.die.net/man/2/lseek>
+ * @see <https://www.freebsd.org/cgi/man.cgi?query=preadv&sektion=2>
+ * @see <https://github.com/libuv/libuv/issues/2332>
+ */
+TBAG_API int __read_foreach(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
+TBAG_API int __read_direct(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
+
+/**
+ * Read or write data into multiple buffers.
+ *
  * @see <https://linux.die.net/man/2/preadv>
  */
 TBAG_API int read(ufile file, binf const * infos, std::size_t infos_size, int64_t offset);
