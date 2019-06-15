@@ -647,7 +647,7 @@ else ()
                        "-DCIVETWEB_ARCH=OFF"
                        "-DCIVETWEB_ENABLE_LUA=OFF"
                        "-DCIVETWEB_INSTALL_EXECUTABLE=OFF"
-                       "-DCIVETWEB_ALLOW_WARNINGS=OFF"
+                       "-DCIVETWEB_ALLOW_WARNINGS=ON"
             #--Output lcivetwebing-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
