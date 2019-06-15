@@ -854,6 +854,12 @@ macro (tbag_modules__apply_ext_lmdb)
     tbag_modules__add_whole_archive (${lmdb_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_civetweb)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES civetweb)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${civetweb_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${civetweb_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

@@ -606,3 +606,56 @@ else ()
 endif ()
 add_custom_target (lmdb DEPENDS ${lmdb_EXT_LIBRARIES})
 
+##############
+## CIVETWEB ##
+##############
+
+set (civetweb_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/civetweb")
+set (civetweb_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (civetweb_EXT_HEADER       "${civetweb_EXT_INCLUDE_DIR}/civetweb.h")
+set (civetweb_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}civetweb${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (civetweb_EXT_LIBRARIES    "${civetweb_EXT_STATIC_LIB}")
+exists_files (civetweb_EXT_EXISTS ${civetweb_EXT_LIBRARIES} ${civetweb_EXT_HEADER})
+
+if (civetweb_EXT_EXISTS)
+    message (STATUS "Skip external/civetweb (Exists: ${civetweb_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/civetweb")
+    ExternalProject_Add (civetweb_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${civetweb_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DCIVETWEB_BUILD_TESTING=OFF"
+                       "-DCIVETWEB_ENABLE_THIRD_PARTY_OUTPUT=OFF"
+                       "-DCIVETWEB_THREAD_STACK_SIZE=102400"
+                       "-DCIVETWEB_ENABLE_SERVER_EXECUTABLE=OFF"
+                       "-DCIVETWEB_SERVE_NO_FILES=OFF"
+                       "-DCIVETWEB_DISABLE_CGI=OFF"
+                       "-DCIVETWEB_DISABLE_CACHING=OFF"
+                       "-DCIVETWEB_ENABLE_CXX=OFF"
+                       "-DCIVETWEB_ENABLE_IPV6=OFF"
+                       "-DCIVETWEB_ENABLE_WEBSOCKETS=ON"
+                       "-DCIVETWEB_ENABLE_SERVER_STATS=OFF"
+                       "-DCIVETWEB_ENABLE_MEMORY_DEBUGGING=OFF"
+                       "-DCIVETWEB_ENABLE_ASAN=OFF"
+                       "-DCIVETWEB_ARCH=OFF"
+                       "-DCIVETWEB_ENABLE_LUA=OFF"
+                       "-DCIVETWEB_INSTALL_EXECUTABLE=OFF"
+                       "-DCIVETWEB_ALLOW_WARNINGS=OFF"
+            #--Output lcivetwebing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (civetweb_ext_output civetweb_ext ${civetweb_EXT_LIBRARIES})
+endif ()
+add_custom_target (civetweb DEPENDS ${civetweb_EXT_LIBRARIES})
+

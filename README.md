@@ -45,6 +45,7 @@ Tea-bag is Third party extension utility project.
 - sqlite 3.28.0 (Public Domain)
 - date master-27d1e1e (MIT license)
 - lmdb bbc15ab (The OpenLDAP Public License)
+- civetweb master-2100e66 (MIT license)
 
 ## Inline libraries
 
