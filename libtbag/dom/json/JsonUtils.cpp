@@ -17,29 +17,38 @@ namespace json {
 
 bool parse(std::string const & json, Json::Value & result)
 {
-    try {
-        return Json::Reader().parse(json, result);
-    } catch (...) {
-        return false;
+    Json::CharReaderBuilder builder;
+    builder["collectComments"] = false;
+    auto * reader = builder.newCharReader();
+    auto * json_text = json.c_str();
+    std::string error;
+    auto const CODE = reader->parse(json_text, json_text + json.size(), &result, &error);
+    if (!CODE) {
+        tDLogE("parse() Json parse error: {}", error);
     }
+    return CODE;
 }
 
 std::string writeFast(Json::Value const & value)
 {
-    try {
-        return Json::FastWriter().write(value);
-    } catch (...) {
-        return std::string();
-    }
+    Json::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "";
+    builder["enableYAMLCompatibility"] = false;
+    builder["dropNullPlaceholders"] = true;
+    builder["useSpecialFloats"] = false;
+    return Json::writeString(builder, value);
 }
 
 std::string writeStyled(Json::Value const & value)
 {
-    try {
-        return Json::StyledWriter().write(value);
-    } catch (...) {
-        return std::string();
-    }
+    Json::StreamWriterBuilder builder;
+    builder["commentStyle"] = "All";
+    builder["indentation"] = "  ";
+    builder["enableYAMLCompatibility"] = true;
+    builder["dropNullPlaceholders"] = false;
+    builder["useSpecialFloats"] = true;
+    return Json::writeString(builder, value);
 }
 
 std::string write(Json::Value const & value, bool fast)
