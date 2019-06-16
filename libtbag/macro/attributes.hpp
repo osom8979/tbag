@@ -176,5 +176,31 @@
 # endif
 #endif
 
+// Macros for enabling compiler-specific checks for printf-like arguments.
+#ifndef TBAG_PRINTF_FORMAT_STRING
+# if defined(TBAG_COMP_MSVC) && (TBAG_COMP_MSVC_VERSION >= 1400)
+#  include <sal.h>
+#  if TBAG_COMP_MSVC_VERSION > 1400
+#   define TBAG_PRINTF_FORMAT_STRING _Printf_format_string_
+#  else
+#   define TBAG_PRINTF_FORMAT_STRING __format_string
+#  endif
+# else
+#  define TBAG_PRINTF_FORMAT_STRING
+# endif
+#endif
+
+#ifndef TBAG_FORMAT_STRING
+#define TBAG_FORMAT_STRING TBAG_PRINTF_FORMAT_STRING
+#endif
+
+#ifndef TBAG_FORMAT_PRINTF_SUFFIX
+# if defined(TBAG_COMP_GNUC)
+#  define TBAG_FORMAT_PRINTF_SUFFIX(x, y) __attribute__((format(printf, x, y)))
+# else
+#  define TBAG_FORMAT_PRINTF_SUFFIX(x, y)
+# endif
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_MACRO_ATTRIBUTES_HPP__
 
