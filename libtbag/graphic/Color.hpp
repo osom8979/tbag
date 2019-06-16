@@ -15,8 +15,10 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 
 #include <cstdint>
+#include <string>
 #include <sstream>
 #include <limits>
 
@@ -65,16 +67,50 @@ inline TBAG_CONSTEXPR Channel channel_max() TBAG_NOEXCEPT
 #endif
 }
 
+inline TBAG_CONSTEXPR Channel channel_minmax_diff() TBAG_NOEXCEPT
+{
+    return channel_max() - channel_min();
+}
+
 /**
  * Half channel value.
  */
-TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
+inline TBAG_CONSTEXPR Channel channel_half() TBAG_NOEXCEPT
 {
     return static_cast<Channel>((channel_min() + channel_max()) / 2);
 }
 
+inline Channel float_to_channel(float v) TBAG_NOEXCEPT
+{
+    if (v < 0.0f) {
+        v = 0.0f;
+    } else if (v > 1.0f) {
+        v = 1.0f;
+    }
+    return static_cast<Channel>(v * channel_max());
+}
+
+inline float channel_to_float(Channel c) TBAG_NOEXCEPT
+{
+    return static_cast<float>(channel_min()) + (static_cast<float>(c) / static_cast<float>(channel_minmax_diff()));
+}
+
+TBAG_CONSTEXPR char const COLOR_STRING_PREFIX = '#';
+TBAG_CONSTEXPR float const COLOR_FLOATING_MAX_HALF_BYTE = 15.0f;
+
 struct Rgb24;
 struct Rgb32;
+
+TBAG_API Rgb32 convertRgb24ToRgb32(Rgb24 const & src) TBAG_NOEXCEPT;
+TBAG_API Rgb24 convertRgb32ToRgb24(Rgb32 const & src) TBAG_NOEXCEPT;
+
+TBAG_API std::string convertRgb24ToHexString(Rgb24 const & c);
+TBAG_API std::string convertRgb32ToHexString(Rgb32 const & c);
+TBAG_API std::string convertRgb32ToArgbHexString(Rgb32 const & c);
+
+TBAG_API Err convertHexStringToRgb32(std::string const & text, Rgb32 & color);
+TBAG_API Err convertArgbHexStringToRgb32(std::string const & text, Rgb32 & color);
+TBAG_API Err convertHexStringToRgb24(std::string const & text, Rgb24 & color);
 
 /**
  * RGB Color structure.
@@ -98,8 +134,17 @@ struct Rgb24
     Rgb24(Channel r_, Channel g_, Channel b_) TBAG_NOEXCEPT : r(r_), g(g_), b(b_)
     { /* EMPTY. */ }
 
+    Rgb24(std::string const & text) TBAG_NOEXCEPT : r(), g(), b()
+    { convertHexStringToRgb24(text, *this); }
+
+    Rgb24(Rgb32 const & obj) TBAG_NOEXCEPT : r(), g(), b()
+    { *this = obj; }
+
     Rgb24(Rgb24 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b)
     { /* EMPTY. */ }
+
+    Rgb24(Rgb24 && obj) TBAG_NOEXCEPT : r(), g(), b()
+    { *this = std::move(obj); }
 
     ~Rgb24()
     { /* EMPTY. */ }
@@ -111,6 +156,18 @@ struct Rgb24
             g = obj.g;
             b = obj.b;
         }
+        return *this;
+    }
+
+    Rgb24 & operator =(Rgb24 && obj) TBAG_NOEXCEPT
+    {
+        swap(obj);
+        return *this;
+    }
+
+    Rgb24 & operator =(Rgb32 const & obj) TBAG_NOEXCEPT
+    {
+        *this = convertRgb32ToRgb24(obj);
         return *this;
     }
 
@@ -144,6 +201,27 @@ struct Rgb24
                      static_cast<Channel>(channel_max() ^ g),
                      static_cast<Channel>(channel_max() ^ b));
     }
+
+    std::string toString() const
+    {
+        return convertRgb24ToHexString(*this);
+    }
+
+    Err fromString(std::string const & text)
+    {
+        return convertHexStringToRgb24(text, *this);
+    }
+
+    explicit operator Rgb32() const TBAG_NOEXCEPT;
+    explicit operator std::string() const;
+
+    static Rgb24 fromFloating(float r, float g, float b) TBAG_NOEXCEPT
+    {
+        return { float_to_channel(r),
+                 float_to_channel(g),
+                 float_to_channel(b)
+        };
+    }
 };
 
 /**
@@ -165,8 +243,17 @@ struct Rgb32
     Rgb32(Channel r_, Channel g_, Channel b_, Channel a_ = channel_max()) TBAG_NOEXCEPT : r(r_), g(g_), b(b_), a(a_)
     { /* EMPTY. */ }
 
+    Rgb32(std::string const & text) TBAG_NOEXCEPT : r(), g(), b(), a()
+    { convertHexStringToRgb32(text, *this); }
+
+    Rgb32(Rgb24 const & obj) TBAG_NOEXCEPT : r(), g(), b(), a()
+    { *this = obj; }
+
     Rgb32(Rgb32 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b), a(obj.a)
     { /* EMPTY. */ }
+
+    Rgb32(Rgb32 && obj) TBAG_NOEXCEPT : r(), g(), b(), a()
+    { *this = std::move(obj); }
 
     ~Rgb32()
     { /* EMPTY. */ }
@@ -179,6 +266,18 @@ struct Rgb32
             b = obj.b;
             a = obj.a;
         }
+        return *this;
+    }
+
+    Rgb32 & operator =(Rgb32 && obj) TBAG_NOEXCEPT
+    {
+        swap(obj);
+        return *this;
+    }
+
+    Rgb32 & operator =(Rgb24 const & obj) TBAG_NOEXCEPT
+    {
+        *this = convertRgb24ToRgb32(obj);
         return *this;
     }
 
@@ -211,9 +310,73 @@ struct Rgb32
     {
         return Rgb32(static_cast<Channel>(channel_max() ^ r),
                      static_cast<Channel>(channel_max() ^ g),
-                     static_cast<Channel>(channel_max() ^ b));
+                     static_cast<Channel>(channel_max() ^ b), a);
+    }
+
+    std::string toString() const
+    {
+        return convertRgb32ToHexString(*this);
+    }
+
+    std::string toArgbString() const
+    {
+        return convertRgb32ToArgbHexString(*this);
+    }
+
+    Err fromString(std::string const & text)
+    {
+        return convertHexStringToRgb32(text, *this);
+    }
+
+    Err fromArgbString(std::string const & text)
+    {
+        return convertArgbHexStringToRgb32(text, *this);
+    }
+
+    explicit operator Rgb24() const TBAG_NOEXCEPT;
+    explicit operator std::string() const;
+
+    static Rgb32 fromFloating(float r, float g, float b, float a = 1.0f) TBAG_NOEXCEPT
+    {
+        return { float_to_channel(r),
+                 float_to_channel(g),
+                 float_to_channel(b),
+                 float_to_channel(a)
+        };
     }
 };
+
+Rgb24::operator Rgb32() const TBAG_NOEXCEPT
+{
+    return convertRgb32ToRgb24(*this);
+}
+
+Rgb24::operator std::string() const
+{
+    return toString();
+}
+
+Rgb32::operator Rgb24() const TBAG_NOEXCEPT
+{
+    return convertRgb24ToRgb32(*this);
+}
+
+Rgb32::operator std::string() const
+{
+    return toString();
+}
+
+template <class CharT, class TraitsT>
+std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, Rgb24 const & color)
+{
+    return os << color.toString();
+}
+
+template <class CharT, class TraitsT>
+std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, Rgb32 const & color)
+{
+    return os << color.toString();
+}
 
 /** General color structure. */
 using Color = Rgb24;
@@ -235,9 +398,9 @@ Color const BLUE_COLOR  = {channel_min(), channel_min(), channel_max()};
 
 Color const GRAY_COLOR  = {211, 211, 211};
 
-// ------------
-// Flat colors.
-// ------------
+// -----------
+// Flat colors
+// -----------
 
 Color const TURQUOISE_COLOR     = { 26, 188, 156};
 Color const EMERALD_COLOR       = { 46, 204, 113};

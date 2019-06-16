@@ -233,17 +233,17 @@ Err convertHexCharToHalfByte(char hex_char, uint8_t & result)
     case '7': result = 0x7; return E_SUCCESS;
     case '8': result = 0x8; return E_SUCCESS;
     case '9': result = 0x9; return E_SUCCESS;
-    case 'A':
+    case 'A': TBAG_FALLTHROUGH
     case 'a': result = 0xA; return E_SUCCESS;
-    case 'B':
+    case 'B': TBAG_FALLTHROUGH
     case 'b': result = 0xB; return E_SUCCESS;
-    case 'C':
+    case 'C': TBAG_FALLTHROUGH
     case 'c': result = 0xC; return E_SUCCESS;
-    case 'D':
+    case 'D': TBAG_FALLTHROUGH
     case 'd': result = 0xD; return E_SUCCESS;
-    case 'E':
+    case 'E': TBAG_FALLTHROUGH
     case 'e': result = 0xE; return E_SUCCESS;
-    case 'F':
+    case 'F': TBAG_FALLTHROUGH
     case 'f': result = 0xF; return E_SUCCESS;
     }
     return E_PARSING;

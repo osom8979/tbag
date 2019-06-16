@@ -18,7 +18,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 
-#include <libtbag/graphic/Color.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/box/Box.hpp>
 

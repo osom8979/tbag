@@ -36,6 +36,12 @@ struct Vector3
     T x, y, z;
 };
 
+template <typename T>
+struct Vector4
+{
+    T x, y, z, w;
+};
+
 template <typename T, std::size_t N>
 struct VectorN
 {
