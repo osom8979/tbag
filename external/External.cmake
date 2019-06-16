@@ -648,13 +648,16 @@ else ()
                        "-DCIVETWEB_ENABLE_LUA=OFF"
                        "-DCIVETWEB_INSTALL_EXECUTABLE=OFF"
                        "-DCIVETWEB_ALLOW_WARNINGS=ON"
+                       "-DCIVETWEB_ENABLE_SSL_DYNAMIC_LOADING=OFF"
+                       "-DCIVETWEB_ENABLE_SSL=ON"
             #--Output lcivetwebing-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
             LOG_BUILD     0
             LOG_TEST      1
-            LOG_INSTALL   1)
+            LOG_INSTALL   1
+            DEPENDS zlib ressl)
     fake_output_library (civetweb_ext_output civetweb_ext ${civetweb_EXT_LIBRARIES})
 endif ()
 add_custom_target (civetweb DEPENDS ${civetweb_EXT_LIBRARIES})
