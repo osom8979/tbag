@@ -187,7 +187,7 @@ std::vector<InterfaceAddress> getInterfaceAddresses()
 std::string convertPhysicalToString(PhysicalAddress const & physical)
 {
     std::vector<uint8_t> const BUFFER(physical.begin(), physical.end());
-    return string::convertByteVectorToHexString(BUFFER, std::string(), std::string(":"));
+    return libtbag::string::convertByteVectorToHexString(BUFFER, std::string(), std::string(":"));
 }
 
 void changeDirectory(std::string const & dir)
@@ -258,30 +258,80 @@ uint64_t getHighResolutionTime()
 
 Err getEnv(std::string const & name, std::string & value)
 {
+#if (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
+    std::size_t size = 0;
+    int code = ::uv_os_getenv(name.c_str(), nullptr, &size);
+    if (code != UV_ENOBUFS) {
+        return libtbag::convertUvErrorToErr(code);
+    }
+    assert(size >= 1);
+    assert(code == UV_ENOBUFS);
+    std::vector<char> buffer(size);
+    code = ::uv_os_getenv(name.c_str(), &value[0], &size);
+    if (code == 0) {
+        value = std::string(&buffer[0]);
+        return E_SUCCESS;
+    }
+    return libtbag::convertUvErrorToErr(code);
+#else
     char * env_value = ::getenv(name.c_str());
     if (env_value != nullptr) {
         value = std::string(env_value);
         return E_SUCCESS;
     }
     return E_ENFOUND;
+#endif
 }
 
 Err setEnv(std::string const & name, std::string const & value)
 {
+#if (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
+    return libtbag::convertUvErrorToErr(::uv_os_setenv(name.c_str(), value.c_str()));
+#else
     tDLogE("setEnv() Function not implemented.");
     return E_ENOSYS;
+#endif
 }
 
 Err unsetEnv(std::string const & name)
 {
+#if (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
+    return libtbag::convertUvErrorToErr(::uv_os_unsetenv(name.c_str()));
+#else
     tDLogE("unsetEnv() Function not implemented.");
     return E_ENOSYS;
+#endif
 }
 
 std::string getHostName()
 {
+#if (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 16)
+    char buffer[UV_MAXHOSTNAMESIZE] = {0,};
+    std::size_t size = UV_MAXHOSTNAMESIZE;
+    int const CODE = ::uv_os_gethostname(buffer, &size);
+    if (CODE == 0) {
+        return std::string(&buffer[0]);
+    }
+    return std::string();
+#elif (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
+    std::size_t size = 0;
+    int code = ::uv_os_gethostname(nullptr, &size);
+    if (code != UV_ENOBUFS) {
+        return std::string();
+    }
+
+    assert(size >= 1);
+    assert(code == UV_ENOBUFS);
+    std::vector<char> buffer(size);
+    code = ::uv_os_gethostname(&buffer[0], &size);
+    if (code == 0) {
+        return std::string(&buffer[0]);
+    }
+    return std::string();
+#else
     tDLogE("getHostName() Function not implemented.");
     return std::string();
+#endif
 }
 
 } // namespace uvpp
