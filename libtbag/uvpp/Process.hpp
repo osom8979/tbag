@@ -56,6 +56,11 @@ public:
     TBAG_CONSTEXPR static int const UNKNOWN_PROCESS_ID = -1;
 
 public:
+    TBAG_CONSTEXPR static char const * const ESSENTIAL_ENV_SYSTEMDRIVE = "SystemDrive";
+    TBAG_CONSTEXPR static char const * const ESSENTIAL_ENV_SYSTEMROOT = "SystemRoot";
+    TBAG_CONSTEXPR static char const * const ESSENTIAL_ENV_TEMP = "TEMP";
+
+public:
     /**
      * Stdio container prototype.
      *
@@ -141,6 +146,7 @@ public:
 
         Options & appendArgument(std::string const & arg);
         Options & appendEnvironment(std::string const & env);
+        Options & appendEnvironment(std::string const & key, std::string const & val);
         Options & appendDefaultEnvironment();
 
         Options & appendStdio(StdioContainer const & io);

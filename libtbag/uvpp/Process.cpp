@@ -324,6 +324,12 @@ Process::Options & Process::Options::appendEnvironment(std::string const & env)
     return *this;
 }
 
+Process::Options & Process::Options::appendEnvironment(std::string const & key, std::string const & val)
+{
+    envs.push_back(key + "=" + val);
+    return *this;
+}
+
 Process::Options & Process::Options::appendDefaultEnvironment()
 {
     if (isWindowsPlatform()) {
@@ -342,15 +348,16 @@ Process::Options & Process::Options::appendDefaultEnvironment()
         // Also add variables known to Cygwin to be required for correct
         // subprocess operation in many cases:
         // https://github.com/Alexpux/Cygwin/blob/b266b04fbbd3a595f02ea149e4306d3ab9b1fe3d/winsup/cygwin/environ.cc#L955
+
         std::string value;
-        if (isSuccess(libtbag::uvpp::getEnv("SystemDrive", value))) {
-            envs.push_back(value);
+        if (isSuccess(libtbag::uvpp::getEnv(ESSENTIAL_ENV_SYSTEMDRIVE, value))) {
+            appendEnvironment(ESSENTIAL_ENV_SYSTEMDRIVE, value);
         }
-        if (isSuccess(libtbag::uvpp::getEnv("SystemRoot", value))) {
-            envs.push_back(value);
+        if (isSuccess(libtbag::uvpp::getEnv(ESSENTIAL_ENV_SYSTEMROOT, value))) {
+            appendEnvironment(ESSENTIAL_ENV_SYSTEMROOT, value);
         }
-        if (isSuccess(libtbag::uvpp::getEnv("TEMP", value))) {
-            envs.push_back(value);
+        if (isSuccess(libtbag::uvpp::getEnv(ESSENTIAL_ENV_TEMP, value))) {
+            appendEnvironment(ESSENTIAL_ENV_TEMP, value);
         }
     }
     return *this;
