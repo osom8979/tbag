@@ -202,24 +202,6 @@ enum {
     MG_WEBSOCKET_OPCODE_PONG = 0xa
 };
 
-#undef PRINTF_FORMAT_STRING
-#if defined(_MSC_VER) && _MSC_VER >= 1400
-# include <sal.h>
-# if defined(_MSC_VER) && _MSC_VER > 1400
-#  define PRINTF_FORMAT_STRING(s) _Printf_format_string_ s
-# else
-#  define PRINTF_FORMAT_STRING(s) __format_string s
-# endif
-#else
-# define PRINTF_FORMAT_STRING(s) s
-#endif
-
-#ifdef __GNUC__
-#define PRINTF_ARGS(x, y) __attribute__((format(printf, x, y)))
-#else
-#define PRINTF_ARGS(x, y)
-#endif
-
 struct mg_form_data_handler
 {
     int (*field_found)(char const * key, char const * filename, char * path, size_t pathlen, void * user_data);

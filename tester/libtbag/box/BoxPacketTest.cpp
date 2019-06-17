@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/dom/jsoncpp/json.h>
+#include <libtbag/dom/json/JsonUtils.hpp>
 #include <libtbag/box/BoxPacket.hpp>
 #include <iterator>
 
@@ -102,8 +103,7 @@ TEST(BoxPacketTest, ToJson)
     // std::cout << text << std::endl;
 
     Json::Value root;
-    Json::Reader reader;
-    ASSERT_TRUE(reader.parse(packet.toJsonString(), root));
+    ASSERT_TRUE(libtbag::dom::json::parse(packet.toJsonString(), root));
     ASSERT_TRUE(root["dims"].isArray());
     ASSERT_EQ(3, root["dims"].size());
     ASSERT_EQ(4, root["dims"][0].asInt());
