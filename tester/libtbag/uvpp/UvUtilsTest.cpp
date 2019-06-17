@@ -147,3 +147,27 @@ TEST(UvUtilsTest, GetEnv)
     ASSERT_FALSE(path.empty());
 }
 
+TEST(UvUtilsTest, GetEnv_For_Windows)
+{
+    if (!isWindowsPlatform()) {
+        std::cout << "Skip this test.\n";
+        return;
+    }
+
+    std::string path;
+    ASSERT_EQ(E_SUCCESS, getEnv("SystemDrive", path));
+    ASSERT_FALSE(path.empty());
+
+    path.clear();
+    ASSERT_EQ(E_SUCCESS, getEnv("SystemRoot", path));
+    ASSERT_FALSE(path.empty());
+
+    path.clear();
+    ASSERT_EQ(E_SUCCESS, getEnv("TEMP", path));
+    ASSERT_FALSE(path.empty());
+
+    path.clear();
+    ASSERT_EQ(E_SUCCESS, getEnv("TMP", path));
+    ASSERT_FALSE(path.empty());
+}
+
