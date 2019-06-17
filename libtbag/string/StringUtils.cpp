@@ -291,21 +291,23 @@ TBAG_CONSTEXPR char const TBAG_HEX_ARRAY_BYTES[] = "0123456789ABCDEF";
 
 AddressHexString convertAddressToHexString(void const * address) TBAG_NOEXCEPT
 {
-    auto addr = reinterpret_cast<std::make_unsigned<std::ptrdiff_t>::type>(address);
-    std::size_t const SIZE = sizeof(void*);
+    return convertUnsignedIntegerToHexString((std::uint64_t)address);
+}
 
+AddressHexString convertUnsignedIntegerToHexString(std::uint64_t value) TBAG_NOEXCEPT
+{
     AddressHexString result = {"0x"};
     result.back() = '\0';
-    char * rend = result.data() + SIZE * 2 + 1;
+    char * rend = result.data() + sizeof(std::uint64_t) * 2 + 1;
 
-    for (std::size_t i = 0; i < SIZE; ++i) {
-        *rend = TBAG_HEX_ARRAY_BYTES[(addr & 0xFFu) & 0xF];
+    for (std::size_t i = 0; i < sizeof(std::uint64_t); ++i) {
+        *rend = TBAG_HEX_ARRAY_BYTES[(value & 0xFFu) & 0xF];
         --rend;
 
-        *rend = TBAG_HEX_ARRAY_BYTES[(addr & 0xFFu) >> 4];
+        *rend = TBAG_HEX_ARRAY_BYTES[(value & 0xFFu) >> 4];
         --rend;
 
-        addr >>= 8;
+        value >>= 8;
     }
     return result;
 }

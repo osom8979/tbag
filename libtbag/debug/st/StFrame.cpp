@@ -23,15 +23,15 @@ NAMESPACE_LIBTBAG_OPEN
 namespace debug {
 namespace st    {
 
-StFrame::StFrame() TBAG_NOEXCEPT : StFrame(nullptr)
-{
-    // EMPTY.
-}
-
-StFrame::StFrame(void const * addr) TBAG_NOEXCEPT : addr(addr), offset(0), index(0)
+StFrame::StFrame(std::uint64_t addr) TBAG_NOEXCEPT : addr(addr), offset(0), index(0)
 {
     clearName();
     clearSource();
+}
+
+StFrame::StFrame(void const * addr) TBAG_NOEXCEPT : StFrame((std::uint64_t)addr)
+{
+    // EMPTY.
 }
 
 StFrame::StFrame(StFrame const & obj) TBAG_NOEXCEPT
@@ -89,7 +89,8 @@ void StFrame::clearSource()
 
 std::string StFrame::toAddressString() const
 {
-    return string::convertAddressHexStringToString(string::convertAddressToHexString(addr));
+    using namespace libtbag::string;
+    return convertAddressHexStringToString(convertUnsignedIntegerToHexString(addr));
 }
 
 void StFrame::demangleAssign(char const * symbol, std::size_t symbol_size)
@@ -111,7 +112,7 @@ std::string StFrame::toString() const
     return toAddressString() + " " + source + "+" + std::to_string(offset) + " [" + name + "]";
 }
 
-StFrame StFrame::parseGccSymbolize(char const * symbols_format, void const * addr)
+StFrame StFrame::parseRawGccSymbolize(char const * symbols_format, std::uint64_t addr)
 {
     if (/* */symbols_format == nullptr ||
             *symbols_format == '[' || // Check the case of "[(nil)]"
@@ -186,8 +187,8 @@ StFrame StFrame::parseGccSymbolize(char const * symbols_format, void const * add
                 frame.offset = static_cast<int>(std::strtol(buffer, nullptr, 0));
 
             } else if (column == SYMBOL_STRINGS_GCC_COLUMN_ADDRESS) {
-                if (addr == nullptr) {
-                    frame.addr = reinterpret_cast<void*>(std::strtoull(buffer, nullptr, 0));
+                if (addr == 0) {
+                    frame.addr = std::strtoull(buffer, nullptr, 0);
                 }
 
             } else {
@@ -204,7 +205,7 @@ StFrame StFrame::parseGccSymbolize(char const * symbols_format, void const * add
     return frame;
 }
 
-StFrame StFrame::parseClangSymbolize(char const * symbols_format, void const * addr)
+StFrame StFrame::parseRawClangSymbolize(char const * symbols_format, std::uint64_t addr)
 {
     if (symbols_format == nullptr) {
         return StFrame(addr);
@@ -250,8 +251,8 @@ StFrame StFrame::parseClangSymbolize(char const * symbols_format, void const * a
                 std::memcpy(frame.name, buffer, copy_size);
 
             } else if (column == SYMBOL_STRINGS_CLANG_COLUMN_ADDRESS) {
-                if (addr == nullptr) {
-                    frame.addr = reinterpret_cast<void*>(std::strtoull(buffer, nullptr, 0));
+                if (addr == 0) {
+                    frame.addr = std::strtoull(buffer, nullptr, 0);
                 }
 
             } else if (column == SYMBOL_STRINGS_CLANG_COLUMN_SYMBOL) {
@@ -273,15 +274,30 @@ StFrame StFrame::parseClangSymbolize(char const * symbols_format, void const * a
     return frame;
 }
 
-StFrame StFrame::parseSymbolize(char const * symbols_format, void const * addr)
+StFrame StFrame::parseRawSymbolize(char const * symbols_format, std::uint64_t addr)
 {
 #if defined(TBAG_COMP_CLANG)
-    return parseClangSymbolize(symbols_format, addr);
+    return parseRawClangSymbolize(symbols_format, addr);
 #elif defined(TBAG_COMP_GNUC_CXX)
-    return parseGccSymbolize(symbols_format, addr);
+    return parseRawGccSymbolize(symbols_format, addr);
 #else
     return StFrame(addr);
 #endif
+}
+
+StFrame StFrame::parseGccSymbolize(char const * symbols_format, void const * addr)
+{
+    return parseRawGccSymbolize(symbols_format, (std::uint64_t)addr);
+}
+
+StFrame StFrame::parseClangSymbolize(char const * symbols_format, void const * addr)
+{
+    return parseRawClangSymbolize(symbols_format, (std::uint64_t)addr);
+}
+
+StFrame StFrame::parseSymbolize(char const * symbols_format, void const * addr)
+{
+    return parseRawSymbolize(symbols_format, (std::uint64_t)addr);
 }
 
 } // namespace st

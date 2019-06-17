@@ -22,6 +22,7 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
+#include <cstdint>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -161,6 +162,7 @@ TBAG_API Err convertHexStringToBuffer(char const * hex_string, std::size_t lengt
  * Address to HEX string.
  */
 TBAG_API AddressHexString convertAddressToHexString(void const * address) TBAG_NOEXCEPT;
+TBAG_API AddressHexString convertUnsignedIntegerToHexString(std::uint64_t value) TBAG_NOEXCEPT;
 TBAG_API std::string convertAddressHexStringToString(AddressHexString const & address);
 TBAG_API std::string convertAddressToString(void const * address);
 

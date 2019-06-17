@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 
 #include <cstdlib>
+#include <cstdint>
+
 #include <iosfwd>
 #include <string>
 #include <array>
@@ -47,15 +49,22 @@ public:
     TBAG_CONSTEXPR static std::size_t getSourceMemSize() TBAG_NOEXCEPT { return SOURCE_MEM_SIZE; }
 
 public:
-    void const * addr;
+    /**
+     * x86 and x64 compatible type.
+     *
+     * @warning
+     *  The <code>void*</code> or <code>size_t</code> type is 4 bytes on x86. @n
+     *  You must use the <code>uint64_t</code> type to read address information of 8 bytes (x64).
+     */
+    std::uint64_t addr;
     char name[NAME_MEM_SIZE];
     char source[SOURCE_MEM_SIZE];
-    int  offset;
-    int  index;
+    int offset;
+    int index;
 
 public:
-    StFrame() TBAG_NOEXCEPT;
-    StFrame(void const * addr) TBAG_NOEXCEPT;
+    StFrame(std::uint64_t addr = 0) TBAG_NOEXCEPT;
+    explicit StFrame(void const * addr) TBAG_NOEXCEPT;
     StFrame(StFrame const & obj) TBAG_NOEXCEPT;
     StFrame(StFrame && obj) TBAG_NOEXCEPT;
     ~StFrame();
@@ -69,15 +78,25 @@ public:
     void clearSource();
 
 public:
-    inline void const * address() const TBAG_NOEXCEPT { return addr; }
-    inline std::ptrdiff_t diff() const TBAG_NOEXCEPT { return reinterpret_cast<std::ptrdiff_t>(addr); }
-    inline bool empty() const TBAG_NOEXCEPT { return addr == nullptr; }
-    inline bool operator!() const TBAG_NOEXCEPT { return addr == nullptr; }
-    inline operator bool() const TBAG_NOEXCEPT { return addr != nullptr; }
+    inline void const * address() const TBAG_NOEXCEPT
+    { return (void const *)(addr); }
+
+    inline bool empty() const TBAG_NOEXCEPT
+    { return addr == 0; }
 
 public:
-    inline std::size_t toHash() TBAG_NOEXCEPT
-    { return reinterpret_cast<std::size_t>(addr); }
+    inline bool operator!() const TBAG_NOEXCEPT
+    { return addr == 0; }
+
+    inline operator bool() const TBAG_NOEXCEPT
+    { return addr != 0; }
+
+public:
+    inline std::uint64_t diff() const TBAG_NOEXCEPT
+    { return addr; }
+
+    inline std::uint64_t toHash() const TBAG_NOEXCEPT
+    { return addr; }
 
 public:
     void demangleAssign(char const * symbol, std::size_t symbol_size);
@@ -99,6 +118,13 @@ public:
     TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_ADDRESS = 2;
     TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_SYMBOL  = 3;
     TBAG_CONSTEXPR static int const SYMBOL_STRINGS_CLANG_COLUMN_OFFSET  = 4;
+
+public:
+    // clang-format off
+    static StFrame parseRawGccSymbolize  (char const * symbols_format, std::uint64_t addr = 0);
+    static StFrame parseRawClangSymbolize(char const * symbols_format, std::uint64_t addr = 0);
+    static StFrame parseRawSymbolize     (char const * symbols_format, std::uint64_t addr = 0);
+    // clang-format on
 
 public:
     // clang-format off
