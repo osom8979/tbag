@@ -18,6 +18,58 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
+TmxProperty::TmxProperty() : name(), value(), type(Type::NONE)
+{
+    // EMPTY.
+}
+
+TmxProperty::TmxProperty(std::string const & n, std::string const & v, Type t)
+        : name(n), value(v), type(t)
+{
+    // EMPTY.
+}
+
+TmxProperty::TmxProperty(std::string const & n, std::string const & v)
+        : name(n), value(v), type(Type::STRING)
+{
+    // EMPTY.
+}
+
+TmxProperty::TmxProperty(std::string const & n, int v)
+        : name(n), value(std::to_string(v)), type(Type::INT)
+{
+    // EMPTY.
+}
+
+TmxProperty::TmxProperty(std::string const & n, float v)
+        : name(n), value(std::to_string(v)), type(Type::FLOAT)
+{
+    // EMPTY.
+}
+
+TmxProperty::TmxProperty(std::string const & n, bool v)
+        : name(n), value(v ? VAL_TRUE : VAL_FALSE), type(Type::BOOL)
+{
+    // EMPTY.
+}
+
+TmxProperty::TmxProperty(std::string const & n, Rgb24 const & c)
+        : TmxProperty(n, libtbag::graphic::convertRgb24ToRgb32(c))
+{
+    // EMPTY.
+}
+
+TmxProperty::TmxProperty(std::string const & n, Rgb32 const & c)
+        : name(n), value(c.toArgbString()), type(Type::COLOR)
+{
+    // EMPTY.
+}
+
+TmxProperty::~TmxProperty()
+{
+    // EMPTY.
+}
+
 void TmxProperty::clear()
 {
     name.clear();

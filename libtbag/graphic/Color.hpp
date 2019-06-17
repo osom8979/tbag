@@ -185,17 +185,17 @@ struct Rgb24
         lh.swap(rh);
     }
 
-    inline bool operator ==(Rgb24 const & obj) const TBAG_NOEXCEPT
+    bool operator ==(Rgb24 const & obj) const TBAG_NOEXCEPT
     {
         return r == obj.r && g == obj.g && b == obj.b;
     }
 
-    inline bool operator !=(Rgb24 const & obj) const TBAG_NOEXCEPT
+    bool operator !=(Rgb24 const & obj) const TBAG_NOEXCEPT
     {
         return !((*this) == obj);
     }
 
-    inline Rgb24 inverse() const TBAG_NOEXCEPT
+    Rgb24 inverse() const TBAG_NOEXCEPT
     {
         return Rgb24(static_cast<Channel>(channel_max() ^ r),
                      static_cast<Channel>(channel_max() ^ g),
@@ -211,9 +211,6 @@ struct Rgb24
     {
         return convertHexStringToRgb24(text, *this);
     }
-
-    explicit operator Rgb32() const TBAG_NOEXCEPT;
-    explicit operator std::string() const;
 
     static Rgb24 fromFloating(float r, float g, float b) TBAG_NOEXCEPT
     {
@@ -306,7 +303,7 @@ struct Rgb32
         return !((*this) == obj);
     }
 
-    inline Rgb32 inverse() const TBAG_NOEXCEPT
+    Rgb32 inverse() const TBAG_NOEXCEPT
     {
         return Rgb32(static_cast<Channel>(channel_max() ^ r),
                      static_cast<Channel>(channel_max() ^ g),
@@ -333,9 +330,6 @@ struct Rgb32
         return convertArgbHexStringToRgb32(text, *this);
     }
 
-    explicit operator Rgb24() const TBAG_NOEXCEPT;
-    explicit operator std::string() const;
-
     static Rgb32 fromFloating(float r, float g, float b, float a = 1.0f) TBAG_NOEXCEPT
     {
         return { float_to_channel(r),
@@ -345,26 +339,6 @@ struct Rgb32
         };
     }
 };
-
-Rgb24::operator Rgb32() const TBAG_NOEXCEPT
-{
-    return convertRgb32ToRgb24(*this);
-}
-
-Rgb24::operator std::string() const
-{
-    return toString();
-}
-
-Rgb32::operator Rgb24() const TBAG_NOEXCEPT
-{
-    return convertRgb24ToRgb32(*this);
-}
-
-Rgb32::operator std::string() const
-{
-    return toString();
-}
 
 template <class CharT, class TraitsT>
 std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, Rgb24 const & color)

@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
+#include <libtbag/graphic/Color.hpp>
 
 #include <vector>
 #include <string>
@@ -28,9 +29,7 @@ namespace tiled   {
 namespace details {
 
 /**
- * TmxProperty class prototype.
- *
- * <property> element.
+ * 'property' element.
  *
  * DTD:
  * @code{.dtd}
@@ -49,10 +48,15 @@ namespace details {
  */
 struct TBAG_API TmxProperty : public libtbag::dom::xml::XmlHelper
 {
+    using Rgb24 = libtbag::graphic::Rgb24;
+    using Rgb32 = libtbag::graphic::Rgb32;
+
     TBAG_CONSTEXPR static char const * const TAG_NAME = "property";
 
     /** The name of the property. */
-    TBAG_CONSTEXPR static char const * const ATT_NAME = "name";
+    TBAG_CONSTEXPR static char const * const ATT_NAME  = "name";
+    TBAG_CONSTEXPR static char const * const VAL_TRUE  = "true";
+    TBAG_CONSTEXPR static char const * const VAL_FALSE = "false";
 
     /**
      * The type of the property.
@@ -79,6 +83,16 @@ struct TBAG_API TmxProperty : public libtbag::dom::xml::XmlHelper
     };
 
     Type type;
+
+    TmxProperty();
+    TmxProperty(std::string const & n, std::string const & v, Type t);
+    TmxProperty(std::string const & n, std::string const & v);
+    TmxProperty(std::string const & n, int v);
+    TmxProperty(std::string const & n, float v);
+    TmxProperty(std::string const & n, bool v);
+    TmxProperty(std::string const & n, Rgb24 const & c);
+    TmxProperty(std::string const & n, Rgb32 const & c);
+    ~TmxProperty();
 
     inline Type getType(std::string const & text) const TBAG_NOEXCEPT
     {
