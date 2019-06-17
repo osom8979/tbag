@@ -50,7 +50,6 @@ int execute(std::string const & file,
     Loop loop;
 
     Process::Options options;
-    options.clear();
     options.setFile(EXE_FILE.toString());
     if (cwd.empty()) {
         options.setWorking(Path::getWorkDir().toString());

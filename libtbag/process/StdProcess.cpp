@@ -56,7 +56,6 @@ Err StdProcess::spawn(Loop & loop,
     }
 
     Process::Options options;
-    options.clear();
     options.setFile(exe_file.toString());
     if (cwd.empty()) {
         options.setWorking(Path::getWorkDir().toString());
