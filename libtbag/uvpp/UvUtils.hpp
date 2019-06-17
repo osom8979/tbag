@@ -156,6 +156,8 @@ TBAG_API uint64_t getTotalMemory();
 /** Returns the current high-resolution real time. This is expressed in nanoseconds. */
 TBAG_API uint64_t getHighResolutionTime();
 
+TBAG_CONSTEXPR std::size_t const DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE = 2048;
+
 /**
  * Retrieves the environment variable specified by name.
  *

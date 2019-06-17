@@ -259,15 +259,14 @@ uint64_t getHighResolutionTime()
 Err getEnv(std::string const & name, std::string & value)
 {
 #if (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
-    std::size_t size = 0;
-    int code = ::uv_os_getenv(name.c_str(), nullptr, &size);
-    if (code != UV_ENOBUFS) {
-        return libtbag::convertUvErrorToErr(code);
-    }
-    assert(size >= 1);
-    assert(code == UV_ENOBUFS);
+    std::size_t size = DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE;
     std::vector<char> buffer(size);
-    code = ::uv_os_getenv(name.c_str(), &value[0], &size);
+    int code = ::uv_os_getenv(name.c_str(), &buffer[0], &size);
+    if (code == UV_ENOBUFS) {
+        assert(size > DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE);
+        buffer.resize(size);
+        code = ::uv_os_getenv(name.c_str(), &value[0], &size);
+    }
     if (code == 0) {
         value = std::string(&buffer[0]);
         return E_SUCCESS;
@@ -314,16 +313,14 @@ std::string getHostName()
     }
     return std::string();
 #elif (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
-    std::size_t size = 0;
-    int code = ::uv_os_gethostname(nullptr, &size);
-    if (code != UV_ENOBUFS) {
-        return std::string();
-    }
-
-    assert(size >= 1);
-    assert(code == UV_ENOBUFS);
+    std::size_t size = DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE;
     std::vector<char> buffer(size);
-    code = ::uv_os_gethostname(&buffer[0], &size);
+    int code = ::uv_os_gethostname(&buffer[0], &size);
+    if (code == UV_ENOBUFS) {
+        assert(size > DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE);
+        buffer.resize(size);
+        code = ::uv_os_gethostname(&buffer[0], &size);
+    }
     if (code == 0) {
         return std::string(&buffer[0]);
     }
