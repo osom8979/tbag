@@ -287,12 +287,12 @@ Err convertHexStringToBuffer(char const * hex_string, std::size_t length, libtba
     return E_SUCCESS;
 }
 
-TBAG_CONSTEXPR char const TBAG_HEX_ARRAY_BYTES[] = "0123456789ABCDEF";
-
 AddressHexString convertAddressToHexString(void const * address) TBAG_NOEXCEPT
 {
     return convertUnsignedIntegerToHexString((std::uint64_t)address);
 }
+
+TBAG_CONSTEXPR static char const TBAG_HEX_ARRAY_BYTES[] = "0123456789ABCDEF";
 
 AddressHexString convertUnsignedIntegerToHexString(std::uint64_t value) TBAG_NOEXCEPT
 {

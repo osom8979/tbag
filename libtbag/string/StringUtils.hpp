@@ -148,7 +148,7 @@ std::string convertByteVectorToHexStringBox(std::vector<T> const & bytes, int li
 }
 
 TBAG_CONSTEXPR std::size_t const HEX_STRING_ADDRESS_BYTE_SIZE =
-        (/*PREFIX(0x)*/2) + (sizeof(void*) * 2/*HEX STRING ADDRESS*/) + (1/*NULL*/);
+        (/*PREFIX(0x)*/2) + (sizeof(std::uint64_t) * 2/*HEX STRING ADDRESS*/) + (1/*NULL*/);
 using AddressHexString = std::array<char, HEX_STRING_ADDRESS_BYTE_SIZE>;
 
 /**
