@@ -141,6 +141,7 @@ public:
 
         Options & appendArgument(std::string const & arg);
         Options & appendEnvironment(std::string const & env);
+        Options & appendDefaultEnvironment();
 
         Options & appendStdio(StdioContainer const & io);
         Options & appendIgnoreStdio();

@@ -9,6 +9,7 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Stream.hpp>
+#include <libtbag/uvpp/UvUtils.hpp>
 #include <uv.h>
 
 #include <sstream>
@@ -268,7 +269,7 @@ Process::Options::Options() : file(), cwd(), args(), envs(), stdios(),
                               uid(0), gid(0), setuid(false), setgid(false),
                               detached(false), verbatim_args(false), hide(false)
 {
-    // EMPTY.
+    appendDefaultEnvironment();
 }
 
 Process::Options::~Options()
@@ -320,6 +321,38 @@ Process::Options & Process::Options::appendArgument(std::string const & arg)
 Process::Options & Process::Options::appendEnvironment(std::string const & env)
 {
     envs.push_back(env);
+    return *this;
+}
+
+Process::Options & Process::Options::appendDefaultEnvironment()
+{
+    if (isWindowsPlatform()) {
+        // https://github.com/libuv/libuv/commit/3409c9b3836e28f8fb3ca22d48ab521950fd3a78
+        //
+        // The way windows takes environment variables is different than what C does;
+        // Windows wants a contiguous block of null-terminated strings, terminated
+        // with an additional null.
+        //
+        // Windows has a few "essential" environment variables. winsock will fail
+        // to initialize if SYSTEMROOT is not defined; some APIs make reference to
+        // TEMP. SYSTEMDRIVE is probably also important. We therefore ensure that
+        // these get defined if the input environment block does not contain any
+        // values for them.
+        //
+        // Also add variables known to Cygwin to be required for correct
+        // subprocess operation in many cases:
+        // https://github.com/Alexpux/Cygwin/blob/b266b04fbbd3a595f02ea149e4306d3ab9b1fe3d/winsup/cygwin/environ.cc#L955
+        std::string value;
+        if (isSuccess(libtbag::uvpp::getEnv("SystemDrive", value))) {
+            envs.push_back(value);
+        }
+        if (isSuccess(libtbag::uvpp::getEnv("SystemRoot", value))) {
+            envs.push_back(value);
+        }
+        if (isSuccess(libtbag::uvpp::getEnv("TEMP", value))) {
+            envs.push_back(value);
+        }
+    }
     return *this;
 }
 
