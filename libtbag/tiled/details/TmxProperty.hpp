@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
 #include <libtbag/graphic/Color.hpp>
+#include <libtbag/filesystem/Path.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <vector>
 #include <string>
@@ -50,6 +52,7 @@ struct TBAG_API TmxProperty : public libtbag::dom::xml::XmlHelper
 {
     using Rgb24 = libtbag::graphic::Rgb24;
     using Rgb32 = libtbag::graphic::Rgb32;
+    using Path  = libtbag::filesystem::Path;
 
     TBAG_CONSTEXPR static char const * const TAG_NAME = "property";
 
@@ -92,46 +95,20 @@ struct TBAG_API TmxProperty : public libtbag::dom::xml::XmlHelper
     TmxProperty(std::string const & n, bool v);
     TmxProperty(std::string const & n, Rgb24 const & c);
     TmxProperty(std::string const & n, Rgb32 const & c);
+    TmxProperty(std::string const & n, Path const & p);
     ~TmxProperty();
 
-    inline Type getType(std::string const & text) const TBAG_NOEXCEPT
-    {
-        if (text == VAL_STRING) {
-            return Type::STRING;
-        } else if (text == VAL_INT) {
-            return Type::INT;
-        } else if (text == VAL_FLOAT) {
-            return Type::FLOAT;
-        } else if (text == VAL_BOOL) {
-            return Type::BOOL;
-        } else if (text == VAL_COLOR) {
-            return Type::COLOR;
-        } else if (text == VAL_FILE) {
-            return Type::FILE;
-        } else {
-            return Type::NONE;
-        }
-    }
+    static Type getType(std::string const & text) TBAG_NOEXCEPT;
+    static char const * const getTypeName(Type t) TBAG_NOEXCEPT;
 
-    inline char const * const getTypeName(Type t) const TBAG_NOEXCEPT
-    {
-        // clang-format off
-        switch (t) {
-        case Type::STRING:  return VAL_STRING;
-        case Type::INT:     return VAL_INT;
-        case Type::FLOAT:   return VAL_FLOAT;
-        case Type::BOOL:    return VAL_BOOL;
-        case Type::COLOR:   return VAL_COLOR;
-        case Type::FILE:    return VAL_FILE;
-        case Type::NONE:
-            TBAG_FALLTHROUGH
-        default:
-            return "";
-        }
-        // clang-format on
-    }
+    int   toInt(int def = 0) const;
+    float toFloat(float def = 0.0f) const;
+    bool  toBool(bool def = false) const;
+    Rgb32 toColor(Rgb32 const & def = libtbag::graphic::BLACK_COLOR) const;
+    Path  toFile() const;
 
     void clear();
+
     Err read(Element const & elem);
     Err dump(Element & elem) const;
     Err dumpToParent(Element & elem) const;
