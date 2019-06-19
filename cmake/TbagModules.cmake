@@ -247,6 +247,38 @@ macro (tbag_modules__apply_thread)
     endif ()
 endmacro ()
 
+macro (tbag_modules__apply_install_name __dir)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -install_name ${__dir})
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_soname __soname)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+        list (APPEND TBAG_PROJECT_LDFLAGS -Wl,-soname,${__soname})
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_soname2 __lib_name __version)
+    tbag_modules__apply_soname (${CMAKE_SHARED_LIBRARY_PREFIX}${__lib_name}${CMAKE_SHARED_LIBRARY_SUFFIX}.${__version})
+endmacro ()
+
+macro (tbag_modules__apply_soname3 __version)
+    tbag_modules__apply_soname2 (${TBAG_PROJECT_CONST_NAME} ${__version})
+endmacro ()
+
+macro (tbag_modules__apply_current_version __current_version)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -current_version ${__current_version})
+    endif ()
+endmacro ()
+
+macro (tbag_modules__apply_compatibility_version __compatibility_version)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -compatibility_version ${__compatibility_version})
+    endif ()
+endmacro ()
+
 ## ----------
 ## Generators
 ## ----------
