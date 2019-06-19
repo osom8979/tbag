@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
 #include <libtbag/graphic/Color.hpp>
 #include <libtbag/filesystem/Path.hpp>

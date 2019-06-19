@@ -190,6 +190,10 @@ Err TmxProperty::dumpToParent(Element & elem) const
 {
     auto * new_elem = newElement(elem, TAG_NAME);
     assert(new_elem != nullptr);
+    auto const CODE = dump(*new_elem);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
     insertElement(elem, new_elem);
     return E_SUCCESS;
 }
