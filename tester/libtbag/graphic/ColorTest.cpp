@@ -58,8 +58,8 @@ TEST(ColorTest, String)
     ASSERT_EQ(Rgb32(17, 34, 51, 68), Rgb32("#1234"));
     ASSERT_EQ(Rgb32(170, 153, 221, 85), Rgb32("#AA99DD55"));
 
-    ASSERT_STREQ(Color(17, 34, 51).toString().c_str(), "#112233");
-    ASSERT_STREQ(Color(170, 153, 221).toString().c_str(), "#AA99DD");
+    ASSERT_STREQ(Color(17, 34, 51).toString().c_str(), "#112233FF");
+    ASSERT_STREQ(Color(170, 153, 221).toString().c_str(), "#AA99DDFF");
 
     ASSERT_STREQ(Rgb32(17, 34, 51, 68).toString().c_str(), "#11223344");
     ASSERT_STREQ(Rgb32(170, 153, 221, 85).toString().c_str(), "#AA99DD55");
