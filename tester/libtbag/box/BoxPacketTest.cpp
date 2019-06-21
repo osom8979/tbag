@@ -110,6 +110,30 @@ TEST(BoxPacketTest, ToJson)
     ASSERT_EQ(3, root["dims"][1].asInt());
     ASSERT_EQ(2, root["dims"][2].asInt());
 
+
+    box_data box2;
+    box_clear(&box2);
+    BoxPacketParser parser;
+    ASSERT_EQ(E_SUCCESS, parser.parseJson(text, &box2));
+
+    ASSERT_EQ(box.type, box2.type);
+    ASSERT_EQ(box.device, box2.device);
+    ASSERT_EQ(box.ext[0], box2.ext[0]);
+    ASSERT_EQ(box.ext[1], box2.ext[1]);
+    ASSERT_EQ(box.ext[2], box2.ext[2]);
+    ASSERT_EQ(box.ext[3], box2.ext[3]);
+    ASSERT_NE(box.data, box2.data);
+    ASSERT_EQ(box.total_data_byte, box2.total_data_byte);
+    ASSERT_EQ(box.size, box2.size);
+    ASSERT_NE(box.dims, box2.dims);
+    ASSERT_EQ(box.total_dims_byte, box2.total_dims_byte);
+    ASSERT_EQ(box.rank, box2.rank);
+
+    for (i = 0; i < 24; ++i) {
+        ASSERT_EQ(((si32*)box.data)[i], ((si32*)box2.data)[i]);
+    }
+
     box_free(&box);
+    box_free(&box2);
 }
 

@@ -91,6 +91,11 @@ inline static AnyArr convertBtypeToAnyArr(btype type) TBAG_NOEXCEPT
     // clang-format on
 }
 
+static bool initParser(FlatBufferParser & parser)
+{
+    return parser.Parse(libtbag::string::mergeArgv((char**)__data_to_string__box__).c_str());
+}
+
 /**
  * FlatBuffer builder implementation for BoxPacketBuilder.
  *
@@ -107,8 +112,7 @@ public:
 public:
     Impl(std::size_t capacity) : builder(capacity, nullptr)
     {
-        auto const PROTOCOL_TEXT = libtbag::string::mergeArgv((char**)__data_to_string__box__);
-        if (!parser.Parse(PROTOCOL_TEXT.c_str())) {
+        if (!initParser(parser)) {
             tDLogA("BoxPacketBuilder::Impl() Parse fail.");
             throw std::bad_alloc();
         }
@@ -285,13 +289,16 @@ BoxPacketBuilder::Buffer BoxPacketBuilder::toBuffer() const
  */
 struct BoxPacketParser::Impl
 {
-private:
-    BoxPacketParser * _parent = nullptr;
+public:
+    FlatBufferParser parser;
 
 public:
-    Impl(BoxPacketParser * parent) : _parent(parent)
+    Impl()
     {
-        assert(_parent != nullptr);
+        if (!initParser(parser)) {
+            tDLogA("BoxPacketParser::Impl() Parse fail.");
+            throw std::bad_alloc();
+        }
     }
 
     ~Impl()
@@ -300,10 +307,17 @@ public:
     }
 
 public:
+    std::pair<Err, std::size_t> parseJson(std::string const & json_text, box_data * box)
+    {
+        if (!parser.Parse(json_text.c_str())) {
+            return std::make_pair(E_PARSING, 0);
+        }
+        return parse(parser.builder_.GetBufferPointer(), parser.builder_.GetSize(), box);
+    }
+
     std::pair<Err, std::size_t> parse(void const * buffer, std::size_t size, box_data * box) const
     {
         using namespace flatbuffers;
-        assert(_parent != nullptr);
         assert(buffer != nullptr);
         assert(size >= 1);
         assert(box != nullptr);
@@ -420,8 +434,7 @@ public:
 // BoxPacketParser
 // ---------------
 
-BoxPacketParser::BoxPacketParser()
-        : _impl(std::make_unique<Impl>(this))
+BoxPacketParser::BoxPacketParser() : _impl(std::make_unique<Impl>())
 {
     assert(_impl);
 }
@@ -440,6 +453,12 @@ Err BoxPacketParser::parse(void const * buffer, std::size_t size,
         *computed_size = result.second;
     }
     return result.first;
+}
+
+Err BoxPacketParser::parseJson(std::string const & json_text, box_data * box)
+{
+    assert(_impl);
+    return _impl->parseJson(json_text, box).first;
 }
 
 // ---------
