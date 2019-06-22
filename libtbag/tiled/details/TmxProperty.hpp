@@ -111,8 +111,10 @@ struct TBAG_API TmxProperty : protected libtbag::dom::xml::XmlHelper
     void clear();
 
     Err read(Element const & elem);
-    Err dump(Element & elem) const;
-    Err dumpToParent(Element & elem) const;
+    Err read(std::string const & xml);
+
+    Err write(Element & elem) const;
+    Err write(std::string & xml);
 
     bool validate(std::string const & version) const;
 };

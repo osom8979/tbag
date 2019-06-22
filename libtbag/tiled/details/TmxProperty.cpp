@@ -177,7 +177,19 @@ Err TmxProperty::read(Element const & elem)
     return E_SUCCESS;
 }
 
-Err TmxProperty::dump(Element & elem) const
+Err TmxProperty::read(std::string const & xml)
+{
+    Document doc;
+    auto const CODE = readFromXml(doc, xml);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+    auto const * elem = doc.FirstChildElement(TAG_NAME);
+    assert(elem != nullptr);
+    return read(*elem);
+}
+
+Err TmxProperty::write(Element & elem) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
@@ -188,16 +200,17 @@ Err TmxProperty::dump(Element & elem) const
     return E_SUCCESS;
 }
 
-Err TmxProperty::dumpToParent(Element & elem) const
+Err TmxProperty::write(std::string & xml)
 {
-    auto * new_elem = newElement(elem, TAG_NAME);
+    Document doc;
+    auto * new_elem = newElement(doc, TAG_NAME);
     assert(new_elem != nullptr);
-    auto const CODE = dump(*new_elem);
+    auto const CODE = write(*new_elem);
     if (isFailure(CODE)) {
         return CODE;
     }
-    insertElement(elem, new_elem);
-    return E_SUCCESS;
+    insertElement(doc, new_elem);
+    return writeToXml(doc, xml);
 }
 
 bool TmxProperty::validate(std::string const & version) const

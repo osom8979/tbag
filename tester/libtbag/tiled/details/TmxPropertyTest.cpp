@@ -78,3 +78,33 @@ TEST(TmxPropertyTest, ToFile)
     ASSERT_EQ(WORK_DIR, value.toFile());
 }
 
+TEST(TmxPropertyTest, ReadAndWrite)
+{
+    char const * const TEST_XML = R"(<property name="test" value="#AABBCCDD" type="color" />)";
+
+    TmxProperty prop;
+    ASSERT_EQ(E_SUCCESS, prop.read(TEST_XML));
+    ASSERT_STREQ("test", prop.name.c_str());
+    ASSERT_STREQ("#AABBCCDD", prop.value.c_str());
+    ASSERT_EQ(TmxProperty::Type::COLOR, prop.type);
+    auto const COLOR = prop.toColor();
+    ASSERT_EQ(0xBB, COLOR.r);
+    ASSERT_EQ(0xCC, COLOR.g);
+    ASSERT_EQ(0xDD, COLOR.b);
+    ASSERT_EQ(0xAA, COLOR.a);
+
+    std::string xml;
+    ASSERT_EQ(E_SUCCESS, prop.write(xml));
+
+    TmxProperty prop2;
+    ASSERT_EQ(E_SUCCESS, prop2.read(xml));
+    ASSERT_STREQ("test", prop2.name.c_str());
+    ASSERT_STREQ("#AABBCCDD", prop2.value.c_str());
+    ASSERT_EQ(TmxProperty::Type::COLOR, prop2.type);
+    auto const COLOR2 = prop2.toColor();
+    ASSERT_EQ(0xBB, COLOR2.r);
+    ASSERT_EQ(0xCC, COLOR2.g);
+    ASSERT_EQ(0xDD, COLOR2.b);
+    ASSERT_EQ(0xAA, COLOR2.a);
+}
+
