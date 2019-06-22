@@ -89,11 +89,8 @@ Err TmxGrid::read(std::string const & xml)
     if (isFailure(CODE)) {
         return CODE;
     }
-
     auto const * elem = doc.FirstChildElement(TAG_NAME);
-    if (elem == nullptr) {
-        return E_NULLPTR;
-    }
+    assert(elem != nullptr);
     return read(*elem);
 }
 

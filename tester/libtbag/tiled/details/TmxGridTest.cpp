@@ -9,7 +9,6 @@
 #include <libtbag/tiled/details/TmxGrid.hpp>
 #include <libtbag/util/TestUtils.hpp>
 #include <string>
-#include <iostream>
 
 using namespace libtbag;
 using namespace libtbag::tiled;
@@ -21,7 +20,7 @@ TEST(TmxGridTest, Default)
     TEST_DEFAULT_ASSIGNMENT(TmxGrid, obj2)
 }
 
-TEST(TmxGridTest, Read)
+TEST(TmxGridTest, ReadAndWrite)
 {
     char const * const TEST_XML = R"(<grid width="10" height="20" orientation="isometric" />)";
 

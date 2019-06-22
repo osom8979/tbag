@@ -51,8 +51,10 @@ struct TBAG_API TmxTileOffset : protected libtbag::dom::xml::XmlHelper
     ~TmxTileOffset();
 
     Err read(Element const & elem);
-    Err dump(Element & elem) const;
-    Err dumpToParent(Element & elem) const;
+    Err read(std::string const & xml);
+
+    Err write(Element & elem) const;
+    Err write(std::string & xml) const;
 };
 
 } // namespace details

@@ -39,18 +39,24 @@ Err TmxTileOffset::read(Element const & elem)
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    Err code = optAttr(elem, ATT_X, x);
-    if (isFailure(code)) {
-        return code;
-    }
-    code = optAttr(elem, ATT_Y, y);
-    if (isFailure(code)) {
-        return code;
-    }
+    optAttr(elem, ATT_X, x);
+    optAttr(elem, ATT_Y, y);
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::dump(Element & elem) const
+Err TmxTileOffset::read(std::string const & xml)
+{
+    Document doc;
+    auto const CODE = readFromXml(doc, xml);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+    auto const * elem = doc.FirstChildElement(TAG_NAME);
+    assert(elem != nullptr);
+    return read(*elem);
+}
+
+Err TmxTileOffset::write(Element & elem) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
@@ -60,16 +66,17 @@ Err TmxTileOffset::dump(Element & elem) const
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::dumpToParent(Element & elem) const
+Err TmxTileOffset::write(std::string & xml) const
 {
-    auto * new_elem = newElement(elem, TAG_NAME);
+    Document doc;
+    auto * new_elem = newElement(doc, TAG_NAME);
     assert(new_elem != nullptr);
-    auto const CODE = dump(*new_elem);
+    auto const CODE = write(*new_elem);
     if (isFailure(CODE)) {
         return CODE;
     }
-    insertElement(elem, new_elem);
-    return E_SUCCESS;
+    insertElement(doc, new_elem);
+    return writeToXml(doc, xml);
 }
 
 } // namespace details
