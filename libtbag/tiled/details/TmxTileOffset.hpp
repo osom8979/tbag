@@ -36,7 +36,7 @@ namespace details {
  *  to be applied when drawing a tile from the related tileset.
  *  When not present, no offset is applied.
  */
-struct TBAG_API TmxTileOffset : public libtbag::dom::xml::XmlHelper
+struct TBAG_API TmxTileOffset : protected libtbag::dom::xml::XmlHelper
 {
     TBAG_CONSTEXPR static char const * const TAG_NAME = "tileoffset";
 

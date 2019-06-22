@@ -37,7 +37,7 @@ namespace details {
  *  This element is only used in case of isometric orientation,
  *  and determines how tile overlays for terrain and collision information are rendered.
  */
-struct TBAG_API TmxGrid : public libtbag::dom::xml::XmlHelper
+struct TBAG_API TmxGrid : protected libtbag::dom::xml::XmlHelper
 {
     TBAG_CONSTEXPR static char const * const TAG_NAME = "grid";
 
@@ -70,8 +70,10 @@ struct TBAG_API TmxGrid : public libtbag::dom::xml::XmlHelper
     static char const * const getOrientationName(Orientation o) TBAG_NOEXCEPT;
 
     Err read(Element const & elem);
-    Err dump(Element & elem) const;
-    Err dumpToParent(Element & elem) const;
+    Err read(std::string const & xml);
+
+    Err write(Element & elem) const;
+    Err write(std::string & xml) const;
 };
 
 } // namespace details

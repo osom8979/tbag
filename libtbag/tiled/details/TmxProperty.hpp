@@ -49,7 +49,7 @@ namespace details {
  * @author zer0
  * @date   2019-06-10
  */
-struct TBAG_API TmxProperty : public libtbag::dom::xml::XmlHelper
+struct TBAG_API TmxProperty : protected libtbag::dom::xml::XmlHelper
 {
     using Rgb24 = libtbag::graphic::Rgb24;
     using Rgb32 = libtbag::graphic::Rgb32;

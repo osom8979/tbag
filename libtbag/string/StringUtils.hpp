@@ -70,6 +70,12 @@ inline TBAG_CONSTEXPR wchar_t const * charOrWidechar<wchar_t>(char const * c, wc
 #define CHAR_OR_WIDECHAR(type, str) ::libtbag::string::charOrWidechar<type>(str, L##str)
 #endif
 
+template <typename CharT>
+inline TBAG_CONSTEXPR std::size_t string_length(CharT const * text)
+{
+    return (text == nullptr || *text == '\0') ? 0U : 1U + string_length(text + 1U);
+}
+
 template <typename FloatingType>
 std::string convertStringWithFloatingPoint(FloatingType floating, int precision = 2)
 {

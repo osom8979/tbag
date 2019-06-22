@@ -82,9 +82,27 @@ static Err queryAttribute(XmlHelper::Element const & element,
 } // namespace __impl
 // ------------------
 
-// -------------------------
-// XmlHelper implementation.
-// -------------------------
+// ---------
+// XmlHelper
+// ---------
+
+Err XmlHelper::readFromXml(Document & doc, std::string const & xml)
+{
+    if (doc.Parse(xml.c_str()) == tinyxml2::XML_SUCCESS) {
+        return E_SUCCESS;
+    }
+    return E_PARSING;
+}
+
+Err XmlHelper::writeToXml(Document const & doc, std::string & xml)
+{
+    tinyxml2::XMLPrinter printer;
+    if (doc.Accept(&printer)) {
+        xml.assign(printer.CStr(), printer.CStr() + printer.CStrSize());
+        return E_SUCCESS;
+    }
+    return E_UNKNOWN;
+}
 
 std::string XmlHelper::text(Element const & element)
 {
@@ -97,6 +115,11 @@ std::string XmlHelper::text(Element const & element)
 void XmlHelper::text(Element & element, std::string const & value)
 {
     element.SetText(value.c_str());
+}
+
+void XmlHelper::text(Element & element, char const * value)
+{
+    element.SetText(value);
 }
 
 void XmlHelper::text(Element & element, bool value)
@@ -151,6 +174,8 @@ Err XmlHelper::opt(Element const & element, std::string const & key, double & re
 // clang-format off
 XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, std::string const & value)
 { return __impl::newChild(element, key, value.c_str()); }
+XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, char const * value)
+{ return __impl::newChild(element, key, value); }
 XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, bool value)
 { return __impl::newChild(element, key, value); }
 XmlHelper::Element & XmlHelper::set(Element & element, std::string const & key, int value)
@@ -190,6 +215,8 @@ Err XmlHelper::optAttr(Element const & element, std::string const & key, double 
 // clang-format off
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, std::string const & value)
 { element.SetAttribute(key.c_str(), value.c_str()); return element; }
+XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, char const * value)
+{ element.SetAttribute(key.c_str(), value); return element; }
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, bool value)
 { element.SetAttribute(key.c_str(), value); return element; }
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, int value)
@@ -200,9 +227,19 @@ XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & k
 { element.SetAttribute(key.c_str(), value); return element; }
 // clang-format on
 
+XmlHelper::Element * XmlHelper::newElement(Document & doc, std::string const & tag)
+{
+    return doc.NewElement(tag.c_str());
+}
+
 XmlHelper::Element * XmlHelper::newElement(Element & element, std::string const & tag)
 {
     return element.GetDocument()->NewElement(tag.c_str());
+}
+
+XmlHelper::Node * XmlHelper::insertElement(Document & doc, Node * node)
+{
+    return doc.InsertEndChild(node);
 }
 
 XmlHelper::Node * XmlHelper::insertElement(Element & element, Node * node)

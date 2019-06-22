@@ -6,7 +6,11 @@
  */
 
 #include <libtbag/tiled/details/TmxGrid.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cstring>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -57,7 +61,7 @@ char const * const TmxGrid::getOrientationName(Orientation o) TBAG_NOEXCEPT
 
 Err TmxGrid::read(Element const & elem)
 {
-    if (elem.Name() != TAG_NAME) {
+    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
 
@@ -70,17 +74,32 @@ Err TmxGrid::read(Element const & elem)
         return code;
     }
 
-    std::string orientation_text = getOrientationName(orientation);
+    std::string orientation_text;
     code = optAttr(elem, ATT_ORIENTATION, orientation_text);
-    if (isFailure(code)) {
-        return code;
+    if (isSuccess(code)) {
+        orientation = getOrientation(orientation_text);
     }
-    return E_SUCCESS;
+    return code;
 }
 
-Err TmxGrid::dump(Element & elem) const
+Err TmxGrid::read(std::string const & xml)
 {
-    if (elem.Name() != TAG_NAME) {
+    Document doc;
+    auto const CODE = readFromXml(doc, xml);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+
+    auto const * elem = doc.FirstChildElement(TAG_NAME);
+    if (elem == nullptr) {
+        return E_NULLPTR;
+    }
+    return read(*elem);
+}
+
+Err TmxGrid::write(Element & elem) const
+{
+    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
     setAttr(elem, ATT_WIDTH, width);
@@ -89,16 +108,17 @@ Err TmxGrid::dump(Element & elem) const
     return E_SUCCESS;
 }
 
-Err TmxGrid::dumpToParent(Element & elem) const
+Err TmxGrid::write(std::string & xml) const
 {
-    auto * new_elem = newElement(elem, TAG_NAME);
+    Document doc;
+    auto * new_elem = newElement(doc, TAG_NAME);
     assert(new_elem != nullptr);
-    auto const CODE = dump(*new_elem);
+    auto const CODE = write(*new_elem);
     if (isFailure(CODE)) {
         return CODE;
     }
-    insertElement(elem, new_elem);
-    return E_SUCCESS;
+    insertElement(doc, new_elem);
+    return writeToXml(doc, xml);
 }
 
 } // namespace details

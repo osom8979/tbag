@@ -6,7 +6,11 @@
  */
 
 #include <libtbag/tiled/details/TmxTileOffset.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
+
+#include <cstring>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -32,7 +36,7 @@ TmxTileOffset::~TmxTileOffset()
 
 Err TmxTileOffset::read(Element const & elem)
 {
-    if (elem.Name() != TAG_NAME) {
+    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
     Err code = optAttr(elem, ATT_X, x);
@@ -48,7 +52,7 @@ Err TmxTileOffset::read(Element const & elem)
 
 Err TmxTileOffset::dump(Element & elem) const
 {
-    if (elem.Name() != TAG_NAME) {
+    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
     setAttr(elem, ATT_X, x);

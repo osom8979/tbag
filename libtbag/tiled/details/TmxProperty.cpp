@@ -6,9 +6,11 @@
  */
 
 #include <libtbag/tiled/details/TmxProperty.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/util/Version.hpp>
+#include <libtbag/log/Log.hpp>
 
+#include <cstring>
 #include <cassert>
 
 // -------------------
@@ -151,7 +153,7 @@ void TmxProperty::clear()
 
 Err TmxProperty::read(Element const & elem)
 {
-    if (elem.Name() != TAG_NAME) {
+    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
 
@@ -177,7 +179,7 @@ Err TmxProperty::read(Element const & elem)
 
 Err TmxProperty::dump(Element & elem) const
 {
-    if (elem.Name() != TAG_NAME) {
+    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
     setAttr(elem, ATT_NAME, name);

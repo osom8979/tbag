@@ -38,8 +38,12 @@ struct TBAG_API XmlHelper
     using Element  = tinyxml2::XMLElement;
     using Node     = tinyxml2::XMLNode;
 
+    static Err readFromXml(Document & doc, std::string const & xml);
+    static Err writeToXml(Document const & doc, std::string & xml);
+
     static std::string text(Element const & element);
     static void text(Element & element, std::string const & value);
+    static void text(Element & element, char const * value);
     static void text(Element & element, bool value);
     static void text(Element & element, int value);
     static void text(Element & element, unsigned int value);
@@ -54,6 +58,7 @@ struct TBAG_API XmlHelper
     static Err opt(Element const & element, std::string const & key, double & result, double default_value = 0.0);
 
     static Element & set(Element & element, std::string const & key, std::string const & value);
+    static Element & set(Element & element, std::string const & key, char const * value);
     static Element & set(Element & element, std::string const & key, bool value);
     static Element & set(Element & element, std::string const & key, int value);
     static Element & set(Element & element, std::string const & key, unsigned int value);
@@ -68,12 +73,15 @@ struct TBAG_API XmlHelper
     static Err optAttr(Element const & element, std::string const & key, double & result, double default_value = 0.0);
 
     static Element & setAttr(Element & element, std::string const & key, std::string const & value);
+    static Element & setAttr(Element & element, std::string const & key, char const * value);
     static Element & setAttr(Element & element, std::string const & key, bool value);
     static Element & setAttr(Element & element, std::string const & key, int value);
     static Element & setAttr(Element & element, std::string const & key, float value);
     static Element & setAttr(Element & element, std::string const & key, double value);
 
+    static Element * newElement(Document & doc, std::string const & tag);
     static Element * newElement(Element & element, std::string const & tag);
+    static Node * insertElement(Document & doc, Node * node);
     static Node * insertElement(Element & element, Node * node);
 
     template <typename Predicated>
