@@ -7,7 +7,6 @@
 
 #include <libtbag/tiled/details/TmxProperty.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/util/Version.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cstring>
@@ -213,34 +212,41 @@ Err TmxProperty::write(std::string & xml)
     return writeToXml(doc, xml);
 }
 
-bool TmxProperty::validate(std::string const & version) const
+bool TmxProperty::validate(Version const & version) const
 {
     if (type == Type::NONE) {
         return false;
     }
 
-    using Version = libtbag::util::Version;
-    Version const V016(0, 1, 6);
-    Version const V017(0, 1, 7);
-    Version ver(version);
-
-    if (ver >= V017) {
+    Version const V017(0, 17);
+    if (version >= V017) {
         return true;
     }
-    assert(ver < V017);
+    assert(version < V017);
     assert(type != Type::NONE);
     if (type == Type::COLOR || type == Type::FILE) {
         return false;
     }
 
-    if (ver >= V016) {
+    Version const V016(0, 16);
+    if (version >= V016) {
         return true;
     }
-    assert(ver < V016);
+    assert(version < V016);
     assert(type != Type::NONE);
     assert(type != Type::COLOR);
     assert(type != Type::FILE);
     return (type == Type::STRING);
+}
+
+bool TmxProperty::validate(std::string const & version) const
+{
+    return validate(Version(version));
+}
+
+bool TmxProperty::validate(int major_version, int minor_version) const
+{
+    return validate(Version(major_version, minor_version));
 }
 
 } // namespace details

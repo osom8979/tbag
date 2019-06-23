@@ -20,6 +20,7 @@
 #include <libtbag/graphic/Color.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/util/Version.hpp>
 
 #include <vector>
 #include <string>
@@ -51,9 +52,10 @@ namespace details {
  */
 struct TBAG_API TmxProperty : protected libtbag::dom::xml::XmlHelper
 {
-    using Rgb24 = libtbag::graphic::Rgb24;
-    using Rgb32 = libtbag::graphic::Rgb32;
-    using Path  = libtbag::filesystem::Path;
+    using Rgb24   = libtbag::graphic::Rgb24;
+    using Rgb32   = libtbag::graphic::Rgb32;
+    using Path    = libtbag::filesystem::Path;
+    using Version = libtbag::util::Version;
 
     TBAG_CONSTEXPR static char const * const TAG_NAME = "property";
 
@@ -116,7 +118,9 @@ struct TBAG_API TmxProperty : protected libtbag::dom::xml::XmlHelper
     Err write(Element & elem) const;
     Err write(std::string & xml);
 
+    bool validate(Version const & version) const;
     bool validate(std::string const & version) const;
+    bool validate(int major_version, int minor_version) const;
 };
 
 } // namespace details

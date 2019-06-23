@@ -108,3 +108,18 @@ TEST(TmxPropertyTest, ReadAndWrite)
     ASSERT_EQ(0xAA, COLOR2.a);
 }
 
+TEST(TmxPropertyTest, Validate)
+{
+    TmxProperty prop1("I", 20);
+    ASSERT_EQ(TmxProperty::Type::INT, prop1.type);
+    ASSERT_FALSE(prop1.validate("0.15"));
+    ASSERT_TRUE(prop1.validate("0.16"));
+    ASSERT_TRUE(prop1.validate("0.17"));
+
+    TmxProperty prop2("C", libtbag::graphic::ORANGE_COLOR);
+    ASSERT_EQ(TmxProperty::Type::COLOR, prop2.type);
+    ASSERT_FALSE(prop2.validate(0, 15));
+    ASSERT_FALSE(prop2.validate(0, 16));
+    ASSERT_TRUE(prop2.validate(0, 17));
+}
+
