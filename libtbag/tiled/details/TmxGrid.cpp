@@ -65,21 +65,17 @@ Err TmxGrid::read(Element const & elem)
         return E_ILLARGS;
     }
 
-    Err code = optAttr(elem, ATT_WIDTH, width);
-    if (isFailure(code)) {
-        return code;
-    }
-    code = optAttr(elem, ATT_HEIGHT, height);
-    if (isFailure(code)) {
-        return code;
-    }
+    optAttr(elem, ATT_WIDTH, width);
+    optAttr(elem, ATT_HEIGHT, height);
 
     std::string orientation_text;
-    code = optAttr(elem, ATT_ORIENTATION, orientation_text);
-    if (isSuccess(code)) {
-        orientation = getOrientation(orientation_text);
+    optAttr(elem, ATT_ORIENTATION, orientation_text);
+    orientation = getOrientation(orientation_text);
+    if (orientation == Orientation::NONE) {
+        tDLogW("TmxGrid::read() Unknown Type value: {}", orientation_text);
     }
-    return code;
+
+    return E_SUCCESS;
 }
 
 Err TmxGrid::read(std::string const & xml)
