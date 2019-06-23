@@ -1,11 +1,11 @@
 /**
- * @file   TmxEllipse.cpp
- * @brief  TmxEllipse class implementation.
+ * @file   TmxPoint.cpp
+ * @brief  TmxPoint class implementation.
  * @author zer0
  * @date   2019-06-23
  */
 
-#include <libtbag/tiled/details/TmxEllipse.hpp>
+#include <libtbag/tiled/details/TmxPoint.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -19,34 +19,32 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxEllipse::TmxEllipse() : x(), y(), width(), height()
+TmxPoint::TmxPoint() : x(), y()
 {
     // EMPTY.
 }
 
-TmxEllipse::TmxEllipse(int x_, int y_, int w_, int h_) : x(x_), y(y_), width(w_), height(h_)
+TmxPoint::TmxPoint(int x_, int y_) : x(x_), y(y_)
 {
     // EMPTY.
 }
 
-TmxEllipse::~TmxEllipse()
+TmxPoint::~TmxPoint()
 {
     // EMPTY.
 }
 
-Err TmxEllipse::read(Element const & elem)
+Err TmxPoint::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
     optAttr(elem, ATT_X, x);
     optAttr(elem, ATT_Y, y);
-    optAttr(elem, ATT_WIDTH, width);
-    optAttr(elem, ATT_HEIGHT, height);
     return E_SUCCESS;
 }
 
-Err TmxEllipse::read(std::string const & xml)
+Err TmxPoint::read(std::string const & xml)
 {
     Document doc;
     auto const CODE = readFromXml(doc, xml);
@@ -58,19 +56,17 @@ Err TmxEllipse::read(std::string const & xml)
     return read(*elem);
 }
 
-Err TmxEllipse::write(Element & elem) const
+Err TmxPoint::write(Element & elem) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
     setAttr(elem, ATT_X, x);
     setAttr(elem, ATT_Y, y);
-    setAttr(elem, ATT_WIDTH, width);
-    setAttr(elem, ATT_HEIGHT, height);
     return E_SUCCESS;
 }
 
-Err TmxEllipse::write(std::string & xml) const
+Err TmxPoint::write(std::string & xml) const
 {
     Document doc;
     auto * new_elem = newElement(doc, TAG_NAME);
