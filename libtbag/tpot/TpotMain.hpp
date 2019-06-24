@@ -71,10 +71,13 @@ public:
              Pots const & pots,
              std::string const & default_app,
              int argc, char ** argv, char ** envs);
-    explicit TpotMain(Params const & params, std::string const & default_app,
+    explicit TpotMain(Params const & params,
+                      std::string const & default_app,
                       bool append_manager_remarks = false,
                       bool update_default_callbacks = false);
-    explicit TpotMain(Params const & params, Pots const & pots, std::string const & default_app,
+    explicit TpotMain(Params const & params,
+                      Pots const & pots,
+                      std::string const & default_app,
                       bool append_manager_remarks = false,
                       bool update_default_callbacks = false);
     virtual ~TpotMain();

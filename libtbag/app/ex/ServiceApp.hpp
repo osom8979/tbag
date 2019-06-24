@@ -128,7 +128,7 @@ protected:
                               std::string const & global_path);
 
     void installVersionOptions(Version const & version);
-    void installVersionOptions(int major, int minor = 0, int patch = 0);
+    void installVersionOptions(int major, int minor = 0, int patch = 0, std::string const & tweak = std::string());
 
     void installCreateConfig();
 

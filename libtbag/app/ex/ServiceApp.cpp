@@ -176,13 +176,14 @@ void ServiceApp::installConfigOptions(ConfigScope scope,
 
 void ServiceApp::installVersionOptions(Version const & version)
 {
-    installVersionOptions(version.getMajor(), version.getMinor(), version.getPatch());
+    installVersionOptions(version.getMajor(), version.getMinor(), version.getPatch(), version.getTweak());
 }
 
-void ServiceApp::installVersionOptions(int major, int minor, int patch)
+void ServiceApp::installVersionOptions(int major, int minor, int patch, std::string const & tweak)
 {
     using namespace libtbag::string;
     _version.set(static_cast<uint32_t>(major), static_cast<uint32_t>(minor), static_cast<uint32_t>(patch));
+    _version.setTweak(tweak);
     _options.insert(SERVICE_APP_OPTIONS_VERSION, [&](Arguments const & args){
         _enable_version = true;
     }, "print the version number and exit.");
@@ -268,7 +269,11 @@ int ServiceApp::run()
     }
 
     if (_enable_version) {
-        std::cout << _version.toString() << std::endl;
+        if (_enable_verbose) {
+            std::cout << _version.toLongString() << std::endl;
+        } else {
+            std::cout << _version.toString() << std::endl;
+        }
         return EXIT_FAILURE;
     }
 
