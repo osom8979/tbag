@@ -92,13 +92,13 @@ Sqlite::~Sqlite()
 
 bool Sqlite::open(std::string const & path)
 {
-    return (sqlite3_open(path.c_str(), (sqlite3**) &_db) == SQLITE_OK);
+    return (::sqlite3_open(path.c_str(), (sqlite3**) &_db) == SQLITE_OK);
 }
 
 void Sqlite::close()
 {
     if (_db != nullptr) {
-        sqlite3_close(sqlite3_cast(_db));
+        ::sqlite3_close(sqlite3_cast(_db));
         _db = nullptr;
     }
 }
@@ -106,6 +106,11 @@ void Sqlite::close()
 bool Sqlite::isOpen() const TBAG_NOEXCEPT
 {
     return (_db != nullptr);
+}
+
+std::string Sqlite::getFilename() const
+{
+    return ::sqlite3_db_filename(sqlite3_cast(_db), nullptr);
 }
 
 bool Sqlite::execute(std::string const & query)

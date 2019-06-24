@@ -33,6 +33,8 @@ TEST(SqliteTest, Default)
     ASSERT_TRUE(db.open(PATH.toString()));
     ASSERT_EQ(0 , db.getErrorCode());
     ASSERT_LT(0U, db.getErrorMessage().size());
+    ASSERT_TRUE(db.isOpen());
+    ASSERT_EQ(PATH.toString(), db.getFilename());
 
     ASSERT_TRUE(db.execute(CREATE_TABLE));
     ASSERT_TRUE(db.execute(INSERT_ITEM1));

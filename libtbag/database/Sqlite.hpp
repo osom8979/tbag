@@ -100,6 +100,7 @@ public:
 
 public:
     bool isOpen() const TBAG_NOEXCEPT;
+    std::string getFilename() const;
 
 public:
     bool execute(std::string const & query);
