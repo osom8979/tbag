@@ -334,6 +334,11 @@ void Storage::setLayoutText(std::string const & dir, std::string const & languag
     setTextLanguage(language);
 }
 
+std::string Storage::getTextLanguage() const
+{
+    return _impl->text.getLanguage();
+}
+
 std::vector<std::string> Storage::getTextFilenames() const
 {
     return getFilenames(LAYOUT_TEXT);
@@ -385,6 +390,11 @@ void Storage::closeSqlite()
 bool Storage::isOpenSqlite() const
 {
     return _impl->sqlite.isOpen();
+}
+
+std::string Storage::getSqliteFilename() const
+{
+    return _impl->sqlite.getFilename();
 }
 
 std::vector<std::string> Storage::getSqliteFilenames() const
@@ -520,6 +530,15 @@ std::string Storage::getInfo() const
 {
     using namespace libtbag::string;
     std::stringstream ss;
+
+    auto const ASSET_KEYS = asset().getKeys();
+    if (!ASSET_KEYS.empty()) {
+        ss << "[ASSET]\n";
+        for (auto & asset_key : ASSET_KEYS) {
+            ss << fformat(" {}={}\n", asset_key, asset().get(asset_key));
+        }
+    }
+
     auto const ENV_KEYS = envs().keys();
     if (!ENV_KEYS.empty()) {
         ss << "[ENVIRONMENTS]\n";
@@ -528,11 +547,54 @@ std::string Storage::getInfo() const
         }
     }
 
-    auto const ASSET_KEYS = asset().getKeys();
-    if (!ASSET_KEYS.empty()) {
-        ss << "[ASSET]\n";
-        for (auto & asset_key : ASSET_KEYS) {
-            ss << fformat(" {}={}\n", asset_key, asset().get(asset_key));
+    auto const CONFIG_FILES = getConfigFilenames();
+    if (!CONFIG_FILES.empty()) {
+        ss << "[CONFIG]\n";
+        for (auto & file : CONFIG_FILES) {
+            auto const CONFIG_MAP = getConfigMap(file);
+            ss << " " << file << " (" << CONFIG_MAP.size() << ")\n";
+            for (auto & conf : CONFIG_MAP) {
+                ss << fformat(" * {}={}\n", conf.first, conf.second);
+            }
+        }
+    }
+
+    auto const MODULE_FILES = getModuleFilenames();
+    if (!MODULE_FILES.empty()) {
+        ss << "[MODULE]\n";
+        for (auto & file : MODULE_FILES) {
+            ss << " " << file << "\n";
+        }
+    }
+
+    auto const TEXT_FILES = getTextFilenames();
+    if (!TEXT_FILES.empty()) {
+        ss << "[TEXT] (Current: " << getTextLanguage() << ")\n";
+        for (auto & file : TEXT_FILES) {
+            ss << " " << file << "\n";
+        }
+    }
+
+    auto const SQLITE_FILES = getSqliteFilenames();
+    if (!SQLITE_FILES.empty()) {
+        ss << "[SQLITE] (Current: " << getSqliteFilename() << ")\n";
+        for (auto & file : SQLITE_FILES) {
+            ss << " " << file << "\n";
+        }
+    }
+
+    auto const TEMP_DIR = getLayoutTemp();
+    if (!TEMP_DIR.empty()) {
+        ss << "[TEMP]\n"
+           << " Path: " << TEMP_DIR << "\n"
+           << " Auto clear: " << (isAutoClearTempFiles() ? "Enable" : "Disable") << "\n";
+    }
+
+    auto const KEY_FILES = getKeyStoreFilenames();
+    if (!KEY_FILES.empty()) {
+        ss << "[KEY]\n";
+        for (auto & file : KEY_FILES) {
+            ss << " " << file << "\n";
         }
     }
 

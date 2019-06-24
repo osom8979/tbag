@@ -15,6 +15,7 @@
 #include <sstream>
 #include <algorithm>
 #include <utility>
+#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -204,7 +205,10 @@ void TpotMain::onInfo(Element const & element)
 void TpotMain::printParamsInfo(RunnerParams const & params) const
 {
     auto const & STORAGE_INFO = params.storage.getInfo();
-    tDLogIfD(params.verbose && !STORAGE_INFO.empty(), "TpotMain::printParamsInfo()\n{}", STORAGE_INFO);
+    if (STORAGE_INFO.empty()) {
+        return;
+    }
+    std::cout << STORAGE_INFO << std::endl;
 }
 
 int TpotMain::onRun(RunnerParams const & params)

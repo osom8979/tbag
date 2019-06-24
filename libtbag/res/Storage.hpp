@@ -181,20 +181,20 @@ public:
     // clang-format on
 
 public:
-    Path getLayout(std::string const & name)
+    Path getLayout(std::string const & name) const
     { return asset().get(name); }
 
 public:
     // clang-format off
-    Path getLayoutEnv     () { return getLayout(LAYOUT_ENV     ); }
-    Path getLayoutConfig  () { return getLayout(LAYOUT_CONFIG  ); }
-    Path getLayoutModule  () { return getLayout(LAYOUT_MODULE  ); }
-    Path getLayoutText    () { return getLayout(LAYOUT_TEXT    ); }
-    Path getLayoutSqlite  () { return getLayout(LAYOUT_SQLITE  ); }
-    Path getLayoutTemp    () { return getLayout(LAYOUT_TEMP    ); }
-    Path getLayoutKeystore() { return getLayout(LAYOUT_KEYSTORE); }
-    Path getLayoutLua     () { return getLayout(LAYOUT_LUA     ); }
-    Path getLayoutLuaRocks() { return getLayout(LAYOUT_LUAROCKS); }
+    Path getLayoutEnv     () const { return getLayout(LAYOUT_ENV     ); }
+    Path getLayoutConfig  () const { return getLayout(LAYOUT_CONFIG  ); }
+    Path getLayoutModule  () const { return getLayout(LAYOUT_MODULE  ); }
+    Path getLayoutText    () const { return getLayout(LAYOUT_TEXT    ); }
+    Path getLayoutSqlite  () const { return getLayout(LAYOUT_SQLITE  ); }
+    Path getLayoutTemp    () const { return getLayout(LAYOUT_TEMP    ); }
+    Path getLayoutKeystore() const { return getLayout(LAYOUT_KEYSTORE); }
+    Path getLayoutLua     () const { return getLayout(LAYOUT_LUA     ); }
+    Path getLayoutLuaRocks() const { return getLayout(LAYOUT_LUAROCKS); }
     // clang-format on
 
 public:
@@ -243,6 +243,7 @@ public:
     void setTextLanguage(std::string const & language);
     void setLayoutText(std::string const & dir, std::string const & language);
 
+    std::string getTextLanguage() const;
     std::vector<std::string> getTextFilenames() const;
 
     std::string getText(std::string const & language, std::string const & name) const;
@@ -262,6 +263,7 @@ public:
     void closeSqlite();
     bool isOpenSqlite() const;
 
+    std::string getSqliteFilename() const;
     std::vector<std::string> getSqliteFilenames() const;
 
 public:
