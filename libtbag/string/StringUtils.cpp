@@ -377,17 +377,24 @@ bool isMatch(std::string const & source, std::string const & regex)
 bool isUtf8Match(std::string const & utf8_source, std::string const & regex)
 {
     UErrorCode status = U_ZERO_ERROR;
+    tDLogD("TEST09: {}, {}", utf8_source, regex);
     icu::RegexMatcher matcher(icu::UnicodeString::fromUTF8(icu::StringPiece(regex.c_str())), 0, status);
+    tDLogD("TEST10");
     if (U_FAILURE(status)) {
         // Handle any syntax errors in the regular expression here
         return false;
     }
 
+    tDLogD("TEST11");
     matcher.reset(icu::UnicodeString::fromUTF8(icu::StringPiece(utf8_source.c_str())));
+    tDLogD("TEST12");
     if (matcher.find() == TRUE) {
+        tDLogD("TEST13");
         int const START_OF_MATCH = matcher.start(status); // string index of start of match.
+        tDLogD("TEST14");
         return true;
     }
+    tDLogD("TEST15");
     return false;
 }
 

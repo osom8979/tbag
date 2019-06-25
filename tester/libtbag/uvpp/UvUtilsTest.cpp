@@ -150,7 +150,7 @@ TEST(UvUtilsTest, GetEnv)
 TEST(UvUtilsTest, GetEnv_For_Windows)
 {
     if (!isWindowsPlatform()) {
-        std::cout << "Skip this test.\n";
+        std::cout << "Skip this test. (windows only)" << std::endl;
         return;
     }
 
