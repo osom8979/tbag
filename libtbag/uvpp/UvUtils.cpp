@@ -259,29 +259,18 @@ uint64_t getHighResolutionTime()
 Err getEnv(std::string const & name, std::string & value)
 {
 #if (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
-    tDLogD("TEST 1 {}", name);
     std::size_t size = DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE;
-    tDLogD("TEST 2 {}", size);
     std::vector<char> buffer(size);
     int code = ::uv_os_getenv(name.c_str(), &buffer[0], &size);
-    tDLogD("TEST 3 {}", ::uv_err_name(code));
     if (code == UV_ENOBUFS) {
-        tDLogD("TEST 4");
         assert(size > DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE);
-        tDLogD("TEST 5");
-        buffer.resize(size);
-        tDLogD("TEST 6");
+        buffer.resize(size+1/*NULL_CHAR*/);
         code = ::uv_os_getenv(name.c_str(), &value[0], &size);
-        tDLogD("TEST 7 {}", ::uv_err_name(code));
     }
-    tDLogD("TEST 8: {}", code);
     if (code == 0) {
-        value = std::string(&buffer[0]);
-        tDLogD("TEST 9: {}", value);
+        value = std::string(buffer.begin(), buffer.begin() + size);
         return E_SUCCESS;
     }
-    tDLogD("TEST 10: {}", code);
-    tDLogD("TEST 11: {}", libtbag::convertUvErrorToErr(code));
     return libtbag::convertUvErrorToErr(code);
 #else
     tDLogD("TEST 12: {}", name);
@@ -333,11 +322,11 @@ std::string getHostName()
     int code = ::uv_os_gethostname(&buffer[0], &size);
     if (code == UV_ENOBUFS) {
         assert(size > DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE);
-        buffer.resize(size);
+        buffer.resize(size+1/*NULL_CHAR*/);
         code = ::uv_os_gethostname(&buffer[0], &size);
     }
     if (code == 0) {
-        return std::string(&buffer[0]);
+        return std::string(buffer.begin(), buffer.begin() + size);
     }
     return std::string();
 #else
