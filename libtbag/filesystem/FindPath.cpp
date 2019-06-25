@@ -21,31 +21,24 @@ std::vector<Path> findUtf8File(std::vector<std::string> const & paths,
                                std::string const & regex,
                                Path::DirentType type)
 {
-    tDLogD("TEST04: {}", regex);
     std::vector<Path> result;
     for (auto & path : paths) {
         for (auto & child : details::scanDir(path, type)) {
-            tDLogD("TEST07 {}", child);
             if (string::isUtf8Match(child, regex)) {
-                tDLogD("TEST08");
                 result.push_back(Path(path) / child);
             }
         }
     }
-    tDLogD("TEST05");
     return result;
 }
 
 std::vector<Path> findUtf8ExecuteFile(std::string const & regex)
 {
-    tDLogD("TEST01");
     std::string path_env;
     if (isFailure(uvpp::getEnv("PATH", path_env))) {
         return std::vector<Path>();
     }
-    tDLogD("TEST02: {}", path_env);
     auto const PATHS = string::splitTokens(path_env, std::string(1, details::PATH_SPLITTER));
-    tDLogD("TEST03: {}", PATHS.size());
     return findUtf8File(PATHS, regex, Path::DIRENT_FILE | Path::DIRENT_LINK);
 }
 
