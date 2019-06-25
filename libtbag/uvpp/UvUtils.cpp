@@ -273,15 +273,11 @@ Err getEnv(std::string const & name, std::string & value)
     }
     return libtbag::convertUvErrorToErr(code);
 #else
-    tDLogD("TEST 12: {}", name);
     char * env_value = ::getenv(name.c_str());
     if (env_value != nullptr) {
-        tDLogD("TEST 13");
         value = std::string(env_value);
-        tDLogD("TEST 14");
         return E_SUCCESS;
     }
-    tDLogD("TEST 15");
     return E_ENFOUND;
 #endif
 }
