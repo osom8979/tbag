@@ -74,11 +74,13 @@ Err Signal::start(int signum)
 
 Err Signal::startOneshot(int signum)
 {
+#if (UV_VERSION_MAJOR >= 1) && (UV_VERSION_MINOR >= 12)
     // New in version 1.12.0.
-    //int const CODE = ::uv_signal_start_oneshot(Parent::cast<uv_signal_t>(), __global_uv_signal_cb__, signum);
-    //return convertUvErrorToErrWithLogging("Signal::startOneshot()", CODE);
-
+    int const CODE = ::uv_signal_start_oneshot(Parent::cast<uv_signal_t>(), __global_uv_signal_cb__, signum);
+    return convertUvErrorToErrWithLogging("Signal::startOneshot()", CODE);
+#else
     return E_ENOSYS;
+#endif
 }
 
 Err Signal::stop()
