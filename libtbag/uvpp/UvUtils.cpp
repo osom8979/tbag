@@ -265,17 +265,12 @@ Err getEnv(std::string const & name, std::string & value)
     if (code == UV_ENOBUFS) {
         assert(size > DEFAULT_ENVIRONMENT_VARIABLE_BUFFER_SIZE);
         buffer.resize(size+1/*NULL_CHAR*/);
-        code = ::uv_os_getenv(name.c_str(), &value[0], &size);
+        code = ::uv_os_getenv(name.c_str(), &buffer[0], &size);
     }
-    tDLogD("TEST ENV code: {}", code);
-    tDLogD("TEST ENV size: {}", size);
-    tDLogD("TEST ENV string: {}", std::string(buffer.begin(), buffer.begin() + size));
     if (code == 0) {
         value = std::string(buffer.begin(), buffer.begin() + size);
-        tDLogD("TEST ENV Done.");
         return E_SUCCESS;
     }
-    tDLogD("TEST ENV Err.");
     return libtbag::convertUvErrorToErr(code);
 #else
     char * env_value = ::getenv(name.c_str());
