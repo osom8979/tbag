@@ -547,11 +547,11 @@ int luaL_newmetatable(lua_State * L, char const * tname)
 {
     auto const CODE = ::luaL_newmetatable(L, tname);
     if (CODE == 0) {
-        tDLogD("luaL_newmetatable() Exists MetaTable: {}", tname);
+        tDLogIfD(false, "luaL_newmetatable() Exists MetaTable: {}", tname);
     } else {
+        tDLogIfD(false, "luaL_newmetatable() Create new MetaTable: {}", tname);
         // Insert 'tname = [New Table]' into the registry.
         // Then, push the table onto the stack.
-        tDLogD("luaL_newmetatable() Create new MetaTable: {}", tname);
 #if defined(LUA_VERSION_NUM) && (LUA_VERSION_NUM <= 501)
         ::lua_pushlstring(L, "__name", 6);
         ::lua_pushlstring(L, tname, ::strlen(tname));
