@@ -11,6 +11,8 @@
 #include <libtbag/process/ProcessManager.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
+#include <atomic>
+
 using namespace libtbag;
 using namespace libtbag::process;
 using namespace libtbag::uvpp;
@@ -26,9 +28,9 @@ TEST(ProcessManagerTest, Default)
     Path const PATH = Path::getExeDir() / filesystem::getExecutableName(EXE_NAME);
 
     int const TEST_COUNT = 10;
-    int on_read  = 0;
-    int on_error = 0;
-    int on_exit  = 0;
+    std::atomic_int on_read(0);
+    std::atomic_int on_error(0);
+    std::atomic_int on_exit(0);
 
     ProcessManager pm;
     pm.out_read_cb = [&](int pid, char const * buffer, std::size_t size){
