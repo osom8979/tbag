@@ -29,6 +29,12 @@ bool parse(std::string const & json, Json::Value & result)
     return CODE;
 }
 
+bool testJsonText(std::string const & json)
+{
+    Json::Value val;
+    return parse(json, val);
+}
+
 std::string writeFast(Json::Value const & value)
 {
     Json::StreamWriterBuilder builder;
