@@ -526,7 +526,7 @@ bool Storage::appendLuaRocksPrefix()
     return _impl->lua.appendPrefix(asset().get(LAYOUT_LUAROCKS));
 }
 
-std::string Storage::getInfo() const
+std::string Storage::getPrintableInformationText() const
 {
     using namespace libtbag::string;
     std::stringstream ss;

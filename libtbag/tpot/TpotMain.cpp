@@ -204,7 +204,7 @@ void TpotMain::onInfo(Element const & element)
 
 void TpotMain::printParamsInfo(RunnerParams const & params) const
 {
-    auto const & STORAGE_INFO = params.storage.getInfo();
+    auto const & STORAGE_INFO = params.storage.getPrintableInformationText();
     if (STORAGE_INFO.empty()) {
         return;
     }

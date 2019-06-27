@@ -307,7 +307,7 @@ public:
     bool appendLuaRocksPrefix();
 
 public:
-    std::string getInfo() const;
+    std::string getPrintableInformationText() const;
 };
 
 } // namespace res
