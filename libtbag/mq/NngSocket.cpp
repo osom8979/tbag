@@ -10,6 +10,7 @@
 #include <libtbag/debug/Assert.hpp>
 
 #include <cassert>
+#include <sstream>
 #include <algorithm>
 #include <utility>
 
@@ -382,7 +383,11 @@ Err NngSocket::getRecvNumberOfMessages(int * size) const
 
 Err NngSocket::setSendNumberOfMessages(int size)
 {
-    return setopt(NNG_OPT_SENDBUF, size);
+    if (0 <= COMPARE_AND(size) <= 8192) {
+        return setopt(NNG_OPT_SENDBUF, size);
+    } else {
+        return E_ILLARGS;
+    }
 }
 
 Err NngSocket::getSendNumberOfMessages(int * size) const
@@ -398,6 +403,11 @@ Err NngSocket::setRecvMaxSize(std::size_t size)
 Err NngSocket::getRecvMaxSize(std::size_t * size) const
 {
     return getopt(NNG_OPT_RECVMAXSZ, size);
+}
+
+Err NngSocket::setUnlimitedRecvMaxSize()
+{
+    return setRecvMaxSize(0);
 }
 
 Err NngSocket::setReconnectTimeMin(nng_duration ms)
@@ -471,6 +481,78 @@ Err NngSocket::getProtocolName(std::string & name) const
 Err NngSocket::getPeerProtocolName(std::string & name) const
 {
     return getopt(NNG_OPT_PEERNAME, name);
+}
+
+std::string NngSocket::getPrintableInformationText() const
+{
+    std::stringstream ss;
+
+    nng_duration recv_timeout;
+    if (isSuccess(getRecvTimeout(&recv_timeout))) {
+        ss << "RecvTimeout: " << recv_timeout << "ms\n";
+    }
+
+    nng_duration send_timeout;
+    if (isSuccess(getSendTimeout(&send_timeout))) {
+        ss << "SendTimeout: " << send_timeout << "ms\n";
+    }
+
+    int recv_messages;
+    if (isSuccess(getRecvNumberOfMessages(&recv_messages))) {
+        ss << "RecvNumberOfMessages: " << recv_messages << "\n";
+    }
+
+    int send_messages;
+    if (isSuccess(getSendNumberOfMessages(&send_messages))) {
+        ss << "SendNumberOfMessages: " << send_messages << "\n";
+    }
+
+    std::size_t recv_max_size;
+    if (isSuccess(getRecvMaxSize(&recv_max_size))) {
+        ss << "RecvMaxSize: " << recv_max_size << "\n";
+    }
+
+    nng_duration reconnect_min;
+    if (isSuccess(getReconnectTimeMin(&reconnect_min))) {
+        ss << "ReconnectTimeMin: " << reconnect_min << "ms\n";
+    }
+
+    nng_duration reconnect_max;
+    if (isSuccess(getReconnectTimeMax(&reconnect_max))) {
+        ss << "ReconnectTimeMax: " << reconnect_max << "ms\n";
+    }
+
+    std::string socket_name;
+    if (isSuccess(getSocketName(socket_name))) {
+        ss << "SocketName: " << socket_name << "\n";
+    }
+
+    int ttl_size;
+    if (isSuccess(getMaxTTL(&ttl_size))) {
+        ss << "MaxTTL: " << ttl_size << "hops\n";
+    }
+
+    bool raw_mode;
+    if (isSuccess(getRaw(&raw_mode))) {
+        ss << "Raw mode: " << (raw_mode ? "Enable" : "Disable") << "\n";
+    }
+
+    std::string url;
+    if (isSuccess(getUrl(url))) {
+        ss << "URL: " << url << "\n";
+    }
+
+    std::string protocol;
+    if (isSuccess(getProtocolName(protocol))) {
+        ss << "ProtocolName: " << protocol << "\n";
+    }
+
+    std::string peer_protocol;
+    if (isSuccess(getPeerProtocolName(peer_protocol))) {
+        ss << "PeerProtocolName: " << peer_protocol << "\n";
+    }
+
+    return ss.str();
 }
 
 } // namespace mq

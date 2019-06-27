@@ -199,6 +199,7 @@ public:
      */
     Err setRecvMaxSize(std::size_t size);
     Err getRecvMaxSize(std::size_t * size) const;
+    Err setUnlimitedRecvMaxSize();
 
     /**
      * This is the minimum amount of time (milliseconds) to wait before attempting to establish
@@ -278,6 +279,9 @@ public:
      * This read-only option is used to obtain the name of the peer protocol for the socket.
      */
     Err getPeerProtocolName(std::string & name) const;
+
+public:
+    std::string getPrintableInformationText() const;
 };
 
 } // namespace mq
