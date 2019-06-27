@@ -213,9 +213,11 @@ void TpotMain::printParamsInfo(RunnerParams const & params) const
 
 int TpotMain::onRun(RunnerParams const & params)
 {
+#if 0
     if (params.verbose) {
         printParamsInfo(params);
     }
+#endif
 
     if (!_help_app.empty()) {
         return _manager.help(_help_app, params.verbose);
