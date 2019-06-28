@@ -242,12 +242,12 @@ Box Box::asType(btype type) const
     return result;
 }
 
-Err Box::encode(BoxPacketBuilder & builder) const
+Err Box::encode(Builder & builder) const
 {
     return builder.build(_data.get());
 }
 
-Err Box::encode(BoxPacketBuilder & builder, Buffer & buffer) const
+Err Box::encode(Builder & builder, Buffer & buffer) const
 {
     auto const CODE = encode(builder);
     if (isFailure(CODE)) {
@@ -259,24 +259,75 @@ Err Box::encode(BoxPacketBuilder & builder, Buffer & buffer) const
 
 Err Box::encode(Buffer & buffer) const
 {
-    BoxPacketBuilder builder;
+    Builder builder;
     return encode(builder, buffer);
 }
 
-Err Box::decode(void const * buffer, std::size_t size, BoxPacketParser const & parser, std::size_t * computed_size)
+Err Box::decode(void const * buffer, std::size_t size, Parser const & parser, std::size_t * computed_size)
 {
     return parser.parse(buffer, size, _data.get(), computed_size);
 }
 
 Err Box::decode(void const * buffer, std::size_t size, std::size_t * computed_size)
 {
-    BoxPacketParser parser;
+    Parser parser;
     return decode(buffer, size, parser, computed_size);
 }
 
 Err Box::decode(Buffer const & buffer, std::size_t * computed_size)
 {
     return decode(buffer.data(), buffer.size(), computed_size);
+}
+
+Err Box::encodeToJson(Builder & builder, std::string & json) const
+{
+    auto const CODE = encode(builder);
+    if (isFailure(CODE)) {
+        return CODE;
+    }
+    json = builder.toJsonString();
+    return E_SUCCESS;
+}
+
+Err Box::encodeToJson(std::string & json) const
+{
+    Builder builder;
+    return encodeToJson(builder, json);
+}
+
+Err Box::decodeFromJson(char const * json, std::size_t size, Parser const & parser)
+{
+    return parser.parseJson(std::string(json, json + size), _data.get());
+}
+
+Err Box::decodeFromJson(char const * json, std::size_t size)
+{
+    Parser parser;
+    return decodeFromJson(json, size, parser);
+}
+
+Err Box::decodeFromJson(std::string const & json)
+{
+    return decodeFromJson(json.c_str(), json.size());
+}
+
+std::string Box::toJsonText(Err * code) const
+{
+    std::string json;
+    auto const result = encodeToJson(json);
+    if (code != nullptr) {
+        *code = result;
+    }
+    return json;
+}
+
+bool Box::fromJsonText(std::string const & json, Err * code)
+{
+    auto const result = decodeFromJson(json);
+    if (code != nullptr) {
+        *code = result;
+    }
+    return isSuccess(result);
 }
 
 } // namespace box

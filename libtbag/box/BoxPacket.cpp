@@ -455,7 +455,7 @@ Err BoxPacketParser::parse(void const * buffer, std::size_t size,
     return result.first;
 }
 
-Err BoxPacketParser::parseJson(std::string const & json_text, box_data * box)
+Err BoxPacketParser::parseJson(std::string const & json_text, box_data * box) const
 {
     assert(_impl);
     return _impl->parseJson(json_text, box).first;

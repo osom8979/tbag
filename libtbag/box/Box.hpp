@@ -17,9 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
 #include <libtbag/box/details/box_api.hpp>
-#include <libtbag/tmp/NumberOfArguments.hpp>
 #include <libtbag/box/BoxPacket.hpp>
-#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -30,6 +28,7 @@
 #include <initializer_list>
 #include <memory>
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -212,7 +211,7 @@ public:
     using box_data   = libtbag::box::details::box_data;
     using box_cursor = libtbag::box::details::box_cursor;
 
-    using Buffer = libtbag::util::Buffer;
+    using Buffer = std::vector<ui8>;
 
 public:
     using SharedBoxData = std::shared_ptr<box_data>;
@@ -427,15 +426,13 @@ public:
     template <typename T, typename ... Args>
     Err reshapeEx(bdev device, ui64 const * ext, Args && ... args) TBAG_NOEXCEPT
     {
-        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
-        return reshape_args(get_btype<T>(), device, ext, n, std::forward<Args>(args) ...);
+        return reshape_args(get_btype<T>(), device, ext, sizeof...(Args), std::forward<Args>(args) ...);
     }
 
     template <typename T, typename ... Args>
     Err reshape(Args && ... args) TBAG_NOEXCEPT
     {
-        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
-        return reshape_args(get_btype<T>(), n, std::forward<Args>(args) ...);
+        return reshape_args(get_btype<T>(), sizeof...(Args), std::forward<Args>(args) ...);
     }
 
 public:
@@ -449,7 +446,7 @@ public:
     {
         return shape_args(get_btype<typename libtbag::remove_cr<T>::type>(),
                           device, ext,
-                          libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+                          sizeof...(Args),
                           std::forward<Args>(args) ...);
     }
 
@@ -457,7 +454,7 @@ public:
     static Box shape(Args && ... args)
     {
         return shape_args(get_btype<typename libtbag::remove_cr<T>::type>(),
-                          libtbag::tmp::NumberOfTemplateArguments<Args ...>::value,
+                          sizeof...(Args),
                           std::forward<Args>(args) ...);
     }
 
@@ -710,20 +707,18 @@ public:
     inline typename libtbag::remove_cr<T>::type & at(Args && ... args) TBAG_NOEXCEPT
     {
         using ResultType = typename libtbag::remove_cr<T>::type;
-        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
-        assert(n >= 1);
+        static_assert(sizeof...(Args) >= 1, "At least one Args is required.");
         using namespace libtbag::box::details;
-        return offset<ResultType>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
+        return offset<ResultType>(box_dim_get_index_args(dims(), sizeof...(Args), std::forward<Args>(args) ...));
     }
 
     template <typename T, typename ... Args>
     inline typename libtbag::remove_cr<T>::type const & at(Args && ... args) const TBAG_NOEXCEPT
     {
         using ResultType = typename libtbag::remove_cr<T>::type;
-        auto const n = libtbag::tmp::NumberOfTemplateArguments<Args ...>::value;
-        assert(n >= 1);
+        static_assert(sizeof...(Args) >= 1, "At least one Args is required.");
         using namespace libtbag::box::details;
-        return offset<ResultType>(box_dim_get_index_args(dims(), n, std::forward<Args>(args) ...));
+        return offset<ResultType>(box_dim_get_index_args(dims(), sizeof...(Args), std::forward<Args>(args) ...));
     }
 
     inline ui32 dim(ui32 i) const TBAG_NOEXCEPT
@@ -733,15 +728,32 @@ public:
     }
 
 public:
-    Err encode(BoxPacketBuilder & builder) const;
-    Err encode(BoxPacketBuilder & builder, Buffer & buffer) const;
+    using Builder = libtbag::box::BoxPacketBuilder;
+    using Parser  = libtbag::box::BoxPacketParser;
+    using Packet  = libtbag::box::BoxPacket;
+
+public:
+    Err encode(Builder & builder) const;
+    Err encode(Builder & builder, Buffer & buffer) const;
     Err encode(Buffer & buffer) const;
 
 public:
-    Err decode(void const * buffer, std::size_t size, BoxPacketParser const & parser,
-               std::size_t * computed_size = nullptr);
+    Err decode(void const * buffer, std::size_t size, Parser const & parser, std::size_t * computed_size = nullptr);
     Err decode(void const * buffer, std::size_t size, std::size_t * computed_size = nullptr);
     Err decode(Buffer const & buffer, std::size_t * computed_size = nullptr);
+
+public:
+    Err encodeToJson(Builder & builder, std::string & json) const;
+    Err encodeToJson(std::string & json) const;
+
+public:
+    Err decodeFromJson(char const * json, std::size_t size, Parser const & parser);
+    Err decodeFromJson(char const * json, std::size_t size);
+    Err decodeFromJson(std::string const & json);
+
+public:
+    std::string toJsonText(Err * code = nullptr) const;
+    bool fromJsonText(std::string const & json, Err * code = nullptr);
 };
 
 } // namespace box

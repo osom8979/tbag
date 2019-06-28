@@ -231,3 +231,32 @@ TEST(BoxTest, EncodeDecode_ONLYINFO)
     ASSERT_EQ(INFO, box2.getInfoString());
 }
 
+TEST(BoxTest, EncodeDecode_Json)
+{
+    Box b0 = {10, 20};
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_si32());
+    ASSERT_EQ(1, b0.rank());
+    ASSERT_EQ(2, b0.size());
+    ASSERT_EQ(2, b0.dim(0));
+    ASSERT_EQ(10, b0.at<si32>(0));
+    ASSERT_EQ(20, b0.at<si32>(1));
+
+    Err code0;
+    auto const JSON = b0.toJsonText(&code0);
+    ASSERT_EQ(E_SUCCESS, code0);
+    ASSERT_FALSE(JSON.empty());
+
+    Err code1;
+    Box b1;
+    ASSERT_TRUE(b1.fromJsonText(JSON, &code1));
+    ASSERT_EQ(E_SUCCESS, code1);
+    ASSERT_TRUE(b1.is_device_cpu());
+    ASSERT_TRUE(b1.is_si32());
+    ASSERT_EQ(1, b1.rank());
+    ASSERT_EQ(2, b1.size());
+    ASSERT_EQ(2, b1.dim(0));
+    ASSERT_EQ(10, b1.at<si32>(0));
+    ASSERT_EQ(20, b1.at<si32>(1));
+}
+

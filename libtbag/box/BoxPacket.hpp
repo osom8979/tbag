@@ -132,7 +132,7 @@ public:
 
 public:
     Err parse(void const * buffer, std::size_t size, box_data * box, std::size_t * computed_size) const;
-    Err parseJson(std::string const & json_text, box_data * box);
+    Err parseJson(std::string const & json_text, box_data * box) const;
 };
 
 /**
