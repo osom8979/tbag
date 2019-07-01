@@ -116,7 +116,7 @@ struct TBAG_API TmxProperty : protected libtbag::dom::xml::XmlHelper
     Err read(std::string const & xml);
 
     Err write(Element & elem) const;
-    Err write(std::string & xml);
+    Err write(std::string & xml) const;
 
     bool validate(Version const & version) const;
     bool validate(std::string const & version) const;

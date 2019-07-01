@@ -199,7 +199,7 @@ Err TmxProperty::write(Element & elem) const
     return E_SUCCESS;
 }
 
-Err TmxProperty::write(std::string & xml)
+Err TmxProperty::write(std::string & xml) const
 {
     Document doc;
     auto * new_elem = newElement(doc, TAG_NAME);
