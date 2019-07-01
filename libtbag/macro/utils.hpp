@@ -57,6 +57,8 @@
 #define BLOCK_OPEN(x)   BLOCK_DO(x) {
 #define BLOCK_CLOSE(x)  } BLOCK_END(x);
 
+#define WITH_NULLSIZE(x) ((x)+1)
+
 #ifndef REMOVE_UNUSED_DECLARATION
 /** Remove unused declaration warning. */
 #define REMOVE_UNUSED_DECLARATION(name, x) \
