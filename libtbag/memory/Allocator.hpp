@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/memory/Memory.hpp>
+#include <libtbag/type/TypeTable.hpp>
 
 #include <cassert>
 #include <memory>
@@ -64,16 +65,7 @@ struct Allocator
     /** returns the largest supported allocation size. */
     TBAG_CONSTEXPR static size_type max_size() TBAG_NOEXCEPT
     {
-#if defined(max)
-        TBAG_PUSH_MACRO(max);
-#undef max
-#define __RESTORE_MAX__
-#endif
-        return std::numeric_limits<size_type>::max() / sizeof(value_type);
-#if defined(__RESTORE_MAX__)
-        TBAG_POP_MACRO(max);
-#undef __RESTORE_MAX__
-#endif
+        return libtbag::type::TypeInfo<size_type>::maximum() / sizeof(value_type);
     }
 
     /** obtains the address of an object. */
