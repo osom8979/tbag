@@ -1,7 +1,0 @@
-
-# RSTL
-
-## Introduction
-
-Restricted STL.
-

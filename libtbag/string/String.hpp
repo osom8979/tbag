@@ -15,10 +15,9 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/memory/Allocator.hpp>
+#include <libtbag/string/details/rstr_base.hpp>
 #include <libtbag/string/Format.hpp>
 
-#include <climits>
 #include <cstdio>
 
 #include <type_traits>
@@ -35,53 +34,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace string {
 
 /**
- * restricted string structure.
- *
- * @author zer0
- * @date   2019-07-01
- */
-struct rstr_base
-{
-    /** Container options. */
-    int flags = 0;
-
-    /** String memory capacity. */
-    int capacity = 0;
-
-    /** String length. */
-    int size = 0;
-
-    /** String data. */
-    char * data = nullptr;
-};
-
-TBAG_CONSTEXPR int const RSTR_FLAG_ALIGN = (int)(0x01);
-
-// @see <https://en.wikipedia.org/wiki/Magic_number_(programming)>
-
-TBAG_CONSTEXPR int const RSTR_MAGIC_FREE = 0xFEEEFEEE;
-
-TBAG_CONSTEXPR int const RSTR_STEP_CAPACITY   = 64;
-TBAG_CONSTEXPR int const RSTR_SMALL_CAPACITY  = 64;
-TBAG_CONSTEXPR int const RSTR_MEDIUM_CAPACITY = 256;
-TBAG_CONSTEXPR int const RSTR_LARGE_CAPACITY  = 2048;
-TBAG_CONSTEXPR int const RSTR_VLARGE_CAPACITY = 4096;
-
-TBAG_API void rstr_clear(rstr_base * s) TBAG_NOEXCEPT;
-TBAG_API void rstr_base_malloc(rstr_base * s, int capacity, int flags) TBAG_NOEXCEPT;
-TBAG_API void rstr_base_free(rstr_base * s) TBAG_NOEXCEPT;
-
-TBAG_API void rstr_base_copy_string(rstr_base * s, char const * src, int size) TBAG_NOEXCEPT;
-TBAG_API void rstr_base_capacity_extend(rstr_base * s, int capacity, int flags) TBAG_NOEXCEPT;
-
-TBAG_API int  rstr_base_get_recommand_capacity(int capacity) TBAG_NOEXCEPT;
-TBAG_API void rstr_base_recommand_capacity_extend(rstr_base * s, int capacity, int flags) TBAG_NOEXCEPT;
-
-TBAG_API void rstr_base_assign(rstr_base * s, char const * src, int size, int flag) TBAG_NOEXCEPT;
-TBAG_API void rstr_base_append(rstr_base * s, char const * src, int size, int flag) TBAG_NOEXCEPT;
-
-/**
- * Restricted ASCII string class prototype.
+ * Restricted string class prototype.
  *
  * @author zer0
  * @date   2016-11-23
@@ -91,25 +44,13 @@ class TBAG_API rstr
 {
 public:
     using value_type      = char;
-    using traits_type     = std::char_traits<char>;
-    using reference       = char &;
-    using const_reference = char const &;
-    using pointer         = char *;
-    using const_pointer   = char const *;
+    using traits_type     = std::char_traits<value_type>;
+    using reference       = value_type &;
+    using const_reference = value_type const &;
+    using pointer         = value_type *;
+    using const_pointer   = value_type const *;
     using difference_type = std::ptrdiff_t;
     using size_type       = int;
-
-public:
-    /**
-     * Fake allocator type.
-     *
-     * @warning
-     *  This type is not used.
-     */
-    using allocator_type = libtbag::memory::Allocator<char>;
-
-public:
-    TBAG_CONSTEXPR static size_type const npos = -1;
 
 public:
     using       iterator = pointer;
@@ -119,6 +60,7 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 public:
+    using        rstr_base = libtbag::string::details::rstr_base;
     using shared_rstr_base = std::shared_ptr<rstr_base>;
 
 public:
@@ -130,6 +72,13 @@ public:
             std::is_nothrow_copy_assignable<shared_rstr_base>::value;
     TBAG_CONSTEXPR static bool const NOTHROW_MOVE_ASSIGNABLE =
             std::is_nothrow_move_assignable<shared_rstr_base>::value;
+
+public:
+    TBAG_CONSTEXPR static size_type const npos = -1;
+
+public:
+    TBAG_CONSTEXPR static size_type max_size() TBAG_NOEXCEPT
+    { return libtbag::string::details::RSTR_MAX_SIZE; }
 
 private:
     shared_rstr_base _base;
@@ -197,10 +146,6 @@ public:
     const_reverse_iterator crend() const TBAG_NOEXCEPT;
 
 public:
-    TBAG_CONSTEXPR static size_type max_size() TBAG_NOEXCEPT
-    { return INT_MAX; }
-
-public:
     size_type size() const TBAG_NOEXCEPT;
     size_type length() const TBAG_NOEXCEPT;
     size_type capacity() const TBAG_NOEXCEPT;
@@ -239,9 +184,9 @@ public:
     rstr & append(std::string const & src) TBAG_NOEXCEPT;
 
 public:
-    TBAG_CONSTEXPR static std::size_t const DEFAULT_PRINTF_BUFFER = RSTR_SMALL_CAPACITY;
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_PRINTF_BUFFER =
+            libtbag::string::details::RSTR_LARGE_CAPACITY;
 
-public:
     template <int BufferSize = DEFAULT_PRINTF_BUFFER, typename ... Args>
     rstr & appendPrintf(char const * format, Args && ... args)
     {
