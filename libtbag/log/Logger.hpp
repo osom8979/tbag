@@ -91,10 +91,10 @@ public:
     inline void setLevel(int level) TBAG_NOEXCEPT_SP_OP(_level.store(level))
     { _level.store(level); }
 
-    inline Severity getSeverity() const TBAG_NOEXCEPT_SP_OP(getLevel())
-    { return getSeverityWithLevelStep(getLevel()); }
-    inline void setSeverity(Severity const & severity) TBAG_NOEXCEPT_SP_OP(setLevel(int(severity)))
-    { setLevel(int(severity)); }
+    inline Severity getSeverity() const TBAG_NOEXCEPT_SP_OP(_level.load())
+    { return getSeverityWithLevelStep(_level.load()); }
+    inline void setSeverity(Severity const & severity) TBAG_NOEXCEPT_SP_OP(_level.store(int(severity)))
+    { _level.store(int(severity)); }
 
 public:
     inline bool getAutoFlush() const TBAG_NOEXCEPT_SP_OP(_auto_flush.load())
