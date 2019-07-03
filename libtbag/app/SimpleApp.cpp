@@ -12,6 +12,7 @@
 #include <libtbag/libtbag.h>
 
 #include <cstdlib>
+#include <iostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -111,7 +112,7 @@ int SimpleApp::run()
     if (!param.name.empty()) {
         libtbag::log::Logger * logger = nullptr;
         if (log_raw) {
-            logger = libtbag::log::createStdoutLogger(param.name, libtbag::log::MakeType::RAW);
+            logger = libtbag::log::createRawStdoutLogger(param.name);
         } else if (log_color) {
             logger = libtbag::log::createColorStdoutLogger(param.name);
         } else {

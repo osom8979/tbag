@@ -3,6 +3,7 @@
  * @brief  FileSink class prototype.
  * @author zer0
  * @date   2017-04-13
+ * @date   2019-07-02 (Create a cpp file)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_SINK_FILESINK_HPP__
@@ -16,8 +17,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/log/sink/Sink.hpp>
-#include <libtbag/filesystem/File.hpp>
 
+#include <cstdio>
 #include <string>
 
 // -------------------
@@ -32,52 +33,21 @@ namespace sink {
  *
  * @author zer0
  * @date   2017-04-13
+ * @date   2019-07-02 (Create a cpp file)
  */
-template <typename MutexType = lock::FakeLock>
-class FileSink : public Sink<MutexType>
+class TBAG_API FileSink : public Sink
 {
-public:
-    using Parent = Sink<MutexType>;
-    using String = typename Parent::String;
-    using Mutex  = typename Parent::Mutex;
-    using File   = libtbag::filesystem::File;
-
-public:
-    TBAG_CONSTEXPR static char const * const TYPE_NAME = "FILE_SINK";
-
 private:
-    File _file;
+    FILE * _file;
 
 public:
-    FileSink(std::string const & path, bool force_flush = false) : Parent(force_flush)
-    {
-        if (_file.open(path, File::Flags().clear().creat().rdwr().append()) == false) {
-            throw std::bad_exception();
-        }
-    }
-
-    virtual ~FileSink()
-    {
-        _file.close();
-    }
+    FileSink(char const * path);
+    FileSink(std::string const & path);
+    virtual ~FileSink();
 
 public:
-    virtual char const * const name() const override
-    {
-        return TYPE_NAME;
-    }
-
-    virtual void write(String const & message) override
-    {
-        if (_file.isOpen()) {
-            _file.write(message.c_str(), message.size(), -1);
-        }
-    }
-
-    virtual void flush() override
-    {
-        // EMPTY.
-    }
+    virtual bool write(char const * message, int size) override;
+    virtual void flush() override;
 };
 
 } // namespace sink

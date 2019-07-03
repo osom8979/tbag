@@ -89,6 +89,18 @@ std::string convertStringWithFloatingPoint(FloatingType floating, int precision 
     return ss.str();
 }
 
+enum class LineFeedStyle
+{
+    LFS_NONE,
+    LFS_UNIX,
+    LFS_WINDOWS,
+    LFS_AUTO,
+};
+
+TBAG_API LineFeedStyle getLineFeedStyle(std::string const & name);
+TBAG_API char const * const getLineFeedStyleText(LineFeedStyle style) TBAG_NOEXCEPT;
+
+TBAG_API bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size, int offset) TBAG_NOEXCEPT;
 TBAG_API std::string getStdEndLine();
 
 /**

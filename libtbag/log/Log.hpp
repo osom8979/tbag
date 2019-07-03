@@ -25,13 +25,11 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Unit.hpp>
 
-#include <libtbag/dom/tinyxml2/tinyxml2.h>
-#include <libtbag/pattern/Singleton.hpp>
-#include <libtbag/log/level/Severity.hpp>
-#include <libtbag/log/mgr/Logger.hpp>
-#include <libtbag/log/msg/PacketGenerator.hpp>
-#include <libtbag/log/node/LogXmlNode.hpp>
-#include <libtbag/log/sink/RotateFileSink.hpp>
+#include <libtbag/log/Severity.hpp>
+#include <libtbag/log/Logger.hpp>
+#include <libtbag/log/LoggerManager.hpp>
+
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,75 +37,50 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
+using LoggerId = libtbag::log::LoggerManager::LoggerId;
+
+inline LoggerId getLoggerId(std::string const & name)
+{
+    return libtbag::log::LoggerManager::getLoggerId(name);
+}
+
 TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME = "tbag";
 
-//TBAG_CONSTEXPR bool isAsynchronousLogging() TBAG_NOEXCEPT { return true;  }
-//TBAG_CONSTEXPR bool  isMultithreadLogging() TBAG_NOEXCEPT { return false; }
+TBAG_API Logger * createDefaultRawStdoutLogger();
+TBAG_API Logger * createDefaultColorStdoutLogger();
+TBAG_API Logger * createDefaultStdoutLogger();
+TBAG_API Logger * createDefaultFileLogger(std::string const & path);
 
-using Severity = ::libtbag::log::level::Severity;
-using Logger   = ::libtbag::log::mgr::Logger;
-using MakeType = ::libtbag::log::msg::PacketGenerator::MakeType;
-
-Severity const       OFF_SEVERITY = ::libtbag::log::level::OFF_SEVERITY;
-Severity const EMERGENCY_SEVERITY = ::libtbag::log::level::EMERGENCY_SEVERITY;
-Severity const     ALERT_SEVERITY = ::libtbag::log::level::ALERT_SEVERITY;
-Severity const  CRITICAL_SEVERITY = ::libtbag::log::level::CRITICAL_SEVERITY;
-Severity const     ERROR_SEVERITY = ::libtbag::log::level::ERROR_SEVERITY;
-Severity const   WARNING_SEVERITY = ::libtbag::log::level::WARNING_SEVERITY;
-Severity const    NOTICE_SEVERITY = ::libtbag::log::level::NOTICE_SEVERITY;
-Severity const      INFO_SEVERITY = ::libtbag::log::level::INFO_SEVERITY;
-Severity const     DEBUG_SEVERITY = ::libtbag::log::level::DEBUG_SEVERITY;
-
-TBAG_CONSTEXPR std::size_t const DEFAULT_LOG_FILE_COUNT = ::libtbag::log::sink::RotateFileSink<>::getDefaultMaxHistory();
-
-TBAG_API Logger * createRawStdoutLogger(std::string const & name, bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createColorStdoutLogger(std::string const & name, bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createStdoutLogger(std::string const & name, MakeType type = MakeType::DEFAULT,
-                                     bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path,
-                                   MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createRotateFileLogger(std::string const & name, std::string const & path,
-                                         std::size_t max_size = MEGA_BYTE_TO_BYTE,
-                                         std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
-                                         MakeType type = MakeType::DEFAULT, bool mutex = true, bool auto_flush = false);
-
-TBAG_API Logger * createDefaultRawStdoutLogger(bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createDefaultColorStdoutLogger(bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createDefaultStdoutLogger(bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createDefaultFileLogger(std::string const & path, bool mutex = true, bool auto_flush = false);
-TBAG_API Logger * createDefaultRotateFileLogger(std::string const & path,
-                                                std::size_t max_size = MEGA_BYTE_TO_BYTE,
-                                                std::size_t max_file_count = DEFAULT_LOG_FILE_COUNT,
-                                                bool mutex = true, bool auto_flush = false);
-
+TBAG_API bool removeLogger(LoggerId id);
 TBAG_API bool removeLogger(std::string const & name);
 TBAG_API bool removeDefaultLogger();
 
+TBAG_API Logger * getLogger(LoggerId id);
 TBAG_API Logger * getLogger(std::string const & name);
 TBAG_API Logger * getDefaultLogger();
 
+TBAG_API bool existsLogger(LoggerId id);
 TBAG_API bool existsLogger(std::string const & name);
 
-TBAG_API void setSeverity(std::string const & name, Severity level);
-TBAG_API void setDefaultSeverity(Severity level);
+TBAG_API void setSeverity(LoggerId id, Severity const & level);
+TBAG_API void setSeverity(std::string const & name, Severity const & level);
+TBAG_API void setDefaultSeverity(Severity const & level);
 
-/**
- * @remarks
- *  - 0:       OFF_SEVERITY
- *  - 1: EMERGENCY_SEVERITY
- *  - 2:     ALERT_SEVERITY
- *  - 3:  CRITICAL_SEVERITY
- *  - 4:     ERROR_SEVERITY
- *  - 5:   WARNING_SEVERITY
- *  - 6:    NOTICE_SEVERITY
- *  - 7:      INFO_SEVERITY
- *  - 8:     DEBUG_SEVERITY
- */
+TBAG_API void setLevel(LoggerId id, int level);
 TBAG_API void setLevel(std::string const & name, int level);
 TBAG_API void setDefaultLevel(int level);
 
+TBAG_API Severity getSeverity(LoggerId id);
 TBAG_API Severity getSeverity(std::string const & name);
 TBAG_API Severity getDefaultSeverity();
+
+TBAG_API void setAutoFlush(LoggerId id, bool flag = true);
+TBAG_API void setAutoFlush(std::string const & name, bool flag = true);
+TBAG_API void setDefaultAutoFlush(bool flag = true);
+
+TBAG_API bool getAutoFlush(LoggerId id);
+TBAG_API bool getAutoFlush(std::string const & name);
+TBAG_API bool getDefaultAutoFlush();
 
 /**
  * SeverityGuard class.
@@ -115,23 +88,23 @@ TBAG_API Severity getDefaultSeverity();
  * @author zer0
  * @date   2017-05-09
  */
-class TBAG_API SeverityGuard : private Noncopyable
+class SeverityGuard : private Noncopyable
 {
 private:
-    std::string _name;
+    LoggerId _id;
     Severity _save;
 
 public:
     SeverityGuard(std::string const & name = TBAG_DEFAULT_LOGGER_NAME,
                   Severity const & severity = OFF_SEVERITY)
-            : _name(name), _save(getSeverity(_name))
+            : _id(getLoggerId(name)), _save(getSeverity(_id))
     {
-        setSeverity(_name, severity);
+        setSeverity(_id, severity);
     }
 
     ~SeverityGuard()
     {
-        setSeverity(_name, _save);
+        setSeverity(_id, _save);
     }
 };
 
@@ -139,7 +112,7 @@ template <typename ... Args>
 inline void logging(Logger * logger, Severity level, std::string const & format, Args && ... args)
 {
     if (logger) {
-        logger->logf(level, format, std::forward<Args>(args) ...);
+        logger->format(level, format, std::forward<Args>(args) ...);
     }
 }
 

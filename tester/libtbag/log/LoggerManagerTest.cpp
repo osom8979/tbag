@@ -6,11 +6,10 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/log/mgr/LoggerManager.hpp>
+#include <libtbag/log/LoggerManager.hpp>
 
 using namespace libtbag;
 using namespace libtbag::log;
-using namespace libtbag::log::mgr;
 
 TEST(LoggerManagerTest, Default)
 {

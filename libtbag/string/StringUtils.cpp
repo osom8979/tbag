@@ -26,6 +26,61 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+LineFeedStyle getLineFeedStyle(std::string const & name)
+{
+    auto const LOWER = lower(trim(name));
+    if (LOWER == "unix" || LOWER == "linux" || LOWER == "lf") {
+        return LineFeedStyle::LFS_UNIX;
+    }
+    if (LOWER == "windows" || LOWER == "window" || LOWER == "win32" || LOWER == "crlf") {
+        return LineFeedStyle::LFS_WINDOWS;
+    }
+    if (LOWER == "auto" || LOWER == "detect" || LOWER == "platform") {
+        return LineFeedStyle::LFS_AUTO;
+    }
+    return LineFeedStyle::LFS_NONE;
+}
+
+char const * const getLineFeedStyleText(LineFeedStyle style) TBAG_NOEXCEPT
+{
+    // clang-format off
+    switch (style) {
+    case LineFeedStyle::LFS_NONE:    return "none";
+    case LineFeedStyle::LFS_UNIX:    return "unix";
+    case LineFeedStyle::LFS_WINDOWS: return "windows";
+    case LineFeedStyle::LFS_AUTO:    return "auto";
+    default:                         return "";
+    }
+    // clang-format on
+}
+
+bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size, int offset) TBAG_NOEXCEPT
+{
+    if (style == LineFeedStyle::LFS_AUTO) {
+        style = isWindowsPlatform() ? LineFeedStyle::LFS_WINDOWS : LineFeedStyle::LFS_UNIX;
+    }
+
+    if (style == LineFeedStyle::LFS_UNIX) {
+        if (offset < buffer_size) {
+            buffer[offset] = UNIX_NEW_LINE[0];
+            return true;
+        } else {
+            return false;
+        }
+    } else if (style == LineFeedStyle::LFS_WINDOWS) {
+        if ((offset+1) < buffer_size) {
+            buffer[offset+0] = WINDOWS_NEW_LINE[0];
+            buffer[offset+1] = WINDOWS_NEW_LINE[1];
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    assert(style == LineFeedStyle::LFS_NONE);
+    return true;
+}
+
 std::string getStdEndLine()
 {
     std::stringstream ss;

@@ -12,6 +12,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Format.hpp>
 
 #include <libtbag/script/lua/RayLua.hpp>
 #include <libtbag/script/lua/RayGuiLua.hpp>

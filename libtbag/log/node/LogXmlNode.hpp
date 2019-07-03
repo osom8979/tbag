@@ -16,10 +16,8 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/dom/xml/XmlModel.hpp>
-#include <libtbag/log/level/Severity.hpp>
-#include <libtbag/log/msg/PacketGenerator.hpp>
-#include <libtbag/log/mgr/Logger.hpp>
 #include <libtbag/string/Environments.hpp>
+#include <libtbag/log/LoggerManager.hpp>
 
 #include <vector>
 
@@ -35,30 +33,26 @@ namespace node {
  *
  * @author zer0
  * @date   2017-04-25
+ * @date   2019-07-03 (Refactoring)
  *
  * @remarks
  *  XML format:
  *  @code{.xml}
- *   <tlog>
+ *   <loggers>
  *     <!-- insert your logger -->
  *     <logger>
  *       <!-- Log name -->
  *       <name>your_logger_name</name>
  *
  *       <!-- Select the sink to which you want to send log messages -->
- *       <!--  cout         (Console/Standard output)                -->
- *       <!--  stdout       (== cout)                                -->
- *       <!--  console      (Console output                          -->
- *       <!--  file         (File output                             -->
- *       <!--  rotate_file  (Rotate file output                      -->
+ *       <!--  console      (Stdout console output)                  -->
+ *       <!--  file         (File output)                            -->
+ *       <!--  null         (Null sink)                              -->
  *       <sink>file</sink>
  *
  *       <!-- Specify the detailed path of the sink                 -->
- *       <!--  <sink: cout>        case: Not used                   -->
- *       <!--  <sink: stdout>      case: Not used                   -->
- *       <!--  <sink: console>     case: 'stdout' or 'stderr', if not exists use the 'stdout' [CURRENTLY NOT SUPPORTED] -->
+ *       <!--  <sink: console>     case: 'stdout' or 'stderr'       -->
  *       <!--  <sink: file>        case: log file location path     -->
- *       <!--  <sink: rotate_file> case: log file location prefix   -->
  *       <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *       <!-- Special exchange variable:          -->
  *       <!-- ${EXE_PATH} : EXE file path         -->
@@ -68,20 +62,8 @@ namespace node {
  *       <!-- ${HOME_DIR} : User's HOME directory -->
  *       <destination>${EXE_DIR}/tbag-logger-test.log</destination>
  *
- *       <!-- File size limit           -->
- *       <!-- [CURRENTLY NOT SUPPORTED] -->
- *       <max_size>1024MByte</max_size>
- *
- *       <!-- Destination size limit    -->
- *       <!-- [CURRENTLY NOT SUPPORTED] -->
- *       <max_file_count>10</max_file_count>
- *
- *       <!-- Multi-thread logger       -->
- *       <!-- [CURRENTLY NOT SUPPORTED] -->
- *       <multithread>false</multithread>
- *
- *       <!-- Use the mutex locking: 'true' or 'false' -->
- *       <mutex>true</mutex>
+ *       <!-- Arguments -->
+ *       <arguments> ... </arguments>
  *
  *       <!-- Log message generator                                 -->
  *       <!--  default        (Default log message)                 -->
@@ -89,7 +71,14 @@ namespace node {
  *       <!--  raw            (Raw log message)                     -->
  *       <generator>default</generator>
  *
- *       <!-- Log level: 'true' or 'false'                           -->
+ *       <!-- Linefeed style                    -->
+ *       <!--  none     : No linefeed.          -->
+ *       <!--  unix     : Unix (LF) style.      -->
+ *       <!--  windows  : Windows (CRLF) style. -->
+ *       <!--  auto     : Auto detection.       -->
+ *       <line_feed>default</line_feed>
+ *
+ *       <!-- Log level                                              -->
  *       <!--  level 0: off       (Hide all messages)                -->
  *       <!--  level 1: emergency (System is unusable)               -->
  *       <!--  level 2: alert     (Action must be taken immediately) -->
@@ -107,87 +96,36 @@ namespace node {
  *     </logger>
  *
  *     <!-- More logger information ... -->
- *   </tlog>
+ *   </loggers>
  *  @endcode
  */
 class TBAG_API LogXmlNode : public libtbag::dom::xml::XmlModel::NodeInterface
 {
 public:
-    using Base         = libtbag::dom::xml::XmlModel::NodeInterface;
-    using Severity     = libtbag::log::level::Severity;
-    using MakeType     = libtbag::log::msg::PacketGenerator::MakeType;
-    using Logger       = libtbag::log::mgr::Logger;
-    using Element      = libtbag::dom::xml::XmlModel::Element;
+    using Info = libtbag::log::LoggerInitParams;
+    using Infos = std::vector<LoggerInitParams>;
     using Environments = libtbag::string::Environments;
-    using StringVector = std::vector<std::string>;
 
 public:
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_TLOG_NAME   = "tlog";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGER_NAME = "logger";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGERS_NAME = "loggers";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGER_NAME  = "logger";
 
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_NAME           = "name";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SINK           = "sink";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_DESTINATION    = "destination";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MAX_SIZE       = "max_size";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MAX_FILE_COUNT = "max_file_count";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MULTITHREAD    = "multithread";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_MUTEX          = "mutex";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_GENERATOR      = "generator";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY       = "severity";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH     = "auto_flush";
-
-public:
-    TBAG_CONSTEXPR static char const * const AUTO_FLUSH_ON  = "true";
-    TBAG_CONSTEXPR static char const * const AUTO_FLUSH_OFF = "false";
-
-    TBAG_CONSTEXPR static char const * const MULTITHREAD_ON  = "true";
-    TBAG_CONSTEXPR static char const * const MULTITHREAD_OFF = "false";
-
-    TBAG_CONSTEXPR static char const * const MUTEX_ON  = "true";
-    TBAG_CONSTEXPR static char const * const MUTEX_OFF = "false";
-
-    TBAG_CONSTEXPR static char const * const GENERATOR_DEFAULT       = "default";
-    TBAG_CONSTEXPR static char const * const GENERATOR_DEFAULT_COLOR = "default_color";
-    TBAG_CONSTEXPR static char const * const GENERATOR_RAW           = "raw";
-
-    TBAG_CONSTEXPR static char const * const SINK_COUT        = "cout";
-    TBAG_CONSTEXPR static char const * const SINK_CONSOLE     = "console";
-    TBAG_CONSTEXPR static char const * const SINK_STDOUT      = "stdout";
-    TBAG_CONSTEXPR static char const * const SINK_FILE        = "file";
-    TBAG_CONSTEXPR static char const * const SINK_ROTATE_FILE = "rotate_file";
-
-public:
-    struct LogInfo
-    {
-        std::string name;
-        std::string sink;
-        std::string destination;
-        std::size_t max_size;
-        std::size_t max_file_count;
-        bool auto_flush;
-        bool multithread;
-        bool mutex;
-        Severity severity;
-        MakeType generator;
-    };
-
-    using LogInfoVector = std::vector<LogInfo>;
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_NAME        = "name";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SINK        = "sink";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_DESTINATION = "destination";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_ARGUMENTS   = "arguments";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_GENERATOR   = "generator";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_LINE_FEED   = "line_feed";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY    = "severity";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
 
 private:
-    LogInfoVector _infos;
-    Environments  _envs;
+    Environments _envs;
+    Infos _infos;
 
 public:
     LogXmlNode();
     virtual ~LogXmlNode();
-
-public:
-    // clang-format off
-    inline LogInfoVector       & atInfos()       TBAG_NOEXCEPT { return _infos; }
-    inline LogInfoVector const & atInfos() const TBAG_NOEXCEPT { return _infos; }
-    inline Environments        & atEnvs ()       TBAG_NOEXCEPT { return _envs;  }
-    inline Environments  const & atEnvs () const TBAG_NOEXCEPT { return _envs;  }
-    // clang-format on
 
 protected:
     virtual std::string name() const override;
@@ -199,6 +137,16 @@ protected:
     virtual void save(Element & element) const override;
 
 public:
+    inline Environments       & envs()       TBAG_NOEXCEPT { return _envs; }
+    inline Environments const & envs() const TBAG_NOEXCEPT { return _envs; }
+
+    inline Infos       & infos()       TBAG_NOEXCEPT { return _infos; }
+    inline Infos const & infos() const TBAG_NOEXCEPT { return _infos; }
+
+public:
+    std::vector<std::string> getInfoNames() const;
+
+public:
     /**
      * Create loggers.
      *
@@ -207,72 +155,18 @@ public:
     int createLoggers();
     int createLoggers(std::string & preview_message);
 
-    /**
-     * Remove loggers.
-     *
-     * @return The number of deleted loggers.
-     */
-    int removeLoggers();
-
 public:
-    StringVector getNames() const;
-
-public:
-    // clang-format off
-    static std::size_t parseSize         (std::string const & value);
-    static bool        parseAutoFlush    (std::string const & value);
-    static bool        parseMultiThread  (std::string const & value);
-    static bool        parseMutex        (std::string const & value);
-    static Severity    parseSeverity     (std::string const & value);
-    static MakeType    parseGeneratorType(std::string const & value);
-    // clang-format on
-
-public:
-    static std::string getElementText(Element const * element);
-
-public:
-    static LogInfo getLogInfo(std::string const & name,
-                              std::string const & sink,
-                              std::string const & destination,
-                              std::string const & max_size,
-                              std::string const & max_file_count,
-                              std::string const & auto_flush,
-                              std::string const & multithread,
-                              std::string const & mutex,
-                              std::string const & severity,
-                              std::string const & generator);
-    static LogInfo getLogInfo(Element const & element);
-
-public:
-    static LogInfoVector loadLogInfo(Element const & element);
-
-public:
-    static bool insertName          (Element & parent, std::string const & name);
-    static bool insertSink          (Element & parent, std::string const & sink);
-    static bool insertDestination   (Element & parent, std::string const & destination);
-    static bool insertMaxSize       (Element & parent, std::size_t max_size);
-    static bool insertMaxFileCount  (Element & parent, std::size_t max_file_count);
-    static bool insertAutoFlush     (Element & parent, bool auto_flush);
-    static bool insertMultiThread   (Element & parent, bool multithread);
-    static bool insertMutex         (Element & parent, bool mutex);
-    static bool insertSeverity      (Element & parent, Severity severity);
-    static bool insertGeneratorType (Element & parent, MakeType type);
-
-public:
-    static bool saveLogInfo(Element & parent, LogInfo const & info);
-    static bool saveLogInfo(Element & parent, LogInfoVector const & infos);
-
-public:
-    static Logger * createLogger(LogInfo const & info, bool recreate_if_exists = true);
-    static Logger * createLogger(LogInfo const & info, Environments const & envs, bool recreate_if_exists = true);
-
-public:
-    static Environments createDefaultEnvironments();
+    static Info getLogInfo(Element const & element);
+    static Infos getLogInfos(Element const & element);
 };
 
-TBAG_API int createLoggerWithXmlConfigPath(std::string const & path);
-TBAG_API int createLoggerWithXmlString(std::string const & xml);
-TBAG_API int createLoggerWithXmlElement(tinyxml2::XMLElement const & parent);
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
+
+TBAG_API int createLoggerWithXmlPath(std::string const & path);
+TBAG_API int createLoggerWithXmlText(std::string const & xml);
+TBAG_API int createLoggerWithXmlLoggersElement(tinyxml2::XMLElement const & parent);
 TBAG_API int createLoggerWithXmlLoggerElement(tinyxml2::XMLElement const & element);
 
 } // namespace node

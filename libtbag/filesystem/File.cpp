@@ -7,6 +7,7 @@
 
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/log/Log.hpp>
 
 // -------------------

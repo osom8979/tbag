@@ -3,6 +3,7 @@
  * @brief  NullSink class prototype.
  * @author zer0
  * @date   2016-07-17
+ * @date   2019-07-02 (Create a cpp file)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_SINK_NULLSINK_HPP__
@@ -29,30 +30,17 @@ namespace sink {
  *
  * @author zer0
  * @date   2016-07-17
+ * @date   2019-07-02 (Create a cpp file)
  */
-class NullSink : public Sink<lock::FakeLock>
+class TBAG_API NullSink : public Sink
 {
 public:
-    using Parent = Sink<lock::FakeLock>;
+    NullSink();
+    virtual ~NullSink();
 
 public:
-    TBAG_CONSTEXPR static char const * const TYPE_NAME = "NULL_SINK";
-
-public:
-    NullSink(bool force_flush = false) : Parent(force_flush)
-    { /* EMPTY. */ }
-    virtual ~NullSink()
-    { /* EMPTY. */ }
-
-public:
-    virtual char const * const name() const override
-    { return TYPE_NAME; }
-
-    virtual void write(String const & msg) override
-    { /* EMPTY. */ }
-
-    virtual void flush() override
-    { /* EMPTY. */ }
+    virtual bool write(char const * message, int size) override;
+    virtual void flush() override;
 };
 
 } // namespace sink

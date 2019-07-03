@@ -10,6 +10,7 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/uvpp/Stream.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <uv.h>
 
 #include <sstream>
@@ -308,7 +309,7 @@ Process::Options & Process::Options::setWorking(std::string const & dir)
 
 Process::Options & Process::Options::setCurrentWorking()
 {
-    cwd = filesystem::Path::getWorkDir().getString();
+    cwd = libtbag::filesystem::Path::getWorkDir().getString();
     return *this;
 }
 

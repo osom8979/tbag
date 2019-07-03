@@ -24,7 +24,6 @@
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/xml/DefaultXmlModel.hpp>
 #include <libtbag/dom/xml/node/ServerXmlNode.hpp>
-#include <libtbag/log/node/DefaultLogXmlNode.hpp>
 
 #include <memory>
 #include <vector>

@@ -8,6 +8,7 @@
 #include <libtbag/uvpp/FsEvent.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/uvpp/Loop.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp>
 
 #include <uv.h>
 
@@ -91,7 +92,7 @@ std::string FsEvent::getPath()
     // Changed in version 1.9.0:
     // the returned length includes the terminating null byte on UV_ENOBUFS, and the buffer is null terminated on success.
 
-    using namespace filesystem::details;
+    using namespace libtbag::filesystem::details;
     std::size_t size = MAX_PATH_LENGTH;
     char name[MAX_PATH_LENGTH] = {0,};
     int const CODE = ::uv_fs_event_getpath(Parent::cast<uv_fs_event_t>(), name, &size);

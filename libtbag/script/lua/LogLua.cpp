@@ -23,7 +23,7 @@ using namespace libtbag::log;
 static int _log(lua_State * L)
 {
     tLog(luaL_checkstring(L, 1),
-         libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 2)),
+         libtbag::log::getSeverityWithLevelStep(luaL_checkinteger(L, 2)),
          luaE_checkfformat(L, 3));
     return 0;
 }
@@ -78,51 +78,33 @@ static int _logd(lua_State * L)
 
 static int _createRawStdoutLogger(lua_State * L)
 {
-    lua_pushboolean(L, createRawStdoutLogger(luaL_checkstring(L, 1),
-                                             luaL_optboolean(L, 2, true),
-                                             luaL_optboolean(L, 3, false)) != nullptr);
+    lua_pushboolean(L, createRawStdoutLogger(luaL_checkstring(L, 1)) != nullptr);
     return 1;
 }
 
 static int _createColorStdoutLogger(lua_State * L)
 {
-    lua_pushboolean(L, createColorStdoutLogger(luaL_checkstring(L, 1),
-                                               luaL_optboolean(L, 2, true),
-                                               luaL_optboolean(L, 3, false)) != nullptr);
+    lua_pushboolean(L, createColorStdoutLogger(luaL_checkstring(L, 1)) != nullptr);
     return 1;
 }
 
-TBAG_CONSTEXPR static int DEFAULT_MAKE_TYPE = static_cast<int>(MakeType::DEFAULT);
-
 static int _createStdoutLogger(lua_State * L)
 {
-    lua_pushboolean(L, createStdoutLogger(luaL_checkstring(L, 1),
-                                          static_cast<MakeType>(luaL_optinteger(L, 2, DEFAULT_MAKE_TYPE)),
-                                          luaL_optboolean(L, 3, true),
-                                          luaL_optboolean(L, 4, false)) != nullptr);
+    lua_pushboolean(L, createStdoutLogger(luaL_checkstring(L, 1)) != nullptr);
     return 1;
 }
 
 static int _createFileLogger(lua_State * L)
 {
-    lua_pushboolean(L, createFileLogger(luaL_checkstring(L, 1),
-                                        luaL_checkstring(L, 2),
-                                        static_cast<MakeType>(luaL_optinteger(L, 3, DEFAULT_MAKE_TYPE)),
-                                        luaL_optboolean(L, 4, true),
-                                        luaL_optboolean(L, 5, false)) != nullptr);
+    lua_pushboolean(L, createFileLogger(luaL_checkstring(L, 1), luaL_checkstring(L, 2)) != nullptr);
     return 1;
 }
 
 static int _createRotateFileLogger(lua_State * L)
 {
-    lua_pushboolean(L, createRotateFileLogger(luaL_checkstring(L, 1),
-                                              luaL_checkstring(L, 2),
-                                              luaL_optinteger(L, 3, MEGA_BYTE_TO_BYTE),
-                                              luaL_optinteger(L, 4, DEFAULT_LOG_FILE_COUNT),
-                                              static_cast<MakeType>(luaL_optinteger(L, 5, DEFAULT_MAKE_TYPE)),
-                                              luaL_optboolean(L, 6, true),
-                                              luaL_optboolean(L, 7, false)) != nullptr);
-    return 1;
+    // lua_pushboolean(L, createRotateFileLogger(luaL_checkstring(L, 1), luaL_checkstring(L, 2)) != nullptr);
+    // return 0;
+    return luaE_unsupport(L);
 }
 
 static int _removeLogger(lua_State * L)
@@ -146,13 +128,13 @@ static int _existsLogger(lua_State * L)
 static int _setSeverity(lua_State * L)
 {
     setSeverity(luaL_checkstring(L, 1),
-                libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 2)));
+                libtbag::log::getSeverityWithLevelStep(luaL_checkinteger(L, 2)));
     return 0;
 }
 
 static int _setDefaultSeverity(lua_State * L)
 {
-    setDefaultSeverity(libtbag::log::level::getSeverityWithLevelStep(luaL_checkinteger(L, 1)));
+    setDefaultSeverity(libtbag::log::getSeverityWithLevelStep(luaL_checkinteger(L, 1)));
     return 0;
 }
 
@@ -232,11 +214,6 @@ static luaL_Reg const __lua_log[] = {
 static void luaL_push_log_symbols(lua_State * L)
 {
     LOG_STRING_SYMBOL(L, DEFAULT_LOGGER_NAME, TBAG_DEFAULT_LOGGER_NAME);
-
-    LOG_INT_SYMBOL(L, MAKETYPE_DEFAULT      , MakeType::DEFAULT);
-    LOG_INT_SYMBOL(L, MAKETYPE_DEFAULT_COLOR, MakeType::DEFAULT_COLOR);
-    LOG_INT_SYMBOL(L, MAKETYPE_RAW          , MakeType::RAW);
-
     LOG_INT_SYMBOL2(L, OFF_SEVERITY);
     LOG_INT_SYMBOL2(L, EMERGENCY_SEVERITY);
     LOG_INT_SYMBOL2(L, ALERT_SEVERITY);

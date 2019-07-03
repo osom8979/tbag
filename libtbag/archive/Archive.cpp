@@ -7,6 +7,7 @@
 
 #include <libtbag/archive/Archive.hpp>
 #include <libtbag/archive/details/archive_frontend.hpp>
+#include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/system/SysInfo.hpp>
