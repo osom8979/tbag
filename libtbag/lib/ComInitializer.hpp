@@ -31,10 +31,10 @@ namespace lib {
  * @author zer0
  * @date   2017-09-05
  */
-class TBAG_API ComInitializer : public pattern::Singleton2<ComInitializer>
+class TBAG_API ComInitializer : public libtbag::pattern::Singleton2<ComInitializer>
 {
 public:
-    friend class pattern::Singleton2<ComInitializer>;
+    friend class libtbag::pattern::Singleton2<ComInitializer>;
 
     using Mutex = std::mutex;
     using Guard = std::lock_guard<Mutex>;

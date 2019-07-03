@@ -6,7 +6,6 @@
  */
 
 #include <${INCLUDE_PAIR}>
-#include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <cassert>

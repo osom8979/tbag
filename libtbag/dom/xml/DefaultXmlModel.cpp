@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/dom/xml/DefaultXmlModel.hpp>
-#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/dom/xml/node/ServerXmlNode.hpp>
-#include <libtbag/log/Log.hpp>
 #include <libtbag/net/Ip.hpp>
 
 #include <algorithm>

@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/dom/xml/XmlModel.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 #include <functional>

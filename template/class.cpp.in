@@ -6,7 +6,6 @@
  */
 
 #include <${INCLUDE_PAIR}>
-#include <libtbag/log/Log.hpp>
 
 // ${NAMESPACE_OPEN_COMMENT}
 ${NAMESPACE_OPEN}
