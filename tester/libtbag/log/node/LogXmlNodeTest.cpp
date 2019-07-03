@@ -21,8 +21,8 @@ TEST(LogXmlNodeTest, XmlString)
         <loggers>
             <logger>
                 <name>test-logger-cout</name>
-                <sink>cout</sink>
-                <destination></destination>
+                <sink>console</sink>
+                <destination>stdout</destination>
                 <generator>default_color</generator>
                 <severity>debug</severity>
                 <auto_flush>false</auto_flush>
@@ -66,8 +66,8 @@ TEST(LogXmlNodeTest, RecreateIfExists)
         <loggers>
             <logger>
                 <name>test-logger-cout</name>
-                <sink>stdout</sink>
-                <destination></destination>
+                <sink>console</sink>
+                <destination>stdout</destination>
                 <generator>default_color</generator>
                 <severity>OFF</severity>
                 <auto_flush>false</auto_flush>
@@ -114,7 +114,7 @@ struct LogXmlNodeTest : public LogXmlNode
     {
         Info param;
         // clang-format off
-        param.name        = "test_logger";
+        param.name        = TEST_LOG_NAME;
         param.sink        = "file";
         param.destination = "${TEST_DIR}/test.log";
         param.arguments   = "";
@@ -131,7 +131,7 @@ struct LogXmlNodeTest : public LogXmlNode
 
 TEST(LogXmlNodeTest, Default)
 {
-    tttDir(true, true);
+    tttDir_Automatic();
     auto const CONFIG_PATH  = tttDir_Get() / "config.xml";
     auto const LOGFILE_PATH = tttDir_Get() / "test.log";
 
