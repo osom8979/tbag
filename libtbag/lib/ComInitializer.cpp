@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/lib/ComInitializer.hpp>
+#include <libtbag/config-ex.h>
 
 #if defined(HAVE_COINITIALIZEEX_FUNC)
 #include <Objbase.h>
