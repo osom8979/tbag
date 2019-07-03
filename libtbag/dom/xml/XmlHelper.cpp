@@ -6,7 +6,8 @@
  */
 
 #include <libtbag/dom/xml/XmlHelper.hpp>
-#include <libtbag/log/Log.hpp>
+#include <cassert>
+#include <functional>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

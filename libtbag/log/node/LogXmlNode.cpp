@@ -108,14 +108,14 @@ LogXmlNode::Info LogXmlNode::getLogInfo(Element const & element)
 {
     Info info;
     // clang-format off
-    info.name        = text(*element.FirstChildElement(XML_ELEMENT_NAME       ));
-    info.sink        = text(*element.FirstChildElement(XML_ELEMENT_SINK       ));
-    info.destination = text(*element.FirstChildElement(XML_ELEMENT_DESTINATION));
-    info.arguments   = text(*element.FirstChildElement(XML_ELEMENT_ARGUMENTS  ));
-    info.generator   = text(*element.FirstChildElement(XML_ELEMENT_GENERATOR  ));
-    info.line_feed   = text(*element.FirstChildElement(XML_ELEMENT_LINE_FEED  ));
-    info.severity    = text(*element.FirstChildElement(XML_ELEMENT_SEVERITY   ));
-    info.auto_flush  = text(*element.FirstChildElement(XML_ELEMENT_AUTO_FLUSH ));
+    info.name        = get<std::string>(element, XML_ELEMENT_NAME       );
+    info.sink        = get<std::string>(element, XML_ELEMENT_SINK       );
+    info.destination = get<std::string>(element, XML_ELEMENT_DESTINATION);
+    info.arguments   = get<std::string>(element, XML_ELEMENT_ARGUMENTS  );
+    info.generator   = get<std::string>(element, XML_ELEMENT_GENERATOR  );
+    info.line_feed   = get<std::string>(element, XML_ELEMENT_LINE_FEED  );
+    info.severity    = get<std::string>(element, XML_ELEMENT_SEVERITY   );
+    info.auto_flush  = get<std::string>(element, XML_ELEMENT_AUTO_FLUSH );
     // clang-format on
     return info;
 }

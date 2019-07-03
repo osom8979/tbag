@@ -57,6 +57,16 @@ struct TBAG_API XmlHelper
     static Err opt(Element const & element, std::string const & key, float & result, float default_value = 0.0);
     static Err opt(Element const & element, std::string const & key, double & result, double default_value = 0.0);
 
+    template <typename T>
+    static T get(Element const & element, std::string const & key, T const & default_value = T())
+    {
+        T result;
+        if (isSuccess(opt(element, key, result, default_value))) {
+            return result;
+        }
+        return default_value;
+    }
+
     static Element & set(Element & element, std::string const & key, std::string const & value);
     static Element & set(Element & element, std::string const & key, char const * value);
     static Element & set(Element & element, std::string const & key, bool value);
