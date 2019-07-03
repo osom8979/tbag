@@ -46,29 +46,32 @@ int DefaultColorGenerator::make(char * buffer, int buffer_size,
                                 char const * msg, int msg_size) const
 {
     std::stringstream ss;
-    if (level <= EMERGENCY_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_BG_RED << tces::DISPLAY_ATTRIBUTE_FG_CYAN;
-    } else if (level <= ALERT_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_FG_MAGENTA;
-    } else if (level <= CRITICAL_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_FG_RED;
-    } else if (level <= ERROR_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_FG_RED;
-    } else if (level <= WARNING_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_FG_YELLOW;
-    } else if (level <= NOTICE_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_FG_GREEN;
-    } else if (level <= INFO_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_FG_GREEN;
-    } else if (level <= DEBUG_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_FG_BLUE;
+
+    using namespace libtbag::tces;
+    // clang-format off
+    switch (level) {
+    case       OFF_LEVEL: /*-------------------------------*/ break;
+    case EMERGENCY_LEVEL: ss << DISPLAY_ATTRIBUTE_BG_RED << DISPLAY_ATTRIBUTE_FG_CYAN; break;
+    case     ALERT_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_MAGENTA; break;
+    case  CRITICAL_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED;     break;
+    case     ERROR_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED;     break;
+    case   WARNING_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_YELLOW;  break;
+    case    NOTICE_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN;   break;
+    case      INFO_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN;   break;
+    case     DEBUG_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_BLUE;    break;
+    case   UNKNOWN_LEVEL: /*-------------------------------*/ break;
+    default: /*--------------------------------------------*/ break;
     }
+    // clang-format on
 
     ss << libtbag::time::TimePoint::now().toLocalLongString()
        << " @" << std::this_thread::get_id()
        << " [" << level_name
-       << "] " << std::string(msg, msg + msg_size)
-       << libtbag::tces::DISPLAY_ATTRIBUTE_RESET;
+       << "] " << std::string(msg, msg + msg_size);
+
+    if (EMERGENCY_LEVEL <= COMPARE_AND(level) <= DEBUG_LEVEL) {
+        ss << libtbag::tces::DISPLAY_ATTRIBUTE_RESET;
+    }
 
     if (LINE_FEED == LineFeedStyle::LFS_AUTO) {
         ss << (isWindowsPlatform() ? libtbag::string::WINDOWS_NEW_LINE : libtbag::string::UNIX_NEW_LINE);

@@ -53,9 +53,6 @@ public:
     using SharedGenerator = std::shared_ptr<Generator>;
     using WeakedGenerator = std::weak_ptr<Generator>;
 
-public:
-    TBAG_CONSTEXPR static int const BUFFER_SIZE = 4096;
-
 private:
     std::string const NAME;
 

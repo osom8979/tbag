@@ -54,12 +54,19 @@ public:
     using LineFeedStyle = libtbag::string::LineFeedStyle;
 
 public:
+    TBAG_CONSTEXPR static int const BUFFER_SIZE = 4096;
+
+public:
     LineFeedStyle const LINE_FEED;
 
 public:
     Generator(LineFeedStyle line_feed = LineFeedStyle::LFS_UNIX) TBAG_NOEXCEPT;
     Generator(std::string const & line_feed);
     virtual ~Generator();
+
+public:
+    std::string make_string(char const * logger, int level, char const * level_name,
+                            char const * msg, int msg_size) const;
 };
 
 } // namespace msg

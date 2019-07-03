@@ -31,6 +31,18 @@ Generator::~Generator()
     // EMPTY.
 }
 
+std::string Generator::make_string(char const * logger, int level, char const * level_name,
+                                   char const * msg, int msg_size) const
+{
+    char buffer[BUFFER_SIZE];
+    int const copy_size = make(buffer, BUFFER_SIZE, logger, level, level_name, msg, msg_size);
+    if (copy_size >= 1) {
+        return std::string(buffer, buffer + copy_size);
+    } else {
+        return std::string(msg, msg + msg_size);
+    }
+}
+
 } // namespace msg
 } // namespace log
 

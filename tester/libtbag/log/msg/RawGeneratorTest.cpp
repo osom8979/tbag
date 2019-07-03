@@ -14,7 +14,7 @@ using namespace libtbag::log::msg;
 
 TEST(RawGeneratorTest, Default)
 {
-    RawGenerator object;
-    ASSERT_TRUE(true);
+    RawGenerator gen(RawGenerator::LineFeedStyle::LFS_UNIX);
+    ASSERT_STREQ("abcd\n", gen.make_string("A", 9, "U", "abcdefg", 4).c_str());
 }
 
