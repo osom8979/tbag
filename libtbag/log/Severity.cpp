@@ -7,6 +7,7 @@
 
 #include <libtbag/log/Severity.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -103,6 +103,12 @@ public:
     { _auto_flush.store(flag); }
 
 public:
+    inline bool isContain(int level) const TBAG_NOEXCEPT
+    { return Severity::isContain(_level, level); }
+    inline bool isContain(Severity const & severity) const TBAG_NOEXCEPT
+    { return isContain(int(severity)); }
+
+public:
     void flush();
 
 public:
@@ -124,7 +130,7 @@ public:
     template <typename ... Args>
     bool format(Severity const & severity, std::string const & format, Args && ... args)
     {
-        if (int(severity) <= _level) {
+        if (!isContain(severity)) {
             return true;
         }
         return write(severity, ::fmt::format(format, std::forward<Args>(args) ...));

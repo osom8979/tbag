@@ -103,8 +103,15 @@ public:
     inline friend bool operator >=(Severity const & lh, Severity const & rh) TBAG_NOEXCEPT
     { return lh._level >= rh._level; }
 
+public:
+    static inline bool isContain(int threshold_level, int comparison_target_level) TBAG_NOEXCEPT
+    { return comparison_target_level <= threshold_level; }
+
+public:
+    inline bool isContain(int level) const TBAG_NOEXCEPT
+    { return isContain(level, _level); }
     inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
-    { return _level >= obj._level; }
+    { return isContain(obj._level); }
 
 public:
     inline char const * getText() const TBAG_NOEXCEPT { return _text; }
