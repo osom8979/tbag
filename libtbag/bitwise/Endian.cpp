@@ -6,18 +6,23 @@
  */
 
 #include <libtbag/bitwise/Endian.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/config-ex.h>
 
 // For the Windows platform:
 // https://msdn.microsoft.com/en-us/library/a3140177.aspx
 #include <stdlib.h>
 
 #if defined(TBAG_PLATFORM_WINDOWS)
-# include <winsock2.h>
-#elif defined(TBAG_PLATFORM_LINUX)
-# include <endian.h>
-#else
-# include <netinet/in.h> // or <arpa/inet.h>
+#include <winsock2.h>
+#endif
+#if defined(HAVE_ENDIAN_H)
+#include <endian.h>
+#endif
+#if defined(HAVE_NETINET_IN_H)
+#include <netinet/in.h>
+#endif
+#if defined(HAVE_ARPA_INET_H)
+#include <arpa/inet.h>
 #endif
 
 // -------------------

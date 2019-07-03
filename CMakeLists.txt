@@ -169,13 +169,15 @@ include (CheckIncludeFile)
 ## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
 ## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
 
-check_include_file (syscall.h      HAVE_SYSCALL_H)
+check_include_file (netinet/in.h   HAVE_NETINET_IN_H)
+check_include_file (arpa/inet.h    HAVE_ARPA_INET_H)
 check_include_file (sys/syscall.h  HAVE_SYS_SYSCALL_H)
 check_include_file (sys/sysctl.h   HAVE_SYS_SYSCTL_H)
 check_include_file (sys/statvfs.h  HAVE_SYS_STATVFS_H)
 check_include_file (sys/mman.h     HAVE_SYS_MMAN_H)
 check_include_file (sys/types.h    HAVE_SYS_TYPES_H)
 check_include_file (sys/uio.h      HAVE_SYS_UIO_H)
+check_include_file (syscall.h      HAVE_SYSCALL_H)
 check_include_file (unistd.h       HAVE_UNISTD_H)
 check_include_file (dlfcn.h        HAVE_DLFCN_H)
 check_include_file (execinfo.h     HAVE_EXECINFO_H)
@@ -186,6 +188,7 @@ check_include_file (Objbase.h      HAVE_OBJBASE_H) ## Win32
 check_include_file (Dbgeng.h       HAVE_DBGENG_H)  ## Win32
 check_include_file (intrin.h       HAVE_INTRIN_H)  ## Win32
 check_include_file (cpuid.h        HAVE_CPUID_H)   ## GCC or CLANG
+check_include_file (endian.h       HAVE_ENDIAN_H)
 
 ## Compile checker.
 include (CheckCSourceCompiles)

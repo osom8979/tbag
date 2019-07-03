@@ -5,8 +5,11 @@
 #pragma once
 #endif
 
-/* Define to 1 if you have the <syscall.h> header file. */
-#cmakedefine HAVE_SYSCALL_H
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#cmakedefine HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#cmakedefine HAVE_ARPA_INET_H
 
 /* Define to 1 if you have the <sys/syscall.h> header file. */
 #cmakedefine HAVE_SYS_SYSCALL_H
@@ -22,6 +25,9 @@
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #cmakedefine HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <syscall.h> header file. */
+#cmakedefine HAVE_SYSCALL_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #cmakedefine HAVE_UNISTD_H
@@ -49,6 +55,9 @@
 
 /* Define to 1 if you have the <cpuid.h> header file. */
 #cmakedefine HAVE_CPUID_H
+
+/* Define to 1 if you have the <endian.h> header file. */
+#cmakedefine HAVE_ENDIAN_H
 
 /* COM library initialized successfully. */
 #cmakedefine HAVE_COINITIALIZEEX_FUNC
