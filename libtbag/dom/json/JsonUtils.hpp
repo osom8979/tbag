@@ -28,6 +28,8 @@ namespace json {
 
 TBAG_API bool parse(std::string const & json, Json::Value & result);
 TBAG_API bool testJsonText(std::string const & json);
+TBAG_API Json::Value getJsonValue(std::string const & json);
+
 TBAG_API std::string writeFast(Json::Value const & value);
 TBAG_API std::string writeStyled(Json::Value const & value);
 TBAG_API std::string write(Json::Value const & value, bool fast = false);
