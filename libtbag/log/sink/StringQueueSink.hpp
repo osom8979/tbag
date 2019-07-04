@@ -18,8 +18,8 @@
 #include <libtbag/log/sink/Sink.hpp>
 #include <libtbag/type/TypeTable.hpp>
 
-#include <queue>
 #include <string>
+#include <deque>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,6 +37,9 @@ namespace sink {
 class TBAG_API StringQueueSink : public Sink
 {
 public:
+    using Deque = std::deque<std::string>;
+
+public:
     TBAG_CONSTEXPR static std::size_t const INFINITY_SIZE =
             libtbag::type::TypeInfo<std::size_t>::maximum();
 
@@ -44,11 +47,15 @@ public:
     std::size_t const MAX_SIZE;
 
 private:
-    std::queue<std::string> _queue;
+    Deque _deque;
 
 public:
     StringQueueSink(std::size_t max_size = INFINITY_SIZE);
     virtual ~StringQueueSink();
+
+public:
+    inline Deque       & deque()       TBAG_NOEXCEPT { return _deque; }
+    inline Deque const & deque() const TBAG_NOEXCEPT { return _deque; }
 
 public:
     virtual bool write(char const * message, int size) override;

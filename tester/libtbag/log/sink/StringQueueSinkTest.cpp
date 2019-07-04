@@ -14,7 +14,19 @@ using namespace libtbag::log::sink;
 
 TEST(StringQueueSinkTest, Default)
 {
-    StringQueueSink object;
-    ASSERT_TRUE(true);
+    StringQueueSink sink(2);
+
+    ASSERT_TRUE(sink.write("ab", 2));
+    ASSERT_TRUE(sink.write("cd", 2));
+    sink.flush();
+    ASSERT_EQ(2, sink.deque().size());
+    ASSERT_STREQ("ab", sink.deque()[0].c_str());
+    ASSERT_STREQ("cd", sink.deque()[1].c_str());
+
+    ASSERT_TRUE(sink.write("ef", 2));
+    sink.flush();
+    ASSERT_EQ(2, sink.deque().size());
+    ASSERT_STREQ("cd", sink.deque()[0].c_str());
+    ASSERT_STREQ("ef", sink.deque()[1].c_str());
 }
 

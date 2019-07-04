@@ -109,7 +109,7 @@ public:
 
 public:
     inline bool isContain(int level) const TBAG_NOEXCEPT
-    { return isContain(level, _level); }
+    { return isContain(_level, level); }
     inline bool isContain(Severity const & obj) const TBAG_NOEXCEPT
     { return isContain(obj._level); }
 

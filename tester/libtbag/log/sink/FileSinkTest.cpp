@@ -8,6 +8,9 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/log/sink/FileSink.hpp>
+#include <libtbag/filesystem/File.hpp>
+
+#include <string>
 
 using namespace libtbag;
 using namespace libtbag::log;
@@ -19,6 +22,15 @@ TEST(FileSinkTest, Default)
     tttDir_Automatic();
     auto const PATH = tttDir_Get() / TEST_FILENAME;
 
-    FileSink object(PATH);
+    COMMENT("SINK RAII") {
+        FileSink sink(PATH);
+        ASSERT_TRUE(sink.write("abcdefg", 4));
+        sink.flush();
+    }
+
+    ASSERT_TRUE(PATH.isRegularFile());
+    std::string buffer;
+    ASSERT_EQ(E_SUCCESS, libtbag::filesystem::readFile(PATH, buffer));
+    ASSERT_STREQ("abcd", buffer.c_str());
 }
 

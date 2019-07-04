@@ -14,7 +14,12 @@ using namespace libtbag::log::sink;
 
 TEST(ConsoleSinkTest, Default)
 {
-    ConsoleSink object;
-    ASSERT_TRUE(true);
+    ConsoleSink sink;
+#if defined(TBAG_PLATFORM_WINDOWS)
+    ASSERT_TRUE(sink.write("ab\r\n", 4));
+#else
+    ASSERT_TRUE(sink.write("abc\n", 4));
+#endif
+    sink.flush();
 }
 

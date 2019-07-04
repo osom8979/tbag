@@ -28,10 +28,10 @@ StringQueueSink::~StringQueueSink()
 
 bool StringQueueSink::write(char const * message, int size)
 {
-    while (_queue.size() >= MAX_SIZE) {
-        _queue.pop();
+    while (_deque.size() >= MAX_SIZE) {
+        _deque.pop_front();
     }
-    _queue.push(std::string(message, message + size));
+    _deque.push_back(std::string(message, message + size));
     return true;
 }
 

@@ -145,6 +145,103 @@ Logger * createFileLogger(std::string const & name, std::string const & path)
     return createLogger(name, sink, gen, DEFAULT_LOG_LEVEL, DEFAULT_AUTO_FLUSH);
 }
 
+bool removeLogger(LoggerId id)
+{
+    return LoggerManager::getInstance()->removeLogger(id);
+}
+
+bool removeLogger(std::string const & name)
+{
+    return removeLogger(getLoggerId(name));
+}
+
+Logger * getLogger(LoggerId id)
+{
+    return LoggerManager::getInstance()->getLoggerPtr(id);
+}
+
+Logger * getLogger(std::string const & name)
+{
+    return getLogger(getLoggerId(name));
+}
+
+bool existsLogger(LoggerId id)
+{
+    return getLogger(id) != nullptr;
+}
+
+bool existsLogger(std::string const & name)
+{
+    return getLogger(name) != nullptr;
+}
+
+void setSeverity(LoggerId id, Severity const & level)
+{
+    Logger * logger = getLogger(id);
+    if (logger != nullptr) {
+        logger->setSeverity(level);
+    }
+}
+
+void setSeverity(std::string const & name, Severity const & level)
+{
+    setSeverity(getLoggerId(name), level);
+}
+
+void setLevel(LoggerId id, int level)
+{
+    Logger * logger = getLogger(id);
+    if (logger != nullptr) {
+        logger->setLevel(level);
+    }
+}
+
+void setLevel(std::string const & name, int level)
+{
+    setLevel(getLoggerId(name), level);
+}
+
+Severity getSeverity(LoggerId id)
+{
+    Logger * logger = getLogger(id);
+    if (logger != nullptr) {
+        return logger->getSeverity();
+    }
+    return OFF_SEVERITY;
+}
+
+Severity getSeverity(std::string const & name)
+{
+    return getSeverity(getLoggerId(name));
+}
+
+void setAutoFlush(LoggerId id, bool flag)
+{
+    Logger * logger = getLogger(id);
+    if (logger != nullptr) {
+        logger->setAutoFlush(flag);
+    }
+}
+
+void setAutoFlush(std::string const & name, bool flag)
+{
+    setAutoFlush(getLoggerId(name), flag);
+}
+
+bool getAutoFlush(LoggerId id)
+{
+    Logger * logger = getLogger(id);
+    if (logger != nullptr) {
+        return logger->getAutoFlush();
+    }
+    return false;
+}
+
+bool getAutoFlush(std::string const & name)
+{
+    return getAutoFlush(getLoggerId(name));
+}
+
 bool existsSinkName(std::string const & name)
 {
     auto const LOWER = libtbag::string::lower(libtbag::string::trim(name));

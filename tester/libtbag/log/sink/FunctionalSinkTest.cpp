@@ -15,12 +15,23 @@ using namespace libtbag::log::sink;
 TEST(FunctionalSinkTest, Default)
 {
     auto write_cb = [](char const * msg, int size, void * user) -> bool {
+        auto * buffer = (std::string*)user;
+        buffer->assign(msg, msg + size);
         return true;
     };
+
     auto flush_cb = [](void * user){
+        auto * buffer = (std::string*)user;
+        buffer->assign("flush");
     };
 
-    int test = 100;
-    FunctionalSink object(write_cb, flush_cb, &test);
+    std::string buffer;
+    FunctionalSink sink(write_cb, flush_cb, &buffer);
+
+    ASSERT_TRUE(sink.write("abcdefg", 4));
+    ASSERT_STREQ("abcd", buffer.c_str());
+
+    sink.flush();
+    ASSERT_STREQ("flush", buffer.c_str());
 }
 

@@ -18,6 +18,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/pattern/Singleton2.hpp>
 #include <libtbag/log/Logger.hpp>
+#include <libtbag/log/Severity.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/dom/tinyxml2/tinyxml2.h>
 
@@ -25,6 +26,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -95,6 +97,13 @@ public:
 // Miscellaneous utilities
 // -----------------------
 
+using LoggerId = LoggerManager::LoggerId;
+
+inline LoggerId getLoggerId(std::string const & name)
+{
+    return LoggerManager::getLoggerId(name);
+}
+
 /**
  * Create new logger.
  *
@@ -111,6 +120,30 @@ TBAG_API Logger * createRawStdoutLogger(std::string const & name);
 TBAG_API Logger * createColorStdoutLogger(std::string const & name);
 TBAG_API Logger * createStdoutLogger(std::string const & name);
 TBAG_API Logger * createFileLogger(std::string const & name, std::string const & path);
+
+TBAG_API bool removeLogger(LoggerId id);
+TBAG_API bool removeLogger(std::string const & name);
+
+TBAG_API Logger * getLogger(LoggerId id);
+TBAG_API Logger * getLogger(std::string const & name);
+
+TBAG_API bool existsLogger(LoggerId id);
+TBAG_API bool existsLogger(std::string const & name);
+
+TBAG_API void setSeverity(LoggerId id, Severity const & level);
+TBAG_API void setSeverity(std::string const & name, Severity const & level);
+
+TBAG_API void setLevel(LoggerId id, int level);
+TBAG_API void setLevel(std::string const & name, int level);
+
+TBAG_API Severity getSeverity(LoggerId id);
+TBAG_API Severity getSeverity(std::string const & name);
+
+TBAG_API void setAutoFlush(LoggerId id, bool flag = true);
+TBAG_API void setAutoFlush(std::string const & name, bool flag = true);
+
+TBAG_API bool getAutoFlush(LoggerId id);
+TBAG_API bool getAutoFlush(std::string const & name);
 
 TBAG_CONSTEXPR char const * const SINK_CONSOLE = "console";
 TBAG_CONSTEXPR char const * const SINK_FILE    = "file";

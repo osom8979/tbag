@@ -28,6 +28,7 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -53,7 +54,7 @@ public:
     using SharedGenerator = std::shared_ptr<Generator>;
     using WeakedGenerator = std::weak_ptr<Generator>;
 
-private:
+public:
     std::string const NAME;
 
 private:
@@ -71,10 +72,6 @@ public:
            int level = libtbag::log::INFO_LEVEL,
            bool auto_flush = false);
     ~Logger();
-
-public:
-    std::string getName() const
-    { return NAME; }
 
 public:
     WeakedSink getWeakedSink() const TBAG_NOEXCEPT_SP_OP(WeakedSink(_sink))
@@ -100,10 +97,11 @@ public:
     { _auto_flush.store(flag); }
 
 public:
-    inline bool isContain(int level) const TBAG_NOEXCEPT
-    { return Severity::isContain(_level, level); }
-    inline bool isContain(Severity const & severity) const TBAG_NOEXCEPT
-    { return isContain(int(severity)); }
+    inline bool youShallNotPass(int level) const TBAG_NOEXCEPT_SP_OP(_level.load())
+    {
+        auto const threshold = _level.load();
+        return threshold == OFF_LEVEL || !Severity::isContain(threshold, level);
+    }
 
 public:
     void flush();
@@ -124,15 +122,35 @@ public:
     bool write(Severity const & severity, std::string const & message);
 
 public:
-    template <typename ... Args>
-    bool format(Severity const & severity, std::string const & format, Args && ... args)
+    template <typename FormatT, typename ... Args>
+    bool format(Severity const & severity, FormatT && format, Args && ... args)
     {
-        if (!isContain(severity)) {
-            return true;
-        }
-        return write(severity, ::fmt::format(format, std::forward<Args>(args) ...));
+        return write(severity, ::fmt::format(std::forward<FormatT>(format), std::forward<Args>(args) ...));
     }
 };
+
+template <typename FormatT, typename ... Args>
+inline bool logging(Logger * logger, Severity level, FormatT && format, Args && ... args)
+{
+    if (logger == nullptr) {
+        return false;
+    }
+    if (logger->youShallNotPass(level)) {
+        return true;
+    }
+    return logger->format(level, std::forward<FormatT>(format), std::forward<Args>(args) ...);
+}
+
+// clang-format off
+template <typename F, typename ... A> inline void emergency(Logger * l, F && f, A && ... a) { logging(l, EMERGENCY_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void alert    (Logger * l, F && f, A && ... a) { logging(l,     ALERT_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void critical (Logger * l, F && f, A && ... a) { logging(l,  CRITICAL_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void error    (Logger * l, F && f, A && ... a) { logging(l,     ERROR_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void warning  (Logger * l, F && f, A && ... a) { logging(l,   WARNING_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void notice   (Logger * l, F && f, A && ... a) { logging(l,    NOTICE_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void info     (Logger * l, F && f, A && ... a) { logging(l,      INFO_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void debug    (Logger * l, F && f, A && ... a) { logging(l,     DEBUG_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+// clang-format on
 
 } // namespace log
 

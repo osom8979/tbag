@@ -41,7 +41,7 @@ void Logger::flush()
 
 bool Logger::write(int level, char const * level_name, char const * message, int size)
 {
-    if (!isContain(level)) {
+    if (youShallNotPass(level)) {
         return true;
     }
 
