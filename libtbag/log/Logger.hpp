@@ -125,6 +125,9 @@ public:
     template <typename FormatT, typename ... Args>
     bool format(Severity const & severity, FormatT && format, Args && ... args)
     {
+        if (youShallNotPass(severity)) {
+            return true;
+        }
         return write(severity, ::fmt::format(std::forward<FormatT>(format), std::forward<Args>(args) ...));
     }
 };
@@ -134,9 +137,6 @@ inline bool logging(Logger * logger, Severity level, FormatT && format, Args && 
 {
     if (logger == nullptr) {
         return false;
-    }
-    if (logger->youShallNotPass(level)) {
-        return true;
     }
     return logger->format(level, std::forward<FormatT>(format), std::forward<Args>(args) ...);
 }
