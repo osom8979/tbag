@@ -249,13 +249,14 @@ ModelLayer ModelNet::getLayer(int id) const
     return _impl->layers[__get_node(id)];
 }
 
-std::size_t ModelNet::setup(std::string const & common_data)
+std::size_t ModelNet::setup(std::string const & data, Splitter const & splitter)
 {
     assert(exists());
+    assert(static_cast<bool>(splitter));
     std::size_t success_count = 0;
     for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
         if (_impl->layers[n]) {
-            if (isSuccess(_impl->layers[n].setup(common_data))) {
+            if (isSuccess(_impl->layers[n].setup(splitter(data)))) {
                 ++success_count;
             }
         }

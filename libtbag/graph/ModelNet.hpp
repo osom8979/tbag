@@ -20,6 +20,7 @@
 #include <libtbag/graph/ModelLayer.hpp>
 
 #include <memory>
+#include <functional>
 #include <string>
 #include <vector>
 #include <set>
@@ -127,7 +128,10 @@ public:
     ModelLayer getLayer(int id) const;
 
 public:
-    std::size_t setup(std::string const & data);
+    using Splitter = std::function<std::string(std::string const &)>;
+
+public:
+    std::size_t setup(std::string const & data, Splitter const & splitter);
     std::size_t teardown();
 
 public:
