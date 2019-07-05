@@ -141,8 +141,9 @@ void ModelNet::swap(ModelNet & obj) TBAG_NOEXCEPT
 
 void ModelNet::clear()
 {
-    assert(exists());
-    _impl->clear();
+    if (exists()) {
+        _impl->clear();
+    }
 }
 
 bool ModelNet::empty() const
@@ -168,12 +169,9 @@ std::size_t ModelNet::size() const
 void ModelNet::updateIncomplete()
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-
-    for (Digraph::NodeIt n(graph); n != lemon::INVALID; ++n) {
-        if (layers[n]) {
-            layers[n]._incomplete();
+    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
+        if (_impl->layers[n]) {
+            _impl->layers[n]._incomplete();
         }
     }
 }
@@ -181,12 +179,9 @@ void ModelNet::updateIncomplete()
 void ModelNet::updateComplete()
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-
-    for (Digraph::NodeIt n(graph); n != lemon::INVALID; ++n) {
-        if (layers[n]) {
-            layers[n]._complete();
+    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
+        if (_impl->layers[n]) {
+            _impl->layers[n]._complete();
         }
     }
 }
@@ -194,40 +189,29 @@ void ModelNet::updateComplete()
 void ModelNet::addFirst(ModelLayer const & layer)
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-    auto & first_ids = _impl->first_ids;
-
-    auto const NODE = graph.addNode();
+    auto const NODE = _impl->graph.addNode();
     auto const ID = __get_id(NODE);
-    first_ids.insert(ID);
-    layers[NODE] = layer;
-    layers[NODE]._assign_id(ID);
+    _impl->first_ids.insert(ID);
+    _impl->layers[NODE] = layer;
+    _impl->layers[NODE]._assign_id(ID);
 }
 
 void ModelNet::addNode(ModelLayer const & layer)
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-
-    auto node = graph.addNode();
-    layers[node] = layer;
-    layers[node]._assign_id(__get_id(node));
+    auto node = _impl->graph.addNode();
+    _impl->layers[node] = layer;
+    _impl->layers[node]._assign_id(__get_id(node));
 }
 
 void ModelNet::addLast(ModelLayer const & layer)
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-    auto & last_ids = _impl->last_ids;
-
-    auto const NODE = graph.addNode();
+    auto const NODE = _impl->graph.addNode();
     auto const ID = __get_id(NODE);
-    last_ids.insert(ID);
-    layers[NODE] = layer;
-    layers[NODE]._assign_id(ID);
+    _impl->last_ids.insert(ID);
+    _impl->layers[NODE] = layer;
+    _impl->layers[NODE]._assign_id(ID);
 }
 
 void ModelNet::addArc(ModelLayer const & source, ModelLayer const & target)
@@ -239,10 +223,8 @@ void ModelNet::addArc(ModelLayer const & source, ModelLayer const & target)
 std::vector<int> ModelNet::getLayerIds() const
 {
     assert(exists());
-    auto & graph = _impl->graph;
-
     std::vector<int> result;
-    for (Digraph::NodeIt n(graph); n != lemon::INVALID; ++n) {
+    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
         result.push_back(__get_id(n));
     }
     return result;
@@ -251,12 +233,9 @@ std::vector<int> ModelNet::getLayerIds() const
 std::set<ModelLayer> ModelNet::getLayers() const
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-
     std::set<ModelLayer> result;
-    for (Digraph::NodeIt n(graph); n != lemon::INVALID; ++n) {
-        result.insert(layers[n]);
+    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
+        result.insert(_impl->layers[n]);
     }
     return result;
 }
@@ -264,28 +243,19 @@ std::set<ModelLayer> ModelNet::getLayers() const
 ModelLayer ModelNet::getLayer(int id) const
 {
     assert(exists());
-    auto & layers = _impl->layers;
-
     if (id == LayerBase::NO_ASSIGN_ID) {
         return ModelLayer(nullptr);
     }
-    return layers[__get_node(id)];
+    return _impl->layers[__get_node(id)];
 }
 
-std::size_t ModelNet::setup(std::string const & data)
+std::size_t ModelNet::setup(std::string const & common_data)
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-
-    // TODO: SetUp self network.
-
     std::size_t success_count = 0;
-    for (Digraph::NodeIt n(graph); n != lemon::INVALID; ++n) {
-        std::string layer_data;
-        // TODO: Splits the data into layer_data.
-        if (layers[n]) {
-            if (isSuccess(layers[n].setup(layer_data))) {
+    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
+        if (_impl->layers[n]) {
+            if (isSuccess(_impl->layers[n].setup(common_data))) {
                 ++success_count;
             }
         }
@@ -296,31 +266,23 @@ std::size_t ModelNet::setup(std::string const & data)
 std::size_t ModelNet::teardown()
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-
     std::size_t success_count = 0;
-    for (Digraph::NodeIt n(graph); n != lemon::INVALID; ++n) {
-        if (layers[n]) {
-            if (isSuccess(layers[n].teardown())) {
+    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
+        if (_impl->layers[n]) {
+            if (isSuccess(_impl->layers[n].teardown())) {
                 ++success_count;
             }
         }
     }
-
-    // TODO: TearDown self network.
-
     return success_count;
 }
 
 std::vector<int> ModelNet::getSourceNodeIds(int node_id) const
 {
     assert(exists());
-    auto & graph = _impl->graph;
-
     std::vector<int> result;
-    for (Digraph::InArcIt a(graph, __get_node(node_id)); a != lemon::INVALID; ++a) {
-        result.push_back(__get_id(graph.source(a)));
+    for (Digraph::InArcIt a(_impl->graph, __get_node(node_id)); a != lemon::INVALID; ++a) {
+        result.push_back(__get_id(_impl->graph.source(a)));
     }
     return result;
 }
@@ -328,11 +290,9 @@ std::vector<int> ModelNet::getSourceNodeIds(int node_id) const
 std::vector<int> ModelNet::getTargetNodeIds(int node_id) const
 {
     assert(exists());
-    auto & graph = _impl->graph;
-
     std::vector<int> result;
-    for (Digraph::OutArcIt a(graph, __get_node(node_id)); a != lemon::INVALID; ++a) {
-        result.push_back(__get_id(graph.target(a)));
+    for (Digraph::OutArcIt a(_impl->graph, __get_node(node_id)); a != lemon::INVALID; ++a) {
+        result.push_back(__get_id(_impl->graph.target(a)));
     }
     return result;
 }
@@ -350,11 +310,9 @@ std::vector<int> ModelNet::getNodeIds(int node_id, ArcOrder order) const
 ModelNet::Layers ModelNet::getInputLayers(int node_id, ArcOrder order) const
 {
     assert(exists());
-    auto & layers = _impl->layers;
-
     std::vector<ModelLayer> input_layers;
     for (auto & source_id : getNodeIds(node_id, order)) {
-        input_layers.push_back(layers[__get_node(source_id)]);
+        input_layers.push_back(_impl->layers[__get_node(source_id)]);
     }
     return input_layers;
 }
@@ -362,10 +320,8 @@ ModelNet::Layers ModelNet::getInputLayers(int node_id, ArcOrder order) const
 bool ModelNet::isReady(int node_id, ArcOrder order) const
 {
     assert(exists());
-    auto & layers = _impl->layers;
-
     for (auto & source_id : getNodeIds(node_id, order)) {
-        if (!layers[__get_node(source_id)].isComplete()) {
+        if (!_impl->layers[__get_node(source_id)].isComplete()) {
             return false;
         }
     }
@@ -375,7 +331,6 @@ bool ModelNet::isReady(int node_id, ArcOrder order) const
 Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std::size_t max_depth)
 {
     assert(exists());
-    auto & layers = _impl->layers;
 
     updateIncomplete();
 
@@ -392,17 +347,16 @@ Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std
             Err code;
 
             if (direction == Direction::D_FORWARD) {
-                code = layers[__get_node(current_id)].forward(getInputLayers(current_id, ArcOrder::AO_SOURCE));
+                code = _impl->layers[__get_node(current_id)].forward(getInputLayers(current_id, ArcOrder::AO_SOURCE));
             } else {
                 assert(direction == Direction::D_BACKWARD);
-                code = layers[__get_node(current_id)].backward(getInputLayers(current_id, ArcOrder::AO_TARGET));
+                code = _impl->layers[__get_node(current_id)].backward(getInputLayers(current_id, ArcOrder::AO_TARGET));
             }
 
             if (isSuccess(code)) {
-                layers[__get_node(current_id)]._complete();
+                _impl->layers[__get_node(current_id)]._complete();
             } else {
-                tDLogE("ModelNet::Impl::run({}) Layer({}) error: {}",
-                       getDirectionName(direction), current_id, code);
+                tDLogE("ModelNet::run({}) Layer({}) error: {}", getDirectionName(direction), current_id, code);
                 return code;
             }
         }
@@ -436,36 +390,29 @@ Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std
 Err ModelNet::forward()
 {
     assert(exists());
-    auto & first_ids = _impl->first_ids;
-
-    if (first_ids.empty()) {
+    if (_impl->first_ids.empty()) {
         return E_NREADY;
     }
-    return run(first_ids, Direction::D_FORWARD);
+    return run(_impl->first_ids, Direction::D_FORWARD);
 }
 
 Err ModelNet::backward()
 {
     assert(exists());
-    auto & last_ids = _impl->last_ids;
-
-    if (last_ids.empty()) {
+    if (_impl->last_ids.empty()) {
         return E_NREADY;
     }
-    return run(last_ids, Direction::D_BACKWARD);
+    return run(_impl->last_ids, Direction::D_BACKWARD);
 }
 
 std::string ModelNet::toString() const
 {
     assert(exists());
-    auto & graph = _impl->graph;
-    auto & layers = _impl->layers;
-    auto & first_ids = _impl->first_ids;
-    auto & last_ids = _impl->last_ids;
-
     bool first_node = true;
     int layer_count = 0;
     std::stringstream ss;
+
+    auto & graph = _impl->graph;
 
     for (Digraph::NodeIt n(graph); n != lemon::INVALID; ++n, ++layer_count) {
         if (first_node) {
@@ -474,12 +421,12 @@ std::string ModelNet::toString() const
             ss << std::endl;
         }
 
-        ss << "Layer #" << layer_count << ": " << layers[n].toString();
+        ss << "Layer #" << layer_count << ": " << _impl->layers[n].toString();
         auto const CURRENT_NODE_ID = __get_id(n);
 
-        if (first_ids.find(CURRENT_NODE_ID) != first_ids.end()) {
+        if (_impl->first_ids.find(CURRENT_NODE_ID) != _impl->first_ids.end()) {
             ss << " [FIRST]";
-        } else if (last_ids.find(CURRENT_NODE_ID) != last_ids.end()) {
+        } else if (_impl->last_ids.find(CURRENT_NODE_ID) != _impl->last_ids.end()) {
             ss << " [LAST]";
         }
 
