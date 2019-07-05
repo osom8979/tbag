@@ -328,6 +328,25 @@ public:
     inline box_data const & operator *() const TBAG_NOEXCEPT { return ref(); }
 
 public:
+    friend inline bool operator <(Box const & x, Box const & y) TBAG_NOEXCEPT
+    { return x.get() < y.get(); }
+
+    friend inline bool operator >(Box const & x, Box const & y) TBAG_NOEXCEPT
+    { return x.get() > y.get(); }
+
+    friend inline bool operator <=(Box const & x, Box const & y) TBAG_NOEXCEPT
+    { return x.get() <= y.get(); }
+
+    friend inline bool operator >=(Box const & x, Box const & y) TBAG_NOEXCEPT
+    { return x.get() >= y.get(); }
+
+    inline bool operator ==(Box const & obj) const TBAG_NOEXCEPT
+    { return get() == obj.get(); }
+
+    inline bool operator !=(Box const & obj) const TBAG_NOEXCEPT
+    { return get() != obj.get(); }
+
+public:
     void reset();
 
 public:

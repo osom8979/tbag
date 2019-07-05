@@ -40,12 +40,39 @@ namespace graph {
 class TBAG_API ModelNet
 {
 public:
+    using Layers = std::vector<ModelLayer>;
+
+public:
+    enum class ArcOrder
+    {
+        AO_SOURCE,
+        AO_TARGET,
+    };
+
+    enum class Direction
+    {
+        D_FORWARD,
+        D_BACKWARD,
+    };
+
+    inline static char const * getDirectionName(Direction d) TBAG_NOEXCEPT
+    {
+        // clang-format off
+        switch (d) {
+        case Direction::D_FORWARD:  return "FORWARD";
+        case Direction::D_BACKWARD: return "BACKWARD";
+        default:                    return "";
+            // clang-format on
+        }
+    }
+
+public:
+    TBAG_CONSTEXPR static std::size_t const MAX_RUN_DEPTH = 1024;
+
+public:
     struct Impl;
     friend struct Impl;
     using SharedImpl = std::shared_ptr<Impl>;
-
-public:
-    using Layers = std::vector<ModelLayer>;
 
 private:
     SharedImpl _impl;
@@ -66,7 +93,8 @@ public:
     void swap(ModelNet & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(ModelNet & lh, ModelNet & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(ModelNet & lh, ModelNet & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -83,14 +111,15 @@ public:
     std::size_t size() const;
 
 public:
+    /** Unplug the finished flags. */
     void updateIncomplete();
     void updateComplete();
 
 public:
-    Err addFirst(ModelLayer const & layer);
-    Err addNode(ModelLayer const & layer);
-    Err addLast(ModelLayer const & layer);
-    Err addArc(ModelLayer const & source, ModelLayer const & target);
+    void addFirst(ModelLayer const & layer);
+    void addNode(ModelLayer const & layer);
+    void addLast(ModelLayer const & layer);
+    void addArc(ModelLayer const & source, ModelLayer const & target);
 
 public:
     std::vector<int> getLayerIds() const;
@@ -98,8 +127,20 @@ public:
     ModelLayer getLayer(int id) const;
 
 public:
-    Err setup(std::string const & data);
-    Err teardown();
+    std::size_t setup(std::string const & data);
+    std::size_t teardown();
+
+public:
+    std::vector<int> getSourceNodeIds(int node_id) const;
+    std::vector<int> getTargetNodeIds(int node_id) const;
+    std::vector<int> getNodeIds(int node_id, ArcOrder order) const;
+
+public:
+    Layers getInputLayers(int node_id, ArcOrder order) const;
+    bool isReady(int node_id, ArcOrder order) const;
+
+public:
+    Err run(std::set<int> const & start_node_ids, Direction direction, std::size_t max_depth = MAX_RUN_DEPTH);
 
 public:
     Err forward();

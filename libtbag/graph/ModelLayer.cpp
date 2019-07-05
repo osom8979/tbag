@@ -6,11 +6,11 @@
  */
 
 #include <libtbag/graph/ModelLayer.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 #include <algorithm>
 #include <utility>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -18,56 +18,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graph {
 
-// --------------------
-// ModelLayer::LogLayer
-// --------------------
-
-ModelLayer::LogLayer::LogLayer(bool verbose) : LayerBase("LogLayer"), _verbose(verbose)
-{
-    // EMPTY.
-}
-
-ModelLayer::LogLayer::~LogLayer()
-{
-    // EMPTY.
-}
-
-Err ModelLayer::LogLayer::setup(std::string const & data)
-{
-    tDLogIfD(_verbose, "LogLayer[{}@{}]::setup()", getName(), getId());
-    return E_SUCCESS;
-}
-
-Err ModelLayer::LogLayer::teardown()
-{
-    tDLogIfD(_verbose, "LogLayer[{}@{}]::teardown()", getName(), getId());
-    return E_SUCCESS;
-}
-
-Err ModelLayer::LogLayer::forward(Layers const & input)
-{
-    tDLogIfD(_verbose, "LogLayer[{}@{}]::forward(in:{})", getName(), getId(), input.size());
-    return E_SUCCESS;
-}
-
-Err ModelLayer::LogLayer::backward(Layers const & input)
-{
-    tDLogIfD(_verbose, "LogLayer[{}@{}]::backward(in:{})", getName(), getId(), input.size());
-    return E_SUCCESS;
-}
-
-// --------------------------
-// ModelLayer implementation.
-// --------------------------
-
 ModelLayer::ModelLayer() : ModelLayer(std::make_shared<LayerBase>())
 {
     assert(static_cast<bool>(_base));
-}
-
-ModelLayer::ModelLayer(int id) : ModelLayer()
-{
-    setId(id);
 }
 
 ModelLayer::ModelLayer(std::nullptr_t) TBAG_NOEXCEPT : _base(nullptr)
@@ -126,46 +79,46 @@ void ModelLayer::swap(ModelLayer & obj) TBAG_NOEXCEPT
     }
 }
 
-int ModelLayer::getId() const
-{
-    assert(exists());
-    return _base->getId();
-}
-
-void ModelLayer::setId(int id)
-{
-    assert(exists());
-    _base->_id = id;
-}
-
-bool ModelLayer::isComplete() const
-{
-    assert(exists());
-    return _base->isComplete();
-}
-
-std::string ModelLayer::getName() const
-{
-    assert(exists());
-    return _base->getName();
-}
-
-void ModelLayer::complete()
+void ModelLayer::_complete()
 {
     assert(exists());
     _base->_complete = true;
 }
 
-void ModelLayer::incomplete()
+void ModelLayer::_incomplete()
 {
     assert(exists());
     _base->_complete = false;
 }
 
+void ModelLayer::_assign_id(int id)
+{
+    assert(exists());
+    _base->_assign_id = id;
+}
+
+char const * ModelLayer::type() const
+{
+    assert(exists());
+    return _base->TYPE;
+}
+
+int ModelLayer::id() const
+{
+    assert(exists());
+    return _base->_assign_id;
+}
+
+bool ModelLayer::isComplete() const
+{
+    assert(exists());
+    return _base->_complete;
+}
+
 Err ModelLayer::setup(std::string const & data)
 {
     assert(exists());
-    return _base->setup(data);
+    return _base->setup(data.c_str(), data.size());
 }
 
 Err ModelLayer::teardown()
@@ -186,21 +139,48 @@ Err ModelLayer::backward(Layers const & input)
     return _base->backward(input);
 }
 
-std::string ModelLayer::get(std::string const & key) const
+Err ModelLayer::get(std::string const & key, std::string & data) const
 {
     assert(exists());
-    return _base->get(key);
+
+    Err code = E_UNKNOWN;
+    int size = LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE;
+
+    COMMENT("Default stack buffer") {
+        char buffer[LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE];
+        code = _base->get(key.c_str(), buffer, &size);
+        if (isSuccess(code)) {
+            data.assign(buffer, buffer + size);
+            return code;
+        }
+    }
+
+    if (code == E_ENOBUFS) {
+        if (size <= LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE) {
+            return E_ENOBUFS;
+        }
+
+        std::vector<char> dynamic_memory(size);
+        char * buffer = dynamic_memory.data();
+
+        code = _base->get(key.c_str(), buffer, &size);
+        if (isSuccess(code)) {
+            data.assign(buffer, buffer + size);
+        }
+    }
+
+    return code;
 }
 
-void ModelLayer::set(std::string const & key, std::string const & val)
+Err ModelLayer::set(std::string const & key, std::string const & data)
 {
     assert(exists());
-    _base->set(key, val);
+    return _base->set(key.c_str(), data.c_str());
 }
 
 std::string ModelLayer::toString() const
 {
-    return getName() + (isComplete() ? "{Y}@" : "{N}@") + std::to_string(getId());
+    return std::string(type()) + (isComplete() ? "{Y}@" : "{N}@") + std::to_string(id());
 }
 
 } // namespace graph

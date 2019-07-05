@@ -20,6 +20,7 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -32,6 +33,85 @@ namespace graph {
 
 // Forward declarations.
 class ModelNet;
+class ModelLayer;
+
+/**
+ * LayerBase class prototype.
+ *
+ * @author zer0
+ * @date   2018-10-23
+ */
+class LayerBase
+{
+public:
+    friend class ModelLayer;
+
+public:
+    using Err = libtbag::Err;
+    using Layers = std::vector<ModelLayer>;
+
+public:
+    TBAG_CONSTEXPR static int const NO_ASSIGN_ID = -1;
+    TBAG_CONSTEXPR static int const DEFAULT_PROPERTY_BUFFER_SIZE = 1024;
+
+private:
+    /**
+     * Layer class type.
+     *
+     * @warning
+     *  Initialization using static strings is required.
+     */
+    char const * const TYPE;
+
+private:
+    /**
+     * Layer instance id.
+     *
+     * @warning
+     *  This value is assigned when added to the model. @n
+     *  The user should not modify this value.
+     */
+    int _assign_id = NO_ASSIGN_ID;
+
+    /**
+     * Whether the operation(forward or backward) is complete.
+     *
+     * @warning
+     *  This value is controlled by the model. @n
+     *  The user should not modify this value.
+     */
+    bool _complete = false;
+
+public:
+    /** User's data. */
+    void * opaque = nullptr;
+
+public:
+    LayerBase() : TYPE("UNKNOWN") { /* EMPTY. */ }
+    LayerBase(char const * const & type) : TYPE(type) { /* EMPTY. */ }
+    virtual ~LayerBase() { /* EMPTY. */ }
+
+public:
+    inline char const * type() const TBAG_NOEXCEPT
+    { return TYPE; }
+
+public:
+    inline int id() const TBAG_NOEXCEPT
+    { return _assign_id; }
+
+    inline bool complete() const TBAG_NOEXCEPT
+    { return _complete; }
+
+public:
+    virtual Err setup(char const * data, int size) { return E_SUCCESS; }
+    virtual Err teardown() { return E_SUCCESS; }
+
+    virtual Err forward(Layers const & input) { return E_SUCCESS; }
+    virtual Err backward(Layers const & input) { return E_SUCCESS; }
+
+    virtual Err get(char const * key, char * buffer, int * size) const { return E_SUCCESS; }
+    virtual Err set(char const * key, char const * data) { return E_SUCCESS; }
+};
 
 /**
  * ModelLayer class prototype.
@@ -45,97 +125,15 @@ public:
     friend class ModelNet;
 
 public:
+    using Err = libtbag::Err;
     using Layers = std::vector<ModelLayer>;
-
-public:
-    TBAG_CONSTEXPR static int const UNKNOWN_ID = -1;
-
-public:
-    /**
-     * LayerBase class prototype.
-     *
-     * @author zer0
-     * @date   2018-10-23
-     */
-    class LayerBase : public Noncopyable
-    {
-    public:
-        using Err = libtbag::Err;
-        using Layers = ModelLayer::Layers;
-
-    public:
-        friend class ModelLayer;
-
-    protected:
-        int _id = UNKNOWN_ID;
-        bool _complete = false;
-
-    private:
-        std::string _name;
-
-    public:
-        LayerBase() { /* EMPTY. */ }
-        LayerBase(std::string const & name) : _name(name) { /* EMPTY. */ }
-        virtual ~LayerBase() { /* EMPTY. */ }
-
-    public:
-        inline int getId() const TBAG_NOEXCEPT { return _id; }
-        inline bool isComplete() const TBAG_NOEXCEPT { return _complete; }
-
-    public:
-        std::string getName() const { return _name; }
-        void setName(std::string const & name) { _name = name; }
-
-    public:
-        virtual Err setup(std::string const & data) { return E_SUCCESS; }
-        virtual Err teardown() { return E_SUCCESS; }
-
-    public:
-        virtual Err  forward(Layers const & input) { return E_SUCCESS; }
-        virtual Err backward(Layers const & input) { return E_SUCCESS; }
-
-    public:
-        virtual std::string get(std::string const & key) const { return std::string(); }
-        virtual void set(std::string const & key, std::string const & val) { /* EMPTY. */ }
-    };
-
     using SharedBase = std::shared_ptr<LayerBase>;
-
-public:
-    /**
-     * LogLayer class prototype.
-     *
-     * @author zer0
-     * @date   2018-10-24
-     */
-    class TBAG_API LogLayer : public LayerBase
-    {
-    private:
-        bool _verbose;
-
-    public:
-        LogLayer(bool verbose = false);
-        virtual ~LogLayer();
-
-    public:
-        inline bool isVerbose() const TBAG_NOEXCEPT { return _verbose; }
-        inline void setVerbose(bool enable = true) TBAG_NOEXCEPT { _verbose = enable; }
-
-    public:
-        virtual Err setup(std::string const & data) override;
-        virtual Err teardown() override;
-
-    public:
-        virtual Err  forward(Layers const & input) override;
-        virtual Err backward(Layers const & input) override;
-    };
 
 private:
     SharedBase _base;
 
 public:
     ModelLayer();
-    explicit ModelLayer(int id);
     explicit ModelLayer(std::nullptr_t) TBAG_NOEXCEPT;
     explicit ModelLayer(LayerBase * base) TBAG_NOEXCEPT;
     explicit ModelLayer(SharedBase const & base) TBAG_NOEXCEPT;
@@ -152,17 +150,21 @@ public:
     void swap(ModelLayer & obj) TBAG_NOEXCEPT;
 
 public:
-    inline friend void swap(ModelLayer & lh, ModelLayer & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    inline friend void swap(ModelLayer & lh, ModelLayer & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     inline LayerBase       * get()       TBAG_NOEXCEPT { return _base.get(); }
     inline LayerBase const * get() const TBAG_NOEXCEPT { return _base.get(); }
 
-    inline LayerBase       & operator *()       TBAG_NOEXCEPT { return *_base; }
-    inline LayerBase const & operator *() const TBAG_NOEXCEPT { return *_base; }
-
     inline LayerBase       * operator ->()       TBAG_NOEXCEPT { return get(); }
     inline LayerBase const * operator ->() const TBAG_NOEXCEPT { return get(); }
+
+    inline LayerBase       & ref()       TBAG_NOEXCEPT { return *get(); }
+    inline LayerBase const & ref() const TBAG_NOEXCEPT { return *get(); }
+
+    inline LayerBase       & operator *()       TBAG_NOEXCEPT { return ref(); }
+    inline LayerBase const & operator *() const TBAG_NOEXCEPT { return ref(); }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -172,45 +174,47 @@ public:
     { return exists(); }
 
 public:
-    /**
-     * Implemented for std::less<> compatibility.
-     *
-     * @see std::set
-     * @see std::map
-     * @see std::less
-     */
-    friend bool operator <(ModelLayer const & x, ModelLayer const & y)
-    {
-        return x.getId() < y.getId();
-    }
+    friend inline bool operator <(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
+    { return x.get() < y.get(); }
+
+    friend inline bool operator >(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
+    { return x.get() > y.get(); }
+
+    friend inline bool operator <=(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
+    { return x.get() <= y.get(); }
+
+    friend inline bool operator >=(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
+    { return x.get() >= y.get(); }
+
+    inline bool operator ==(ModelLayer const & obj) const TBAG_NOEXCEPT
+    { return get() == obj.get(); }
+
+    inline bool operator !=(ModelLayer const & obj) const TBAG_NOEXCEPT
+    { return get() != obj.get(); }
+
+private:
+    void _complete();
+    void _incomplete();
+    void _assign_id(int id);
 
 public:
-    bool operator ==(ModelLayer const & obj) const TBAG_NOEXCEPT
-    {
-        return _base.get() == obj.get();
-    }
+    char const * type() const;
 
 public:
-    int getId() const;
+    int id() const;
     bool isComplete() const;
-    std::string getName() const;
-
-protected:
-    void setId(int id);
-    void complete();
-    void incomplete();
 
 public:
     Err setup(std::string const & data);
     Err teardown();
 
 public:
-    Err  forward(Layers const & input);
+    Err forward(Layers const & input);
     Err backward(Layers const & input);
 
 public:
-    std::string get(std::string const & key) const;
-    void set(std::string const & key, std::string const & val);
+    Err get(std::string const & key, std::string & data) const;
+    Err set(std::string const & key, std::string const & data);
 
 public:
     std::string toString() const;
@@ -221,18 +225,13 @@ public:
     {
         STATIC_ASSERT_CHECK_IS_BASE_OF(LayerBase, LayerType);
         STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE(LayerType);
-        typedef typename remove_cr<LayerType>::type ResultLayerType;
+        typedef typename libtbag::remove_cr<LayerType>::type ResultLayerType;
 
         auto shared = std::make_shared<ResultLayerType>(std::forward<Args>(args) ...);
         if (static_cast<bool>(shared)) {
-            return ModelLayer(std::static_pointer_cast<ModelLayer::LayerBase>(shared));
+            return ModelLayer(std::static_pointer_cast<LayerBase>(shared));
         }
         return ModelLayer(nullptr);
-    }
-
-    static ModelLayer createLog(bool verbose = true)
-    {
-        return create<LogLayer>(verbose);
     }
 };
 
