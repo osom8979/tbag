@@ -376,19 +376,21 @@ using Color = Rgb32;
 TBAG_CONSTEXPR Color const BLACK_COLOR = { Color::constexpr_init, channel_min(), channel_min(), channel_min() };
 TBAG_CONSTEXPR Color const WHITE_COLOR = { Color::constexpr_init, channel_max(), channel_max(), channel_max() };
 
+TBAG_CONSTEXPR Color const RED_COLOR     = { Color::constexpr_init, 0xFF, 0x00, 0x00 };
+TBAG_CONSTEXPR Color const LIME_COLOR    = { Color::constexpr_init, 0x00, 0xFF, 0x00 };
+TBAG_CONSTEXPR Color const BLUE_COLOR    = { Color::constexpr_init, 0x00, 0x00, 0xFF };
+
+TBAG_CONSTEXPR Color const YELLOW_COLOR  = { Color::constexpr_init, 0xFF, 0xFF, 0x00 };
+TBAG_CONSTEXPR Color const AQUA_COLOR    = { Color::constexpr_init, 0x00, 0xFF, 0xFF };
+TBAG_CONSTEXPR Color const FUCHSIA_COLOR = { Color::constexpr_init, 0xFF, 0x00, 0xFF };
+
 TBAG_CONSTEXPR Color const SILVER_COLOR  = { Color::constexpr_init, 0xC0, 0xC0, 0xC0 };
 TBAG_CONSTEXPR Color const GRAY_COLOR    = { Color::constexpr_init, 0x80, 0x80, 0x80 };
-TBAG_CONSTEXPR Color const RED_COLOR     = { Color::constexpr_init, 0xFF, 0x00, 0x00 };
 TBAG_CONSTEXPR Color const MAROON_COLOR  = { Color::constexpr_init, 0x80, 0x00, 0x00 };
-TBAG_CONSTEXPR Color const YELLOW_COLOR  = { Color::constexpr_init, 0xFF, 0xFF, 0x00 };
 TBAG_CONSTEXPR Color const OLIVE_COLOR   = { Color::constexpr_init, 0x80, 0x80, 0x00 };
-TBAG_CONSTEXPR Color const LIME_COLOR    = { Color::constexpr_init, 0x00, 0xFF, 0x00 };
 TBAG_CONSTEXPR Color const GREEN_COLOR   = { Color::constexpr_init, 0x00, 0x80, 0x00 };
-TBAG_CONSTEXPR Color const AQUA_COLOR    = { Color::constexpr_init, 0x00, 0xFF, 0xFF };
 TBAG_CONSTEXPR Color const TEAL_COLOR    = { Color::constexpr_init, 0x00, 0x80, 0x80 };
-TBAG_CONSTEXPR Color const BLUE_COLOR    = { Color::constexpr_init, 0x00, 0x00, 0xFF };
 TBAG_CONSTEXPR Color const NAVY_COLOR    = { Color::constexpr_init, 0x00, 0x00, 0x80 };
-TBAG_CONSTEXPR Color const FUCHSIA_COLOR = { Color::constexpr_init, 0xFF, 0x00, 0xFF };
 TBAG_CONSTEXPR Color const PURPLE_COLOR  = { Color::constexpr_init, 0x80, 0x00, 0x80 };
 
 // -----------

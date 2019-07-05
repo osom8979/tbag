@@ -42,10 +42,10 @@ TEST(ColorTest, String)
     ASSERT_EQ(RED_COLOR, Color("F00"));
     ASSERT_EQ(RED_COLOR, Color("FF0000"));
 
-    ASSERT_EQ(GREEN_COLOR, Color("#0F0"));
-    ASSERT_EQ(GREEN_COLOR, Color("#00FF00"));
-    ASSERT_EQ(GREEN_COLOR, Color("0F0"));
-    ASSERT_EQ(GREEN_COLOR, Color("00FF00"));
+    ASSERT_EQ(LIME_COLOR, Color("#0F0"));
+    ASSERT_EQ(LIME_COLOR, Color("#00FF00"));
+    ASSERT_EQ(LIME_COLOR, Color("0F0"));
+    ASSERT_EQ(LIME_COLOR, Color("00FF00"));
 
     ASSERT_EQ(BLUE_COLOR, Color("#00F"));
     ASSERT_EQ(BLUE_COLOR, Color("#0000FF"));
