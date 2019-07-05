@@ -50,14 +50,14 @@ TEST(TmxPropertyTest, ToBool)
 
 TEST(TmxPropertyTest, ToColor)
 {
-    TmxProperty value1("C1", libtbag::graphic::ORANGE_COLOR);
+    TmxProperty value1("C1", libtbag::graphic::ORANGE_FLAT_COLOR);
     ASSERT_EQ("C1", value1.name);
     ASSERT_EQ(TmxProperty::Type::COLOR, value1.type);
     auto color1 = value1.toColor();
-    ASSERT_EQ(libtbag::graphic::ORANGE_COLOR.r, color1.r);
-    ASSERT_EQ(libtbag::graphic::ORANGE_COLOR.g, color1.g);
-    ASSERT_EQ(libtbag::graphic::ORANGE_COLOR.b, color1.b);
-    ASSERT_EQ(libtbag::graphic::ORANGE_COLOR.a, color1.a);
+    ASSERT_EQ(libtbag::graphic::ORANGE_FLAT_COLOR.r, color1.r);
+    ASSERT_EQ(libtbag::graphic::ORANGE_FLAT_COLOR.g, color1.g);
+    ASSERT_EQ(libtbag::graphic::ORANGE_FLAT_COLOR.b, color1.b);
+    ASSERT_EQ(libtbag::graphic::ORANGE_FLAT_COLOR.a, color1.a);
 
     TmxProperty value2("C2", "#AABBCCDD", TmxProperty::Type::COLOR);
     ASSERT_EQ("C2", value2.name);
@@ -116,7 +116,7 @@ TEST(TmxPropertyTest, Validate)
     ASSERT_TRUE(prop1.validate("0.16"));
     ASSERT_TRUE(prop1.validate("0.17"));
 
-    TmxProperty prop2("C", libtbag::graphic::ORANGE_COLOR);
+    TmxProperty prop2("C", libtbag::graphic::ORANGE_FLAT_COLOR);
     ASSERT_EQ(TmxProperty::Type::COLOR, prop2.type);
     ASSERT_FALSE(prop2.validate(0, 15));
     ASSERT_FALSE(prop2.validate(0, 16));
