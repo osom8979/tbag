@@ -21,6 +21,8 @@
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
+#include <cstring>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -111,6 +113,34 @@ public:
 
     virtual Err get(char const * key, char * buffer, int * size) const { return E_SUCCESS; }
     virtual Err set(char const * key, char const * data) { return E_SUCCESS; }
+
+public:
+    static Err getProperty(char * buffer, int * buffer_size, char const * value, int value_size)
+    {
+        if (*buffer_size >= value_size) {
+            ::strncpy(buffer, value, value_size);
+            return E_SUCCESS;
+        } else {
+            *buffer_size = value_size;
+            return E_ENOBUFS;
+        }
+    }
+
+    static Err getProperty(char * buffer, int * buffer_size, char const * value)
+    {
+        return getProperty(buffer, buffer_size, value, ::strlen(value));
+    }
+
+    static Err getProperty(char * buffer, int * buffer_size, std::string const & str)
+    {
+        return getProperty(buffer, buffer_size, str.c_str(), static_cast<int>(str.size()));
+    }
+
+    template <typename T>
+    static Err getProperty(char * buffer, int * buffer_size, T const & value)
+    {
+        return getProperty(buffer, buffer_size, std::to_string(value));
+    }
 };
 
 /**
