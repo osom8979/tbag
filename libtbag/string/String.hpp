@@ -124,7 +124,6 @@ public:
 public:
     rstr clone() const;
 
-// Iterators:
 public:
     iterator begin() TBAG_NOEXCEPT;
     iterator end() TBAG_NOEXCEPT;

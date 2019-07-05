@@ -60,6 +60,7 @@ public:
     class LayerBase : public Noncopyable
     {
     public:
+        using Err = libtbag::Err;
         using Layers = ModelLayer::Layers;
 
     public:

@@ -63,8 +63,8 @@ public:
         { /* EMPTY. */ }
     };
 
-    using FlagVector   = std::vector<Flag>;
-    using ArgvVector   = std::vector<char*>;
+    using FlagVector = std::vector<Flag>;
+    using ArgvVector = std::vector<char*>;
 
     struct Argv
     {
