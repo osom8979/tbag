@@ -387,11 +387,12 @@ std::string Path::getExtensionName() const
     return std::string();
 }
 
-Path::FileState Path::getState() const
+Path::FileState Path::getState(bool * result) const
 {
-    FileState state = {0};
-    if (details::getState(_path, &state) == false) {
-        tDLogE("Path::getState() result error.");
+    FileState state = { 0, };
+    bool const code = details::getState(_path, &state);
+    if (result != nullptr) {
+        *result = code;
     }
     return state;
 }

@@ -223,7 +223,7 @@ public:
     using FileState = details::FileState;
 
 public:
-    FileState getState() const;
+    FileState getState(bool * result = nullptr) const;
 
 // Filesystem operators.
 public:

@@ -7,7 +7,6 @@
 
 #include <libtbag/filesystem/RotatePath.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
-#include <libtbag/log/Log.hpp>
 #include <utility>
 
 // -------------------
@@ -17,101 +16,61 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 
 RotatePath::RotatePath()
+        : path(), checker(), updater()
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & path) : RotatePath(path, SharedChecker(), SharedUpdater())
+RotatePath::RotatePath(Path const & path)
+        : path(path), checker(), updater()
 {
     // EMPTY.
 }
 
 RotatePath::RotatePath(Path const & path, SharedChecker const & checker, SharedUpdater const & updater)
-        : _path(path), _checker(checker), _updater(updater)
+        : path(path), checker(checker), updater(updater)
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & path, std::size_t size)
-        : _path(), _checker(new SizeChecker(size)), _updater(new TimeFormatUpdater(path))
-{
-    update();
-}
-
-RotatePath::RotatePath(RotatePath const & obj)
-{
-    (*this) = obj;
-}
-
-RotatePath::RotatePath(RotatePath && obj)
-{
-    (*this) = std::move(obj);
-}
-
-RotatePath::~RotatePath()
+RotatePath::RotatePath(SharedChecker const & checker, SharedUpdater const & updater)
+        : path(), checker(checker), updater(updater)
 {
     // EMPTY.
-}
-
-RotatePath & RotatePath::operator =(RotatePath const & obj)
-{
-    if (this != &obj) {
-        _checker = obj._checker;
-        _updater = obj._updater;
-        _path = obj._path;
-    }
-    return *this;
-}
-
-RotatePath & RotatePath::operator =(RotatePath && obj)
-{
-    if (this != &obj) {
-        _checker.swap(obj._checker);
-        _updater.swap(obj._updater);
-        _path.swap(obj._path);
-    }
-    return *this;
-}
-
-RotatePath::FileState RotatePath::getState() const
-{
-    FileState state = {0};
-    if (details::getState(_path, &state) == false) {
-        tDLogE("RotatePath::getState() result error.");
-    }
-    return state;
 }
 
 bool RotatePath::update()
 {
-    if (static_cast<bool>(_updater)) {
-        Path next = _updater->update(_path);
-        if (next.empty() == false) {
-            _path.swap(next);
-            return true;
-        }
+    if (!updater) {
+        return false;
+    }
+
+    Path next = updater->update(path);
+    if (!next.empty()) {
+        path.swap(next);
+        return true;
     }
     return false;
 }
 
 bool RotatePath::testIfRead(Path const & prev) const
 {
-    return static_cast<bool>(_checker) && _checker->test(prev, nullptr, 0);
+    return checker && checker->test(prev, nullptr, 0);
 }
 
 bool RotatePath::testIfRead() const
 {
-    return testIfRead(_path);
+    return testIfRead(path);
 }
 
 bool RotatePath::testIfWrite(Path const & prev, char const * buffer, std::size_t size) const
 {
-    return static_cast<bool>(_checker) && _checker->test(prev, buffer, size);
+    return checker && checker->test(prev, buffer, size);
 }
 
 bool RotatePath::testIfWrite(char const * buffer, std::size_t size) const
 {
-    return testIfWrite(_path, buffer, size);
+    return testIfWrite(path, buffer, size);
 }
 
 bool RotatePath::next(char const * buffer, std::size_t size)
@@ -128,11 +87,6 @@ bool RotatePath::next()
         return update();
     }
     return false;
-}
-
-RotatePath RotatePath::createDefault(Path const & path, std::size_t size)
-{
-    return RotatePath(path, size);
 }
 
 } // namespace filesystem
