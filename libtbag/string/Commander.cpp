@@ -108,8 +108,8 @@ Commander::ArgsVector Commander::parseArguments(Flags const & flags,
     for (std::size_t index = 0; index < SIZE; ++index) {
         auto & flag = flags.at(index);
         Arguments arguments;
-        arguments.setName(flag.key);
-        arguments.setFull(Flags::convertString(flag, prefix, delimiter));
+        arguments.name = flag.key;
+        arguments.full = Flags::convertString(flag, prefix, delimiter);
         arguments.parse(flag.value);
         result.push_back(std::move(arguments));
     }
@@ -123,8 +123,8 @@ Commander::ArgsVector Commander::parseArguments(Flags const & flags, std::vector
     for (std::size_t index = 0; index < SIZE; ++index) {
         auto & flag = flags.at(index);
         Arguments arguments;
-        arguments.setName(flag.key);
-        arguments.setFull(originals.at(index));
+        arguments.name = flag.key;
+        arguments.full = originals.at(index);
         arguments.parse(flag.value);
         result.push_back(std::move(arguments));
     }
@@ -149,21 +149,21 @@ void Commander::setDefaultCallbackForLeftArguments(std::vector<std::string> * le
                                                    std::vector<std::string> * unknown_flags)
 {
     _default = [left_arguments, unknown_flags](Arguments const & args){
-        if (!args.getName().empty()) {
+        if (!args.name.empty()) {
             // This block comes when an unknown option is hit.
             if (unknown_flags != nullptr) {
-                unknown_flags->push_back(args.getName());
+                unknown_flags->push_back(args.name);
             }
             return;
         }
 
         if (left_arguments != nullptr) {
-            if (!args.getFull().empty()) {
-                left_arguments->push_back(args.getFull());
+            if (!args.full.empty()) {
+                left_arguments->push_back(args.full);
             } else if (!args.getOriginalArgumentString().empty()) {
                 left_arguments->push_back(args.getOriginalArgumentString());
-            } else if (!args.getName().empty()) {
-                left_arguments->push_back(args.getName());
+            } else if (!args.name.empty()) {
+                left_arguments->push_back(args.name);
             }
         }
     };
@@ -182,15 +182,15 @@ std::size_t Commander::request(ArgsVector const & args_vector)
             continue;
         }
 
-        auto itr = _commands.find(arguments.getName());
+        auto itr = _commands.find(arguments.name);
         if (_skip_commands || itr == _commands.end()) {
-            if (static_cast<bool>(_default)) {
+            if (_default) {
                 _default(arguments);
             }
             continue;
         }
 
-        if (static_cast<bool>(itr->second)) {
+        if (itr->second) {
             itr->second(arguments);
         }
 

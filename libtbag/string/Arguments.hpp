@@ -48,18 +48,20 @@ public:
     TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE3 = "FALSE";
 
 private:
-    std::string _name;
-    std::string _original; ///< The original string that was last parsed.
+    std::string _last_parsed; ///< The original string that was last parsed.
     std::vector<std::string> _args;
 
-    std::string _delimiter;
-    std::string _point_delimiter;
+public:
+    std::string name; ///< This variable does nothing in the logic.
+    std::string full; ///< This variable does nothing in the logic.
 
-private:
-    std::string _full;
+public:
+    std::string delimiter;
+    std::string point_delimiter;
 
 public:
     Arguments();
+    Arguments(std::string const & arguments);
     Arguments(std::string const & name,
               std::string const & arguments,
               std::string const & delimiter = DEFAULT_ARGUMENTS_DELIMITER,
@@ -73,25 +75,8 @@ public:
     Arguments & operator =(Arguments && obj) TBAG_NOEXCEPT;
 
 public:
-    inline std::string getName() const
-    { return _name; }
-    inline std::string getDelimiter() const
-    { return _delimiter; }
-    inline std::string getPointDelimiter() const
-    { return _point_delimiter; }
     inline std::string getOriginalArgumentString() const
-    { return _original; }
-    inline std::string getFull() const
-    { return _full; }
-
-    inline void setName(std::string const & name)
-    { _name = name; }
-    inline void setDelimiter(std::string const & delimiter)
-    { _delimiter = delimiter; }
-    inline void setPointDelimiter(std::string const & point_delimiter)
-    { _point_delimiter = point_delimiter; }
-    inline void setFull(std::string const & full)
-    { _full = full; }
+    { return _last_parsed; }
 
     inline void clear() TBAG_NOEXCEPT
     { _args.clear(); }
@@ -168,7 +153,7 @@ private:
     inline bool tryObtainTokens(std::size_t index, OutputType * output, Predicated predicated) const
     {
         try {
-            auto tokens = libtbag::string::splitTokens(_args.at(index), _point_delimiter);
+            auto tokens = libtbag::string::splitTokens(_args.at(index), point_delimiter);
             if (tokens.empty()) {
                 return false;
             }

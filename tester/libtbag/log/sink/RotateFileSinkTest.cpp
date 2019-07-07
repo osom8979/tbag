@@ -15,10 +15,12 @@ using namespace libtbag::log::sink;
 
 TEST(RotateFileSinkTest, Default)
 {
-    char const * const TEST_FILENAME = "test.file";
+    char const * const TEST_FILENAME = "test";
     tttDir_Automatic();
-    auto const PATH = tttDir_Get() / TEST_FILENAME;
+    auto const PREFIX = tttDir_Get() / TEST_FILENAME;
+    auto const ARGUMENTS = std::string("size=1024m counter=") + PREFIX.toString();
 
-    RotateFileSink object(PATH);
+    RotateFileSink object(ARGUMENTS);
+
 }
 

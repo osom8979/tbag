@@ -17,10 +17,11 @@ using namespace libtbag::filesystem;
 TEST(RotatePathTest, Default)
 {
     tttDir_Automatic();
-    auto const file_path = tttDir_Get() / "test.log";
+    auto const FILE_PATH = tttDir_Get() / "test.log";
+    auto const FORMAT = TimeFormatUpdater::getDefaultTimeFormatString(FILE_PATH);
 
     auto rotate = RotatePath(std::make_shared<SizeChecker>(),
-                             std::make_shared<TimeFormatUpdater>(file_path));
+                             std::make_shared<TimeFormatUpdater>(FORMAT));
     ASSERT_TRUE(rotate.update());
 
     auto checker = std::static_pointer_cast<SizeChecker>(rotate.checker);

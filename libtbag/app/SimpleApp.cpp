@@ -65,18 +65,18 @@ bool SimpleApp::onCreate()
     }
 
     help.setDefaultCallback([&](Arguments const & args){
-        if (!args.getName().empty()) {
+        if (!args.name.empty()) {
             // This block comes when an unknown option is hit.
             print_unknown = true;
             return;
         }
 
-        if (!args.getFull().empty()) {
-            commands.push_back(args.getFull());
+        if (!args.full.empty()) {
+            commands.push_back(args.full);
         } else if (!args.getOriginalArgumentString().empty()) {
             commands.push_back(args.getOriginalArgumentString());
-        } else if (!args.getName().empty()) {
-            commands.push_back(args.getName());
+        } else if (!args.name.empty()) {
+            commands.push_back(args.name);
         }
     });
 

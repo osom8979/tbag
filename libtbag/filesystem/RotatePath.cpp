@@ -7,6 +7,8 @@
 
 #include <libtbag/filesystem/RotatePath.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
+#include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Commander.hpp>
 #include <utility>
 
 // -------------------
@@ -17,6 +19,18 @@ namespace filesystem {
 
 RotatePath::RotatePath()
         : path(), checker(), updater()
+{
+    // EMPTY.
+}
+
+RotatePath::RotatePath(std::string const & arguments)
+        : RotatePath(createParams(arguments))
+{
+    // EMPTY.
+}
+
+RotatePath::RotatePath(InitParams const & params)
+        : path(), checker(params.first), updater(params.second)
 {
     // EMPTY.
 }
@@ -37,6 +51,62 @@ RotatePath::RotatePath(SharedChecker const & checker, SharedUpdater const & upda
         : path(), checker(checker), updater(updater)
 {
     // EMPTY.
+}
+
+RotatePath::InitParams RotatePath::createParams(std::string const & arguments, Environments const & envs)
+{
+    InitParams result;
+    using namespace libtbag::string;
+    auto cmd = Commander("", Commander::DEFAULT_DELIMITER);
+    cmd.insert(CHECKER_KEY_SIZE, [&](Arguments const & args){
+        if (args.empty()) {
+            result.first = std::make_shared<SizeChecker>();
+        } else {
+            result.first = std::make_shared<SizeChecker>(toByteSize(args.get(0)));
+        }
+    });
+    cmd.insert(UPDATER_KEY_TIME, [&](Arguments const & args){
+        if (args.empty()) {
+            result.second = std::make_shared<TimeFormatUpdater>();
+        } else {
+            result.second = std::make_shared<TimeFormatUpdater>(args.get(0));
+        }
+    });
+    cmd.insert(UPDATER_KEY_COUNTER, [&](Arguments const & args){
+        auto const ARGS_SIZE = args.size();
+        if (ARGS_SIZE == 0U) {
+            result.second = std::make_shared<CounterUpdater>();
+        } else if (ARGS_SIZE == 1U) {
+            result.second = std::make_shared<CounterUpdater>(args.get(0));
+        } else if (ARGS_SIZE == 2U) {
+            result.second = std::make_shared<CounterUpdater>(args.get(0), args.get(1));
+        } else {
+            unsigned long counter = 0;
+            args.opt(2, &counter);
+            result.second = std::make_shared<CounterUpdater>(args.get(0), args.get(1), counter);
+        }
+    });
+    cmd.request(envs.convert(arguments));
+    return result;
+}
+
+RotatePath::InitParams RotatePath::createParams(std::string const & arguments)
+{
+    return createParams(arguments, Environments::createDefaultEnvironments());
+}
+
+void RotatePath::init(std::string const & args, Environments const & envs)
+{
+    auto params = createParams(args, envs);
+    checker = params.first;
+    updater = params.second;
+}
+
+void RotatePath::init(std::string const & args)
+{
+    auto params = createParams(args);
+    checker = params.first;
+    updater = params.second;
 }
 
 bool RotatePath::update()

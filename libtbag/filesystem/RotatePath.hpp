@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 
+#include <libtbag/string/Environments.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/time/TimePoint.hpp>
@@ -107,11 +108,14 @@ struct SizeChecker : public CheckerInterface
  */
 struct CounterUpdater : public UpdaterInterface
 {
+    TBAG_CONSTEXPR static char const * const DEFAULT_PREFIX = "";
+    TBAG_CONSTEXPR static char const * const DEFAULT_SUFFIX = ".log";
+
     std::string prefix;
     std::string suffix;
-    int count = 0;
+    std::size_t count;
 
-    CounterUpdater(std::string const & p, std::string const & s, int c = 0)
+    CounterUpdater(std::string const & p = DEFAULT_PREFIX, std::string const & s = DEFAULT_SUFFIX, std::size_t c = 0)
             : prefix(p), suffix(s), count(c)
     { /* EMPTY. */ }
     virtual ~CounterUpdater()
@@ -136,15 +140,13 @@ struct CounterUpdater : public UpdaterInterface
  */
 struct TimeFormatUpdater : public UpdaterInterface
 {
-    TBAG_CONSTEXPR static char const * const DEFAULT_TIME_FORMAT_STRING = "-$py$pm$pdT$ph$pi$ps_$pl$pc";
+    TBAG_CONSTEXPR static char const * const DEFAULT_TIME_FORMAT_STRING = "$py$pm$pd_$ph$pi$ps.log";
 
     std::string format;
 
     TimeFormatUpdater() : format(DEFAULT_TIME_FORMAT_STRING)
     { /* EMPTY. */ }
-    explicit TimeFormatUpdater(std::string const & f) : format(f)
-    { /* EMPTY. */ }
-    explicit TimeFormatUpdater(Path const & p) : format(getDefaultTimeFormatString(p))
+    TimeFormatUpdater(std::string const & f) : format(f)
     { /* EMPTY. */ }
     virtual ~TimeFormatUpdater()
     { /* EMPTY. */ }
@@ -154,10 +156,16 @@ struct TimeFormatUpdater : public UpdaterInterface
         return Path(libtbag::time::TimePoint::now().fformat(format));
     }
 
+    /**
+     * @remarks
+     *  <pre>
+     *   /prefix/file.log -> /prefix/file-$py$pm$pdT$ph$pi$ps_$pl$pc.log
+     *  </pre>
+     */
     static std::string getDefaultTimeFormatString(Path const & path)
     {
         std::string const PREFIX = path.getNameWithoutExtension();
-        std::string const FORMAT = DEFAULT_TIME_FORMAT_STRING;
+        std::string const FORMAT = "-$py$pm$pdT$ph$pi$ps_$pl$pc";
         std::string const SUFFIX = path.getExtensionName();
         return (path.getParent() / (PREFIX + FORMAT + SUFFIX)).toString();
     }
@@ -175,8 +183,23 @@ struct TimeFormatUpdater : public UpdaterInterface
  */
 struct TBAG_API RotatePath
 {
+    using Environments = libtbag::string::Environments;
     using SharedChecker = std::shared_ptr<CheckerInterface>;
     using SharedUpdater = std::shared_ptr<UpdaterInterface>;
+    using InitParams = std::pair<SharedChecker, SharedUpdater>;
+
+    TBAG_CONSTEXPR static char const * const CHECKER_KEY_SIZE = "size";
+    TBAG_CONSTEXPR static char const * const UPDATER_KEY_COUNTER = "counter";
+    TBAG_CONSTEXPR static char const * const UPDATER_KEY_TIME = "time";
+
+    /**
+     * @remarks
+     *  Examples:
+     *  - size and counter: <code>size=1024m counter=/prefix/path/log,.log,0</code>
+     *  - size and time: <code>size=1024m time=/prefix/path/file-$py$pm$pdT$ph$pi$ps.log</code>
+     */
+    static InitParams createParams(std::string const & arguments, Environments const & envs);
+    static InitParams createParams(std::string const & arguments);
 
     Path path;
 
@@ -184,14 +207,19 @@ struct TBAG_API RotatePath
     SharedUpdater updater;
 
     RotatePath();
-    RotatePath(Path const & path);
-    RotatePath(Path const & path, SharedChecker const & checker, SharedUpdater const & updater);
-    RotatePath(SharedChecker const & checker, SharedUpdater const & updater);
+    RotatePath(std::string const & arguments);
+    explicit RotatePath(InitParams const & params);
+    explicit RotatePath(Path const & path);
+    explicit RotatePath(Path const & path, SharedChecker const & checker, SharedUpdater const & updater);
+    explicit RotatePath(SharedChecker const & checker, SharedUpdater const & updater);
 
     inline bool isReady() const TBAG_NOEXCEPT_SPECIFIER(
             TBAG_NOEXCEPT_OPERATOR((bool)checker) &&
             TBAG_NOEXCEPT_OPERATOR((bool)updater))
     { return checker && updater; }
+
+    void init(std::string const & args, Environments const & envs);
+    void init(std::string const & args);
 
     bool update();
 

@@ -18,6 +18,10 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/log/sink/Sink.hpp>
 
+#include <libtbag/filesystem/File.hpp>
+#include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/RotatePath.hpp>
+
 #include <string>
 
 // -------------------
@@ -37,8 +41,38 @@ namespace sink {
 class TBAG_API RotateFileSink : public Sink
 {
 public:
-    RotateFileSink(std::string const & path);
+    using Path = libtbag::filesystem::Path;
+    using File = libtbag::filesystem::File;
+
+public:
+    using RotatePath = libtbag::filesystem::RotatePath;
+
+public:
+    using CheckerInterface  = libtbag::filesystem::CheckerInterface;
+    using SizeChecker       = libtbag::filesystem::SizeChecker;
+
+public:
+    using UpdaterInterface  = libtbag::filesystem::UpdaterInterface;
+    using CounterUpdater    = libtbag::filesystem::CounterUpdater;
+    using TimeFormatUpdater = libtbag::filesystem::TimeFormatUpdater;
+
+private:
+    RotatePath  _rotate;
+    File        _file;
+
+private:
+    bool _verbose;
+
+public:
+    RotateFileSink(std::string const & arguments, bool verbose = true);
     virtual ~RotateFileSink();
+
+private:
+    void close();
+    bool reopen(std::string const & path);
+    bool reopen();
+    bool update();
+    bool isOpen() const;
 
 public:
     virtual bool write(char const * message, int size) override;

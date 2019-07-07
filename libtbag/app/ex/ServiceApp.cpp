@@ -232,18 +232,18 @@ int ServiceApp::run()
     std::vector<std::string> cmds;
 
     _options.setDefaultCallback([&](Arguments const & args){
-        if (!_options.isSkipCommands() && !args.getName().empty()) {
+        if (!_options.isSkipCommands() && !args.name.empty()) {
             // This block comes when an unknown option is hit.
-            unknown_command = args.getName();
+            unknown_command = args.name;
             return;
         }
 
-        if (!args.getFull().empty()) {
-            cmds.push_back(args.getFull());
+        if (!args.full.empty()) {
+            cmds.push_back(args.full);
         } else if (!args.getOriginalArgumentString().empty()) {
             cmds.push_back(args.getOriginalArgumentString());
-        } else if (!args.getName().empty()) {
-            cmds.push_back(args.getName());
+        } else if (!args.name.empty()) {
+            cmds.push_back(args.name);
         }
         _options.setSkipCommands();
     });

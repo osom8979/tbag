@@ -8,7 +8,6 @@
 #include <libtbag/string/Arguments.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/Exception.hpp>
-#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -17,24 +16,36 @@ NAMESPACE_LIBTBAG_OPEN
 namespace string {
 
 Arguments::Arguments()
-        : _original(), _name(), _args(),
-          _delimiter(DEFAULT_ARGUMENTS_DELIMITER),
-          _point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER),
-          _full()
+        : _last_parsed(), _args(),
+          name(), full(),
+          delimiter(DEFAULT_ARGUMENTS_DELIMITER),
+          point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
 {
     // EMPTY.
+}
+
+Arguments::Arguments(std::string const & arguments)
+        : _last_parsed(), _args(),
+          name(), full(),
+          delimiter(DEFAULT_ARGUMENTS_DELIMITER),
+          point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
+{
+    if (!parse(arguments)) {
+        throw std::bad_alloc();
+    }
 }
 
 Arguments::Arguments(std::string const & name
                    , std::string const & arguments
                    , std::string const & delimiter
                    , std::string const & point_delimiter)
-        : _original(), _name(name), _args(),
-          _delimiter(delimiter), _point_delimiter(point_delimiter),
-          _full()
+        : _last_parsed(), _args(),
+          name(name), full(),
+          delimiter(delimiter),
+          point_delimiter(point_delimiter)
 {
-    if (parse(arguments) == false) {
-        tDLogE("Arguments::Arguments() parse error.");
+    if (!parse(arguments)) {
+        throw std::bad_alloc();
     }
 }
 
@@ -56,12 +67,12 @@ Arguments::~Arguments()
 Arguments & Arguments::operator =(Arguments const & obj)
 {
     if (this != &obj) {
-        _original = obj._original;
-        _name = obj._name;
+        _last_parsed = obj._last_parsed;
+        name = obj.name;
         _args = obj._args;
-        _delimiter = obj._delimiter;
-        _point_delimiter = obj._point_delimiter;
-        _full = obj._full;
+        delimiter = obj.delimiter;
+        point_delimiter = obj.point_delimiter;
+        full = obj.full;
     }
     return *this;
 }
@@ -69,12 +80,12 @@ Arguments & Arguments::operator =(Arguments const & obj)
 Arguments & Arguments::operator =(Arguments && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _original.swap(obj._original);
-        _name.swap(obj._name);
+        _last_parsed.swap(obj._last_parsed);
+        name.swap(obj.name);
         _args.swap(obj._args);
-        _delimiter.swap(obj._delimiter);
-        _point_delimiter.swap(obj._point_delimiter);
-        _full.swap(obj._full);
+        delimiter.swap(obj.delimiter);
+        point_delimiter.swap(obj.point_delimiter);
+        full.swap(obj.full);
     }
     return *this;
 }
@@ -86,7 +97,7 @@ void Arguments::insert(std::size_t index, std::string const & argument)
 
 bool Arguments::parse(std::string const & arguments)
 {
-    for (auto & cursor : libtbag::string::splitTokens(arguments, _delimiter)) {
+    for (auto & cursor : libtbag::string::splitTokens(arguments, delimiter)) {
         push(cursor);
     }
     return true;
@@ -103,7 +114,7 @@ std::string Arguments::toString()
     std::size_t const SIZE = _args.size();
     std::string result = _args[0];
     for (std::size_t index = 1; index < SIZE; ++index) {
-        result += _delimiter + _args.at(index);
+        result += delimiter + _args.at(index);
     }
     return result;
 }
@@ -111,7 +122,7 @@ std::string Arguments::toString()
 bool Arguments::optBoolean(std::size_t index, bool * output, bool check_grammar) const
 {
     return tryObtainArgument(index, output, [this, check_grammar](std::string const & value){
-        if (check_grammar && value.find(this->_point_delimiter) != std::string::npos) {
+        if (check_grammar && value.find(this->point_delimiter) != std::string::npos) {
             throw ParseException();
         }
         std::string const UPPER = string::upper(string::trim(value));
@@ -128,7 +139,7 @@ bool Arguments::optBoolean(std::size_t index, bool * output, bool check_grammar)
 #ifndef __TBAG_ARGUMENTS_OBTAIN_TRY
 #define __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, param_name, retval) \
     return tryObtainArgument(index, output, [this, check_grammar](std::string const & param_name){ \
-        if (check_grammar && param_name.find(this->_point_delimiter) != std::string::npos) { \
+        if (check_grammar && param_name.find(this->point_delimiter) != std::string::npos) { \
             throw ParseException(); \
         } \
         return retval; \

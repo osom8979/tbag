@@ -14,13 +14,9 @@ using namespace libtbag::string;
 TEST(ArgumentsTest, OnlyCoverage)
 {
     Arguments args("name", "args");
-    args.getName();
-    args.getDelimiter();
-    args.getPointDelimiter();
-
-    args.setName("");
-    args.setDelimiter("");
-    args.setPointDelimiter("");
+    args.name = "";
+    args.delimiter = "";
+    args.point_delimiter = "";
 
     args.clear();
     args.empty();
