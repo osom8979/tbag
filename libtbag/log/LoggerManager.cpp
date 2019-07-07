@@ -251,6 +251,8 @@ bool existsSinkName(std::string const & name)
         return true;
     } else if (LOWER == SINK_NULL) {
         return true;
+    } else if (LOWER == SINK_ROTATE_FILE) {
+        return true;
     }
     return false;
 }
@@ -277,6 +279,8 @@ Logger::SharedSink newSink(std::string const & name, std::string const & dest, s
         return std::make_shared<FileSink>(dest);
     } else if (LOWER == SINK_NULL) {
         return std::make_shared<NullSink>();
+    } else if (LOWER == SINK_ROTATE_FILE) {
+        return std::make_shared<RotateFileSink>(args);
     } else {
         return Logger::SharedSink(nullptr);
     }

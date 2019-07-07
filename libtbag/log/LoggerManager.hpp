@@ -145,9 +145,10 @@ TBAG_API void setAutoFlush(std::string const & name, bool flag = true);
 TBAG_API bool getAutoFlush(LoggerId id);
 TBAG_API bool getAutoFlush(std::string const & name);
 
-TBAG_CONSTEXPR char const * const SINK_CONSOLE = "console";
-TBAG_CONSTEXPR char const * const SINK_FILE    = "file";
-TBAG_CONSTEXPR char const * const SINK_NULL    = "null";
+TBAG_CONSTEXPR char const * const SINK_CONSOLE     = "console";
+TBAG_CONSTEXPR char const * const SINK_FILE        = "file";
+TBAG_CONSTEXPR char const * const SINK_NULL        = "null";
+TBAG_CONSTEXPR char const * const SINK_ROTATE_FILE = "rotate_file";
 
 TBAG_CONSTEXPR char const * const GENERATOR_DEFAULT       = "default";
 TBAG_CONSTEXPR char const * const GENERATOR_DEFAULT_COLOR = "default_color";
