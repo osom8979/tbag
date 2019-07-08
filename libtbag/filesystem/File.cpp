@@ -8,7 +8,6 @@
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,8 +38,6 @@ bool File::open(std::string const & path, Flags flags, int mode)
     if (_file > 0) {
         return true;
     }
-
-    tDLogE("File::open({}) error.", path);
     return false;
 }
 
@@ -107,9 +104,7 @@ int File::write(char const * buffer, std::size_t size)
 File::FileState File::getState() const
 {
     FileState state = {0};
-    if (!details::getStateWithFile(_file, &state)) {
-        tDLogE("File::getState() result error.");
-    }
+    details::getStateWithFile(_file, &state);
     return state;
 }
 
@@ -137,7 +132,7 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 
     uint64_t const SIZE = f.getState().size;
     if (SIZE > limit_size) {
-        tDLogE("readToBuffer() limit size error: file_size({}) vs limit_siz({})", SIZE, limit_size);
+        // limit size error: file_size({}) vs limit_siz({})", SIZE, limit_size
         return E_SMALLBUF;
     }
 
@@ -147,7 +142,7 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 
     int const READ_SIZE = f.read((char*)&result[0], SIZE, 0);
     if (SIZE != static_cast<uint64_t>(READ_SIZE)) {
-        tDLogW("readToBuffer() Read size is not the same: {}/{}.", READ_SIZE, SIZE);
+        // Read size is not the same: {}/{}.", READ_SIZE, SIZE);
     }
 
     return E_SUCCESS;
@@ -156,13 +151,13 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 static Err writeFromBuffer(std::string const & path, char const * buffer, std::size_t size)
 {
     File f(path, File::Flags().clear().creat().wronly());
-    if (f.isOpen() == false) {
+    if (!f.isOpen()) {
         return E_ENOENT;
     }
 
     int const WRITE_SIZE = f.write(buffer, size, 0);
     if (size != static_cast<uint64_t>(WRITE_SIZE)) {
-        tDLogW("writeFromBuffer() Read size is not the same: {}/{}.", WRITE_SIZE, size);
+        // Read size is not the same: {}/{}.", WRITE_SIZE, size
     }
 
     return E_SUCCESS;

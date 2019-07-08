@@ -18,9 +18,11 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/archive/Archive.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
+#include <libtbag/filesystem/File.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/time/TimePoint.hpp>
 
@@ -35,56 +37,141 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 
 /**
- * Condition checker interface of RotatePath.
+ * Condition check and data writer interface of RotatePath.
  *
  * @author zer0
  * @date   2017-10-21
  */
-struct CheckerInterface
+struct WriterInterface
 {
-    CheckerInterface() { /* EMPTY. */ }
-    virtual ~CheckerInterface() { /* EMPTY. */ }
+    using Err = libtbag::Err;
+
+    WriterInterface() { /* EMPTY. */ }
+    virtual ~WriterInterface() { /* EMPTY. */ }
+
+    virtual bool ready() const = 0;
+    virtual bool open(char const * path) = 0;
+    virtual void flush() = 0;
+    virtual void close() = 0;
 
     /**
-     * Rotate check method.
+     * Write method.
      *
-     * @param[in] prev
-     *      Previous path information.
      * @param[in] buffer
      *      If you want a wirte in file, this parameter is the source buffer.
      * @param[in] size
      *      If you want a wirte in file, this parameter is the size of source buffer.
+     * @param[out] written
+     *      If the function returns successfully, it returns the size written.
+     *
+     * @retval E_SUCCESS
+     * @retval E_CONTINUE
+     *
+     * @retval E_EOPEN
+     * @retval E_WRERR
+     * @retval E_SMALLBUF
+     * @retval E_UNKNOWN
      */
-    virtual bool test(Path const & prev, char const * buffer, std::size_t size) = 0;
+    virtual Err write(char const * buffer, int size, int * written) = 0;
 };
 
 /**
- * Maximum file size checkr.
+ * Maximum file size check and writer.
  *
  * @author zer0
  * @date   2017-10-21
  */
-struct SizeChecker : public CheckerInterface
+struct MaxSizeWriter : public WriterInterface
 {
+    using File = libtbag::filesystem::File;
+
     TBAG_CONSTEXPR static std::size_t const DEFAULT_MAX_SIZE = 1 * MEGA_BYTE_TO_BYTE;
 
     std::size_t max_size;
+    File file;
 
-    SizeChecker(std::size_t size = DEFAULT_MAX_SIZE) : max_size(size)
-    { /* EMPTY. */ }
-    virtual ~SizeChecker()
+    MaxSizeWriter(std::size_t size = DEFAULT_MAX_SIZE) : max_size(size)
     { /* EMPTY. */ }
 
-    virtual bool test(Path const & prev, char const * buffer, std::size_t size) override
+    virtual ~MaxSizeWriter()
     {
-        details::FileState state = { 0, };
-        if (!details::getState(prev, &state)) {
-            return false;
+        if (ready()) {
+            flush();
+            close();
         }
-        if (state.size + size <= max_size) {
-            return false;
+    }
+
+    virtual bool ready() const override
+    {
+        return file.isOpen();
+    }
+
+    virtual bool open(char const * path) override
+    {
+        using namespace libtbag::filesystem::details;
+        if (file.open(path, File::Flags(FILE_OPEN_FLAG_WRITE_ONLY | FILE_OPEN_CREATE))) {
+            file.seek(0);
+            return true;
         }
-        return true;
+        return false;
+    }
+
+    virtual void flush() override
+    {
+        // EMPTY.
+    }
+
+    virtual void close() override
+    {
+        file.close();
+    }
+
+    virtual Err write(char const * buffer, int size, int * written) override
+    {
+        assert(buffer != nullptr);
+        assert(written != nullptr);
+
+        if (!file.isOpen()) {
+            return E_EOPEN;
+        }
+
+        if (file.offset() >= max_size) {
+            *written = 0;
+            return E_SMALLBUF;
+        }
+
+        assert(file.offset() < max_size);
+        auto const MAXIMUM_WRITE_SIZE = file.offset() + size;
+
+        if (MAXIMUM_WRITE_SIZE == max_size) {
+            *written = file.write(buffer, size);
+            if (*written > 0 && *written == size) {
+                return E_CONTINUE;
+            } else {
+                return E_WRERR;
+            }
+
+        } else if (MAXIMUM_WRITE_SIZE < max_size) {
+            *written = file.write(buffer, size);
+            if (*written > 0 && *written == size) {
+                return E_SUCCESS;
+            } else {
+                return E_WRERR;
+            }
+
+        } else {
+            assert(MAXIMUM_WRITE_SIZE > max_size);
+            assert(max_size > file.offset());
+            *written = file.write(buffer, max_size - file.offset());
+            if (*written > 0) {
+                return E_SMALLBUF;
+            } else {
+                return E_WRERR;
+            }
+        }
+
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return E_UNKNOWN;
     }
 };
 
@@ -184,7 +271,7 @@ struct CleanerInterface
     CleanerInterface() { /* EMPTY. */ }
     virtual ~CleanerInterface() { /* EMPTY. */ }
 
-    virtual bool clean(Path const & path) = 0;
+    virtual void clean(Path const & path) = 0;
 };
 
 /**
@@ -209,18 +296,16 @@ struct ArchiveCleaner : public CleanerInterface
     virtual ~ArchiveCleaner()
     { /* EMPTY. */ }
 
-    virtual bool clean(Path const & path) override
+    virtual void clean(Path const & path) override
     {
         using namespace libtbag::archive;
-        auto const success_count = compressArchive(path.toString() + archive_suffix, {path.toString()});
-        if (success_count == 0) {
-            return false;
-        }
+        auto const success_count = compressArchive(path.toString() + archive_suffix,
+                                                   { path.toString() },
+                                                   getCompressFormatFromOutputFileName(archive_suffix));
         assert(success_count == 1);
         if (remove_source_file) {
             path.remove();
         }
-        return true;
     }
 };
 
@@ -238,18 +323,18 @@ struct TBAG_API RotatePath
 {
     using Environments = libtbag::string::Environments;
 
-    using SharedChecker = std::shared_ptr<CheckerInterface>;
+    using SharedWriter = std::shared_ptr<WriterInterface>;
     using SharedUpdater = std::shared_ptr<UpdaterInterface>;
     using SharedCleaner = std::shared_ptr<CleanerInterface>;
 
     struct InitParams
     {
-        SharedChecker checker;
+        SharedWriter  writer;
         SharedUpdater updater;
         SharedCleaner cleaner;
     };
 
-    TBAG_CONSTEXPR static char const * const CHECKER_KEY_SIZE = "size";
+    TBAG_CONSTEXPR static char const * const WRITER_KEY_SIZE = "size";
     TBAG_CONSTEXPR static char const * const UPDATER_KEY_COUNTER = "counter";
     TBAG_CONSTEXPR static char const * const UPDATER_KEY_TIME = "time";
     TBAG_CONSTEXPR static char const * const CLEANER_KEY_ARCHIVE = "archive";
@@ -265,7 +350,7 @@ struct TBAG_API RotatePath
 
     Path path;
 
-    SharedChecker checker;
+    SharedWriter  writer;
     SharedUpdater updater;
     SharedCleaner cleaner;
 
@@ -275,29 +360,23 @@ struct TBAG_API RotatePath
     explicit RotatePath(InitParams const & params);
     explicit RotatePath(Path const & p, InitParams const & params);
     explicit RotatePath(Path const & p);
-    explicit RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u);
-    explicit RotatePath(SharedChecker const & k, SharedUpdater const & u);
-    explicit RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c);
-    explicit RotatePath(SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c);
+    explicit RotatePath(Path const & p, SharedWriter const & w, SharedUpdater const & u);
+    explicit RotatePath(SharedWriter const & w, SharedUpdater const & u);
+    explicit RotatePath(Path const & p, SharedWriter const & w, SharedUpdater const & u, SharedCleaner const & c);
+    explicit RotatePath(SharedWriter const & w, SharedUpdater const & u, SharedCleaner const & c);
 
     inline bool isReady() const TBAG_NOEXCEPT_SPECIFIER(
-            TBAG_NOEXCEPT_OPERATOR((bool)checker) &&
+            TBAG_NOEXCEPT_OPERATOR((bool)writer) &&
             TBAG_NOEXCEPT_OPERATOR((bool)updater))
-    { return checker && updater; }
+    { return writer && updater; }
 
     void init(std::string const & args, Environments const & envs);
     void init(std::string const & args);
 
-    bool update();
+    void update();
+    void flush();
 
-    bool testIfRead(Path const & prev) const;
-    bool testIfRead() const;
-
-    bool testIfWrite(Path const & prev, char const * buffer, std::size_t size) const;
-    bool testIfWrite(char const * buffer, std::size_t size) const;
-
-    bool next(char const * buffer, std::size_t size);
-    bool next();
+    Err write(char const * buffer, std::size_t size);
 };
 
 } // namespace filesystem

@@ -9,6 +9,8 @@
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Commander.hpp>
+
+#include <cassert>
 #include <utility>
 
 // -------------------
@@ -18,7 +20,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 
 RotatePath::RotatePath()
-        : path(), checker(), updater(), cleaner()
+        : path(), writer(), updater(), cleaner()
 {
     // EMPTY.
 }
@@ -30,43 +32,43 @@ RotatePath::RotatePath(std::string const & arguments)
 }
 
 RotatePath::RotatePath(InitParams const & params)
-        : path(), checker(params.checker), updater(params.updater), cleaner(params.cleaner)
+        : path(), writer(params.writer), updater(params.updater), cleaner(params.cleaner)
 {
     // EMPTY.
 }
 
 RotatePath::RotatePath(Path const & p, InitParams const & params)
-        : path(p), checker(params.checker), updater(params.updater), cleaner(params.cleaner)
+        : path(p), writer(params.writer), updater(params.updater), cleaner(params.cleaner)
 {
     // EMPTY.
 }
 
 RotatePath::RotatePath(Path const & p)
-        : path(p), checker(), updater(), cleaner()
+        : path(p), writer(), updater(), cleaner()
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u)
-        : path(p), checker(k), updater(u), cleaner()
+RotatePath::RotatePath(Path const & p, SharedWriter const & w, SharedUpdater const & u)
+        : path(p), writer(w), updater(u), cleaner()
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(SharedChecker const & k, SharedUpdater const & u)
-        : path(), checker(k), updater(u), cleaner()
+RotatePath::RotatePath(SharedWriter const & w, SharedUpdater const & u)
+        : path(), writer(w), updater(u), cleaner()
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c)
-        : path(p), checker(k), updater(u), cleaner(c)
+RotatePath::RotatePath(Path const & p, SharedWriter const & w, SharedUpdater const & u, SharedCleaner const & c)
+        : path(p), writer(w), updater(u), cleaner(c)
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c)
-        : path(), checker(k), updater(u), cleaner(c)
+RotatePath::RotatePath(SharedWriter const & w, SharedUpdater const & u, SharedCleaner const & c)
+        : path(), writer(w), updater(u), cleaner(c)
 {
     // EMPTY.
 }
@@ -76,11 +78,11 @@ RotatePath::InitParams RotatePath::createParams(std::string const & arguments, E
     InitParams result;
     using namespace libtbag::string;
     auto cmd = Commander("", Commander::DEFAULT_DELIMITER);
-    cmd.insert(CHECKER_KEY_SIZE, [&](Arguments const & args){
+    cmd.insert(WRITER_KEY_SIZE, [&](Arguments const & args){
         if (args.empty()) {
-            result.checker = std::make_shared<SizeChecker>();
+            result.writer = std::make_shared<MaxSizeWriter>();
         } else {
-            result.checker = std::make_shared<SizeChecker>(toByteSize(args.get(0)));
+            result.writer = std::make_shared<MaxSizeWriter>(toByteSize(args.get(0)));
         }
     });
     cmd.insert(UPDATER_KEY_TIME, [&](Arguments const & args){
@@ -128,7 +130,7 @@ RotatePath::InitParams RotatePath::createParams(std::string const & arguments)
 void RotatePath::init(std::string const & args, Environments const & envs)
 {
     auto params = createParams(args, envs);
-    checker = params.checker;
+    writer = params.writer;
     updater = params.updater;
     cleaner = params.cleaner;
 }
@@ -136,67 +138,88 @@ void RotatePath::init(std::string const & args, Environments const & envs)
 void RotatePath::init(std::string const & args)
 {
     auto params = createParams(args);
-    checker = params.checker;
+    writer = params.writer;
     updater = params.updater;
     cleaner = params.cleaner;
 }
 
-bool RotatePath::update()
+void RotatePath::update()
 {
-    if (!updater) {
-        return false;
+    if (updater) {
+        path = updater->update(path);
     }
-
-    Path next = updater->update(path);
-    if (!next.empty()) {
-        path.swap(next);
-        return true;
-    }
-    return false;
 }
 
-bool RotatePath::testIfRead(Path const & prev) const
+void RotatePath::flush()
 {
-    return checker && checker->test(prev, nullptr, 0);
-}
-
-bool RotatePath::testIfRead() const
-{
-    return testIfRead(path);
-}
-
-bool RotatePath::testIfWrite(Path const & prev, char const * buffer, std::size_t size) const
-{
-    return checker && checker->test(prev, buffer, size);
-}
-
-bool RotatePath::testIfWrite(char const * buffer, std::size_t size) const
-{
-    return testIfWrite(path, buffer, size);
-}
-
-bool RotatePath::next(char const * buffer, std::size_t size)
-{
-    if (!testIfWrite(buffer, size)) {
-        return false;
+    if (writer) {
+        writer->flush();
     }
-    if (!cleaner) {
-        return update();
-    }
-    Path const PREV_PATH = path;
-    return update() && cleaner->clean(PREV_PATH);
 }
 
-bool RotatePath::next()
+Err RotatePath::write(char const * buffer, std::size_t size)
 {
-    if (!testIfRead()) {
-        return false;
+    if (!isReady()) {
+        return E_ALREADY;
     }
-    if (!cleaner) {
-        return update();
+
+    assert(writer);
+    assert(updater);
+
+    if (path.empty()) {
+        path = updater->update(path);
+        if (path.empty()) {
+            return E_EINTERNAL;
+        }
     }
-    Path const PREV_PATH = path;
-    return update() && cleaner->clean(PREV_PATH);
+
+    assert(!path.empty());
+    if (!writer->ready()) {
+        if (!writer->open(path.c_str())) {
+            return E_EOPEN;
+        }
+    }
+
+    Err code;
+    int written;
+
+    assert(writer->ready());
+    while (true) {
+        code = writer->write(buffer, static_cast<int>(size), &written);
+        if (code == E_SMALLBUF) {
+            // SKIP.
+        } else if (code == E_CONTINUE) {
+            // SKIP.
+        } else {
+            return code;
+        }
+
+        writer->flush();
+        writer->close();
+
+        if (cleaner) {
+            cleaner->clean(path);
+        }
+
+        path = updater->update(path);
+        assert(!path.empty());
+
+        if (!writer->open(path.c_str())) {
+            return E_EOPEN;
+        }
+
+        if (code == E_CONTINUE) {
+            assert(size - written == 0);
+            return E_SUCCESS;
+        } else {
+            buffer += written;
+            size -= written;
+            assert(size >= 1);
+        }
+    }
+
+    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+    return E_UNKNOWN;
 }
 
 } // namespace filesystem

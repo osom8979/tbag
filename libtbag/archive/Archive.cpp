@@ -756,7 +756,10 @@ std::string getCompressFormatFromOutputFileName(std::string const & output_filen
     }
     using namespace libtbag::string;
     assert(output_extension.size() >= 1);
-    return lower(trim(output_extension.substr(1))); // Remove dot('.') char.
+    if (output_extension[0] == '.') {
+        return lower(trim(output_extension.substr(1))); // Remove dot('.') char.
+    }
+    return lower(trim(output_extension));
 }
 
 std::size_t compressArchive(std::string const & output_filename,

@@ -47,38 +47,13 @@ public:
 public:
     using RotatePath = libtbag::filesystem::RotatePath;
 
-public:
-    using CheckerInterface  = libtbag::filesystem::CheckerInterface;
-    using SizeChecker       = libtbag::filesystem::SizeChecker;
-
-public:
-    using UpdaterInterface  = libtbag::filesystem::UpdaterInterface;
-    using CounterUpdater    = libtbag::filesystem::CounterUpdater;
-    using TimeFormatUpdater = libtbag::filesystem::TimeFormatUpdater;
-
-public:
-    struct default_init_t { /* EMPTY. */ };
-
-public:
-    TBAG_CONSTEXPR static default_init_t const default_init = {};
-
 private:
-    RotatePath  _rotate;
-    File        _file;
-
-private:
-    bool _verbose;
+    RotatePath _rotate;
 
 public:
-    RotateFileSink(std::string const & arguments, bool verbose = true);
+    RotateFileSink();
+    RotateFileSink(std::string const & arguments);
     virtual ~RotateFileSink();
-
-private:
-    void close();
-    bool reopen(std::string const & path);
-    bool reopen();
-    bool update();
-    bool isOpen() const;
 
 public:
     virtual bool write(char const * message, int size) override;
