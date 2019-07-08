@@ -35,7 +35,7 @@ struct SinkInterface
     SinkInterface() TBAG_NOEXCEPT { /* EMPTY. */ }
     virtual ~SinkInterface() { /* EMPTY. */ }
 
-    virtual bool write(char const * message, int size) = 0;
+    virtual bool write(int level, char const * message, int size) = 0;
     virtual void flush() = 0;
 };
 

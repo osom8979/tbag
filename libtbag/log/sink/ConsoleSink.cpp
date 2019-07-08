@@ -53,7 +53,7 @@ ConsoleSink::~ConsoleSink()
     // EMPTY.
 }
 
-bool ConsoleSink::write(char const * message, int size)
+bool ConsoleSink::write(int level, char const * message, int size)
 {
     return ::fwrite(message, size, 1, CONSOLE_TYPE == ConsoleType::CT_STDOUT ? stdout : stderr) == 1;
 }

@@ -61,9 +61,9 @@ bool Logger::write(int level, char const * level_name, char const * message, int
 
     bool write_result;
     if (write_buffer_size >= 1) {
-        write_result = _sink->write(buffer, write_buffer_size);
+        write_result = _sink->write(level, buffer, write_buffer_size);
     } else {
-        write_result = _sink->write(message, size);
+        write_result = _sink->write(level, message, size);
     }
 
     if (_auto_flush) {

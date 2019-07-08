@@ -16,14 +16,14 @@ TEST(StringQueueSinkTest, Default)
 {
     StringQueueSink sink(2);
 
-    ASSERT_TRUE(sink.write("ab", 2));
-    ASSERT_TRUE(sink.write("cd", 2));
+    ASSERT_TRUE(sink.write(0, "ab", 2));
+    ASSERT_TRUE(sink.write(0, "cd", 2));
     sink.flush();
     ASSERT_EQ(2, sink.deque().size());
     ASSERT_STREQ("ab", sink.deque()[0].c_str());
     ASSERT_STREQ("cd", sink.deque()[1].c_str());
 
-    ASSERT_TRUE(sink.write("ef", 2));
+    ASSERT_TRUE(sink.write(0, "ef", 2));
     sink.flush();
     ASSERT_EQ(2, sink.deque().size());
     ASSERT_STREQ("cd", sink.deque()[0].c_str());

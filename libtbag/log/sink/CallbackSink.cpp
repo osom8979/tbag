@@ -26,9 +26,9 @@ CallbackSink::~CallbackSink()
     // EMPTY.
 }
 
-bool CallbackSink::write(char const * message, int size)
+bool CallbackSink::write(int level, char const * message, int size)
 {
-    return WRITE_CALLBACK(message, size, USER_DATA);
+    return WRITE_CALLBACK(level, message, size, USER_DATA);
 }
 
 void CallbackSink::flush()

@@ -34,7 +34,7 @@ class TBAG_API CallbackSink : public Sink
 {
 public:
     using UserData = void *;
-    using WriteCallback = bool(*)(char const *, int, UserData);
+    using WriteCallback = bool(*)(int, char const *, int, UserData);
     using FlushCallback = void(*)(UserData);
 
 public:
@@ -49,7 +49,7 @@ public:
     virtual ~CallbackSink();
 
 public:
-    virtual bool write(char const * message, int size) override;
+    virtual bool write(int level, char const * message, int size) override;
     virtual void flush() override;
 };
 

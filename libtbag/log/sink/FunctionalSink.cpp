@@ -26,9 +26,9 @@ FunctionalSink::~FunctionalSink()
     // EMPTY.
 }
 
-bool FunctionalSink::write(char const * message, int size)
+bool FunctionalSink::write(int level, char const * message, int size)
 {
-    return WRITE_CALLBACK(message, size, USER_DATA);
+    return WRITE_CALLBACK(level, message, size, USER_DATA);
 }
 
 void FunctionalSink::flush()

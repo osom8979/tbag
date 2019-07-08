@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/log/sink/Sink.hpp>
-#include <libtbag/string/StringUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

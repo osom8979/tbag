@@ -24,7 +24,7 @@ NullSink::~NullSink()
     // EMPTY.
 }
 
-bool NullSink::write(char const * message, int size)
+bool NullSink::write(int level, char const * message, int size)
 {
     return true;
 }

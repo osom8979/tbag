@@ -46,7 +46,7 @@ public:
     virtual ~FileSink();
 
 public:
-    virtual bool write(char const * message, int size) override;
+    virtual bool write(int level, char const * message, int size) override;
     virtual void flush() override;
 };
 

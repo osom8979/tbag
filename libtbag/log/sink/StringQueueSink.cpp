@@ -26,7 +26,7 @@ StringQueueSink::~StringQueueSink()
     // EMPTY.
 }
 
-bool StringQueueSink::write(char const * message, int size)
+bool StringQueueSink::write(int level, char const * message, int size)
 {
     while (_deque.size() >= MAX_SIZE) {
         _deque.pop_front();

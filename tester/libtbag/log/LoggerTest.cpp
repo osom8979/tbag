@@ -20,7 +20,7 @@ TEST(LoggerTest, Default)
     auto gen = std::make_shared<RawGenerator>(RawGenerator::LineFeedStyle::LFS_NONE);
     ASSERT_TRUE(static_cast<bool>(gen));
 
-    auto write_cb = [](char const * msg, int size, void * user) -> bool {
+    auto write_cb = [](int level, char const * msg, int size, void * user) -> bool {
         auto * buffer = (std::string*)user;
         buffer->assign(msg, msg + size);
         return true;

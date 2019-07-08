@@ -15,7 +15,7 @@ using namespace libtbag::log::sink;
 TEST(NullSinkTest, Default)
 {
     NullSink sink;
-    ASSERT_TRUE(sink.write("abcd", 4));
+    ASSERT_TRUE(sink.write(0, "abcd", 4));
     sink.flush();
 }
 

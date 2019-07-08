@@ -50,7 +50,7 @@ RotateFileSink::~RotateFileSink()
     // EMPTY.
 }
 
-bool RotateFileSink::write(char const * message, int size)
+bool RotateFileSink::write(int level, char const * message, int size)
 {
     return _rotate.write(message, size) == E_SUCCESS;
 }

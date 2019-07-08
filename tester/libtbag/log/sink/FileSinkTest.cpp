@@ -24,7 +24,7 @@ TEST(FileSinkTest, Default)
 
     COMMENT("SINK RAII") {
         FileSink sink(PATH);
-        ASSERT_TRUE(sink.write("abcdefg", 4));
+        ASSERT_TRUE(sink.write(0, "abcdefg", 4));
         sink.flush();
     }
 
