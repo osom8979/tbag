@@ -10,7 +10,6 @@
 #include <libtbag/filesystem/details/FsCanonical.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 

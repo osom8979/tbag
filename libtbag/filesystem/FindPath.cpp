@@ -9,7 +9,6 @@
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
-#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -7,7 +7,6 @@
 
 #include <libtbag/filesystem/details/FsCanonical.hpp>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 

@@ -22,7 +22,7 @@ TempDirGuard::TempDirGuard(std::string const & case_name,
         : _auto_remove(auto_remove), _temp_dir(Path(prefix) / (case_name + "-" + name))
 {
     if (auto_create) {
-        if (_temp_dir.createDir() == false) {
+        if (!_temp_dir.createDir()) {
             tDLogW("TempDirGuard::TempDirGuard() Create directory failure: {}", _temp_dir);
         }
     }
@@ -40,7 +40,7 @@ TempDirGuard::TempDirGuard(std::string const & case_name,
 TempDirGuard::~TempDirGuard()
 {
     if (_auto_remove) {
-        if (_temp_dir.removeAll() == false) {
+        if (!_temp_dir.removeAll()) {
             tDLogW("TempDirGuard::~TempDirGuard() Remove directory failure: {}", _temp_dir);
         }
     }

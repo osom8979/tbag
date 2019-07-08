@@ -10,7 +10,6 @@
 #include <libtbag/filesystem/details/FsNode.hpp>
 #include <libtbag/filesystem/details/FsProhibited.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
-#include <libtbag/log/Log.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -533,35 +532,35 @@ Err checkPrepareFiles(std::string const & source_path, std::string const & desti
 
 Err checkPrepareFiles(Path const & source_path, Path const & destination_path, bool check_dir)
 {
-    if (source_path.exists() == false) {
-        tDLogD("checkPrepareFiles() Not exists source file: {}", source_path.toString());
+    if (!source_path.exists()) {
+        // Not exists source file.
         return E_ENOENT;
     }
 
-    if (source_path.isReadable() == false) {
-        tDLogD("checkPrepareFiles() You do not have read permission.");
+    if (!source_path.isReadable()) {
+        // You do not have read permission.
         return E_EACCES;
     }
 
     if (destination_path.exists()) {
-        tDLogD("checkPrepareFiles() File already exists: {}", destination_path.toString());
+        // File already exists.
         return E_EEXIST;
     }
 
     Path const DESTINATION_DIR = destination_path.getParent();
     if (check_dir) {
-        if (DESTINATION_DIR.exists() == false) {
-            tDLogD("checkPrepareFiles() Not exists destination directory: {}", DESTINATION_DIR.toString());
+        if (!DESTINATION_DIR.exists()) {
+            // Not exists destination directory.
             return E_ENOENT;
         }
 
-        if (DESTINATION_DIR.isDirectory() == false) {
-            tDLogD("checkPrepareFiles() Not a directory: {}", DESTINATION_DIR.toString());
+        if (!DESTINATION_DIR.isDirectory()) {
+            // Not a directory.
             return E_ENOENT;
         }
 
-        if (DESTINATION_DIR.isWritable() == false) {
-            tDLogD("checkPrepareFiles() You do not have write permission.");
+        if (!DESTINATION_DIR.isWritable()) {
+            // You do not have write permission.
             return E_EACCES;
         }
     }

@@ -9,7 +9,6 @@
 #include <libtbag/filesystem/details/windows/FsWinCommon.hpp>
 #include <libtbag/filesystem/details/UvFs-inl.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <libtbag/config-ex.h>
 

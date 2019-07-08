@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/filesystem/details/FsProhibited.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <unicode/unistr.h>
 #include <unicode/uchar.h>
