@@ -7,7 +7,7 @@
 
 #include <libtbag/log/sink/RotateFileSink.hpp>
 #include <libtbag/Err.hpp>
-#include <iostream>
+#include <sstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,6 +15,29 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log  {
 namespace sink {
+
+std::string RotateFileSink::getDefaultArguments(std::string const & path)
+{
+    using namespace libtbag::filesystem;
+    std::stringstream ss;
+    ss << "size=10240m ";
+    ss << "archive=.zip ";
+    ss << "time=" << TimeFormatUpdater::getDefaultTimeFormatString(Path(path));
+    return ss.str();
+}
+
+RotateFileSink::RotateFileSink()
+        : _rotate(std::make_shared<libtbag::filesystem::MaxSizeWriter>(),
+                  std::make_shared<libtbag::filesystem::TimeFormatUpdater>())
+{
+    // EMPTY.
+}
+
+RotateFileSink::RotateFileSink(default_init_t, std::string const & path)
+        : _rotate(getDefaultArguments(path))
+{
+    // EMPTY.
+}
 
 RotateFileSink::RotateFileSink(std::string const & arguments)
         : _rotate(arguments)

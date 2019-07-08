@@ -18,8 +18,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/log/sink/Sink.hpp>
 
-#include <libtbag/filesystem/File.hpp>
-#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/RotatePath.hpp>
 
 #include <string>
@@ -41,17 +39,27 @@ namespace sink {
 class TBAG_API RotateFileSink : public Sink
 {
 public:
-    using Path = libtbag::filesystem::Path;
-    using File = libtbag::filesystem::File;
+    using RotatePath = libtbag::filesystem::RotatePath;
 
 public:
-    using RotatePath = libtbag::filesystem::RotatePath;
+    struct default_init_t { /* EMPTY. */ };
+
+public:
+    TBAG_CONSTEXPR static default_init_t const default_init = {};
+
+public:
+    TBAG_CONSTEXPR static default_init_t const init() TBAG_NOEXCEPT
+    { return default_init; }
 
 private:
     RotatePath _rotate;
 
 public:
+    static std::string getDefaultArguments(std::string const & path);
+
+public:
     RotateFileSink();
+    RotateFileSink(default_init_t, std::string const & path);
     RotateFileSink(std::string const & arguments);
     virtual ~RotateFileSink();
 

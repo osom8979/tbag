@@ -280,7 +280,13 @@ Logger::SharedSink newSink(std::string const & name, std::string const & dest, s
     } else if (LOWER == SINK_NULL) {
         return std::make_shared<NullSink>();
     } else if (LOWER == SINK_ROTATE_FILE) {
-        return std::make_shared<RotateFileSink>(args);
+        if (!args.empty()) {
+            return std::make_shared<RotateFileSink>(args);
+        }
+        if (!dest.empty()) {
+            return std::make_shared<RotateFileSink>(RotateFileSink::init(), dest);
+        }
+        return std::make_shared<RotateFileSink>();
     } else {
         return Logger::SharedSink(nullptr);
     }
