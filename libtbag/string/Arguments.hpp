@@ -104,7 +104,9 @@ public:
 
 public:
     bool parse(std::string const & arguments);
-    std::string toString();
+
+public:
+    std::string toString() const;
 
 private:
     template <typename OutputType, typename Predicated>

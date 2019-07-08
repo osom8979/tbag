@@ -103,7 +103,7 @@ bool Arguments::parse(std::string const & arguments)
     return true;
 }
 
-std::string Arguments::toString()
+std::string Arguments::toString() const
 {
     if (_args.empty()) {
         return std::string();

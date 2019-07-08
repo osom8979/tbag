@@ -8,6 +8,9 @@
 #include <gtest/gtest.h>
 #include <libtbag/string/Commander.hpp>
 
+#include <string>
+#include <vector>
+
 using namespace libtbag;
 using namespace libtbag::string;
 
@@ -54,5 +57,22 @@ TEST(CommanderTest, OnlyPrefix)
     commander.request("-- --t");
     ASSERT_EQ(1, args_result.size());
     ASSERT_STREQ("--", args_result[0].c_str());
+}
+
+TEST(CommanderTest, WindowsPath)
+{
+    std::string s_val;
+    std::string c_val;
+
+    auto commander = Commander("", "=");
+    commander.insert("s", [&](Arguments const & args){
+        s_val = args.toString();
+    });
+    commander.insert("c", [&](Arguments const & args){
+        c_val = args.toString();
+    });
+    ASSERT_EQ(2, commander.request("u=a \"c=c:\\\\Program Files\\\\Test File\" s=m"));
+    ASSERT_STREQ("m", s_val.c_str());
+    ASSERT_STREQ("c:\\Program Files\\Test File", c_val.c_str());
 }
 
