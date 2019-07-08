@@ -44,13 +44,14 @@ TEST(RotatePathTest, Default)
 TEST(RotatePathTest, CreateParams_01)
 {
     auto params = RotatePath::createParams("size=2k counter=/prefix/path/log,.log,2");
-    ASSERT_TRUE((bool)params.first);
-    ASSERT_TRUE((bool)params.second);
+    ASSERT_TRUE((bool)params.checker);
+    ASSERT_TRUE((bool)params.updater);
+    ASSERT_FALSE((bool)params.cleaner);
 
-    ASSERT_EQ(2048, ((SizeChecker*)params.first.get())->max_size);
-    ASSERT_STREQ("/prefix/path/log", ((CounterUpdater*)params.second.get())->prefix.c_str());
-    ASSERT_STREQ(".log", ((CounterUpdater*)params.second.get())->suffix.c_str());
-    ASSERT_EQ(2, ((CounterUpdater*)params.second.get())->count);
+    ASSERT_EQ(2048, ((SizeChecker*)params.checker.get())->max_size);
+    ASSERT_STREQ("/prefix/path/log", ((CounterUpdater*)params.updater.get())->prefix.c_str());
+    ASSERT_STREQ(".log", ((CounterUpdater*)params.updater.get())->suffix.c_str());
+    ASSERT_EQ(2, ((CounterUpdater*)params.updater.get())->count);
 }
 
 TEST(RotatePathTest, CreateParams_02)
@@ -59,11 +60,14 @@ TEST(RotatePathTest, CreateParams_02)
     envs.push("SIZE", "2m");
     envs.push("FORMAT", "$ps.log");
 
-    auto params = RotatePath::createParams("size=${SIZE} time=${FORMAT}", envs);
-    ASSERT_TRUE((bool)params.first);
-    ASSERT_TRUE((bool)params.second);
+    auto params = RotatePath::createParams("size=${SIZE} time=${FORMAT} archive=.zip,false", envs);
+    ASSERT_TRUE((bool)params.checker);
+    ASSERT_TRUE((bool)params.updater);
+    ASSERT_TRUE((bool)params.cleaner);
 
-    ASSERT_EQ(1024*1024*2, ((SizeChecker*)params.first.get())->max_size);
-    ASSERT_STREQ("$ps.log", ((TimeFormatUpdater*)params.second.get())->format.c_str());
+    ASSERT_EQ(1024*1024*2, ((SizeChecker*)params.checker.get())->max_size);
+    ASSERT_STREQ("$ps.log", ((TimeFormatUpdater*)params.updater.get())->format.c_str());
+    ASSERT_STREQ(".zip", ((ArchiveCleaner*)params.cleaner.get())->archive_suffix.c_str());
+    ASSERT_FALSE(((ArchiveCleaner*)params.cleaner.get())->remove_source_file);
 }
 

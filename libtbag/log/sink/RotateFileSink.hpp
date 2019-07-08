@@ -56,6 +56,12 @@ public:
     using CounterUpdater    = libtbag::filesystem::CounterUpdater;
     using TimeFormatUpdater = libtbag::filesystem::TimeFormatUpdater;
 
+public:
+    struct default_init_t { /* EMPTY. */ };
+
+public:
+    TBAG_CONSTEXPR static default_init_t const default_init = {};
+
 private:
     RotatePath  _rotate;
     File        _file;

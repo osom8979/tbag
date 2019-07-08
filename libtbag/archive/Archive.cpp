@@ -8,6 +8,7 @@
 #include <libtbag/archive/Archive.hpp>
 #include <libtbag/archive/details/archive_frontend.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/system/SysInfo.hpp>
@@ -743,6 +744,37 @@ std::size_t compressArchive(std::string const & output_filename,
         }
     }
     return success_count;
+}
+
+std::string getCompressFormatFromOutputFileName(std::string const & output_filename)
+{
+    using namespace libtbag::filesystem;
+    auto const output = Path(output_filename);
+    auto const output_extension = output.getExtensionName();
+    if (output_extension.empty()) {
+        return 0U;
+    }
+    using namespace libtbag::string;
+    assert(output_extension.size() >= 1);
+    return lower(trim(output_extension.substr(1))); // Remove dot('.') char.
+}
+
+std::size_t compressArchive(std::string const & output_filename,
+                            std::vector<std::string> const & input_filenames,
+                            CompressType compress)
+{
+    return compressArchive(output_filename, input_filenames,
+                           getCompressFormatFromOutputFileName(output_filename),
+                           compress);
+}
+
+std::size_t compressArchive(std::string const & output_filename,
+                            BaseArchive::MemoryEntries & entries,
+                            CompressType compress)
+{
+    return compressArchive(output_filename, entries,
+                           getCompressFormatFromOutputFileName(output_filename),
+                           compress);
 }
 
 std::size_t decompressArchive(std::string const & filename, std::string const & output_prefix)

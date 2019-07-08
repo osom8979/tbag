@@ -264,11 +264,20 @@ public:
 
 TBAG_API std::size_t compressArchive(std::string const & output_filename,
                                      std::vector<std::string> const & input_filenames,
-                                     std::string const & format = COMPRESS_FORMAT_PAXR,
+                                     std::string const & format,
                                      CompressType compress = CompressType::CT_NONE);
 TBAG_API std::size_t compressArchive(std::string const & output_filename,
                                      BaseArchive::MemoryEntries & entries,
-                                     std::string const & format = COMPRESS_FORMAT_PAXR,
+                                     std::string const & format,
+                                     CompressType compress = CompressType::CT_NONE);
+
+TBAG_API std::string getCompressFormatFromOutputFileName(std::string const & output_filename);
+
+TBAG_API std::size_t compressArchive(std::string const & output_filename,
+                                     std::vector<std::string> const & input_filenames,
+                                     CompressType compress = CompressType::CT_NONE);
+TBAG_API std::size_t compressArchive(std::string const & output_filename,
+                                     BaseArchive::MemoryEntries & entries,
                                      CompressType compress = CompressType::CT_NONE);
 
 TBAG_API std::size_t decompressArchive(std::string const & filename,

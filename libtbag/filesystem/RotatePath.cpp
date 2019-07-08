@@ -18,7 +18,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace filesystem {
 
 RotatePath::RotatePath()
-        : path(), checker(), updater()
+        : path(), checker(), updater(), cleaner()
 {
     // EMPTY.
 }
@@ -30,25 +30,43 @@ RotatePath::RotatePath(std::string const & arguments)
 }
 
 RotatePath::RotatePath(InitParams const & params)
-        : path(), checker(params.first), updater(params.second)
+        : path(), checker(params.checker), updater(params.updater), cleaner(params.cleaner)
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & path)
-        : path(path), checker(), updater()
+RotatePath::RotatePath(Path const & p, InitParams const & params)
+        : path(p), checker(params.checker), updater(params.updater), cleaner(params.cleaner)
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(Path const & path, SharedChecker const & checker, SharedUpdater const & updater)
-        : path(path), checker(checker), updater(updater)
+RotatePath::RotatePath(Path const & p)
+        : path(p), checker(), updater(), cleaner()
 {
     // EMPTY.
 }
 
-RotatePath::RotatePath(SharedChecker const & checker, SharedUpdater const & updater)
-        : path(), checker(checker), updater(updater)
+RotatePath::RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u)
+        : path(p), checker(k), updater(u), cleaner()
+{
+    // EMPTY.
+}
+
+RotatePath::RotatePath(SharedChecker const & k, SharedUpdater const & u)
+        : path(), checker(k), updater(u), cleaner()
+{
+    // EMPTY.
+}
+
+RotatePath::RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c)
+        : path(p), checker(k), updater(u), cleaner(c)
+{
+    // EMPTY.
+}
+
+RotatePath::RotatePath(SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c)
+        : path(), checker(k), updater(u), cleaner(c)
 {
     // EMPTY.
 }
@@ -60,30 +78,42 @@ RotatePath::InitParams RotatePath::createParams(std::string const & arguments, E
     auto cmd = Commander("", Commander::DEFAULT_DELIMITER);
     cmd.insert(CHECKER_KEY_SIZE, [&](Arguments const & args){
         if (args.empty()) {
-            result.first = std::make_shared<SizeChecker>();
+            result.checker = std::make_shared<SizeChecker>();
         } else {
-            result.first = std::make_shared<SizeChecker>(toByteSize(args.get(0)));
+            result.checker = std::make_shared<SizeChecker>(toByteSize(args.get(0)));
         }
     });
     cmd.insert(UPDATER_KEY_TIME, [&](Arguments const & args){
         if (args.empty()) {
-            result.second = std::make_shared<TimeFormatUpdater>();
+            result.updater = std::make_shared<TimeFormatUpdater>();
         } else {
-            result.second = std::make_shared<TimeFormatUpdater>(args.get(0));
+            result.updater = std::make_shared<TimeFormatUpdater>(args.get(0));
         }
     });
     cmd.insert(UPDATER_KEY_COUNTER, [&](Arguments const & args){
         auto const ARGS_SIZE = args.size();
         if (ARGS_SIZE == 0U) {
-            result.second = std::make_shared<CounterUpdater>();
+            result.updater = std::make_shared<CounterUpdater>();
         } else if (ARGS_SIZE == 1U) {
-            result.second = std::make_shared<CounterUpdater>(args.get(0));
+            result.updater = std::make_shared<CounterUpdater>(args.get(0));
         } else if (ARGS_SIZE == 2U) {
-            result.second = std::make_shared<CounterUpdater>(args.get(0), args.get(1));
+            result.updater = std::make_shared<CounterUpdater>(args.get(0), args.get(1));
         } else {
             unsigned long counter = 0;
             args.opt(2, &counter);
-            result.second = std::make_shared<CounterUpdater>(args.get(0), args.get(1), counter);
+            result.updater = std::make_shared<CounterUpdater>(args.get(0), args.get(1), counter);
+        }
+    });
+    cmd.insert(CLEANER_KEY_ARCHIVE, [&](Arguments const & args){
+        auto const ARGS_SIZE = args.size();
+        if (ARGS_SIZE == 0U) {
+            result.cleaner = std::make_shared<ArchiveCleaner>();
+        } else if (ARGS_SIZE == 1U) {
+            result.cleaner = std::make_shared<ArchiveCleaner>(args.get(0));
+        } else {
+            bool remove = true;
+            args.opt(1, &remove);
+            result.cleaner = std::make_shared<ArchiveCleaner>(args.get(0), remove);
         }
     });
     cmd.request(envs.convert(arguments));
@@ -98,15 +128,17 @@ RotatePath::InitParams RotatePath::createParams(std::string const & arguments)
 void RotatePath::init(std::string const & args, Environments const & envs)
 {
     auto params = createParams(args, envs);
-    checker = params.first;
-    updater = params.second;
+    checker = params.checker;
+    updater = params.updater;
+    cleaner = params.cleaner;
 }
 
 void RotatePath::init(std::string const & args)
 {
     auto params = createParams(args);
-    checker = params.first;
-    updater = params.second;
+    checker = params.checker;
+    updater = params.updater;
+    cleaner = params.cleaner;
 }
 
 bool RotatePath::update()
@@ -145,18 +177,26 @@ bool RotatePath::testIfWrite(char const * buffer, std::size_t size) const
 
 bool RotatePath::next(char const * buffer, std::size_t size)
 {
-    if (testIfWrite(buffer, size)) {
+    if (!testIfWrite(buffer, size)) {
+        return false;
+    }
+    if (!cleaner) {
         return update();
     }
-    return false;
+    Path const PREV_PATH = path;
+    return update() && cleaner->clean(PREV_PATH);
 }
 
 bool RotatePath::next()
 {
-    if (testIfRead()) {
+    if (!testIfRead()) {
+        return false;
+    }
+    if (!cleaner) {
         return update();
     }
-    return false;
+    Path const PREV_PATH = path;
+    return update() && cleaner->clean(PREV_PATH);
 }
 
 } // namespace filesystem

@@ -18,11 +18,13 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/Unit.hpp>
 
+#include <libtbag/archive/Archive.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/time/TimePoint.hpp>
 
+#include <cassert>
 #include <string>
 #include <memory>
 
@@ -57,20 +59,6 @@ struct CheckerInterface
 };
 
 /**
- * Rules of redefine the path.
- *
- * @author zer0
- * @date   2017-11-20
- */
-struct UpdaterInterface
-{
-    UpdaterInterface() { /* EMPTY. */ }
-    virtual ~UpdaterInterface() { /* EMPTY. */ }
-
-    virtual Path update(Path const & prev) = 0;
-};
-
-/**
  * Maximum file size checkr.
  *
  * @author zer0
@@ -98,6 +86,20 @@ struct SizeChecker : public CheckerInterface
         }
         return true;
     }
+};
+
+/**
+ * Rules of redefine the path.
+ *
+ * @author zer0
+ * @date   2017-11-20
+ */
+struct UpdaterInterface
+{
+    UpdaterInterface() { /* EMPTY. */ }
+    virtual ~UpdaterInterface() { /* EMPTY. */ }
+
+    virtual Path update(Path const & prev) = 0;
 };
 
 /**
@@ -172,6 +174,57 @@ struct TimeFormatUpdater : public UpdaterInterface
 };
 
 /**
+ * Cleaning an expired path.
+ *
+ * @author zer0
+ * @date   2019-07-08
+ */
+struct CleanerInterface
+{
+    CleanerInterface() { /* EMPTY. */ }
+    virtual ~CleanerInterface() { /* EMPTY. */ }
+
+    virtual bool clean(Path const & path) = 0;
+};
+
+/**
+ * Archiving an expired path.
+ *
+ * @author zer0
+ * @date   2019-07-08
+ */
+struct ArchiveCleaner : public CleanerInterface
+{
+    TBAG_CONSTEXPR static char const * const DEFAULT_ARCHIVE_SUFFIX = ".zip";
+
+    std::string archive_suffix;
+    bool remove_source_file;
+
+    ArchiveCleaner() : archive_suffix(DEFAULT_ARCHIVE_SUFFIX), remove_source_file(true)
+    { /* EMPTY. */ }
+    ArchiveCleaner(std::string const & suffix) : archive_suffix(suffix), remove_source_file(true)
+    { /* EMPTY. */ }
+    ArchiveCleaner(std::string const & suffix, bool remove) : archive_suffix(suffix), remove_source_file(remove)
+    { /* EMPTY. */ }
+    virtual ~ArchiveCleaner()
+    { /* EMPTY. */ }
+
+    virtual bool clean(Path const & path) override
+    {
+        using namespace libtbag::archive;
+        auto const success_count = compressArchive(path.toString() + archive_suffix, {path.toString()});
+        if (success_count == 0) {
+            return false;
+        }
+        assert(success_count == 1);
+        if (remove_source_file) {
+            path.remove();
+        }
+        return true;
+    }
+};
+
+/**
  * RotatePath class prototype.
  *
  * @author zer0
@@ -184,19 +237,28 @@ struct TimeFormatUpdater : public UpdaterInterface
 struct TBAG_API RotatePath
 {
     using Environments = libtbag::string::Environments;
+
     using SharedChecker = std::shared_ptr<CheckerInterface>;
     using SharedUpdater = std::shared_ptr<UpdaterInterface>;
-    using InitParams = std::pair<SharedChecker, SharedUpdater>;
+    using SharedCleaner = std::shared_ptr<CleanerInterface>;
+
+    struct InitParams
+    {
+        SharedChecker checker;
+        SharedUpdater updater;
+        SharedCleaner cleaner;
+    };
 
     TBAG_CONSTEXPR static char const * const CHECKER_KEY_SIZE = "size";
     TBAG_CONSTEXPR static char const * const UPDATER_KEY_COUNTER = "counter";
     TBAG_CONSTEXPR static char const * const UPDATER_KEY_TIME = "time";
+    TBAG_CONSTEXPR static char const * const CLEANER_KEY_ARCHIVE = "archive";
 
     /**
      * @remarks
      *  Examples:
      *  - size and counter: <code>size=1024m counter=/prefix/path/log,.log,0</code>
-     *  - size and time: <code>size=1024m time=/prefix/path/file-$py$pm$pdT$ph$pi$ps.log</code>
+     *  - size and time and archive: <code>size=1024m time=/prefix/path/file-$py$pm$pdT$ph$pi$ps.log archive=.zip</code>
      */
     static InitParams createParams(std::string const & arguments, Environments const & envs);
     static InitParams createParams(std::string const & arguments);
@@ -205,13 +267,18 @@ struct TBAG_API RotatePath
 
     SharedChecker checker;
     SharedUpdater updater;
+    SharedCleaner cleaner;
 
     RotatePath();
     RotatePath(std::string const & arguments);
+
     explicit RotatePath(InitParams const & params);
-    explicit RotatePath(Path const & path);
-    explicit RotatePath(Path const & path, SharedChecker const & checker, SharedUpdater const & updater);
-    explicit RotatePath(SharedChecker const & checker, SharedUpdater const & updater);
+    explicit RotatePath(Path const & p, InitParams const & params);
+    explicit RotatePath(Path const & p);
+    explicit RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u);
+    explicit RotatePath(SharedChecker const & k, SharedUpdater const & u);
+    explicit RotatePath(Path const & p, SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c);
+    explicit RotatePath(SharedChecker const & k, SharedUpdater const & u, SharedCleaner const & c);
 
     inline bool isReady() const TBAG_NOEXCEPT_SPECIFIER(
             TBAG_NOEXCEPT_OPERATOR((bool)checker) &&
