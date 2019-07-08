@@ -86,50 +86,30 @@ public:
 
         bool loadFromXmlFile(std::string const & path)
         {
-            Document doc;
-            if (doc.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS) {
-                return false;
-            }
-            Element const * root = doc.FirstChildElement(name().c_str());
-            if (root == nullptr) {
-                return false;
-            }
-            load(*root);
-            return true;
+            return XmlHelper::loadFromXmlFile(path, name(), [this](Element const & element){
+                load(element);
+            });
         }
 
         bool loadFromXmlText(std::string const & xml)
         {
-            Document doc;
-            if (doc.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS) {
-                return false;
-            }
-            Element const * root = doc.FirstChildElement(name().c_str());
-            if (root == nullptr) {
-                return false;
-            }
-            load(*root);
-            return true;
+            return XmlHelper::loadFromXmlText(xml, name(), [this](Element const & element){
+                load(element);
+            });
         }
 
         bool writeToXmlFile(std::string const & path, bool compact = false) const
         {
-            Document doc;
-            auto * element = newElement(doc, name());
-            assert(element != nullptr);
-            save(*element);
-            doc.InsertFirstChild(element);
-            return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_SUCCESS;
+            return XmlHelper::writeToXmlFile(path, name(), compact, [this](Element & element){
+                save(element);
+            });
         }
 
         bool writeToXmlText(std::string & xml, bool compact = false) const
         {
-            Document doc;
-            auto * element = newElement(doc, name());
-            assert(element != nullptr);
-            save(*element);
-            doc.InsertFirstChild(element);
-            return writeToXml(doc, xml, compact) == E_SUCCESS;
+            return XmlHelper::writeToXmlText(xml, name(), compact, [this](Element & element){
+                save(element);
+            });
         }
     };
 

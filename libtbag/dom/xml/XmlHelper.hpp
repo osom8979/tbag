@@ -116,6 +116,58 @@ struct TBAG_API XmlHelper
         }
         return count;
     }
+
+    template <typename Predicated>
+    static bool loadFromXmlFile(std::string const & path, std::string const & tag, Predicated predicated)
+    {
+        Document doc;
+        if (doc.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS) {
+            return false;
+        }
+        Element const * root = doc.FirstChildElement(tag.c_str());
+        if (root == nullptr) {
+            return false;
+        }
+        predicated(*root);
+        return true;
+    }
+
+    template <typename Predicated>
+    static bool loadFromXmlText(std::string const & xml, std::string const & tag, Predicated predicated)
+    {
+        Document doc;
+        if (doc.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS) {
+            return false;
+        }
+        Element const * root = doc.FirstChildElement(tag.c_str());
+        if (root == nullptr) {
+            return false;
+        }
+        predicated(*root);
+        return true;
+    }
+
+    template <typename Predicated>
+    static bool writeToXmlFile(std::string const & path, std::string const & tag, bool compact, Predicated predicated)
+    {
+        Document doc;
+        auto * element = newElement(doc, tag);
+        assert(element != nullptr);
+        predicated(*element);
+        doc.InsertFirstChild(element);
+        return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_SUCCESS;
+    }
+
+    template <typename Predicated>
+    static bool writeToXmlText(std::string & xml, std::string const & tag, bool compact, Predicated predicated)
+    {
+        Document doc;
+        auto * element = newElement(doc, tag);
+        assert(element != nullptr);
+        predicated(*element);
+        doc.InsertFirstChild(element);
+        return writeToXml(doc, xml, compact) == E_SUCCESS;
+    }
 };
 
 } // namespace xml
