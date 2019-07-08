@@ -22,9 +22,10 @@
 #include <libtbag/dom/tinyxml2/tinyxml2.h>
 #include <libtbag/dom/xml/XmlHelper.hpp>
 
-#include <map>
-#include <string>
+#include <cassert>
 #include <memory>
+#include <string>
+#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -83,29 +84,52 @@ public:
         virtual void load(Element const & element) { /* EMPTY. */ };
         virtual void save(Element & element) const { /* EMPTY. */ };
 
-        bool loadFile(std::string const & path)
+        bool loadFromXmlFile(std::string const & path)
         {
             Document doc;
-            if (doc.LoadFile(path.c_str()) == tinyxml2::XML_SUCCESS) {
-                Element const * root = doc.FirstChildElement(name().c_str());
-                if (root != nullptr) {
-                    load(*root);
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        bool saveFile(std::string const & path, bool compact = false) const
-        {
-            Document doc;
-            auto * element = doc.NewElement(name().c_str());
-            if (element == nullptr) {
+            if (doc.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS) {
                 return false;
             }
+            Element const * root = doc.FirstChildElement(name().c_str());
+            if (root == nullptr) {
+                return false;
+            }
+            load(*root);
+            return true;
+        }
+
+        bool loadFromXmlText(std::string const & xml)
+        {
+            Document doc;
+            if (doc.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS) {
+                return false;
+            }
+            Element const * root = doc.FirstChildElement(name().c_str());
+            if (root == nullptr) {
+                return false;
+            }
+            load(*root);
+            return true;
+        }
+
+        bool writeToXmlFile(std::string const & path, bool compact = false) const
+        {
+            Document doc;
+            auto * element = newElement(doc, name());
+            assert(element != nullptr);
             save(*element);
             doc.InsertFirstChild(element);
             return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_SUCCESS;
+        }
+
+        bool writeToXmlText(std::string & xml, bool compact = false) const
+        {
+            Document doc;
+            auto * element = newElement(doc, name());
+            assert(element != nullptr);
+            save(*element);
+            doc.InsertFirstChild(element);
+            return writeToXml(doc, xml, compact) == E_SUCCESS;
         }
     };
 

@@ -39,7 +39,7 @@ struct TBAG_API XmlHelper
     using Node     = tinyxml2::XMLNode;
 
     static Err readFromXml(Document & doc, std::string const & xml);
-    static Err writeToXml(Document const & doc, std::string & xml);
+    static Err writeToXml(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
 
     static std::string text(Element const & element);
     static void text(Element & element, std::string const & value);

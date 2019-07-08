@@ -74,3 +74,54 @@ TEST(LogTest, FileSink)
     ASSERT_TRUE(PATH.exists());
 }
 
+TEST(LogTest, RotateFileSink)
+{
+    char const * const TEST_XML_STRING = R"XML(
+        <loggers>
+            <logger>
+                <name>test-logger-rotate</name>
+                <sink>rotate</sink>
+                <arguments></arguments>
+                <generator>raw</generator>
+                <severity>OFF</severity>
+                <auto_flush>false</auto_flush>
+            </logger>
+        </loggers>)XML";
+
+//    char const * const COUT_LOGGER = "test-logger-cout";
+//    ASSERT_NE(nullptr, createStdoutLogger(COUT_LOGGER));
+//    setSeverity(COUT_LOGGER, WARNING_SEVERITY);
+//
+//    Logger * logger = getLogger(COUT_LOGGER);
+//    ASSERT_NE(nullptr, logger);
+//    ASSERT_EQ(WARNING_SEVERITY, logger->getSeverity());
+//
+//    ASSERT_EQ(1, node::createLoggerWithXmlText(TEST_XML_STRING));
+//    logger = getLogger(COUT_LOGGER);
+//    ASSERT_NE(nullptr, logger);
+//    ASSERT_EQ(OFF_SEVERITY, logger->getSeverity());
+//
+//    ASSERT_TRUE(removeLogger(COUT_LOGGER));
+
+//    tttDir(true, true);
+//    auto const PATH = tttDir_Get() / "file.log";
+//    std::string const LOGGER_NAME = "LogTest.FileSink";
+//
+//    createFileLogger(LOGGER_NAME, PATH.toString());
+//    ASSERT_TRUE(PATH.exists());
+//    setSeverity(LOGGER_NAME, log::WARNING_SEVERITY);
+//
+//    tLogM(LOGGER_NAME, "LogTest: emergency");
+//    tLogA(LOGGER_NAME, "LogTest: alert");
+//    tLogC(LOGGER_NAME, "LogTest: critical");
+//    tLogE(LOGGER_NAME, "LogTest: error");
+//    tLogW(LOGGER_NAME, "LogTest: warning");
+//    tLogN(LOGGER_NAME, "LogTest: notice");
+//    tLogI(LOGGER_NAME, "LogTest: info");
+//    tLogD(LOGGER_NAME, "LogTest: debug");
+//
+//    removeLogger(LOGGER_NAME);
+//    ASSERT_LT(0, PATH.getState().size);
+//    ASSERT_TRUE(PATH.exists());
+}
+

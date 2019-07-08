@@ -31,7 +31,7 @@ TEST(StorageNodeTest, LoadAndSave)
     ASSERT_TRUE(PATH.isRegularFile());
 
     StorageNode node;
-    ASSERT_TRUE(node.loadFile(PATH));
+    ASSERT_TRUE(node.loadFromXmlFile(PATH));
     ASSERT_EQ(1, node.property().users.size());
     ASSERT_EQ("temp", node.property().users[0].name);
     ASSERT_EQ("temp.dir", node.property().users[0].text);
@@ -44,7 +44,7 @@ TEST(StorageNodeTest, LoadAndSave)
     ASSERT_TRUE(PATH.remove());
     ASSERT_FALSE(PATH.isRegularFile());
 
-    ASSERT_TRUE(node.saveFile(PATH));
+    ASSERT_TRUE(node.writeToXmlFile(PATH));
     ASSERT_TRUE(PATH.isRegularFile());
 }
 
@@ -70,13 +70,13 @@ TEST(StorageNodeTest, SaveAndLoad)
     node1.root() = PATH;
     node1.update();
 
-    ASSERT_TRUE(node1.saveFile(FILE_PATH));
+    ASSERT_TRUE(node1.writeToXmlFile(FILE_PATH));
     ASSERT_TRUE(FILE_PATH.isRegularFile());
     ASSERT_TRUE(node1.storage().saveConfig(NAME1, KEY1, VAL1));
     ASSERT_TRUE(node1.storage().saveConfig(NAME2, KEY2, VAL2));
 
     StorageNode node2;
-    ASSERT_TRUE(node2.loadFile(FILE_PATH));
+    ASSERT_TRUE(node2.loadFromXmlFile(FILE_PATH));
 
     std::string value1;
     ASSERT_TRUE(node2.storage().readConfig(NAME1, KEY1, value1));

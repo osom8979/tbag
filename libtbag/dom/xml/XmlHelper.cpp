@@ -95,9 +95,9 @@ Err XmlHelper::readFromXml(Document & doc, std::string const & xml)
     return E_PARSING;
 }
 
-Err XmlHelper::writeToXml(Document const & doc, std::string & xml)
+Err XmlHelper::writeToXml(Document const & doc, std::string & xml, bool compact, int depth)
 {
-    tinyxml2::XMLPrinter printer;
+    tinyxml2::XMLPrinter printer(0, compact, depth);
     if (doc.Accept(&printer)) {
         xml.assign(printer.CStr(), printer.CStr() + printer.CStrSize());
         return E_SUCCESS;
