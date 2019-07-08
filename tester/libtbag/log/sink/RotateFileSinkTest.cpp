@@ -18,7 +18,7 @@ TEST(RotateFileSinkTest, Default)
     char const * const TEST_FILENAME = "test";
     tttDir_Automatic();
     auto const PREFIX = tttDir_Get() / TEST_FILENAME;
-    auto const ARGUMENTS = std::string("size=1024m counter=") + PREFIX.getCanonicalString();
+    auto const ARGUMENTS = std::string("size=1024m counter=") + PREFIX.getGenericString();
 
     RotateFileSink object(ARGUMENTS);
 }

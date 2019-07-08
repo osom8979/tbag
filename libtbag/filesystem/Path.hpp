@@ -133,6 +133,10 @@ public:
 public:
     /**
      * Generic path format.
+     *
+     * @remarks
+     *  - No directory shortcut.
+     *  - Use generic path separator. (Unix style: '/')
      */
     std::string getGenericString() const;
     Path getGeneric() const;
@@ -145,6 +149,10 @@ public:
 
     /**
      * Canonical path.
+     *
+     * @remarks
+     *  - No directory shortcut.
+     *  - Use native path.
      */
     Path getCanonical() const;
     std::string getCanonicalString() const;
