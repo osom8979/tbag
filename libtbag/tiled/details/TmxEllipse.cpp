@@ -49,7 +49,7 @@ Err TmxEllipse::read(Element const & elem)
 Err TmxEllipse::read(std::string const & xml)
 {
     Document doc;
-    auto const CODE = readFromXml(doc, xml);
+    auto const CODE = readFromXmlText(doc, xml);
     if (isFailure(CODE)) {
         return CODE;
     }
@@ -80,7 +80,7 @@ Err TmxEllipse::write(std::string & xml) const
         return CODE;
     }
     insertElement(doc, new_elem);
-    return writeToXml(doc, xml);
+    return writeToXmlText(doc, xml);
 }
 
 } // namespace details

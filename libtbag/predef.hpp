@@ -26,6 +26,8 @@
 
 #include <libtbag/config.h>
 
+#include <cassert>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

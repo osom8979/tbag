@@ -17,7 +17,10 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/dom/tinyxml2/tinyxml2.h>
+
+#include <cassert>
 #include <string>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,9 +40,6 @@ struct TBAG_API XmlHelper
     using Document = tinyxml2::XMLDocument;
     using Element  = tinyxml2::XMLElement;
     using Node     = tinyxml2::XMLNode;
-
-    static Err readFromXml(Document & doc, std::string const & xml);
-    static Err writeToXml(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
 
     static std::string text(Element const & element);
     static void text(Element & element, std::string const & value);
@@ -94,15 +94,15 @@ struct TBAG_API XmlHelper
     static Node * insertElement(Document & doc, Node * node);
     static Node * insertElement(Element & element, Node * node);
 
-    template <typename Predicated>
-    static Node * newElement(Element & element, std::string const & tag, Predicated predicated)
+    template <typename NodeT, typename Predicated>
+    static Node * newElement(NodeT & v, std::string const & tag, Predicated predicated)
     {
-        Element * child = newElement(element, tag);
-        if (child != nullptr) {
-            predicated(*child);
-            return insertElement(element, child);
-        }
-        return child;
+        static_assert(std::is_same<NodeT, Document>::value || std::is_same<NodeT, Element>::value,
+                      "NodeT must be of type Document or Element.");
+        Element * child = newElement(v, tag);
+        assert(child != nullptr);
+        predicated(*child);
+        return insertElement(v, child);
     }
 
     template <typename Predicated>
@@ -117,8 +117,11 @@ struct TBAG_API XmlHelper
         return count;
     }
 
+    static Err readFromXmlText(Document & doc, std::string const & xml);
+    static Err writeToXmlText(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
+
     template <typename Predicated>
-    static bool loadFromXmlFile(std::string const & path, std::string const & tag, Predicated predicated)
+    static bool readFromXmlFile(std::string const & path, std::string const & tag, Predicated predicated)
     {
         Document doc;
         if (doc.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS) {
@@ -133,7 +136,7 @@ struct TBAG_API XmlHelper
     }
 
     template <typename Predicated>
-    static bool loadFromXmlText(std::string const & xml, std::string const & tag, Predicated predicated)
+    static bool readFromXmlText(std::string const & xml, std::string const & tag, Predicated predicated)
     {
         Document doc;
         if (doc.Parse(xml.c_str()) != tinyxml2::XML_SUCCESS) {
@@ -166,7 +169,7 @@ struct TBAG_API XmlHelper
         assert(element != nullptr);
         predicated(*element);
         doc.InsertFirstChild(element);
-        return writeToXml(doc, xml, compact) == E_SUCCESS;
+        return writeToXmlText(doc, xml, compact) == E_SUCCESS;
     }
 };
 

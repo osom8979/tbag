@@ -84,16 +84,16 @@ public:
         virtual void load(Element const & element) { /* EMPTY. */ };
         virtual void save(Element & element) const { /* EMPTY. */ };
 
-        bool loadFromXmlFile(std::string const & path)
+        bool readFromXmlFile(std::string const & path)
         {
-            return XmlHelper::loadFromXmlFile(path, name(), [this](Element const & element){
+            return XmlHelper::readFromXmlFile(path, name(), [this](Element const & element){
                 load(element);
             });
         }
 
-        bool loadFromXmlText(std::string const & xml)
+        bool readFromXmlText(std::string const & xml)
         {
-            return XmlHelper::loadFromXmlText(xml, name(), [this](Element const & element){
+            return XmlHelper::readFromXmlText(xml, name(), [this](Element const & element){
                 load(element);
             });
         }

@@ -87,24 +87,6 @@ static Err queryAttribute(XmlHelper::Element const & element,
 // XmlHelper
 // ---------
 
-Err XmlHelper::readFromXml(Document & doc, std::string const & xml)
-{
-    if (doc.Parse(xml.c_str()) == tinyxml2::XML_SUCCESS) {
-        return E_SUCCESS;
-    }
-    return E_PARSING;
-}
-
-Err XmlHelper::writeToXml(Document const & doc, std::string & xml, bool compact, int depth)
-{
-    tinyxml2::XMLPrinter printer(0, compact, depth);
-    if (doc.Accept(&printer)) {
-        xml.assign(printer.CStr(), printer.CStr() + printer.CStrSize());
-        return E_SUCCESS;
-    }
-    return E_UNKNOWN;
-}
-
 std::string XmlHelper::text(Element const & element)
 {
     if (element.GetText() != nullptr) {
@@ -246,6 +228,24 @@ XmlHelper::Node * XmlHelper::insertElement(Document & doc, Node * node)
 XmlHelper::Node * XmlHelper::insertElement(Element & element, Node * node)
 {
     return element.InsertEndChild(node);
+}
+
+Err XmlHelper::readFromXmlText(Document & doc, std::string const & xml)
+{
+    if (doc.Parse(xml.c_str()) == tinyxml2::XML_SUCCESS) {
+        return E_SUCCESS;
+    }
+    return E_PARSING;
+}
+
+Err XmlHelper::writeToXmlText(Document const & doc, std::string & xml, bool compact, int depth)
+{
+    tinyxml2::XMLPrinter printer(0, compact, depth);
+    if (doc.Accept(&printer)) {
+        xml.assign(printer.CStr(), printer.CStr() + printer.CStrSize());
+        return E_SUCCESS;
+    }
+    return E_UNKNOWN;
 }
 
 } // namespace xml

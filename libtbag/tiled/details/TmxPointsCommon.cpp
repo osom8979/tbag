@@ -76,7 +76,7 @@ Err TmxPointsCommon::readToPoints(std::string const & tag, Element const & elem,
 Err TmxPointsCommon::readToPoints(std::string const & tag, std::string const & xml, Points & points)
 {
     Document doc;
-    auto const CODE = readFromXml(doc, xml);
+    auto const CODE = readFromXmlText(doc, xml);
     if (isFailure(CODE)) {
         return CODE;
     }
@@ -109,7 +109,7 @@ Err TmxPointsCommon::writeFromPoints(std::string const & tag, Points const & poi
         return CODE;
     }
     insertElement(doc, new_elem);
-    return writeToXml(doc, xml);
+    return writeToXmlText(doc, xml);
 }
 
 } // namespace details

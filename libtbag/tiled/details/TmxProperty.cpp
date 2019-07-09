@@ -179,7 +179,7 @@ Err TmxProperty::read(Element const & elem)
 Err TmxProperty::read(std::string const & xml)
 {
     Document doc;
-    auto const CODE = readFromXml(doc, xml);
+    auto const CODE = readFromXmlText(doc, xml);
     if (isFailure(CODE)) {
         return CODE;
     }
@@ -209,7 +209,7 @@ Err TmxProperty::write(std::string & xml) const
         return CODE;
     }
     insertElement(doc, new_elem);
-    return writeToXml(doc, xml);
+    return writeToXmlText(doc, xml);
 }
 
 bool TmxProperty::validate(Version const & version) const
