@@ -365,6 +365,8 @@ struct TBAG_API RotatePath
     explicit RotatePath(Path const & p, SharedWriter const & w, SharedUpdater const & u, SharedCleaner const & c);
     explicit RotatePath(SharedWriter const & w, SharedUpdater const & u, SharedCleaner const & c);
 
+    ~RotatePath();
+
     inline bool isReady() const TBAG_NOEXCEPT_SPECIFIER(
             TBAG_NOEXCEPT_OPERATOR((bool)writer) &&
             TBAG_NOEXCEPT_OPERATOR((bool)updater))

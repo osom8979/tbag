@@ -135,52 +135,30 @@ LogXmlNode::Infos LogXmlNode::getLogInfos(Element const & parent)
 // Miscellaneous utilities
 // -----------------------
 
-int createLoggerWithXmlPath(std::string const & path)
+int createLoggerWithXmlFile(std::string const & path)
 {
-    tinyxml2::XMLDocument doc;
-    if (doc.LoadFile(path.c_str()) != tinyxml2::XML_SUCCESS) {
-        return 0;
-    }
-    auto * element = doc.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGERS_NAME);
-    if (element == nullptr) {
-        return 0;
-    }
-    return createLoggerWithXmlLoggerElement(*element);
+    return createLoggerWithXmlFile(path, LogXmlNode::Environments::createDefaultEnvironments());
+}
+
+int createLoggerWithXmlFile(std::string const & path, libtbag::string::Environments const & envs)
+{
+    LogXmlNode node;
+    node.envs() = envs;
+    node.readFromXmlFile(path);
+    return node.createLoggers();
 }
 
 int createLoggerWithXmlText(std::string const & xml)
 {
-    tinyxml2::XMLDocument doc;
-    if (doc.Parse(xml.c_str(), xml.size()) != tinyxml2::XML_SUCCESS) {
-        return 0;
-    }
-    auto * element = doc.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGERS_NAME);
-    if (element == nullptr) {
-        return 0;
-    }
-    return createLoggerWithXmlLoggerElement(*element);
+    return createLoggerWithXmlText(xml, LogXmlNode::Environments::createDefaultEnvironments());
 }
 
-int createLoggerWithXmlLoggersElement(tinyxml2::XMLElement const & parent)
+int createLoggerWithXmlText(std::string const & xml, libtbag::string::Environments const & envs)
 {
-    auto * element = parent.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGERS_NAME);
-    if (element == nullptr) {
-        return 0;
-    }
-    return createLoggerWithXmlLoggerElement(*element);
-}
-
-int createLoggerWithXmlLoggerElement(tinyxml2::XMLElement const & element)
-{
-    int result = 0;
-    auto * cursor = element.FirstChildElement(LogXmlNode::XML_ELEMENT_LOGGER_NAME);
-    while (cursor != nullptr) {
-        if (createLogger(LogXmlNode::getLogInfo(*cursor)) != nullptr) {
-            ++result;
-        }
-        cursor = cursor->NextSiblingElement();
-    }
-    return result;
+    LogXmlNode node;
+    node.envs() = envs;
+    node.readFromXmlText(xml);
+    return node.createLoggers();
 }
 
 } // namespace node

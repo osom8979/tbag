@@ -284,11 +284,13 @@ TBAG_API std::size_t decompressArchive(std::string const & filename,
                                        std::string const & output_prefix);
 TBAG_API std::size_t decompressArchive(std::string const & filename,
                                        BaseArchive::MemoryEntries & entries);
+TBAG_API BaseArchive::MemoryEntries decompressArchive(std::string const & filename);
 
 TBAG_API std::size_t decompressMemoryArchive(char const * buffer, std::size_t size,
                                              std::string const & output_prefix);
 TBAG_API std::size_t decompressMemoryArchive(char const * buffer, std::size_t size,
                                              BaseArchive::MemoryEntries & entries);
+TBAG_API BaseArchive::MemoryEntries decompressMemoryArchive(char const * buffer, std::size_t size);
 
 TBAG_API std::vector<std::string> getArchiveFileList(std::string const & filename);
 

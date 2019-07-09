@@ -73,6 +73,22 @@ RotatePath::RotatePath(SharedWriter const & w, SharedUpdater const & u, SharedCl
     // EMPTY.
 }
 
+RotatePath::~RotatePath()
+{
+    if (writer) {
+        if (writer->ready()) {
+            writer->flush();
+            writer->close();
+        }
+    }
+    if (cleaner) {
+        cleaner->clean(path);
+    }
+    writer.reset();
+    cleaner.reset();
+    updater.reset();
+}
+
 RotatePath::InitParams RotatePath::createParams(std::string const & arguments, Environments const & envs)
 {
     InitParams result;

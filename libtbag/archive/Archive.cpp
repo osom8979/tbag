@@ -790,6 +790,13 @@ std::size_t decompressArchive(std::string const & filename, BaseArchive::MemoryE
     return FileArchiveReader(filename).readToMemory(entries);
 }
 
+BaseArchive::MemoryEntries decompressArchive(std::string const & filename)
+{
+    BaseArchive::MemoryEntries result;
+    decompressArchive(filename, result);
+    return result;
+}
+
 std::size_t decompressMemoryArchive(char const * buffer, std::size_t size, std::string const & output_prefix)
 {
     return MemoryArchiveReader(buffer, size).readToFile(output_prefix);
@@ -798,6 +805,13 @@ std::size_t decompressMemoryArchive(char const * buffer, std::size_t size, std::
 std::size_t decompressMemoryArchive(char const * buffer, std::size_t size, BaseArchive::MemoryEntries & entries)
 {
     return MemoryArchiveReader(buffer, size).readToMemory(entries);
+}
+
+BaseArchive::MemoryEntries decompressMemoryArchive(char const * buffer, std::size_t size)
+{
+    BaseArchive::MemoryEntries result;
+    decompressMemoryArchive(buffer, size);
+    return result;
 }
 
 std::vector<std::string> getArchiveFileList(std::string const & filename)

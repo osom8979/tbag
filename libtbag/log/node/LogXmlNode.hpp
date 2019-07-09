@@ -20,6 +20,7 @@
 #include <libtbag/log/LoggerManager.hpp>
 
 #include <vector>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -164,10 +165,11 @@ public:
 // Miscellaneous utilities
 // -----------------------
 
-TBAG_API int createLoggerWithXmlPath(std::string const & path);
+TBAG_API int createLoggerWithXmlFile(std::string const & path);
+TBAG_API int createLoggerWithXmlFile(std::string const & path, libtbag::string::Environments const & envs);
+
 TBAG_API int createLoggerWithXmlText(std::string const & xml);
-TBAG_API int createLoggerWithXmlLoggersElement(tinyxml2::XMLElement const & parent);
-TBAG_API int createLoggerWithXmlLoggerElement(tinyxml2::XMLElement const & element);
+TBAG_API int createLoggerWithXmlText(std::string const & xml, libtbag::string::Environments const & envs);
 
 } // namespace node
 } // namespace log

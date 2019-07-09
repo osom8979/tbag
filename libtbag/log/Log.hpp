@@ -3,13 +3,6 @@
  * @brief  Log class prototype.
  * @author zer0
  * @date   2016-04-04
- *
- * @remarks
- *  # Push log:         {name,severity,message} -> (Bypass)                -> LoggerManager            @n
- *  # Select logger:    LoggerManager           -> (use name)              -> Logger{severity,message} @n
- *  # Select severity:  Logger                  -> (filtering severity)    -> Logger{severity,message} @n
- *  # Make packet:      Logger                  -> (use severity, message) -> PacketGenerator{message} @n
- *  # Pass to sink:     PacketGenerator         -> (use message)           -> Sink                     @n
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__
