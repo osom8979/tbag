@@ -53,6 +53,13 @@ public:
     using Layers = std::vector<ModelLayer>;
 
 public:
+    enum class Direction
+    {
+        D_FORWARD,
+        D_BACKWARD,
+    };
+
+public:
     TBAG_CONSTEXPR static int const NO_ASSIGN_ID = -1;
     TBAG_CONSTEXPR static int const DEFAULT_PROPERTY_BUFFER_SIZE = 1024;
 
@@ -90,7 +97,7 @@ public:
 
 public:
     LayerBase() : TYPE("UNKNOWN") { /* EMPTY. */ }
-    LayerBase(char const * const & type) : TYPE(type) { /* EMPTY. */ }
+    LayerBase(char const * type) : TYPE(type) { /* EMPTY. */ }
     virtual ~LayerBase() { /* EMPTY. */ }
 
 public:
@@ -105,23 +112,23 @@ public:
     { return _complete; }
 
 public:
-    virtual Err setup(char const * data, int size) { return E_SUCCESS; }
-    virtual Err teardown() { return E_SUCCESS; }
+    virtual Err runner(Direction direction, Layers const & input, void * user)
+    { return E_SUCCESS; }
 
-    virtual Err forward(Layers const & input) { return E_SUCCESS; }
-    virtual Err backward(Layers const & input) { return E_SUCCESS; }
-
-    virtual Err get(char const * key, char * buffer, int * size) const { return E_SUCCESS; }
-    virtual Err set(char const * key, char const * data) { return E_SUCCESS; }
+public:
+    virtual Err get(char const * key, char * buffer, int * size) const
+    { return E_SUCCESS; }
+    virtual Err set(char const * key, char const * data)
+    { return E_SUCCESS; }
 
 public:
     static Err getProperty(char * buffer, int * buffer_size, char const * value, int value_size)
     {
+        *buffer_size = value_size;
         if (*buffer_size >= value_size) {
             ::strncpy(buffer, value, value_size);
             return E_SUCCESS;
         } else {
-            *buffer_size = value_size;
             return E_ENOBUFS;
         }
     }
@@ -158,6 +165,7 @@ public:
     using Err = libtbag::Err;
     using Layers = std::vector<ModelLayer>;
     using SharedBase = std::shared_ptr<LayerBase>;
+    using Direction = LayerBase::Direction;
 
 private:
     SharedBase _base;
@@ -235,12 +243,7 @@ public:
     bool isComplete() const;
 
 public:
-    Err setup(std::string const & data);
-    Err teardown();
-
-public:
-    Err forward(Layers const & input);
-    Err backward(Layers const & input);
+    Err runner(Direction direction, Layers const & input, void * user);
 
 public:
     Err get(std::string const & key, std::string & data) const;

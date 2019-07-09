@@ -115,36 +115,18 @@ bool ModelLayer::isComplete() const
     return _base->_complete;
 }
 
-Err ModelLayer::setup(std::string const & data)
+Err ModelLayer::runner(Direction direction, Layers const & input, void * user)
 {
     assert(exists());
-    return _base->setup(data.c_str(), data.size());
-}
-
-Err ModelLayer::teardown()
-{
-    assert(exists());
-    return _base->teardown();
-}
-
-Err ModelLayer::forward(Layers const & input)
-{
-    assert(exists());
-    return _base->forward(input);
-}
-
-Err ModelLayer::backward(Layers const & input)
-{
-    assert(exists());
-    return _base->backward(input);
+    return _base->runner(direction, input, user);
 }
 
 Err ModelLayer::get(std::string const & key, std::string & data) const
 {
     assert(exists());
 
-    Err code = E_UNKNOWN;
     int size = LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE;
+    Err code;
 
     COMMENT("Default stack buffer") {
         char buffer[LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE];

@@ -42,6 +42,7 @@ class TBAG_API ModelNet
 {
 public:
     using Layers = std::vector<ModelLayer>;
+    using Direction = LayerBase::Direction;
 
 public:
     enum class ArcOrder
@@ -49,23 +50,6 @@ public:
         AO_SOURCE,
         AO_TARGET,
     };
-
-    enum class Direction
-    {
-        D_FORWARD,
-        D_BACKWARD,
-    };
-
-    inline static char const * getDirectionName(Direction d) TBAG_NOEXCEPT
-    {
-        // clang-format off
-        switch (d) {
-        case Direction::D_FORWARD:  return "FORWARD";
-        case Direction::D_BACKWARD: return "BACKWARD";
-        default:                    return "";
-            // clang-format on
-        }
-    }
 
 public:
     TBAG_CONSTEXPR static std::size_t const MAX_RUN_DEPTH = 1024;
@@ -111,7 +95,7 @@ public:
     bool empty() const;
     std::size_t size() const;
 
-public:
+private:
     /** Unplug the finished flags. */
     void updateIncomplete();
     void updateComplete();
@@ -128,13 +112,6 @@ public:
     ModelLayer getLayer(int id) const;
 
 public:
-    using Splitter = std::function<std::string(std::string const &)>;
-
-public:
-    std::size_t setup(std::string const & data, Splitter const & splitter);
-    std::size_t teardown();
-
-public:
     std::vector<int> getSourceNodeIds(int node_id) const;
     std::vector<int> getTargetNodeIds(int node_id) const;
     std::vector<int> getNodeIds(int node_id, ArcOrder order) const;
@@ -143,12 +120,19 @@ public:
     Layers getInputLayers(int node_id, ArcOrder order) const;
     bool isReady(int node_id, ArcOrder order) const;
 
-public:
-    Err run(std::set<int> const & start_node_ids, Direction direction, std::size_t max_depth = MAX_RUN_DEPTH);
+private:
+    Err run(std::set<int> const & start_node_ids,
+            Direction direction = Direction::D_FORWARD,
+            std::size_t max_depth = MAX_RUN_DEPTH,
+            void * user = nullptr);
 
 public:
-    Err forward();
-    Err backward();
+    Err forward(std::size_t max_depth, void * user = nullptr);
+    Err backward(std::size_t max_depth, void * user = nullptr);
+
+public:
+    Err forward(void * user = nullptr);
+    Err backward(void * user = nullptr);
 
 public:
     std::string toString() const;

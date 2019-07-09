@@ -7,7 +7,6 @@
 
 #include <libtbag/graph/ModelNet.hpp>
 #include <libtbag/graph/ModelLayer.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -249,35 +248,6 @@ ModelLayer ModelNet::getLayer(int id) const
     return _impl->layers[__get_node(id)];
 }
 
-std::size_t ModelNet::setup(std::string const & data, Splitter const & splitter)
-{
-    assert(exists());
-    assert(static_cast<bool>(splitter));
-    std::size_t success_count = 0;
-    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
-        if (_impl->layers[n]) {
-            if (isSuccess(_impl->layers[n].setup(splitter(data)))) {
-                ++success_count;
-            }
-        }
-    }
-    return success_count;
-}
-
-std::size_t ModelNet::teardown()
-{
-    assert(exists());
-    std::size_t success_count = 0;
-    for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
-        if (_impl->layers[n]) {
-            if (isSuccess(_impl->layers[n].teardown())) {
-                ++success_count;
-            }
-        }
-    }
-    return success_count;
-}
-
 std::vector<int> ModelNet::getSourceNodeIds(int node_id) const
 {
     assert(exists());
@@ -329,7 +299,7 @@ bool ModelNet::isReady(int node_id, ArcOrder order) const
     return true;
 }
 
-Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std::size_t max_depth)
+Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std::size_t max_depth, void * user)
 {
     assert(exists());
 
@@ -344,36 +314,28 @@ Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std
         }
 
         // Run current list.
-        for (int current_id : current) {
-            Err code;
-
-            if (direction == Direction::D_FORWARD) {
-                code = _impl->layers[__get_node(current_id)].forward(getInputLayers(current_id, ArcOrder::AO_SOURCE));
-            } else {
-                assert(direction == Direction::D_BACKWARD);
-                code = _impl->layers[__get_node(current_id)].backward(getInputLayers(current_id, ArcOrder::AO_TARGET));
-            }
-
+        for (int id : current) {
+            auto & layer = _impl->layers[__get_node(id)];
+            auto code = layer.runner(direction, getInputLayers(id, ArcOrder::AO_SOURCE), user);
             if (isSuccess(code)) {
-                _impl->layers[__get_node(current_id)]._complete();
+                layer._complete();
             } else {
-                tDLogE("ModelNet::run({}) Layer({}) error: {}", getDirectionName(direction), current_id, code);
                 return code;
             }
         }
 
         // Update children list.
         children.clear();
-        for (int current_id : current) {
+        for (int id : current) {
             if (direction == Direction::D_FORWARD) {
-                for (auto & next_node_id : getTargetNodeIds(current_id)) {
+                for (auto & next_node_id : getTargetNodeIds(id)) {
                     if (isReady(next_node_id, ArcOrder::AO_SOURCE)) {
                         children.insert(next_node_id);
                     }
                 }
             } else {
                 assert(direction == Direction::D_BACKWARD);
-                for (auto & next_node_id : getSourceNodeIds(current_id)) {
+                for (auto & next_node_id : getSourceNodeIds(id)) {
                     if (isReady(next_node_id, ArcOrder::AO_TARGET)) {
                         children.insert(next_node_id);
                     }
@@ -388,22 +350,32 @@ Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std
     return E_SUCCESS;
 }
 
-Err ModelNet::forward()
+Err ModelNet::forward(std::size_t max_depth, void * user)
 {
     assert(exists());
     if (_impl->first_ids.empty()) {
         return E_NREADY;
     }
-    return run(_impl->first_ids, Direction::D_FORWARD);
+    return run(_impl->first_ids, Direction::D_FORWARD, max_depth, user);
 }
 
-Err ModelNet::backward()
+Err ModelNet::backward(std::size_t max_depth, void * user)
 {
     assert(exists());
     if (_impl->last_ids.empty()) {
         return E_NREADY;
     }
-    return run(_impl->last_ids, Direction::D_BACKWARD);
+    return run(_impl->last_ids, Direction::D_BACKWARD, max_depth, user);
+}
+
+Err ModelNet::forward(void * user)
+{
+    return forward(MAX_RUN_DEPTH, user);
+}
+
+Err ModelNet::backward(void * user)
+{
+    return backward(MAX_RUN_DEPTH, user);
 }
 
 std::string ModelNet::toString() const
