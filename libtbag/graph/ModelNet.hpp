@@ -95,7 +95,7 @@ public:
     bool empty() const;
     std::size_t size() const;
 
-private:
+public:
     /** Unplug the finished flags. */
     void updateIncomplete();
     void updateComplete();
@@ -115,16 +115,34 @@ public:
     std::vector<int> getSourceNodeIds(int node_id) const;
     std::vector<int> getTargetNodeIds(int node_id) const;
     std::vector<int> getNodeIds(int node_id, ArcOrder order) const;
+    std::vector<int> getChildrenNodeIds(int node_id, Direction direction) const;
 
 public:
     Layers getInputLayers(int node_id, ArcOrder order) const;
+    Layers getInputLayers(int node_id, Direction direction) const;
+
+public:
     bool isReady(int node_id, ArcOrder order) const;
+    bool isChildrenReady(int node_id, Direction direction) const;
 
 private:
-    Err run(std::set<int> const & start_node_ids,
+    /**
+     * @param[in] start
+     *      List of start node ids.
+     * @param[in] direction
+     *      Loop direction. (forward or backward)
+     * @param[in] max_depth
+     *      Maximum loop iteration.
+     * @param[in] user
+     *      User's data.
+     * @param[out] result
+     *      Returns the result in the task sequence.
+     */
+    Err run(std::set<int> const & start,
             Direction direction = Direction::D_FORWARD,
             std::size_t max_depth = MAX_RUN_DEPTH,
-            void * user = nullptr);
+            void * user = nullptr,
+            std::vector<int> * result = nullptr);
 
 public:
     Err forward(std::size_t max_depth, void * user = nullptr);

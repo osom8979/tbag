@@ -278,6 +278,11 @@ std::vector<int> ModelNet::getNodeIds(int node_id, ArcOrder order) const
     }
 }
 
+std::vector<int> ModelNet::getChildrenNodeIds(int node_id, Direction direction) const
+{
+    return getNodeIds(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_TARGET : ArcOrder::AO_SOURCE);
+}
+
 ModelNet::Layers ModelNet::getInputLayers(int node_id, ArcOrder order) const
 {
     assert(exists());
@@ -286,6 +291,11 @@ ModelNet::Layers ModelNet::getInputLayers(int node_id, ArcOrder order) const
         input_layers.push_back(_impl->layers[__get_node(source_id)]);
     }
     return input_layers;
+}
+
+ModelNet::Layers ModelNet::getInputLayers(int node_id, Direction direction) const
+{
+    return getInputLayers(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_SOURCE : ArcOrder::AO_TARGET);
 }
 
 bool ModelNet::isReady(int node_id, ArcOrder order) const
@@ -299,16 +309,25 @@ bool ModelNet::isReady(int node_id, ArcOrder order) const
     return true;
 }
 
-Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std::size_t max_depth, void * user)
+bool ModelNet::isChildrenReady(int node_id, Direction direction) const
+{
+    return isReady(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_SOURCE : ArcOrder::AO_TARGET);
+}
+
+Err ModelNet::run(std::set<int> const & start,
+                  Direction direction,
+                  std::size_t max_depth,
+                  void * user,
+                  std::vector<int> * result)
 {
     assert(exists());
 
-    updateIncomplete();
-
-    std::set<int> current = start_node_ids;
+    std::set<int> current = start;
     std::set<int> children;
 
-    for (std::size_t current_depth = 0; current_depth < max_depth; ++current_depth) {
+    updateIncomplete();
+
+    for (auto i = 0; i < max_depth; ++i) {
         if (current.empty()) {
             break; // No more current node exist.
         }
@@ -316,9 +335,12 @@ Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std
         // Run current list.
         for (int id : current) {
             auto & layer = _impl->layers[__get_node(id)];
-            auto code = layer.runner(direction, getInputLayers(id, ArcOrder::AO_SOURCE), user);
+            auto code = layer.runner(direction, getInputLayers(id, direction), user);
             if (isSuccess(code)) {
                 layer._complete();
+                if (result != nullptr) {
+                    result->push_back(id);
+                }
             } else {
                 return code;
             }
@@ -326,19 +348,11 @@ Err ModelNet::run(std::set<int> const & start_node_ids, Direction direction, std
 
         // Update children list.
         children.clear();
+
         for (int id : current) {
-            if (direction == Direction::D_FORWARD) {
-                for (auto & next_node_id : getTargetNodeIds(id)) {
-                    if (isReady(next_node_id, ArcOrder::AO_SOURCE)) {
-                        children.insert(next_node_id);
-                    }
-                }
-            } else {
-                assert(direction == Direction::D_BACKWARD);
-                for (auto & next_node_id : getSourceNodeIds(id)) {
-                    if (isReady(next_node_id, ArcOrder::AO_TARGET)) {
-                        children.insert(next_node_id);
-                    }
+            for (auto & next_node_id : getChildrenNodeIds(id, direction)) {
+                if (isChildrenReady(next_node_id, direction)) {
+                    children.insert(next_node_id);
                 }
             }
         }
