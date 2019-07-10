@@ -175,5 +175,26 @@ TEST(ModelNetTest, Default)
     ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG7));
     ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG8));
     ASSERT_EQ(9, LAYERS.size());
+
+    auto const forward = net.getForwardSequence();
+    ASSERT_EQ(9, forward.size());
+    ASSERT_EQ(0, forward[0]);
+    ASSERT_EQ(8, forward[1]);
+    ASSERT_EQ(1, forward[2]);
+    ASSERT_EQ(2, forward[3]);
+    ASSERT_EQ(3, forward[4]);
+    ASSERT_EQ(4, forward[5]);
+    ASSERT_EQ(5, forward[6]);
+    ASSERT_EQ(6, forward[7]);
+    ASSERT_EQ(7, forward[8]);
+
+    auto const backward = net.getBackwardSequence();
+    ASSERT_EQ(6, backward.size());
+    ASSERT_EQ(7, backward[0]);
+    ASSERT_EQ(3, backward[1]);
+    ASSERT_EQ(4, backward[2]);
+    ASSERT_EQ(6, backward[3]);
+    ASSERT_EQ(8, backward[4]);
+    ASSERT_EQ(1, backward[5]);
 }
 

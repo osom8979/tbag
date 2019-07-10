@@ -153,6 +153,10 @@ public:
     Err backward(void * user = nullptr);
 
 public:
+    std::vector<int> getForwardSequence(std::size_t max_depth = MAX_RUN_DEPTH, void * user = nullptr);
+    std::vector<int> getBackwardSequence(std::size_t max_depth = MAX_RUN_DEPTH, void * user = nullptr);
+
+public:
     std::string toString() const;
 };
 
