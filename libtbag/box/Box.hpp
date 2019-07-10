@@ -781,5 +781,24 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
+#include <utility>
+
+// ------------
+namespace std {
+// ------------
+
+template <>
+struct hash<libtbag::box::Box>
+{
+    inline std::size_t operator()(libtbag::box::Box const & v) const TBAG_NOEXCEPT
+    {
+        return reinterpret_cast<std::size_t>(v.get());
+    }
+};
+
+// ---------------
+} // namespace std
+// ---------------
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_BOX_BOX_HPP__
 

@@ -7,6 +7,13 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/box/Box.hpp>
+#include <libtbag/util/TestUtils.hpp>
+
+#include <vector>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 
 using namespace libtbag;
 using namespace libtbag::box;
@@ -40,6 +47,113 @@ TEST(BoxTest, Default)
     auto const * b5_data = b5.get();
     auto const * b6_data = b6.get();
     ASSERT_EQ(b5_data, b6_data);
+}
+
+TEST(BoxTest, StlContainerCompatibility)
+{
+    Box b1;
+    Box b2;
+    b1.setInfo("1");
+    b2.setInfo("2");
+
+    TBAG_SCENARIO("std::vector") {
+        std::vector<Box> container;
+        container.push_back(b1);
+        container.push_back(b2);
+
+        ASSERT_EQ(2, container.size());
+        ASSERT_STREQ("1", container[0].getInfoString().c_str());
+        ASSERT_STREQ("2", container[1].getInfoString().c_str());
+
+        auto container2 = container;
+        ASSERT_STREQ("1", container2[0].getInfoString().c_str());
+        ASSERT_STREQ("2", container2[1].getInfoString().c_str());
+
+        ASSERT_EQ(container[0].get(), container2[0].get());
+        ASSERT_EQ(container[1].get(), container2[1].get());
+    }
+
+    TBAG_SCENARIO("std::set") {
+        std::set<Box> container;
+        ASSERT_TRUE(container.insert(b1).second);
+        ASSERT_TRUE(container.insert(b2).second);
+        ASSERT_FALSE(container.insert(b1).second);
+        ASSERT_FALSE(container.insert(b2).second);
+
+        ASSERT_EQ(2, container.size());
+        ASSERT_STREQ("1", container.find(b1)->getInfoString().c_str());
+        ASSERT_STREQ("2", container.find(b2)->getInfoString().c_str());
+
+        auto container2 = container;
+        ASSERT_STREQ("1", container2.find(b1)->getInfoString().c_str());
+        ASSERT_STREQ("2", container2.find(b2)->getInfoString().c_str());
+    }
+
+    TBAG_SCENARIO("std::map") {
+        std::map<int, Box> container;
+        ASSERT_TRUE(container.insert(std::make_pair(1, b1)).second);
+        ASSERT_TRUE(container.insert(std::make_pair(2, b2)).second);
+        ASSERT_TRUE(container.insert(std::make_pair(3, b1)).second);
+        ASSERT_TRUE(container.insert(std::make_pair(4, b2)).second);
+
+        ASSERT_EQ(4, container.size());
+        ASSERT_STREQ("1", container.find(1)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container.find(2)->second.getInfoString().c_str());
+        ASSERT_STREQ("1", container.find(3)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container.find(4)->second.getInfoString().c_str());
+
+        auto container2 = container;
+        ASSERT_STREQ("1", container2.find(1)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container2.find(2)->second.getInfoString().c_str());
+        ASSERT_STREQ("1", container2.find(3)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container2.find(4)->second.getInfoString().c_str());
+
+        ASSERT_EQ(container.find(1)->second.get(), container2.find(1)->second.get());
+        ASSERT_EQ(container.find(2)->second.get(), container2.find(2)->second.get());
+        ASSERT_EQ(container.find(3)->second.get(), container2.find(3)->second.get());
+        ASSERT_EQ(container.find(4)->second.get(), container2.find(4)->second.get());
+    }
+
+    TBAG_SCENARIO("std::unordered_set") {
+        std::unordered_set<Box> container;
+        ASSERT_TRUE(container.insert(b1).second);
+        ASSERT_TRUE(container.insert(b2).second);
+        ASSERT_FALSE(container.insert(b1).second);
+        ASSERT_FALSE(container.insert(b2).second);
+
+        ASSERT_EQ(2, container.size());
+        ASSERT_STREQ("1", container.find(b1)->getInfoString().c_str());
+        ASSERT_STREQ("2", container.find(b2)->getInfoString().c_str());
+
+        auto container2 = container;
+        ASSERT_STREQ("1", container2.find(b1)->getInfoString().c_str());
+        ASSERT_STREQ("2", container2.find(b2)->getInfoString().c_str());
+    }
+
+    TBAG_SCENARIO("std::unordered_map") {
+        std::unordered_map<int, Box> container;
+        ASSERT_TRUE(container.insert(std::make_pair(1, b1)).second);
+        ASSERT_TRUE(container.insert(std::make_pair(2, b2)).second);
+        ASSERT_TRUE(container.insert(std::make_pair(3, b1)).second);
+        ASSERT_TRUE(container.insert(std::make_pair(4, b2)).second);
+
+        ASSERT_EQ(4, container.size());
+        ASSERT_STREQ("1", container.find(1)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container.find(2)->second.getInfoString().c_str());
+        ASSERT_STREQ("1", container.find(3)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container.find(4)->second.getInfoString().c_str());
+
+        auto container2 = container;
+        ASSERT_STREQ("1", container2.find(1)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container2.find(2)->second.getInfoString().c_str());
+        ASSERT_STREQ("1", container2.find(3)->second.getInfoString().c_str());
+        ASSERT_STREQ("2", container2.find(4)->second.getInfoString().c_str());
+
+        ASSERT_EQ(container.find(1)->second.get(), container2.find(1)->second.get());
+        ASSERT_EQ(container.find(2)->second.get(), container2.find(2)->second.get());
+        ASSERT_EQ(container.find(3)->second.get(), container2.find(3)->second.get());
+        ASSERT_EQ(container.find(4)->second.get(), container2.find(4)->second.get());
+    }
 }
 
 TEST(BoxTest, Reshape)
