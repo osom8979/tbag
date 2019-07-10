@@ -35,19 +35,25 @@ TmxChunk::~TmxChunk()
     // EMPTY.
 }
 
-Err TmxChunk::read(Element const & elem)
+Err TmxChunk::read(Element const & elem, Encoding e, Compression c)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
+
     optAttr(elem, ATT_X, x);
     optAttr(elem, ATT_Y, y);
     optAttr(elem, ATT_WIDTH, width);
     optAttr(elem, ATT_HEIGHT, height);
+
+    if (elem.NoChildren() && elem.GetText() != nullptr) {
+    } else {
+    }
+
     return E_SUCCESS;
 }
 
-Err TmxChunk::read(std::string const & xml)
+Err TmxChunk::read(std::string const & xml, Encoding e, Compression c)
 {
     Document doc;
     auto const CODE = readFromXmlText(doc, xml);
@@ -56,10 +62,10 @@ Err TmxChunk::read(std::string const & xml)
     }
     auto const * elem = doc.FirstChildElement(TAG_NAME);
     assert(elem != nullptr);
-    return read(*elem);
+    return read(*elem, e, c);
 }
 
-Err TmxChunk::write(Element & elem) const
+Err TmxChunk::write(Element & elem, Encoding e, Compression c) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
@@ -71,12 +77,12 @@ Err TmxChunk::write(Element & elem) const
     return E_SUCCESS;
 }
 
-Err TmxChunk::write(std::string & xml) const
+Err TmxChunk::write(std::string & xml, Encoding e, Compression c) const
 {
     Document doc;
     auto * new_elem = newElement(doc, TAG_NAME);
     assert(new_elem != nullptr);
-    auto const CODE = write(*new_elem);
+    auto const CODE = write(*new_elem, e, c);
     if (isFailure(CODE)) {
         return CODE;
     }

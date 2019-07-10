@@ -16,9 +16,10 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/dom/xml/XmlHelper.hpp>
+#include <libtbag/tiled/details/TmxDataCommon.hpp>
 
 #include <string>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -48,51 +49,18 @@ namespace details {
  *  with the highest firstgid that is still lower or equal than the gid. The tilesets @n
  *  are always stored with increasing firstgids.
  */
-struct TBAG_API TmxData : protected libtbag::dom::xml::XmlHelper
+struct TBAG_API TmxData : public TmxDataCommon
 {
     TBAG_CONSTEXPR static char const * const TAG_NAME = "data";
 
-    /**
-     * The encoding used to encode the tile layer data.
-     * When used, it can be "base64" and "csv" at the moment.
-     */
-    TBAG_CONSTEXPR static char const * const ATT_ENCODING = "encoding";
-    TBAG_CONSTEXPR static char const * const VAL_BASE64 = "base64";
-    TBAG_CONSTEXPR static char const * const VAL_CSV = "csv";
-
-    /**
-     * The compression used to compress the tile layer data.
-     * Tiled supports "gzip" and "zlib".
-     */
-    TBAG_CONSTEXPR static char const * const ATT_COMPRESSION = "compression";
-    TBAG_CONSTEXPR static char const * const VAL_GZIP = "gzip";
-    TBAG_CONSTEXPR static char const * const VAL_ZLIB = "zlib";
-
-    enum class Encoding
-    {
-        NONE, BASE64, CSV,
-    };
-
-    enum class Compression
-    {
-        NONE, GZIP, ZLIB,
-    };
-
     Encoding encoding;
     Compression compression;
-    std::string data;
 
-    // std::vector<int> tile_gid; ///< The global tile IDs.
+    //std::vector<int> gids; ///< The global tile IDs.
 
     TmxData();
-    TmxData(Encoding e, Compression c, std::string const & data);
+    TmxData(Encoding e, Compression c);
     ~TmxData();
-
-    static Encoding getEncoding(std::string const & text) TBAG_NOEXCEPT;
-    static char const * const getEncodingName(Encoding e) TBAG_NOEXCEPT;
-
-    static Compression getCompression(std::string const & text) TBAG_NOEXCEPT;
-    static char const * const getCompressionName(Compression c) TBAG_NOEXCEPT;
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

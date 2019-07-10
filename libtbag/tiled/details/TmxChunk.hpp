@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/dom/xml/XmlHelper.hpp>
+#include <libtbag/tiled/details/TmxDataCommon.hpp>
 
 #include <string>
 #include <vector>
@@ -39,7 +39,7 @@ namespace details {
  *  The contents of a chunk element is same as that of the data element, @n
  *  except it stores the data of the area specified in the attributes.
  */
-struct TBAG_API TmxChunk : protected libtbag::dom::xml::XmlHelper
+struct TBAG_API TmxChunk : public TmxDataCommon
 {
     TBAG_CONSTEXPR static char const * const TAG_NAME = "chunk";
 
@@ -55,22 +55,25 @@ struct TBAG_API TmxChunk : protected libtbag::dom::xml::XmlHelper
     /** The height of the chunk in tiles. */
     TBAG_CONSTEXPR static char const * const ATT_HEIGHT = "height";
 
+    /** "tile" element. */
+    TBAG_CONSTEXPR static char const * const TAG_TILE = "tile";
+
     int x;
     int y;
     int width;
     int height;
 
-    // std::vector<int> tile_gid; ///< The global tile IDs.
+    std::vector<int> gids; ///< The global tile IDs.
 
     TmxChunk();
     TmxChunk(int x_, int y_, int w_, int h_);
-    virtual ~TmxChunk();
+    ~TmxChunk();
 
-    Err read(Element const & elem);
-    Err read(std::string const & xml);
+    Err read(Element const & elem, Encoding e, Compression c);
+    Err read(std::string const & xml, Encoding e, Compression c);
 
-    Err write(Element & elem) const;
-    Err write(std::string & xml) const;
+    Err write(Element & elem, Encoding e, Compression c) const;
+    Err write(std::string & xml, Encoding e, Compression c) const;
 };
 
 } // namespace details

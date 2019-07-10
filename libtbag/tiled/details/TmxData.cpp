@@ -19,13 +19,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxData::TmxData() : encoding(Encoding::NONE), compression(Compression::NONE), data()
+TmxData::TmxData() : encoding(Encoding::NONE), compression(Compression::NONE)
 {
     // EMPTY.
 }
 
-TmxData::TmxData(Encoding e, Compression c, std::string const & d)
-        : encoding(e), compression(c), data(d)
+TmxData::TmxData(Encoding e, Compression c)
+        : encoding(e), compression(c)
 {
     // EMPTY.
 }
@@ -33,56 +33,6 @@ TmxData::TmxData(Encoding e, Compression c, std::string const & d)
 TmxData::~TmxData()
 {
     // EMPTY.
-}
-
-TmxData::Encoding TmxData::getEncoding(std::string const & text) TBAG_NOEXCEPT
-{
-    if (text == VAL_BASE64) {
-        return Encoding::BASE64;
-    } else if (text == VAL_CSV) {
-        return Encoding::CSV;
-    } else {
-        return Encoding::NONE;
-    }
-}
-
-char const * const TmxData::getEncodingName(Encoding e) TBAG_NOEXCEPT
-{
-    // clang-format off
-    switch (e) {
-    case Encoding::BASE64:  return VAL_BASE64;
-    case Encoding::CSV:     return VAL_CSV;
-    case Encoding::NONE:
-        TBAG_FALLTHROUGH
-    default:
-        return "";
-    }
-    // clang-format on
-}
-
-TmxData::Compression TmxData::getCompression(std::string const & text) TBAG_NOEXCEPT
-{
-    if (text == VAL_GZIP) {
-        return Compression::GZIP;
-    } else if (text == VAL_ZLIB) {
-        return Compression::ZLIB;
-    } else {
-        return Compression::NONE;
-    }
-}
-
-char const * const TmxData::getCompressionName(Compression c) TBAG_NOEXCEPT
-{
-    // clang-format off
-    switch (c) {
-    case Compression::GZIP:  return VAL_GZIP;
-    case Compression::ZLIB:  return VAL_ZLIB;
-    case Compression::NONE:
-        TBAG_FALLTHROUGH
-    default:
-        return "";
-    }
-    // clang-format on
 }
 
 Err TmxData::read(Element const & elem)
@@ -105,7 +55,7 @@ Err TmxData::read(Element const & elem)
         tDLogW("TmxData::read() Unknown Compression value: {}", compression_text);
     }
 
-    data = libtbag::string::trim(text(elem));
+    // data = libtbag::string::trim(text(elem));
 
     return E_SUCCESS;
 }
@@ -129,7 +79,7 @@ Err TmxData::write(Element & elem) const
     }
     setAttr(elem, ATT_ENCODING, getEncodingName(encoding));
     setAttr(elem, ATT_COMPRESSION, getCompressionName(compression));
-    text(elem, data);
+    //text(elem, data);
     return E_SUCCESS;
 }
 
