@@ -36,7 +36,7 @@ namespace details {
  *
  * @remarks
  *  This is currently added only for infinite maps. @n
- *  The contents of a chunk element is same as that of the data element, @n
+ *  The contents of a chunk element is same as that of the <code>data</code> element, @n
  *  except it stores the data of the area specified in the attributes.
  */
 struct TBAG_API TmxChunk : public TmxDataCommon

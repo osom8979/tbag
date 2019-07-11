@@ -64,7 +64,7 @@ TBAG_CONSTEXPR uint32_t const TEST_ONE = 1U;
 
 inline bool isLittleEndianSystem() TBAG_NOEXCEPT
 {
-    return ((*(uint8_t*)&TEST_ONE) == 1);
+    return ((*(volatile uint8_t *)&TEST_ONE) == 1);
 }
 
 inline bool isBigEndianSystem() TBAG_NOEXCEPT

@@ -53,6 +53,10 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     TBAG_CONSTEXPR static char const * const VAL_GZIP = "gzip";
     TBAG_CONSTEXPR static char const * const VAL_ZLIB = "zlib";
 
+    /** Array of unsigned 32-bit integers using little-endian byte ordering. */
+    using GlobalTileId  = std::uint32_t;
+    using GlobalTileIds = std::vector<GlobalTileId>;
+
     enum class Encoding
     {
         NONE, BASE64, CSV,
@@ -72,15 +76,15 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     static Compression getCompression(std::string const & text) TBAG_NOEXCEPT;
     static char const * const getCompressionName(Compression c) TBAG_NOEXCEPT;
 
-    static std::string writeToBase64(std::uint32_t const * guis, std::size_t size);
-    static std::string writeToBase64Gzip(std::uint32_t const * guis, std::size_t size);
-    static std::string writeToBase64Zlib(std::uint32_t const * guis, std::size_t size);
-    static std::string writeToCsv(std::uint32_t const * guis, std::size_t size);
+    static std::string writeToBase64    (GlobalTileId const * guis, std::size_t size);
+    static std::string writeToBase64Gzip(GlobalTileId const * guis, std::size_t size);
+    static std::string writeToBase64Zlib(GlobalTileId const * guis, std::size_t size);
+    static std::string writeToCsv       (GlobalTileId const * guis, std::size_t size);
 
-    static std::vector<std::uint32_t> readFromBase64(std::string const & text);
-    static std::vector<std::uint32_t> readFromBase64Gzip(std::string const & text);
-    static std::vector<std::uint32_t> readFromBase64Zlib(std::string const & text);
-    static std::vector<std::uint32_t> readFromCsv(std::string const & text);
+    static GlobalTileIds readFromBase64    (std::string const & text);
+    static GlobalTileIds readFromBase64Gzip(std::string const & text);
+    static GlobalTileIds readFromBase64Zlib(std::string const & text);
+    static GlobalTileIds readFromCsv       (std::string const & text);
 };
 
 } // namespace details

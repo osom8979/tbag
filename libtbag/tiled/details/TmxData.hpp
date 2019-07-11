@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/tiled/details/TmxDataCommon.hpp>
+#include <libtbag/tiled/details/TmxChunk.hpp>
 
 #include <string>
 #include <vector>
@@ -46,17 +47,31 @@ namespace details {
  *  Whatever format you choose for your layer data, you will always end up with so called "global tile IDs" (gids). @n
  *  They are global, since they may refer to a tile from any of the tilesets used by the map. @n
  *  In order to find out from which tileset the tile is you need to find the tileset @n
- *  with the highest firstgid that is still lower or equal than the gid. The tilesets @n
- *  are always stored with increasing firstgids.
+ *  with the highest <code>firstgid</code> that is still lower or equal than the gid. The tilesets @n
+ *  are always stored with increasing <code>firstgids</code>.
  */
 struct TBAG_API TmxData : public TmxDataCommon
 {
     TBAG_CONSTEXPR static char const * const TAG_NAME = "data";
 
+    using GlobalIds = std::vector<std::uint32_t>;
+    using Chunks = std::vector<TmxChunk>;
+
     Encoding encoding;
     Compression compression;
 
-    //std::vector<int> gids; ///< The global tile IDs.
+    enum class DataType
+    {
+        GIDS, CHUNK,
+    };
+
+    DataType data_type;
+
+    /** The global tile IDs. */
+    std::vector<int> gids;
+
+    /** Only for infinite maps. */
+    std::vector<TmxChunk> chunks;
 
     TmxData();
     TmxData(Encoding e, Compression c);

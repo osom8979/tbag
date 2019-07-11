@@ -6,6 +6,11 @@
  */
 
 #include <libtbag/tiled/details/TmxDataCommon.hpp>
+#include <libtbag/bitwise/Endian.hpp>
+#include <libtbag/crypto/Base64.hpp>
+#include <libtbag/util/BufferInfo.hpp>
+
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -74,42 +79,72 @@ char const * const TmxDataCommon::getCompressionName(Compression c) TBAG_NOEXCEP
     // clang-format on
 }
 
-std::string TmxDataCommon::writeToBase64(std::uint32_t const * guis, std::size_t size)
+std::string TmxDataCommon::writeToBase64(GlobalTileId const * guis, std::size_t size)
 {
     return "";
 }
 
-std::string TmxDataCommon::writeToBase64Gzip(std::uint32_t const * guis, std::size_t size)
+std::string TmxDataCommon::writeToBase64Gzip(GlobalTileId const * guis, std::size_t size)
 {
     return "";
 }
 
-std::string TmxDataCommon::writeToBase64Zlib(std::uint32_t const * guis, std::size_t size)
+std::string TmxDataCommon::writeToBase64Zlib(GlobalTileId const * guis, std::size_t size)
 {
     return "";
 }
 
-std::string TmxDataCommon::writeToCsv(std::uint32_t const * guis, std::size_t size)
+std::string TmxDataCommon::writeToCsv(GlobalTileId const * guis, std::size_t size)
 {
     return "";
 }
 
-std::vector<std::uint32_t> TmxDataCommon::readFromBase64(std::string const & text)
+TmxDataCommon::GlobalTileIds TmxDataCommon::readFromBase64(std::string const & text)
+{
+    if (text.empty()) {
+        return {};
+    }
+
+    using namespace libtbag::util;
+    using namespace libtbag::crypto;
+
+    Buffer buffer;
+    if (!decodeBase64(text, buffer)) {
+        return {};
+    }
+
+    auto const SIZE = buffer.size();
+    if ((SIZE%4) != 0) {
+        return {};
+    }
+
+    auto const * data = (GlobalTileId const *)(buffer.data());
+    assert(data != nullptr);
+
+    if (libtbag::bitwise::isLittleEndianSystem()) {
+        return GlobalTileIds(data, data + (SIZE/4));
+    } else {
+        assert(libtbag::bitwise::isBigEndianSystem());
+        auto const ID_SIZE = SIZE/4;
+        GlobalTileIds result(ID_SIZE);
+        for (auto i = 0; i < ID_SIZE; ++i) {
+            result[i] = libtbag::bitwise::toHost(*data);
+        }
+        return result;
+    }
+}
+
+TmxDataCommon::GlobalTileIds TmxDataCommon::readFromBase64Gzip(std::string const & text)
 {
     return {};
 }
 
-std::vector<std::uint32_t> TmxDataCommon::readFromBase64Gzip(std::string const & text)
+TmxDataCommon::GlobalTileIds TmxDataCommon::readFromBase64Zlib(std::string const & text)
 {
     return {};
 }
 
-std::vector<std::uint32_t> TmxDataCommon::readFromBase64Zlib(std::string const & text)
-{
-    return {};
-}
-
-std::vector<std::uint32_t> TmxDataCommon::readFromCsv(std::string const & text)
+TmxDataCommon::GlobalTileIds TmxDataCommon::readFromCsv(std::string const & text)
 {
     return {};
 }
