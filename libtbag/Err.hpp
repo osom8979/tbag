@@ -90,6 +90,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_HTTP_5XX  , "Server Error (HTTP 5xx)"        ) \
     _TBAG_XX(_EXITPROC  , "Exit process"                   ) \
     _TBAG_XX(_EXCHANGE  , "Error exchange"                 ) \
+    _TBAG_XX(_FILTERED  , "Filtered."                      ) \
     /* SSL */ \
     _TBAG_XX(_SSL       , "SSL library error"          ) \
     _TBAG_XX(_SSL_NONE  , "SSL I/O operation completed") \
