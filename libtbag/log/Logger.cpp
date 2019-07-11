@@ -33,13 +33,13 @@ Logger::~Logger()
     _generator.reset();
 }
 
-void Logger::flush()
+void Logger::flush() const
 {
     assert(static_cast<bool>(_sink));
     _sink->flush();
 }
 
-bool Logger::write(int level, char const * level_name, char const * message, int size)
+bool Logger::write(int level, char const * level_name, char const * message, int size) const
 {
     if (youShallNotPass(level)) {
         return true;
@@ -73,42 +73,42 @@ bool Logger::write(int level, char const * level_name, char const * message, int
     return write_result;
 }
 
-bool Logger::write(int level, char const * level_name, char const * message)
+bool Logger::write(int level, char const * level_name, char const * message) const
 {
     return write(level, level_name, message, ::strlen(message));
 }
 
-bool Logger::write(int level, char const * level_name, std::string const & message)
+bool Logger::write(int level, char const * level_name, std::string const & message) const
 {
     return write(level, level_name, message.c_str(), static_cast<int>(message.size()));
 }
 
-bool Logger::write(int level, char const * message, int size)
+bool Logger::write(int level, char const * message, int size) const
 {
     return write(level, getTextWithLevelStep(level), message, size);
 }
 
-bool Logger::write(int level, char const * message)
+bool Logger::write(int level, char const * message) const
 {
     return write(level, getTextWithLevelStep(level), message);
 }
 
-bool Logger::write(int level, std::string const & message)
+bool Logger::write(int level, std::string const & message) const
 {
     return write(level, getTextWithLevelStep(level), message);
 }
 
-bool Logger::write(Severity const & severity, char const * message, int size)
+bool Logger::write(Severity const & severity, char const * message, int size) const
 {
     return write(severity.getLevel(), severity.getText(), message, size);
 }
 
-bool Logger::write(Severity const & severity, char const * message)
+bool Logger::write(Severity const & severity, char const * message) const
 {
     return write(severity.getLevel(), severity.getText(), message);
 }
 
-bool Logger::write(Severity const & severity, std::string const & message)
+bool Logger::write(Severity const & severity, std::string const & message) const
 {
     return write(severity.getLevel(), severity.getText(), message);
 }

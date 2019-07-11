@@ -58,11 +58,11 @@ public:
     std::string const NAME;
 
 private:
-    SharedSink _sink;
+    SharedSink      _sink;
     SharedGenerator _generator;
 
 private:
-    std::atomic_int _level;
+    std::atomic_int  _level;
     std::atomic_bool _auto_flush;
 
 public:
@@ -104,52 +104,61 @@ public:
     }
 
 public:
-    void flush();
+    void flush() const;
 
 public:
-    bool write(int level, char const * level_name, char const * message, int size);
-    bool write(int level, char const * level_name, char const * message);
-    bool write(int level, char const * level_name, std::string const & message);
+    bool write(int level, char const * level_name, char const * message, int size) const;
+    bool write(int level, char const * level_name, char const * message) const;
+    bool write(int level, char const * level_name, std::string const & message) const;
 
 public:
-    bool write(int level, char const * message, int size);
-    bool write(int level, char const * message);
-    bool write(int level, std::string const & message);
+    bool write(int level, char const * message, int size) const;
+    bool write(int level, char const * message) const;
+    bool write(int level, std::string const & message) const;
 
 public:
-    bool write(Severity const & severity, char const * message, int size);
-    bool write(Severity const & severity, char const * message);
-    bool write(Severity const & severity, std::string const & message);
+    bool write(Severity const & severity, char const * message, int size) const;
+    bool write(Severity const & severity, char const * message) const;
+    bool write(Severity const & severity, std::string const & message) const;
 
 public:
     template <typename FormatT, typename ... Args>
-    bool format(Severity const & severity, FormatT && format, Args && ... args)
+    bool format(Severity const & severity, FormatT && format, Args && ... args) const
     {
         if (youShallNotPass(severity)) {
             return true;
         }
         return write(severity, ::fmt::format(std::forward<FormatT>(format), std::forward<Args>(args) ...));
     }
+
+public:
+    // clang-format off
+    template <typename F, typename ... A> inline void emergency(F && f, A && ... a) const { format(EMERGENCY_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    template <typename F, typename ... A> inline void alert    (F && f, A && ... a) const { format(    ALERT_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    template <typename F, typename ... A> inline void critical (F && f, A && ... a) const { format( CRITICAL_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    template <typename F, typename ... A> inline void error    (F && f, A && ... a) const { format(    ERROR_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    template <typename F, typename ... A> inline void warning  (F && f, A && ... a) const { format(  WARNING_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    template <typename F, typename ... A> inline void notice   (F && f, A && ... a) const { format(   NOTICE_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    template <typename F, typename ... A> inline void info     (F && f, A && ... a) const { format(     INFO_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    template <typename F, typename ... A> inline void debug    (F && f, A && ... a) const { format(    DEBUG_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+    // clang-format on
 };
 
 template <typename FormatT, typename ... Args>
-inline bool logging(Logger * logger, Severity level, FormatT && format, Args && ... args)
+inline bool logging(Logger const * logger, Severity level, FormatT && format, Args && ... args)
 {
-    if (logger == nullptr) {
-        return false;
-    }
     return logger->format(level, std::forward<FormatT>(format), std::forward<Args>(args) ...);
 }
 
 // clang-format off
-template <typename F, typename ... A> inline void emergency(Logger * l, F && f, A && ... a) { logging(l, EMERGENCY_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void alert    (Logger * l, F && f, A && ... a) { logging(l,     ALERT_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void critical (Logger * l, F && f, A && ... a) { logging(l,  CRITICAL_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void error    (Logger * l, F && f, A && ... a) { logging(l,     ERROR_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void warning  (Logger * l, F && f, A && ... a) { logging(l,   WARNING_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void notice   (Logger * l, F && f, A && ... a) { logging(l,    NOTICE_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void info     (Logger * l, F && f, A && ... a) { logging(l,      INFO_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void debug    (Logger * l, F && f, A && ... a) { logging(l,     DEBUG_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void emergency(Logger const * l, F && f, A && ... a) { l->emergency(std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void alert    (Logger const * l, F && f, A && ... a) { l->alert    (std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void critical (Logger const * l, F && f, A && ... a) { l->critical (std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void error    (Logger const * l, F && f, A && ... a) { l->error    (std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void warning  (Logger const * l, F && f, A && ... a) { l->warning  (std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void notice   (Logger const * l, F && f, A && ... a) { l->notice   (std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void info     (Logger const * l, F && f, A && ... a) { l->info     (std::forward<F>(f), std::forward<A>(a) ...); }
+template <typename F, typename ... A> inline void debug    (Logger const * l, F && f, A && ... a) { l->debug    (std::forward<F>(f), std::forward<A>(a) ...); }
 // clang-format on
 
 } // namespace log
