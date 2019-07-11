@@ -46,7 +46,34 @@ TEST(ArchiveTest, WriteArchive)
     ASSERT_EQ(ORIGINAL_MD5, EXTRACT_MD5);
 }
 
-TEST(ArchiveTest, MemoryArchive)
+template <CompressType v>
+struct compress_value_t
+{
+    TBAG_CONSTEXPR static CompressType const value = v;
+};
+
+using  none_compress_value = compress_value_t<CompressType::CT_NONE>;
+using  gzip_compress_value = compress_value_t<CompressType::CT_GZIP>;
+using bzip2_compress_value = compress_value_t<CompressType::CT_BZIP2>;
+using  lzma_compress_value = compress_value_t<CompressType::CT_LZMA>;
+using    xz_compress_value = compress_value_t<CompressType::CT_XZ>;
+
+template <typename T>
+struct CompressTypeTestFeature : public ::testing::Test
+{
+    TBAG_CONSTEXPR static CompressType const get_compress_value() TBAG_NOEXCEPT
+    { return T::value; }
+};
+
+using test_compress_types = ::testing::Types<
+        none_compress_value,
+        gzip_compress_value,
+        bzip2_compress_value,
+        lzma_compress_value,
+        xz_compress_value>;
+TYPED_TEST_CASE(CompressTypeTestFeature, test_compress_types);
+
+TYPED_TEST(CompressTypeTestFeature, MemoryArchive)
 {
     auto const IMAGE_FILE_NAME = "lena.png";
     auto const IMAGE_PATH = DemoAsset::get_tester_dir_image() / IMAGE_FILE_NAME;
@@ -54,7 +81,7 @@ TEST(ArchiveTest, MemoryArchive)
     libtbag::util::Buffer image_buffer;
     ASSERT_EQ(E_SUCCESS, libtbag::filesystem::readFile(IMAGE_PATH.toString(), image_buffer));
 
-    MemoryArchiveWriter writer;//(COMPRESS_FORMAT_7ZIP);
+    MemoryArchiveWriter writer(this->get_compress_value());
     ASSERT_EQ(E_SUCCESS, writer.writeFromFile(IMAGE_PATH.toString()));
     ASSERT_EQ(E_SUCCESS, writer.close());
     ASSERT_LT(0, writer.used());

@@ -213,8 +213,10 @@ public:
     MemoryArchiveWriter(std::size_t capacity,
                         std::string const & format = COMPRESS_FORMAT_PAXR,
                         CompressType compress = CompressType::CT_NONE);
-    MemoryArchiveWriter(std::string const & format = COMPRESS_FORMAT_PAXR,
+    MemoryArchiveWriter(std::string const & format,
                         CompressType compress = CompressType::CT_NONE);
+    MemoryArchiveWriter(CompressType compress);
+    MemoryArchiveWriter();
     virtual ~MemoryArchiveWriter();
 
 public:

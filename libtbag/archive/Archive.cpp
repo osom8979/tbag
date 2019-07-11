@@ -659,6 +659,18 @@ MemoryArchiveWriter::MemoryArchiveWriter(std::string const & format, CompressTyp
     // EMPTY.
 }
 
+MemoryArchiveWriter::MemoryArchiveWriter(CompressType compress)
+        : MemoryArchiveWriter(COMPRESS_FORMAT_PAXR, compress)
+{
+    // EMPTY.
+}
+
+MemoryArchiveWriter::MemoryArchiveWriter()
+        : MemoryArchiveWriter(CompressType::CT_NONE)
+{
+    // EMPTY.
+}
+
 MemoryArchiveWriter::~MemoryArchiveWriter()
 {
     // EMPTY.

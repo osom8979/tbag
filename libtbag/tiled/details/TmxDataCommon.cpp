@@ -84,6 +84,7 @@ std::string TmxDataCommon::writeToBase64(GlobalTileId const * guis, std::size_t 
     assert(guis != nullptr);
     assert(size >= 1);
     assert(libtbag::bitwise::isLittleEndianSystem());
+
     std::string result;
     if (!libtbag::crypto::encodeBase64((char const *)guis, size*sizeof(GlobalTileId), result)) {
         return {};
@@ -93,7 +94,15 @@ std::string TmxDataCommon::writeToBase64(GlobalTileId const * guis, std::size_t 
 
 std::string TmxDataCommon::writeToBase64Gzip(GlobalTileId const * guis, std::size_t size)
 {
-    return "";
+    assert(guis != nullptr);
+    assert(size >= 1);
+    assert(libtbag::bitwise::isLittleEndianSystem());
+
+    std::string result;
+    if (!libtbag::crypto::encodeBase64((char const *)guis, size*sizeof(GlobalTileId), result)) {
+        return {};
+    }
+    return result;
 }
 
 std::string TmxDataCommon::writeToBase64Zlib(GlobalTileId const * guis, std::size_t size)
