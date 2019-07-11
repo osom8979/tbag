@@ -9,6 +9,11 @@
 #include <libtbag/graph/ModelNet.hpp>
 #include <libtbag/graph/ModelLayer.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
+
+#include <cstring>
+#include <sstream>
+#include <set>
 
 using namespace libtbag;
 using namespace libtbag::graph;
@@ -32,28 +37,105 @@ TEST(ModelNetTest, Constructor)
     ASSERT_TRUE(static_cast<bool>(obj5));
 }
 
+struct ModelNetTestLayer : public LayerBase
+{
+    int index;
+    std::string layers;
+
+    ModelNetTestLayer(int i) : index(i)
+    { /* EMPTY. */ }
+    virtual ~ModelNetTestLayer()
+    { /* EMPTY. */ }
+
+    virtual Err runner(Direction direction, Layers const & input, void * user) override
+    {
+        std::set<ModelLayer, ModelLayer::IdLess> sorted_layers(input.begin(), input.end());
+        std::stringstream ss;
+        for (auto & layer : sorted_layers) {
+            ss << layer.id() << ",";
+        }
+        layers = ss.str();
+        return E_SUCCESS;
+    }
+
+    virtual Err get(char const * key, char * buffer, int * size) const override
+    {
+        if (strcmp(key, "index") == 0) {
+            return getProperty(buffer, size, index);
+        }
+        if (strcmp(key, "layers") == 0) {
+            return getProperty(buffer, size, layers);
+        }
+        return E_ENFOUND;
+    }
+
+    virtual Err set(char const * key, char const * data) override
+    {
+        if (strcmp(key, "index") == 0) {
+            index = libtbag::string::toValue<int>(data);
+            return E_SUCCESS;
+        }
+        if (strcmp(key, "layers") == 0) {
+            layers = data;
+            return E_SUCCESS;
+        }
+        return E_ENFOUND;
+    }
+};
+
+TEST(ModelNetTest, GetAndSet)
+{
+    ModelLayer log0 = ModelLayer::create<ModelNetTestLayer>(0);
+    ModelLayer log1 = ModelLayer::create<ModelNetTestLayer>(1);
+    ModelLayer log2 = ModelLayer::create<ModelNetTestLayer>(2);
+    ModelLayer log3 = ModelLayer::create<ModelNetTestLayer>(3);
+
+    std::string property;
+
+    // clang-format off
+    ASSERT_EQ(E_SUCCESS, log0.get("index", property)); ASSERT_STREQ("0", property.c_str());
+    ASSERT_EQ(E_SUCCESS, log1.get("index", property)); ASSERT_STREQ("1", property.c_str());
+    ASSERT_EQ(E_SUCCESS, log2.get("index", property)); ASSERT_STREQ("2", property.c_str());
+    ASSERT_EQ(E_SUCCESS, log3.get("index", property)); ASSERT_STREQ("3", property.c_str());
+    // clang-format on
+
+    // clang-format off
+    ASSERT_EQ(E_SUCCESS, log0.set("index", "100"));
+    ASSERT_EQ(E_SUCCESS, log1.set("index", "101"));
+    ASSERT_EQ(E_SUCCESS, log2.set("index", "102"));
+    ASSERT_EQ(E_SUCCESS, log3.set("index", "103"));
+    // clang-format on
+
+    // clang-format off
+    ASSERT_EQ(E_SUCCESS, log0.get("index", property)); ASSERT_STREQ("100", property.c_str());
+    ASSERT_EQ(E_SUCCESS, log1.get("index", property)); ASSERT_STREQ("101", property.c_str());
+    ASSERT_EQ(E_SUCCESS, log2.get("index", property)); ASSERT_STREQ("102", property.c_str());
+    ASSERT_EQ(E_SUCCESS, log3.get("index", property)); ASSERT_STREQ("103", property.c_str());
+    // clang-format on
+}
+
 TEST(ModelNetTest, Default)
 {
     ModelNet net;
 
     // Depth 0
-    ModelLayer log0;
+    ModelLayer log0 = ModelLayer::create<ModelNetTestLayer>(0);
 
     // Depth 1
-    ModelLayer log1;
-    ModelLayer log2;
+    ModelLayer log1 = ModelLayer::create<ModelNetTestLayer>(1);
+    ModelLayer log2 = ModelLayer::create<ModelNetTestLayer>(2);
 
     // Depth 2
-    ModelLayer log3;
-    ModelLayer log4;
-    ModelLayer log5;
-    ModelLayer log6;
+    ModelLayer log3 = ModelLayer::create<ModelNetTestLayer>(3);
+    ModelLayer log4 = ModelLayer::create<ModelNetTestLayer>(4);
+    ModelLayer log5 = ModelLayer::create<ModelNetTestLayer>(5);
+    ModelLayer log6 = ModelLayer::create<ModelNetTestLayer>(6);
 
     // Depth 3
-    ModelLayer log7;
+    ModelLayer log7 = ModelLayer::create<ModelNetTestLayer>(7);
 
     // Depth Unknown
-    ModelLayer log8;
+    ModelLayer log8 = ModelLayer::create<ModelNetTestLayer>(8);
 
     ASSERT_EQ(int(LayerBase::NO_ASSIGN_ID), log0.id());
     ASSERT_EQ(int(LayerBase::NO_ASSIGN_ID), log1.id());
@@ -94,6 +176,16 @@ TEST(ModelNetTest, Default)
     auto const LOG6_ID = log6.id();
     auto const LOG7_ID = log7.id();
     auto const LOG8_ID = log8.id();
+
+    ASSERT_EQ(0, LOG0_ID);
+    ASSERT_EQ(1, LOG1_ID);
+    ASSERT_EQ(2, LOG2_ID);
+    ASSERT_EQ(3, LOG3_ID);
+    ASSERT_EQ(4, LOG4_ID);
+    ASSERT_EQ(5, LOG5_ID);
+    ASSERT_EQ(6, LOG6_ID);
+    ASSERT_EQ(7, LOG7_ID);
+    ASSERT_EQ(8, LOG8_ID);
 
     ASSERT_NE(int(LayerBase::NO_ASSIGN_ID), log0.id());
     ASSERT_NE(int(LayerBase::NO_ASSIGN_ID), log1.id());
@@ -151,6 +243,28 @@ TEST(ModelNetTest, Default)
     ASSERT_TRUE(log6.isComplete());
     ASSERT_TRUE(log7.isComplete());
     ASSERT_TRUE(log8.isComplete());
+
+    std::string layers0;
+    std::string layers1;
+    std::string layers2;
+    std::string layers3;
+    std::string layers4;
+    std::string layers5;
+    std::string layers6;
+    std::string layers7;
+    std::string layers8;
+
+    // clang-format off
+    ASSERT_EQ(E_SUCCESS, log0.get("layers", layers0)); ASSERT_TRUE(layers0.empty());
+    ASSERT_EQ(E_SUCCESS, log1.get("layers", layers1)); ASSERT_STREQ("0,", layers1.c_str());
+    ASSERT_EQ(E_SUCCESS, log2.get("layers", layers2)); ASSERT_STREQ("0,", layers2.c_str());
+    ASSERT_EQ(E_SUCCESS, log3.get("layers", layers3)); ASSERT_STREQ("1,", layers3.c_str());
+    ASSERT_EQ(E_SUCCESS, log4.get("layers", layers4)); ASSERT_STREQ("1,", layers4.c_str());
+    ASSERT_EQ(E_SUCCESS, log5.get("layers", layers5)); ASSERT_STREQ("2,", layers5.c_str());
+    ASSERT_EQ(E_SUCCESS, log6.get("layers", layers6)); ASSERT_STREQ("0,2,", layers6.c_str());
+    ASSERT_EQ(E_SUCCESS, log7.get("layers", layers7)); ASSERT_STREQ("3,4,6,8,", layers7.c_str());
+    ASSERT_EQ(E_SUCCESS, log8.get("layers", layers8)); ASSERT_TRUE(layers8.empty());
+    // clang-format on
 
     std::cout << net.toString() << std::endl;
 

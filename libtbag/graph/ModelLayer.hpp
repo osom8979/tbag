@@ -257,7 +257,6 @@ public:
     static ModelLayer create(Args && ... args)
     {
         STATIC_ASSERT_CHECK_IS_BASE_OF(LayerBase, LayerType);
-        STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE(LayerType);
         typedef typename libtbag::remove_cr<LayerType>::type ResultLayerType;
 
         auto shared = std::make_shared<ResultLayerType>(std::forward<Args>(args) ...);
@@ -266,6 +265,20 @@ public:
         }
         return ModelLayer(nullptr);
     }
+
+    /**
+     * The class that sorts the IDs in the std::set container.
+     *
+     * @author zer0
+     * @date   2019-07-11
+     */
+    struct IdLess
+    {
+        inline bool operator()(ModelLayer const & x, ModelLayer const & y) const
+        {
+            return x.id() < y.id();
+        }
+    };
 };
 
 } // namespace graph
