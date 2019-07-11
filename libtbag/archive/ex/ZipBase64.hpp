@@ -16,7 +16,6 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/util/BufferInfo.hpp>
-
 #include <string>
 
 // -------------------

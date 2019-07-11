@@ -65,11 +65,12 @@ TEST(ZipBase64Test, FileToFile)
 TEST(ZipBase64Test, AutoEncode)
 {
     auto const EXE_DIR = filesystem::Path::getExeDir();
-    auto const SOURCE_PATH      = EXE_DIR / "encode.source";
-    auto const DESTINATION_PATH = EXE_DIR / "encode.destination";
+    auto const SOURCE_PATH      = EXE_DIR / "encode.zip.source";
+    auto const DESTINATION_PATH = EXE_DIR / "encode.zip.destination";
 
-    if (SOURCE_PATH.exists() == false) {
-        std::cout << "If you want to encode, move the file to the \"" << SOURCE_PATH.toString() << "\" path." << std::endl;
+    if (!SOURCE_PATH.exists()) {
+        std::cout << "If you want to encode, move the file to the \""
+                  << SOURCE_PATH.toString() << "\" path." << std::endl;
         return;
     }
 
@@ -83,11 +84,12 @@ TEST(ZipBase64Test, AutoEncode)
 TEST(ZipBase64Test, AutoDecode)
 {
     auto const EXE_DIR = filesystem::Path::getExeDir();
-    auto const SOURCE_PATH      = EXE_DIR / "decode.source";
-    auto const DESTINATION_PATH = EXE_DIR / "decode.destination";
+    auto const SOURCE_PATH      = EXE_DIR / "decode.zip.source";
+    auto const DESTINATION_PATH = EXE_DIR / "decode.zip.destination";
 
-    if (SOURCE_PATH.exists() == false) {
-        std::cout << "If you want to decode, move the file to the \"" << SOURCE_PATH.toString() << "\" path." << std::endl;
+    if (!SOURCE_PATH.exists()) {
+        std::cout << "If you want to decode, move the file to the \""
+                  << SOURCE_PATH.toString() << "\" path." << std::endl;
         return;
     }
 
