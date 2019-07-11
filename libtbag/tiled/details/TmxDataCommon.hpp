@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
+#include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
 #include <string>
@@ -53,6 +54,8 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     TBAG_CONSTEXPR static char const * const VAL_GZIP = "gzip";
     TBAG_CONSTEXPR static char const * const VAL_ZLIB = "zlib";
 
+    using Buffer = libtbag::util::Buffer;
+
     /** Array of unsigned 32-bit integers using little-endian byte ordering. */
     using GlobalTileId  = std::uint32_t;
     using GlobalTileIds = std::vector<GlobalTileId>;
@@ -77,13 +80,15 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     static char const * const getCompressionName(Compression c) TBAG_NOEXCEPT;
 
     static std::string writeToBase64    (GlobalTileId const * guis, std::size_t size);
-    static std::string writeToBase64Gzip(GlobalTileId const * guis, std::size_t size);
-    static std::string writeToBase64Zlib(GlobalTileId const * guis, std::size_t size);
+    static std::string writeToGzipBase64(GlobalTileId const * guis, std::size_t size);
+    static std::string writeToZlibBase64(GlobalTileId const * guis, std::size_t size);
     static std::string writeToCsv       (GlobalTileId const * guis, std::size_t size);
 
+    static GlobalTileIds convertGlobalTileIds(Buffer const & buffer);
+
     static GlobalTileIds readFromBase64    (std::string const & text);
-    static GlobalTileIds readFromBase64Gzip(std::string const & text);
-    static GlobalTileIds readFromBase64Zlib(std::string const & text);
+    static GlobalTileIds readFromGzipBase64(std::string const & text);
+    static GlobalTileIds readFromZlibBase64(std::string const & text);
     static GlobalTileIds readFromCsv       (std::string const & text);
 };
 
