@@ -33,6 +33,7 @@ TBAG_API std::size_t getDecodeLength(std::string const & base64);
 TBAG_API bool encodeBase64(std::string const & input, std::string & output);
 TBAG_API bool decodeBase64(std::string const & input, std::string & output);
 
+TBAG_API bool encodeBase64(char const * input, std::size_t size, std::string & output);
 TBAG_API bool encodeBase64(util::Buffer const & input, std::string & output);
 TBAG_API bool decodeBase64(std::string const & input, util::Buffer & output);
 

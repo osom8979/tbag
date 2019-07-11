@@ -58,14 +58,14 @@ bool decodeBase64(std::string const & input, std::string & output)
     return RESULT;
 }
 
-bool encodeBase64(util::Buffer const & input, std::string & output)
+bool encodeBase64(char const * input, std::size_t size, std::string & output)
 {
     BIO * b64 = BIO_new(BIO_f_base64());
     BIO * bmem = BIO_new(BIO_s_mem());
     BIO_push(b64, bmem);
 
     BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL); // Ignore newlines - write everything in one line
-    int const WSIZE = BIO_write(b64, input.data(), input.size());
+    int const WSIZE = BIO_write(b64, input, size);
     BIO_flush(b64);
 
     BUF_MEM * bptr = nullptr;
@@ -73,10 +73,15 @@ bool encodeBase64(util::Buffer const & input, std::string & output)
 
     output.clear();
     output.assign(bptr->data, bptr->data + bptr->length);
-    std::size_t const BLENGTH = bptr->length;
+    auto const BLENGTH = bptr->length;
 
     BIO_free_all(b64);
-    return WSIZE == input.size() && /* CHECK THIS CONDITION */ BLENGTH >= input.size();
+    return WSIZE == size && /* CHECK THIS CONDITION */ BLENGTH >= size;
+}
+
+bool encodeBase64(util::Buffer const & input, std::string & output)
+{
+    return encodeBase64(input.data(), input.size(), output);
 }
 
 bool decodeBase64(std::string const & input, util::Buffer & output)

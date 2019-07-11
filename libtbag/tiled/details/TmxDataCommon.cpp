@@ -81,7 +81,14 @@ char const * const TmxDataCommon::getCompressionName(Compression c) TBAG_NOEXCEP
 
 std::string TmxDataCommon::writeToBase64(GlobalTileId const * guis, std::size_t size)
 {
-    return "";
+    assert(guis != nullptr);
+    assert(size >= 1);
+    assert(libtbag::bitwise::isLittleEndianSystem());
+    std::string result;
+    if (!libtbag::crypto::encodeBase64((char const *)guis, size*sizeof(GlobalTileId), result)) {
+        return {};
+    }
+    return result;
 }
 
 std::string TmxDataCommon::writeToBase64Gzip(GlobalTileId const * guis, std::size_t size)
@@ -105,11 +112,8 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromBase64(std::string const & t
         return {};
     }
 
-    using namespace libtbag::util;
-    using namespace libtbag::crypto;
-
-    Buffer buffer;
-    if (!decodeBase64(text, buffer)) {
+    libtbag::util::Buffer buffer;
+    if (!libtbag::crypto::decodeBase64(text, buffer)) {
         return {};
     }
 
