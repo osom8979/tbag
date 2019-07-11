@@ -318,9 +318,14 @@ Err ModelNet::run(std::set<int> const & start,
                   Direction direction,
                   std::size_t max_depth,
                   void * user,
-                  std::vector<int> * result)
+                  std::vector<int> * sequence,
+                  bool simulate)
 {
     assert(exists());
+
+    if (start.empty()) {
+        return E_NREADY;
+    }
 
     std::set<int> current = start;
     std::set<int> children;
@@ -335,15 +340,22 @@ Err ModelNet::run(std::set<int> const & start,
         // Run current list.
         for (int id : current) {
             auto & layer = _impl->layers[__get_node(id)];
-            auto const code = layer.runner(direction, getInputLayers(id, direction), user);
-            if (isFailure(code)) {
-                return code;
+
+            Err code;
+            if (simulate) {
+                code = E_SUCCESS;
+            } else {
+                code = layer.runner(direction, getInputLayers(id, direction), user);
+                if (isFailure(code)) {
+                    return code;
+                }
             }
 
-            layer._complete();
-            if (result != nullptr) {
-                result->push_back(id);
+            assert(isSuccess(code));
+            if (sequence != nullptr) {
+                sequence->push_back(id);
             }
+            layer._complete();
         }
 
         // Update children list.
@@ -366,19 +378,11 @@ Err ModelNet::run(std::set<int> const & start,
 
 Err ModelNet::forward(std::size_t max_depth, void * user)
 {
-    assert(exists());
-    if (_impl->first_ids.empty()) {
-        return E_NREADY;
-    }
     return run(_impl->first_ids, Direction::D_FORWARD, max_depth, user);
 }
 
 Err ModelNet::backward(std::size_t max_depth, void * user)
 {
-    assert(exists());
-    if (_impl->last_ids.empty()) {
-        return E_NREADY;
-    }
     return run(_impl->last_ids, Direction::D_BACKWARD, max_depth, user);
 }
 
@@ -392,27 +396,27 @@ Err ModelNet::backward(void * user)
     return backward(MAX_RUN_DEPTH, user);
 }
 
-std::vector<int> ModelNet::getForwardSequence(std::size_t max_depth, void * user)
+std::vector<int> ModelNet::getForwardSequence(std::size_t max_depth, void * user, Err * run_result, bool simulate)
 {
-    assert(exists());
-    if (_impl->first_ids.empty()) {
-        return {};
-    }
     std::vector<int> result;
-    if (isFailure(run(_impl->first_ids, Direction::D_FORWARD, max_depth, user, &result))) {
+    auto const code = run(_impl->first_ids, Direction::D_FORWARD, max_depth, user, &result, simulate);
+    if (run_result != nullptr) {
+        *run_result = code;
+    }
+    if (isFailure(code)) {
         return {};
     }
     return result;
 }
 
-std::vector<int> ModelNet::getBackwardSequence(std::size_t max_depth, void * user)
+std::vector<int> ModelNet::getBackwardSequence(std::size_t max_depth, void * user, Err * run_result, bool simulate)
 {
-    assert(exists());
-    if (_impl->last_ids.empty()) {
-        return {};
-    }
     std::vector<int> result;
-    if (isFailure(run(_impl->last_ids, Direction::D_BACKWARD, max_depth, user, &result))) {
+    auto const code = run(_impl->last_ids, Direction::D_BACKWARD, max_depth, user, &result, simulate);
+    if (run_result != nullptr) {
+        *run_result = code;
+    }
+    if (isFailure(code)) {
         return {};
     }
     return result;

@@ -176,7 +176,9 @@ TEST(ModelNetTest, Default)
     ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG8));
     ASSERT_EQ(9, LAYERS.size());
 
-    auto const forward = net.getForwardSequence();
+    Err code;
+    auto const forward = net.getForwardSequence(1024, nullptr, &code);
+    ASSERT_EQ(E_SUCCESS, code);
     ASSERT_EQ(9, forward.size());
     ASSERT_EQ(0, forward[0]);
     ASSERT_EQ(8, forward[1]);
@@ -188,7 +190,8 @@ TEST(ModelNetTest, Default)
     ASSERT_EQ(6, forward[7]);
     ASSERT_EQ(7, forward[8]);
 
-    auto const backward = net.getBackwardSequence();
+    auto const backward = net.getBackwardSequence(1024, nullptr, &code);
+    ASSERT_EQ(E_SUCCESS, code);
     ASSERT_EQ(6, backward.size());
     ASSERT_EQ(7, backward[0]);
     ASSERT_EQ(3, backward[1]);

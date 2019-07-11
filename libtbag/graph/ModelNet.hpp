@@ -125,7 +125,7 @@ public:
     bool isReady(int node_id, ArcOrder order) const;
     bool isChildrenReady(int node_id, Direction direction) const;
 
-private:
+public:
     /**
      * @param[in] start
      *      List of start node ids.
@@ -135,14 +135,17 @@ private:
      *      Maximum loop iteration.
      * @param[in] user
      *      User's data.
-     * @param[out] result
+     * @param[out] sequence
      *      Returns the result in the task sequence.
+     * @params[in] simulate
+     *      If this value is true, the child layer is not executed.
      */
     Err run(std::set<int> const & start,
             Direction direction = Direction::D_FORWARD,
             std::size_t max_depth = MAX_RUN_DEPTH,
             void * user = nullptr,
-            std::vector<int> * result = nullptr);
+            std::vector<int> * sequence = nullptr,
+            bool simulate = false);
 
 public:
     Err forward(std::size_t max_depth, void * user = nullptr);
@@ -153,8 +156,14 @@ public:
     Err backward(void * user = nullptr);
 
 public:
-    std::vector<int> getForwardSequence(std::size_t max_depth = MAX_RUN_DEPTH, void * user = nullptr);
-    std::vector<int> getBackwardSequence(std::size_t max_depth = MAX_RUN_DEPTH, void * user = nullptr);
+    std::vector<int> getForwardSequence(std::size_t max_depth = MAX_RUN_DEPTH,
+                                        void * user = nullptr,
+                                        Err * run_result = nullptr,
+                                        bool simulate = true);
+    std::vector<int> getBackwardSequence(std::size_t max_depth = MAX_RUN_DEPTH,
+                                         void * user = nullptr,
+                                         Err * run_result = nullptr,
+                                         bool simulate = true);
 
 public:
     std::string toString() const;
