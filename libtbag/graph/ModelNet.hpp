@@ -108,7 +108,7 @@ public:
 
 public:
     std::vector<int> getLayerIds() const;
-    std::set<ModelLayer> getLayers() const;
+    Layers getLayers() const;
     ModelLayer getLayer(int id) const;
 
 public:

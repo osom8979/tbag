@@ -12,6 +12,7 @@
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cstring>
+#include <algorithm>
 #include <sstream>
 #include <set>
 
@@ -279,15 +280,15 @@ TEST(ModelNetTest, Default)
     auto const LAYER_LOG7 = net.getLayer(LOG7_ID);
     auto const LAYER_LOG8 = net.getLayer(LOG8_ID);
 
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG0));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG1));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG2));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG3));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG4));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG5));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG6));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG7));
-    ASSERT_NE(LAYERS.end(), LAYERS.find(LAYER_LOG8));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG0));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG1));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG2));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG3));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG4));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG5));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG6));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG7));
+    ASSERT_NE(LAYERS.end(), std::find(LAYERS.begin(), LAYERS.end(), LAYER_LOG8));
     ASSERT_EQ(9, LAYERS.size());
 
     Err code;

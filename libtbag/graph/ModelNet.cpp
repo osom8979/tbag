@@ -229,12 +229,12 @@ std::vector<int> ModelNet::getLayerIds() const
     return result;
 }
 
-std::set<ModelLayer> ModelNet::getLayers() const
+ModelNet::Layers ModelNet::getLayers() const
 {
     assert(exists());
-    std::set<ModelLayer> result;
+    Layers result;
     for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
-        result.insert(_impl->layers[n]);
+        result.push_back(_impl->layers[n]);
     }
     return result;
 }
