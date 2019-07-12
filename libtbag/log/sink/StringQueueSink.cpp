@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/log/sink/StringQueueSink.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -15,10 +15,29 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log  {
 namespace sink {
 
+std::size_t StringQueueSink::parseArguments(std::string const & arguments)
+{
+    if (arguments.empty()) {
+        return DEFAULT_SIZE;
+    }
+    using namespace libtbag::string;
+    auto const lower_arguments = lower(trim(arguments));
+    if (lower_arguments == "inf" || lower_arguments == "infinity" || lower_arguments == "infinity_size") {
+        return INFINITY_SIZE;
+    }
+    return libtbag::string::toValue<int>(arguments, DEFAULT_SIZE);
+}
+
 StringQueueSink::StringQueueSink(std::size_t max_size)
         : MAX_SIZE(max_size == 0U ? INFINITY_SIZE : max_size)
 {
     assert(MAX_SIZE >= 1);
+}
+
+StringQueueSink::StringQueueSink(std::string const & arguments)
+        : StringQueueSink(parseArguments(arguments))
+{
+    // EMPTY.
 }
 
 StringQueueSink::~StringQueueSink()

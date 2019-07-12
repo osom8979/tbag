@@ -19,6 +19,7 @@
 #include <libtbag/log/sink/FileSink.hpp>
 #include <libtbag/log/sink/NullSink.hpp>
 #include <libtbag/log/sink/RotateFileSink.hpp>
+#include <libtbag/log/sink/StringQueueSink.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -287,6 +288,12 @@ Logger::SharedSink newSink(std::string const & name, std::string const & dest, s
             return std::make_shared<RotateFileSink>(RotateFileSink::init(), dest);
         }
         return std::make_shared<RotateFileSink>();
+    } else if (LOWER == SINK_STRING_QUEUE) {
+        if (args.empty()) {
+            return std::make_shared<StringQueueSink>();
+        } else {
+            return std::make_shared<StringQueueSink>(args);
+        }
     } else {
         return Logger::SharedSink(nullptr);
     }

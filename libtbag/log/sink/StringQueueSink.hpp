@@ -40,6 +40,7 @@ public:
     using Deque = std::deque<std::string>;
 
 public:
+    TBAG_CONSTEXPR static std::size_t const DEFAULT_SIZE = 1024;
     TBAG_CONSTEXPR static std::size_t const INFINITY_SIZE =
             libtbag::type::TypeInfo<std::size_t>::maximum();
 
@@ -50,7 +51,11 @@ private:
     Deque _deque;
 
 public:
-    StringQueueSink(std::size_t max_size = INFINITY_SIZE);
+    static std::size_t parseArguments(std::string const & arguments);
+
+public:
+    StringQueueSink(std::size_t max_size = DEFAULT_SIZE);
+    StringQueueSink(std::string const & arguments);
     virtual ~StringQueueSink();
 
 public:
