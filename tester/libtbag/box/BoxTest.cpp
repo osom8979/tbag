@@ -360,6 +360,7 @@ TEST(BoxTest, EncodeDecode_Json)
     auto const JSON = b0.toJsonText(&code0);
     ASSERT_EQ(E_SUCCESS, code0);
     ASSERT_FALSE(JSON.empty());
+    std::cout << JSON << std::endl;
 
     Err code1;
     Box b1;

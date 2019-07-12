@@ -110,16 +110,18 @@ public:
     FlatBufferParser parser;
 
 public:
-    Impl(std::size_t capacity) : builder(capacity, nullptr)
+    Impl(std::size_t capacity) : Impl(Options(), capacity)
+    {
+        // EMPTY.
+    }
+
+    Impl(Options const & options, std::size_t capacity) : builder(capacity, nullptr)
     {
         if (!initParser(parser)) {
             tDLogA("BoxPacketBuilder::Impl() Parse fail.");
             throw std::bad_alloc();
         }
-    }
 
-    Impl(Options const & options, std::size_t capacity) : Impl(capacity)
-    {
         parser.opts.strict_json = options.strict_json;
         parser.opts.indent_step = options.indent_step;
     }

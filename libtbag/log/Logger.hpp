@@ -132,34 +132,135 @@ public:
     }
 
 public:
-    // clang-format off
-    template <typename F, typename ... A> inline void emergency(F && f, A && ... a) const { format(EMERGENCY_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    template <typename F, typename ... A> inline void alert    (F && f, A && ... a) const { format(    ALERT_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    template <typename F, typename ... A> inline void critical (F && f, A && ... a) const { format( CRITICAL_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    template <typename F, typename ... A> inline void error    (F && f, A && ... a) const { format(    ERROR_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    template <typename F, typename ... A> inline void warning  (F && f, A && ... a) const { format(  WARNING_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    template <typename F, typename ... A> inline void notice   (F && f, A && ... a) const { format(   NOTICE_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    template <typename F, typename ... A> inline void info     (F && f, A && ... a) const { format(     INFO_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    template <typename F, typename ... A> inline void debug    (F && f, A && ... a) const { format(    DEBUG_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...); }
-    // clang-format on
+    template <typename F, typename ... A> inline
+    bool emergency(F && f, A && ... a) const
+    {
+        return format(EMERGENCY_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
+
+    template <typename F, typename ... A> inline
+    bool alert(F && f, A && ... a) const
+    {
+        return format(ALERT_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
+
+    template <typename F, typename ... A> inline
+    bool critical(F && f, A && ... a) const
+    {
+        return format(CRITICAL_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
+
+    template <typename F, typename ... A> inline
+    bool error(F && f, A && ... a) const
+    {
+        return format(ERROR_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
+
+    template <typename F, typename ... A> inline
+    bool warning(F && f, A && ... a) const
+    {
+        return format(WARNING_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
+
+    template <typename F, typename ... A> inline
+    bool notice(F && f, A && ... a) const
+    {
+        return format(NOTICE_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
+
+    template <typename F, typename ... A> inline
+    bool info(F && f, A && ... a) const
+    {
+        return format(INFO_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
+
+    template <typename F, typename ... A> inline
+    bool debug(F && f, A && ... a) const
+    {
+        return format(DEBUG_SEVERITY, std::forward<F>(f), std::forward<A>(a) ...);
+    }
 };
 
 template <typename FormatT, typename ... Args>
 inline bool logging(Logger const * logger, Severity level, FormatT && format, Args && ... args)
 {
+    if (!logger) {
+        return false;
+    }
     return logger->format(level, std::forward<FormatT>(format), std::forward<Args>(args) ...);
 }
 
-// clang-format off
-template <typename F, typename ... A> inline void emergency(Logger const * l, F && f, A && ... a) { l->emergency(std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void alert    (Logger const * l, F && f, A && ... a) { l->alert    (std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void critical (Logger const * l, F && f, A && ... a) { l->critical (std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void error    (Logger const * l, F && f, A && ... a) { l->error    (std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void warning  (Logger const * l, F && f, A && ... a) { l->warning  (std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void notice   (Logger const * l, F && f, A && ... a) { l->notice   (std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void info     (Logger const * l, F && f, A && ... a) { l->info     (std::forward<F>(f), std::forward<A>(a) ...); }
-template <typename F, typename ... A> inline void debug    (Logger const * l, F && f, A && ... a) { l->debug    (std::forward<F>(f), std::forward<A>(a) ...); }
-// clang-format on
+template <typename F, typename ... A>
+inline bool emergency(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->emergency(std::forward<F>(format), std::forward<A>(args) ...);
+}
+
+template <typename F, typename ... A>
+inline bool alert(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->alert(std::forward<F>(format), std::forward<A>(args) ...);
+}
+
+template <typename F, typename ... A>
+inline bool critical(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->critical(std::forward<F>(format), std::forward<A>(args) ...);
+}
+
+template <typename F, typename ... A>
+inline bool error(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->error(std::forward<F>(format), std::forward<A>(args) ...);
+}
+
+template <typename F, typename ... A>
+inline bool warning(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->warning(std::forward<F>(format), std::forward<A>(args) ...);
+}
+
+template <typename F, typename ... A>
+inline bool notice(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->notice(std::forward<F>(format), std::forward<A>(args) ...);
+}
+
+template <typename F, typename ... A>
+inline bool info(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->info(std::forward<F>(format), std::forward<A>(args) ...);
+}
+
+template <typename F, typename ... A>
+inline bool debug(Logger const * logger, F && format, A && ... args)
+{
+    if (!logger) {
+        return false;
+    }
+    return logger->debug(std::forward<F>(format), std::forward<A>(args) ...);
+}
 
 } // namespace log
 
