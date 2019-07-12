@@ -254,6 +254,8 @@ bool existsSinkName(std::string const & name)
         return true;
     } else if (LOWER == SINK_ROTATE) {
         return true;
+    } else if (LOWER == SINK_STRING_QUEUE) {
+        return true;
     }
     return false;
 }
