@@ -58,7 +58,9 @@ Box::~Box()
 
 Box & Box::operator =(Box const & obj) TBAG_NOEXCEPT
 {
-    copy(obj);
+    if (this != &obj) {
+        _data = obj._data;
+    }
     return *this;
 }
 
@@ -66,13 +68,6 @@ Box & Box::operator =(Box && obj) TBAG_NOEXCEPT
 {
     swap(obj);
     return *this;
-}
-
-void Box::copy(Box const & obj) TBAG_NOEXCEPT
-{
-    if (this != &obj) {
-        _data = obj._data;
-    }
 }
 
 void Box::swap(Box & obj) TBAG_NOEXCEPT
@@ -214,10 +209,15 @@ Err Box::copyToInfo(Box & box) const
     return box.copyFromInfo(*this);
 }
 
+Err Box::clone(Box & box) const
+{
+    return box_clone(box.get(), get());
+}
+
 Box Box::clone() const
 {
     Box result;
-    auto const CODE = box_clone(result.get(), get());
+    auto const CODE = clone(result);
     if (isFailure(CODE)) {
         return Box(nullptr);
     }

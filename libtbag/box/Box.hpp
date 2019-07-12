@@ -300,7 +300,6 @@ public:
     Box & operator =(Box && obj) TBAG_NOEXCEPT;
 
 public:
-    void copy(Box const & obj) TBAG_NOEXCEPT;
     void swap(Box & obj) TBAG_NOEXCEPT;
 
 public:
@@ -486,6 +485,7 @@ public:
     Err copyToInfo(Box & box) const;
 
 public:
+    Err clone(Box & box) const;
     Box clone() const;
     Box asType(btype type) const;
 
