@@ -34,6 +34,16 @@ TmxData::~TmxData()
     // EMPTY.
 }
 
+TmxData::TileLayerFormat TmxData::getTileLayerFormat() const TBAG_NOEXCEPT
+{
+    return TmxDataCommon::getTileLayerFormat(encoding, compression);
+}
+
+bool TmxData::isInfinieMap() const TBAG_NOEXCEPT
+{
+    return data_type == DataType::CHUNK;
+}
+
 Err TmxData::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
@@ -59,7 +69,7 @@ Err TmxData::read(Element const & elem)
     } else {
         data_type = DataType::GIDS;
         chunks.clear();
-        readGids(elem, gids, encoding, compression);
+        readGids(elem, gids, getTileLayerFormat());
     }
 
     return E_SUCCESS;

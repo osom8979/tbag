@@ -227,12 +227,11 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::convertGlobalTileIds(Buffer const & 
 
 TmxDataCommon::GlobalTileIds TmxDataCommon::readFromBase64(std::string const & text)
 {
-    using namespace libtbag::crypto;
     if (text.empty()) {
         return {};
     }
     Buffer buffer;
-    if (!decodeBase64(text, buffer)) {
+    if (!libtbag::crypto::decodeBase64(libtbag::string::trim(text), buffer)) {
         return {};
     }
     return convertGlobalTileIds(buffer);
@@ -245,7 +244,7 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromCompressedBase64(std::string
         return {};
     }
     Buffer buffer;
-    if (isFailure(decodeZipBase64(text, buffer))) {
+    if (isFailure(decodeZipBase64(libtbag::string::trim(text), buffer))) {
         return {};
     }
     return convertGlobalTileIds(buffer);
@@ -267,7 +266,7 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromCsv(std::string const & text
     auto const size = tokens.size();
     GlobalTileIds result(size);
     for (auto i = 0; i < size; ++i) {
-        result[i] = libtbag::string::toValue<GlobalTileId>(tokens[i]);
+        result[i] = libtbag::string::toValue<GlobalTileId>(libtbag::string::trim(tokens[i]));
     }
     return result;
 }

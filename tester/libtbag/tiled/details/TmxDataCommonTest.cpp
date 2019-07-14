@@ -40,3 +40,31 @@ TEST(TmxDataCommonTest, ZlibBase64)
     ASSERT_EQ(GLOBAL_TILE_IDS[3], IDS[3]);
 }
 
+TEST(TmxDataCommonTest, GzipBase64)
+{
+    TmxDataCommon::GlobalTileIds const IDS = { 1, 2, 3, 4 };
+    auto const BASE64_TEXT = TmxDataCommon::writeToGzipBase64(IDS.data(), IDS.size());
+    ASSERT_FALSE(BASE64_TEXT.empty());
+
+    auto const GLOBAL_TILE_IDS = TmxDataCommon::readFromGzipBase64(BASE64_TEXT);
+    ASSERT_EQ(GLOBAL_TILE_IDS.size(), IDS.size());
+    ASSERT_EQ(GLOBAL_TILE_IDS[0], IDS[0]);
+    ASSERT_EQ(GLOBAL_TILE_IDS[1], IDS[1]);
+    ASSERT_EQ(GLOBAL_TILE_IDS[2], IDS[2]);
+    ASSERT_EQ(GLOBAL_TILE_IDS[3], IDS[3]);
+}
+
+TEST(TmxDataCommonTest, CSV)
+{
+    TmxDataCommon::GlobalTileIds const IDS = { 1, 2, 3, 4 };
+    auto const CSV_TEXT = TmxDataCommon::writeToCsv(IDS.data(), IDS.size());
+    ASSERT_FALSE(CSV_TEXT.empty());
+
+    auto const GLOBAL_TILE_IDS = TmxDataCommon::readFromCsv(CSV_TEXT);
+    ASSERT_EQ(GLOBAL_TILE_IDS.size(), IDS.size());
+    ASSERT_EQ(GLOBAL_TILE_IDS[0], IDS[0]);
+    ASSERT_EQ(GLOBAL_TILE_IDS[1], IDS[1]);
+    ASSERT_EQ(GLOBAL_TILE_IDS[2], IDS[2]);
+    ASSERT_EQ(GLOBAL_TILE_IDS[3], IDS[3]);
+}
+

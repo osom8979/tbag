@@ -77,6 +77,9 @@ struct TBAG_API TmxData : public TmxDataCommon
     TmxData(Encoding e, Compression c, DataType d);
     ~TmxData();
 
+    TileLayerFormat getTileLayerFormat() const TBAG_NOEXCEPT;
+    bool isInfinieMap() const TBAG_NOEXCEPT;
+
     Err read(Element const & elem);
     Err read(std::string const & xml);
 
