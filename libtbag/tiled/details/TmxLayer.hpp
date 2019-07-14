@@ -77,12 +77,14 @@ struct TBAG_API TmxLayer : protected libtbag::dom::xml::XmlHelper
      * Defaults to 0 and can not be changed in Tiled.
      */
     TBAG_CONSTEXPR static char const * const ATT_X = "x";
+    TBAG_CONSTEXPR static int const VAL_DEFAULT_X = 0;
 
     /**
      * The y coordinate of the layer in tiles.
      * Defaults to 0 and can not be changed in Tiled.
      */
     TBAG_CONSTEXPR static char const * const ATT_Y = "y";
+    TBAG_CONSTEXPR static int const VAL_DEFAULT_Y = 0;
 
     /**
      * The width of the layer in tiles.
@@ -101,24 +103,28 @@ struct TBAG_API TmxLayer : protected libtbag::dom::xml::XmlHelper
      * Defaults to 1.
      */
     TBAG_CONSTEXPR static char const * const ATT_OPACITY = "opacity";
+    TBAG_CONSTEXPR static int const VAL_DEFAULT_OPACITY = 1;
 
     /**
      * Whether the layer is shown (1) or hidden (0).
      * Defaults to 1.
      */
     TBAG_CONSTEXPR static char const * const ATT_VISIBLE = "visible";
+    TBAG_CONSTEXPR static int const VAL_DEFAULT_VISIBLE = 1;
 
     /**
      * Rendering offset for this layer in pixels.
      * Defaults to 0. (since 0.14)
      */
     TBAG_CONSTEXPR static char const * const ATT_OFFSETX = "offsetx";
+    TBAG_CONSTEXPR static int const VAL_DEFAULT_OFFSETX = 0;
 
     /**
      * Rendering offset for this layer in pixels.
      * Defaults to 0. (since 0.14)
      */
     TBAG_CONSTEXPR static char const * const ATT_OFFSETY = "offsety";
+    TBAG_CONSTEXPR static int const VAL_DEFAULT_OFFSETY = 0;
 
     int id;
     std::string name; // #REQUIRED
@@ -136,7 +142,7 @@ struct TBAG_API TmxLayer : protected libtbag::dom::xml::XmlHelper
 
     TmxLayer();
     TmxLayer(int i, std::string const & n, int x_, int y_, int w, int h, int o, int v, int ox, int oy);
-    virtual ~TmxLayer();
+    ~TmxLayer();
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

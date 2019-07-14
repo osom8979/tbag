@@ -1,11 +1,11 @@
 /**
- * @file   TmxTileOffset.cpp
- * @brief  TmxTileOffset class implementation.
+ * @file   TmxWangTile.cpp
+ * @brief  TmxWangTile class implementation.
  * @author zer0
- * @date   2019-06-19
+ * @date   2019-07-14
  */
 
-#include <libtbag/tiled/details/TmxTileOffset.hpp>
+#include <libtbag/tiled/details/TmxWangTile.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cstring>
@@ -18,32 +18,48 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxTileOffset::TmxTileOffset() : x(), y()
+TmxWangTile::TmxWangTile()
 {
     // EMPTY.
 }
 
-TmxTileOffset::TmxTileOffset(int x_, int y_) : x(x_), y(y_)
+TmxWangTile::TmxWangTile(int t, int w) : tileid(t), wangid(w)
 {
     // EMPTY.
 }
 
-TmxTileOffset::~TmxTileOffset()
+TmxWangTile::~TmxWangTile()
 {
     // EMPTY.
 }
 
-Err TmxTileOffset::read(Element const & elem)
+Err TmxWangTile::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    optAttr(elem, ATT_X, x);
-    optAttr(elem, ATT_Y, y);
+    optAttr(elem, ATT_TILEID, tileid);
+
+//    std::string wangid_text;
+//    auto code = optAttr(elem, ATT_WANGID, wangid_text);
+//    if (isSuccess(code)) {
+//        using namespace libtbag::string;
+//        using namespace libtbag::util;
+//        Buffer buffer;
+//        code = convertHexStringToBuffer(wangid_text.c_str(), wangid_text.size(), buffer);
+//        if (isSuccess(code)) {
+//            // &buffer[0]
+//        } else {
+//            return code;
+//        }
+//    } else {
+//        return code;
+//    }
+
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::read(std::string const & xml)
+Err TmxWangTile::read(std::string const & xml)
 {
     Document doc;
     auto const CODE = readFromXmlText(doc, xml);
@@ -55,17 +71,17 @@ Err TmxTileOffset::read(std::string const & xml)
     return read(*elem);
 }
 
-Err TmxTileOffset::write(Element & elem) const
+Err TmxWangTile::write(Element & elem) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    setAttr(elem, ATT_X, x);
-    setAttr(elem, ATT_Y, y);
+    setAttr(elem, ATT_TILEID, tileid);
+
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::write(std::string & xml) const
+Err TmxWangTile::write(std::string & xml) const
 {
     Document doc;
     auto * new_elem = newElement(doc, TAG_NAME);

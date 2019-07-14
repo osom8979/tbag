@@ -1,11 +1,11 @@
 /**
- * @file   TmxTileOffset.cpp
- * @brief  TmxTileOffset class implementation.
+ * @file   TmxWangCornerColor.cpp
+ * @brief  TmxWangCornerColor class implementation.
  * @author zer0
- * @date   2019-06-19
+ * @date   2019-07-14
  */
 
-#include <libtbag/tiled/details/TmxTileOffset.hpp>
+#include <libtbag/tiled/details/TmxWangCornerColor.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cstring>
@@ -18,32 +18,41 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxTileOffset::TmxTileOffset() : x(), y()
+TmxWangCornerColor::TmxWangCornerColor()
 {
     // EMPTY.
 }
 
-TmxTileOffset::TmxTileOffset(int x_, int y_) : x(x_), y(y_)
+TmxWangCornerColor::TmxWangCornerColor(std::string const & n, Color const & c, int t, int p)
+        : name(n), color(c), tile(t), probability(p)
 {
     // EMPTY.
 }
 
-TmxTileOffset::~TmxTileOffset()
+TmxWangCornerColor::~TmxWangCornerColor()
 {
     // EMPTY.
 }
 
-Err TmxTileOffset::read(Element const & elem)
+Err TmxWangCornerColor::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    optAttr(elem, ATT_X, x);
-    optAttr(elem, ATT_Y, y);
+
+    optAttr(elem, ATT_NAME, name);
+
+    std::string color_text;
+    optAttr(elem, ATT_COLOR, color_text);
+    color.fromString(color_text);
+
+    optAttr(elem, ATT_TILE, tile);
+    optAttr(elem, ATT_PROBABILITY, probability);
+
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::read(std::string const & xml)
+Err TmxWangCornerColor::read(std::string const & xml)
 {
     Document doc;
     auto const CODE = readFromXmlText(doc, xml);
@@ -55,17 +64,19 @@ Err TmxTileOffset::read(std::string const & xml)
     return read(*elem);
 }
 
-Err TmxTileOffset::write(Element & elem) const
+Err TmxWangCornerColor::write(Element & elem) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    setAttr(elem, ATT_X, x);
-    setAttr(elem, ATT_Y, y);
+    setAttr(elem, ATT_NAME, name);
+    setAttr(elem, ATT_COLOR, color.toString());
+    setAttr(elem, ATT_TILE, tile);
+    setAttr(elem, ATT_PROBABILITY, probability);
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::write(std::string & xml) const
+Err TmxWangCornerColor::write(std::string & xml) const
 {
     Document doc;
     auto * new_elem = newElement(doc, TAG_NAME);

@@ -1,11 +1,11 @@
 /**
- * @file   TmxTileOffset.cpp
- * @brief  TmxTileOffset class implementation.
+ * @file   TmxWangSets.cpp
+ * @brief  TmxWangSets class implementation.
  * @author zer0
- * @date   2019-06-19
+ * @date   2019-07-14
  */
 
-#include <libtbag/tiled/details/TmxTileOffset.hpp>
+#include <libtbag/tiled/details/TmxWangSets.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cstring>
@@ -18,32 +18,36 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxTileOffset::TmxTileOffset() : x(), y()
+TmxWangSets::TmxWangSets()
 {
     // EMPTY.
 }
 
-TmxTileOffset::TmxTileOffset(int x_, int y_) : x(x_), y(y_)
+TmxWangSets::TmxWangSets(WangSets const & w) : wang_sets(w)
 {
     // EMPTY.
 }
 
-TmxTileOffset::~TmxTileOffset()
+TmxWangSets::~TmxWangSets()
 {
     // EMPTY.
 }
 
-Err TmxTileOffset::read(Element const & elem)
+Err TmxWangSets::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    optAttr(elem, ATT_X, x);
-    optAttr(elem, ATT_Y, y);
+    foreachElement(elem, TmxWangSet::TAG_NAME, [&](Element const & e){
+        TmxWangSet wang_set;
+        if (isSuccess(wang_set.read(e))) {
+            wang_sets.push_back(std::move(wang_set));
+        }
+    });
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::read(std::string const & xml)
+Err TmxWangSets::read(std::string const & xml)
 {
     Document doc;
     auto const CODE = readFromXmlText(doc, xml);
@@ -55,17 +59,20 @@ Err TmxTileOffset::read(std::string const & xml)
     return read(*elem);
 }
 
-Err TmxTileOffset::write(Element & elem) const
+Err TmxWangSets::write(Element & elem) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    setAttr(elem, ATT_X, x);
-    setAttr(elem, ATT_Y, y);
+    for (auto & wang_set : wang_sets) {
+        newElement(elem, TmxWangSet::TAG_NAME, [&](Element & p){
+            wang_set.write(p);
+        });
+    }
     return E_SUCCESS;
 }
 
-Err TmxTileOffset::write(std::string & xml) const
+Err TmxWangSets::write(std::string & xml) const
 {
     Document doc;
     auto * new_elem = newElement(doc, TAG_NAME);

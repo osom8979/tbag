@@ -54,12 +54,12 @@ Err TmxLayer::read(Element const & elem)
     }
 
     optAttr(elem, ATT_ID, id);
-    optAttr(elem, ATT_X, x);
-    optAttr(elem, ATT_Y, y);
-    optAttr(elem, ATT_OPACITY, opacity);
-    optAttr(elem, ATT_VISIBLE, visible);
-    optAttr(elem, ATT_OFFSETX, offsetx);
-    optAttr(elem, ATT_OFFSETY, offsety);
+    optAttr(elem, ATT_X, x, VAL_DEFAULT_X);
+    optAttr(elem, ATT_Y, y, VAL_DEFAULT_Y);
+    optAttr(elem, ATT_OPACITY, opacity, VAL_DEFAULT_OPACITY);
+    optAttr(elem, ATT_VISIBLE, visible, VAL_DEFAULT_VISIBLE);
+    optAttr(elem, ATT_OFFSETX, offsetx, VAL_DEFAULT_OFFSETX);
+    optAttr(elem, ATT_OFFSETY, offsety, VAL_DEFAULT_OFFSETY);
 
     foreachElement(elem, TmxProperty::TAG_NAME, [&](Element const & e){
         TmxProperty property;
