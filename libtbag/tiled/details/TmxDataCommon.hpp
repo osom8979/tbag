@@ -45,6 +45,7 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     TBAG_CONSTEXPR static char const * const ATT_ENCODING = "encoding";
     TBAG_CONSTEXPR static char const * const VAL_BASE64 = "base64";
     TBAG_CONSTEXPR static char const * const VAL_CSV = "csv";
+    TBAG_CONSTEXPR static char const * const CSV_DELIMITER = ",";
 
     /**
      * The compression used to compress the tile layer data.
@@ -79,17 +80,22 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     static Compression getCompression(std::string const & text) TBAG_NOEXCEPT;
     static char const * const getCompressionName(Compression c) TBAG_NOEXCEPT;
 
-    static std::string writeToBase64    (GlobalTileId const * guis, std::size_t size);
-    static std::string writeToGzipBase64(GlobalTileId const * guis, std::size_t size);
-    static std::string writeToZlibBase64(GlobalTileId const * guis, std::size_t size);
-    static std::string writeToCsv       (GlobalTileId const * guis, std::size_t size);
+    static std::string writeToBase64          (GlobalTileId const * gids, std::size_t size);
+    static std::string writeToCompressedBase64(GlobalTileId const * gids, std::size_t size, Compression c);
+    static std::string writeToGzipBase64      (GlobalTileId const * gids, std::size_t size);
+    static std::string writeToZlibBase64      (GlobalTileId const * gids, std::size_t size);
+    static std::string writeToCsv             (GlobalTileId const * gids, std::size_t size);
 
     static GlobalTileIds convertGlobalTileIds(Buffer const & buffer);
 
-    static GlobalTileIds readFromBase64    (std::string const & text);
-    static GlobalTileIds readFromGzipBase64(std::string const & text);
-    static GlobalTileIds readFromZlibBase64(std::string const & text);
-    static GlobalTileIds readFromCsv       (std::string const & text);
+    static GlobalTileIds readFromBase64          (std::string const & text);
+    static GlobalTileIds readFromCompressedBase64(std::string const & text);
+    static GlobalTileIds readFromGzipBase64      (std::string const & text);
+    static GlobalTileIds readFromZlibBase64      (std::string const & text);
+    static GlobalTileIds readFromCsv             (std::string const & text);
+
+    static Err writeGids(GlobalTileId const * gids, std::size_t size, std::string & out, Encoding e, Compression c);
+    static Err readGids(std::string const & text, GlobalTileIds & out, Encoding e, Compression c);
 };
 
 } // namespace details

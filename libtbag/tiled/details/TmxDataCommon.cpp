@@ -10,6 +10,7 @@
 #include <libtbag/crypto/Base64.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 #include <libtbag/archive/ex/ZipBase64.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 
@@ -80,45 +81,59 @@ char const * const TmxDataCommon::getCompressionName(Compression c) TBAG_NOEXCEP
     // clang-format on
 }
 
-std::string TmxDataCommon::writeToBase64(GlobalTileId const * guis, std::size_t size)
+std::string TmxDataCommon::writeToBase64(GlobalTileId const * gids, std::size_t size)
 {
-    assert(guis != nullptr);
+    assert(gids != nullptr);
     assert(size >= 1);
     assert(libtbag::bitwise::isLittleEndianSystem());
 
     std::string result;
-    if (!libtbag::crypto::encodeBase64((char const *)guis, size*sizeof(GlobalTileId), result)) {
+    if (!libtbag::crypto::encodeBase64((char const *)gids, size*sizeof(GlobalTileId), result)) {
         return {};
     }
     return result;
 }
 
-std::string TmxDataCommon::writeToGzipBase64(GlobalTileId const * guis, std::size_t size)
+std::string TmxDataCommon::writeToCompressedBase64(GlobalTileId const * gids, std::size_t size, Compression c)
 {
-    return {};
-}
-
-std::string TmxDataCommon::writeToZlibBase64(GlobalTileId const * guis, std::size_t size)
-{
-    assert(guis != nullptr);
+    assert(gids != nullptr);
     assert(size >= 1);
     assert(libtbag::bitwise::isLittleEndianSystem());
+    assert(c != Compression::NONE);
 
     using namespace libtbag::archive;
     using namespace libtbag::archive::ex;
+    auto const METHOD = (c == Compression::GZIP ? CompressionMethod::CM_GZIP : CompressionMethod::CM_ZLIB);
+
     std::string result;
-    auto const code = encodeZipBase64((char const *)guis, size*sizeof(GlobalTileId), result,
-                                      TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
-                                      CompressionMethod::CM_ZLIB);
+    auto const code = encodeZipBase64((char const *)gids, size*sizeof(GlobalTileId), result,
+                                      TBAG_ZIP_DEFAULT_ENCODE_LEVEL, METHOD);
     if (isFailure(code)) {
         return {};
     }
     return result;
 }
 
-std::string TmxDataCommon::writeToCsv(GlobalTileId const * guis, std::size_t size)
+std::string TmxDataCommon::writeToGzipBase64(GlobalTileId const * gids, std::size_t size)
 {
-    return "";
+    return writeToCompressedBase64(gids, size, Compression::GZIP);
+}
+
+std::string TmxDataCommon::writeToZlibBase64(GlobalTileId const * gids, std::size_t size)
+{
+    return writeToCompressedBase64(gids, size, Compression::ZLIB);
+}
+
+std::string TmxDataCommon::writeToCsv(GlobalTileId const * gids, std::size_t size)
+{
+    if (gids == nullptr || size == 0) {
+        return {};
+    }
+    std::vector<std::string> tokens(size);
+    for (auto i = 0; i < size; ++i) {
+        tokens[i] = libtbag::string::toString(gids[i]);
+    }
+    return libtbag::string::mergeTokens(tokens, CSV_DELIMITER);
 }
 
 TmxDataCommon::GlobalTileIds TmxDataCommon::convertGlobalTileIds(Buffer const & buffer)
@@ -161,12 +176,7 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromBase64(std::string const & t
     return convertGlobalTileIds(buffer);
 }
 
-TmxDataCommon::GlobalTileIds TmxDataCommon::readFromGzipBase64(std::string const & text)
-{
-    return {};
-}
-
-TmxDataCommon::GlobalTileIds TmxDataCommon::readFromZlibBase64(std::string const & text)
+TmxDataCommon::GlobalTileIds TmxDataCommon::readFromCompressedBase64(std::string const & text)
 {
     using namespace libtbag::archive::ex;
     if (text.empty()) {
@@ -179,9 +189,73 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromZlibBase64(std::string const
     return convertGlobalTileIds(buffer);
 }
 
+TmxDataCommon::GlobalTileIds TmxDataCommon::readFromGzipBase64(std::string const & text)
+{
+    return readFromCompressedBase64(text);
+}
+
+TmxDataCommon::GlobalTileIds TmxDataCommon::readFromZlibBase64(std::string const & text)
+{
+    return readFromCompressedBase64(text);
+}
+
 TmxDataCommon::GlobalTileIds TmxDataCommon::readFromCsv(std::string const & text)
 {
-    return {};
+    auto const tokens = libtbag::string::splitTokens(text, CSV_DELIMITER, false);
+    auto const size = tokens.size();
+    GlobalTileIds result(size);
+    for (auto i = 0; i < size; ++i) {
+        result[i] = libtbag::string::toValue<GlobalTileId>(tokens[i]);
+    }
+    return result;
+}
+
+Err TmxDataCommon::writeGids(GlobalTileId const * gids, std::size_t size, std::string & out, Encoding e, Compression c)
+{
+    assert(gids != nullptr);
+    assert(size >= 1);
+
+    if (e == Encoding::CSV) {
+        if (c != Compression::NONE) {
+            return E_ILLARGS;
+        }
+        out = writeToCsv(gids, size);
+    } else if (e == Encoding::BASE64) {
+        if (c == Compression::GZIP) {
+            out = writeToGzipBase64(gids, size);
+        } else if (c == Compression::ZLIB) {
+            out = writeToZlibBase64(gids, size);
+        } else {
+            assert(c == Compression::NONE);
+            out = writeToBase64(gids, size);
+        }
+    } else if (e == Encoding::NONE) {
+        return E_ENOSYS;
+    }
+    return out.empty() ? E_ENCODE : E_SUCCESS;
+}
+
+Err TmxDataCommon::readGids(std::string const & text, GlobalTileIds & out, Encoding e, Compression c)
+{
+    assert(!text.empty());
+    if (e == Encoding::CSV) {
+        if (c != Compression::NONE) {
+            return E_ILLARGS;
+        }
+        out = readFromCsv(text);
+    } else if (e == Encoding::BASE64) {
+        if (c == Compression::GZIP) {
+            out = readFromGzipBase64(text);
+        } else if (c == Compression::ZLIB) {
+            out = readFromZlibBase64(text);
+        } else {
+            assert(c == Compression::NONE);
+            out = readFromBase64(text);
+        }
+    } else if (e == Encoding::NONE) {
+        return E_ENOSYS;
+    }
+    return out.empty() ? E_DECODE : E_SUCCESS;
 }
 
 } // namespace details
