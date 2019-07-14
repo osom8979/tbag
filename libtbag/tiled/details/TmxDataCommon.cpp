@@ -81,6 +81,68 @@ char const * const TmxDataCommon::getCompressionName(Compression c) TBAG_NOEXCEP
     // clang-format on
 }
 
+TmxDataCommon::Encoding TmxDataCommon::getEncoding(TileLayerFormat f) TBAG_NOEXCEPT
+{
+    // clang-format off
+    switch (f) {
+    case TileLayerFormat::XML:          return Encoding::NONE;
+    case TileLayerFormat::BASE64:       return Encoding::BASE64;
+    case TileLayerFormat::GZIP_BASE64:  return Encoding::BASE64;
+    case TileLayerFormat::ZLIB_BASE64:  return Encoding::BASE64;
+    case TileLayerFormat::CSV:          return Encoding::CSV;
+    case TileLayerFormat::NONE:         return Encoding::NONE;
+    default:                            return Encoding::NONE;
+    }
+    // clang-format on
+}
+
+TmxDataCommon::Compression TmxDataCommon::getCompression(TileLayerFormat f) TBAG_NOEXCEPT
+{
+    // clang-format off
+    switch (f) {
+    case TileLayerFormat::XML:          return Compression::NONE;
+    case TileLayerFormat::BASE64:       return Compression::NONE;
+    case TileLayerFormat::GZIP_BASE64:  return Compression::GZIP;
+    case TileLayerFormat::ZLIB_BASE64:  return Compression::ZLIB;
+    case TileLayerFormat::CSV:          return Compression::NONE;
+    case TileLayerFormat::NONE:         return Compression::NONE;
+    default:                            return Compression::NONE;
+    }
+    // clang-format on
+}
+
+TmxDataCommon::TileLayerFormat TmxDataCommon::getTileLayerFormat(Encoding e, Compression c) TBAG_NOEXCEPT
+{
+    if (e == Encoding::BASE64) {
+        if (c == Compression::GZIP) {
+            return TileLayerFormat::GZIP_BASE64;
+        } else if (c == Compression::ZLIB) {
+            return TileLayerFormat::ZLIB_BASE64;
+        }
+        assert(c == Compression::NONE);
+        return TileLayerFormat::BASE64;
+
+    } else if (e == Encoding::CSV) {
+        if (c == Compression::GZIP) {
+            return TileLayerFormat::NONE;
+        } else if (c == Compression::ZLIB) {
+            return TileLayerFormat::NONE;
+        }
+        assert(c == Compression::NONE);
+        return TileLayerFormat::CSV;
+    }
+
+    assert(e == Encoding::NONE);
+    if (c == Compression::GZIP) {
+        return TileLayerFormat::NONE;
+    } else if (c == Compression::ZLIB) {
+        return TileLayerFormat::NONE;
+    }
+
+    assert(c == Compression::NONE);
+    return TileLayerFormat::XML;
+}
+
 std::string TmxDataCommon::writeToBase64(GlobalTileId const * gids, std::size_t size)
 {
     assert(gids != nullptr);
@@ -210,28 +272,9 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromCsv(std::string const & text
     return result;
 }
 
-Err TmxDataCommon::readGids(Element const & elem, GlobalTileIds & gids, Encoding e, Compression c)
+Err TmxDataCommon::readGids(Element const & elem, GlobalTileIds & gids, TileLayerFormat f)
 {
-    if (e == Encoding::CSV) {
-        if (c != Compression::NONE) {
-            return E_ILLARGS;
-        }
-        gids = readFromCsv(text(elem));
-
-    } else if (e == Encoding::BASE64) {
-        if (c == Compression::GZIP) {
-            gids = readFromGzipBase64(text(elem));
-        } else if (c == Compression::ZLIB) {
-            gids = readFromZlibBase64(text(elem));
-        } else {
-            assert(c == Compression::NONE);
-            gids = readFromBase64(text(elem));
-        }
-
-    } else if (e == Encoding::NONE) {
-        if (c != Compression::NONE) {
-            return E_ILLARGS;
-        }
+    if (f == TileLayerFormat::XML) {
         gids.clear();
         foreachElement(elem, TAG_TILE, [&](Element const & tile){
             std::string gid_text;
@@ -241,63 +284,75 @@ Err TmxDataCommon::readGids(Element const & elem, GlobalTileIds & gids, Encoding
                 gids.push_back(0);
             }
         });
+    } else if (f == TileLayerFormat::BASE64) {
+        gids = readFromBase64(text(elem));
+    } else if (f == TileLayerFormat::GZIP_BASE64) {
+        gids = readFromGzipBase64(text(elem));
+    } else if (f == TileLayerFormat::ZLIB_BASE64) {
+        gids = readFromZlibBase64(text(elem));
+    } else if (f == TileLayerFormat::CSV) {
+        gids = readFromCsv(text(elem));
+    } else {
+        return E_ILLARGS;
     }
-
     return gids.empty() ? E_DECODE : E_SUCCESS;
 }
 
-Err TmxDataCommon::writeGids(Element & elem, GlobalTileId const * gids, std::size_t size, Encoding e, Compression c)
+Err TmxDataCommon::readGids(Element const & elem, GlobalTileIds & gids, Encoding e, Compression c)
+{
+    return readGids(elem, gids, getTileLayerFormat(e, c));
+}
+
+Err TmxDataCommon::writeGids(Element & elem, GlobalTileId const * gids, std::size_t size, TileLayerFormat f)
 {
     assert(gids != nullptr);
     assert(size >= 1);
 
-    if (e == Encoding::CSV) {
-        if (c != Compression::NONE) {
-            return E_ILLARGS;
+    if (f == TileLayerFormat::XML) {
+        for (auto i = 0; i < size; ++i) {
+            newElement(elem, TAG_TILE, [&](Element & tile){
+                if (gids[i]) {
+                    setAttr(tile, ATT_GID, gids[i]);
+                }
+            });
         }
-        auto const cdata = writeToCsv(gids, size);
-        if (cdata.empty()) {
-            return E_ENCODE;
-        } else {
-            text(elem, cdata);
-            return E_SUCCESS;
-        }
-
-    } else if (e == Encoding::BASE64) {
-        std::string cdata;
-        if (c == Compression::GZIP) {
-            cdata = writeToGzipBase64(gids, size);
-        } else if (c == Compression::ZLIB) {
-            cdata = writeToZlibBase64(gids, size);
-        } else {
-            assert(c == Compression::NONE);
-            cdata = writeToBase64(gids, size);
-        }
-        if (cdata.empty()) {
-            return E_ENCODE;
-        } else {
-            text(elem, cdata);
-            return E_SUCCESS;
-        }
+        return E_SUCCESS;
     }
 
-    assert(e == Encoding::NONE);
-    if (c != Compression::NONE) {
+    std::string cdata;
+    if (f == TileLayerFormat::BASE64) {
+        cdata = writeToBase64(gids, size);
+    } else if (f == TileLayerFormat::GZIP_BASE64) {
+        cdata = writeToGzipBase64(gids, size);
+    } else if (f == TileLayerFormat::ZLIB_BASE64) {
+        cdata = writeToZlibBase64(gids, size);
+    } else if (f == TileLayerFormat::CSV) {
+        cdata = writeToCsv(gids, size);
+    } else {
         return E_ILLARGS;
     }
-    for (auto i = 0; i < size; ++i) {
-        newElement(elem, TAG_TILE, [&](Element & tile){
-            if (gids[i]) {
-                setAttr(tile, ATT_GID, gids[i]);
-            }
-        });
+
+    if (cdata.empty()) {
+        return E_ENCODE;
     }
+
+    text(elem, cdata);
     return E_SUCCESS;
+}
+
+Err TmxDataCommon::writeGids(Element & elem, GlobalTileId const * gids, std::size_t size, Encoding e, Compression c)
+{
+    return writeGids(elem, gids, size, getTileLayerFormat(e, c));
+}
+
+Err TmxDataCommon::writeGids(Element & elem, GlobalTileIds const & gids, TileLayerFormat f)
+{
+    return writeGids(elem, gids.data(), gids.size(), f);
 }
 
 Err TmxDataCommon::writeGids(Element & elem, GlobalTileIds const & gids, Encoding e, Compression c)
 {
-    return writeGids(elem, gids.data(), gids.size(), e, c);
+    return writeGids(elem, gids.data(), gids.size(), getTileLayerFormat(e, c));
 }
 
 } // namespace details

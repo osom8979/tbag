@@ -130,6 +130,16 @@ void XmlHelper::text(Element & element, double value)
     element.SetText(value);
 }
 
+bool XmlHelper::existsChildElement(Element const & element, std::string const & tag)
+{
+    return element.FirstChildElement(tag.c_str()) != nullptr;
+}
+
+bool XmlHelper::existsAttribute(Element const & element, std::string const & key)
+{
+    return element.Attribute(key.c_str()) != nullptr;
+}
+
 Err XmlHelper::opt(Element const & element, std::string const & key, std::string & result, std::string const & default_value)
 {
     auto * node = element.FirstChildElement(key.c_str());

@@ -48,11 +48,7 @@ Err TmxData::read(Element const & elem)
     optAttr(elem, ATT_COMPRESSION, compression_text);
     compression = getCompression(compression_text);
 
-    if (elem.NoChildren()) {
-        data_type = DataType::GIDS;
-        chunks.clear();
-        readGids(elem, gids, encoding, compression);
-    } else {
+    if (!elem.NoChildren() && existsChildElement(elem, TmxChunk::TAG_NAME)) {
         data_type = DataType::CHUNK;
         gids.clear();
         foreachElement(elem, TmxChunk::TAG_NAME, [&](Element const & c){
@@ -60,6 +56,10 @@ Err TmxData::read(Element const & elem)
             chunk.read(c, encoding, compression);
             chunks.push_back(std::move(chunk));
         });
+    } else {
+        data_type = DataType::GIDS;
+        chunks.clear();
+        readGids(elem, gids, encoding, compression);
     }
 
     return E_SUCCESS;

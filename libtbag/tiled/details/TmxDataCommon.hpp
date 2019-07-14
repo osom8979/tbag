@@ -77,6 +77,11 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
         NONE, GZIP, ZLIB,
     };
 
+    enum class TileLayerFormat
+    {
+        NONE, XML, BASE64, GZIP_BASE64, ZLIB_BASE64, CSV
+    };
+
     TmxDataCommon();
     ~TmxDataCommon();
 
@@ -85,6 +90,10 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
 
     static Compression getCompression(std::string const & text) TBAG_NOEXCEPT;
     static char const * const getCompressionName(Compression c) TBAG_NOEXCEPT;
+
+    static Encoding getEncoding(TileLayerFormat f) TBAG_NOEXCEPT;
+    static Compression getCompression(TileLayerFormat f) TBAG_NOEXCEPT;
+    static TileLayerFormat getTileLayerFormat(Encoding e, Compression c) TBAG_NOEXCEPT;
 
     static std::string writeToBase64          (GlobalTileId const * gids, std::size_t size);
     static std::string writeToCompressedBase64(GlobalTileId const * gids, std::size_t size, Compression c);
@@ -100,8 +109,12 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     static GlobalTileIds readFromZlibBase64      (std::string const & text);
     static GlobalTileIds readFromCsv             (std::string const & text);
 
+    static Err readGids(Element const & elem, GlobalTileIds & gids, TileLayerFormat f);
     static Err readGids(Element const & elem, GlobalTileIds & gids, Encoding e, Compression c);
+
+    static Err writeGids(Element & elem, GlobalTileId const * gids, std::size_t size, TileLayerFormat f);
     static Err writeGids(Element & elem, GlobalTileId const * gids, std::size_t size, Encoding e, Compression c);
+    static Err writeGids(Element & elem, GlobalTileIds const & gids, TileLayerFormat f);
     static Err writeGids(Element & elem, GlobalTileIds const & gids, Encoding e, Compression c);
 };
 

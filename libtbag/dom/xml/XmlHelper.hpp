@@ -51,6 +51,9 @@ struct TBAG_API XmlHelper
     static void text(Element & element, float value);
     static void text(Element & element, double value);
 
+    static bool existsChildElement(Element const & element, std::string const & tag);
+    static bool existsAttribute(Element const & element, std::string const & key);
+
     static Err opt(Element const & element, std::string const & key, std::string & result, std::string const & default_value = std::string());
     static Err opt(Element const & element, std::string const & key, bool & result, bool default_value = false);
     static Err opt(Element const & element, std::string const & key, int & result, int default_value = 0);
