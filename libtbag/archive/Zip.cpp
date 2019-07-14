@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/archive/Zip.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/system/SysInfo.hpp>
@@ -30,29 +31,81 @@ enum class CodingDirection
     CD_DECODE,
 };
 
+inline static Err _zlib_error_to_tbag_error(int code) TBAG_NOEXCEPT
+{
+    switch (code) {
+    case Z_OK:
+        return E_SUCCESS;
+    case Z_MEM_ERROR:
+        return E_EAI_MEMORY; // Out of memory while (de)compressing data!
+    case Z_VERSION_ERROR:
+        return E_EVERSION; // Incompatible zlib version!
+    case Z_STREAM_ERROR:
+        TBAG_FALLTHROUGH
+    case Z_NEED_DICT:
+        TBAG_FALLTHROUGH
+    case Z_DATA_ERROR:
+        return E_ILLARGS; // Incorrect zlib compressed data!
+    default:
+        return E_UNKNOWN; // Unknown error while (de)compressing data!
+    }
+}
+
+TBAG_CONSTEXPR static int const DEFLATE_WINDOW_BITS_FOR_GZIP = 15 + 16;
+TBAG_CONSTEXPR static int const DEFLATE_WINDOW_BITS_FOR_ZLIB = 15;
+TBAG_CONSTEXPR static int const INFLATE_WINDOW_BITS = 15 + 32;
+
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_ZIP_NO_ENCODE_LEVEL, Z_NO_COMPRESSION);
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_ZIP_MIN_ENCODE_LEVEL, Z_BEST_SPEED);
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_ZIP_MAX_ENCODE_LEVEL, Z_BEST_COMPRESSION);
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_ZIP_DEFAULT_ENCODE_LEVEL, Z_DEFAULT_COMPRESSION);
+
 template <CodingDirection direction>
 static Err coding(char const * input, std::size_t size, util::Buffer & output,
-                  int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL)
+                  int window_bits, int level = Z_DEFAULT_COMPRESSION)
 {
-    z_stream stream = {0,};
-    stream.zalloc   = Z_NULL;
-    stream.zfree    = Z_NULL;
-    stream.opaque   = Z_NULL;
+    z_stream stream;
+    stream.zalloc = Z_NULL;
+    stream.zfree  = Z_NULL;
+    stream.opaque = Z_NULL;
 
     int result = Z_OK;
     if (direction == CodingDirection::CD_ENCODE) {
-        result = deflateInit(&stream, level);
+        // windowBits can also be greater than 15 for optional gzip encoding.
+        // Add 16 to windowBits to write a simple gzip header and
+        // trailer around the compressed data instead of a zlib wrapper.
+        // The gzip header will have no file name, no extra data,
+        // no comment, no modification time (set to zero), no header crc,
+        // and the operating system will be set to the appropriate value,
+        // if the operating system was determined at compile time.
+        // If a gzip stream is being written, strm->adler is a CRC-32 instead of an Adler-32.
+
+        // The memLevel parameter specifies how much memory should be allocated for the internal compression state.
+        // memLevel=1 uses minimum memory but is slow and reduces compression ratio;
+        // memLevel=9 uses maximum memory for optimal speed.
+        // The default value is 8.
+        // See zconf.h for total memory usage as a function of windowBits and memLevel.
+        TBAG_CONSTEXPR static int const MEM_LEVEL = 9;
+        result = deflateInit2(&stream, level, Z_DEFLATED, window_bits, MEM_LEVEL, Z_DEFAULT_STRATEGY);
     } else {
-        result = inflateInit(&stream);
+        // windowBits can also be greater than 15 for optional gzip decoding.
+        // Add 32 to windowBits to enable zlib and gzip decoding with automatic header detection,
+        // or add 16 to decode only the gzip format (the zlib format will return a Z_DATA_ERROR).
+        // If a gzip stream is being decoded, strm->adler is a CRC-32 instead of an Adler-32.
+        // Unlike the gunzip utility and gzread() (see below),
+        // inflate() will not automatically decode concatenated gzip streams.
+        // inflate() will return Z_STREAM_END at the end of the gzip stream.
+        // The state would need to be reset to continue decoding a subsequent gzip stream.
+        result = inflateInit2(&stream, window_bits);
     }
 
     if (result != Z_OK) {
-        return E_EINIT;
+        return _zlib_error_to_tbag_error(result);
     }
 
-    int const PAGE_SIZE = system::getPageSize();
-    std::size_t const MIN_BUFFER_SIZE = 1024;
-    std::size_t const BUFFER_SIZE = static_cast<std::size_t>(PAGE_SIZE < MIN_BUFFER_SIZE ? MIN_BUFFER_SIZE : PAGE_SIZE);
+    TBAG_CONSTEXPR static std::size_t const MIN_BUFFER_SIZE = 1024;
+    auto const PAGE_SIZE = libtbag::system::getPageSize();
+    auto const BUFFER_SIZE = static_cast<std::size_t>(PAGE_SIZE < MIN_BUFFER_SIZE ? MIN_BUFFER_SIZE : PAGE_SIZE);
 
     std::vector<Bytef>  in(BUFFER_SIZE);
     std::vector<Bytef> out(BUFFER_SIZE);
@@ -86,19 +139,17 @@ static Err coding(char const * input, std::size_t size, util::Buffer & output,
             }
             assert(result != Z_STREAM_ERROR);  // state not clobbered.
 
-            std::size_t const OUTPUT_SIZE = out.size() - stream.avail_out;
+            auto const OUTPUT_SIZE = out.size() - stream.avail_out;
             output.insert(output.end(), out.begin(), out.begin() + OUTPUT_SIZE);
-
         } while (stream.avail_out == 0);
         assert(stream.avail_in == 0); // All input will be used.
-
     } while (flush != Z_FINISH);
 
     Err result_code;
     if (result == Z_STREAM_END) {
         result_code = E_SUCCESS;
     } else {
-        result_code = E_UNKNOWN;
+        result_code = _zlib_error_to_tbag_error(result);
     }
 
     if (direction == CodingDirection::CD_ENCODE) {
@@ -110,17 +161,29 @@ static Err coding(char const * input, std::size_t size, util::Buffer & output,
     return result_code;
 }
 
-Err encode(char const * input, std::size_t size, util::Buffer & output, int level)
+Err encode(char const * input, std::size_t size, util::Buffer & output, int level, CompressionMethod method)
 {
-    if (level < TBAG_ZIP_MIN_ENCODE_LEVEL || level > TBAG_ZIP_MAX_ENCODE_LEVEL) {
+    if (level == TBAG_ZIP_NO_ENCODE_LEVEL) {
+        level = Z_NO_COMPRESSION;
+    } else if (TBAG_ZIP_MIN_ENCODE_LEVEL <= COMPARE_AND(level) <= TBAG_ZIP_MAX_ENCODE_LEVEL) {
+        // SKIP.
+    } else {
         level = Z_DEFAULT_COMPRESSION;
     }
-    return coding<CodingDirection::CD_ENCODE>(input, size, output, level);
+    auto const WINDOW_BITS = method == CompressionMethod::CM_GZIP ?
+                             DEFLATE_WINDOW_BITS_FOR_GZIP :
+                             DEFLATE_WINDOW_BITS_FOR_ZLIB;
+    return coding<CodingDirection::CD_ENCODE>(input, size, output, WINDOW_BITS, level);
+}
+
+Err encode(char const * input, std::size_t size, util::Buffer & output, CompressionMethod method)
+{
+    return encode(input, size, output, Z_DEFAULT_COMPRESSION, method);
 }
 
 Err decode(char const * input, std::size_t size, util::Buffer & output)
 {
-    return coding<CodingDirection::CD_DECODE>(input, size, output);
+    return coding<CodingDirection::CD_DECODE>(input, size, output, INFLATE_WINDOW_BITS);
 }
 
 Err zip(std::vector<std::string> const & files,

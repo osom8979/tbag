@@ -91,6 +91,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EXITPROC  , "Exit process"                   ) \
     _TBAG_XX(_EXCHANGE  , "Error exchange"                 ) \
     _TBAG_XX(_FILTERED  , "Filtered."                      ) \
+    _TBAG_XX(_EVERSION  , "Incompatible version error"     ) \
     /* SSL */ \
     _TBAG_XX(_SSL       , "SSL library error"          ) \
     _TBAG_XX(_SSL_NONE  , "SSL I/O operation completed") \

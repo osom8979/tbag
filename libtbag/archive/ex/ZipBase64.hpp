@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/archive/Zip.hpp>
 #include <libtbag/util/BufferInfo.hpp>
 #include <string>
 
@@ -25,21 +26,33 @@ NAMESPACE_LIBTBAG_OPEN
 namespace archive {
 namespace ex      {
 
-TBAG_API bool encodeZipBase64(char const * input, std::size_t size, std::string & output);
-TBAG_API bool encodeZipBase64(util::Buffer const & input, std::string & output);
-TBAG_API bool decodeZipBase64(std::string  const & input, util::Buffer & output);
+TBAG_API Err encodeZipBase64(char const * input, std::size_t size, std::string & output,
+                             int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
+                             CompressionMethod method = CompressionMethod::CM_ZLIB);
+TBAG_API Err encodeZipBase64(util::Buffer const & input, std::string & output,
+                             int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
+                             CompressionMethod method = CompressionMethod::CM_ZLIB);
+TBAG_API Err decodeZipBase64(std::string const & input, util::Buffer & output);
 
-TBAG_API bool encodeZipBase64(std::string const & input, std::string & output);
-TBAG_API bool decodeZipBase64(std::string const & input, std::string & output);
+TBAG_API Err encodeZipBase64(std::string const & input, std::string & output,
+                             int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
+                             CompressionMethod method = CompressionMethod::CM_ZLIB);
+TBAG_API Err decodeZipBase64(std::string const & input, std::string & output);
 
-TBAG_API bool encodeZipBase64FromFile(std::string const & input_file_path, std::string & output);
-TBAG_API bool decodeZipBase64FromFile(std::string const & input_file_path, util::Buffer & output);
+TBAG_API Err encodeZipBase64FromFile(std::string const & input_file_path, std::string & output,
+                                     int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
+                                     CompressionMethod method = CompressionMethod::CM_ZLIB);
+TBAG_API Err decodeZipBase64FromFile(std::string const & input_file_path, util::Buffer & output);
 
-TBAG_API bool encodeZipBase64ToFile(util::Buffer const & input, std::string const & output_file_path);
-TBAG_API bool decodeZipBase64ToFile(std::string  const & input, std::string const & output_file_path);
+TBAG_API Err encodeZipBase64ToFile(util::Buffer const & input, std::string const & output_file_path,
+                                   int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
+                                   CompressionMethod method = CompressionMethod::CM_ZLIB);
+TBAG_API Err decodeZipBase64ToFile(std::string  const & input, std::string const & output_file_path);
 
-TBAG_API bool encodeZipBase64FileToFile(std::string const & input_file_path, std::string const & output_file_path);
-TBAG_API bool decodeZipBase64FileToFile(std::string const & input_file_path, std::string const & output_file_path);
+TBAG_API Err encodeZipBase64FileToFile(std::string const & input_file_path, std::string const & output_file_path,
+                                       int level = TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
+                                       CompressionMethod method = CompressionMethod::CM_ZLIB);
+TBAG_API Err decodeZipBase64FileToFile(std::string const & input_file_path, std::string const & output_file_path);
 
 } // namespace ex
 } // namespace archive

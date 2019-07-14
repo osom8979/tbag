@@ -104,8 +104,13 @@ std::string TmxDataCommon::writeToZlibBase64(GlobalTileId const * guis, std::siz
     assert(size >= 1);
     assert(libtbag::bitwise::isLittleEndianSystem());
 
+    using namespace libtbag::archive;
+    using namespace libtbag::archive::ex;
     std::string result;
-    if (!libtbag::archive::ex::encodeZipBase64((char const *)guis, size*sizeof(GlobalTileId), result)) {
+    auto const code = encodeZipBase64((char const *)guis, size*sizeof(GlobalTileId), result,
+                                      TBAG_ZIP_DEFAULT_ENCODE_LEVEL,
+                                      CompressionMethod::CM_ZLIB);
+    if (isFailure(code)) {
         return {};
     }
     return result;
@@ -168,7 +173,7 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromZlibBase64(std::string const
         return {};
     }
     Buffer buffer;
-    if (!decodeZipBase64(text, buffer)) {
+    if (isFailure(decodeZipBase64(text, buffer))) {
         return {};
     }
     return convertGlobalTileIds(buffer);
