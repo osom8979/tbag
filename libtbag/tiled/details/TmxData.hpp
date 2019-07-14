@@ -68,13 +68,13 @@ struct TBAG_API TmxData : public TmxDataCommon
     DataType data_type;
 
     /** The global tile IDs. */
-    std::vector<int> gids;
+    GlobalTileIds gids;
 
     /** Only for infinite maps. */
     std::vector<TmxChunk> chunks;
 
     TmxData();
-    TmxData(Encoding e, Compression c);
+    TmxData(Encoding e, Compression c, DataType d);
     ~TmxData();
 
     Err read(Element const & elem);

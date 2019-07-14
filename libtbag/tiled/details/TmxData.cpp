@@ -7,7 +7,6 @@
 
 #include <libtbag/tiled/details/TmxData.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cstring>
 #include <cassert>
@@ -19,13 +18,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxData::TmxData() : encoding(Encoding::NONE), compression(Compression::NONE)
+TmxData::TmxData() : encoding(Encoding::NONE), compression(Compression::NONE), data_type(DataType::GIDS)
 {
     // EMPTY.
 }
 
-TmxData::TmxData(Encoding e, Compression c)
-        : encoding(e), compression(c)
+TmxData::TmxData(Encoding e, Compression c, DataType d)
+        : encoding(e), compression(c), data_type(d)
 {
     // EMPTY.
 }
@@ -44,18 +43,24 @@ Err TmxData::read(Element const & elem)
     std::string encoding_text;
     optAttr(elem, ATT_ENCODING, encoding_text);
     encoding = getEncoding(encoding_text);
-    if (encoding == Encoding::NONE) {
-        tDLogW("TmxData::read() Unknown Encoding value: {}", encoding_text);
-    }
 
     std::string compression_text;
     optAttr(elem, ATT_COMPRESSION, compression_text);
     compression = getCompression(compression_text);
-    if (compression == Compression::NONE) {
-        tDLogW("TmxData::read() Unknown Compression value: {}", compression_text);
-    }
 
-    // data = libtbag::string::trim(text(elem));
+    if (elem.NoChildren()) {
+        data_type = DataType::GIDS;
+        chunks.clear();
+        readGids(elem, gids, encoding, compression);
+    } else {
+        data_type = DataType::CHUNK;
+        gids.clear();
+        foreachElement(elem, TmxChunk::TAG_NAME, [&](Element const & c){
+            TmxChunk chunk;
+            chunk.read(c, encoding, compression);
+            chunks.push_back(std::move(chunk));
+        });
+    }
 
     return E_SUCCESS;
 }
@@ -79,7 +84,18 @@ Err TmxData::write(Element & elem) const
     }
     setAttr(elem, ATT_ENCODING, getEncodingName(encoding));
     setAttr(elem, ATT_COMPRESSION, getCompressionName(compression));
-    //text(elem, data);
+
+    if (data_type == DataType::GIDS) {
+        writeGids(elem, gids, encoding, compression);
+    } else {
+        assert(data_type == DataType::CHUNK);
+        for (auto & chunk : chunks) {
+            newElement(elem, TmxChunk::TAG_NAME, [&](Element & c){
+                chunk.write(elem, encoding, compression);
+            });
+        }
+    }
+
     return E_SUCCESS;
 }
 

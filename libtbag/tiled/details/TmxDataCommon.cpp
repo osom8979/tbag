@@ -210,7 +210,43 @@ TmxDataCommon::GlobalTileIds TmxDataCommon::readFromCsv(std::string const & text
     return result;
 }
 
-Err TmxDataCommon::writeGids(GlobalTileId const * gids, std::size_t size, std::string & out, Encoding e, Compression c)
+Err TmxDataCommon::readGids(Element const & elem, GlobalTileIds & gids, Encoding e, Compression c)
+{
+    if (e == Encoding::CSV) {
+        if (c != Compression::NONE) {
+            return E_ILLARGS;
+        }
+        gids = readFromCsv(text(elem));
+
+    } else if (e == Encoding::BASE64) {
+        if (c == Compression::GZIP) {
+            gids = readFromGzipBase64(text(elem));
+        } else if (c == Compression::ZLIB) {
+            gids = readFromZlibBase64(text(elem));
+        } else {
+            assert(c == Compression::NONE);
+            gids = readFromBase64(text(elem));
+        }
+
+    } else if (e == Encoding::NONE) {
+        if (c != Compression::NONE) {
+            return E_ILLARGS;
+        }
+        gids.clear();
+        foreachElement(elem, TAG_TILE, [&](Element const & tile){
+            std::string gid_text;
+            if (isSuccess(optAttr(tile, ATT_GID, gid_text))) {
+                gids.push_back(libtbag::string::toValue<int>(gid_text));
+            } else {
+                gids.push_back(0);
+            }
+        });
+    }
+
+    return gids.empty() ? E_DECODE : E_SUCCESS;
+}
+
+Err TmxDataCommon::writeGids(Element & elem, GlobalTileId const * gids, std::size_t size, Encoding e, Compression c)
 {
     assert(gids != nullptr);
     assert(size >= 1);
@@ -219,43 +255,49 @@ Err TmxDataCommon::writeGids(GlobalTileId const * gids, std::size_t size, std::s
         if (c != Compression::NONE) {
             return E_ILLARGS;
         }
-        out = writeToCsv(gids, size);
+        auto const cdata = writeToCsv(gids, size);
+        if (cdata.empty()) {
+            return E_ENCODE;
+        } else {
+            text(elem, cdata);
+            return E_SUCCESS;
+        }
+
     } else if (e == Encoding::BASE64) {
+        std::string cdata;
         if (c == Compression::GZIP) {
-            out = writeToGzipBase64(gids, size);
+            cdata = writeToGzipBase64(gids, size);
         } else if (c == Compression::ZLIB) {
-            out = writeToZlibBase64(gids, size);
+            cdata = writeToZlibBase64(gids, size);
         } else {
             assert(c == Compression::NONE);
-            out = writeToBase64(gids, size);
+            cdata = writeToBase64(gids, size);
         }
-    } else if (e == Encoding::NONE) {
-        return E_ENOSYS;
+        if (cdata.empty()) {
+            return E_ENCODE;
+        } else {
+            text(elem, cdata);
+            return E_SUCCESS;
+        }
     }
-    return out.empty() ? E_ENCODE : E_SUCCESS;
+
+    assert(e == Encoding::NONE);
+    if (c != Compression::NONE) {
+        return E_ILLARGS;
+    }
+    for (auto i = 0; i < size; ++i) {
+        newElement(elem, TAG_TILE, [&](Element & tile){
+            if (gids[i]) {
+                setAttr(tile, ATT_GID, gids[i]);
+            }
+        });
+    }
+    return E_SUCCESS;
 }
 
-Err TmxDataCommon::readGids(std::string const & text, GlobalTileIds & out, Encoding e, Compression c)
+Err TmxDataCommon::writeGids(Element & elem, GlobalTileIds const & gids, Encoding e, Compression c)
 {
-    assert(!text.empty());
-    if (e == Encoding::CSV) {
-        if (c != Compression::NONE) {
-            return E_ILLARGS;
-        }
-        out = readFromCsv(text);
-    } else if (e == Encoding::BASE64) {
-        if (c == Compression::GZIP) {
-            out = readFromGzipBase64(text);
-        } else if (c == Compression::ZLIB) {
-            out = readFromZlibBase64(text);
-        } else {
-            assert(c == Compression::NONE);
-            out = readFromBase64(text);
-        }
-    } else if (e == Encoding::NONE) {
-        return E_ENOSYS;
-    }
-    return out.empty() ? E_DECODE : E_SUCCESS;
+    return writeGids(elem, gids.data(), gids.size(), e, c);
 }
 
 } // namespace details

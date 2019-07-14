@@ -189,6 +189,8 @@ Err XmlHelper::optAttr(Element const & element, std::string const & key, int & r
 { return __impl::queryAttribute(element, key, result, default_value); }
 Err XmlHelper::optAttr(Element const & element, std::string const & key, unsigned int & result, unsigned int default_value)
 { return __impl::queryAttribute(element, key, result, default_value); }
+Err XmlHelper::optAttr(Element const & element, std::string const & key, std::int64_t & result, std::int64_t default_value)
+{ return __impl::queryAttribute(element, key, result, default_value); }
 Err XmlHelper::optAttr(Element const & element, std::string const & key, float & result, float default_value)
 { return __impl::queryAttribute(element, key, result, default_value); }
 Err XmlHelper::optAttr(Element const & element, std::string const & key, double & result, double default_value)
@@ -203,6 +205,10 @@ XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & k
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, bool value)
 { element.SetAttribute(key.c_str(), value); return element; }
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, int value)
+{ element.SetAttribute(key.c_str(), value); return element; }
+XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, unsigned int value)
+{ element.SetAttribute(key.c_str(), value); return element; }
+XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, std::int64_t value)
 { element.SetAttribute(key.c_str(), value); return element; }
 XmlHelper::Element & XmlHelper::setAttr(Element & element, std::string const & key, float value)
 { element.SetAttribute(key.c_str(), value); return element; }

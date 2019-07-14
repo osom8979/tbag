@@ -38,6 +38,12 @@ namespace details {
  */
 struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
 {
+    /** "tile" element. */
+    TBAG_CONSTEXPR static char const * const TAG_TILE = "tile";
+
+    /** The global tile ID (default: 0). */
+    TBAG_CONSTEXPR static char const * const ATT_GID = "gid";
+
     /**
      * The encoding used to encode the tile layer data.
      * When used, it can be "base64" and "csv" at the moment.
@@ -94,8 +100,9 @@ struct TBAG_API TmxDataCommon : protected libtbag::dom::xml::XmlHelper
     static GlobalTileIds readFromZlibBase64      (std::string const & text);
     static GlobalTileIds readFromCsv             (std::string const & text);
 
-    static Err writeGids(GlobalTileId const * gids, std::size_t size, std::string & out, Encoding e, Compression c);
-    static Err readGids(std::string const & text, GlobalTileIds & out, Encoding e, Compression c);
+    static Err readGids(Element const & elem, GlobalTileIds & gids, Encoding e, Compression c);
+    static Err writeGids(Element & elem, GlobalTileId const * gids, std::size_t size, Encoding e, Compression c);
+    static Err writeGids(Element & elem, GlobalTileIds const & gids, Encoding e, Compression c);
 };
 
 } // namespace details

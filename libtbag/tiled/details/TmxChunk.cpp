@@ -45,6 +45,7 @@ Err TmxChunk::read(Element const & elem, Encoding e, Compression c)
     optAttr(elem, ATT_Y, y);
     optAttr(elem, ATT_WIDTH, width);
     optAttr(elem, ATT_HEIGHT, height);
+    readGids(elem, gids, e, c);
 
     if (elem.NoChildren() && elem.GetText() != nullptr) {
     } else {
@@ -74,6 +75,7 @@ Err TmxChunk::write(Element & elem, Encoding e, Compression c) const
     setAttr(elem, ATT_Y, y);
     setAttr(elem, ATT_WIDTH, width);
     setAttr(elem, ATT_HEIGHT, height);
+    writeGids(elem, gids, e, c);
     return E_SUCCESS;
 }
 

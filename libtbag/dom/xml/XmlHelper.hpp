@@ -19,6 +19,7 @@
 #include <libtbag/dom/tinyxml2/tinyxml2.h>
 
 #include <cassert>
+#include <cstdint>
 #include <string>
 #include <type_traits>
 
@@ -79,6 +80,7 @@ struct TBAG_API XmlHelper
     static Err optAttr(Element const & element, std::string const & key, bool & result, bool default_value = false);
     static Err optAttr(Element const & element, std::string const & key, int & result, int default_value = 0);
     static Err optAttr(Element const & element, std::string const & key, unsigned int & result, unsigned int default_value = 0);
+    static Err optAttr(Element const & element, std::string const & key, std::int64_t & result, std::int64_t default_value = 0);
     static Err optAttr(Element const & element, std::string const & key, float & result, float default_value = 0.0);
     static Err optAttr(Element const & element, std::string const & key, double & result, double default_value = 0.0);
 
@@ -86,6 +88,8 @@ struct TBAG_API XmlHelper
     static Element & setAttr(Element & element, std::string const & key, char const * value);
     static Element & setAttr(Element & element, std::string const & key, bool value);
     static Element & setAttr(Element & element, std::string const & key, int value);
+    static Element & setAttr(Element & element, std::string const & key, unsigned int value);
+    static Element & setAttr(Element & element, std::string const & key, std::int64_t value);
     static Element & setAttr(Element & element, std::string const & key, float value);
     static Element & setAttr(Element & element, std::string const & key, double value);
 

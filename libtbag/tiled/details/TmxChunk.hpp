@@ -55,15 +55,12 @@ struct TBAG_API TmxChunk : public TmxDataCommon
     /** The height of the chunk in tiles. */
     TBAG_CONSTEXPR static char const * const ATT_HEIGHT = "height";
 
-    /** "tile" element. */
-    TBAG_CONSTEXPR static char const * const TAG_TILE = "tile";
-
     int x;
     int y;
     int width;
     int height;
 
-    std::vector<int> gids; ///< The global tile IDs.
+    GlobalTileIds gids;
 
     TmxChunk();
     TmxChunk(int x_, int y_, int w_, int h_);
