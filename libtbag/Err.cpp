@@ -158,7 +158,7 @@ NAMESPACE_LIBTBAG_OPEN
 char const * getErrName(Err code) TBAG_NOEXCEPT
 {
     switch (code) {
-#define _TBAG_XX(name, message) case Err::E##name: return "E"#name;
+#define _TBAG_XX(name, num, message) case Err::E##name: return "E"#name;
     TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
     default: return "E_UNKNOWN";
@@ -168,7 +168,7 @@ char const * getErrName(Err code) TBAG_NOEXCEPT
 char const * getErrDetail(Err code) TBAG_NOEXCEPT
 {
     switch (code) {
-#define _TBAG_XX(name, message) case Err::E##name: return message;
+#define _TBAG_XX(name, num, message) case Err::E##name: return message;
     TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
     default: return "Unknown error.";
@@ -180,8 +180,8 @@ Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT
     // clang-format off
     switch (uv_error_code) {
     case 0: return Err::E_SUCCESS;
-#define _TBAG_ERASE_XX(name, msg)
-#define _TBAG_XX(name, msg) case UV##name: return Err::E##name;
+#define _TBAG_ERASE_XX(name, num, msg)
+#define _TBAG_XX(name, num, msg) case UV##name: return Err::E##name;
     TBAG_ERROR_INFO_MAP(_TBAG_ERASE_XX, _TBAG_XX)
 #undef _TBAG_ERASE_XX
 #undef _TBAG_XX

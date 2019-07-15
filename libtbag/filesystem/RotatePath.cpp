@@ -185,14 +185,14 @@ Err RotatePath::write(char const * buffer, std::size_t size)
     if (path.empty()) {
         path = updater->update(path);
         if (path.empty()) {
-            return E_EINTERNAL;
+            return E_INTERNAL;
         }
     }
 
     assert(!path.empty());
     if (!writer->ready()) {
         if (!writer->open(path.c_str())) {
-            return E_EOPEN;
+            return E_OPEN;
         }
     }
 
@@ -221,7 +221,7 @@ Err RotatePath::write(char const * buffer, std::size_t size)
         assert(!path.empty());
 
         if (!writer->open(path.c_str())) {
-            return E_EOPEN;
+            return E_OPEN;
         }
 
         if (code == E_CONTINUE) {

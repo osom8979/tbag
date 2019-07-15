@@ -95,7 +95,7 @@ public:
         Guard guard(_mutex);
         while (_queue.size() > size) {
             if (_queue.empty()) {
-                return E_EQUEUE;
+                return E_QUEUE;
             }
             _queue.pop();
         }
@@ -106,7 +106,7 @@ public:
     {
         Guard guard(_mutex);
         if (_queue.empty() == true) {
-            return E_EQUEUE;
+            return E_QUEUE;
         }
         result = _queue.front();
         return E_SUCCESS;
@@ -116,7 +116,7 @@ public:
     {
         Guard guard(_mutex);
         if (_queue.empty()) {
-            return E_EQUEUE;
+            return E_QUEUE;
         }
         result = _queue.front();
         _queue.pop();

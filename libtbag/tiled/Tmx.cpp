@@ -104,7 +104,7 @@ Err Tmx::loadFromXmlDocument(Document const & doc)
 {
     auto const * elem = doc.FirstChildElement(Map::TAG_NAME);
     if (elem == nullptr) {
-        return E_ENFOUND;
+        return E_NFOUND;
     }
     return loadFromMapElement(*elem);
 }

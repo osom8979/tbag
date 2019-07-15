@@ -39,7 +39,7 @@ inline static Err _zlib_error_to_tbag_error(int code) TBAG_NOEXCEPT
     case Z_MEM_ERROR:
         return E_EAI_MEMORY; // Out of memory while (de)compressing data!
     case Z_VERSION_ERROR:
-        return E_EVERSION; // Incompatible zlib version!
+        return E_VERSION; // Incompatible zlib version!
     case Z_STREAM_ERROR:
         TBAG_FALLTHROUGH
     case Z_NEED_DICT:
@@ -199,7 +199,7 @@ Err zip(std::vector<std::string> const & files,
 
     zipFile zf = zipOpen(output_path.c_str(), APPEND_STATUS_CREATE);
     if (zf == nullptr) {
-        return E_EOPEN;
+        return E_OPEN;
     }
 
     zip_fileinfo info = {0,};
@@ -286,12 +286,12 @@ Err unzip(std::string const & path, std::string const & output_dir)
 {
     unzFile uf = unzOpen(path.c_str());
     if (uf == nullptr) {
-        return E_EOPEN;
+        return E_OPEN;
     }
 
     if (unzGoToFirstFile(uf) != UNZ_OK) {
         unzClose(uf);
-        return E_EINDEX;
+        return E_INDEX;
     }
 
     std::size_t const MAX_PATH_LENGTH = filesystem::details::MAX_PATH_LENGTH;

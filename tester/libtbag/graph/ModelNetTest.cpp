@@ -67,7 +67,7 @@ struct ModelNetTestLayer : public LayerBase
         if (strcmp(key, "layers") == 0) {
             return getProperty(buffer, size, layers);
         }
-        return E_ENFOUND;
+        return E_NFOUND;
     }
 
     virtual Err set(char const * key, char const * data) override
@@ -80,7 +80,7 @@ struct ModelNetTestLayer : public LayerBase
             layers = data;
             return E_SUCCESS;
         }
-        return E_ENFOUND;
+        return E_NFOUND;
     }
 };
 

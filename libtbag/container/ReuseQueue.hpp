@@ -123,7 +123,7 @@ public:
     Err front(Value & result)
     {
         if (_active.empty()) {
-            return E_EQUEUE;
+            return E_QUEUE;
         }
         result = _active.front();
         return E_SUCCESS;
@@ -145,7 +145,7 @@ public:
     Err pop()
     {
         if (_active.empty()) {
-            return E_EQUEUE;
+            return E_QUEUE;
         }
         _ready.push_back(_active.front());
         _active.pop_front();
@@ -156,7 +156,7 @@ public:
     Err frontAndPop(Value & result)
     {
         if (_active.empty()) {
-            return E_EQUEUE;
+            return E_QUEUE;
         }
         result = _active.front();
         _ready.push_back(_active.front());

@@ -30,7 +30,7 @@ static Err queryText(XmlHelper::Element const * node,
     BaseType temp = 0;
     if (predicated(&temp) != tinyxml2::XML_SUCCESS) {
         result = default_value;
-        return E_EQUERY;
+        return E_QUERY;
     }
     result = temp;
     return E_SUCCESS;
@@ -46,7 +46,7 @@ static Err queryText2(XmlHelper::Element const & element,
     auto * node = element.FirstChildElement(key.c_str());
     if (node == nullptr) {
         result = default_value;
-        return E_ENFOUND;
+        return E_NFOUND;
     }
     auto query = std::bind(std::forward<Fp>(f), node, std::placeholders::_1);
     return queryText(node, key, result, default_value, query);
@@ -73,7 +73,7 @@ static Err queryAttribute(XmlHelper::Element const & element,
     BaseType temp;
     if (element.QueryAttribute(key.c_str(), &temp) != tinyxml2::XML_SUCCESS) {
         result = default_value;
-        return E_EQUERY;
+        return E_QUERY;
     }
     result = temp;
     return E_SUCCESS;
@@ -186,7 +186,7 @@ Err XmlHelper::optAttr(Element const & element, std::string const & key, std::st
     char const * value = element.Attribute(key.c_str());
     if (value == nullptr) {
         result = default_value;
-        return E_EQUERY;
+        return E_QUERY;
     }
     result.assign(value);
     return E_SUCCESS;

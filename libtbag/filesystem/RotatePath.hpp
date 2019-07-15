@@ -132,7 +132,7 @@ struct MaxSizeWriter : public WriterInterface
         assert(written != nullptr);
 
         if (!file.isOpen()) {
-            return E_EOPEN;
+            return E_OPEN;
         }
 
         if (file.offset() >= max_size) {

@@ -212,7 +212,7 @@ Err ProcessManager::kill(int pid, int signum)
             return E_EXPIRED;
         }
     }
-    return E_ENFOUND;
+    return E_NFOUND;
 }
 
 void ProcessManager::onOutRead(int pid, char const * buffer, std::size_t size)

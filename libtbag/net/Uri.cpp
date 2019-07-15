@@ -364,7 +364,7 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
     if (info == nullptr) {
         info = addr.findFirst();
         if (info == nullptr) {
-            return E_ENFOUND;
+            return E_NFOUND;
         }
     }
 

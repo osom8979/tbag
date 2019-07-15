@@ -128,7 +128,7 @@ Err SocketAddress::initName(std::string const & host, std::string const & servic
     addrinfo const * info = dns.getAddrInfo();
     assert(info != nullptr);
     if (info->ai_addrlen == 0) {
-        return E_ENFOUND;
+        return E_NFOUND;
     }
 
     addrinfo * next = dns.getAddrInfo()->ai_next;
