@@ -8,6 +8,9 @@
 #include <libtbag/time/DurationString.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
+#include <cctype>
+#include <cassert>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
