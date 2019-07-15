@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <chrono>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -23,27 +24,36 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace time {
 
-TBAG_CONSTEXPR char const * const    __TBAG_NANO_DURATION_STRING__ =  "nano";
-TBAG_CONSTEXPR char const * const   __TBAG_MICRO_DURATION_STRING__ = "micro";
-TBAG_CONSTEXPR char const * const   __TBAG_MILLI_DURATION_STRING__ = "milli";
-TBAG_CONSTEXPR char const * const     __TBAG_SEC_DURATION_STRING__ =   "sec";
-TBAG_CONSTEXPR char const * const     __TBAG_MIN_DURATION_STRING__ =   "min";
-TBAG_CONSTEXPR char const * const    __TBAG_HOUR_DURATION_STRING__ =  "hour";
-TBAG_CONSTEXPR char const * const __TBAG_DEFAULT_DURATION_STRING__ =   "dur";
+TBAG_CONSTEXPR char const * const    TBAG_NANO_DURATION_STRING =  "nano";
+TBAG_CONSTEXPR char const * const   TBAG_MICRO_DURATION_STRING = "micro";
+TBAG_CONSTEXPR char const * const   TBAG_MILLI_DURATION_STRING = "milli";
+TBAG_CONSTEXPR char const * const     TBAG_SEC_DURATION_STRING =   "sec";
+TBAG_CONSTEXPR char const * const     TBAG_MIN_DURATION_STRING =   "min";
+TBAG_CONSTEXPR char const * const    TBAG_HOUR_DURATION_STRING =  "hour";
+TBAG_CONSTEXPR char const * const TBAG_DEFAULT_DURATION_STRING =   "dur";
 
 template <typename Duration>
 inline TBAG_CONSTEXPR char const * getDurationString() TBAG_NOEXCEPT
 {
-    return __TBAG_DEFAULT_DURATION_STRING__;
+    return TBAG_DEFAULT_DURATION_STRING;
 }
 
 // clang-format off
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::nanoseconds> () TBAG_NOEXCEPT { return __TBAG_NANO_DURATION_STRING__; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::microseconds>() TBAG_NOEXCEPT { return __TBAG_MICRO_DURATION_STRING__; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::milliseconds>() TBAG_NOEXCEPT { return __TBAG_MILLI_DURATION_STRING__; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::seconds>     () TBAG_NOEXCEPT { return __TBAG_SEC_DURATION_STRING__; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::minutes>     () TBAG_NOEXCEPT { return __TBAG_MIN_DURATION_STRING__; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::hours>       () TBAG_NOEXCEPT { return __TBAG_HOUR_DURATION_STRING__; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::nanoseconds> () TBAG_NOEXCEPT { return TBAG_NANO_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::microseconds>() TBAG_NOEXCEPT { return TBAG_MICRO_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::milliseconds>() TBAG_NOEXCEPT { return TBAG_MILLI_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::seconds>     () TBAG_NOEXCEPT { return TBAG_SEC_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::minutes>     () TBAG_NOEXCEPT { return TBAG_MIN_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::hours>       () TBAG_NOEXCEPT { return TBAG_HOUR_DURATION_STRING; }
+// clang-format on
+
+// clang-format off
+TBAG_API std::size_t toNanoseconds (std::string const & str);
+TBAG_API std::size_t toMicroseconds(std::string const & str);
+TBAG_API std::size_t toMilliseconds(std::string const & str);
+TBAG_API std::size_t toSeconds     (std::string const & str);
+TBAG_API std::size_t toMinutes     (std::string const & str);
+TBAG_API std::size_t toHours       (std::string const & str);
 // clang-format on
 
 } // namespace time

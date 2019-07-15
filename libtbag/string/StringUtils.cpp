@@ -7,7 +7,6 @@
  */
 
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/log/Log.hpp>
 #include <libtbag/Unit.hpp>
 
 #include <cctype>
@@ -327,10 +326,7 @@ Err convertHexCharToByte(char high_char, char low_char, uint8_t & result)
 
 Err convertHexStringToBuffer(char const * hex_string, std::size_t length, libtbag::util::Buffer & buffer)
 {
-    if ((length & 0x1) == 0x1) {
-        tDLogE("convertHexStringToBuffer() Odd length strings are not supported.");
-        return E_ILLARGS;
-    }
+    assert((length & 0x1) == 0x0); // Odd length strings are not supported.
     assert(hex_string != nullptr);
     assert(length >= 1);
 
