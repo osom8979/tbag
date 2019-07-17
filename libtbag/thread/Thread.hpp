@@ -81,7 +81,7 @@ public:
     Err run(std::size_t stack_size);
     Err run();
 
-public:
+protected:
     virtual void onRunner()
     { /* EMPTY. */ }
 
