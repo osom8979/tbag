@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/thread/ThreadGroup.hpp>
+#include <algorithm>
 
 using namespace libtbag;
 using namespace libtbag::thread;
@@ -19,13 +20,21 @@ TEST(ThreadGroupTest, Default)
     int t3 = 0;
     int t4 = 0;
 
-    thread::ThreadGroup group;
+    ThreadGroup group;
     auto thread1 = group.createThread([&](){ while ((++t1) < TEST_NUMBER); });
     auto thread2 = group.createThread([&](){ while ((++t2) < TEST_NUMBER); });
     auto thread3 = group.createThread([&](){ while ((++t3) < TEST_NUMBER); });
     auto thread4 = group.createThread([&](){ while ((++t4) < TEST_NUMBER); });
     group.joinAll();
 
+    auto ids = group.ids();
+    ASSERT_EQ(4, ids.size());
+    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread1));
+    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread2));
+    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread3));
+    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread4));
+
+    ASSERT_FALSE(group.existsCurrentThread());
     ASSERT_TRUE(group.exists(thread1));
     ASSERT_TRUE(group.exists(thread2));
     ASSERT_TRUE(group.exists(thread3));
@@ -42,15 +51,18 @@ TEST(ThreadGroupTest, Add_And_Remove)
     int const TEST_NUMBER = 10000;
     int t1 = 0;
 
-    thread::ThreadGroup group;
-    std::thread * thread1 = new std::thread([&](){ while ((++t1) < TEST_NUMBER); });
-    group.addThread(thread1);
-    ASSERT_EQ(1U, group.size());
+    ThreadGroup group;
+    ASSERT_TRUE(group.empty());
+    ASSERT_EQ(0, group.size());
 
-    group.removeThread(thread1);
-    ASSERT_EQ(0U, group.size());
+    auto thread1 = group.createThread([&](){ while ((++t1) < TEST_NUMBER); });
+    ASSERT_FALSE(group.empty());
+    ASSERT_EQ(1, group.size());
 
-    thread1->join();
-    delete thread1;
+    ASSERT_TRUE(group.erase(thread1));
+    ASSERT_TRUE(group.empty());
+    ASSERT_EQ(0, group.size());
+
+    group.joinAll();
 }
 

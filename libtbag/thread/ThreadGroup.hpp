@@ -15,10 +15,11 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/lock/RwLock.hpp>
+#include <libtbag/thread/Thread.hpp>
+#include <libtbag/thread/FunctionalThread.hpp>
 
-#include <thread>
-#include <list>
+#include <unordered_set>
+#include <vector>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,42 +36,62 @@ namespace thread {
 class TBAG_API ThreadGroup : private Noncopyable
 {
 public:
-    using ThreadPointer = std::thread*;
-    using List = std::list<ThreadPointer>;
+    using uthread = Thread::uthread;
+    using SharedThread = std::shared_ptr<Thread>;
+    using ThreadSet = std::unordered_set<SharedThread>;
+
+    using iterator = ThreadSet::iterator;
+    using const_iterator = ThreadSet::const_iterator;
 
 private:
-    mutable lock::RwLock _lock;
-    List _list;
+    ThreadSet _threads;
 
 public:
     ThreadGroup();
     ~ThreadGroup();
 
 public:
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_threads.size())
+    { return _threads.size(); }
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_threads.empty())
+    { return _threads.empty(); }
+
+public:
+    iterator begin() TBAG_NOEXCEPT_SP_OP(_threads.begin())
+    { return _threads.begin(); }
+    iterator end() TBAG_NOEXCEPT_SP_OP(_threads.end())
+    { return _threads.end(); }
+
+    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(_threads.begin())
+    { return _threads.begin(); }
+    const_iterator end() const TBAG_NOEXCEPT_SP_OP(_threads.end())
+    { return _threads.end(); }
+
+    const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(_threads.cbegin())
+    { return _threads.cbegin(); }
+    const_iterator cend() const TBAG_NOEXCEPT_SP_OP(_threads.cend())
+    { return _threads.  cend(); }
+
+public:
     void clear();
 
-// exists thread.
 public:
-    bool exists(std::thread::id const & id) const;
-    bool exists(std::thread const * thread) const;
-    bool existsThis() const;
+    bool exists(uthread const & id) const;
+    bool exists(Thread const & thread) const;
+    bool existsCurrentThread() const;
 
 public:
-    void addThread(std::thread * thread);
-    void removeThread(std::thread * thread);
+    bool insert(SharedThread const & thread);
+    bool erase(uthread const & id);
 
 public:
-    void joinAll();
-    std::size_t size() const TBAG_NOEXCEPT;
+    uthread createThread(FunctionalThread::Callback const & cb, bool join_in_destructors = true);
 
 public:
-    template <typename ... Args>
-    std::thread * createThread(Args && ... args)
-    {
-        std::thread * create_thread = new (std::nothrow) std::thread(std::forward<Args>(args) ...);
-        addThread(create_thread);
-        return create_thread;
-    }
+    void joinAll(bool rethrow = false);
+
+public:
+    std::vector<uthread> ids() const;
 };
 
 } // namespace thread

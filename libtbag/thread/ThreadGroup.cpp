@@ -6,12 +6,15 @@
  */
 
 #include <libtbag/thread/ThreadGroup.hpp>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace thread {
+
+using uthread = ThreadGroup::uthread;
 
 ThreadGroup::ThreadGroup()
 {
@@ -20,82 +23,84 @@ ThreadGroup::ThreadGroup()
 
 ThreadGroup::~ThreadGroup()
 {
-    this->clear();
+    // EMPTY.
 }
 
 void ThreadGroup::clear()
 {
-    lock::WriteLockGuard guard(_lock);
-    for (List::iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
-        delete *itr;
-    }
-    _list.clear();
+    _threads.clear();
 }
 
-bool ThreadGroup::exists(std::thread::id const & id) const
+bool ThreadGroup::exists(uthread const & id) const
 {
-    lock::ReadLockGuard guard(_lock);
-    for (List::const_iterator itr = _list.cbegin(), end = _list.cend(); itr != end; ++itr) {
-        if ((*itr)->get_id() == id) {
+    for (auto & t : _threads) {
+        if (t && t->equal(id)) {
             return true;
         }
     }
     return false;
 }
 
-bool ThreadGroup::exists(std::thread const * thread) const
+bool ThreadGroup::exists(Thread const & thread) const
 {
-    if (thread != nullptr) {
-        return this->exists(thread->get_id());
-    }
-    return true;
+    return exists(thread.id());
 }
 
-bool ThreadGroup::existsThis() const
+bool ThreadGroup::existsCurrentThread() const
 {
-    return this->exists(std::this_thread::get_id());
+    return exists(Thread::getCurrentThreadId());
 }
 
-void ThreadGroup::addThread(std::thread * thread)
+bool ThreadGroup::insert(SharedThread const & thread)
 {
-    if (thread != nullptr && this->exists(thread) == false) {
-        lock::WriteLockGuard guard(_lock);
-        _list.push_back(thread);
-    }
+    return _threads.insert(thread).second;
 }
 
-void ThreadGroup::removeThread(std::thread * thread)
+bool ThreadGroup::erase(uthread const & id)
 {
-    lock::WriteLockGuard guard(_lock);
-
-    // [WARNING]
-    // Don't use std::find.
-    // Reason: No matching function for call to std::find (in G++).
-    //         'std::find(List::iterator, List::iterator, std::thread * &)'
-    // List::iterator itr = std::find(_list.begin(), _list.end(), thread);
-
-    for (List::iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
-        if ((*itr) == thread) {
-            _list.erase(itr);
+    auto itr = _threads.begin();
+    auto const end = _threads.end();
+    for (; itr != end; ++itr) {
+        auto shared_thread = *itr;
+        if (shared_thread && shared_thread->id() == id) {
             break;
         }
     }
+    if (itr == end) {
+        return false;
+    }
+    _threads.erase(itr);
+    return true;
 }
 
-void ThreadGroup::joinAll()
+uthread ThreadGroup::createThread(FunctionalThread::Callback const & cb, bool join_in_destructors)
 {
-    lock::ReadLockGuard guard(_lock);
-    for (List::iterator itr = _list.begin(), end = _list.end(); itr != end; ++itr) {
-        if ((*itr)->joinable()) {
-            (*itr)->join();
+    auto thread = std::make_shared<FunctionalThread>(cb, join_in_destructors);
+    assert(static_cast<bool>(thread));
+    if (isSuccess(thread->run()) && insert(thread)) {
+        return thread->id();
+    }
+    return uthread();
+}
+
+void ThreadGroup::joinAll(bool rethrow)
+{
+    for (auto & t : _threads) {
+        if (t && t->joinable()) {
+            t->join(rethrow);
         }
     }
 }
 
-std::size_t ThreadGroup::size() const TBAG_NOEXCEPT
+std::vector<uthread> ThreadGroup::ids() const
 {
-    lock::ReadLockGuard guard(_lock);
-    return _list.size();
+    std::vector<uthread> result;
+    for (auto & t : _threads) {
+        if (t) {
+            result.push_back(t->id());
+        }
+    }
+    return result;
 }
 
 } // namespace thread

@@ -17,18 +17,26 @@ NAMESPACE_LIBTBAG_OPEN
 namespace thread {
 
 using uthread = Thread::uthread;
+using State = Thread::State;
 
 void __global_uv_thread_cb__(void * args) TBAG_NOEXCEPT
 {
     assert(args != nullptr);
     auto * thread = (Thread*)args;
+
+    thread->_lock.lock();
     thread->_state = Thread::State::S_RUNNING;
+    thread->_lock.unlock();
+
     try {
         thread->onRunner();
     } catch (...) {
         thread->_exception = std::current_exception();
     }
+
+    thread->_lock.lock();
     thread->_state = Thread::State::S_DONE;
+    thread->_lock.unlock();
 }
 
 Thread::Thread(bool join_in_destructors) TBAG_NOEXCEPT
@@ -47,11 +55,17 @@ Thread::Thread(start_t, bool join_in_destructors) : Thread(join_in_destructors)
 
 Thread::~Thread()
 {
-    if (JOIN_IN_DESTRUCTORS && _state.load() == Thread::State::S_RUNNING) {
+    if (JOIN_IN_DESTRUCTORS && joinable()) {
         join(false); // Destructor is an implicit 'NOEXCEPT' state.
     }
     // S_READY is E_ESRCH
     // S_DONE is no need to join.
+}
+
+State Thread::state() const
+{
+    UvGuard const G(_lock);
+    return _state;
 }
 
 bool Thread::operator ==(Thread const & obj) const TBAG_NOEXCEPT
@@ -59,9 +73,15 @@ bool Thread::operator ==(Thread const & obj) const TBAG_NOEXCEPT
     return equal(obj);
 }
 
+bool Thread::operator !=(Thread const & obj) const TBAG_NOEXCEPT
+{
+    return !equal(obj);
+}
+
 bool Thread::equal(uthread const & t) const TBAG_NOEXCEPT
 {
-    return ::uv_thread_equal(&_thread, &t) != 0;
+    UvGuard const G(_lock);
+    return ::uv_thread_equal(&_thread, &t);
 }
 
 bool Thread::equal(Thread const & t) const TBAG_NOEXCEPT
@@ -81,32 +101,22 @@ bool Thread::isCurrentThread() TBAG_NOEXCEPT
 
 Err Thread::run()
 {
-    switch (_state.load()) {
-    case State::S_READY:
-        // OK!
-        break;
-    case State::S_RUNNING:
+    UvGuard const G(_lock);
+    if (_state != State::S_READY) {
         return E_ILLSTATE;
-    case State::S_DONE:
-        return E_EXPIRED;
-    default:
-        return E_UNKNOWN;
     }
-    return convertUvErrorToErr(::uv_thread_create(&_thread, &__global_uv_thread_cb__, this));
+    auto const code = ::uv_thread_create(&_thread, &__global_uv_thread_cb__, this);
+    if (code == 0) {
+        _state = State::S_CREATED;
+    }
+    return convertUvErrorToErr(code);
 }
 
 Err Thread::run(std::size_t stack_size)
 {
-    switch (_state.load()) {
-    case State::S_READY:
-        // OK!
-        break;
-    case State::S_RUNNING:
+    UvGuard const G(_lock);
+    if (_state != State::S_READY) {
         return E_ILLSTATE;
-    case State::S_DONE:
-        return E_EXPIRED;
-    default:
-        return E_UNKNOWN;
     }
 
     // If UV_THREAD_HAS_STACK_SIZE is set, stack_size specifies a stack size for the new thread.
@@ -115,35 +125,37 @@ Err Thread::run(std::size_t stack_size)
     uv_thread_options_t options;
     options.flags = UV_THREAD_HAS_STACK_SIZE;
     options.stack_size = stack_size;
-    return convertUvErrorToErr(::uv_thread_create_ex(&_thread, &options, &__global_uv_thread_cb__, this));
-}
 
-void Thread::rethrowIfExists() const
-{
-    if (_exception) {
-        std::rethrow_exception(_exception);
+    auto const code = ::uv_thread_create_ex(&_thread, &options, &__global_uv_thread_cb__, this);
+    if (code == 0) {
+        _state = State::S_CREATED;
     }
+    return convertUvErrorToErr(code);
 }
 
 bool Thread::joinable() const
 {
-    // clang-format off
-    switch (_state.load()) {
-    case State::S_READY:    return false;
-    case State::S_RUNNING:  return true;
-    case State::S_DONE:     return true;
-    default:                return false;
-    }
-    // clang-format on
+    UvGuard const G(_lock);
+    return _state != State::S_READY;
 }
 
 Err Thread::join(bool rethrow)
 {
-    auto const code = convertUvErrorToErr(::uv_thread_join(&_thread));
-    if (rethrow) {
-        rethrowIfExists();
+    _lock.lock();
+    auto const STATE = _state;
+    _lock.unlock();
+
+    if (STATE == State::S_READY) {
+        return E_ILLSTATE;
     }
-    return code;
+
+    auto const code = ::uv_thread_join(&_thread);
+    if (rethrow && code == 0) {
+        if (_exception) {
+            std::rethrow_exception(_exception);
+        }
+    }
+    return convertUvErrorToErr(code);
 }
 
 Err Thread::waitForRunningOrDone(unsigned long timeout_ms, unsigned long tick_ms)

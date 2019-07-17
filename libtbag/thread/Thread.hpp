@@ -18,6 +18,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/lock/UvLock.hpp>
 
 #include <atomic>
 #include <exception>
@@ -40,6 +41,8 @@ class TBAG_API Thread : private Noncopyable
 {
 public:
     using uthread = libtbag::uvpp::uthread;
+    using UvLock = libtbag::lock::UvLock;
+    using UvGuard = libtbag::lock::UvLockGuard<UvLock>;
 
 public:
     struct start_t { /* EMPTY. */ };
@@ -51,6 +54,7 @@ public:
     enum class State
     {
         S_READY,
+        S_CREATED, ///< It will be running soon.
         S_RUNNING,
         S_DONE,
     };
@@ -59,8 +63,9 @@ private:
     bool const JOIN_IN_DESTRUCTORS;
 
 private:
+    UvLock mutable _lock;
     uthread _thread;
-    std::atomic<State> _state;
+    State _state;
 
 private:
     std::exception_ptr _exception;
@@ -71,13 +76,16 @@ public:
     virtual ~Thread();
 
 public:
-    inline State state() const TBAG_NOEXCEPT_SP_OP(_state.load())
-    { return _state.load(); }
     inline uthread id() const TBAG_NOEXCEPT
     { return _thread; }
 
 public:
+    State state() const;
+
+public:
     bool operator ==(Thread const & obj) const TBAG_NOEXCEPT;
+    bool operator !=(Thread const & obj) const TBAG_NOEXCEPT;
+
     bool equal(uthread const & t) const TBAG_NOEXCEPT;
     bool equal(Thread const & t) const TBAG_NOEXCEPT;
 
@@ -94,9 +102,6 @@ public:
 protected:
     virtual void onRunner()
     { /* EMPTY. */ }
-
-public:
-    void rethrowIfExists() const;
 
 public:
     bool joinable() const;
