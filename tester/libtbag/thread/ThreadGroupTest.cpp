@@ -29,10 +29,14 @@ TEST(ThreadGroupTest, Default)
 
     auto ids = group.ids();
     ASSERT_EQ(4, ids.size());
-    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread1));
-    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread2));
-    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread3));
-    ASSERT_NE(ids.end(), std::find(ids.begin(), ids.end(), thread4));
+    bool const THREAD1_FIND = std::find(ids.begin(), ids.end(), thread1) != ids.end();
+    bool const THREAD2_FIND = std::find(ids.begin(), ids.end(), thread2) != ids.end();
+    bool const THREAD3_FIND = std::find(ids.begin(), ids.end(), thread3) != ids.end();
+    bool const THREAD4_FIND = std::find(ids.begin(), ids.end(), thread4) != ids.end();
+    ASSERT_TRUE(THREAD1_FIND);
+    ASSERT_TRUE(THREAD2_FIND);
+    ASSERT_TRUE(THREAD3_FIND);
+    ASSERT_TRUE(THREAD4_FIND);
 
     ASSERT_FALSE(group.existsCurrentThread());
     ASSERT_TRUE(group.exists(thread1));

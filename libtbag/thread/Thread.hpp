@@ -70,6 +70,9 @@ private:
 private:
     std::exception_ptr _exception;
 
+private:
+    void * _opaque; ///< Internally, this value is not modified.
+
 public:
     Thread(bool join_in_destructors = true) TBAG_NOEXCEPT;
     Thread(start_t, bool join_in_destructors = true);
@@ -78,6 +81,12 @@ public:
 public:
     inline uthread id() const TBAG_NOEXCEPT
     { return _thread; }
+
+public:
+    inline void * getOpaque() const TBAG_NOEXCEPT
+    { return _opaque; }
+    inline void setOpaque(void * opaque) TBAG_NOEXCEPT
+    { _opaque = opaque; }
 
 public:
     State state() const;
