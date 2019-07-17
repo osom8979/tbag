@@ -31,14 +31,27 @@ void __global_uv_thread_cb__(void * args) TBAG_NOEXCEPT
     thread->_state = Thread::State::S_DONE;
 }
 
-Thread::Thread() TBAG_NOEXCEPT : _thread(), _state(State::S_READY), _exception()
+Thread::Thread(bool join_in_destructors) TBAG_NOEXCEPT
+        : JOIN_IN_DESTRUCTORS(join_in_destructors), _thread(), _state(State::S_READY), _exception()
 {
     // EMPTY.
 }
 
+Thread::Thread(start_t, bool join_in_destructors) : Thread(join_in_destructors)
+{
+    auto const code = run();
+    if (isFailure(code)) {
+        throw ErrException(code);
+    }
+}
+
 Thread::~Thread()
 {
-    assert(_state == Thread::State::S_DONE);
+    if (JOIN_IN_DESTRUCTORS && _state.load() == Thread::State::S_RUNNING) {
+        join(false); // Destructor is an implicit 'NOEXCEPT' state.
+    }
+    // S_READY is E_ESRCH
+    // S_DONE is no need to join.
 }
 
 bool Thread::operator ==(Thread const & obj) const TBAG_NOEXCEPT
@@ -72,10 +85,10 @@ Err Thread::run()
     case State::S_READY:
         // OK!
         break;
-    case State::S_DONE:
-        return E_EXPIRED;
     case State::S_RUNNING:
         return E_ILLSTATE;
+    case State::S_DONE:
+        return E_EXPIRED;
     default:
         return E_UNKNOWN;
     }
@@ -88,10 +101,10 @@ Err Thread::run(std::size_t stack_size)
     case State::S_READY:
         // OK!
         break;
-    case State::S_DONE:
-        return E_EXPIRED;
     case State::S_RUNNING:
         return E_ILLSTATE;
+    case State::S_DONE:
+        return E_EXPIRED;
     default:
         return E_UNKNOWN;
     }
@@ -110,6 +123,18 @@ void Thread::rethrowIfExists() const
     if (_exception) {
         std::rethrow_exception(_exception);
     }
+}
+
+bool Thread::joinable() const
+{
+    // clang-format off
+    switch (_state.load()) {
+    case State::S_READY:    return false;
+    case State::S_RUNNING:  return true;
+    case State::S_DONE:     return true;
+    default:                return false;
+    }
+    // clang-format on
 }
 
 Err Thread::join(bool rethrow)

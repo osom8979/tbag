@@ -42,12 +42,21 @@ public:
     using uthread = libtbag::uvpp::uthread;
 
 public:
+    struct start_t { /* EMPTY. */ };
+
+public:
+    TBAG_CONSTEXPR static start_t const start = {};
+
+public:
     enum class State
     {
         S_READY,
         S_RUNNING,
         S_DONE,
     };
+
+private:
+    bool const JOIN_IN_DESTRUCTORS;
 
 private:
     uthread _thread;
@@ -57,7 +66,8 @@ private:
     std::exception_ptr _exception;
 
 public:
-    Thread() TBAG_NOEXCEPT;
+    Thread(bool join_in_destructors = true) TBAG_NOEXCEPT;
+    Thread(start_t, bool join_in_destructors = true);
     virtual ~Thread();
 
 public:
@@ -87,6 +97,9 @@ protected:
 
 public:
     void rethrowIfExists() const;
+
+public:
+    bool joinable() const;
 
 public:
     Err join(bool rethrow = true);

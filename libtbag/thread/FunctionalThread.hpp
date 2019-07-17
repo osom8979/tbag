@@ -40,9 +40,14 @@ private:
     Callback _cb;
 
 public:
-    FunctionalThread();
-    FunctionalThread(Callback const & cb);
-    FunctionalThread(Callback && cb) TBAG_NOEXCEPT;
+    FunctionalThread(bool join_in_destructors = true) TBAG_NOEXCEPT;
+    FunctionalThread(Callback const & cb, bool join_in_destructors = true);
+    FunctionalThread(Callback && cb, bool join_in_destructors = true) TBAG_NOEXCEPT;
+
+    FunctionalThread(start_t, bool join_in_destructors = true);
+    FunctionalThread(start_t, Callback const & cb, bool join_in_destructors = true);
+    FunctionalThread(start_t, Callback && cb, bool join_in_destructors = true);
+
     virtual ~FunctionalThread();
 
 public:

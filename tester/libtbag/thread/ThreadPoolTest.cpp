@@ -177,7 +177,6 @@ TEST(ThreadPoolTest, Exception)
 TEST(ThreadPoolTest, NoException)
 {
     ThreadPool pool;
-    pool.handling_exceptions_in_destructors = false;
     pool.push([&](){
         throw std::runtime_error("ERROR");
     });

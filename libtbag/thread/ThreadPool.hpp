@@ -75,9 +75,6 @@ private:
     std::exception_ptr _exception;
 
 public:
-    std::atomic_bool handling_exceptions_in_destructors;
-
-public:
     ThreadPool(std::size_t size = 1U,
                bool wait_active = true,
                bool signal_handing = true);
