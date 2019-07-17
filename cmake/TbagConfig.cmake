@@ -405,7 +405,23 @@ endmacro ()
 #///
 #/// @param ... [in] message arguments.
 macro (tbag_config__find_thread)
+    ## https://cmake.org/cmake/help/v3.2/module/FindThreads.html
     find_package (Threads)
+
+    # CMAKE_THREAD_LIBS_INIT - the thread library
+
+    if (CMAKE_USE_SPROC_INIT)
+        set (USE_SPROC 1)
+    endif ()
+    if (CMAKE_USE_WIN32_THREADS_INIT)
+        set (USE_WIN32_THREADS 1)
+    endif ()
+    if (CMAKE_USE_PTHREADS_INIT)
+        set (USE_PTHREADS 1)
+    endif ()
+    if (CMAKE_HP_PTHREADS_INIT)
+        set (USE_HP_PTHREADS 1)
+    endif ()
 endmacro ()
 
 #/// Find thread package.

@@ -62,6 +62,12 @@
 /* COM library initialized successfully. */
 #cmakedefine HAVE_COINITIALIZEEX_FUNC
 
+/* Thread library */
+#cmakedefine USE_SPROC
+#cmakedefine USE_WIN32_THREADS
+#cmakedefine USE_PTHREADS
+#cmakedefine USE_HP_PTHREADS
+
 /* [SIMDPP] Instruction flags. */
 #cmakedefine SIMDPP_RUNNABLE_ARCH_X86_SSE2
 #cmakedefine SIMDPP_RUNNABLE_ARCH_X86_SSE3

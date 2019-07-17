@@ -16,6 +16,7 @@
 #endif
 
 #include <libtbag/config.h>
+#include <libtbag/config-ex.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/util/BufferInfo.hpp>
@@ -41,6 +42,10 @@ typedef intptr_t ssize_t;
 # include <netdb.h> // addrinfo
 #endif
 
+#if defined(USE_PTHREADS)
+#include <pthread.h>
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -63,6 +68,14 @@ using usock  = int;
 using ufd    = int;
 using uuser  = uint32_t;
 using ugroup = uint32_t;
+#endif
+
+#if defined(TBAG_PLATFORM_WINDOWS)
+using uthread = HANDLE;
+#elif defined(USE_PTHREADS)
+using uthread = pthread_t;
+#else
+using uthread = int;
 #endif
 
 using binf = util::binf;

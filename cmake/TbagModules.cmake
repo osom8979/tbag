@@ -236,6 +236,7 @@ macro (tbag_modules__apply_no_rtti)
 endmacro ()
 
 macro (tbag_modules__apply_thread)
+    # CMAKE_THREAD_LIBS_INIT - the thread library
     if (CMAKE_USE_SPROC_INIT)
     endif ()
     if (CMAKE_USE_WIN32_THREADS_INIT)
