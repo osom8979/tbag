@@ -92,6 +92,9 @@ public:
 
 public:
     std::vector<uthread> ids() const;
+
+public:
+    static bool existsThreadId(std::vector<uthread> const & ids, uthread const & id) TBAG_NOEXCEPT;
 };
 
 } // namespace thread

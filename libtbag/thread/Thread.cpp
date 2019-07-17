@@ -78,10 +78,15 @@ bool Thread::operator !=(Thread const & obj) const TBAG_NOEXCEPT
     return !equal(obj);
 }
 
+bool Thread::equal(uthread const & lh, uthread const & rh) TBAG_NOEXCEPT
+{
+    return ::uv_thread_equal(&lh, &rh);
+}
+
 bool Thread::equal(uthread const & t) const TBAG_NOEXCEPT
 {
     UvGuard const G(_lock);
-    return ::uv_thread_equal(&_thread, &t);
+    return Thread::equal(_thread, t);
 }
 
 bool Thread::equal(Thread const & t) const TBAG_NOEXCEPT

@@ -103,6 +103,16 @@ std::vector<uthread> ThreadGroup::ids() const
     return result;
 }
 
+bool ThreadGroup::existsThreadId(std::vector<uthread> const & ids, uthread const & id) TBAG_NOEXCEPT
+{
+    for (auto const & cursor : ids) {
+        if (Thread::equal(cursor, id)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace thread
 
 // --------------------

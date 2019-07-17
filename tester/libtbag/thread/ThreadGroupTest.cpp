@@ -27,16 +27,13 @@ TEST(ThreadGroupTest, Default)
     auto thread4 = group.createThread([&](){ while ((++t4) < TEST_NUMBER); });
     group.joinAll();
 
-    auto ids = group.ids();
+    auto const ids = group.ids();
     ASSERT_EQ(4, ids.size());
-    bool const THREAD1_FIND = std::find(ids.begin(), ids.end(), thread1) != ids.end();
-    bool const THREAD2_FIND = std::find(ids.begin(), ids.end(), thread2) != ids.end();
-    bool const THREAD3_FIND = std::find(ids.begin(), ids.end(), thread3) != ids.end();
-    bool const THREAD4_FIND = std::find(ids.begin(), ids.end(), thread4) != ids.end();
-    ASSERT_TRUE(THREAD1_FIND);
-    ASSERT_TRUE(THREAD2_FIND);
-    ASSERT_TRUE(THREAD3_FIND);
-    ASSERT_TRUE(THREAD4_FIND);
+    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread1));
+    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread2));
+    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread3));
+    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread4));
+    ASSERT_FALSE(ThreadGroup::existsThreadId(ids, Thread::getCurrentThreadId()));
 
     ASSERT_FALSE(group.existsCurrentThread());
     ASSERT_TRUE(group.exists(thread1));

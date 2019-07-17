@@ -92,11 +92,15 @@ public:
     State state() const;
 
 public:
-    bool operator ==(Thread const & obj) const TBAG_NOEXCEPT;
-    bool operator !=(Thread const & obj) const TBAG_NOEXCEPT;
+    static bool equal(uthread const & lh, uthread const & rh) TBAG_NOEXCEPT;
 
+public:
     bool equal(uthread const & t) const TBAG_NOEXCEPT;
     bool equal(Thread const & t) const TBAG_NOEXCEPT;
+
+public:
+    bool operator ==(Thread const & obj) const TBAG_NOEXCEPT;
+    bool operator !=(Thread const & obj) const TBAG_NOEXCEPT;
 
 public:
     static uthread getCurrentThreadId() TBAG_NOEXCEPT;
