@@ -33,12 +33,6 @@ TEST(ThreadGroupTest, Default)
     ASSERT_EQ(4, group.size());
     group.joinAll();
 
-    ASSERT_FALSE(group.existsCurrentThread());
-    ASSERT_TRUE(group.exists(thread1));
-    ASSERT_TRUE(group.exists(thread2));
-    ASSERT_TRUE(group.exists(thread3));
-    ASSERT_TRUE(group.exists(thread4));
-
     ASSERT_EQ(TEST_NUMBER, t1);
     ASSERT_EQ(TEST_NUMBER, t2);
     ASSERT_EQ(TEST_NUMBER, t3);
