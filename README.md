@@ -46,6 +46,7 @@ Tea-bag is Third party extension utility project.
 - date master-27d1e1e (MIT license)
 - lmdb bbc15ab (The OpenLDAP Public License)
 - civetweb master-2100e66 (MIT license)
+- asmjit master-5d40561 (zlib license)
 
 ## Inline libraries
 
