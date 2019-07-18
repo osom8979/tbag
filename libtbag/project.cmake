@@ -41,6 +41,7 @@ tbag_modules__apply_ext_sqlite3  ()
 tbag_modules__apply_ext_date     ()
 tbag_modules__apply_ext_lmdb     ()
 tbag_modules__apply_ext_civetweb ()
+tbag_modules__apply_ext_blend2d  ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()

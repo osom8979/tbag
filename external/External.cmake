@@ -662,3 +662,44 @@ else ()
 endif ()
 add_custom_target (civetweb DEPENDS ${civetweb_EXT_LIBRARIES})
 
+######################
+## Blend2d + asmjit ##
+######################
+
+set (asmjit_EXT_SOURCE_DIR    "${CMAKE_SOURCE_DIR}/external/asmjit")
+set (blend2d_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/blend2d")
+set (blend2d_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
+set (blend2d_EXT_HEADER       "${blend2d_EXT_INCLUDE_DIR}/blend2d.h")
+set (blend2d_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}blend2d${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (blend2d_EXT_LIBRARIES    "${blend2d_EXT_STATIC_LIB}")
+exists_files (blend2d_EXT_EXISTS ${blend2d_EXT_LIBRARIES} ${blend2d_EXT_HEADER})
+
+if (blend2d_EXT_EXISTS)
+    message (STATUS "Skip external/blend2d (Exists: ${blend2d_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/blend2d")
+    ExternalProject_Add (blend2d_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${blend2d_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DASMJIT_DIR=${asmjit_EXT_SOURCE_DIR}"
+                       "-DBLEND2D_DIR=${blend2d_EXT_SOURCE_DIR}"
+                       "-DBLEND2D_TEST=OFF"
+                       "-DBLEND2D_STATIC=ON"
+            #--Output lblend2ding-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (blend2d_ext_output blend2d_ext ${blend2d_EXT_LIBRARIES})
+endif ()
+add_custom_target (blend2d DEPENDS ${blend2d_EXT_LIBRARIES})
+
