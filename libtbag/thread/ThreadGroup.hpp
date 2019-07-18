@@ -76,25 +76,19 @@ public:
     void clear();
 
 public:
-    bool exists(uthread const & id) const;
+    bool exists(uthread const & tid) const;
     bool exists(Thread const & thread) const;
     bool existsCurrentThread() const;
 
 public:
     bool insert(SharedThread const & thread);
-    bool erase(uthread const & id);
+    bool erase(uthread const & tid);
 
 public:
-    uthread createThread(FunctionalThread::Callback const & cb, bool join_in_destructors = true);
+    uthread createThread(FunctionalThread::Callback const & cb);
 
 public:
     void joinAll(bool rethrow = false);
-
-public:
-    std::vector<uthread> ids() const;
-
-public:
-    static bool existsThreadId(std::vector<uthread> const & ids, uthread const & id) TBAG_NOEXCEPT;
 };
 
 } // namespace thread

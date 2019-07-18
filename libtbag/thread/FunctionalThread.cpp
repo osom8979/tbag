@@ -13,49 +13,19 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace thread {
 
-FunctionalThread::FunctionalThread(bool join_in_destructors) TBAG_NOEXCEPT
-        : Thread(join_in_destructors), _cb()
+FunctionalThread::FunctionalThread() TBAG_NOEXCEPT : _cb()
 {
     // EMPTY.
 }
 
-FunctionalThread::FunctionalThread(Callback const & cb, bool join_in_destructors)
-        : Thread(join_in_destructors), _cb(cb)
+FunctionalThread::FunctionalThread(Callback const & cb) : _cb(cb)
 {
     // EMPTY.
 }
 
-FunctionalThread::FunctionalThread(Callback && cb, bool join_in_destructors) TBAG_NOEXCEPT
-        : Thread(join_in_destructors), _cb(std::move(cb))
+FunctionalThread::FunctionalThread(Callback && cb) TBAG_NOEXCEPT : _cb(std::move(cb))
 {
     // EMPTY.
-}
-
-FunctionalThread::FunctionalThread(start_t, bool join_in_destructors)
-        : Thread(join_in_destructors), _cb()
-{
-    auto const code = run();
-    if (isFailure(code)) {
-        throw ErrException(code);
-    }
-}
-
-FunctionalThread::FunctionalThread(start_t, Callback const & cb, bool join_in_destructors)
-        : Thread(join_in_destructors), _cb(cb)
-{
-    auto const code = run();
-    if (isFailure(code)) {
-        throw ErrException(code);
-    }
-}
-
-FunctionalThread::FunctionalThread(start_t, Callback && cb, bool join_in_destructors)
-        : Thread(join_in_destructors), _cb(std::move(cb))
-{
-    auto const code = run();
-    if (isFailure(code)) {
-        throw ErrException(code);
-    }
 }
 
 FunctionalThread::~FunctionalThread()

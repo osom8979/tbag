@@ -45,12 +45,20 @@ public:
     using UvGuard = libtbag::lock::UvLockGuard<UvLock>;
 
 public:
-    struct start_t { /* EMPTY. */ };
+    TBAG_CONSTEXPR static std::size_t NO_ASSIGN_ID = 0;
 
 public:
-    TBAG_CONSTEXPR static start_t const start = {};
-
-public:
+    /**
+     * Thread state enumeration.
+     *
+     * @remarks
+     *  The state is moved from <code>READY -> CREATED -> RUNNING</code> -> DONE.
+     *
+     * @warning
+     *  It is not converted in the reverse direction.
+     *
+     * @translate{ko, 상태는 READY -> CREATED -> RUNNING -> DONE 순서로 이동한다. 역방향으로 변환되지 않는다.}
+     */
     enum class State
     {
         S_READY,
@@ -60,12 +68,28 @@ public:
     };
 
 private:
-    bool const JOIN_IN_DESTRUCTORS;
-
-private:
     UvLock mutable _lock;
+
+    /**
+     * @warning
+     *  After joining, the corresponding handle can not be used.
+     */
     uthread _thread;
+
+    /**
+     * The handle ID that can be used after joining.
+     */
+    std::size_t _id;
+
+    /**
+     * Current thread state.
+     */
     State _state;
+
+    /**
+     * Flag variable to prevent multiple joins.
+     */
+    bool _once_joined;
 
 private:
     std::exception_ptr _exception;
@@ -74,13 +98,8 @@ private:
     void * _opaque; ///< Internally, this value is not modified.
 
 public:
-    Thread(bool join_in_destructors = true) TBAG_NOEXCEPT;
-    Thread(start_t, bool join_in_destructors = true);
+    Thread() TBAG_NOEXCEPT;
     virtual ~Thread();
-
-public:
-    inline uthread id() const TBAG_NOEXCEPT
-    { return _thread; }
 
 public:
     inline void * getOpaque() const TBAG_NOEXCEPT
@@ -89,14 +108,24 @@ public:
     { _opaque = opaque; }
 
 public:
+    /**
+     * @warning
+     *  After the join, the value may change.
+     */
+    uthread tid() const;
+    std::size_t id() const;
     State state() const;
 
 public:
+    /**
+     * @warning
+     *  After the join, you should not use the comparison.
+     */
     static bool equal(uthread const & lh, uthread const & rh) TBAG_NOEXCEPT;
 
 public:
-    bool equal(uthread const & t) const TBAG_NOEXCEPT;
-    bool equal(Thread const & t) const TBAG_NOEXCEPT;
+    bool equal(uthread const & tid) const TBAG_NOEXCEPT;
+    bool equal(Thread const & thread) const TBAG_NOEXCEPT;
 
 public:
     bool operator ==(Thread const & obj) const TBAG_NOEXCEPT;

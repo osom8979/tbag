@@ -39,27 +39,28 @@ void __global_uv_thread_cb__(void * args) TBAG_NOEXCEPT
     thread->_lock.unlock();
 }
 
-Thread::Thread(bool join_in_destructors) TBAG_NOEXCEPT
-        : JOIN_IN_DESTRUCTORS(join_in_destructors), _thread(), _state(State::S_READY), _exception()
+Thread::Thread() TBAG_NOEXCEPT
+        : _thread(), _id(NO_ASSIGN_ID), _state(State::S_READY), _exception(),
+          _once_joined(false)
 {
     // EMPTY.
 }
 
-Thread::Thread(start_t, bool join_in_destructors) : Thread(join_in_destructors)
-{
-    auto const code = run();
-    if (isFailure(code)) {
-        throw ErrException(code);
-    }
-}
-
 Thread::~Thread()
 {
-    if (JOIN_IN_DESTRUCTORS && joinable()) {
-        join(false); // Destructor is an implicit 'NOEXCEPT' state.
-    }
-    // S_READY is E_ESRCH
-    // S_DONE is no need to join.
+    join(false); // Note: Destructor is an implicit 'NOEXCEPT' state.
+}
+
+uthread Thread::tid() const
+{
+    UvGuard const G(_lock);
+    return _thread;
+}
+
+std::size_t Thread::id() const
+{
+    UvGuard const G(_lock);
+    return _id;
 }
 
 State Thread::state() const
@@ -112,6 +113,7 @@ Err Thread::run()
     }
     auto const code = ::uv_thread_create(&_thread, &__global_uv_thread_cb__, this);
     if (code == 0) {
+        _id = reinterpret_cast<std::size_t>(_thread);
         _state = State::S_CREATED;
     }
     return convertUvErrorToErr(code);
@@ -133,6 +135,7 @@ Err Thread::run(std::size_t stack_size)
 
     auto const code = ::uv_thread_create_ex(&_thread, &options, &__global_uv_thread_cb__, this);
     if (code == 0) {
+        _id = reinterpret_cast<std::size_t>(_thread);
         _state = State::S_CREATED;
     }
     return convertUvErrorToErr(code);
@@ -147,16 +150,25 @@ bool Thread::joinable() const
 Err Thread::join(bool rethrow)
 {
     _lock.lock();
-    auto const STATE = _state;
+    auto const state = _state;
+    auto const joined = _once_joined;
+    _once_joined = true;
     _lock.unlock();
 
-    if (STATE == State::S_READY) {
+    if (state == State::S_READY) {
         return E_ILLSTATE;
     }
+    if (joined) {
+        return E_ALREADY;
+    }
 
+    // [WARNING]
+    //  The thread resource is freed at this point.
+    //  After joining in Windows, the corresponding handle value disappears.
     auto const code = ::uv_thread_join(&_thread);
-    if (rethrow && code == 0) {
-        if (_exception) {
+    if (code == 0) {
+        // After joining, it is accessible without thread contention.
+        if (rethrow && _exception) {
             std::rethrow_exception(_exception);
         }
     }

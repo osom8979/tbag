@@ -31,10 +31,10 @@ void ThreadGroup::clear()
     _threads.clear();
 }
 
-bool ThreadGroup::exists(uthread const & id) const
+bool ThreadGroup::exists(uthread const & tid) const
 {
     for (auto & t : _threads) {
-        if (t && t->equal(id)) {
+        if (t && t->equal(tid)) {
             return true;
         }
     }
@@ -43,7 +43,7 @@ bool ThreadGroup::exists(uthread const & id) const
 
 bool ThreadGroup::exists(Thread const & thread) const
 {
-    return exists(thread.id());
+    return exists(thread.tid());
 }
 
 bool ThreadGroup::existsCurrentThread() const
@@ -56,13 +56,13 @@ bool ThreadGroup::insert(SharedThread const & thread)
     return _threads.insert(thread).second;
 }
 
-bool ThreadGroup::erase(uthread const & id)
+bool ThreadGroup::erase(uthread const & tid)
 {
     auto itr = _threads.begin();
     auto const end = _threads.end();
     for (; itr != end; ++itr) {
         auto shared_thread = *itr;
-        if (shared_thread && shared_thread->id() == id) {
+        if (shared_thread && shared_thread->tid() == tid) {
             break;
         }
     }
@@ -73,12 +73,12 @@ bool ThreadGroup::erase(uthread const & id)
     return true;
 }
 
-uthread ThreadGroup::createThread(FunctionalThread::Callback const & cb, bool join_in_destructors)
+uthread ThreadGroup::createThread(FunctionalThread::Callback const & cb)
 {
-    auto thread = std::make_shared<FunctionalThread>(cb, join_in_destructors);
+    auto thread = std::make_shared<FunctionalThread>(cb);
     assert(static_cast<bool>(thread));
     if (isSuccess(thread->run()) && insert(thread)) {
-        return thread->id();
+        return thread->tid();
     }
     return uthread();
 }
@@ -90,27 +90,6 @@ void ThreadGroup::joinAll(bool rethrow)
             t->join(rethrow);
         }
     }
-}
-
-std::vector<uthread> ThreadGroup::ids() const
-{
-    std::vector<uthread> result;
-    for (auto & t : _threads) {
-        if (t) {
-            result.push_back(t->id());
-        }
-    }
-    return result;
-}
-
-bool ThreadGroup::existsThreadId(std::vector<uthread> const & ids, uthread const & id) TBAG_NOEXCEPT
-{
-    for (auto const & cursor : ids) {
-        if (Thread::equal(cursor, id)) {
-            return true;
-        }
-    }
-    return false;
 }
 
 } // namespace thread

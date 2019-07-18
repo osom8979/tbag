@@ -25,15 +25,13 @@ TEST(ThreadGroupTest, Default)
     auto thread2 = group.createThread([&](){ while ((++t2) < TEST_NUMBER); });
     auto thread3 = group.createThread([&](){ while ((++t3) < TEST_NUMBER); });
     auto thread4 = group.createThread([&](){ while ((++t4) < TEST_NUMBER); });
+    ASSERT_TRUE(group.exists(thread1));
+    ASSERT_TRUE(group.exists(thread2));
+    ASSERT_TRUE(group.exists(thread3));
+    ASSERT_TRUE(group.exists(thread4));
+    ASSERT_FALSE(group.exists(Thread::getCurrentThreadId()));
+    ASSERT_EQ(4, group.size());
     group.joinAll();
-
-    auto const ids = group.ids();
-    ASSERT_EQ(4, ids.size());
-    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread1));
-    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread2));
-    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread3));
-    ASSERT_TRUE(ThreadGroup::existsThreadId(ids, thread4));
-    ASSERT_FALSE(ThreadGroup::existsThreadId(ids, Thread::getCurrentThreadId()));
 
     ASSERT_FALSE(group.existsCurrentThread());
     ASSERT_TRUE(group.exists(thread1));
