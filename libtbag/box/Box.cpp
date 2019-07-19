@@ -149,6 +149,24 @@ Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
     return reshape_vargs(type, reshape_device, reshape_ext, rank, ap);
 }
 
+Err Box::reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+{
+    return box_resize(_data.get(), type, device, ext, rank, dims);
+}
+
+Err Box::reshape_dims(btype type, ui32 rank, ui32 const * dims)
+{
+    btype reshape_device = device_cpu();
+    ui64 const * reshape_ext = nullptr;
+    if (exists()) {
+        if (!is_device_none()) {
+            reshape_device = device();
+        }
+        reshape_ext = ext();
+    }
+    return reshape_dims(type, reshape_device, reshape_ext, rank, dims);
+}
+
 Box Box::shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
 {
     va_list ap;
@@ -183,6 +201,28 @@ Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
     Box result;
     assert(result);
     auto const CODE = result.reshape_vargs(type, rank, ap);
+    if (isFailure(CODE)) {
+        return Box(nullptr);
+    }
+    return result;
+}
+
+Box Box::shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+{
+    Box result;
+    assert(result);
+    auto const CODE = result.reshape_dims(type, device, ext, rank, dims);
+    if (isFailure(CODE)) {
+        return Box(nullptr);
+    }
+    return result;
+}
+
+Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
+{
+    Box result;
+    assert(result);
+    auto const CODE = result.reshape_dims(type, rank, dims);
     if (isFailure(CODE)) {
         return Box(nullptr);
     }

@@ -14,6 +14,7 @@
 #include <libtbag/box/details/box_cuda.hpp>
 #include <libtbag/box/details/box_fbs.hpp>
 
+#include <cassert>
 #include <cstring>
 
 // -------------------

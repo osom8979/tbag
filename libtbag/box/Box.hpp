@@ -26,6 +26,7 @@
 
 #include <type_traits>
 #include <initializer_list>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
@@ -219,15 +220,11 @@ public:
 public:
     template <typename T>
     TBAG_CONSTEXPR inline static btype get_btype() TBAG_NOEXCEPT
-    {
-        return static_cast<btype>(BoxTypeInfo<T>::value);
-    }
+    { return static_cast<btype>(BoxTypeInfo<typename libtbag::remove_cr<T>::type>::value); }
 
     template <typename T>
     inline static bool is_btype_equals(btype type) TBAG_NOEXCEPT
-    {
-        return type == get_btype<T>();
-    }
+    { return type == get_btype<T>(); }
 
 public:
     TBAG_CONSTEXPR static btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
@@ -440,41 +437,48 @@ public:
     Err reshape_args(btype type, ui32 rank, ...);
     Err reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
     Err reshape_vargs(btype type, ui32 rank, va_list ap);
+    Err reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
+    Err reshape_dims(btype type, ui32 rank, ui32 const * dims);
 
     template <typename T, typename ... Args>
-    Err reshapeEx(bdev device, ui64 const * ext, Args && ... args) TBAG_NOEXCEPT
-    {
-        return reshape_args(get_btype<T>(), device, ext, sizeof...(Args), std::forward<Args>(args) ...);
-    }
+    Err reshapeEx(bdev device, ui64 const * ext, Args && ... args)
+    { return reshape_args(get_btype<T>(), device, ext, sizeof...(Args), std::forward<Args>(args) ...); }
 
     template <typename T, typename ... Args>
-    Err reshape(Args && ... args) TBAG_NOEXCEPT
-    {
-        return reshape_args(get_btype<T>(), sizeof...(Args), std::forward<Args>(args) ...);
-    }
+    Err reshape(Args && ... args)
+    { return reshape_args(get_btype<T>(), sizeof...(Args), std::forward<Args>(args) ...); }
+
+    template <typename T>
+    Err reshapeDims(bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+    { return reshape_dims(get_btype<T>(), device, ext, rank, dims); }
+
+    template <typename T>
+    Err reshapeDims(ui32 rank, ui32 const * dims)
+    { return reshape_dims(get_btype<T>(), rank, dims); }
 
 public:
     static Box shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
     static Box shape_args(btype type, ui32 rank, ...);
     static Box shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
     static Box shape_vargs(btype type, ui32 rank, va_list ap);
+    static Box shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
+    static Box shape_dims(btype type, ui32 rank, ui32 const * dims);
 
     template <typename T, typename ... Args>
     static Box shapeEx(bdev device, ui64 const * ext, Args && ... args)
-    {
-        return shape_args(get_btype<typename libtbag::remove_cr<T>::type>(),
-                          device, ext,
-                          sizeof...(Args),
-                          std::forward<Args>(args) ...);
-    }
+    { return shape_args(get_btype<T>(), device, ext, sizeof...(Args), std::forward<Args>(args) ...); }
 
     template <typename T, typename ... Args>
     static Box shape(Args && ... args)
-    {
-        return shape_args(get_btype<typename libtbag::remove_cr<T>::type>(),
-                          sizeof...(Args),
-                          std::forward<Args>(args) ...);
-    }
+    { return shape_args(get_btype<T>(), sizeof...(Args), std::forward<Args>(args) ...); }
+
+    template <typename T>
+    static Box shapeDims(bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+    { return shape_dims(get_btype<T>(), device, ext, rank, dims); }
+
+    template <typename T>
+    static Box shapeDims(ui32 rank, ui32 const * dims)
+    { return shape_dims(get_btype<T>(), rank, dims); }
 
 public:
     Err copyFromData(Box const & box);
@@ -491,9 +495,7 @@ public:
 
     template <typename T>
     Box asType() const
-    {
-        return asType(get_btype<typename libtbag::remove_cr<T>::type>());
-    }
+    { return asType(get_btype<T>()); }
 
 public:
     template <typename T>
