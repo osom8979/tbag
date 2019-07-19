@@ -896,6 +896,7 @@ endmacro ()
 macro (tbag_modules__apply_ext_blend2d)
     list (APPEND TBAG_PROJECT_DEPENDENCIES blend2d)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${blend2d_EXT_INCLUDE_DIR})
+    tbag_modules__append_definitions (BL_STATIC)
     tbag_modules__add_whole_archive (${blend2d_EXT_STATIC_LIB})
 endmacro ()
 

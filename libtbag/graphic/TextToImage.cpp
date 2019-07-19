@@ -9,7 +9,6 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/typography/font/Ngc.hpp>
 
-#define BL_STATIC
 #include <blend2d.h>
 
 // -------------------
