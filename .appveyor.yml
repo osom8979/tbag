@@ -68,7 +68,7 @@ before_build:
 build_script:
   - cmd: echo Running build...
   - cmd: cd "%TBAG_BUILD%"
-  - cmd: cmake --build . --target tester -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: cmake --build . --target tbag -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 #---------------------------------#
 #       tests configuration       #
@@ -78,7 +78,7 @@ build_script:
 test_script:
   - cmd: echo Running test...
   - cmd: cd "%TBAG_BUILD%\\Debug"
-  - cmd: tester.exe
+  #- cmd: tester.exe
 
 #---------------------------------#
 #         notifications           #
