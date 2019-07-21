@@ -19,6 +19,9 @@ TEST(FormatTest, Format)
     ASSERT_STREQ("1.34", format("%.2f", static_cast<double>(1.344555)).c_str());
     ASSERT_STREQ("TEST/1234", format("%s/%d", "TEST", 1234).c_str());
     ASSERT_STREQ("TEST/1234", fformat("{}/{}", "TEST", 1234).c_str());
+
+    ASSERT_STREQ("0xA1B2C3D4", libtbag::string::fformat("0x{:0>8X}", 0xA1B2C3D4).c_str());
+    ASSERT_STREQ("0x00B2C3D4", libtbag::string::fformat("0x{:0>8X}", 0xB2C3D4).c_str());
 }
 
 TEST(FormatTest, FormatClass)

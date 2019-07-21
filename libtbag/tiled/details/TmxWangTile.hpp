@@ -52,18 +52,30 @@ struct TBAG_API TmxWangTile : protected libtbag::dom::xml::XmlHelper
      */
     TBAG_CONSTEXPR static char const * const ATT_WANGID = "wangid";
 
+    using WangId = std::uint32_t;
+
     int tileid;
-    std::uint32_t wangid;
+    WangId wangid;
 
     TmxWangTile();
-    TmxWangTile(int t, int w);
-    virtual ~TmxWangTile();
+    TmxWangTile(int t, WangId w);
+    ~TmxWangTile();
 
     Err read(Element const & elem);
     Err read(std::string const & xml);
 
     Err write(Element & elem) const;
     Err write(std::string & xml) const;
+
+    int getCornerRight() const TBAG_NOEXCEPT;
+    int getCornerBottom() const TBAG_NOEXCEPT;
+    int getCornerLeft() const TBAG_NOEXCEPT;
+    int getCornerTop() const TBAG_NOEXCEPT;
+
+    int getEdgeTopRight() const TBAG_NOEXCEPT;
+    int getEdgeBottomRight() const TBAG_NOEXCEPT;
+    int getEdgeBottomLeft() const TBAG_NOEXCEPT;
+    int getEdgeTopLeft() const TBAG_NOEXCEPT;
 };
 
 } // namespace details
