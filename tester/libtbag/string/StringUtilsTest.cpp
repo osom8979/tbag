@@ -410,6 +410,37 @@ TEST(StringUtilsTest, ToValue)
     ASSERT_FLOAT_EQ(200, toValue<      float>("200"));
     ASSERT_FLOAT_EQ(201, toValue<     double>("201"));
     ASSERT_FLOAT_EQ(202, toValue<long double>("202"));
+
+    unsigned int value1;
+    unsigned int value2;
+    unsigned int value3;
+    unsigned int value4;
+    ASSERT_TRUE(toVal("0xA1B2C3D4", value1, nullptr, 16));
+    ASSERT_TRUE(toVal("FF0011DD", value2, nullptr, 16));
+    ASSERT_TRUE(toVal("1", value3, nullptr, 16));
+    ASSERT_TRUE(toVal("F0000000", value4, nullptr, 16));
+    ASSERT_EQ(0xA1B2C3D4, value1);
+    ASSERT_EQ(0xFF0011DD, value2);
+    ASSERT_EQ(1, value3);
+    ASSERT_EQ(0xF0000000, value4);
+}
+
+TEST(StringUtilsTest, ToHexString)
+{
+    ASSERT_STREQ("FF", toHexString((unsigned char)0xFF, true).c_str());
+    ASSERT_STREQ("ff", toHexString((unsigned char)0xFF, false).c_str());
+
+    ASSERT_STREQ("FF", toHexString((unsigned short)0xFF, true).c_str());
+    ASSERT_STREQ("ff", toHexString((unsigned short)0xFF, false).c_str());
+
+    ASSERT_STREQ("FF", toHexString((unsigned int)0xFF, true).c_str());
+    ASSERT_STREQ("ff", toHexString((unsigned int)0xFF, false).c_str());
+
+    ASSERT_STREQ("FF", toHexString((unsigned long)0xFF, true).c_str());
+    ASSERT_STREQ("ff", toHexString((unsigned long)0xFF, false).c_str());
+
+    ASSERT_STREQ("FF", toHexString((unsigned long long)0xFF, true).c_str());
+    ASSERT_STREQ("ff", toHexString((unsigned long long)0xFF, false).c_str());
 }
 
 TEST(StringUtilsTest, ToByteSize)

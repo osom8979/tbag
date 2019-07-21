@@ -250,6 +250,16 @@ TBAG_API bool toVal(std::string const & str,             double & to, std::size_
 TBAG_API bool toVal(std::string const & str,        long double & to, std::size_t * index = nullptr, int base = 10);
 
 template <typename T>
+inline T toValue(std::string const & str, T default_value = T(), int base = 10)
+{
+    T result;
+    if (toVal(str, result, nullptr, base)) {
+        return result;
+    }
+    return default_value;
+}
+
+template <typename T>
 inline std::string toString(T val)
 {
     return std::to_string(val);
@@ -260,15 +270,11 @@ inline std::string toString(bool val)
     return std::to_string(val ? 1 : 0);
 }
 
-template <typename T>
-inline T toValue(std::string const & str, T default_value = T(), int base = 10)
-{
-    T result;
-    if (toVal(str, result, nullptr, base)) {
-        return result;
-    }
-    return default_value;
-}
+TBAG_API std::string toHexString(unsigned char val, bool upper = true);
+TBAG_API std::string toHexString(unsigned short val, bool upper = true);
+TBAG_API std::string toHexString(unsigned int val, bool upper = true);
+TBAG_API std::string toHexString(unsigned long val, bool upper = true);
+TBAG_API std::string toHexString(unsigned long long val, bool upper = true);
 
 TBAG_API std::size_t toByteSize(std::string const & str);
 

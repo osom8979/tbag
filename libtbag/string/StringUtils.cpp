@@ -11,6 +11,7 @@
 
 #include <cctype>
 #include <cassert>
+#include <cstdio>
 
 #include <algorithm>
 #include <random>
@@ -583,6 +584,40 @@ bool toVal(std::string const & str,              float & to, std::size_t * index
 bool toVal(std::string const & str,             double & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stod , index); }
 bool toVal(std::string const & str,        long double & to, std::size_t * index, int base) { _TBAG_STRING_TO_FLOATING_IMPLEMENT(str, to, std::stold, index); }
 // clang-format on
+
+template <typename T>
+static std::string __to_hex_string(char const * format, T val)
+{
+    AddressHexString buffer;
+    auto const length = ::snprintf(buffer.data(), buffer.size(), format, val);
+    assert(length >= 1);
+    return std::string(buffer.data(), buffer.data() + length);
+}
+
+std::string toHexString(unsigned char val, bool upper)
+{
+    return __to_hex_string(upper ? "%hhX" : "%hhx", val);
+}
+
+std::string toHexString(unsigned short val, bool upper)
+{
+    return __to_hex_string(upper ? "%hX" : "%hx", val);
+}
+
+std::string toHexString(unsigned int val, bool upper)
+{
+    return __to_hex_string(upper ? "%X" : "%x", val);
+}
+
+std::string toHexString(unsigned long val, bool upper)
+{
+    return __to_hex_string(upper ? "%lX" : "%lx", val);
+}
+
+std::string toHexString(unsigned long long val, bool upper)
+{
+    return __to_hex_string(upper ? "%llX" : "%llx", val);
+}
 
 std::size_t toByteSize(std::string const & str)
 {
