@@ -47,11 +47,21 @@ TEST(TmxWangSetTest, ReadAndWrite)
 
     TmxWangSet wang_set;
     ASSERT_EQ(E_SUCCESS, wang_set.read(TEST_XML));
+    ASSERT_STREQ("Path and Grass", wang_set.name.c_str());
+    ASSERT_EQ(-1, wang_set.tile);
+    ASSERT_EQ(0, wang_set.wang_corner_colors.size());
+    ASSERT_EQ(2, wang_set.wang_edge_colors.size());
+    ASSERT_EQ(16, wang_set.wang_tiles.size());
 
     std::string xml;
     ASSERT_EQ(E_SUCCESS, wang_set.write(xml));
 
     TmxWangSet wang_set2;
     ASSERT_EQ(E_SUCCESS, wang_set2.read(xml));
+    ASSERT_STREQ("Path and Grass", wang_set2.name.c_str());
+    ASSERT_EQ(-1, wang_set2.tile);
+    ASSERT_EQ(0, wang_set2.wang_corner_colors.size());
+    ASSERT_EQ(2, wang_set2.wang_edge_colors.size());
+    ASSERT_EQ(16, wang_set2.wang_tiles.size());
 }
 

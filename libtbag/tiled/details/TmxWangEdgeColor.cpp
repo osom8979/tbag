@@ -44,7 +44,7 @@ Err TmxWangEdgeColor::read(Element const & elem)
 
     std::string color_text;
     optAttr(elem, ATT_COLOR, color_text);
-    color.fromString(color_text);
+    color.fromRgb24String(color_text);
 
     optAttr(elem, ATT_TILE, tile);
     optAttr(elem, ATT_PROBABILITY, probability);
@@ -70,7 +70,7 @@ Err TmxWangEdgeColor::write(Element & elem) const
         return E_ILLARGS;
     }
     setAttr(elem, ATT_NAME, name);
-    setAttr(elem, ATT_COLOR, color.toString());
+    setAttr(elem, ATT_COLOR, color.toRgb24String());
     setAttr(elem, ATT_TILE, tile);
     setAttr(elem, ATT_PROBABILITY, probability);
     return E_SUCCESS;

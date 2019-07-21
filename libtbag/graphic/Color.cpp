@@ -37,6 +37,19 @@ std::string convertRgb24ToHexString(Rgb24 const & c)
     };
 }
 
+std::string convertRgb24ToHexString(Rgb32 const & c)
+{
+    using namespace libtbag::string;
+    return { COLOR_STRING_PREFIX,
+             convertHalfByteToHexChar(c.r>>4),
+             convertHalfByteToHexChar(c.r),
+             convertHalfByteToHexChar(c.g>>4),
+             convertHalfByteToHexChar(c.g),
+             convertHalfByteToHexChar(c.b>>4),
+             convertHalfByteToHexChar(c.b)
+    };
+}
+
 std::string convertRgb32ToHexString(Rgb32 const & c)
 {
     using namespace libtbag::string;

@@ -28,11 +28,19 @@ TEST(TmxWangCornerColorTest, ReadAndWrite)
 
     TmxWangCornerColor wang_corner_color;
     ASSERT_EQ(E_SUCCESS, wang_corner_color.read(TEST_XML));
+    ASSERT_STREQ("Stone", wang_corner_color.name.c_str());
+    ASSERT_STREQ("#FFEFAF", wang_corner_color.color.toRgb24String().c_str());
+    ASSERT_EQ(17, wang_corner_color.tile);
+    ASSERT_FLOAT_EQ(0.25, wang_corner_color.probability);
 
     std::string xml;
     ASSERT_EQ(E_SUCCESS, wang_corner_color.write(xml));
 
     TmxWangCornerColor wang_corner_color2;
     ASSERT_EQ(E_SUCCESS, wang_corner_color2.read(xml));
+    ASSERT_STREQ("Stone", wang_corner_color2.name.c_str());
+    ASSERT_STREQ("#FFEFAF", wang_corner_color2.color.toRgb24String().c_str());
+    ASSERT_EQ(17, wang_corner_color2.tile);
+    ASSERT_FLOAT_EQ(0.25, wang_corner_color2.probability);
 }
 

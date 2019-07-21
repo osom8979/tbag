@@ -28,11 +28,19 @@ TEST(TmxWangEdgeColorTest, ReadAndWrite)
 
     TmxWangEdgeColor wang_edge_color;
     ASSERT_EQ(E_SUCCESS, wang_edge_color.read(TEST_XML));
+    ASSERT_STREQ("Grass", wang_edge_color.name.c_str());
+    ASSERT_STREQ("#97FF67", wang_edge_color.color.toRgb24String().c_str());
+    ASSERT_EQ(80, wang_edge_color.tile);
+    ASSERT_FLOAT_EQ(1, wang_edge_color.probability);
 
     std::string xml;
     ASSERT_EQ(E_SUCCESS, wang_edge_color.write(xml));
 
     TmxWangEdgeColor wang_edge_color2;
     ASSERT_EQ(E_SUCCESS, wang_edge_color2.read(xml));
+    ASSERT_STREQ("Grass", wang_edge_color2.name.c_str());
+    ASSERT_STREQ("#97FF67", wang_edge_color2.color.toRgb24String().c_str());
+    ASSERT_EQ(80, wang_edge_color2.tile);
+    ASSERT_FLOAT_EQ(1, wang_edge_color2.probability);
 }
 

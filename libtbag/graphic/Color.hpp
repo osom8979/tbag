@@ -105,6 +105,7 @@ TBAG_API Rgb32 convertRgb24ToRgb32(Rgb24 const & src) TBAG_NOEXCEPT;
 TBAG_API Rgb24 convertRgb32ToRgb24(Rgb32 const & src) TBAG_NOEXCEPT;
 
 TBAG_API std::string convertRgb24ToHexString(Rgb24 const & c);
+TBAG_API std::string convertRgb24ToHexString(Rgb32 const & c);
 TBAG_API std::string convertRgb32ToHexString(Rgb32 const & c);
 TBAG_API std::string convertRgb32ToArgbHexString(Rgb32 const & c);
 
@@ -321,6 +322,16 @@ struct Rgb32
 
     std::string toString() const
     {
+        return toRgb32String();
+    }
+
+    std::string toRgb24String() const
+    {
+        return convertRgb24ToHexString(*this);
+    }
+
+    std::string toRgb32String() const
+    {
         return convertRgb32ToHexString(*this);
     }
 
@@ -330,6 +341,25 @@ struct Rgb32
     }
 
     Err fromString(std::string const & text)
+    {
+        return fromRgb32String(text);
+    }
+
+    Err fromRgb24String(std::string const & text)
+    {
+        Rgb24 rgb24;
+        auto const code = convertHexStringToRgb24(text, rgb24);
+        if (isFailure(code)) {
+            return code;
+        }
+        r = rgb24.r;
+        g = rgb24.g;
+        b = rgb24.b;
+        a = channel_max();
+        return E_SUCCESS;
+    }
+
+    Err fromRgb32String(std::string const & text)
     {
         return convertHexStringToRgb32(text, *this);
     }

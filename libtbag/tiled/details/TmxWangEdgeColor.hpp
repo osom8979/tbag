@@ -58,7 +58,7 @@ struct TBAG_API TmxWangEdgeColor : protected libtbag::dom::xml::XmlHelper
     std::string name;
     Color color;
     int tile;
-    int probability;
+    float probability;
 
     TmxWangEdgeColor();
     TmxWangEdgeColor(std::string const & n, Color const & c, int t, int p);
