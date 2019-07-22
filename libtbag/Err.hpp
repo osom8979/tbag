@@ -51,7 +51,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_QUEUE                  , 10014, "Empty queue"                                            )\
     _TBAG_XX(_NREADY                 , 10015, "Not ready"                                              )\
     _TBAG_XX(_UNSUPOP                , 10016, "Unsupported operation"                                  )\
-    _TBAG_XX(_EINIT                  , 10017, "Initialize error"                                       )\
+    _TBAG_XX(_INIT                   , 10017, "Initialize error"                                       )\
     _TBAG_XX(_RDERR                  , 10018, "Unknown Read error"                                     )\
     _TBAG_XX(_WRERR                  , 10019, "Unknown Write error"                                    )\
     _TBAG_XX(_READONLY               , 10020, "Read only error"                                        )\

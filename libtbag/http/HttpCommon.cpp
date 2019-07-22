@@ -690,7 +690,7 @@ std::string toStatusLine(HttpCommon const & common, HttpBaseResponse const & res
     std::stringstream ss;
     ss << toVersionString(common) << SP
        << response.code << SP
-       << (response.reason.empty() ? getErrName(E_EINIT) : response.reason);
+       << (response.reason.empty() ? getErrName(E_INIT) : response.reason);
     return ss.str();
 }
 

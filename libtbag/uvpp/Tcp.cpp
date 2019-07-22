@@ -236,7 +236,7 @@ Err initCommonClientSock(Tcp & tcp, ConnectRequest & request, struct sockaddr co
 {
     if (tcp.isInit() == false) {
         tDLogE("initCommonClientSock() tcp is not initialized.");
-        return E_EINIT;
+        return E_INIT;
     }
 
     Err const CODE = tcp.connect(request, addr);
@@ -262,7 +262,7 @@ Err initCommonServerSock(Tcp & tcp, struct sockaddr const * addr)
 {
     if (tcp.isInit() == false) {
         tDLogE("initCommonServerSock() tcp is not initialized.");
-        return E_EINIT;
+        return E_INIT;
     }
 
     Err const BIND_CODE = tcp.bind(addr);

@@ -198,7 +198,7 @@ Err TrueType::loadFromMemory(char const * buffer, std::size_t size)
     if (_impl->init(buffer, size)) {
         return E_SUCCESS;
     }
-    return E_EINIT;
+    return E_INIT;
 }
 
 Err TrueType::loadFromMemory(Buffer const & buffer)
