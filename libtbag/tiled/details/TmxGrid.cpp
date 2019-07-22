@@ -7,7 +7,6 @@
 
 #include <libtbag/tiled/details/TmxGrid.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cstring>
 #include <cassert>
@@ -72,7 +71,7 @@ Err TmxGrid::read(Element const & elem)
     optAttr(elem, ATT_ORIENTATION, orientation_text);
     orientation = getOrientation(orientation_text);
     if (orientation == Orientation::NONE) {
-        tDLogW("TmxGrid::read() Unknown Type value: {}", orientation_text);
+        // Unknown Type value.
     }
 
     return E_SUCCESS;

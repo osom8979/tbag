@@ -7,7 +7,6 @@
 
 #include <libtbag/tiled/details/TmxProperty.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cstring>
 #include <cassert>
@@ -170,7 +169,7 @@ Err TmxProperty::read(Element const & elem)
     optAttr(elem, ATT_TYPE, type_text, VAL_STRING);
     type = getType(type_text);
     if (type == Type::NONE) {
-        tDLogW("TmxProperty::read() Unknown Type value: {}", type_text);
+        // Unknown Type value.
     }
 
     return E_SUCCESS;

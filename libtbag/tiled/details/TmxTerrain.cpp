@@ -1,11 +1,11 @@
 /**
- * @file   TmxEllipse.cpp
- * @brief  TmxEllipse class implementation.
+ * @file   TmxTerrain.cpp
+ * @brief  TmxTerrain class implementation.
  * @author zer0
- * @date   2019-06-23
+ * @date   2019-07-22
  */
 
-#include <libtbag/tiled/details/TmxEllipse.hpp>
+#include <libtbag/tiled/details/TmxTerrain.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cstring>
@@ -18,34 +18,42 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxEllipse::TmxEllipse() : x(), y(), width(), height()
+TmxTerrain::TmxTerrain()
 {
     // EMPTY.
 }
 
-TmxEllipse::TmxEllipse(int x_, int y_, int w_, int h_) : x(x_), y(y_), width(w_), height(h_)
+TmxTerrain::TmxTerrain(std::string const & n, int t, Properties const & p)
+        : name(n), tile(t), properties(p)
 {
     // EMPTY.
 }
 
-TmxEllipse::~TmxEllipse()
+TmxTerrain::~TmxTerrain()
 {
     // EMPTY.
 }
 
-Err TmxEllipse::read(Element const & elem)
+Err TmxTerrain::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    optAttr(elem, ATT_X, x);
-    optAttr(elem, ATT_Y, y);
-    optAttr(elem, ATT_WIDTH, width);
-    optAttr(elem, ATT_HEIGHT, height);
+
+    optAttr(elem, ATT_NAME, name);
+    optAttr(elem, ATT_TILE, tile);
+
+    foreachElement(elem, TmxProperty::TAG_NAME, [&](Element const & e){
+        TmxProperty property;
+        if (isSuccess(property.read(e))) {
+            properties.push_back(std::move(property));
+        }
+    });
+
     return E_SUCCESS;
 }
 
-Err TmxEllipse::read(std::string const & xml)
+Err TmxTerrain::read(std::string const & xml)
 {
     Document doc;
     auto const CODE = readFromXmlText(doc, xml);
@@ -57,19 +65,25 @@ Err TmxEllipse::read(std::string const & xml)
     return read(*elem);
 }
 
-Err TmxEllipse::write(Element & elem) const
+Err TmxTerrain::write(Element & elem) const
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
-    setAttr(elem, ATT_X, x);
-    setAttr(elem, ATT_Y, y);
-    setAttr(elem, ATT_WIDTH, width);
-    setAttr(elem, ATT_HEIGHT, height);
+
+    setAttr(elem, ATT_NAME, name);
+    setAttr(elem, ATT_TILE, tile);
+
+    for (auto & property : properties) {
+        newElement(elem, TmxProperty::TAG_NAME, [&](Element & p){
+            property.write(p);
+        });
+    }
+
     return E_SUCCESS;
 }
 
-Err TmxEllipse::write(std::string & xml) const
+Err TmxTerrain::write(std::string & xml) const
 {
     Document doc;
     auto * new_elem = newElement(doc, TAG_NAME);

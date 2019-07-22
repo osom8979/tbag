@@ -6,7 +6,10 @@
  */
 
 #include <libtbag/tiled/details/TmxText.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
+
+#include <cstring>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -147,14 +150,14 @@ Err TmxText::read(Element const & elem)
     optAttr(elem, ATT_HALIGN, halign_text, VAL_DEFAULT_HALIGN);
     halign = getHorizontalAlignment(halign_text);
     if (halign == HorizontalAlignment::NONE) {
-        tDLogW("TmxText::read() Unknown HorizontalAlignment value: {}", halign_text);
+        // Unknown HorizontalAlignment value.
     }
 
     std::string valign_text;
     optAttr(elem, ATT_VALIGN, valign_text, VAL_DEFAULT_VALIGN);
     valign = getVerticalAlignment(valign_text);
     if (valign == VerticalAlignment::NONE) {
-        tDLogW("TmxText::read() Unknown VerticalAlignment value: {}", valign_text);
+        // Unknown VerticalAlignment value.
     }
 
     data = text(elem);

@@ -7,7 +7,6 @@
 
 #include <libtbag/tiled/details/TmxPointsCommon.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cstring>
 #include <cassert>
