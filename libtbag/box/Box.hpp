@@ -172,16 +172,41 @@ struct make_egg_type : public __make_egg_type<T, std::is_unsigned<T>::value, siz
     using original_type = T;
 };
 
+/**
+ * The following applies:
+ *  - Remove <code>const</code> decoration.
+ *  - Remove <code>& (reference)</code> decoration.
+ *  - keep <code>signed char</code> and <code>char</code> type results the same.
+ */
+template <typename T>
+struct btype_regularization
+{
+    using __data_t = typename libtbag::remove_cr<T>::type;
+    using type = typename std::conditional<std::is_same<__data_t, char>::value, si8, __data_t>::type;
+};
+
 template <typename T>
 TBAG_CONSTEXPR inline BoxTypeTable getBoxType() TBAG_NOEXCEPT
 {
-    return BoxTypeInfo<T>::value;
+    return BoxTypeInfo<typename btype_regularization<T>::type>::value;
 }
 
 template <typename T>
 inline bool isTypeEquals(BoxTypeTable type) TBAG_NOEXCEPT
 {
-    return type == getBoxType<T>();
+    return type == getBoxType<typename btype_regularization<T>::type>();
+}
+
+template <typename T>
+TBAG_CONSTEXPR inline libtbag::box::details::btype get_btype() TBAG_NOEXCEPT
+{
+    return static_cast<libtbag::box::details::btype>(BoxTypeInfo<typename btype_regularization<T>::type>::value);
+}
+
+template <typename T>
+inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
+{
+    return type == get_btype<typename btype_regularization<T>::type>();
 }
 
 /**
@@ -216,15 +241,6 @@ public:
 
 public:
     using SharedBoxData = std::shared_ptr<box_data>;
-
-public:
-    template <typename T>
-    TBAG_CONSTEXPR inline static btype get_btype() TBAG_NOEXCEPT
-    { return static_cast<btype>(BoxTypeInfo<typename libtbag::remove_cr<T>::type>::value); }
-
-    template <typename T>
-    inline static bool is_btype_equals(btype type) TBAG_NOEXCEPT
-    { return type == get_btype<T>(); }
 
 public:
     TBAG_CONSTEXPR static btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }

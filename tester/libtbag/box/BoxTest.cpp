@@ -49,6 +49,13 @@ TEST(BoxTest, Default)
     ASSERT_EQ(b5_data, b6_data);
 }
 
+TEST(BoxTest, GetBtype)
+{
+    auto const char_btype = get_btype<char>();
+    auto const si8_btype = get_btype<si8>();
+    ASSERT_EQ(char_btype, si8_btype);
+}
+
 TEST(BoxTest, StlContainerCompatibility)
 {
     Box b1;
