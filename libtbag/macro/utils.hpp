@@ -26,7 +26,8 @@
 // Inline information macros.
 // --------------------------
 
-#define LINE_STRING TO_STRING(__LINE__)
+#define LINE_NUMBER __LINE__
+#define LINE_STRING TO_STRING(LINE_NUMBER)
 #define FILE_STRING __FILE__
 #define DATE_STRING __DATE__
 #define TIME_STRING __TIME__
