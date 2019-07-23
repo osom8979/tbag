@@ -21,6 +21,24 @@ TEST(PreprocessorTest, IncDec)
     ASSERT_EQ(49, DEC);
 }
 
+TEST(PreprocessorTest, Equal)
+{
+    bool const equal1 = TBAG_PP_EQUAL(1, 2);
+    ASSERT_FALSE(equal1);
+
+    bool const equal2 = TBAG_PP_EQUAL(3, 3);
+    ASSERT_TRUE(equal2);
+}
+
+TEST(PreprocessorTest, NotEqual)
+{
+    bool const equal1 = TBAG_PP_NOT_EQUAL(1, 2);
+    ASSERT_TRUE(equal1);
+
+    bool const equal2 = TBAG_PP_NOT_EQUAL(3, 3);
+    ASSERT_FALSE(equal2);
+}
+
 TEST(PreprocessorTest, Cat)
 {
     std::string const TEST_STR = "TEST";
@@ -32,6 +50,54 @@ TEST(PreprocessorTest, Stringify)
 {
     std::string const STR = TBAG_PP_STRINGIZE(test_string);
     ASSERT_EQ("test_string", STR);
+}
+
+TEST(PreprocessorTest, BitAnd)
+{
+    auto const b11 = TBAG_PP_BITAND(1, 1);
+    ASSERT_TRUE(b11);
+    auto const b10 = TBAG_PP_BITAND(1, 0);
+    ASSERT_FALSE(b10);
+    auto const b01 = TBAG_PP_BITAND(0, 1);
+    ASSERT_FALSE(b01);
+    auto const b00 = TBAG_PP_BITAND(0, 0);
+    ASSERT_FALSE(b00);
+}
+
+TEST(PreprocessorTest, BitNor)
+{
+    auto const b11 = TBAG_PP_BITNOR(1, 1);
+    ASSERT_FALSE(b11);
+    auto const b10 = TBAG_PP_BITNOR(1, 0);
+    ASSERT_FALSE(b10);
+    auto const b01 = TBAG_PP_BITNOR(0, 1);
+    ASSERT_FALSE(b01);
+    auto const b00 = TBAG_PP_BITNOR(0, 0);
+    ASSERT_TRUE(b00);
+}
+
+TEST(PreprocessorTest, BitOr)
+{
+    auto const b11 = TBAG_PP_BITOR(1, 1);
+    ASSERT_TRUE(b11);
+    auto const b10 = TBAG_PP_BITOR(1, 0);
+    ASSERT_TRUE(b10);
+    auto const b01 = TBAG_PP_BITOR(0, 1);
+    ASSERT_TRUE(b01);
+    auto const b00 = TBAG_PP_BITOR(0, 0);
+    ASSERT_FALSE(b00);
+}
+
+TEST(PreprocessorTest, BitXor)
+{
+    auto const b11 = TBAG_PP_BITXOR(1, 1);
+    ASSERT_FALSE(b11);
+    auto const b10 = TBAG_PP_BITXOR(1, 0);
+    ASSERT_TRUE(b10);
+    auto const b01 = TBAG_PP_BITXOR(0, 1);
+    ASSERT_TRUE(b01);
+    auto const b00 = TBAG_PP_BITXOR(0, 0);
+    ASSERT_FALSE(b00);
 }
 
 TEST(PreprocessorTest, Boolean)
@@ -66,6 +132,41 @@ TEST(PreprocessorTest, If)
 
     ASSERT_EQ(NO, TEST1);
     ASSERT_EQ(OK, TEST2);
+}
+
+TEST(PreprocessorTest, If_Equal_VariadicSize_01)
+{
+    std::string const ONE = "1";
+    std::string const TWO = "2";
+
+#define _PP_EQUAL_TEST(...) TBAG_PP_IF(TBAG_PP_EQUAL(TBAG_PP_VARIADIC_SIZE(__VA_ARGS__), 1), ONE, TWO)
+    std::string const TEST1 = _PP_EQUAL_TEST(1);
+    std::string const TEST2 = _PP_EQUAL_TEST(1, 2);
+    std::string const TEST3 = _PP_EQUAL_TEST(1, 2, 3);
+#undef _PP_EQUAL_TEST
+
+    ASSERT_EQ(ONE, TEST1);
+    ASSERT_EQ(TWO, TEST2);
+    ASSERT_EQ(TWO, TEST3);
+}
+
+TEST(PreprocessorTest, If_Equal_VariadicSize_02)
+{
+#define _PP_EQUAL_TEST_I1(x) { x }
+#define _PP_EQUAL_TEST_I2(x, ...) { x, __VA_ARGS__ }
+#define _PP_EQUAL_TEST_II(...) TBAG_PP_IF(TBAG_PP_EXPAND(TBAG_PP_EQUAL(TBAG_PP_VARIADIC_SIZE(__VA_ARGS__), 1)), _PP_EQUAL_TEST_I1, _PP_EQUAL_TEST_I2)
+#define _PP_EQUAL_TEST(...) _PP_EQUAL_TEST_II(__VA_ARGS__)(__VA_ARGS__)
+    std::string const TEST1 = _PP_EQUAL_TEST('1');
+    std::string const TEST2 = _PP_EQUAL_TEST('1', '2');
+    std::string const TEST3 = _PP_EQUAL_TEST('1', '2', '3');
+#undef _PP_EQUAL_TEST
+#undef _PP_EQUAL_TEST_I1
+#undef _PP_EQUAL_TEST_I2
+#undef _PP_EQUAL_TEST_II
+
+    ASSERT_STREQ("1", TEST1.c_str());
+    ASSERT_STREQ("12", TEST2.c_str());
+    ASSERT_STREQ("123", TEST3.c_str());
 }
 
 TEST(PreprocessorTest, CommaIf)
