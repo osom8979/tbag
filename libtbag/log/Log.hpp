@@ -30,7 +30,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
-TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME = "tbag";
+/** Use fewer characters to reduce hash iteration. */
+TBAG_CONSTEXPR char const * const TBAG_DEFAULT_LOGGER_NAME = "@";
 
 // clang-format off
 TBAG_API Logger * createDefaultRawStdoutLogger();
@@ -103,8 +104,6 @@ template <typename ... Args> inline void info     (std::string const & f, Args &
 template <typename ... Args> inline void debug    (std::string const & f, Args && ... args) { debug    (getDefaultLogger(), f, std::forward<Args>(args) ...); }
 // clang-format on
 
-TBAG_API void __debug_message(char const * TBAG_RESTRICT text);
-
 } // namespace log
 
 // --------------------
@@ -158,48 +157,6 @@ NAMESPACE_LIBTBAG_CLOSE
 #define tDLogIfN(c, ...)  tLogIfN(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
 #define tDLogIfI(c, ...)  tLogIfI(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
 #define tDLogIfD(c, ...)  tLogIfD(c, ::libtbag::log::TBAG_DEFAULT_LOGGER_NAME, __VA_ARGS__)
-
-/**
- * @def ENABLE_TBAG_LIBRARY_DEBUGGING_LOG
- *
- * @warning
- *  Don't use this macros from user level developers.
- */
-#if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
-# include <libtbag/string/fmt/format.h>
-# include <libtbag/tty/Tces.hpp>
-# if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 5
-#  define __tbag_profile(...) ::libtbag::log::__debug_message(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_WHITE "P/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
-# else
-#  define __tbag_profile(...)
-# endif
-# if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 4
-#  define __tbag_debug(...) ::libtbag::log::__debug_message(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_BLUE "D/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
-# else
-#  define __tbag_debug(...)
-# endif
-# if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 3
-#  define __tbag_info(...) ::libtbag::log::__debug_message(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_GREEN "I/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
-# else
-#  define __tbag_info(...)
-# endif
-# if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 2
-#  define __tbag_warning(...) ::libtbag::log::__debug_message(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_YELLOW "W/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
-# else
-#  define __tbag_warning(...)
-# endif
-# if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 1
-#  define __tbag_error(...) ::libtbag::log::__debug_message(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_RED "E/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
-# else
-#  define __tbag_error(...)
-# endif
-#else
-# define __tbag_profile(...)
-# define __tbag_debug(...)
-# define __tbag_info(...)
-# define __tbag_warning(...)
-# define __tbag_error(...)
-#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_LOG_HPP__
 

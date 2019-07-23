@@ -6,9 +6,6 @@
  */
 
 #include <libtbag/log/Log.hpp>
-#include <libtbag/lock/UvLock.hpp>
-
-#include <cstdio>
 #include <cassert>
 #include <utility>
 
@@ -76,19 +73,6 @@ void setDefaultAutoFlush(bool flag)
 bool getDefaultAutoFlush()
 {
     return getAutoFlush(TBAG_DEFAULT_LOGGER_NAME);
-}
-
-void __debug_message(char const * TBAG_RESTRICT text)
-{
-    assert(text != nullptr);
-#if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG_LOCK)
-    static libtbag::lock::UvLock __lock__;
-    __lock__.lock();
-#endif
-    ::fputs(text, stderr);
-#if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG_LOCK)
-    __lock__.unlock();
-#endif
 }
 
 } // namespace log

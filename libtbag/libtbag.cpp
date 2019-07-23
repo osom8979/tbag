@@ -10,7 +10,7 @@
 #include <libtbag/locale/Locale.hpp>
 #include <libtbag/crypto/SslUtils.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/log/details/dlog.hpp>
 
 #include <mutex>
 
