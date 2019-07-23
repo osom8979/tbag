@@ -11,6 +11,7 @@
 
 // Singleton classes.
 #include <libtbag/lib/ComInitializer.hpp>
+#include <libtbag/log/details/dlog.hpp>
 #include <libtbag/log/LoggerManager.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/container/Global.hpp>
@@ -84,14 +85,21 @@ static void runCreateOrRelease(bool is_create = true)
     using Func = CreateOrRelease::Func;
 
     // clang-format off
-    Func    com([](){ lib::ComInitializer::createInstance(); }, [](){ lib::ComInitializer::releaseInstance(); });
-    Func    log([](){  log::LoggerManager::createInstance(); }, [](){  log::LoggerManager::releaseInstance(); });
-    Func signal([](){      signal::__impl::createInstance(); }, [](){      signal::__impl::releaseInstance(); });
-    Func   time([](){        time::__impl::createInstance(); }, [](){        time::__impl::releaseInstance(); });
-    Func global([](){   container::Global::createInstance(); }, [](){   container::Global::releaseInstance(); });
+    Func dlog([](){ log::details::setDebugLogLevelFromEnvs(); },
+              [](){ /* EMPTY. */ });
+    Func com([](){ lib::ComInitializer::createInstance(); },
+             [](){ lib::ComInitializer::releaseInstance(); });
+    Func log([](){ log::LoggerManager::createInstance(); },
+             [](){ log::LoggerManager::releaseInstance(); });
+    Func signal([](){ signal::__impl::createInstance(); },
+                [](){ signal::__impl::releaseInstance(); });
+    Func time([](){ time::__impl::createInstance(); },
+              [](){ time::__impl::releaseInstance(); });
+    Func global([](){ container::Global::createInstance(); },
+                [](){ container::Global::releaseInstance(); });
     // clang-format on
 
-    CreateOrRelease init({com, log, signal, time, global});
+    CreateOrRelease init({dlog, com, log, signal, time, global});
 
     if (is_create) {
         init.create();

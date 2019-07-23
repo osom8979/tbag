@@ -20,6 +20,7 @@
 #include <libtbag/preprocessor/comparison/Equal.hpp>
 #include <libtbag/tty/Tces.hpp>
 #include <libtbag/string/fmt/format.h>
+#include <string>
 
 #define __TBAG_DLOG_PREFIX_PROFILE    TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_MAGENTA "[P] " DEBUG_STAMP " "
 #define __TBAG_DLOG_PREFIX_DEBUG      TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_BLUE    "[D] " DEBUG_STAMP " "
@@ -33,17 +34,17 @@
 #define __TBAG_DLOG_SUFFIX  TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET "\n"
 #endif
 
-#define __TBAG_DLOG_FMT_PROFILE1(f)    ::fmt::format(__TBAG_DLOG_PREFIX_PROFILE f __TBAG_DLOG_SUFFIX).c_str()
-#define __TBAG_DLOG_FMT_DEBUG1(f)      ::fmt::format(__TBAG_DLOG_PREFIX_DEBUG   f __TBAG_DLOG_SUFFIX).c_str()
-#define __TBAG_DLOG_FMT_INFO1(f)       ::fmt::format(__TBAG_DLOG_PREFIX_INFO    f __TBAG_DLOG_SUFFIX).c_str()
-#define __TBAG_DLOG_FMT_WARNING1(f)    ::fmt::format(__TBAG_DLOG_PREFIX_WARNING f __TBAG_DLOG_SUFFIX).c_str()
-#define __TBAG_DLOG_FMT_ERROR1(f)      ::fmt::format(__TBAG_DLOG_PREFIX_ERROR   f __TBAG_DLOG_SUFFIX).c_str()
+#define __TBAG_DLOG_FMT_PROFILE1(f)       ::fmt::format(__TBAG_DLOG_PREFIX_PROFILE f __TBAG_DLOG_SUFFIX)
+#define __TBAG_DLOG_FMT_DEBUG1(f)         ::fmt::format(__TBAG_DLOG_PREFIX_DEBUG   f __TBAG_DLOG_SUFFIX)
+#define __TBAG_DLOG_FMT_INFO1(f)          ::fmt::format(__TBAG_DLOG_PREFIX_INFO    f __TBAG_DLOG_SUFFIX)
+#define __TBAG_DLOG_FMT_WARNING1(f)       ::fmt::format(__TBAG_DLOG_PREFIX_WARNING f __TBAG_DLOG_SUFFIX)
+#define __TBAG_DLOG_FMT_ERROR1(f)         ::fmt::format(__TBAG_DLOG_PREFIX_ERROR   f __TBAG_DLOG_SUFFIX)
 
-#define __TBAG_DLOG_FMT_PROFILE2(f, ...)    ::fmt::format(__TBAG_DLOG_PREFIX_PROFILE f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
-#define __TBAG_DLOG_FMT_DEBUG2(f, ...)      ::fmt::format(__TBAG_DLOG_PREFIX_DEBUG   f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
-#define __TBAG_DLOG_FMT_INFO2(f, ...)       ::fmt::format(__TBAG_DLOG_PREFIX_INFO    f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
-#define __TBAG_DLOG_FMT_WARNING2(f, ...)    ::fmt::format(__TBAG_DLOG_PREFIX_WARNING f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
-#define __TBAG_DLOG_FMT_ERROR2(f, ...)      ::fmt::format(__TBAG_DLOG_PREFIX_ERROR   f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
+#define __TBAG_DLOG_FMT_PROFILE2(f, ...)  ::fmt::format(__TBAG_DLOG_PREFIX_PROFILE f __TBAG_DLOG_SUFFIX, __VA_ARGS__)
+#define __TBAG_DLOG_FMT_DEBUG2(f, ...)    ::fmt::format(__TBAG_DLOG_PREFIX_DEBUG   f __TBAG_DLOG_SUFFIX, __VA_ARGS__)
+#define __TBAG_DLOG_FMT_INFO2(f, ...)     ::fmt::format(__TBAG_DLOG_PREFIX_INFO    f __TBAG_DLOG_SUFFIX, __VA_ARGS__)
+#define __TBAG_DLOG_FMT_WARNING2(f, ...)  ::fmt::format(__TBAG_DLOG_PREFIX_WARNING f __TBAG_DLOG_SUFFIX, __VA_ARGS__)
+#define __TBAG_DLOG_FMT_ERROR2(f, ...)    ::fmt::format(__TBAG_DLOG_PREFIX_ERROR   f __TBAG_DLOG_SUFFIX, __VA_ARGS__)
 
 #define __TBAG_DLOG_FMT_PROFILE_I(...)    TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_PROFILE1, __TBAG_DLOG_FMT_PROFILE2)
 #define __TBAG_DLOG_FMT_DEBUG_I(...)      TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_DEBUG1, __TBAG_DLOG_FMT_DEBUG2)
@@ -51,11 +52,11 @@
 #define __TBAG_DLOG_FMT_WARNING_I(...)    TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_WARNING1, __TBAG_DLOG_FMT_WARNING2)
 #define __TBAG_DLOG_FMT_ERROR_I(...)      TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_ERROR1, __TBAG_DLOG_FMT_ERROR2)
 
-#define __TBAG_DLOG_FMT_PROFILE(...)    __TBAG_DLOG_FMT_PROFILE_I(__VA_ARGS__)(__VA_ARGS__)
-#define __TBAG_DLOG_FMT_DEBUG(...)      __TBAG_DLOG_FMT_DEBUG_I(__VA_ARGS__)(__VA_ARGS__)
-#define __TBAG_DLOG_FMT_INFO(...)       __TBAG_DLOG_FMT_INFO_I(__VA_ARGS__)(__VA_ARGS__)
-#define __TBAG_DLOG_FMT_WARNING(...)    __TBAG_DLOG_FMT_WARNING_I(__VA_ARGS__)(__VA_ARGS__)
-#define __TBAG_DLOG_FMT_ERROR(...)      __TBAG_DLOG_FMT_ERROR_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_PROFILE(...)      __TBAG_DLOG_FMT_PROFILE_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_DEBUG(...)        __TBAG_DLOG_FMT_DEBUG_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_INFO(...)         __TBAG_DLOG_FMT_INFO_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_WARNING(...)      __TBAG_DLOG_FMT_WARNING_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_ERROR(...)        __TBAG_DLOG_FMT_ERROR_I(__VA_ARGS__)(__VA_ARGS__)
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -70,7 +71,7 @@ TBAG_API int getDebugLogLevel() TBAG_NOEXCEPT;
 TBAG_API void setDebugLogLevel(int level) TBAG_NOEXCEPT;
 TBAG_API void setDebugLogLevelFromEnvs();
 
-TBAG_API void dlog(int level, char const * TBAG_RESTRICT text);
+TBAG_API void dlog(int level, std::string const & text);
 
 } // namespace details
 } // namespace log

@@ -57,20 +57,18 @@ void setDebugLogLevelFromEnvs()
     g_debug_log_level = level;
 }
 
-void dlog(int level, char const * TBAG_RESTRICT text)
+void dlog(int level, std::string const & text)
 {
     if (level > g_debug_log_level) {
         return;
     }
-
-    assert(text != nullptr);
 
 #if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG_LOCK)
     static libtbag::lock::UvLock __lock__;
     __lock__.lock();
 #endif
 
-    ::fputs(text, stderr);
+    ::fputs(text.c_str(), stderr);
 
 #if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG_LOCK)
     __lock__.unlock();
