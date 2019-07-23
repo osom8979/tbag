@@ -21,6 +21,27 @@ using namespace libtbag;
 using namespace libtbag::log;
 using namespace libtbag::log::node;
 
+TEST(LogTest, Coverage)
+{
+    tDLogM("tDLogM()");
+    tDLogA("tDLogA()");
+    tDLogC("tDLogC()");
+    tDLogE("tDLogE()");
+    tDLogW("tDLogW()");
+    tDLogN("tDLogN()");
+    tDLogI("tDLogI()");
+    tDLogD("tDLogD()");
+
+    tDLogIfM(true, "tDLogM({})", 1);
+    tDLogIfA(true, "tDLogA({})", 1);
+    tDLogIfC(true, "tDLogC({})", 1);
+    tDLogIfE(true, "tDLogE({})", 1);
+    tDLogIfW(true, "tDLogW({})", 1);
+    tDLogIfN(true, "tDLogN({})", 1);
+    tDLogIfI(true, "tDLogI({})", 1);
+    tDLogIfD(true, "tDLogD({})", 1);
+}
+
 TEST(LogTest, Stdout)
 {
     std::string const LOGGER_NAME = "LogTest.Console";
