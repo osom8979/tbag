@@ -15,6 +15,47 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/preprocessor/control/If.hpp>
+#include <libtbag/preprocessor/variadic/VariadicSize.hpp>
+#include <libtbag/preprocessor/comparison/Equal.hpp>
+#include <libtbag/tty/Tces.hpp>
+#include <libtbag/string/fmt/format.h>
+
+#define __TBAG_DLOG_PREFIX_PROFILE    TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_MAGENTA "[P] " DEBUG_STAMP " "
+#define __TBAG_DLOG_PREFIX_DEBUG      TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_BLUE    "[D] " DEBUG_STAMP " "
+#define __TBAG_DLOG_PREFIX_INFO       TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_GREEN   "[I] " DEBUG_STAMP " "
+#define __TBAG_DLOG_PREFIX_WARNING    TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_YELLOW  "[W] " DEBUG_STAMP " "
+#define __TBAG_DLOG_PREFIX_ERROR      TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_RED     "[E] " DEBUG_STAMP " "
+
+#if defined(TBAG_PLATFORM_WINDOWS)
+#define __TBAG_DLOG_SUFFIX  TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET "\r\n"
+#else
+#define __TBAG_DLOG_SUFFIX  TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET "\n"
+#endif
+
+#define __TBAG_DLOG_FMT_PROFILE1(f)    ::fmt::format(__TBAG_DLOG_PREFIX_PROFILE f __TBAG_DLOG_SUFFIX).c_str()
+#define __TBAG_DLOG_FMT_DEBUG1(f)      ::fmt::format(__TBAG_DLOG_PREFIX_DEBUG   f __TBAG_DLOG_SUFFIX).c_str()
+#define __TBAG_DLOG_FMT_INFO1(f)       ::fmt::format(__TBAG_DLOG_PREFIX_INFO    f __TBAG_DLOG_SUFFIX).c_str()
+#define __TBAG_DLOG_FMT_WARNING1(f)    ::fmt::format(__TBAG_DLOG_PREFIX_WARNING f __TBAG_DLOG_SUFFIX).c_str()
+#define __TBAG_DLOG_FMT_ERROR1(f)      ::fmt::format(__TBAG_DLOG_PREFIX_ERROR   f __TBAG_DLOG_SUFFIX).c_str()
+
+#define __TBAG_DLOG_FMT_PROFILE2(f, ...)    ::fmt::format(__TBAG_DLOG_PREFIX_PROFILE f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
+#define __TBAG_DLOG_FMT_DEBUG2(f, ...)      ::fmt::format(__TBAG_DLOG_PREFIX_DEBUG   f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
+#define __TBAG_DLOG_FMT_INFO2(f, ...)       ::fmt::format(__TBAG_DLOG_PREFIX_INFO    f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
+#define __TBAG_DLOG_FMT_WARNING2(f, ...)    ::fmt::format(__TBAG_DLOG_PREFIX_WARNING f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
+#define __TBAG_DLOG_FMT_ERROR2(f, ...)      ::fmt::format(__TBAG_DLOG_PREFIX_ERROR   f __TBAG_DLOG_SUFFIX, __VA_ARGS__).c_str()
+
+#define __TBAG_DLOG_FMT_PROFILE_I(...)    TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_PROFILE1, __TBAG_DLOG_FMT_PROFILE2)
+#define __TBAG_DLOG_FMT_DEBUG_I(...)      TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_DEBUG1, __TBAG_DLOG_FMT_DEBUG2)
+#define __TBAG_DLOG_FMT_INFO_I(...)       TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_INFO1, __TBAG_DLOG_FMT_INFO2)
+#define __TBAG_DLOG_FMT_WARNING_I(...)    TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_WARNING1, __TBAG_DLOG_FMT_WARNING2)
+#define __TBAG_DLOG_FMT_ERROR_I(...)      TBAG_PP_IF(TBAG_PP_EQUAL(1, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__)), __TBAG_DLOG_FMT_ERROR1, __TBAG_DLOG_FMT_ERROR2)
+
+#define __TBAG_DLOG_FMT_PROFILE(...)    __TBAG_DLOG_FMT_PROFILE_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_DEBUG(...)      __TBAG_DLOG_FMT_DEBUG_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_INFO(...)       __TBAG_DLOG_FMT_INFO_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_WARNING(...)    __TBAG_DLOG_FMT_WARNING_I(__VA_ARGS__)(__VA_ARGS__)
+#define __TBAG_DLOG_FMT_ERROR(...)      __TBAG_DLOG_FMT_ERROR_I(__VA_ARGS__)(__VA_ARGS__)
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,46 +80,38 @@ NAMESPACE_LIBTBAG_CLOSE
  *  Don't use this macros from user level developers.
  */
 #if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
-# include <libtbag/string/fmt/format.h>
-# include <libtbag/tty/Tces.hpp>
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 5
-#  define __tbag_profile(...) ::libtbag::log::details::dlog(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_WHITE "P/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
+#  define _tp(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_PROFILE(__VA_ARGS__))
 # else
-#  define __tbag_profile(...)
+#  define _tp(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 4
-#  define __tbag_debug(...) ::libtbag::log::details::dlog(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_BLUE "D/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
+#  define _td(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_DEBUG(__VA_ARGS__))
 # else
-#  define __tbag_debug(...)
+#  define _td(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 3
-#  define __tbag_info(...) ::libtbag::log::details::dlog(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_GREEN "I/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
+#  define _ti(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_INFO(__VA_ARGS__))
 # else
-#  define __tbag_info(...)
+#  define _ti(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 2
-#  define __tbag_warning(...) ::libtbag::log::details::dlog(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_YELLOW "W/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
+#  define _tw(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_WARNING(__VA_ARGS__))
 # else
-#  define __tbag_warning(...)
+#  define _tw(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 1
-#  define __tbag_error(...) ::libtbag::log::details::dlog(::fmt::format(TBAG_OS_TTY_DISPLAY_ATTRIBUTE_FG_RED "E/" DEBUG_STAMP TBAG_OS_TTY_DISPLAY_ATTRIBUTE_RESET " " __VA_ARGS__).c_str())
+#  define _te(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_ERROR(__VA_ARGS__))
 # else
-#  define __tbag_error(...)
+#  define _te(...)
 # endif
 #else
-# define __tbag_profile(...)
-# define __tbag_debug(...)
-# define __tbag_info(...)
-# define __tbag_warning(...)
-# define __tbag_error(...)
+# define _tp(...)
+# define _td(...)
+# define _ti(...)
+# define _tw(...)
+# define _te(...)
 #endif
-
-#define _dp(...) __tbag_profile(__VA_ARGS__)
-#define _dd(...) __tbag_debug(__VA_ARGS__)
-#define _di(...) __tbag_info(__VA_ARGS__)
-#define _dw(...) __tbag_warning(__VA_ARGS__)
-#define _de(...) __tbag_error(__VA_ARGS__)
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_LOG_DETAILS_DLOG_HPP__
 

@@ -12,12 +12,30 @@ using namespace libtbag;
 using namespace libtbag::log;
 using namespace libtbag::log::details;
 
-TEST(dlogTest, Default)
+TEST(dlogTest, OneArg)
 {
-    _dp("profile");
-    _dd("debug");
-    _di("info");
-    _dw("warning");
-    _de("error");
+    _tp("profile");
+    _td("debug");
+    _ti("info");
+    _tw("warning");
+    _te("error");
+}
+
+TEST(dlogTest, TwoArg)
+{
+    _tp("profile {}", 1);
+    _td("debug {}", 1);
+    _ti("info {}", 1);
+    _tw("warning {}", 1);
+    _te("error {}", 1);
+}
+
+TEST(dlogTest, ThreeArg)
+{
+    _tp("profile {} {}", 1, 2);
+    _td("debug {} {}", 1, 2);
+    _ti("info {} {}", 1, 2);
+    _tw("warning {} {}", 1, 2);
+    _te("error {} {}", 1, 2);
 }
 

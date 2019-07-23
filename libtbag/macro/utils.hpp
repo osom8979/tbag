@@ -35,7 +35,7 @@
 
 #define __DATETIME__  DATE_STRING  "T" TIME_STRING
 #define __LOCATION__  FILE_STRING  ":" LINE_STRING
-#define DEBUG_STAMP   __DATETIME__ "/" __LOCATION__
+#define DEBUG_STAMP   __DATETIME__ " " __LOCATION__
 
 #define VERSION_SEPARATOR "."
 

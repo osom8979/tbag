@@ -45,7 +45,7 @@ public:
     {
         Guard guard(_mutex);
         if (_init == true) {
-            __tbag_debug("It has already been initialized.");
+            _td("It has already been initialized.");
             return false;
         }
 
@@ -61,7 +61,7 @@ public:
     {
         Guard guard(_mutex);
         if (_init == false) {
-            __tbag_debug("It has already been release.");
+            _td("It has already been release.");
             return false;
         }
 
@@ -80,7 +80,7 @@ bool LibtbagInitializer::_init = false;
 static bool setUp(tbInitParam * param = nullptr)
 {
     if (LibtbagInitializer::isInit()) {
-        __tbag_debug("It has already been initialized.");
+        _td("It has already been initialized.");
         return true;
     }
     return LibtbagInitializer::init(param);
@@ -89,7 +89,7 @@ static bool setUp(tbInitParam * param = nullptr)
 static bool tearDown()
 {
     if (!libtbag::LibtbagInitializer::isInit()) {
-        __tbag_debug("It has already been release.");
+        _td("It has already been release.");
         return true;
     }
     return libtbag::LibtbagInitializer::release();
