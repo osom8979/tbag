@@ -47,7 +47,7 @@ int DefaultColorGenerator::make(char * buffer, int buffer_size,
 {
     std::stringstream ss;
 
-    using namespace libtbag::tces;
+    using namespace libtbag::tty;
     // clang-format off
     switch (level) {
     case       OFF_LEVEL: /*-------------------------------*/ break;
@@ -70,7 +70,7 @@ int DefaultColorGenerator::make(char * buffer, int buffer_size,
        << "] " << std::string(msg, msg + msg_size);
 
     if (EMERGENCY_LEVEL <= COMPARE_AND(level) <= DEBUG_LEVEL) {
-        ss << libtbag::tces::DISPLAY_ATTRIBUTE_RESET;
+        ss << DISPLAY_ATTRIBUTE_RESET;
     }
 
     if (LINE_FEED == LineFeedStyle::LFS_AUTO) {

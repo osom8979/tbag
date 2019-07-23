@@ -13,12 +13,18 @@
 #pragma once
 #endif
 
-// --------------------------
-// Inline information macros.
-// --------------------------
+// --------------
+// String macros.
+// --------------
 
 #define TO_STRING_IMP(m) #m
 #define TO_STRING(x) TO_STRING_IMP(x)
+
+#define WIDE_STRING(x) L##x
+
+// --------------------------
+// Inline information macros.
+// --------------------------
 
 #define LINE_STRING TO_STRING(__LINE__)
 #define FILE_STRING __FILE__
@@ -29,7 +35,7 @@
 
 #define __DATETIME__  DATE_STRING  "T" TIME_STRING
 #define __LOCATION__  FILE_STRING  ":" LINE_STRING
-#define DEBUG_STAMP   __DATETIME__ " " __LOCATION__
+#define DEBUG_STAMP   __DATETIME__ "/" __LOCATION__
 
 #define VERSION_SEPARATOR "."
 
