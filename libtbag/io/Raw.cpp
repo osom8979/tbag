@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/io/Raw.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cstdarg>
 #include <cstdio>
@@ -34,14 +33,20 @@ bool formatToMemory(char * buf, int size, char const * format, ...)
 {
     va_list args;
     va_start(args, format);
-    int n = vsnprintf(buf, size, format, args);
+    auto const n = vsnprintf(buf, size, format, args);
     // Not counting the terminating null character.
     va_end(args);
+    return (0 <= COMPARE_AND(n) <= size);
+}
 
-    if (0 <= COMPARE_AND(n) <= size) {
-        return true;
-    }
-    return false;
+int putStdout(char const * text)
+{
+    return ::puts(text);
+}
+
+int putStderr(char const * text)
+{
+    return ::fputs(text, stderr);
 }
 
 } // namespace io

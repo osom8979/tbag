@@ -24,6 +24,9 @@ namespace io {
 
 TBAG_API bool formatToMemory(char * buf, int size, char const * format, ...);
 
+TBAG_API int putStdout(char const * TBAG_RESTRICT text);
+TBAG_API int putStderr(char const * TBAG_RESTRICT text);
+
 } // namespace io
 
 // --------------------

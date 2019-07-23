@@ -41,7 +41,10 @@ elseif (TBAG_GCC)
     #set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -DNDEBUG") ## Default
     set  (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 endif ()
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_TBAG_LIBRARY_DEBUGGING_LOG")
+
+## Library logging.
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_TBAG_LIBRARY_DEBUGGING_LOG=5")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DENABLE_TBAG_LIBRARY_DEBUGGING_LOG_LOCK")
 
 tbag_config__set_option (USE_CCACHE  ON) ## Enable ccache compile.
 tbag_config__set_option (USE_GOLD    ON) ## Enable ld.gold linker if gcc compiler.
