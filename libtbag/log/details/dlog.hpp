@@ -64,7 +64,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log     {
 namespace details {
 
-TBAG_API void dlog(char const * TBAG_RESTRICT text);
+TBAG_CONSTEXPR char const * const DEBUG_LOG_LEVEL_ENV_NAME = "TBAG_LIBRARY_DEBUG_LOG_LEVEL";
+
+TBAG_API int getDebugLogLevel() TBAG_NOEXCEPT;
+TBAG_API void setDebugLogLevel(int level) TBAG_NOEXCEPT;
+TBAG_API void setDebugLogLevelFromEnvs();
+
+TBAG_API void dlog(int level, char const * TBAG_RESTRICT text);
 
 } // namespace details
 } // namespace log
@@ -81,27 +87,27 @@ NAMESPACE_LIBTBAG_CLOSE
  */
 #if defined(ENABLE_TBAG_LIBRARY_DEBUGGING_LOG)
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 5
-#  define _tp(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_PROFILE(__VA_ARGS__))
+#  define _tp(...) ::libtbag::log::details::dlog(5, __TBAG_DLOG_FMT_PROFILE(__VA_ARGS__))
 # else
 #  define _tp(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 4
-#  define _td(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_DEBUG(__VA_ARGS__))
+#  define _td(...) ::libtbag::log::details::dlog(4, __TBAG_DLOG_FMT_DEBUG(__VA_ARGS__))
 # else
 #  define _td(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 3
-#  define _ti(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_INFO(__VA_ARGS__))
+#  define _ti(...) ::libtbag::log::details::dlog(3, __TBAG_DLOG_FMT_INFO(__VA_ARGS__))
 # else
 #  define _ti(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 2
-#  define _tw(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_WARNING(__VA_ARGS__))
+#  define _tw(...) ::libtbag::log::details::dlog(2, __TBAG_DLOG_FMT_WARNING(__VA_ARGS__))
 # else
 #  define _tw(...)
 # endif
 # if ENABLE_TBAG_LIBRARY_DEBUGGING_LOG >= 1
-#  define _te(...) ::libtbag::log::details::dlog(__TBAG_DLOG_FMT_ERROR(__VA_ARGS__))
+#  define _te(...) ::libtbag::log::details::dlog(1, __TBAG_DLOG_FMT_ERROR(__VA_ARGS__))
 # else
 #  define _te(...)
 # endif
