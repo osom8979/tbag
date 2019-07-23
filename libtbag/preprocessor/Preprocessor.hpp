@@ -19,6 +19,8 @@
 #include <libtbag/preprocessor/arithmetic/Decrease.hpp>
 #include <libtbag/preprocessor/arithmetic/Increase.hpp>
 
+#include <libtbag/preprocessor/config/Config.hpp>
+
 #include <libtbag/preprocessor/control/If.hpp>
 
 #include <libtbag/preprocessor/details/AutoRec.hpp>
