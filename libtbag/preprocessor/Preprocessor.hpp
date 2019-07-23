@@ -31,6 +31,10 @@
 #include <libtbag/preprocessor/facilities/IsEmpty.hpp>
 #include <libtbag/preprocessor/facilities/Overload.hpp>
 
+#include <libtbag/preprocessor/logical/BitAnd.hpp>
+#include <libtbag/preprocessor/logical/BitNor.hpp>
+#include <libtbag/preprocessor/logical/BitOr.hpp>
+#include <libtbag/preprocessor/logical/BitXor.hpp>
 #include <libtbag/preprocessor/logical/Boolean.hpp>
 #include <libtbag/preprocessor/logical/Complement.hpp>
 
