@@ -36,7 +36,7 @@ TEST(TmxLayerTest, ReadAndWrite)
     ASSERT_STREQ("test", layer.name.c_str());
     ASSERT_EQ(2, layer.width);
     ASSERT_EQ(2, layer.height);
-    ASSERT_TRUE(layer.properties.empty());
+    ASSERT_TRUE(layer.properties.properties.empty());
     ASSERT_EQ(TmxData::Encoding::BASE64, layer.data.encoding);
     ASSERT_EQ(TmxData::Compression::ZLIB, layer.data.compression);
     ASSERT_EQ(4, layer.data.gids.size());
@@ -54,7 +54,7 @@ TEST(TmxLayerTest, ReadAndWrite)
     ASSERT_STREQ("test", layer2.name.c_str());
     ASSERT_EQ(2, layer2.width);
     ASSERT_EQ(2, layer2.height);
-    ASSERT_TRUE(layer2.properties.empty());
+    ASSERT_TRUE(layer2.properties.properties.empty());
     ASSERT_EQ(TmxData::Encoding::BASE64, layer2.data.encoding);
     ASSERT_EQ(TmxData::Compression::ZLIB, layer2.data.compression);
     ASSERT_EQ(4, layer2.data.gids.size());

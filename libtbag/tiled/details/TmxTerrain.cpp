@@ -23,7 +23,7 @@ TmxTerrain::TmxTerrain()
     // EMPTY.
 }
 
-TmxTerrain::TmxTerrain(std::string const & n, int t, Properties const & p)
+TmxTerrain::TmxTerrain(std::string const & n, int t, TmxProperties const & p)
         : name(n), tile(t), properties(p)
 {
     // EMPTY.
@@ -43,12 +43,10 @@ Err TmxTerrain::read(Element const & elem)
     optAttr(elem, ATT_NAME, name);
     optAttr(elem, ATT_TILE, tile);
 
-    foreachElement(elem, TmxProperty::TAG_NAME, [&](Element const & e){
-        TmxProperty property;
-        if (isSuccess(property.read(e))) {
-            properties.push_back(std::move(property));
-        }
-    });
+    auto const * properties_elem = elem.FirstChildElement(TmxProperties::TAG_NAME);
+    if (properties_elem != nullptr) {
+        properties.read(*properties_elem);
+    }
 
     return E_SUCCESS;
 }
@@ -74,11 +72,9 @@ Err TmxTerrain::write(Element & elem) const
     setAttr(elem, ATT_NAME, name);
     setAttr(elem, ATT_TILE, tile);
 
-    for (auto & property : properties) {
-        newElement(elem, TmxProperty::TAG_NAME, [&](Element & p){
-            property.write(p);
-        });
-    }
+    newElement(elem, TmxProperties::TAG_NAME, [&](Element & d){
+        properties.write(d);
+    });
 
     return E_SUCCESS;
 }

@@ -24,7 +24,9 @@ TEST(TmxTerrainTest, ReadAndWrite)
 {
     char const * const TEST_XML = R"(
 <terrain name="Brick" tile="9">
-  <property name="spawncount" type="int" value="5"/>
+  <properties>
+    <property name="spawncount" type="int" value="5"/>
+  </properties>
 </terrain>
 )";
 
@@ -32,10 +34,10 @@ TEST(TmxTerrainTest, ReadAndWrite)
     ASSERT_EQ(E_SUCCESS, terrain.read(TEST_XML));
     ASSERT_STREQ("Brick", terrain.name.c_str());
     ASSERT_EQ(9, terrain.tile);
-    ASSERT_EQ(1, terrain.properties.size());
-    ASSERT_STREQ("spawncount", terrain.properties[0].name.c_str());
-    ASSERT_EQ(TmxProperty::Type::INT, terrain.properties[0].type);
-    ASSERT_EQ(5, terrain.properties[0].toInt());
+    ASSERT_EQ(1, terrain.properties.properties.size());
+    ASSERT_STREQ("spawncount", terrain.properties.properties[0].name.c_str());
+    ASSERT_EQ(TmxProperty::Type::INT, terrain.properties.properties[0].type);
+    ASSERT_EQ(5, terrain.properties.properties[0].toInt());
 
     std::string xml;
     ASSERT_EQ(E_SUCCESS, terrain.write(xml));
@@ -44,9 +46,9 @@ TEST(TmxTerrainTest, ReadAndWrite)
     ASSERT_EQ(E_SUCCESS, terrain2.read(xml));
     ASSERT_STREQ("Brick", terrain2.name.c_str());
     ASSERT_EQ(9, terrain2.tile);
-    ASSERT_EQ(1, terrain2.properties.size());
-    ASSERT_STREQ("spawncount", terrain2.properties[0].name.c_str());
-    ASSERT_EQ(TmxProperty::Type::INT, terrain2.properties[0].type);
-    ASSERT_EQ(5, terrain2.properties[0].toInt());
+    ASSERT_EQ(1, terrain2.properties.properties.size());
+    ASSERT_STREQ("spawncount", terrain2.properties.properties[0].name.c_str());
+    ASSERT_EQ(TmxProperty::Type::INT, terrain2.properties.properties[0].type);
+    ASSERT_EQ(5, terrain2.properties.properties[0].toInt());
 }
 

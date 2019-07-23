@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
-#include <libtbag/tiled/details/TmxProperty.hpp>
+#include <libtbag/tiled/details/TmxProperties.hpp>
 #include <libtbag/tiled/details/TmxData.hpp>
 
 #include <string>
@@ -56,8 +56,6 @@ namespace details {
  */
 struct TBAG_API TmxLayer : protected libtbag::dom::xml::XmlHelper
 {
-    using Properties = std::vector<TmxProperty>;
-
     TBAG_CONSTEXPR static char const * const TAG_NAME = "layer";
 
     /**
@@ -137,7 +135,7 @@ struct TBAG_API TmxLayer : protected libtbag::dom::xml::XmlHelper
     int offsetx;
     int offsety;
 
-    Properties properties;
+    TmxProperties properties;
     TmxData data;
 
     TmxLayer();

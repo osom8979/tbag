@@ -61,13 +61,10 @@ Err TmxLayer::read(Element const & elem)
     optAttr(elem, ATT_OFFSETX, offsetx, VAL_DEFAULT_OFFSETX);
     optAttr(elem, ATT_OFFSETY, offsety, VAL_DEFAULT_OFFSETY);
 
-    foreachElement(elem, TmxProperty::TAG_NAME, [&](Element const & e){
-        TmxProperty property;
-        if (isSuccess(property.read(e))) {
-            properties.push_back(std::move(property));
-        }
-    });
-
+    auto const * properties_elem = elem.FirstChildElement(TmxProperties::TAG_NAME);
+    if (properties_elem != nullptr) {
+        properties.read(*properties_elem);
+    }
     auto const * data_elem = elem.FirstChildElement(TmxData::TAG_NAME);
     if (data_elem != nullptr) {
         data.read(*data_elem);
@@ -110,12 +107,9 @@ Err TmxLayer::write(Element & elem) const
     setAttr(elem, ATT_OFFSETX, offsetx);
     setAttr(elem, ATT_OFFSETY, offsety);
 
-    for (auto & property : properties) {
-        newElement(elem, TmxProperty::TAG_NAME, [&](Element & p){
-            property.write(p);
-        });
-    }
-
+    newElement(elem, TmxProperties::TAG_NAME, [&](Element & d){
+        properties.write(d);
+    });
     newElement(elem, TmxData::TAG_NAME, [&](Element & d){
         data.write(d);
     });

@@ -17,7 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
-#include <libtbag/tiled/details/TmxProperty.hpp>
+#include <libtbag/tiled/details/TmxProperties.hpp>
 
 #include <string>
 #include <vector>
@@ -37,8 +37,6 @@ namespace details {
  */
 struct TBAG_API TmxTerrain : protected libtbag::dom::xml::XmlHelper
 {
-    using Properties = std::vector<TmxProperty>;
-
     TBAG_CONSTEXPR static char const * const TAG_NAME = "terrain";
 
     /** The name of the terrain type. */
@@ -50,10 +48,10 @@ struct TBAG_API TmxTerrain : protected libtbag::dom::xml::XmlHelper
     std::string name;
     int tile;
 
-    Properties properties;
+    TmxProperties properties;
 
     TmxTerrain();
-    TmxTerrain(std::string const & n, int t, Properties const & p);
+    TmxTerrain(std::string const & n, int t, TmxProperties const & p);
     ~TmxTerrain();
 
     Err read(Element const & elem);
