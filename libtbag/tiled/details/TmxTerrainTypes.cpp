@@ -33,6 +33,16 @@ TmxTerrainTypes::~TmxTerrainTypes()
     // EMPTY.
 }
 
+bool TmxTerrainTypes::empty() const
+{
+    return terrains.empty();
+}
+
+std::size_t TmxTerrainTypes::size() const
+{
+    return terrains.size();
+}
+
 Err TmxTerrainTypes::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {

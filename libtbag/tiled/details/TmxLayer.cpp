@@ -107,12 +107,16 @@ Err TmxLayer::write(Element & elem) const
     setAttr(elem, ATT_OFFSETX, offsetx);
     setAttr(elem, ATT_OFFSETY, offsety);
 
-    newElement(elem, TmxProperties::TAG_NAME, [&](Element & d){
-        properties.write(d);
-    });
-    newElement(elem, TmxData::TAG_NAME, [&](Element & d){
-        data.write(d);
-    });
+    if (!properties.empty()) {
+        newElement(elem, TmxProperties::TAG_NAME, [&](Element & d){
+            properties.write(d);
+        });
+    }
+    if (!data.empty()) {
+        newElement(elem, TmxData::TAG_NAME, [&](Element & d){
+            data.write(d);
+        });
+    }
 
     return E_SUCCESS;
 }

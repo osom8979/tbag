@@ -72,9 +72,11 @@ Err TmxTerrain::write(Element & elem) const
     setAttr(elem, ATT_NAME, name);
     setAttr(elem, ATT_TILE, tile);
 
-    newElement(elem, TmxProperties::TAG_NAME, [&](Element & d){
-        properties.write(d);
-    });
+    if (!properties.empty()) {
+        newElement(elem, TmxProperties::TAG_NAME, [&](Element & d){
+            properties.write(d);
+        });
+    }
 
     return E_SUCCESS;
 }

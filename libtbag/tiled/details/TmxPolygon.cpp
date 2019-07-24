@@ -29,6 +29,16 @@ TmxPolygon::~TmxPolygon()
     // EMPTY.
 }
 
+bool TmxPolygon::empty() const
+{
+    return points.empty();
+}
+
+std::size_t TmxPolygon::size() const
+{
+    return points.size();
+}
+
 Err TmxPolygon::read(Element const & elem)
 {
     return readToPoints(TAG_NAME, elem, points);

@@ -78,7 +78,12 @@ struct TBAG_API TmxData : public TmxDataCommon
     ~TmxData();
 
     TileLayerFormat getTileLayerFormat() const TBAG_NOEXCEPT;
+
+    /** If the return value is True, the chunk must be read. */
     bool isInfinieMap() const TBAG_NOEXCEPT;
+
+    bool empty() const;
+    std::size_t size() const;
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

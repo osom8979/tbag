@@ -43,6 +43,9 @@ struct TBAG_API TmxPolyline : protected libtbag::tiled::details::TmxPointsCommon
     TmxPolyline(Points const & p);
     ~TmxPolyline();
 
+    bool empty() const;
+    std::size_t size() const;
+
     Err read(Element const & elem);
     Err read(std::string const & xml);
 

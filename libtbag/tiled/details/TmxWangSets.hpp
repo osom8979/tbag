@@ -50,6 +50,9 @@ struct TBAG_API TmxWangSets : protected libtbag::dom::xml::XmlHelper
     TmxWangSets(WangSets const & w);
     ~TmxWangSets();
 
+    bool empty() const;
+    std::size_t size() const;
+
     Err read(Element const & elem);
     Err read(std::string const & xml);
 

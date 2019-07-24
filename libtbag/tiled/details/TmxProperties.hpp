@@ -47,6 +47,9 @@ struct TBAG_API TmxProperties : protected libtbag::dom::xml::XmlHelper
     TmxProperties(Properties const & p);
     ~TmxProperties();
 
+    bool empty() const;
+    std::size_t size() const;
+
     Err read(Element const & elem);
     Err read(std::string const & xml);
 

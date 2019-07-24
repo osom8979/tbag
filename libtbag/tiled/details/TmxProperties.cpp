@@ -33,6 +33,16 @@ TmxProperties::~TmxProperties()
     // EMPTY.
 }
 
+bool TmxProperties::empty() const
+{
+    return properties.empty();
+}
+
+std::size_t TmxProperties::size() const
+{
+    return properties.size();
+}
+
 Err TmxProperties::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {

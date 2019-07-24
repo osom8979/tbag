@@ -33,6 +33,16 @@ TmxWangSets::~TmxWangSets()
     // EMPTY.
 }
 
+bool TmxWangSets::empty() const
+{
+    return wang_sets.empty();
+}
+
+std::size_t TmxWangSets::size() const
+{
+    return wang_sets.size();
+}
+
 Err TmxWangSets::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {

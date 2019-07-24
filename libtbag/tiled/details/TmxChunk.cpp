@@ -34,6 +34,16 @@ TmxChunk::~TmxChunk()
     // EMPTY.
 }
 
+bool TmxChunk::empty() const
+{
+    return gids.empty();
+}
+
+std::size_t TmxChunk::size() const
+{
+    return gids.size();
+}
+
 Err TmxChunk::read(Element const & elem, TileLayerFormat f)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {

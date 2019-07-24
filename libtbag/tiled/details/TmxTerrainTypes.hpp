@@ -47,6 +47,9 @@ struct TBAG_API TmxTerrainTypes : protected libtbag::dom::xml::XmlHelper
     TmxTerrainTypes(Terrains const & t);
     ~TmxTerrainTypes();
 
+    bool empty() const;
+    std::size_t size() const;
+
     Err read(Element const & elem);
     Err read(std::string const & xml);
 

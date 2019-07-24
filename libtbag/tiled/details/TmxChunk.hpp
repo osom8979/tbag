@@ -66,6 +66,9 @@ struct TBAG_API TmxChunk : public TmxDataCommon
     TmxChunk(int x_, int y_, int w_, int h_);
     ~TmxChunk();
 
+    bool empty() const;
+    std::size_t size() const;
+
     Err read(Element const & elem, TileLayerFormat f = TileLayerFormat::XML);
     Err read(Element const & elem, Encoding e, Compression c);
     Err read(std::string const & xml, TileLayerFormat f = TileLayerFormat::XML);

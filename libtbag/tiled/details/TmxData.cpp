@@ -44,6 +44,24 @@ bool TmxData::isInfinieMap() const TBAG_NOEXCEPT
     return data_type == DataType::CHUNK;
 }
 
+bool TmxData::empty() const
+{
+    if (isInfinieMap()) {
+        return chunks.empty();
+    } else {
+        return gids.empty();
+    }
+}
+
+std::size_t TmxData::size() const
+{
+    if (isInfinieMap()) {
+        return chunks.size();
+    } else {
+        return gids.size();
+    }
+}
+
 Err TmxData::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
@@ -92,11 +110,14 @@ Err TmxData::write(Element & elem) const
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
         return E_ILLARGS;
     }
+
     setAttr(elem, ATT_ENCODING, getEncodingName(encoding));
     setAttr(elem, ATT_COMPRESSION, getCompressionName(compression));
 
     if (data_type == DataType::GIDS) {
-        writeGids(elem, gids, encoding, compression);
+        if (!gids.empty()) {
+            writeGids(elem, gids, encoding, compression);
+        }
     } else {
         assert(data_type == DataType::CHUNK);
         for (auto & chunk : chunks) {

@@ -33,6 +33,16 @@ TmxAnimation::~TmxAnimation()
     // EMPTY.
 }
 
+bool TmxAnimation::empty() const
+{
+    return frames.empty();
+}
+
+std::size_t TmxAnimation::size() const
+{
+    return frames.size();
+}
+
 Err TmxAnimation::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
