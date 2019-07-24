@@ -35,7 +35,8 @@ namespace details {
  *
  * @remarks
  *  Used to mark an object as an ellipse.
- *  The existing x, y, width and height attributes are used to determine the size of the ellipse.
+ *  The existing x, y, width and height attributes are used to
+ *  determine the size of the ellipse.
  */
 struct TBAG_API TmxEllipse : protected libtbag::dom::xml::XmlHelper
 {
@@ -46,14 +47,16 @@ struct TBAG_API TmxEllipse : protected libtbag::dom::xml::XmlHelper
     TBAG_CONSTEXPR static char const * const ATT_WIDTH = "width";
     TBAG_CONSTEXPR static char const * const ATT_HEIGHT = "height";
 
-    int x;
-    int y;
-    int width;
-    int height;
+    int x = 0;
+    int y = 0;
+    int width = 0;
+    int height = 0;
 
     TmxEllipse();
     TmxEllipse(int x_, int y_, int w_, int h_);
     ~TmxEllipse();
+
+    bool empty() const;
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

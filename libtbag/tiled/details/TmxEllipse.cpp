@@ -18,12 +18,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxEllipse::TmxEllipse() : x(), y(), width(), height()
+TmxEllipse::TmxEllipse()
 {
     // EMPTY.
 }
 
-TmxEllipse::TmxEllipse(int x_, int y_, int w_, int h_) : x(x_), y(y_), width(w_), height(h_)
+TmxEllipse::TmxEllipse(int x_, int y_, int w_, int h_)
+        : x(x_), y(y_), width(w_), height(h_)
 {
     // EMPTY.
 }
@@ -31,6 +32,11 @@ TmxEllipse::TmxEllipse(int x_, int y_, int w_, int h_) : x(x_), y(y_), width(w_)
 TmxEllipse::~TmxEllipse()
 {
     // EMPTY.
+}
+
+bool TmxEllipse::empty() const
+{
+    return x == 0 && y == 0 && width == 0 && height == 0;
 }
 
 Err TmxEllipse::read(Element const & elem)
