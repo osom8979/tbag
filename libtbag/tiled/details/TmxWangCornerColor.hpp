@@ -46,7 +46,7 @@ struct TBAG_API TmxWangCornerColor : protected libtbag::dom::xml::XmlHelper
     /** The name of this color. */
     TBAG_CONSTEXPR static char const * const ATT_NAME = "name";
 
-    /** The color in <code>#RRGGBB</code> format. */
+    /** The color in \#RRGGBB format. */
     TBAG_CONSTEXPR static char const * const ATT_COLOR = "color";
 
     /** The tile ID of the tile representing this color. */

@@ -64,8 +64,8 @@ struct TBAG_API TmxText : protected libtbag::dom::xml::XmlHelper
     TBAG_CONSTEXPR static int const VAL_DEFAULT_WRAP = 0;
 
     /**
-     * Color of the text in #AARRGGBB or #RRGGBB format
-     * (default: #000000)
+     * Color of the text in \#AARRGGBB or \#RRGGBB format
+     * (default: \#000000)
      */
     TBAG_CONSTEXPR static char const * const ATT_COLOR = "color";
     TBAG_CONSTEXPR static char const * const VAL_DEFAULT_COLOR = "#000000";

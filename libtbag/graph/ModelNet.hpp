@@ -137,7 +137,7 @@ public:
      *      User's data.
      * @param[out] sequence
      *      Returns the result in the task sequence.
-     * @params[in] simulate
+     * @param[in] simulate
      *      If this value is true, the child layer is not executed.
      */
     Err run(std::set<int> const & start,

@@ -62,9 +62,9 @@ struct TBAG_API TmxImage : protected libtbag::dom::xml::XmlHelper
 
     /**
      * Defines a specific color that is treated as transparent
-     * (example value: <code>#FF00FF</code> for magenta).
+     * (example value: \#FF00FF for magenta).
      * Up until Tiled 0.12, this value is written out
-     * without a <code>#</code> but this is planned to change.
+     * without a \# but this is planned to change.
      */
     TBAG_CONSTEXPR static char const * const ATT_TRANS = "trans";
 
