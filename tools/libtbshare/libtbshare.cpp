@@ -8,16 +8,21 @@
  * @date   2017-04-12 (Rename: tbshare -> libtbshare)
  */
 
-#if defined(WIN32) || defined(_WIN32)
-# include <windows.h>
-# if defined(USE_LIBTEST_EXPORT)
+#if defined(USE_LIBTEST_EXPORT)
+# if defined(WIN32) || defined(_WIN32)
 #  define LIBTBAG_TEST_EXPORT __declspec(dllexport)
+# elif defined(__GNUC__)
+#  define LIBTBAG_TEST_EXPORT __attribute__((visibility("default")))
 # else
+#  define LIBTBAG_TEST_EXPORT
+# endif
+#else // defined(USE_LIBTEST_EXPORT)
+# if defined(WIN32) || defined(_WIN32)
 #  define LIBTBAG_TEST_EXPORT __declspec(dllimport)
-# endif /* USE_LIBTESTBAG_EXPORT */
-#else /* defined(WIN32) || defined(_WIN32) */
-# define LIBTBAG_TEST_EXPORT
-#endif
+# else
+#  define LIBTBAG_TEST_EXPORT
+# endif
+#endif // defined(TBAG_EXPORT_API)
 
 #if defined(__cplusplus)
 extern "C" {
