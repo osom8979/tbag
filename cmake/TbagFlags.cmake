@@ -76,8 +76,17 @@ endmacro ()
 
 #/// Print all compile warning.
 macro (tbag_flags__set_print_all_compile_warning)
-    set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -Wall")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    endif ()
+endmacro ()
+
+macro (tbag_flags__set_visibility_hidden)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        set (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -fvisibility=hidden")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
+    endif ()
 endmacro ()
 
 #/// Setup RPATH variables.

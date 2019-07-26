@@ -47,8 +47,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
     set (EXT_CXX_FLAGS)
     set (EXT_C_FLAGS)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    set (EXT_CXX_FLAGS "-fPIC -w")
-    set (EXT_C_FLAGS   "-fPIC -w")
+    set (EXT_CXX_FLAGS "-fPIC -w -fvisibility=hidden")
+    set (EXT_C_FLAGS   "-fPIC -w -fvisibility=hidden")
 endif ()
 
 ###########
@@ -172,7 +172,7 @@ else ()
             SOURCE_DIR "${ressl_EXT_SOURCE_DIR}"
             CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
                        "-DBUILD_SHARED_LIBS=OFF"
-                       #"-DCMAKE_C_FLAGS=${EXT_C_FLAGS}" ## [WARNING] Don't use this flag.
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
                        #"-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}" ## [WARNING] Don't use this flag.
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
