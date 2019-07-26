@@ -22,7 +22,7 @@
 # else
 #  define LIBTBAG_TEST_EXPORT
 # endif
-#endif // defined(TBAG_EXPORT_API)
+#endif // defined(USE_LIBTEST_EXPORT)
 
 #if defined(__cplusplus)
 extern "C" {
