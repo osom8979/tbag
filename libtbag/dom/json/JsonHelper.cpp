@@ -100,6 +100,26 @@ bool JsonHelper::existsObject(Value const & v, std::string const & key)
     return libtbag::dom::json::existsObject(v, key);
 }
 
+bool JsonHelper::getString(Json::Value const & v, std::string * out)
+{
+    return libtbag::dom::json::getString(v, out);
+}
+
+bool JsonHelper::getString(Json::Value const & v, std::string const & key, std::string * out)
+{
+    return libtbag::dom::json::getString(v, key, out);
+}
+
+bool JsonHelper::getIntegral(Json::Value const & v, int * out)
+{
+    return libtbag::dom::json::getIntegral(v, out);
+}
+
+bool JsonHelper::getIntegral(Json::Value const & v, std::string const & key, int * out)
+{
+    return libtbag::dom::json::getIntegral(v, key, out);
+}
+
 } // namespace json
 } // namespace dom
 

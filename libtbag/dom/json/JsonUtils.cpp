@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/dom/json/JsonUtils.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -22,11 +22,7 @@ bool parse(std::string const & json, Json::Value & result)
     auto * reader = builder.newCharReader();
     auto * json_text = json.c_str();
     std::string error;
-    auto const CODE = reader->parse(json_text, json_text + json.size(), &result, &error);
-    if (!CODE) {
-        tDLogE("parse() Json parse error: {}", error);
-    }
-    return CODE;
+    return reader->parse(json_text, json_text + json.size(), &result, &error);
 }
 
 bool testJsonText(std::string const & json)
@@ -98,6 +94,112 @@ bool existsString  (Json::Value const & v, std::string const & key) { return exi
 bool existsArray   (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isArray   (); }
 bool existsObject  (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isObject  (); }
 // clang-format on
+
+bool getString(Json::Value const & v, std::string * out)
+{
+    switch (v.type()) {
+    case Json::nullValue:
+        if (out != nullptr) {
+            out->clear();
+        }
+        return true;
+    case Json::intValue:
+        if (out != nullptr) {
+            *out = libtbag::string::toString(v.asInt());
+        }
+        return true;
+    case Json::uintValue:
+        if (out != nullptr) {
+            *out = libtbag::string::toString(v.asUInt());
+        }
+        return true;
+    case Json::realValue:
+        if (out != nullptr) {
+            *out = libtbag::string::toString(v.asDouble());
+        }
+        return true;
+    case Json::stringValue:
+        if (out != nullptr) {
+            *out = v.asString();
+        }
+        return true;
+    case Json::booleanValue:
+        if (out != nullptr) {
+            *out = libtbag::string::toString(v.asBool());
+        }
+        return true;
+    case Json::arrayValue:
+        TBAG_FALLTHROUGH
+    case Json::objectValue:
+        TBAG_FALLTHROUGH
+    default:
+        return false;
+    }
+}
+
+bool getString(Json::Value const & v, std::string const & key, std::string * out)
+{
+    if (!existsObject(v, key)) {
+        return false;
+    }
+    return getString(v[key], out);
+}
+
+bool getIntegral(Json::Value const & v, int * out)
+{
+    switch (v.type()) {
+    case Json::nullValue:
+        if (out != nullptr) {
+            *out = 0;
+        }
+        return true;
+    case Json::intValue:
+        if (out != nullptr) {
+            *out = v.asInt();
+        }
+        return true;
+    case Json::uintValue:
+        if (out != nullptr) {
+            *out = static_cast<int>(v.asUInt());
+        }
+        return true;
+    case Json::realValue:
+        if (out != nullptr) {
+            *out = static_cast<int>(v.asDouble());
+        }
+        return true;
+    case Json::stringValue:
+        BRACE("String to Integer") {
+            int temp;
+            if (libtbag::string::toVal(v.asString(), temp)) {
+                if (out != nullptr) {
+                    *out = temp;
+                }
+                return true;
+            }
+        }
+        return false;
+    case Json::booleanValue:
+        if (out != nullptr) {
+            *out = v.asBool() ? 1 : 0;
+        }
+        return true;
+    case Json::arrayValue:
+        TBAG_FALLTHROUGH
+    case Json::objectValue:
+        TBAG_FALLTHROUGH
+    default:
+        return false;
+    }
+}
+
+bool getIntegral(Json::Value const & v, std::string const & key, int * out)
+{
+    if (!existsNumeric(v, key)) {
+        return false;
+    }
+    return getIntegral(v[key], out);
+}
 
 } // namespace json
 } // namespace dom
