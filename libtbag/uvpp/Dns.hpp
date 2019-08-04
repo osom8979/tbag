@@ -134,6 +134,15 @@ public:
     std::string getService() const;
 
 public:
+    // flags:
+    //#define  NI_NOFQDN        0x00000001
+    //#define  NI_NUMERICHOST   0x00000002
+    //#define  NI_NAMEREQD      0x00000004
+    //#define  NI_NUMERICSERV   0x00000008
+    //#define  NI_NUMERICSCOPE  0x00000100
+    //#define  NI_DGRAM         0x00000010
+
+public:
     /** Asynchronous getnameinfo(3). */
     Err requestNameInfo(Loop & loop, struct sockaddr const * addr, int flags);
 

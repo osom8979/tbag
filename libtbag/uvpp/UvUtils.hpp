@@ -104,6 +104,7 @@ using PhysicalAddress = std::array<char, PHYSICAL_ADDRESS_SIZE>;
 
 union SocketAddress
 {
+    struct sockaddr  common;
     struct sockaddr_in  in4;
     struct sockaddr_in6 in6;
 };
