@@ -60,8 +60,8 @@ struct TBAG_API JsonHelper
     static bool getString(Json::Value const & v, std::string * out);
     static bool getString(Json::Value const & v, std::string const & key, std::string * out);
 
-    static bool getIntegral(Json::Value const & v, int * out);
-    static bool getIntegral(Json::Value const & v, std::string const & key, int * out);
+    static bool getInt(Json::Value const & v, int * out);
+    static bool getInt(Json::Value const & v, std::string const & key, int * out);
 };
 
 } // namespace json

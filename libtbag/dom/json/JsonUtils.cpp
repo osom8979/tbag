@@ -145,7 +145,7 @@ bool getString(Json::Value const & v, std::string const & key, std::string * out
     return getString(v[key], out);
 }
 
-bool getIntegral(Json::Value const & v, int * out)
+bool getInt(Json::Value const & v, int * out)
 {
     switch (v.type()) {
     case Json::nullValue:
@@ -193,12 +193,12 @@ bool getIntegral(Json::Value const & v, int * out)
     }
 }
 
-bool getIntegral(Json::Value const & v, std::string const & key, int * out)
+bool getInt(Json::Value const & v, std::string const & key, int * out)
 {
     if (!existsNumeric(v, key)) {
         return false;
     }
-    return getIntegral(v[key], out);
+    return getInt(v[key], out);
 }
 
 } // namespace json

@@ -110,14 +110,14 @@ bool JsonHelper::getString(Json::Value const & v, std::string const & key, std::
     return libtbag::dom::json::getString(v, key, out);
 }
 
-bool JsonHelper::getIntegral(Json::Value const & v, int * out)
+bool JsonHelper::getInt(Json::Value const & v, int * out)
 {
-    return libtbag::dom::json::getIntegral(v, out);
+    return libtbag::dom::json::getInt(v, out);
 }
 
-bool JsonHelper::getIntegral(Json::Value const & v, std::string const & key, int * out)
+bool JsonHelper::getInt(Json::Value const & v, std::string const & key, int * out)
 {
-    return libtbag::dom::json::getIntegral(v, key, out);
+    return libtbag::dom::json::getInt(v, key, out);
 }
 
 } // namespace json
