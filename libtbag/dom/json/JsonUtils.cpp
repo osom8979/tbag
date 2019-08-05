@@ -139,7 +139,7 @@ bool getString(Json::Value const & v, std::string * out)
 
 bool getString(Json::Value const & v, std::string const & key, std::string * out)
 {
-    if (!existsObject(v, key)) {
+    if (!exists(v, key)) {
         return false;
     }
     return getString(v[key], out);
@@ -195,7 +195,7 @@ bool getInt(Json::Value const & v, int * out)
 
 bool getInt(Json::Value const & v, std::string const & key, int * out)
 {
-    if (!existsNumeric(v, key)) {
+    if (!exists(v, key)) {
         return false;
     }
     return getInt(v[key], out);
