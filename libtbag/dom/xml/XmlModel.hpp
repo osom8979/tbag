@@ -19,7 +19,6 @@
 #include <libtbag/Type.hpp>
 
 #include <libtbag/filesystem/Path.hpp>
-#include <libtbag/dom/tinyxml2/tinyxml2.h>
 #include <libtbag/dom/xml/XmlHelper.hpp>
 
 #include <cassert>

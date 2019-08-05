@@ -20,7 +20,7 @@
 #include <libtbag/log/Logger.hpp>
 #include <libtbag/log/Severity.hpp>
 #include <libtbag/string/Environments.hpp>
-#include <libtbag/dom/tinyxml2/tinyxml2.h>
+#include <libtbag/dom/xml/XmlUtils.hpp>
 
 #include <unordered_map>
 #include <memory>

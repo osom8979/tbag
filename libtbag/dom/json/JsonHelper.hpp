@@ -15,7 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/dom/jsoncpp/json.h>
+#include <libtbag/dom/json/JsonUtils.hpp>
 #include <string>
 
 // -------------------

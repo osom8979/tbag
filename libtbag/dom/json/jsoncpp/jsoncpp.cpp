@@ -73,7 +73,7 @@ license you like.
 
 
 
-#include <libtbag/dom/jsoncpp/json.h>
+#include <libtbag/dom/json/jsoncpp/json.h>
 
 #ifndef JSON_IS_AMALGAMATION
 #error "Compile with -I PATH_TO_JSON_DIRECTORY"

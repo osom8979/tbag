@@ -15,8 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Err.hpp>
-#include <libtbag/dom/tinyxml2/tinyxml2.h>
+#include <libtbag/dom/xml/XmlUtils.hpp>
 
 #include <cassert>
 #include <cstdint>
@@ -38,9 +37,9 @@ namespace xml {
  */
 struct TBAG_API XmlHelper
 {
-    using Document = tinyxml2::XMLDocument;
-    using Element  = tinyxml2::XMLElement;
-    using Node     = tinyxml2::XMLNode;
+    using Document = libtbag::dom::xml::Document;
+    using Element = libtbag::dom::xml::Element;
+    using Node = libtbag::dom::xml::Node;
 
     static std::string text(Element const & element);
     static void text(Element & element, std::string const & value);

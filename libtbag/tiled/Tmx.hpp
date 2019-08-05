@@ -19,7 +19,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/dom/tinyxml2/tinyxml2.h>
+#include <libtbag/dom/xml/XmlUtils.hpp>
 
 #include <string>
 #include <vector>
