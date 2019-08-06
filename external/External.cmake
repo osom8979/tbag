@@ -560,6 +560,7 @@ else ()
                        "-DUSE_TZ_DB_IN_DOT=OFF"
                        "-DENABLE_DATE_TESTING=OFF"
                        "-DDISABLE_STRING_VIEW=OFF"
+                       "-DCMAKE_CXX_STANDARD=14"
             #--Output ldateing-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
