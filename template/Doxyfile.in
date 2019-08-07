@@ -17,13 +17,13 @@ FILE_PATTERNS           = *.c *.cc *.cxx *.cpp *.c++ \
                           *.h *.hh *.hxx *.hpp *.h++ \
                           *.idl *.odl *.inc *.simd
 RECURSIVE               = YES
-EXCLUDE_PATTERNS        = *libtbag/dom/jsoncpp/*    \
-                          *libtbag/dom/tinyxml2/*   \
-                          *libtbag/string/fmt/*     \
-                          *.capnp.c++               \
-                          *.capnp.h                 \
-                          *_generated.h             \
-                          *_d2s.h                   \
+EXCLUDE_PATTERNS        = *libtbag/dom/json/jsoncpp/* \
+                          *libtbag/dom/xml/tinyxml2/* \
+                          *libtbag/string/fmt/*       \
+                          *.capnp.c++                 \
+                          *.capnp.h                   \
+                          *_generated.h               \
+                          *_d2s.h                     \
                           *.h.inl
 HTML_TIMESTAMP          = YES
 HTML_OUTPUT             = doxygen

@@ -32,20 +32,24 @@
 #include <type_traits>
 #include <utility>
 
+#define TBAG_WINDOWS_NEW_LINE  "\r\n"
+#define TBAG_UNIX_NEW_LINE     "\n"
+
+#if defined(TBAG_PLATFORM_WINDOWS)
+#define TBAG_NEW_LINE TBAG_WINDOWS_NEW_LINE
+#else
+#define TBAG_NEW_LINE TBAG_UNIX_NEW_LINE
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace string {
 
-TBAG_CONSTEXPR char const * const WINDOWS_NEW_LINE = "\r\n";
-TBAG_CONSTEXPR char const * const    UNIX_NEW_LINE = "\n";
-
-#if defined(TBAG_PLATFORM_WINDOWS)
-TBAG_CONSTEXPR char const * const NEW_LINE = WINDOWS_NEW_LINE;
-#else
-TBAG_CONSTEXPR char const * const NEW_LINE = UNIX_NEW_LINE;
-#endif
+TBAG_CONSTEXPR char const * const WINDOWS_NEW_LINE = TBAG_WINDOWS_NEW_LINE;
+TBAG_CONSTEXPR char const * const UNIX_NEW_LINE = TBAG_UNIX_NEW_LINE;
+TBAG_CONSTEXPR char const * const NEW_LINE = TBAG_NEW_LINE;
 
 TBAG_CONSTEXPR char const CHAR_SPACE  = ' ';
 TBAG_CONSTEXPR char const CHAR_TAB    = '\t';
