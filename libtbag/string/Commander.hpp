@@ -133,7 +133,13 @@ public:
 public:
     std::size_t request(ArgsVector const & args_vector);
     std::size_t request(Flags const & flags);
-    std::size_t request(std::string const & arguments, std::string const & prefix, std::string const & delimiter);
+    std::size_t request(std::vector<std::string> const & arguments,
+                        std::string const & prefix,
+                        std::string const & delimiter);
+    std::size_t request(std::vector<std::string> const & arguments);
+    std::size_t request(std::string const & arguments,
+                        std::string const & prefix,
+                        std::string const & delimiter);
     std::size_t request(std::string const & arguments);
 
     /**

@@ -208,6 +208,18 @@ std::size_t Commander::request(Flags const & flags)
     return request(parseArguments(flags));
 }
 
+std::size_t Commander::request(std::vector<std::string> const & arguments,
+                               std::string const & prefix,
+                               std::string const & delimiter)
+{
+    return request(parseArguments(arguments, prefix, delimiter));
+}
+
+std::size_t Commander::request(std::vector<std::string> const & arguments)
+{
+    return request(parseArguments(arguments, _prefix, _delimiter));
+}
+
 std::size_t Commander::request(std::string const & arguments, std::string const & prefix, std::string const & delimiter)
 {
     return request(parseArguments(arguments, prefix, delimiter));
@@ -222,7 +234,7 @@ std::size_t Commander::request(int argc, char ** argv, std::string const & prefi
 {
     std::vector<std::string> arguments;
     for (int i = (ignore_first ? 1 : 0); i < argc; ++i) {
-        arguments.push_back(argv[i]);
+        arguments.emplace_back(argv[i]);
     }
     return request(parseArguments(arguments, prefix, delimiter));
 }
