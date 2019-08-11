@@ -18,6 +18,8 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/dom/xml/XmlHelper.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
