@@ -6,6 +6,10 @@
  */
 
 #include <libtbag/tiled/details/TmxObjectGroup.hpp>
+#include <libtbag/string/StringUtils.hpp>
+
+#include <cstring>
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

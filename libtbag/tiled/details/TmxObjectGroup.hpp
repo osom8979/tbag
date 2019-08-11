@@ -36,6 +36,8 @@ namespace details {
  *
  * @author zer0
  * @date   2019-08-11
+ *
+ * The object group is in fact a map layer, and is hence called "object layer" in Tiled.
  */
 struct TBAG_API TmxObjectGroup : protected libtbag::dom::xml::XmlHelper
 {
