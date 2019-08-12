@@ -8,7 +8,7 @@ tbag_modules__update_c_family_subdir_objects (
         algorithm animation app archive bitwise box codec common
         container crypto database debug dom dummy filesystem flow
         functional game geometry gpu graph graphic http id io iterator
-        lib locale lock lockfree log loop macro math memory mq net
+        lib locale lock lockfree log loop macro math media memory mq net
         network parallel pattern preprocessor process proto random
         ray res rstl scene science script security signal string system
         thread tiled time tmp tpot tty type typography util uvpp uvxx)
