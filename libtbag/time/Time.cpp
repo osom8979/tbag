@@ -204,47 +204,47 @@ void releaseInstance()
 
 } // namespace __impl
 
-int getYear(std::chrono::system_clock::time_point const & time)
+int getYear(SystemTimePoint const & time)
 {
     return static_cast<int>(date::year_month_day(date::floor<date::days>(time)).year());
 }
 
-int getMonth(std::chrono::system_clock::time_point const & time)
+int getMonth(SystemTimePoint const & time)
 {
     return static_cast<unsigned>(date::year_month_day(date::floor<date::days>(time)).month());
 }
 
-int getDay(std::chrono::system_clock::time_point const & time)
+int getDay(SystemTimePoint const & time)
 {
     return static_cast<unsigned>(date::year_month_day(date::floor<date::days>(time)).day());
 }
 
-int getHours(std::chrono::system_clock::time_point const & time)
+int getHours(SystemTimePoint const & time)
 {
     return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).hours().count());
 }
 
-int getMinutes(std::chrono::system_clock::time_point const & time)
+int getMinutes(SystemTimePoint const & time)
 {
     return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).minutes().count());
 }
 
-int getSeconds(std::chrono::system_clock::time_point const & time)
+int getSeconds(SystemTimePoint const & time)
 {
     return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).seconds().count());
 }
 
-int getSubSeconds(std::chrono::system_clock::time_point const & time)
+int getSubSeconds(SystemTimePoint const & time)
 {
     return static_cast<int>(date::make_time(time - date::floor<date::days>(time)).subseconds().count());
 }
 
-int getWeek(std::chrono::system_clock::time_point const & time)
+int getWeek(SystemTimePoint const & time)
 {
     return date::weekday(date::floor<date::days>(time)).c_encoding();
 }
 
-std::string getWeekString(std::chrono::system_clock::time_point const & time)
+std::string getWeekString(SystemTimePoint const & time)
 {
     switch (getWeek(time)) {
     case 0: return "Sun";
@@ -259,7 +259,7 @@ std::string getWeekString(std::chrono::system_clock::time_point const & time)
     return "[Unknown]";
 }
 
-int getMillisec(std::chrono::system_clock::time_point const & time)
+int getMillisec(SystemTimePoint const & time)
 {
     using namespace std::chrono;
     auto const RESULT = __impl::getTimeFloor<seconds, milliseconds>(time);
@@ -267,7 +267,7 @@ int getMillisec(std::chrono::system_clock::time_point const & time)
     return static_cast<int>(RESULT);
 }
 
-int getMicrosec(std::chrono::system_clock::time_point const & time)
+int getMicrosec(SystemTimePoint const & time)
 {
     using namespace std::chrono;
     auto const RESULT = __impl::getTimeFloor<milliseconds, microseconds>(time);
@@ -275,7 +275,7 @@ int getMicrosec(std::chrono::system_clock::time_point const & time)
     return static_cast<int>(RESULT);
 }
 
-int getNanosec(std::chrono::system_clock::time_point const & time)
+int getNanosec(SystemTimePoint const & time)
 {
     using namespace std::chrono;
     auto const RESULT = __impl::getTimeFloor<microseconds, nanoseconds>(time);
@@ -283,12 +283,12 @@ int getNanosec(std::chrono::system_clock::time_point const & time)
     return static_cast<int>(RESULT);
 }
 
-int getDays(std::chrono::system_clock::time_point const & time)
+int getDays(SystemTimePoint const & time)
 {
     return date::floor<date::days>(time).time_since_epoch().count();
 }
 
-std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)
+std::string getMillisecMbs(SystemTimePoint const & time)
 {
     std::string millisec = std::to_string(getMillisec(time));
     switch (millisec.size()) {
@@ -299,17 +299,17 @@ std::string getMillisecMbs(std::chrono::system_clock::time_point const & time)
     }
 }
 
-void getMillisecString(std::chrono::system_clock::time_point const & time, std::string & result)
+void getMillisecString(SystemTimePoint const & time, std::string & result)
 {
     result = getMillisecMbs(time);
 }
 
-std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT
+SystemTimePoint getNowSystemClock() TBAG_NOEXCEPT
 {
     return std::chrono::system_clock::now();
 }
 
-time_t getTime(std::chrono::system_clock::time_point const & time_point) TBAG_NOEXCEPT
+time_t getTime(SystemTimePoint const & time_point) TBAG_NOEXCEPT
 {
     return std::chrono::system_clock::to_time_t(time_point);
 }

@@ -67,29 +67,31 @@ TBAG_CONSTEXPR int const YEARS_SINCE = 1900;
 /** Months since january: 0-11 */
 TBAG_CONSTEXPR int const MONTHS_SINCE = 1;
 
-TBAG_API int getYear(std::chrono::system_clock::time_point const & time);
-TBAG_API int getMonth(std::chrono::system_clock::time_point const & time);
-TBAG_API int getDay(std::chrono::system_clock::time_point const & time);
-TBAG_API int getHours(std::chrono::system_clock::time_point const & time);
-TBAG_API int getMinutes(std::chrono::system_clock::time_point const & time);
-TBAG_API int getSeconds(std::chrono::system_clock::time_point const & time);
-TBAG_API int getSubSeconds(std::chrono::system_clock::time_point const & time);
-TBAG_API int getWeek(std::chrono::system_clock::time_point const & time);
+using SystemTimePoint = std::chrono::system_clock::time_point;
 
-TBAG_API std::string getWeekString(std::chrono::system_clock::time_point const & time);
+TBAG_API int getYear(SystemTimePoint const & time);
+TBAG_API int getMonth(SystemTimePoint const & time);
+TBAG_API int getDay(SystemTimePoint const & time);
+TBAG_API int getHours(SystemTimePoint const & time);
+TBAG_API int getMinutes(SystemTimePoint const & time);
+TBAG_API int getSeconds(SystemTimePoint const & time);
+TBAG_API int getSubSeconds(SystemTimePoint const & time);
+TBAG_API int getWeek(SystemTimePoint const & time);
+
+TBAG_API std::string getWeekString(SystemTimePoint const & time);
 
 /** milliseconds part of the seconds 0-999. */
-TBAG_API int getMillisec(std::chrono::system_clock::time_point const & time);
-TBAG_API int getMicrosec(std::chrono::system_clock::time_point const & time);
-TBAG_API int getNanosec(std::chrono::system_clock::time_point const & time);
+TBAG_API int getMillisec(SystemTimePoint const & time);
+TBAG_API int getMicrosec(SystemTimePoint const & time);
+TBAG_API int getNanosec(SystemTimePoint const & time);
 
-TBAG_API int getDays(std::chrono::system_clock::time_point const & time);
+TBAG_API int getDays(SystemTimePoint const & time);
 
-TBAG_API std::string getMillisecMbs(std::chrono::system_clock::time_point const & time);
-TBAG_API void getMillisecString(std::chrono::system_clock::time_point const & time, std::string & result);
+TBAG_API std::string getMillisecMbs(SystemTimePoint const & time);
+TBAG_API void getMillisecString(SystemTimePoint const & time, std::string & result);
 
-TBAG_API std::chrono::system_clock::time_point getNowSystemClock() TBAG_NOEXCEPT;
-TBAG_API time_t getTime(std::chrono::system_clock::time_point const & time_point) TBAG_NOEXCEPT;
+TBAG_API SystemTimePoint getNowSystemClock() TBAG_NOEXCEPT;
+TBAG_API time_t getTime(SystemTimePoint const & time_point) TBAG_NOEXCEPT;
 
 /** Obtain current time. */
 TBAG_API time_t getCurrentTime() TBAG_NOEXCEPT;
