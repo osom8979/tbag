@@ -29,6 +29,14 @@
 #define TBAG_COMP_GNUC_VERSION 0
 #endif
 
+#if defined(TBAG_COMP_GNUC)
+# define TBAG_GCC_VERSION_AT_LEAST(x,y) (__GNUC__ > (x) || __GNUC__ == (x) && __GNUC_MINOR__ >= (y))
+# define TBAG_GCC_VERSION_AT_MOST(x,y)  (__GNUC__ < (x) || __GNUC__ == (x) && __GNUC_MINOR__ <= (y))
+#else
+# define TBAG_GCC_VERSION_AT_LEAST(x,y) 0
+# define TBAG_GCC_VERSION_AT_MOST(x,y)  0
+#endif
+
 /**
  * @def CHECK_GNUC_CXX_REGEX
  *

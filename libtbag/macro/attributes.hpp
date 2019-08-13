@@ -17,7 +17,7 @@
 #include <libtbag/macro/compiler.hpp>
 
 #ifndef TBAG_ATTRIBUTE_FORCE_INLINE
-# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 30100)
+# if defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 30100)
 #  define TBAG_ATTRIBUTE_FORCE_INLINE __attribute__((always_inline)) inline
 # elif defined(TBAG_COMP_MSVC)
 #  define TBAG_ATTRIBUTE_FORCE_INLINE __forceinline
@@ -26,8 +26,26 @@
 # endif
 #endif
 
+#ifndef TBAG_ATTRIBUTE_NOINLINE
+# if defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 30100)
+#  define TBAG_ATTRIBUTE_NOINLINE __attribute__((noinline))
+# elif defined(TBAG_COMP_MSVC)
+#  define TBAG_ATTRIBUTE_NOINLINE __declspec(noinline)
+# else
+#  define TBAG_ATTRIBUTE_NOINLINE
+# endif
+#endif
+
+#ifndef TBAG_ATTRIBUTE_WARNING_UNUSED_RESULT
+# if defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 30400)
+#  define TBAG_ATTRIBUTE_WARNING_UNUSED_RESULT __attribute__((warn_unused_result))
+# else
+#  define TBAG_ATTRIBUTE_WARNING_UNUSED_RESULT
+# endif
+#endif
+
 #ifndef TBAG_ATTRIBUTE_DEPRECATED
-# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 30100)
+# if defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 30100)
 #  define TBAG_ATTRIBUTE_DEPRECATED __attribute__((deprecated))
 # elif defined(TBAG_COMP_MSVC)
 #  define TBAG_ATTRIBUTE_DEPRECATED __declspec(deprecated)
@@ -37,7 +55,7 @@
 #endif
 
 #ifndef TBAG_ATTRIBUTE_NORETURN
-# if defined(TBAG_COMP_GNUC_CXX) && (TBAG_COMP_GNUC_VERSION >= 20500)
+# if defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 20500)
 #  define TBAG_ATTRIBUTE_NORETURN __attribute__((noreturn))
 # else
 #  define TBAG_ATTRIBUTE_NORETURN
@@ -45,7 +63,7 @@
 #endif
 
 #ifndef TBAG_ATTRIBUTE_ALIGN
-# if defined(TBAG_COMP_GNUC_CXX)
+# if defined(TBAG_COMP_GNUC)
 #  define TBAG_ATTRIBUTE_ALIGN(n) __attribute__((__aligned__(n)))
 # elif defined(TBAG_COMP_MSVC)
 #  define TBAG_ATTRIBUTE_ALIGN(n) __declspec(align(n))
@@ -86,8 +104,70 @@
 # define TBAG_ALIGNED_STRUCT_END(name, size)
 #endif
 
+#ifndef TBAG_ATTRIBUTE_PURE
+# if (defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 30100)) || defined(TBAG_COMP_CLANG)
+#  define TBAG_ATTRIBUTE_PURE __attribute__((pure))
+# else
+#  define TBAG_ATTRIBUTE_PURE
+# endif
+#endif
+
+#ifndef TBAG_ATTRIBUTE_CONST
+# if (defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 20600)) || defined(TBAG_COMP_CLANG)
+#  define TBAG_ATTRIBUTE_CONST __attribute__((const))
+# else
+#  define TBAG_ATTRIBUTE_CONST
+# endif
+#endif
+
+#ifndef TBAG_ATTRIBUTE_COLD
+# if (defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 40300)) || defined(TBAG_COMP_CLANG)
+#  define TBAG_ATTRIBUTE_COLD __attribute__((cold))
+# else
+#  define TBAG_ATTRIBUTE_COLD
+# endif
+#endif
+
+#ifndef TBAG_ATTRIBUTE_FLATTEN
+# if (defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 40100)) || defined(TBAG_COMP_LLVM)
+#  define TBAG_ATTRIBUTE_FLATTEN __attribute__((flatten))
+# else
+#  define TBAG_ATTRIBUTE_FLATTEN
+# endif
+#endif
+
+#ifndef TBAG_ATTRIBUTE_UNUSED
+# if defined(TBAG_COMP_GNUC) || defined(TBAG_COMP_CLANG)
+#  define TBAG_ATTRIBUTE_UNUSED __attribute__((unused))
+# else
+#  define TBAG_ATTRIBUTE_UNUSED
+# endif
+#endif
+
+/**
+ * @def TBAG_ATTRIBUTE_USED
+ *
+ * Mark a variable as used and prevent the compiler from optimizing it away.
+ * This is useful for variables accessed only from inline assembler without the compiler being aware.
+ */
+#ifndef TBAG_ATTRIBUTE_USED
+# if (defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 30100)) || defined(TBAG_COMP_CLANG)
+#  define TBAG_ATTRIBUTE_USED __attribute__((used))
+# else
+#  define TBAG_ATTRIBUTE_USED
+# endif
+#endif
+
+#ifndef TBAG_ATTRIBUTE_ALIAS
+# if (defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 30300)) || defined(TBAG_COMP_CLANG)
+#  define TBAG_ATTRIBUTE_ALIAS __attribute__((may_alias))
+# else
+#  define TBAG_ATTRIBUTE_ALIAS
+# endif
+#endif
+
 #ifndef TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED
-# if defined(TBAG_COMP_GNUC_CXX) /*&& (TBAG_COMP_GNUC_VERSION >= 40600)*/
+# if defined(TBAG_COMP_GNUC) /*&& (TBAG_COMP_GNUC_VERSION >= 40600)*/
 #  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_DEPRECATED                 \
     _Pragma("GCC diagnostic push")                                  \
     _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
@@ -105,7 +185,7 @@
 #  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER    \
     _Pragma("GCC diagnostic push")                  \
     _Pragma("GCC diagnostic ignored \"-Wreorder\"")
-# elif defined(TBAG_COMP_GNUC_CXX)
+# elif defined(TBAG_COMP_GNUC)
 #  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
 # elif defined(TBAG_COMP_MSVC)
 #  define TBAG_ATTRIBUTE_PUSH_NO_WARNING_REORDER
@@ -115,7 +195,7 @@
 #endif
 
 #ifndef TBAG_ATTRIBUTE_DIAGNOSTIC_POP
-# if defined(TBAG_COMP_GNUC_CXX)
+# if defined(TBAG_COMP_GNUC)
 #  define TBAG_ATTRIBUTE_DIAGNOSTIC_POP  _Pragma("GCC diagnostic pop")
 # elif defined(TBAG_COMP_MSVC)
 #  define TBAG_ATTRIBUTE_DIAGNOSTIC_POP  __pragma(warning(pop))
@@ -125,7 +205,7 @@
 #endif
 
 #ifndef TBAG_PUSH_MACRO
-# if defined(TBAG_COMP_GNUC_CXX)
+# if defined(TBAG_COMP_GNUC)
 #  define TBAG_PUSH_MACRO(name) _Pragma("push_macro(\"" #name "\")")
 # elif defined(TBAG_COMP_MSVC)
 #  define TBAG_PUSH_MACRO(name) __pragma(push_macro("\"" #name "\""))
@@ -135,7 +215,7 @@
 #endif
 
 #ifndef TBAG_POP_MACRO
-# if defined(TBAG_COMP_GNUC_CXX)
+# if defined(TBAG_COMP_GNUC)
 #  define TBAG_POP_MACRO(name) _Pragma("pop_macro(\"" #name "\")")
 # elif defined(TBAG_COMP_MSVC)
 #  define TBAG_POP_MACRO(name) __pragma(pop_macro("\"" #name "\""))
@@ -194,11 +274,11 @@
 #define TBAG_FORMAT_STRING TBAG_PRINTF_FORMAT_STRING
 #endif
 
-#ifndef TBAG_FORMAT_PRINTF_SUFFIX
+#ifndef TBAG_ATTRIBUTE_FORMAT_PRINTF_SUFFIX
 # if defined(TBAG_COMP_GNUC)
-#  define TBAG_FORMAT_PRINTF_SUFFIX(x, y) __attribute__((format(printf, x, y)))
+#  define TBAG_ATTRIBUTE_FORMAT_PRINTF_SUFFIX(fmtpos, attrpos) __attribute__((format(printf, fmtpos, attrpos)))
 # else
-#  define TBAG_FORMAT_PRINTF_SUFFIX(x, y)
+#  define TBAG_ATTRIBUTE_FORMAT_PRINTF_SUFFIX(fmtpos, attrpos)
 # endif
 #endif
 
