@@ -21,6 +21,8 @@
 #include <libtbag/log/sink/RotateFileSink.hpp>
 #include <libtbag/log/sink/StringQueueSink.hpp>
 
+#include <cassert>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -154,6 +156,12 @@ bool removeLogger(LoggerId id)
 bool removeLogger(std::string const & name)
 {
     return removeLogger(getLoggerId(name));
+}
+
+bool removeLogger(Logger const * logger)
+{
+    assert(logger != nullptr);
+    return removeLogger(logger->NAME);
 }
 
 Logger * getLogger(LoggerId id)

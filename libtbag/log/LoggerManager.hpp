@@ -123,6 +123,7 @@ TBAG_API Logger * createFileLogger(std::string const & name, std::string const &
 
 TBAG_API bool removeLogger(LoggerId id);
 TBAG_API bool removeLogger(std::string const & name);
+TBAG_API bool removeLogger(Logger const * logger);
 
 TBAG_API Logger * getLogger(LoggerId id);
 TBAG_API Logger * getLogger(std::string const & name);
