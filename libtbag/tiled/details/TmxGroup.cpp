@@ -60,7 +60,6 @@ Err TmxGroup::read(Element const & elem)
         }
     });
 
-
     foreachElement(elem, TmxImageLayer::TAG_NAME, [&](Element const & e){
         TmxImageLayer image_layer;
         if (isSuccess(image_layer.read(e))) {

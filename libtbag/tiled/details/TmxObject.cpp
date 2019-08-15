@@ -39,18 +39,11 @@ Err TmxObject::read(Element const & elem)
         return E_ILLARGS;
     }
 
-    auto const code1 = optAttr(elem, ATT_X, x);
-    if (isFailure(code1)) {
-        return code1;
-    }
-    auto const code2 = optAttr(elem, ATT_Y, y);
-    if (isFailure(code2)) {
-        return code2;
-    }
-
     optAttr(elem, ATT_ID, id);
     optAttr(elem, ATT_NAME, name);
     optAttr(elem, ATT_TYPE, type);
+    optAttr(elem, ATT_X, x);
+    optAttr(elem, ATT_Y, y);
     optAttr(elem, ATT_WIDTH, width);
     optAttr(elem, ATT_HEIGHT, height);
     optAttr(elem, ATT_ROTATION, rotation);
@@ -104,12 +97,11 @@ Err TmxObject::write(Element & elem) const
         return E_ILLARGS;
     }
 
-    setAttr(elem, ATT_X, x);
-    setAttr(elem, ATT_Y, y);
-
     setAttr(elem, ATT_ID, id);
     setAttr(elem, ATT_NAME, name);
     setAttr(elem, ATT_TYPE, type);
+    setAttr(elem, ATT_X, x);
+    setAttr(elem, ATT_Y, y);
     setAttr(elem, ATT_WIDTH, width);
     setAttr(elem, ATT_HEIGHT, height);
     setAttr(elem, ATT_ROTATION, rotation);
