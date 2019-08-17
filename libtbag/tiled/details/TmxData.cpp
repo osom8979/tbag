@@ -18,7 +18,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxData::TmxData() : encoding(Encoding::NONE), compression(Compression::NONE), data_type(DataType::GIDS)
+TmxData::TmxData() : encoding(Encoding::NONE),
+                     compression(Compression::NONE),
+                     data_type(DataType::GIDS)
 {
     // EMPTY.
 }

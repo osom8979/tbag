@@ -18,12 +18,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace tiled   {
 namespace details {
 
-TmxAnimation::TmxAnimation()
+TmxAnimation::TmxAnimation() : TmxTag(TAG_NAME)
 {
     // EMPTY.
 }
 
-TmxAnimation::TmxAnimation(Frames const & f) : frames(f)
+TmxAnimation::TmxAnimation(Frames const & f)
+        : TmxTag(TAG_NAME), frames(f)
 {
     // EMPTY.
 }
@@ -43,60 +44,16 @@ std::size_t TmxAnimation::size() const
     return frames.size();
 }
 
-Err TmxAnimation::read(Element const & elem)
+Err TmxAnimation::onRead(Element const & elem)
 {
-    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
-        return E_ILLARGS;
-    }
-
-    foreachElement(elem, TmxFrame::TAG_NAME, [&](Element const & e){
-        TmxFrame frame;
-        if (isSuccess(frame.read(e))) {
-            frames.push_back(std::move(frame));
-        }
-    });
-
+    read(elem, frames);
     return E_SUCCESS;
 }
 
-Err TmxAnimation::read(std::string const & xml)
+Err TmxAnimation::onWrite(Element & elem) const
 {
-    Document doc;
-    auto const CODE = readFromXmlText(doc, xml);
-    if (isFailure(CODE)) {
-        return CODE;
-    }
-    auto const * elem = doc.FirstChildElement(TAG_NAME);
-    assert(elem != nullptr);
-    return read(*elem);
-}
-
-Err TmxAnimation::write(Element & elem) const
-{
-    if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {
-        return E_ILLARGS;
-    }
-
-    for (auto & frame : frames) {
-        newElement(elem, TmxFrame::TAG_NAME, [&](Element & p){
-            frame.write(p);
-        });
-    }
-
+    write(elem, frames);
     return E_SUCCESS;
-}
-
-Err TmxAnimation::write(std::string & xml) const
-{
-    Document doc;
-    auto * new_elem = newElement(doc, TAG_NAME);
-    assert(new_elem != nullptr);
-    auto const CODE = write(*new_elem);
-    if (isFailure(CODE)) {
-        return CODE;
-    }
-    insertElement(doc, new_elem);
-    return writeToXmlText(doc, xml);
 }
 
 } // namespace details

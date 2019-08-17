@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/dom/xml/XmlHelper.hpp>
+#include <libtbag/tiled/details/TmxTag.hpp>
 #include <libtbag/tiled/details/TmxFrame.hpp>
 
 #include <string>
@@ -35,11 +35,11 @@ namespace details {
  * @author zer0
  * @date   2019-07-23
  */
-struct TBAG_API TmxAnimation : protected libtbag::dom::xml::XmlHelper
+struct TBAG_API TmxAnimation : public TmxTag
 {
-    using Frames = std::vector<TmxFrame>;
-
     TBAG_CONSTEXPR static char const * const TAG_NAME = "animation";
+
+    using Frames = std::vector<TmxFrame>;
 
     Frames frames;
 
@@ -50,11 +50,8 @@ struct TBAG_API TmxAnimation : protected libtbag::dom::xml::XmlHelper
     bool empty() const;
     std::size_t size() const;
 
-    Err read(Element const & elem);
-    Err read(std::string const & xml);
-
-    Err write(Element & elem) const;
-    Err write(std::string & xml) const;
+    virtual Err onRead(Element const & elem) override;
+    virtual Err onWrite(Element & elem) const override;
 };
 
 } // namespace details

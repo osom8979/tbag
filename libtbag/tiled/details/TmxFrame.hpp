@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
-#include <libtbag/dom/xml/XmlHelper.hpp>
+#include <libtbag/tiled/details/TmxTag.hpp>
 
 #include <string>
 
@@ -33,7 +33,7 @@ namespace details {
  * @author zer0
  * @date   2019-07-23
  */
-struct TBAG_API TmxFrame : protected libtbag::dom::xml::XmlHelper
+struct TBAG_API TmxFrame : public TmxTag
 {
     TBAG_CONSTEXPR static char const * const TAG_NAME = "frame";
 
@@ -43,18 +43,15 @@ struct TBAG_API TmxFrame : protected libtbag::dom::xml::XmlHelper
     /** How long (in milliseconds) this frame should be displayed before advancing to the next frame. */
     TBAG_CONSTEXPR static char const * const ATT_DURATION = "duration";
 
-    int tileid;
-    int duration;
+    int tileid = 0;
+    int duration = 0;
 
     TmxFrame();
     TmxFrame(int t, int d);
-    ~TmxFrame();
+    virtual ~TmxFrame();
 
-    Err read(Element const & elem);
-    Err read(std::string const & xml);
-
-    Err write(Element & elem) const;
-    Err write(std::string & xml) const;
+    virtual Err onRead(Element const & elem) override;
+    virtual Err onWrite(Element & elem) const override;
 };
 
 } // namespace details
