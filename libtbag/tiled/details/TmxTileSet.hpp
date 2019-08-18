@@ -66,7 +66,7 @@ struct TBAG_API TmxTileSet : protected libtbag::dom::xml::XmlHelper
     /**
      * If this tileset is stored in an external TSX (Tile Set XML) file,
      * this attribute refers to that file.
-     * That TSX file has the same structure as the <tileset> element described here.
+     * That TSX file has the same structure as the <code>tileset</code> element described here.
      * (There is the firstgid attribute missing and this source attribute is also not there.
      * These two attributes are kept in the TMX map, since they are map specific.)
      */

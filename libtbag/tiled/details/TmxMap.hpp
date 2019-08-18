@@ -137,7 +137,7 @@ struct TBAG_API TmxMap : protected libtbag::dom::xml::XmlHelper
 
     /**
      * The background color of the map.
-     * (optional, may include alpha value since 0.15 in the form #AARRGGBB)
+     * (optional, may include alpha value since 0.15 in the form \#AARRGGBB)
      */
     TBAG_CONSTEXPR static char const * const ATT_BACKGROUNDCOLOR = "backgroundcolor";
 
