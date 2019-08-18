@@ -179,6 +179,15 @@ TEST(BoxTest, Reshape)
     ASSERT_EQ(1, b0.rank());
     ASSERT_EQ(2, b0.size());
     ASSERT_EQ(2, b0.dim(0));
+
+    b0.reshape<double>(3, 4, 5);
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_fp64());
+    ASSERT_EQ(3, b0.rank());
+    ASSERT_EQ(3*4*5, b0.size());
+    ASSERT_EQ(3, b0.dim(0));
+    ASSERT_EQ(4, b0.dim(1));
+    ASSERT_EQ(5, b0.dim(2));
 }
 
 TEST(BoxTest, Assign)
@@ -253,26 +262,28 @@ TEST(BoxTest, Assign)
     ASSERT_EQ(1, b4.dim(1));
 }
 
-TEST(BoxTest, AsType)
+TEST(BoxTest, Astype)
 {
-    Box b0 = {10, 20};
-    Box b1 = b0.asType<double>();
+    Box b0 = {10, 20, 30, 40};
+    Box b1 = b0.astype<double>();
 
     ASSERT_TRUE(b0.is_device_cpu());
     ASSERT_TRUE(b0.is_si32());
     ASSERT_EQ(1, b0.rank());
-    ASSERT_EQ(2, b0.size());
-    ASSERT_EQ(2, b0.dim(0));
+    ASSERT_EQ(4, b0.size());
+    ASSERT_EQ(4, b0.dim(0));
     ASSERT_EQ(10, b0.at<si32>(0));
     ASSERT_EQ(20, b0.at<si32>(1));
 
     ASSERT_TRUE(b1.is_device_cpu());
     ASSERT_TRUE(b1.is_fp64());
     ASSERT_EQ(1, b1.rank());
-    ASSERT_EQ(2, b1.size());
-    ASSERT_EQ(2, b1.dim(0));
+    ASSERT_EQ(4, b1.size());
+    ASSERT_EQ(4, b1.dim(0));
     ASSERT_EQ(10.0, b1.at<fp64>(0));
     ASSERT_EQ(20.0, b1.at<fp64>(1));
+    ASSERT_EQ(30.0, b1.at<fp64>(2));
+    ASSERT_EQ(40.0, b1.at<fp64>(3));
 }
 
 TEST(BoxTest, Info)

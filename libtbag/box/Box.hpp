@@ -212,6 +212,26 @@ inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
 /**
  * Box class prototype.
  *
+ * Containers:
+ * <table>
+ *   <tr>
+ *     <th>NumPy</th>
+ *     <th>Box</th>
+ *   </tr>
+ *   <tr>
+ *     <td><code>a = np.array([[1, 2], [3, 4], [5, 6]])</code></td>
+ *     <td><code>Box a = {{1, 2}, {3, 4}, {5, 6}};</code></td>
+ *   </tr>
+ *   <tr>
+ *     <td><code>a.reshape([2, 3])</code></td>
+ *     <td><code>a.reshape(2, 3)</code></td>
+ *   </tr>
+ *   <tr>
+ *     <td><code>a.astype(np.double)</code></td>
+ *     <td><code>b0.astype<double>()</code></td>
+ *   </tr>
+ * </table>
+ *
  * @author zer0
  * @date   2019-05-16
  */
@@ -239,6 +259,9 @@ public:
 
     using Buffer = std::vector<ui8>;
 
+    using size_type = ui32;
+    using difference_type = std::ptrdiff_t;
+
 public:
     using SharedBoxData = std::shared_ptr<box_data>;
 
@@ -260,6 +283,42 @@ public:
     TBAG_CONSTEXPR static btype const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
     TBAG_CONSTEXPR static btype const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }
     TBAG_CONSTEXPR static btype const device_glsl() TBAG_NOEXCEPT { return libtbag::box::details::BD_GLSL; }
+
+public:
+    struct Cursor : public std::forward_iterator_tag
+    {
+        box_cursor cursor;
+
+        Cursor(Box & box) TBAG_NOEXCEPT
+        {
+            libtbag::box::details::box_cursor_init(&cursor, box.get());
+        }
+
+        Cursor & operator ++() TBAG_NOEXCEPT
+        {
+            libtbag::box::details::box_cursor_next(&cursor);
+            return *this;
+        }
+
+        inline void * data() TBAG_NOEXCEPT
+        { return cursor.data; }
+
+        inline void const * data() const TBAG_NOEXCEPT
+        { return cursor.data; }
+
+        template <typename T>
+        inline T * cast() TBAG_NOEXCEPT
+        { return static_cast<T*>(data()); }
+
+        template <typename T>
+        inline T const * cast() const TBAG_NOEXCEPT
+        { return static_cast<T const *>(data()); }
+    };
+
+    using iterator = Cursor;
+    using const_iterator = iterator const;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 private:
     SharedBoxData _data;
@@ -507,11 +566,13 @@ public:
 public:
     Err clone(Box & box) const;
     Box clone() const;
-    Box asType(btype type) const;
+
+public:
+    Box astype(btype type) const;
 
     template <typename T>
-    Box asType() const
-    { return asType(get_btype<T>()); }
+    Box astype() const
+    { return astype(get_btype<T>()); }
 
 public:
     template <typename T>

@@ -264,7 +264,7 @@ Box Box::clone() const
     return result;
 }
 
-Box Box::asType(btype type) const
+Box Box::astype(btype type) const
 {
     Box result;
     auto code = box_malloc_copy_dims(result.get(), type, device(), ext(), dims(), dims_capacity(), rank());
