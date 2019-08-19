@@ -54,11 +54,11 @@ struct TBAG_API TmxTag : protected libtbag::dom::xml::XmlHelper
     Err write(std::string & xml) const;
 
     template <typename T>
-    void read(Element const & elem, std::vector<T> & vec) const
+    static void read(Element const & elem, char const * tag, std::vector<T> & vec)
     {
         STATIC_ASSERT_CHECK_IS_BASE_OF(TmxTag, T);
         std::vector<T> result;
-        foreachElement(elem, TAG, [&](Element const & e){
+        foreachElement(elem, tag, [&](Element const & e){
             T v;
             if (isSuccess(v.read(e))) {
                 result.emplace_back(std::move(v));
@@ -67,12 +67,18 @@ struct TBAG_API TmxTag : protected libtbag::dom::xml::XmlHelper
         vec.swap(result);
     }
 
+    template <typename T>
+    static void read(Element const & elem, std::vector<T> & vec)
+    {
+        read(elem, T::TAG_NAME, vec);
+    }
+
     template <typename Itr>
-    std::size_t write(Element & elem, Itr begin, Itr end) const
+    static std::size_t write(Element & elem, char const * tag, Itr begin, Itr end)
     {
         std::size_t result = 0;
         for (; begin != end; ++begin) {
-            newElement(elem, TAG, [&](Element & p){
+            newElement(elem, tag, [&](Element & p){
                 if (isSuccess(begin->write(p))) {
                     ++result;
                 }
@@ -82,9 +88,15 @@ struct TBAG_API TmxTag : protected libtbag::dom::xml::XmlHelper
     }
 
     template <typename T>
-    std::size_t write(Element & elem, std::vector<T> const & vec) const
+    static std::size_t write(Element & elem, char const * tag, std::vector<T> const & vec)
     {
-        return write(elem, vec.begin(), vec.end());
+        return write(elem, tag, vec.begin(), vec.end());
+    }
+
+    template <typename T>
+    static std::size_t write(Element & elem, std::vector<T> const & vec)
+    {
+        return write(elem, T::TAG_NAME, vec);
     }
 };
 

@@ -220,7 +220,7 @@ inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
  *   </tr>
  *   <tr>
  *     <td><code>a = np.array([[1, 2], [3, 4], [5, 6]])</code></td>
- *     <td><code>Box a = {{1, 2}, {3, 4}, {5, 6}};</code></td>
+ *     <td><code>Box b = {{1, 2}, {3, 4}, {5, 6}};</code></td>
  *   </tr>
  *   <tr>
  *     <td><code>a.reshape([2, 3])</code></td>
@@ -228,7 +228,7 @@ inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
  *   </tr>
  *   <tr>
  *     <td><code>a.astype(np.double)</code></td>
- *     <td><code>b0.astype<double>()</code></td>
+ *     <td><code>b.astype<double>()</code></td>
  *   </tr>
  * </table>
  *
