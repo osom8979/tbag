@@ -628,7 +628,7 @@ else ()
             SOURCE_DIR "${civetweb_EXT_SOURCE_DIR}"
             CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
                        "-DBUILD_SHARED_LIBS=OFF"
-                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS} -I${ressl_EXT_INCLUDE_DIR}"
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
