@@ -54,6 +54,8 @@ public:
 
     TBAG_CONSTEXPR Severity(constexpr_init_t, char const * t, int l) TBAG_NOEXCEPT : _text(t), _level(l)
     { /* EMPTY */ }
+    TBAG_CONSTEXPR Severity(constexpr_init_t, Severity const & obj) TBAG_NOEXCEPT : _text(obj._text), _level(obj._level)
+    { /* EMPTY */ }
 
     Severity(Severity const & obj) TBAG_NOEXCEPT : _text(obj._text), _level(obj._level)
     { /* EMPTY. */ }
@@ -161,6 +163,17 @@ TBAG_CONSTEXPR Severity const    NOTICE_SEVERITY(Severity::constexpr_init,    NO
 TBAG_CONSTEXPR Severity const      INFO_SEVERITY(Severity::constexpr_init,      INFO_TEXT,      INFO_LEVEL);
 TBAG_CONSTEXPR Severity const     DEBUG_SEVERITY(Severity::constexpr_init,     DEBUG_TEXT,     DEBUG_LEVEL);
 TBAG_CONSTEXPR Severity const   UNKNOWN_SEVERITY(Severity::constexpr_init,   UNKNOWN_TEXT,   UNKNOWN_LEVEL);
+
+TBAG_CONSTEXPR Severity const F(Severity::constexpr_init,       OFF_SEVERITY);
+TBAG_CONSTEXPR Severity const M(Severity::constexpr_init, EMERGENCY_SEVERITY);
+TBAG_CONSTEXPR Severity const A(Severity::constexpr_init,     ALERT_SEVERITY);
+TBAG_CONSTEXPR Severity const C(Severity::constexpr_init,  CRITICAL_SEVERITY);
+TBAG_CONSTEXPR Severity const E(Severity::constexpr_init,     ERROR_SEVERITY);
+TBAG_CONSTEXPR Severity const W(Severity::constexpr_init,   WARNING_SEVERITY);
+TBAG_CONSTEXPR Severity const N(Severity::constexpr_init,    NOTICE_SEVERITY);
+TBAG_CONSTEXPR Severity const I(Severity::constexpr_init,      INFO_SEVERITY);
+TBAG_CONSTEXPR Severity const D(Severity::constexpr_init,     DEBUG_SEVERITY);
+TBAG_CONSTEXPR Severity const U(Severity::constexpr_init,   UNKNOWN_SEVERITY);
 
 TBAG_API char const * const getTextWithLevelStep(int level) TBAG_NOEXCEPT;
 TBAG_API char const * const getDetailsWithLevelStep(int level) TBAG_NOEXCEPT;
