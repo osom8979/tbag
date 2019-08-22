@@ -28,11 +28,11 @@ NAMESPACE_LIBTBAG_OPEN
 #define TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_UV_XX) \
     /* Success code ***********************************************************************************/\
     _TBAG_XX(_SUCCESS                ,     0, "No error"                                               )\
-    _TBAG_XX(_WARNING                ,     1, "Success, but warning"                                   )\
-    _TBAG_XX(_RETRY                  ,     2, "Retry might succeed"                                    )\
-    _TBAG_XX(_CONTINUE               ,     3, "Wait for the next"                                      )\
-    _TBAG_XX(_ASYNCREQ               ,     4, "Async request"                                          )\
-    _TBAG_XX(_ENQASYNC               ,     5, "Enqueue and async"                                      )\
+    _TBAG_XX(_WARNING                ,  1001, "Success, but warning"                                   )\
+    _TBAG_XX(_RETRY                  ,  1002, "Retry might succeed"                                    )\
+    _TBAG_XX(_CONTINUE               ,  1003, "Wait for the next"                                      )\
+    _TBAG_XX(_ASYNCREQ               ,  1004, "Async request"                                          )\
+    _TBAG_XX(_ENQASYNC               ,  1005, "Enqueue and async"                                      )\
     /* Common error codes *****************************************************************************/\
     _TBAG_XX(_ILLARGS                , 10000, "Illegal arguments"                                      )\
     _TBAG_XX(_ILLSTATE               , 10001, "Illegal state"                                          )\
