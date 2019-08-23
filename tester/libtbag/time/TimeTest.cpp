@@ -12,6 +12,7 @@
 #include <iostream>
 
 using namespace libtbag;
+using namespace libtbag::time;
 
 TEST(TimeTest, Ctime)
 {
@@ -65,5 +66,19 @@ TEST(TimeTest, GetTime)
     auto const CODE = time::getTimeOfDay(&sec);
     ASSERT_TRUE(isSuccess(CODE));
     ASSERT_NE(sec, 0);
+}
+
+TEST(TimeTest, SyncedWait)
+{
+    using namespace std::chrono;
+    auto const result1 = syncedWait(E_SUCCESS, system_clock::now(), seconds(1), milliseconds(1), []() -> Err{
+        return E_SUCCESS;
+    });
+    ASSERT_EQ(E_SUCCESS, result1);
+
+    auto const result2 = syncedWait(E_SUCCESS, system_clock::now(), seconds(1), milliseconds(1), []() -> Err{
+        return E_UNKNOWN;
+    });
+    ASSERT_EQ(E_UNKNOWN, result2);
 }
 

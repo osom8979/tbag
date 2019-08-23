@@ -20,6 +20,7 @@
 #include <ctime>
 #include <string>
 #include <chrono>
+#include <thread>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -107,6 +108,21 @@ TBAG_API std::string getLocalTimeZoneAbbreviation();
 
 /** get the date and time. */
 TBAG_API Err getTimeOfDay(long * sec, long * micro = nullptr);
+
+template <typename ReturnType, typename StartTimePoint, typename TimeoutDuration, typename TickDuration, typename Predicated>
+ReturnType syncedWait(ReturnType success_code, StartTimePoint begin, TimeoutDuration timeout, TickDuration tick, Predicated predicated)
+{
+    while (true) {
+        std::this_thread::sleep_for(tick);
+        auto const last = predicated();
+        if (last == success_code) {
+            return success_code;
+        }
+        if (std::chrono::system_clock::now() - begin >= timeout) {
+            return last;
+        }
+    }
+}
 
 } // namespace time
 
