@@ -109,7 +109,6 @@ TEST(BoxPacketTest, ToJson)
     ASSERT_EQ(3, root["dims"][1].asInt());
     ASSERT_EQ(2, root["dims"][2].asInt());
 
-
     box_data box2;
     box_clear(&box2);
     BoxPacketParser parser;
