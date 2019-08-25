@@ -112,6 +112,14 @@ TEST(StringUtilsTest, SplitTokens_NotRemoveEmpty)
     ASSERT_STREQ("B", tokens8[1].c_str());
 }
 
+TEST(StringUtilsTest, MergeTokens)
+{
+    ASSERT_STREQ("", mergeTokens({}, ":").c_str());
+    ASSERT_STREQ("A", mergeTokens({"A"}, ":").c_str());
+    ASSERT_STREQ("A:B", mergeTokens({"A", "B"}, ":").c_str());
+    ASSERT_STREQ("A:B:C", mergeTokens({"A", "B", "C"}, ":").c_str());
+}
+
 TEST(StringUtilsTest, SplitUtf8Tokens)
 {
     auto tokens1 = splitUtf8Tokens(UTF8_SOURCE, UTF8_NA);

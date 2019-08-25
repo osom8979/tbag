@@ -30,6 +30,7 @@
 #include <regex>
 #include <thread>
 #include <type_traits>
+#include <iterator>
 #include <utility>
 
 #define TBAG_WINDOWS_NEW_LINE  "\r\n"
@@ -122,6 +123,24 @@ TBAG_API std::string getStdEndLine();
  */
 TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter, bool remove_empty = true);
 TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter, bool remove_empty = true);
+
+template <typename Iterator>
+std::string mergeTokens(Iterator begin, Iterator end, std::string const & delimiter)
+{
+    if (begin == end) {
+        return {};
+    }
+    if (begin + 1 == end) {
+        return *begin;
+    }
+    std::stringstream ss;
+    ss << *begin;
+    ++begin;
+    for (; begin != end; ++begin) {
+        ss << delimiter << *begin;
+    }
+    return ss.str();
+}
 
 TBAG_API std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter);
 TBAG_API std::string mergeTokens(std::vector<std::string> const & tokens);

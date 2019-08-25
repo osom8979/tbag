@@ -163,27 +163,12 @@ std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::s
 
 std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter)
 {
-    if (tokens.empty()) {
-        return {};
-    }
-
-    std::size_t const SIZE = tokens.size();
-    if (SIZE == 1) {
-        return tokens[0];
-    }
-
-    assert(SIZE >= 2);
-    std::stringstream ss;
-    ss << tokens[0];
-    for (std::size_t i = 1; i < SIZE; ++i) {
-        ss << delimiter << tokens[i];
-    }
-    return ss.str();
+    return mergeTokens(tokens.begin(), tokens.end(), delimiter);
 }
 
 std::string mergeTokens(std::vector<std::string> const & tokens)
 {
-    return mergeTokens(tokens, " ");
+    return mergeTokens(tokens, STRING_SPACE);
 }
 
 std::string mergeArgv(char ** argv)
