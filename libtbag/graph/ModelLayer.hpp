@@ -266,6 +266,14 @@ public:
         return ModelLayer(nullptr);
     }
 
+public:
+    template <typename LayerType = LayerBase>
+    inline std::shared_ptr<LayerType> base() const TBAG_NOEXCEPT
+    {
+        return std::static_pointer_cast<LayerType>(_base);
+    }
+
+public:
     /**
      * The class that sorts the IDs in the std::set container.
      *
