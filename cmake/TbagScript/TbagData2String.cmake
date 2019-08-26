@@ -31,10 +31,15 @@ set (__header_suffix
         "\n#endif /* __INCLUDE__DATA_TO_STRING__${NAME}_H__ */"
         "\n")
 
+get_filename_component (OUTPUT_DIR ${OUTPUT_PATH} DIRECTORY)
+if (NOT IS_DIRECTORY "${OUTPUT_DIR}")
+    file (MAKE_DIRECTORY "${OUTPUT_DIR}")
+endif ()
+
 file (WRITE ${OUTPUT_PATH} ${__header_prefix})
 while (${__index} LESS ${__content_length})
     string (SUBSTRING "${__content}" ${__index} ${__substring_size} __content_cursor)
-    file (APPEND ${OUTPUT_PATH} "\n        R\"_${NAME}_(${__content_cursor})_${NAME}_\",")
+    file (APPEND ${OUTPUT_PATH} "\n        R\"__(${__content_cursor})__\",")
     math (EXPR __index "${__index} + ${__substring_size}")
 endwhile ()
 file (APPEND ${OUTPUT_PATH} ${__header_suffix})
