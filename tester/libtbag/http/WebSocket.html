@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>WebSocket Test</title>
+    <script language="javascript" type="text/javascript">
+    var wsUri = "ws://localhost:60430/";
+    var output;
+    var websocket;
+
+    function send(message) {
+        write("SENT: " + message);
+        websocket.send(message);
+    }
+
+    function write(message) {
+        var pre = document.createElement("p");
+        pre.style.wordWrap = "break-word";
+        pre.innerHTML = message;
+        output.appendChild(pre);
+    }
+
+    function init() {
+        output = document.getElementById("output");
+
+        if ("WebSocket" in window) {
+            websocket = new WebSocket(wsUri);
+            websocket.onopen = function(evt) {
+                write("CONNECTED");
+                send("WebSocket rocks");
+            };
+            websocket.onclose = function(evt) {
+                write("DISCONNECTED");
+            };
+            websocket.onmessage = function(evt) {
+                write('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
+                websocket.close();
+            };
+            websocket.onerror = function(evt) {
+                write('<span style="color: red;">ERROR:</span> ' + evt.data);
+            };
+        } else {
+            alert("WebSocket NOT supported by your Browser!");
+        }
+    }
+
+    window.addEventListener("load", init, false);
+    </script>
+</head>
+<body>
+    <h2>WebSocket Tester</h2>
+    <div id="output"></div>
+</body>
+</html>
+
+
