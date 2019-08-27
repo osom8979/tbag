@@ -184,7 +184,7 @@ Path & Path::operator =(Path && obj)
 
 bool Path::operator ==(Path const & path) const
 {
-    return getCanonicalString() == path.getCanonicalString();
+    return getGenericString() == path.getGenericString();
 }
 
 bool Path::operator !=(Path const & path) const
@@ -194,7 +194,7 @@ bool Path::operator !=(Path const & path) const
 
 bool Path::operator ==(std::string const & path) const
 {
-    return getCanonicalString() == Path(path).getCanonicalString();
+    return getGenericString() == Path(path).getGenericString();
 }
 
 bool Path::operator !=(std::string const & path) const
