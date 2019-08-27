@@ -309,7 +309,7 @@ void StorageNode::readElement(Element const & element, Property::usr_layout & la
 {
     layout.exists = true;
     layout.text = text(element);
-    optAttr(element, ATT_NAME    , layout.name);
+    optAttr(element, ATT_NAME    , layout.name, layout.text);
     optAttr(element, ATT_ABSOLUTE, layout.abs);
     optAttr(element, ATT_RAW     , layout.raw);
 }

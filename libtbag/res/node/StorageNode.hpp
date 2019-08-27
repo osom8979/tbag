@@ -109,6 +109,8 @@ namespace node {
  *     <user name='name1' absolute='true' raw='true'>dir1</user>
  *     <user name='name2' absolute='false'>dir2</user>
  *     <user name='name3'>dir3</user>
+ *     <user>dir4</user> <!-- name='dir4' -->
+ *
  *     <!-- ... -->
  *   </storage>
  *  @endcode
