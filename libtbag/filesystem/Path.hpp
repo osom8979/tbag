@@ -137,6 +137,7 @@ public:
      * @remarks
      *  - No directory shortcut.
      *  - Use generic path separator. (Unix style: '/')
+     *  - (Not implement) If windows platform, all paths are converted to lowercase.
      */
     std::string getGenericString() const;
     Path getGeneric() const;
