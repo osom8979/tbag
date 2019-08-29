@@ -283,6 +283,18 @@ std::vector<int> ModelNet::getChildrenNodeIds(int node_id, Direction direction) 
     return getNodeIds(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_TARGET : ArcOrder::AO_SOURCE);
 }
 
+std::set<int> ModelNet::getFirstIds() const
+{
+    assert(exists());
+    return _impl->first_ids;
+}
+
+std::set<int> ModelNet::getLastIds() const
+{
+    assert(exists());
+    return _impl->last_ids;
+}
+
 ModelNet::Layers ModelNet::getInputLayers(int node_id, ArcOrder order) const
 {
     assert(exists());

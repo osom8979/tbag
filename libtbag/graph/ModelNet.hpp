@@ -118,6 +118,10 @@ public:
     std::vector<int> getChildrenNodeIds(int node_id, Direction direction) const;
 
 public:
+    std::set<int> getFirstIds() const;
+    std::set<int> getLastIds() const;
+
+public:
     Layers getInputLayers(int node_id, ArcOrder order) const;
     Layers getInputLayers(int node_id, Direction direction) const;
 
