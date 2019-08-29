@@ -92,6 +92,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_NO_RESPONSE            , 10055, "No response"                                            )\
     _TBAG_XX(_NOT_WS_RESPONSE        , 10056, "Not WebSocket response"                                 )\
     _TBAG_XX(_UNKNOWN_ID             , 10057, "Unknown id"                                             )\
+    _TBAG_XX(_REJECTED               , 10058, "Rejected"                                               )\
     /* OpenSSL/ReSSL error code ***********************************************************************/\
     _TBAG_XX(_SSL                    , 11000, "SSL library error"                                      )\
     _TBAG_XX(_SSL_NONE               , 11001, "SSL I/O operation completed"                            )\
