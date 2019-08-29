@@ -114,40 +114,6 @@ public:
 public:
     virtual Err runner(Direction direction, Layers const & input, void * user)
     { return E_SUCCESS; }
-
-public:
-    virtual Err get(char const * key, char * buffer, int * size) const
-    { return E_SUCCESS; }
-    virtual Err set(char const * key, char const * data)
-    { return E_SUCCESS; }
-
-public:
-    static Err getProperty(char * buffer, int * buffer_size, char const * value, int value_size)
-    {
-        *buffer_size = value_size;
-        if (*buffer_size >= value_size) {
-            ::strncpy(buffer, value, value_size);
-            return E_SUCCESS;
-        } else {
-            return E_ENOBUFS;
-        }
-    }
-
-    static Err getProperty(char * buffer, int * buffer_size, char const * value)
-    {
-        return getProperty(buffer, buffer_size, value, ::strlen(value));
-    }
-
-    static Err getProperty(char * buffer, int * buffer_size, std::string const & str)
-    {
-        return getProperty(buffer, buffer_size, str.c_str(), static_cast<int>(str.size()));
-    }
-
-    template <typename T>
-    static Err getProperty(char * buffer, int * buffer_size, T const & value)
-    {
-        return getProperty(buffer, buffer_size, std::to_string(value));
-    }
 };
 
 /**
@@ -244,10 +210,6 @@ public:
 
 public:
     Err runner(Direction direction, Layers const & input, void * user);
-
-public:
-    Err get(std::string const & key, std::string & data) const;
-    Err set(std::string const & key, std::string const & data);
 
 public:
     std::string toString() const;

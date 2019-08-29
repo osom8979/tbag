@@ -121,45 +121,6 @@ Err ModelLayer::runner(Direction direction, Layers const & input, void * user)
     return _base->runner(direction, input, user);
 }
 
-Err ModelLayer::get(std::string const & key, std::string & data) const
-{
-    assert(exists());
-
-    int size = LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE;
-    Err code;
-
-    COMMENT("Default stack buffer") {
-        char buffer[LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE];
-        code = _base->get(key.c_str(), buffer, &size);
-        if (isSuccess(code)) {
-            data.assign(buffer, buffer + size);
-            return code;
-        }
-    }
-
-    if (code == E_ENOBUFS) {
-        if (size <= LayerBase::DEFAULT_PROPERTY_BUFFER_SIZE) {
-            return E_ENOBUFS;
-        }
-
-        std::vector<char> dynamic_memory(size);
-        char * buffer = dynamic_memory.data();
-
-        code = _base->get(key.c_str(), buffer, &size);
-        if (isSuccess(code)) {
-            data.assign(buffer, buffer + size);
-        }
-    }
-
-    return code;
-}
-
-Err ModelLayer::set(std::string const & key, std::string const & data)
-{
-    assert(exists());
-    return _base->set(key.c_str(), data.c_str());
-}
-
 std::string ModelLayer::toString() const
 {
     return std::string(type()) + (isComplete() ? "{Y}@" : "{N}@") + std::to_string(id());

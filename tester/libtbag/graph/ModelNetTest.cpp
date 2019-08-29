@@ -58,62 +58,7 @@ struct ModelNetTestLayer : public LayerBase
         layers = ss.str();
         return E_SUCCESS;
     }
-
-    virtual Err get(char const * key, char * buffer, int * size) const override
-    {
-        if (strcmp(key, "index") == 0) {
-            return getProperty(buffer, size, index);
-        }
-        if (strcmp(key, "layers") == 0) {
-            return getProperty(buffer, size, layers);
-        }
-        return E_NFOUND;
-    }
-
-    virtual Err set(char const * key, char const * data) override
-    {
-        if (strcmp(key, "index") == 0) {
-            index = libtbag::string::toValue<int>(data);
-            return E_SUCCESS;
-        }
-        if (strcmp(key, "layers") == 0) {
-            layers = data;
-            return E_SUCCESS;
-        }
-        return E_NFOUND;
-    }
 };
-
-TEST(ModelNetTest, GetAndSet)
-{
-    ModelLayer log0 = ModelLayer::create<ModelNetTestLayer>(0);
-    ModelLayer log1 = ModelLayer::create<ModelNetTestLayer>(1);
-    ModelLayer log2 = ModelLayer::create<ModelNetTestLayer>(2);
-    ModelLayer log3 = ModelLayer::create<ModelNetTestLayer>(3);
-
-    std::string property;
-
-    // clang-format off
-    ASSERT_EQ(E_SUCCESS, log0.get("index", property)); ASSERT_STREQ("0", property.c_str());
-    ASSERT_EQ(E_SUCCESS, log1.get("index", property)); ASSERT_STREQ("1", property.c_str());
-    ASSERT_EQ(E_SUCCESS, log2.get("index", property)); ASSERT_STREQ("2", property.c_str());
-    ASSERT_EQ(E_SUCCESS, log3.get("index", property)); ASSERT_STREQ("3", property.c_str());
-    // clang-format on
-
-    // clang-format off
-    ASSERT_EQ(E_SUCCESS, log0.set("index", "100"));
-    ASSERT_EQ(E_SUCCESS, log1.set("index", "101"));
-    ASSERT_EQ(E_SUCCESS, log2.set("index", "102"));
-    ASSERT_EQ(E_SUCCESS, log3.set("index", "103"));
-    // clang-format on
-
-    // clang-format off
-    ASSERT_EQ(E_SUCCESS, log0.get("index", property)); ASSERT_STREQ("100", property.c_str());
-    ASSERT_EQ(E_SUCCESS, log1.get("index", property)); ASSERT_STREQ("101", property.c_str());
-    ASSERT_EQ(E_SUCCESS, log2.get("index", property)); ASSERT_STREQ("102", property.c_str());
-    ASSERT_EQ(E_SUCCESS, log3.get("index", property)); ASSERT_STREQ("103", property.c_str());
-    // clang-format on
-}
 
 TEST(ModelNetTest, Default)
 {
@@ -245,26 +190,26 @@ TEST(ModelNetTest, Default)
     ASSERT_TRUE(log7.isComplete());
     ASSERT_TRUE(log8.isComplete());
 
-    std::string layers0;
-    std::string layers1;
-    std::string layers2;
-    std::string layers3;
-    std::string layers4;
-    std::string layers5;
-    std::string layers6;
-    std::string layers7;
-    std::string layers8;
+    auto const layers0 = log0.base<ModelNetTestLayer>()->layers;
+    auto const layers1 = log1.base<ModelNetTestLayer>()->layers;
+    auto const layers2 = log2.base<ModelNetTestLayer>()->layers;
+    auto const layers3 = log3.base<ModelNetTestLayer>()->layers;
+    auto const layers4 = log4.base<ModelNetTestLayer>()->layers;
+    auto const layers5 = log5.base<ModelNetTestLayer>()->layers;
+    auto const layers6 = log6.base<ModelNetTestLayer>()->layers;
+    auto const layers7 = log7.base<ModelNetTestLayer>()->layers;
+    auto const layers8 = log8.base<ModelNetTestLayer>()->layers;
 
     // clang-format off
-    ASSERT_EQ(E_SUCCESS, log0.get("layers", layers0)); ASSERT_TRUE(layers0.empty());
-    ASSERT_EQ(E_SUCCESS, log1.get("layers", layers1)); ASSERT_STREQ("0,", layers1.c_str());
-    ASSERT_EQ(E_SUCCESS, log2.get("layers", layers2)); ASSERT_STREQ("0,", layers2.c_str());
-    ASSERT_EQ(E_SUCCESS, log3.get("layers", layers3)); ASSERT_STREQ("1,", layers3.c_str());
-    ASSERT_EQ(E_SUCCESS, log4.get("layers", layers4)); ASSERT_STREQ("1,", layers4.c_str());
-    ASSERT_EQ(E_SUCCESS, log5.get("layers", layers5)); ASSERT_STREQ("2,", layers5.c_str());
-    ASSERT_EQ(E_SUCCESS, log6.get("layers", layers6)); ASSERT_STREQ("0,2,", layers6.c_str());
-    ASSERT_EQ(E_SUCCESS, log7.get("layers", layers7)); ASSERT_STREQ("3,4,6,8,", layers7.c_str());
-    ASSERT_EQ(E_SUCCESS, log8.get("layers", layers8)); ASSERT_TRUE(layers8.empty());
+    ASSERT_TRUE(layers0.empty());
+    ASSERT_STREQ("0,", layers1.c_str());
+    ASSERT_STREQ("0,", layers2.c_str());
+    ASSERT_STREQ("1,", layers3.c_str());
+    ASSERT_STREQ("1,", layers4.c_str());
+    ASSERT_STREQ("2,", layers5.c_str());
+    ASSERT_STREQ("0,2,", layers6.c_str());
+    ASSERT_STREQ("3,4,6,8,", layers7.c_str());
+    ASSERT_TRUE(layers8.empty());
     // clang-format on
 
     std::cout << net.toString() << std::endl;
