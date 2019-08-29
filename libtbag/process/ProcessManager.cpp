@@ -101,25 +101,50 @@ ProcessManager::ProcessManager()
 
 ProcessManager::~ProcessManager()
 {
-    Guard g(_mutex);
-    for (auto & proc : _procs) {
-        if (static_cast<bool>(proc.second) && proc.second->isRunning()) {
-            proc.second->kill(signal::TBAG_SIGNAL_TERMINATION);
-        }
-    }
+    Guard const G(_mutex);
+    killUnsafe();
+    clearUnsafe();
+}
+
+void ProcessManager::clearUnsafe()
+{
     _procs.clear();
 }
 
-void ProcessManager::join()
+void ProcessManager::joinUnsafe()
 {
-    tDLogD("ProcessManager::join() BEGIN");
-    Guard g(_mutex);
     for (auto & proc : _procs) {
         if (static_cast<bool>(proc.second) && proc.second->joinable()) {
             proc.second->join();
         }
     }
-    tDLogD("ProcessManager::join() END");
+}
+
+void ProcessManager::killUnsafe()
+{
+    for (auto & proc : _procs) {
+        if (static_cast<bool>(proc.second) && proc.second->isRunning()) {
+            proc.second->kill(signal::TBAG_SIGNAL_TERMINATION);
+        }
+    }
+}
+
+void ProcessManager::clear()
+{
+    Guard const G(_mutex);
+    clearUnsafe();
+}
+
+void ProcessManager::join()
+{
+    Guard const G(_mutex);
+    joinUnsafe();
+}
+
+void ProcessManager::kill()
+{
+    Guard const G(_mutex);
+    killUnsafe();
 }
 
 bool ProcessManager::exists(int pid) const

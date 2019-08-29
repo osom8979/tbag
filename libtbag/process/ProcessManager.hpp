@@ -120,8 +120,15 @@ public:
     inline bool        empty() const TBAG_NOEXCEPT_SP_OP(_procs.empty()) { Guard g(_mutex); return _procs.empty(); }
     inline std::size_t  size() const TBAG_NOEXCEPT_SP_OP(_procs.size())  { Guard g(_mutex); return _procs.size();  }
 
+private:
+    void clearUnsafe();
+    void joinUnsafe();
+    void killUnsafe();
+
 public:
+    void clear();
     void join();
+    void kill();
 
 public:
     bool exists(int pid) const;
