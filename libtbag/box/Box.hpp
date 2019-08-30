@@ -445,6 +445,9 @@ public:
     inline ui32 size() const TBAG_NOEXCEPT
     { return _data->size; }
 
+    inline bool empty() const TBAG_NOEXCEPT
+    { return _data->size == 0; }
+
 public:
     inline ui32 const * dims() const TBAG_NOEXCEPT
     { return _data->dims; }
