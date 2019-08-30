@@ -249,15 +249,28 @@ Err Box::copyToInfo(Box & box) const
     return box.copyFromInfo(*this);
 }
 
-Err Box::clone(Box & box) const
+Err Box::copyFrom(Box const & box)
 {
-    return box_clone(box.get(), get());
+    auto const code = copyFromData(box);
+    if (isFailure(code)) {
+        return code;
+    }
+    return copyFromInfo(box);
+}
+
+Err Box::copyTo(Box & box) const
+{
+    auto const code = copyToData(box);
+    if (isFailure(code)) {
+        return code;
+    }
+    return copyToInfo(box);
 }
 
 Box Box::clone() const
 {
     Box result;
-    auto const CODE = clone(result);
+    auto const CODE = copyTo(result);
     if (isFailure(CODE)) {
         return Box(nullptr);
     }

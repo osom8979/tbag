@@ -564,7 +564,10 @@ public:
     Err copyToInfo(Box & box) const;
 
 public:
-    Err clone(Box & box) const;
+    Err copyFrom(Box const & box);
+    Err copyTo(Box & box) const;
+
+public:
     Box clone() const;
 
 public:
