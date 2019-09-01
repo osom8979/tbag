@@ -764,8 +764,8 @@ public:
     inline ui32 getTypeByte() const TBAG_NOEXCEPT
     { return libtbag::box::details::box_get_type_byte(type()); }
 
-    inline ui32 getStride(ui32 rank) const TBAG_NOEXCEPT
-    { return libtbag::box::details::box_dim_get_stride(dims(), rank, 0); }
+    inline ui32 getStride(ui32 i) const TBAG_NOEXCEPT
+    { return libtbag::box::details::box_dim_get_stride(dims(), rank(), i); }
 
 public:
     inline void * data() TBAG_NOEXCEPT
