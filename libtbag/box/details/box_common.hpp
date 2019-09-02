@@ -268,16 +268,24 @@ TBAG_API bool box_data_check_address_raw(void const * data_begin, ui32 size, bty
  */
 struct box_cursor
 {
+    /** box container pointer. */
     box_data * box;
 
+    /** Next data pointer. */
     void * data;
+    /** Dimensional index with the cursor. */
     int dim_index;
+    /** Stride size of the cursor. (not byte! it is element size.) */
     int stride;
 
+    /** Beginning element position. */
     int begin;
+    /** End element position. */
     int end;
+    /** Step to move to the next element. */
     int step;
 
+    /** Current element position. */
     int index;
 };
 
@@ -316,6 +324,13 @@ TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_curso
 TBAG_API bool box_cursor_init_sub(box_cursor * cursor, box_cursor * parent_cursor) TBAG_NOEXCEPT;
 
 TBAG_API bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT;
+
+struct box_slice
+{
+    int begin;
+    int end;
+    int step;
+};
 
 } // namespace details
 } // namespace box

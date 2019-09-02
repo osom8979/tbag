@@ -29,7 +29,7 @@ TBAG_API bool renderCenteredText(std::string const & text,
                                  int width, int height, float font_size,
                                  libtbag::graphic::Color const & text_color,
                                  libtbag::graphic::Color const & background_color,
-                                 libtbag::box::Box & output);
+                                 libtbag::box::Box & output /* ARGB format */);
 
 } // namespace graphic
 
