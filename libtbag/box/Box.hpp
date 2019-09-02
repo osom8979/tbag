@@ -593,10 +593,10 @@ public:
     using init4d_t = std::initializer_list< init3d_t<T> >;
 
     template <typename T>
-    Err assign(bdev device, ui64 const * ext, init1d_t<T> const & items)
+    Err assign(bdev device, ui64 const * ext, T const * begin, T const * end)
     {
         using DataType = typename libtbag::remove_cr<T>::type;
-        auto const dim_1d = static_cast<ui32>(items.size());
+        auto const dim_1d = static_cast<ui32>(std::distance(begin, end));
         auto const type = get_btype<DataType>();
         auto const code = reshape_args(type, device, ext, 1, dim_1d);
         if (isFailure(code)) {
@@ -605,18 +605,30 @@ public:
 
         if (is_device_cpu() && type == device_cpu()) {
             auto * d = cast<DataType>();
-            for (auto & i1 : items) {
-                *d = static_cast<DataType>(i1);
+            for (; begin != end; ++begin) {
+                *d = static_cast<DataType>(*begin);
                 ++d;
             }
         } else {
             ui32 offset = 0;
-            for (auto & i1 : items) {
-                libtbag::box::details::box_data_set(get(), &i1, type, device, ext, offset);
+            for (; begin != end; ++begin) {
+                libtbag::box::details::box_data_set(get(), begin, type, device, ext, offset);
                 ++offset;
             }
         }
         return E_SUCCESS;
+    }
+
+    template <typename T>
+    Err assign(T const * begin, T const * end)
+    {
+        return assign(device_cpu(), nullptr, begin, end);
+    }
+
+    template <typename T>
+    Err assign(bdev device, ui64 const * ext, init1d_t<T> const & items)
+    {
+        return assign(device, ext, items.begin(), items.end());
     }
 
     template <typename T>
@@ -769,6 +781,9 @@ public:
     inline ui32 getStride(ui32 i) const TBAG_NOEXCEPT
     { return libtbag::box::details::box_dim_get_stride(dims(), rank(), i); }
 
+    inline ui32 getStrideByte(ui32 i) const TBAG_NOEXCEPT
+    { return getStride(i) * getTypeByte(); }
+
 public:
     inline void * data() TBAG_NOEXCEPT
     { return _data->data; }
@@ -835,6 +850,11 @@ public:
         assert(0 <= COMPARE_AND(i) < rank());
         return *(dims() + i);
     }
+
+public:
+    Err setData(ui8 const * info, ui32 size);
+    Err setData(std::string const & info);
+    Err setData(Buffer const & info);
 
 public:
     using Builder = libtbag::box::BoxPacketBuilder;

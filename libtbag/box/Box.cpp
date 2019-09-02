@@ -315,6 +315,21 @@ Box Box::astype(btype type) const
     return result;
 }
 
+Err Box::setData(ui8 const * info, ui32 size)
+{
+    return assign(info, info + size);
+}
+
+Err Box::setData(std::string const & info)
+{
+    return assign(info.c_str(), info.c_str() + info.size());
+}
+
+Err Box::setData(Buffer const & info)
+{
+    return assign(info.data(), info.data() + info.size());
+}
+
 Err Box::encode(Builder & builder) const
 {
     return builder.build(_data.get());
