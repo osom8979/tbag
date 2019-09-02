@@ -393,3 +393,15 @@ TEST(BoxTest, EncodeDecode_Json)
     ASSERT_EQ(20, b1.at<si32>(1));
 }
 
+TEST(BoxTest, SetData_GetDataString)
+{
+    Box b0;
+    ASSERT_TRUE(isSuccess(b0.setData("TEST")));
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_si8());
+    ASSERT_EQ(1, b0.rank());
+    ASSERT_EQ(4, b0.size());
+    ASSERT_EQ(4, b0.dim(0));
+    ASSERT_STREQ("TEST", b0.getDataString().c_str());
+}
+

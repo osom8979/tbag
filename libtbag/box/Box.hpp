@@ -857,6 +857,10 @@ public:
     Err setData(Buffer const & info);
 
 public:
+    Err getDataString(std::string & result) const;
+    std::string getDataString() const;
+
+public:
     using Builder = libtbag::box::BoxPacketBuilder;
     using Parser  = libtbag::box::BoxPacketParser;
     using Packet  = libtbag::box::BoxPacket;

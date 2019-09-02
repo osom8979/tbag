@@ -330,6 +330,28 @@ Err Box::setData(Buffer const & info)
     return assign(info.data(), info.data() + info.size());
 }
 
+Err Box::getDataString(std::string & result) const
+{
+    if (empty()) {
+        return E_NREADY;
+    }
+    auto const * data = cast<char>();
+    assert(data != nullptr);
+    auto const byte_size = size() * getTypeByte();
+    assert(byte_size >= 1);
+    result.assign(data, data + byte_size);
+    return E_SUCCESS;
+}
+
+std::string Box::getDataString() const
+{
+    std::string result;
+    if (isSuccess(getDataString(result))) {
+        return result;
+    }
+    return {};
+}
+
 Err Box::encode(Builder & builder) const
 {
     return builder.build(_data.get());
