@@ -517,6 +517,8 @@ public:
     Err reshape_vargs(btype type, ui32 rank, va_list ap);
     Err reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
     Err reshape_dims(btype type, ui32 rank, ui32 const * dims);
+    Err reshape_box(box_data const * reference_box_data);
+    Err reshape_box(Box const & reference_box_data);
 
     template <typename T, typename ... Args>
     Err reshapeEx(bdev device, ui64 const * ext, Args && ... args)

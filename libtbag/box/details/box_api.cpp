@@ -448,8 +448,10 @@ Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEP
 {
     assert(dest != nullptr);
     assert(src != nullptr);
-    assert(size >= 1);
 
+    if (size < 1) {
+        return E_ILLARGS;
+    }
     if (dest->size < size) {
         return E_ILLARGS;
     }

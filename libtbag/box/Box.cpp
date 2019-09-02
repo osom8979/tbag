@@ -167,6 +167,21 @@ Err Box::reshape_dims(btype type, ui32 rank, ui32 const * dims)
     return reshape_dims(type, reshape_device, reshape_ext, rank, dims);
 }
 
+Err Box::reshape_box(box_data const * reference_box_data)
+{
+    assert(reference_box_data != nullptr);
+    return reshape_dims(reference_box_data->type,
+                        reference_box_data->device,
+                        reference_box_data->ext,
+                        reference_box_data->rank,
+                        reference_box_data->dims);
+}
+
+Err Box::reshape_box(Box const & reference_box_data)
+{
+    return reshape_box(reference_box_data.get());
+}
+
 Box Box::shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
 {
     va_list ap;
@@ -251,20 +266,25 @@ Err Box::copyToInfo(Box & box) const
 
 Err Box::copyFrom(Box const & box)
 {
-    auto const code = copyFromData(box);
-    if (isFailure(code)) {
-        return code;
+    if (box.size() == 0 || box.rank() == 0) {
+        return E_ALREADY;
+    }
+
+    auto const code1 = reshape_box(box);
+    if (isFailure(code1)) {
+        return code1;
+    }
+
+    auto const code2 = copyFromData(box);
+    if (isFailure(code2)) {
+        return code2;
     }
     return copyFromInfo(box);
 }
 
 Err Box::copyTo(Box & box) const
 {
-    auto const code = copyToData(box);
-    if (isFailure(code)) {
-        return code;
-    }
-    return copyToInfo(box);
+    return box.copyFrom(*this);
 }
 
 Box Box::clone() const
