@@ -8,6 +8,7 @@
 #include <libtbag/graphic/TextToImage.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/typography/font/Ngc.hpp>
+#include <cstdint>
 
 #include <blend2d.h>
 
@@ -17,13 +18,33 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graphic {
 
-bool renderCenteredText(std::string const & text,
-                        int width, int height, float font_size,
-                        libtbag::graphic::Color const & text_color,
-                        libtbag::graphic::Color const & background_color,
-                        libtbag::box::Box & output)
+Err renderCenteredText(std::string const & text,
+                       int width, int height, int channels, float font_size,
+                       libtbag::graphic::Color const & text_color,
+                       libtbag::graphic::Color const & background_color,
+                       libtbag::box::Box & output)
 {
-    BLImage img(width, height, BL_FORMAT_PRGB32);
+    if (width <= 0 || height <= 0) {
+        return E_ILLARGS;
+    }
+    if (channels != 4 && channels != 3 && channels != 1) {
+        return E_ILLARGS;
+    }
+    if (font_size <= 0.0f) {
+        return E_ILLARGS;
+    }
+
+    uint32_t format_type;
+    if (channels == 1) {
+        format_type = BL_FORMAT_XRGB32;
+    } else if (channels == 3) {
+        format_type = BL_FORMAT_XRGB32;
+    } else {
+        assert(channels == 4);
+        format_type = BL_FORMAT_PRGB32;
+    }
+
+    BLImage img(width, height, format_type);
     BLContext ctx(img);
     ctx.setCompOp(BL_COMP_OP_SRC_COPY);
 
@@ -34,51 +55,76 @@ bool renderCenteredText(std::string const & text,
     // Set the text color.
     ctx.setFillStyle(BLRgba32(text_color.r, text_color.g, text_color.b, text_color.a));
 
-    BLFontLoader loader;
-    auto const NGC_NORMAL = libtbag::typography::font::getNgcNormal();
-    if (loader.createFromData(NGC_NORMAL.data(), NGC_NORMAL.size())) {
-        return false;
-    }
+    if (!text.empty()) {
+        BLFontLoader loader;
+        auto const NGC_NORMAL = libtbag::typography::font::getNgcNormal();
+        auto const create_font_result = loader.createFromData(NGC_NORMAL.data(), NGC_NORMAL.size());
+        assert(create_font_result == 0);
 
-    BLFontFace face;
-    if (face.createFromLoader(loader, 0)) {
-        return false;
-    }
+        BLFontFace face;
+        auto const create_face_result = face.createFromLoader(loader, 0);
+        assert(create_face_result == 0);
 
-    BLFont font;
-    font.createFromFace(face, font_size);
+        BLFont font;
+        font.createFromFace(face, font_size);
 
-    BLFontMetrics fm = font.metrics();
-    BLTextMetrics tm = {};
-    BLGlyphBuffer gb;
+        BLFontMetrics fm = font.metrics();
+        BLTextMetrics tm = {};
+        BLGlyphBuffer gb;
 
-    using namespace libtbag::string;
-    auto const lines = splitTokens(text, UNIX_NEW_LINE, false);
+        using namespace libtbag::string;
+        auto const lines = splitTokens(text, UNIX_NEW_LINE, false);
 
-    auto const all_text_box_height = (fm.ascent+fm.descent+fm.lineGap) * lines.size() - (lines.size()>=1?fm.lineGap:0);
-    auto const start_height = (static_cast<double>(height) - all_text_box_height) / 2.0;
+        auto const all_text_box_height = (fm.ascent+fm.descent+fm.lineGap) * lines.size() - (lines.size()>=1?fm.lineGap:0);
+        auto const start_height = (static_cast<double>(height) - all_text_box_height) / 2.0;
 
-    BLPoint p = {0, start_height};
-    for (auto & line : lines) {
-        gb.setUtf8Text(line.c_str());
-        font.shape(gb);
-        font.getTextMetrics(gb, tm);
+        BLPoint p = {0, start_height};
+        for (auto & line : lines) {
+            gb.setUtf8Text(line.c_str());
+            font.shape(gb);
+            font.getTextMetrics(gb, tm);
 
-        p.x = (static_cast<double>(width) - (tm.boundingBox.x1 - tm.boundingBox.x0)) / 2.0;
-        ctx.fillGlyphRun(p, font, gb.glyphRun());
+            p.x = (static_cast<double>(width) - (tm.boundingBox.x1 - tm.boundingBox.x0)) / 2.0;
+            ctx.fillGlyphRun(p, font, gb.glyphRun());
 
-        p.y += fm.ascent + fm.descent + fm.lineGap;
+            p.y += fm.ascent + fm.descent + fm.lineGap;
+        }
     }
     ctx.end();
 
     BLImageData data = {};
-    if (img.getData(&data)) {
-        return false;
-    }
+    auto const obtain_result = img.getData(&data);
+    assert(obtain_result == 0);
 
-    output.reshape<int>(height, width, 4);
-    memcpy(output.data(), data.pixelData, (height*width*4));
-    return true;
+    if (channels == 1) {
+        output.reshape<std::uint8_t>(height, width, 1);
+        auto const * source = static_cast<std::uint8_t const *>(data.pixelData);
+        auto * destination = output.cast<std::uint8_t>();
+        auto const loop_size = height*width;
+        for (auto i = 0; i < loop_size; ++i) {
+            *destination = static_cast<std::uint8_t>((source[0] + source[1] + source[2]) / 3);
+            destination += 1;
+            source += 4;
+        }
+    } else if (channels == 3) {
+        output.reshape<std::uint8_t>(height, width, 3);
+        auto const * source = static_cast<std::uint8_t const *>(data.pixelData);
+        auto * destination = output.cast<std::uint8_t>();
+        auto const loop_size = height*width;
+        for (auto i = 0; i < loop_size; ++i) {
+            destination[0] = source[0];
+            destination[1] = source[1];
+            destination[2] = source[2];
+            // destination[-] = source[3]; // Alpha value!
+            destination += 3;
+            source += 4;
+        }
+    } else {
+        assert(channels == 4);
+        output.reshape<std::uint8_t>(height, width, 4);
+        memcpy(output.data(), data.pixelData, (height*width*4));
+    }
+    return E_SUCCESS;
 }
 
 } // namespace graphic
