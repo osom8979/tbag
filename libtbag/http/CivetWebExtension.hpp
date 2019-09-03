@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/http/CivetWebBypass.hpp>
+#include <libtbag/dom/json/JsonUtils.hpp>
 #include <libtbag/string/Format.hpp>
 
 #include <string>
@@ -33,6 +34,8 @@ inline int mg_write_format(mg_connection * conn, std::string const & format, Arg
 {
     return mg_write_string(conn, libtbag::string::fformat(format, std::forward<Args>(args) ...));
 }
+
+TBAG_API Json::Value getJsonBody(mg_connection * conn);
 
 } // namespace http
 
