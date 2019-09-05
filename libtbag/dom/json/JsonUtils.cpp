@@ -95,6 +95,23 @@ bool existsArray   (Json::Value const & v, std::string const & key) { return exi
 bool existsObject  (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isObject  (); }
 // clang-format on
 
+std::string getForceString(Json::Value const & v)
+{
+    std::string result;
+    if (getString(v, &result)) {
+        return result;
+    }
+    return writeFast(v);
+}
+
+std::string getForceString(Json::Value const & v, std::string const & key)
+{
+    if (exists(v, key)) {
+        return getForceString(v[key]);
+    }
+    return {};
+}
+
 bool getString(Json::Value const & v, std::string * out)
 {
     switch (v.type()) {
@@ -139,10 +156,10 @@ bool getString(Json::Value const & v, std::string * out)
 
 bool getString(Json::Value const & v, std::string const & key, std::string * out)
 {
-    if (!exists(v, key)) {
-        return false;
+    if (exists(v, key)) {
+        return getString(v[key], out);
     }
-    return getString(v[key], out);
+    return false;
 }
 
 bool getInt(Json::Value const & v, int * out)

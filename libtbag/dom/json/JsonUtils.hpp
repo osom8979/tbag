@@ -51,6 +51,9 @@ TBAG_API bool existsArray   (Json::Value const & v, std::string const & key);
 TBAG_API bool existsObject  (Json::Value const & v, std::string const & key);
 // clang-format on
 
+TBAG_API std::string getForceString(Json::Value const & v);
+TBAG_API std::string getForceString(Json::Value const & v, std::string const & key);
+
 TBAG_API bool getString(Json::Value const & v, std::string * out);
 TBAG_API bool getString(Json::Value const & v, std::string const & key, std::string * out);
 
