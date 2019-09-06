@@ -53,6 +53,9 @@ public:
     using size_type       = int;
 
 public:
+    static_assert(sizeof(value_type) == 1, "The size of the element must be 1 byte.");
+
+public:
     using       iterator = pointer;
     using const_iterator = const_pointer;
 
