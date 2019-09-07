@@ -71,14 +71,14 @@ TEST(TimeTest, GetTime)
 TEST(TimeTest, SyncedWait)
 {
     using namespace std::chrono;
-    auto const result1 = syncedWait(E_SUCCESS, system_clock::now(), seconds(1), milliseconds(1), []() -> Err{
-        return E_SUCCESS;
+    auto const result1 = syncedWait(system_clock::now(), seconds(1), milliseconds(1), []() -> bool {
+        return true;
     });
-    ASSERT_EQ(E_SUCCESS, result1);
+    ASSERT_TRUE(result1);
 
-    auto const result2 = syncedWait(E_SUCCESS, system_clock::now(), seconds(1), milliseconds(1), []() -> Err{
-        return E_UNKNOWN;
+    auto const result2 = syncedWait(system_clock::now(), seconds(1), milliseconds(1), []() -> bool {
+        return false;
     });
-    ASSERT_EQ(E_UNKNOWN, result2);
+    ASSERT_FALSE(result2);
 }
 
