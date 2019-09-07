@@ -10,6 +10,7 @@
 #include <libtbag/net/Ip.hpp>
 #include <libtbag/bitwise/Endian.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
+#include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/log/Log.hpp>
@@ -201,6 +202,49 @@ int SocketAddress::getPortNumber() const
         return uvpp::getPortNumber(&_addr.ipv6);
     }
     return 0;
+}
+
+std::string getHostByClientIp(std::string const & client_ip)
+{
+    libtbag::net::SocketAddress client_socket_address;
+    if (isFailure(client_socket_address.init(client_ip, 0))) {
+        return {};
+    }
+
+    auto const CLIENT_FAMILY = client_socket_address.getCommon()->sa_family;
+
+    libtbag::uvpp::Loop loop;
+    libtbag::uvpp::DnsNameInfo name;
+
+    for (auto const & interface : libtbag::uvpp::getInterfaceAddresses()) {
+        auto const addr_family = interface.address.common.sa_family;
+        auto const mask_family = interface.netmask.common.sa_family;
+
+        if (CLIENT_FAMILY == AF_INET && addr_family == AF_INET && mask_family == AF_INET) {
+            auto const mask_addr = interface.netmask.in4.sin_addr.s_addr;
+            auto const addr_addr = interface.address.in4.sin_addr.s_addr;
+            auto const client_addr = client_socket_address.getIpv4()->sin_addr.s_addr;
+
+            if ((mask_addr & addr_addr) == (mask_addr & client_addr)) {
+                if (isSuccess(name.requestNameInfoWithSync(loop, &interface.address.common, NI_NUMERICHOST))) {
+                    return name.getHost();
+                }
+            }
+        } else if (CLIENT_FAMILY == AF_INET6 && addr_family == AF_INET6 && mask_family == AF_INET6) {
+            using Ipv6AddressBitset = std::bitset<128/*IP6 address*/>;
+            Ipv6AddressBitset mask_addr(interface.netmask.in6.sin6_addr.s6_addr);
+            Ipv6AddressBitset addr_addr(interface.address.in6.sin6_addr.s6_addr);
+            Ipv6AddressBitset client_addr(client_socket_address.getIpv6()->sin6_addr.s6_addr);
+
+            if ((mask_addr & addr_addr) == (mask_addr & client_addr)) {
+                if (isSuccess(name.requestNameInfoWithSync(loop, &interface.address.common, NI_NUMERICHOST))) {
+                    return name.getHost();
+                }
+            }
+        }
+    }
+
+    return {};
 }
 
 } // namespace net

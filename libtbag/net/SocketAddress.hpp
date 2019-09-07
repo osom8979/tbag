@@ -92,6 +92,8 @@ public:
     int getPortNumber() const;
 };
 
+TBAG_API std::string getHostByClientIp(std::string const & client_ip);
+
 } // namespace net
 
 // --------------------
