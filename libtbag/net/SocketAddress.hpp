@@ -92,6 +92,7 @@ public:
     int getPortNumber() const;
 };
 
+/** Answer with IP that is on same network as client. */
 TBAG_API std::string getHostByClientIp(std::string const & client_ip);
 
 } // namespace net
