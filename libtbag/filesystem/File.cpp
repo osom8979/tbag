@@ -150,6 +150,12 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 
 static Err writeFromBuffer(std::string const & path, char const * buffer, std::size_t size)
 {
+    // If not remove the original file, the existing content remains.
+    auto const FILE_PATH = Path(path);
+    if (FILE_PATH.isRegularFile()) {
+        FILE_PATH.remove();
+    }
+
     File f(path, File::Flags().clear().creat().wronly());
     if (!f.isOpen()) {
         return E_ENOENT;
