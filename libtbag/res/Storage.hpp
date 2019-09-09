@@ -62,6 +62,9 @@ public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_RANDOM_STRING_SIZE = 16;
 
 public:
+    TBAG_CONSTEXPR static char const * const DEFAULT_STORAGE_KEY_PREFIX = "STORAGE_";
+
+public:
     /**
      * Storage::Impl class implementation.
      *
@@ -211,6 +214,8 @@ public:
     void readEnvDefault();
     void readEnvParams(char ** envs);
     bool saveEnv();
+
+    void addAssetsToEnv(std::string const & key_prefix, bool make_upper_key = true);
     void addAssetsToEnv(bool make_upper_key = true);
 
     void clearEnv();

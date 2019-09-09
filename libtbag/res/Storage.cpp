@@ -187,7 +187,7 @@ bool Storage::saveEnv()
     return _impl->envs.saveResourceXmlFile(ENV_DIR / _impl->envs_filename);
 }
 
-void Storage::addAssetsToEnv(bool make_upper_key)
+void Storage::addAssetsToEnv(std::string const & key_prefix, bool make_upper_key)
 {
     for (auto const & key : asset().getKeys()) {
         if (key.empty()) {
@@ -195,8 +195,13 @@ void Storage::addAssetsToEnv(bool make_upper_key)
         }
         using namespace libtbag::string;
         auto const env_key = trim(make_upper_key ? upper(key) : key);
-        setEnv(env_key, asset().get(key).getGenericString());
+        setEnv(key_prefix + env_key, asset().get(key).getGenericString());
     }
+}
+
+void Storage::addAssetsToEnv(bool make_upper_key)
+{
+    addAssetsToEnv(DEFAULT_STORAGE_KEY_PREFIX, make_upper_key);
 }
 
 void Storage::clearEnv()
