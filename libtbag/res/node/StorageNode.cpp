@@ -537,6 +537,8 @@ StorageNode::Storage StorageNode::loadStorage(std::string const & root, Property
         storage.asset().set(user.name, Path(getPath(updated_root, user.name, user, ENVIRONMENTS)));
     }
 
+    storage.addAssetsToEnv();
+    storage.setEnv(ENV_KEY_STORAGE_ROOT, updated_root);
     return storage;
 }
 

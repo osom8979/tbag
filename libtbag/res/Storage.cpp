@@ -187,6 +187,18 @@ bool Storage::saveEnv()
     return _impl->envs.saveResourceXmlFile(ENV_DIR / _impl->envs_filename);
 }
 
+void Storage::addAssetsToEnv(bool make_upper_key)
+{
+    for (auto const & key : asset().getKeys()) {
+        if (key.empty()) {
+            continue;
+        }
+        using namespace libtbag::string;
+        auto const env_key = trim(make_upper_key ? upper(key) : key);
+        setEnv(env_key, asset().get(key).getGenericString());
+    }
+}
+
 void Storage::clearEnv()
 {
     _impl->envs.clear();

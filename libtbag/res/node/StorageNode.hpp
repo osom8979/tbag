@@ -124,22 +124,23 @@ public:
 
 public:
     TBAG_CONSTEXPR static char const * const DEFAULT_STORAGE_ROOT = "${WORK_DIR}/storage";
+    TBAG_CONSTEXPR static char const * const ENV_KEY_STORAGE_ROOT = "STORAGE_ROOT";
 
 public:
     TBAG_CONSTEXPR static char const * const TAG_STORAGE = "storage";
 
 public:
     // clang-format off
-    TBAG_CONSTEXPR static char const * const TAG_ENV      = Storage::LAYOUT_ENV     ;
-    TBAG_CONSTEXPR static char const * const TAG_CONFIG   = Storage::LAYOUT_CONFIG  ;
-    TBAG_CONSTEXPR static char const * const TAG_MODULE   = Storage::LAYOUT_MODULE  ;
-    TBAG_CONSTEXPR static char const * const TAG_TEXT     = Storage::LAYOUT_TEXT    ;
-    TBAG_CONSTEXPR static char const * const TAG_SQLITE   = Storage::LAYOUT_SQLITE  ;
-    TBAG_CONSTEXPR static char const * const TAG_TEMP     = Storage::LAYOUT_TEMP    ;
+    TBAG_CONSTEXPR static char const * const TAG_ENV      = Storage::LAYOUT_ENV;
+    TBAG_CONSTEXPR static char const * const TAG_CONFIG   = Storage::LAYOUT_CONFIG;
+    TBAG_CONSTEXPR static char const * const TAG_MODULE   = Storage::LAYOUT_MODULE;
+    TBAG_CONSTEXPR static char const * const TAG_TEXT     = Storage::LAYOUT_TEXT;
+    TBAG_CONSTEXPR static char const * const TAG_SQLITE   = Storage::LAYOUT_SQLITE;
+    TBAG_CONSTEXPR static char const * const TAG_TEMP     = Storage::LAYOUT_TEMP;
     TBAG_CONSTEXPR static char const * const TAG_KEYSTORE = Storage::LAYOUT_KEYSTORE;
-    TBAG_CONSTEXPR static char const * const TAG_LUA      = Storage::LAYOUT_LUA     ;
+    TBAG_CONSTEXPR static char const * const TAG_LUA      = Storage::LAYOUT_LUA;
     TBAG_CONSTEXPR static char const * const TAG_LUAROCKS = Storage::LAYOUT_LUAROCKS;
-    TBAG_CONSTEXPR static char const * const TAG_USER     = Storage::LAYOUT_USER    ;
+    TBAG_CONSTEXPR static char const * const TAG_USER     = Storage::LAYOUT_USER;
     // clang-format on
 
     TBAG_CONSTEXPR static char const * const ATT_ROOT       = "root";

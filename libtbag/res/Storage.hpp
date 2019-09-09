@@ -211,6 +211,7 @@ public:
     void readEnvDefault();
     void readEnvParams(char ** envs);
     bool saveEnv();
+    void addAssetsToEnv(bool make_upper_key = true);
 
     void clearEnv();
 
