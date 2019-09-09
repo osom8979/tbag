@@ -24,6 +24,11 @@ using namespace libtbag::uvxx;
 
 TEST(UxFsEventTest, Default)
 {
+    if (isMacPlatform()) {
+        std::cout << "Skip this test in macOS platform." << std::endl;
+        return;
+    }
+
     char const * const TEST_FILENAME = "test.file";
     tttDir_Automatic();
     auto const PATH = tttDir_Get() / TEST_FILENAME;
