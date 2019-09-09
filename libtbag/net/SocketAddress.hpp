@@ -101,7 +101,7 @@ public:
  *
  * @param[in] client_ip
  *      Client IP address.
- * @param[in] client_ip
+ * @param[in] flags
  *      Flag values for getnameinfo(). (e.g. NI_NUMERICHOST)
  * @param[out] result_host
  *      Result host name.
