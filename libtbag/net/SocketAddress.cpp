@@ -16,6 +16,7 @@
 #include <libtbag/log/Log.hpp>
 
 #include <cstring>
+#include <bitset>
 #include <utility>
 
 // -------------------
@@ -204,11 +205,16 @@ int SocketAddress::getPortNumber() const
     return 0;
 }
 
-std::string getHostByClientIp(std::string const & client_ip)
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
+
+Err requestHostNameByClientIp(std::string const & client_ip, int flags, std::string & result_host)
 {
     libtbag::net::SocketAddress client_socket_address;
-    if (isFailure(client_socket_address.init(client_ip, 0))) {
-        return {};
+    auto const code1 = client_socket_address.init(client_ip, 0);
+    if (isFailure(code1)) {
+        return code1;
     }
 
     auto const CLIENT_FAMILY = client_socket_address.getCommon()->sa_family;
@@ -226,25 +232,44 @@ std::string getHostByClientIp(std::string const & client_ip)
             auto const client_addr = client_socket_address.getIpv4()->sin_addr.s_addr;
 
             if ((mask_addr & addr_addr) == (mask_addr & client_addr)) {
-                if (isSuccess(name.requestNameInfoWithSync(loop, &interface.address.common, NI_NUMERICHOST))) {
-                    return name.getHost();
+                auto const code2 = name.requestNameInfoWithSync(loop, &interface.address.common, flags);
+                if (isSuccess(code2)) {
+                    result_host = name.getHost();
+                    return E_SUCCESS;
                 }
             }
         } else if (CLIENT_FAMILY == AF_INET6 && addr_family == AF_INET6 && mask_family == AF_INET6) {
-            using Ipv6AddressBitset = std::bitset<128/*IP6 address*/>;
+            using Ipv6AddressBitset = std::bitset<128/*IP6 address is 128bit*/>;
             Ipv6AddressBitset mask_addr(interface.netmask.in6.sin6_addr.s6_addr);
             Ipv6AddressBitset addr_addr(interface.address.in6.sin6_addr.s6_addr);
             Ipv6AddressBitset client_addr(client_socket_address.getIpv6()->sin6_addr.s6_addr);
 
             if ((mask_addr & addr_addr) == (mask_addr & client_addr)) {
-                if (isSuccess(name.requestNameInfoWithSync(loop, &interface.address.common, NI_NUMERICHOST))) {
-                    return name.getHost();
+                auto const code3 = name.requestNameInfoWithSync(loop, &interface.address.common, flags);
+                if (isSuccess(code3)) {
+                    result_host = name.getHost();
+                    return E_SUCCESS;
                 }
             }
         }
     }
 
-    return {};
+    return E_NFOUND;
+}
+
+std::string requestHostNameByClientIp(std::string const & client_ip, int flags)
+{
+    std::string result_host;
+    auto const code = requestHostNameByClientIp(client_ip, flags, result_host);
+    if (isFailure(code)) {
+        return {};
+    }
+    return result_host;
+}
+
+std::string requestHostNameByClientIp(std::string const & client_ip)
+{
+    return requestHostNameByClientIp(client_ip, NI_NUMERICHOST);
 }
 
 } // namespace net
