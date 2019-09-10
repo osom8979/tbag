@@ -99,29 +99,31 @@ public:
 /**
  * Find the network interface that the client IP is connected to and return the hostname of that interface.
  *
- * @param[in] client_ip
- *      Client IP address.
+ * @param[in] ip
+ *      IP address.
  * @param[in] flags
  *      Flag values for getnameinfo(). (e.g. NI_NUMERICHOST)
- * @param[out] result_host
- *      Result host name.
+ * @param[out] result
+ *      Interface host name.
  *
- * @return Result error code.
+ * @return
+ *  Result error code.
  */
-TBAG_API Err requestHostNameByClientIp(std::string const & client_ip, int flags, std::string & result_host);
-TBAG_API std::string requestHostNameByClientIp(std::string const & client_ip, int flags);
+TBAG_API Err findHostNameOfConnectedInterfaceByIpAddress(std::string const & ip, int flags, std::string & result);
+TBAG_API std::string findHostNameOfConnectedInterfaceByIpAddress(std::string const & ip, int flags);
 
 /**
  * Find the network interface that the client IP is connected to and return the hostname of that interface.
  *
  * Flag value is <code>NI_NUMERICHOST</code>.
  *
- * @param[in] client_ip
- *      Client IP address.
+ * @param[in] ip
+ *      IP address.
  *
- * @return Result host name.
+ * @return
+ *  Interface host name.
  */
-TBAG_API std::string requestHostNameByClientIp(std::string const & client_ip);
+TBAG_API std::string findHostNameOfConnectedInterfaceByIpAddress(std::string const & ip);
 
 } // namespace net
 

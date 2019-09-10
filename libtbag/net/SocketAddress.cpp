@@ -209,10 +209,10 @@ int SocketAddress::getPortNumber() const
 // Miscellaneous utilities
 // -----------------------
 
-Err requestHostNameByClientIp(std::string const & client_ip, int flags, std::string & result_host)
+Err findHostNameOfConnectedInterfaceByIpAddress(std::string const & ip, int flags, std::string & result_host)
 {
     libtbag::net::SocketAddress client_socket_address;
-    auto const code1 = client_socket_address.init(client_ip, 0);
+    auto const code1 = client_socket_address.init(ip, 0);
     if (isFailure(code1)) {
         return code1;
     }
@@ -257,19 +257,19 @@ Err requestHostNameByClientIp(std::string const & client_ip, int flags, std::str
     return E_NFOUND;
 }
 
-std::string requestHostNameByClientIp(std::string const & client_ip, int flags)
+std::string findHostNameOfConnectedInterfaceByIpAddress(std::string const & ip, int flags)
 {
     std::string result_host;
-    auto const code = requestHostNameByClientIp(client_ip, flags, result_host);
+    auto const code = findHostNameOfConnectedInterfaceByIpAddress(ip, flags, result_host);
     if (isFailure(code)) {
         return {};
     }
     return result_host;
 }
 
-std::string requestHostNameByClientIp(std::string const & client_ip)
+std::string findHostNameOfConnectedInterfaceByIpAddress(std::string const & ip)
 {
-    return requestHostNameByClientIp(client_ip, NI_NUMERICHOST);
+    return findHostNameOfConnectedInterfaceByIpAddress(ip, NI_NUMERICHOST);
 }
 
 } // namespace net

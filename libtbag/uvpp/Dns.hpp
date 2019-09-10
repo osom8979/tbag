@@ -32,7 +32,7 @@ namespace uvpp {
 class Loop;
 
 /**
- * Dns address info class prototype.
+ * Domain name to IP address.
  *
  * @author zer0
  * @date   2017-05-03
@@ -108,7 +108,7 @@ public:
 };
 
 /**
- * Dns name info class prototype.
+ * IP address to Domain name.
  *
  * @author zer0
  * @date   2017-05-03
