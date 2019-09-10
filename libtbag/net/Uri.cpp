@@ -383,10 +383,10 @@ Err Uri::requestAddrInfo(std::string & host, int & port, AddrFlags flags) const
 // Extension methods.
 // ------------------
 
-std::map<std::string, std::string> Uri::getQueryMap() const
+std::map<std::string, std::string> Uri::getQueryMap(std::string const & query_string)
 {
     std::map<std::string, std::string> result;
-    for (auto & item : libtbag::string::splitTokens(getQuery(), "&")) {
+    for (auto & item : libtbag::string::splitTokens(query_string, "&")) {
         auto const key_value = libtbag::string::splitTokens(item, "=");
         switch (key_value.size()) {
         case 1:
@@ -403,14 +403,24 @@ std::map<std::string, std::string> Uri::getQueryMap() const
     return result;
 }
 
-std::map<std::string, std::string> Uri::decodeQueryMap() const
+std::map<std::string, std::string> Uri::decodeQueryMap(std::string const & query_string)
 {
     std::map<std::string, std::string> result;
-    for (auto & cursor : getQueryMap()) {
+    for (auto & cursor : getQueryMap(query_string)) {
         result.insert(std::make_pair(decodePercent(cursor.first),
                                      decodePercent(cursor.second)));
     }
     return result;
+}
+
+std::map<std::string, std::string> Uri::getQueryMap() const
+{
+    return getQueryMap(getQuery());
+}
+
+std::map<std::string, std::string> Uri::decodeQueryMap() const
+{
+    return decodeQueryMap(getQuery());
 }
 
 // ---------------

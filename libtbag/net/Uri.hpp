@@ -201,6 +201,9 @@ public:
 
 // Extension methods.
 public:
+    static std::map<std::string, std::string> getQueryMap(std::string const & query_string);
+    static std::map<std::string, std::string> decodeQueryMap(std::string const & query_string);
+
     std::map<std::string, std::string> getQueryMap() const;
     std::map<std::string, std::string> decodeQueryMap() const;
 
