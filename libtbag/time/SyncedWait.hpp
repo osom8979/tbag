@@ -56,8 +56,8 @@ public:
         ~RunningSignal()
         { /* EMPTY. */ }
     public:
-        inline void nowRunning() TBAG_NOEXCEPT_SP_OP(_parent._state.store(State::S_RUNNING))
-        { _parent._state.store(State::S_RUNNING); }
+        inline void nowRunning()
+        { _parent.setRunning(); }
     };
     friend class RunningSignal;
 
@@ -88,6 +88,10 @@ public:
 public:
     static char const * getStateName(State s) TBAG_NOEXCEPT;
     static State getState(std::string const & s) TBAG_NOEXCEPT;
+
+private:
+    inline void setRunning() TBAG_NOEXCEPT_SP_OP(_state.store(State::S_RUNNING))
+    { _state.store(State::S_RUNNING); }
 
 public:
     inline State state() const TBAG_NOEXCEPT_SP_OP(_state.load())
