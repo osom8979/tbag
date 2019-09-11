@@ -101,11 +101,32 @@ struct CivetCallbacks : public mg_callbacks
  */
 class TBAG_API CivetServer
 {
+protected:
+    class CivetConnection
+    {
+    public:
+        char *postData;
+        unsigned long postDataLen;
+
+        CivetConnection();
+        ~CivetConnection();
+    };
+
+public:
+    using Options = std::vector<std::string>;
+
+protected:
+    mg_context * context;
+    std::map<struct mg_connection *, class CivetConnection> connections;
+
+    // generic user context which can be set/read,
+    // the server does nothing with this apart from keep it.
+    void const * _user;
+
 public:
     /**
-     * Constructor
-     *
      * This automatically starts the sever.
+     *
      * It is good practice to call getContext() after this in case there
      * were errors starting the server.
      *
@@ -114,46 +135,30 @@ public:
      * them again (creating/joining threads should not be done in static
      * constructors).
      *
-     * @param options - the web server options.
-     * @param callbacks - optional web server callback methods.
+     * @param[in] options
+     *      The web server options.
+     * @param[in] cb
+     *      Optional web server callback methods.
+     * @param[in] user
+     *      User's data.
      *
      * @throws CivetException
      */
-    CivetServer(const char **options,
-                const struct CivetCallbacks *callbacks = 0,
-                const void *UserContext = 0);
-    CivetServer(std::vector<std::string> options,
-                const struct CivetCallbacks *callbacks = 0,
-                const void *UserContext = 0);
-
-    /**
-     * Destructor
-     */
+    CivetServer(char const ** options, CivetCallbacks const * cb = nullptr, void const * user = nullptr);
+    CivetServer(Options const & options, CivetCallbacks const * cb = nullptr, void const * user = nullptr);
     virtual ~CivetServer();
 
-    /**
-     * close()
-     *
-     * Stops server and frees resources.
-     */
+public:
+    inline void const * getUserContext() const TBAG_NOEXCEPT
+    { return _user; }
+
+public:
+    inline mg_context       * getContext()       TBAG_NOEXCEPT { return context; }
+    inline mg_context const * getContext() const TBAG_NOEXCEPT { return context; }
+
+public:
+    /** Stops server and frees resources. */
     void close();
-
-    /**
-     * getContext()
-     *
-     * @return the context or 0 if not running.
-     */
-    const struct mg_context *
-    getContext() const
-    {
-        return context;
-    }
-
-    struct mg_context *
-    getContext()
-    {
-        return context;
-    }
 
     /**
      * addHandler(const std::string &, CivetHandler *)
@@ -453,32 +458,6 @@ public:
                           size_t src_len,
                           std::string &dst,
                           bool append = false);
-
-    // generic user context which can be set/read,
-    // the server does nothing with this apart from keep it.
-    const void *
-    getUserContext() const
-    {
-        return UserContext;
-    }
-
-protected:
-    class CivetConnection
-    {
-    public:
-        char *postData;
-        unsigned long postDataLen;
-
-        CivetConnection();
-        ~CivetConnection();
-    };
-
-    struct mg_context *context;
-    std::map<struct mg_connection *, class CivetConnection> connections;
-
-    // generic user context which can be set/read,
-    // the server does nothing with this apart from keep it.
-    const void *UserContext;
 
 private:
     /**

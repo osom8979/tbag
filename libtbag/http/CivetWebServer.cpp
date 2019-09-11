@@ -22,16 +22,65 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace http {
 
+CivetServer::CivetServer(char const ** options, CivetCallbacks const * cb, void const * user)
+        : context(nullptr), _user(user)
+{
+    CivetCallbacks callbacks;
+    if (cb) {
+        callbacks = *cb;
+        userCloseHandler = cb->connection_close;
+    } else {
+        userCloseHandler = nullptr;
+    }
+    callbacks.connection_close = closeHandler;
+
+    context = mg_start(&callbacks, this, options);
+    if (context == nullptr) {
+        throw CivetException("Null context when constructing CivetServer. "
+                             "Possible problem binding to port.");
+    }
+}
+
+CivetServer::CivetServer(Options const & options, CivetCallbacks const * cb, void const * user)
+        : context(nullptr), _user(user)
+{
+    CivetCallbacks callbacks;
+    if (cb) {
+        callbacks = *cb;
+        userCloseHandler = cb->connection_close;
+    } else {
+        userCloseHandler = nullptr;
+    }
+    callbacks.connection_close = closeHandler;
+
+    std::vector<char const *> pointers(options.size());
+    for (size_t i = 0; i < options.size(); i++) {
+        pointers[i] = (options[i].c_str());
+    }
+    pointers.push_back(nullptr);
+
+    context = mg_start(&callbacks, this, &pointers[0]);
+    if (context == nullptr) {
+        throw CivetException("null context when constructing CivetServer. "
+                             "Possible problem binding to port.");
+    }
+}
+
+CivetServer::~CivetServer()
+{
+    close();
+}
+
 int
 CivetServer::requestHandler(struct mg_connection *conn, void *cbdata)
 {
     const struct mg_request_info *request_info = mg_get_request_info(conn);
-    assert(request_info != NULL);
+    assert(request_info != nullptr);
     CivetServer *me = (CivetServer *)(request_info->user_data);
-    assert(me != NULL);
+    assert(me != nullptr);
 
     // Happens when a request hits the server before the context is saved
-    if (me->context == NULL)
+    if (me->context == nullptr)
         return 0;
 
     mg_lock_context(me->context);
@@ -65,12 +114,12 @@ int
 CivetServer::authHandler(struct mg_connection *conn, void *cbdata)
 {
     const struct mg_request_info *request_info = mg_get_request_info(conn);
-    assert(request_info != NULL);
+    assert(request_info != nullptr);
     CivetServer *me = (CivetServer *)(request_info->user_data);
-    assert(me != NULL);
+    assert(me != nullptr);
 
     // Happens when a request hits the server before the context is saved
-    if (me->context == NULL)
+    if (me->context == nullptr)
         return 0;
 
     mg_lock_context(me->context);
@@ -91,12 +140,12 @@ CivetServer::webSocketConnectionHandler(const struct mg_connection *conn,
                                         void *cbdata)
 {
     const struct mg_request_info *request_info = mg_get_request_info(conn);
-    assert(request_info != NULL);
+    assert(request_info != nullptr);
     CivetServer *me = (CivetServer *)(request_info->user_data);
-    assert(me != NULL);
+    assert(me != nullptr);
 
     // Happens when a request hits the server before the context is saved
-    if (me->context == NULL)
+    if (me->context == nullptr)
         return 0;
 
     CivetWebSocketHandler *handler = (CivetWebSocketHandler *)cbdata;
@@ -112,12 +161,12 @@ void
 CivetServer::webSocketReadyHandler(struct mg_connection *conn, void *cbdata)
 {
     const struct mg_request_info *request_info = mg_get_request_info(conn);
-    assert(request_info != NULL);
+    assert(request_info != nullptr);
     CivetServer *me = (CivetServer *)(request_info->user_data);
-    assert(me != NULL);
+    assert(me != nullptr);
 
     // Happens when a request hits the server before the context is saved
-    if (me->context == NULL)
+    if (me->context == nullptr)
         return;
 
     CivetWebSocketHandler *handler = (CivetWebSocketHandler *)cbdata;
@@ -135,12 +184,12 @@ CivetServer::webSocketDataHandler(struct mg_connection *conn,
                                   void *cbdata)
 {
     const struct mg_request_info *request_info = mg_get_request_info(conn);
-    assert(request_info != NULL);
+    assert(request_info != nullptr);
     CivetServer *me = (CivetServer *)(request_info->user_data);
-    assert(me != NULL);
+    assert(me != nullptr);
 
     // Happens when a request hits the server before the context is saved
-    if (me->context == NULL)
+    if (me->context == nullptr)
         return 0;
 
     CivetWebSocketHandler *handler = (CivetWebSocketHandler *)cbdata;
@@ -157,12 +206,12 @@ CivetServer::webSocketCloseHandler(const struct mg_connection *conn,
                                    void *cbdata)
 {
     const struct mg_request_info *request_info = mg_get_request_info(conn);
-    assert(request_info != NULL);
+    assert(request_info != nullptr);
     CivetServer *me = (CivetServer *)(request_info->user_data);
-    assert(me != NULL);
+    assert(me != nullptr);
 
     // Happens when a request hits the server before the context is saved
-    if (me->context == NULL)
+    if (me->context == nullptr)
         return;
 
     CivetWebSocketHandler *handler = (CivetWebSocketHandler *)cbdata;
@@ -172,70 +221,14 @@ CivetServer::webSocketCloseHandler(const struct mg_connection *conn,
     }
 }
 
-CivetServer::CivetServer(const char **options,
-                         const struct CivetCallbacks *_callbacks,
-                         const void *UserContextIn)
-        : context(0)
-{
-    struct CivetCallbacks callbacks;
-
-    UserContext = UserContextIn;
-
-    if (_callbacks) {
-        callbacks = *_callbacks;
-        userCloseHandler = _callbacks->connection_close;
-    } else {
-        userCloseHandler = NULL;
-    }
-    callbacks.connection_close = closeHandler;
-    context = mg_start(&callbacks, this, options);
-    if (context == NULL)
-        throw CivetException("null context when constructing CivetServer. "
-                             "Possible problem binding to port.");
-}
-
-CivetServer::CivetServer(std::vector<std::string> options,
-                         const struct CivetCallbacks *_callbacks,
-                         const void *UserContextIn)
-        : context(0)
-{
-    struct CivetCallbacks callbacks;
-
-    UserContext = UserContextIn;
-
-    if (_callbacks) {
-        callbacks = *_callbacks;
-        userCloseHandler = _callbacks->connection_close;
-    } else {
-        userCloseHandler = NULL;
-    }
-    callbacks.connection_close = closeHandler;
-
-    std::vector<const char *> pointers(options.size());
-    for (size_t i = 0; i < options.size(); i++) {
-        pointers[i] = (options[i].c_str());
-    }
-    pointers.push_back(0);
-
-    context = mg_start(&callbacks, this, &pointers[0]);
-    if (context == NULL)
-        throw CivetException("null context when constructing CivetServer. "
-                             "Possible problem binding to port.");
-}
-
-CivetServer::~CivetServer()
-{
-    close();
-}
-
 void
 CivetServer::closeHandler(const struct mg_connection *conn)
 {
     CivetServer *me = (CivetServer *)mg_get_user_data(mg_get_context(conn));
-    assert(me != NULL);
+    assert(me != nullptr);
 
     // Happens when a request hits the server before the context is saved
-    if (me->context == NULL)
+    if (me->context == nullptr)
         return;
 
     if (me->userCloseHandler) {
@@ -274,20 +267,20 @@ CivetServer::addAuthHandler(const std::string &uri, CivetAuthHandler *handler)
 void
 CivetServer::removeHandler(const std::string &uri)
 {
-    mg_set_request_handler(context, uri.c_str(), NULL, NULL);
+    mg_set_request_handler(context, uri.c_str(), nullptr, nullptr);
 }
 
 void
 CivetServer::removeWebSocketHandler(const std::string &uri)
 {
     mg_set_websocket_handler(
-            context, uri.c_str(), NULL, NULL, NULL, NULL, NULL);
+            context, uri.c_str(), nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
 void
 CivetServer::removeAuthHandler(const std::string &uri)
 {
-    mg_set_auth_handler(context, uri.c_str(), NULL, NULL);
+    mg_set_auth_handler(context, uri.c_str(), nullptr, nullptr);
 }
 
 void
@@ -364,18 +357,18 @@ CivetServer::getParam(struct mg_connection *conn,
                       std::string &dst,
                       size_t occurrence)
 {
-    const char *formParams = NULL;
-    const char *queryString = NULL;
+    const char *formParams = nullptr;
+    const char *queryString = nullptr;
     const struct mg_request_info *ri = mg_get_request_info(conn);
-    assert(ri != NULL);
+    assert(ri != nullptr);
     CivetServer *me = (CivetServer *)(ri->user_data);
-    assert(me != NULL);
+    assert(me != nullptr);
     mg_lock_context(me->context);
     CivetConnection &conobj = me->connections[conn];
     mg_lock_connection(conn);
     mg_unlock_context(me->context);
 
-    if (conobj.postData != NULL) {
+    if (conobj.postData != nullptr) {
         // check if form parameter are already stored
         formParams = conobj.postData;
     } else {
@@ -384,7 +377,7 @@ CivetServer::getParam(struct mg_connection *conn,
         if (con_len_str) {
             char *end = 0;
             unsigned long con_len = strtoul(con_len_str, &end, 10);
-            if ((end == NULL) || (*end != 0)) {
+            if ((end == nullptr) || (*end != 0)) {
                 // malformed header
                 mg_unlock_connection(conn);
                 return false;
@@ -398,7 +391,7 @@ CivetServer::getParam(struct mg_connection *conn,
                 // Do not increment con_len, since the 0 terminating is not part
                 // of the content (text or binary).
                 conobj.postData = (char *)malloc(con_len + 1);
-                if (conobj.postData != NULL) {
+                if (conobj.postData != nullptr) {
                     // malloc may fail for huge requests
                     mg_read(conn, conobj.postData, con_len);
                     conobj.postData[con_len] = 0;
@@ -406,7 +399,7 @@ CivetServer::getParam(struct mg_connection *conn,
                     conobj.postDataLen = con_len;
                 }
             }
-            if (conobj.postData == NULL) {
+            if (conobj.postData == nullptr) {
                 // we cannot store the body
                 mg_unlock_connection(conn);
                 return false;
@@ -414,7 +407,7 @@ CivetServer::getParam(struct mg_connection *conn,
         }
     }
 
-    if (ri->query_string != NULL) {
+    if (ri->query_string != nullptr) {
         // get requests do store html <form> field values in the http
         // query_string
         queryString = ri->query_string;
@@ -423,11 +416,11 @@ CivetServer::getParam(struct mg_connection *conn,
     mg_unlock_connection(conn);
 
     bool get_param_success = false;
-    if (formParams != NULL) {
+    if (formParams != nullptr) {
         get_param_success =
                 getParam(formParams, strlen(formParams), name, dst, occurrence);
     }
-    if (!get_param_success && queryString != NULL) {
+    if (!get_param_success && queryString != nullptr) {
         get_param_success =
                 getParam(queryString, strlen(queryString), name, dst, occurrence);
     }
@@ -446,7 +439,7 @@ CivetServer::getParam(const char *data,
     size_t name_len;
 
     dst.clear();
-    if (data == NULL || name == NULL || data_len == 0) {
+    if (data == nullptr || name == nullptr || data_len == 0) {
         return false;
     }
     name_len = strlen(name);
@@ -462,7 +455,7 @@ CivetServer::getParam(const char *data,
 
             // Point s to the end of the value
             s = (const char *)memchr(p, '&', (size_t)(e - p));
-            if (s == NULL) {
+            if (s == nullptr) {
                 s = e;
             }
             assert(s >= p);
@@ -509,7 +502,7 @@ CivetServer::urlEncode(const char *src,
         dst.clear();
 
     for (; src_len > 0; src++, src_len--) {
-        if (isalnum((unsigned char)*src) || strchr(dont_escape, *src) != NULL) {
+        if (isalnum((unsigned char)*src) || strchr(dont_escape, *src) != nullptr) {
             dst.push_back(*src);
         } else {
             dst.push_back('%');
@@ -549,7 +542,7 @@ CivetServer::getListeningPortsFull()
 
 CivetServer::CivetConnection::CivetConnection()
 {
-    postData = NULL;
+    postData = nullptr;
     postDataLen = 0;
 }
 
