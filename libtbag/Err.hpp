@@ -93,6 +93,10 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_NOT_WS_RESPONSE        , 10056, "Not WebSocket response"                                 )\
     _TBAG_XX(_UNKNOWN_ID             , 10057, "Unknown id"                                             )\
     _TBAG_XX(_REJECTED               , 10058, "Rejected"                                               )\
+    _TBAG_XX(_NETWORK                , 10059, "Unknown network error"                                  )\
+    _TBAG_XX(_MODIFY                 , 10060, "Modify error"                                           )\
+    _TBAG_XX(_RESOURCE_EXHAUSTED     , 10061, "Some resource has been exhausted"                       )\
+    _TBAG_XX(_INACCESSIBLE_BLOCK     , 10062, "Inaccessible block"                                     )\
     /* OpenSSL/ReSSL error code ***********************************************************************/\
     _TBAG_XX(_SSL                    , 11000, "SSL library error"                                      )\
     _TBAG_XX(_SSL_NONE               , 11001, "SSL I/O operation completed"                            )\
