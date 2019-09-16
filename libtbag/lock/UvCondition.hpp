@@ -31,6 +31,30 @@ class UvLock;
 /**
  * UvCondition class prototype.
  *
+ * Example
+ * @code{.cpp}
+ *  Lock lock;
+ *  Condition signal;
+ *  bool task_end = false;
+ *  auto const run_async_result = run_thread([&](){
+ *
+ *      run_tack_callback(); // RUN ASYNC TASK !!
+ *
+ *      lock.lock();
+ *      task_end = true;
+ *      signal.signal();
+ *      lock.unlock();
+ *  });
+ *  if (run_async_result) {
+ *      lock.lock();
+ *      while (task_end == false) {
+ *          signal.wait(lock);
+ *      }
+ *      lock.unlock();
+ *  }
+ *  return run_async_result;
+ * @endcode
+ *
  * @author zer0
  * @date   2016-10-12
  */
