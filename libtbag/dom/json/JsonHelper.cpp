@@ -99,6 +99,16 @@ bool JsonHelper::existsObject(Value const & v, std::string const & key)
     return libtbag::dom::json::existsObject(v, key);
 }
 
+std::string JsonHelper::getForceString(Json::Value const & v)
+{
+    return libtbag::dom::json::getForceString(v);
+}
+
+std::string JsonHelper::getForceString(Json::Value const & v, std::string const & key)
+{
+    return libtbag::dom::json::getForceString(v, key);
+}
+
 bool JsonHelper::getString(Json::Value const & v, std::string * out)
 {
     return libtbag::dom::json::getString(v, out);
