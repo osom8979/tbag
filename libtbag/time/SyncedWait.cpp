@@ -11,6 +11,8 @@
 #include <cassert>
 #include <chrono>
 
+#define _DISABLE_FUTURE_SWAP
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -114,7 +116,14 @@ Err SyncedWait::done()
         illegal_state = true;
     } else {
         illegal_state = false;
+        // Don't use the future.swap() method in MSVC.
+        // error C2039: 'swap': is not a member of 'std::future'
+#if defined(_DISABLE_FUTURE_SWAP)
+        future = std::move(_future);
+        _future = {};
+#else
         future.swap(_future);
+#endif
         assert(!_future.valid());
     }
     _mutex.unlock();
