@@ -19,9 +19,9 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <string>
-#include <atomic>
 #include <functional>
 #include <future>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,12 +38,8 @@ namespace time {
 class TBAG_API SyncedWait : private Noncopyable
 {
 public:
-    TBAG_CONSTEXPR static char const * const STATE_NONE = "NONE";
-    TBAG_CONSTEXPR static char const * const STATE_READY = "READY";
-    TBAG_CONSTEXPR static char const * const STATE_INITIALIZING = "INITIALIZING";
-    TBAG_CONSTEXPR static char const * const STATE_RUNNING = "RUNNING";
-    TBAG_CONSTEXPR static char const * const STATE_DONE = "DONE";
-    TBAG_CONSTEXPR static char const * const STATE_ERROR = "ERROR";
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
 
 public:
     class RunningSignal TBAG_FINAL : private Noncopyable
@@ -57,14 +53,20 @@ public:
         { /* EMPTY. */ }
     public:
         inline void nowRunning()
-        { _parent.setRunning(); }
+        { _parent.__set_running(); }
     };
     friend class RunningSignal;
 
 public:
+    TBAG_CONSTEXPR static char const * const STATE_READY = "READY";
+    TBAG_CONSTEXPR static char const * const STATE_INITIALIZING = "INITIALIZING";
+    TBAG_CONSTEXPR static char const * const STATE_RUNNING = "RUNNING";
+    TBAG_CONSTEXPR static char const * const STATE_DONE = "DONE";
+    TBAG_CONSTEXPR static char const * const STATE_ERROR = "ERROR";
+
+public:
     enum class State
     {
-        S_NONE,
         S_READY,
         S_INITIALIZING,
         S_RUNNING,
@@ -73,13 +75,12 @@ public:
     };
 
 public:
-    using AtomicState = std::atomic<State>;
-    using ErrFuture = std::future<Err>;
     using Callback = std::function<Err(RunningSignal&)>;
 
 private:
-    AtomicState _state;
-    ErrFuture _future;
+    Mutex mutable _mutex;
+    std::future<Err> _future;
+    State _state;
 
 public:
     SyncedWait();
@@ -90,18 +91,23 @@ public:
     static State getState(std::string const & s) TBAG_NOEXCEPT;
 
 private:
-    inline void setRunning() TBAG_NOEXCEPT_SP_OP(_state.store(State::S_RUNNING))
-    { _state.store(State::S_RUNNING); }
+    void __set_running();
 
 public:
-    inline State state() const TBAG_NOEXCEPT_SP_OP(_state.load())
-    { return _state.load(); }
+    State state() const;
 
 public:
-    Err run(Callback const & cb, int timeout_ms, int tick_ms = 1);
+    TBAG_CONSTEXPR static unsigned const DEFAULT_TIMEOUT_MS = 1000;
+    TBAG_CONSTEXPR static unsigned const DEFAULT_TICK_MS = 1;
 
 public:
-    Err get();
+    Err run(Callback const & cb,
+            unsigned timeout_ms = DEFAULT_TIMEOUT_MS,
+            unsigned tick_ms = DEFAULT_TICK_MS);
+    Err done();
+
+public:
+    std::string toString() const;
 };
 
 } // namespace time

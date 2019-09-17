@@ -15,6 +15,17 @@ using namespace libtbag::time;
 TEST(SyncedWaitTest, Default)
 {
     SyncedWait obj;
+    ASSERT_EQ(std::string(SyncedWait::STATE_READY), obj.toString());
+}
+
+TEST(SyncedWaitTest, Run_And_Delete)
+{
+    SyncedWait obj;
+    auto const result = obj.run([](SyncedWait::RunningSignal & s) -> Err {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        return E_SUCCESS;
+    }, 100);
+    ASSERT_EQ(E_TIMEOUT, result);
 }
 
 TEST(SyncedWaitTest, Run_DirectSuccess)
@@ -24,7 +35,7 @@ TEST(SyncedWaitTest, Run_DirectSuccess)
         return E_SUCCESS;
     }, 100);
     ASSERT_EQ(E_SUCCESS, result);
-    ASSERT_EQ(E_SUCCESS, obj.get());
+    ASSERT_EQ(E_SUCCESS, obj.done());
 }
 
 TEST(SyncedWaitTest, Run_Success)
@@ -36,7 +47,7 @@ TEST(SyncedWaitTest, Run_Success)
         return E_SUCCESS;
     }, 100);
     ASSERT_EQ(E_SUCCESS, result);
-    ASSERT_EQ(E_SUCCESS, obj.get());
+    ASSERT_EQ(E_SUCCESS, obj.done());
 }
 
 TEST(SyncedWaitTest, Run_Error)
@@ -46,7 +57,7 @@ TEST(SyncedWaitTest, Run_Error)
         return E_UNKNOWN;
     }, 100);
     ASSERT_EQ(E_SUCCESS, result);
-    ASSERT_EQ(E_UNKNOWN, obj.get());
+    ASSERT_EQ(E_UNKNOWN, obj.done());
 }
 
 TEST(SyncedWaitTest, Run_Timeout)
@@ -57,6 +68,6 @@ TEST(SyncedWaitTest, Run_Timeout)
         return E_SUCCESS;
     }, 100);
     ASSERT_EQ(E_TIMEOUT, result);
-    ASSERT_EQ(E_SUCCESS, obj.get());
+    ASSERT_EQ(E_SUCCESS, obj.done());
 }
 
