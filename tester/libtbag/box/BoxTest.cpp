@@ -190,6 +190,22 @@ TEST(BoxTest, Reshape)
     ASSERT_EQ(5, b0.dim(2));
 }
 
+TEST(BoxTest, Stride)
+{
+    auto b0 = Box::shape<int>(2, 3);
+    ASSERT_EQ(3, b0.getStride(0));
+    ASSERT_EQ(1, b0.getStride(1));
+
+    auto b1 = Box::shape<double>(2, 3);
+    ASSERT_EQ(3, b1.getStride(0));
+    ASSERT_EQ(1, b1.getStride(1));
+
+    auto b2 = Box::shape<double>(3, 4, 5);
+    ASSERT_EQ(4*5, b2.getStride(0));
+    ASSERT_EQ(5, b2.getStride(1));
+    ASSERT_EQ(1, b2.getStride(2));
+}
+
 TEST(BoxTest, Assign)
 {
     Box b0 = {10, 20};
