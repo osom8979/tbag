@@ -164,6 +164,11 @@ public:
         bool install_create_config = false;
 
         /**
+         * Install define options.
+         */
+        bool install_define = false;
+
+        /**
          * User defined config.xml file name.
          * You can add logging information if necessary.
          */

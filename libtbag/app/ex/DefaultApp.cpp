@@ -40,6 +40,9 @@ public:
     using StorageNode   = libtbag::res::node::StorageNode;
 
 public:
+    TBAG_CONSTEXPR static char const * const OPTION_DEFINE = "define";
+
+public:
     /**
      * DefaultApp::Impl::Loggers class implementation.
      *
@@ -148,6 +151,9 @@ private:
     Params  _params;
 
 private:
+    std::map<std::string, std::string> _definitions;
+
+private:
     SharedLoggers    _loggers;
     SharedValues     _values;
     SharedProperties _properties;
@@ -178,6 +184,21 @@ public:
     ~Impl()
     {
         // EMPTY.
+    }
+
+public:
+    void installDefineOptions()
+    {
+        _options.insert(OPTION_DEFINE, [&](libtbag::string::Arguments const & args){
+            auto const full_text = args.toString();
+            auto const split_pos = full_text.find('=');
+            if (split_pos == std::string::npos) {
+                _definitions.emplace(full_text, std::string());
+            } else {
+                _definitions.emplace(full_text.substr(0, split_pos),
+                                     full_text.substr(split_pos+1));
+            }
+        }, "Add a Storage environment variable.", "{key}={val}");
     }
 
 public:
@@ -220,6 +241,10 @@ public:
 
         if (_params.install_create_config) {
             installCreateConfig();
+        }
+
+        if (_params.install_define) {
+            installDefineOptions();
         }
 
         if (_params.install_service) {
@@ -270,6 +295,15 @@ public:
                 std::cout << "Register STD Terminate signal." << std::endl;
             }
             registerStdTerminateFunctionalHandler(_params.std_signal);
+        }
+
+        if (_storages) {
+            for (auto const & def : _definitions) {
+                if (isEnableVerbose()) {
+                    std::cout << "Storage definition: " << def.first <<  "=" << def.second << std::endl;
+                }
+                _storages->storage().setEnv(def.first, def.second);
+            }
         }
 
         return true;

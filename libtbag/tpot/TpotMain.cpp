@@ -90,6 +90,7 @@ TpotMain::TpotMain(std::string const & service_name,
     _params.synopsis = synopsis;
     _params.install_remarks = true;
     _params.install_create_config = true;
+    _params.install_define = true;
     _params.config_name = config_name;
     _params.install_service = true;
     _params.service_name = service_name;
