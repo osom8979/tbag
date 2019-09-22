@@ -97,6 +97,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_MODIFY                 , 10060, "Modify error"                                           )\
     _TBAG_XX(_RESOURCE_EXHAUSTED     , 10061, "Some resource has been exhausted"                       )\
     _TBAG_XX(_INACCESSIBLE_BLOCK     , 10062, "Inaccessible block"                                     )\
+    _TBAG_XX(_SCRIPT                 , 10063, "Script error"                                           )\
     /* OpenSSL/ReSSL error code ***********************************************************************/\
     _TBAG_XX(_SSL                    , 11000, "SSL library error"                                      )\
     _TBAG_XX(_SSL_NONE               , 11001, "SSL I/O operation completed"                            )\
