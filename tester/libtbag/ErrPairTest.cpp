@@ -23,8 +23,7 @@ TEST(ErrPairTest, Default)
 TEST(ErrPairTest, StringCast)
 {
     ErrPair<int> obj(E_ILLARGS);
-    std::string const str = obj;
-    ASSERT_STREQ("E_ILLARGS", str.c_str());
+    ASSERT_STREQ("E_ILLARGS", obj.name());
 }
 
 TEST(ErrPairTest, StreamCast)

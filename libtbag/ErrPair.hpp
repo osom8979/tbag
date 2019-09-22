@@ -109,12 +109,12 @@ struct ErrPair
         return *this;
     }
 
-    char const * getErrName() const TBAG_NOEXCEPT
+    char const * name() const TBAG_NOEXCEPT
     {
         return libtbag::getErrName(code);
     }
 
-    char const * getErrDetail() const TBAG_NOEXCEPT
+    char const * detail() const TBAG_NOEXCEPT
     {
         return libtbag::getErrDetail(code);
     }
@@ -124,24 +124,9 @@ struct ErrPair
         return code;
     }
 
-    inline operator ValueType() const TBAG_NOEXCEPT
-    {
-        return value;
-    }
-
     inline operator bool() const TBAG_NOEXCEPT
     {
         return isSuccess(code);
-    }
-
-    operator char const *() const TBAG_NOEXCEPT
-    {
-        return getErrName();
-    }
-
-    operator std::string() const
-    {
-        return std::string(getErrName());
     }
 
     inline int toInt() const TBAG_NOEXCEPT
@@ -157,7 +142,7 @@ struct ErrPair
     template <class CharT, class TraitsT>
     friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, ErrPair const & err)
     {
-        return os << err.getErrName();
+        return os << err.name();
     }
 };
 
