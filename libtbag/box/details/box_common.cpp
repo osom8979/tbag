@@ -74,7 +74,6 @@ bool box_support_device(bdev dev) TBAG_NOEXCEPT
     case BD_CPU:  return true;
     case BD_CUDA: return false;
     case BD_CL:   return false;
-    case BD_GLSL: return false;
     default:      return false;
     }
     // clang-format on
@@ -107,7 +106,6 @@ char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT
     case BD_CPU:  return "CPU";
     case BD_CUDA: return "CUDA";
     case BD_CL:   return "CL";
-    case BD_GLSL: return "GLSL";
     case BD_NONE: return "NONE";
     default:      return "UNKNOWN";
     }

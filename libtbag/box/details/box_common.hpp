@@ -62,8 +62,6 @@ namespace details {
 #define _BOX_DEVICE_CPU   1
 #define _BOX_DEVICE_CUDA  2
 #define _BOX_DEVICE_CL    3
-#define _BOX_DEVICE_GLSL  4
-#define _BOX_DEVICE_FBS   5
 
 #define _BOX_EXT_SIZE 4
 
@@ -106,7 +104,6 @@ enum BoxDevice
     BD_CPU  = _BOX_DEVICE_CPU ,
     BD_CUDA = _BOX_DEVICE_CUDA,
     BD_CL   = _BOX_DEVICE_CL  ,
-    BD_GLSL = _BOX_DEVICE_GLSL,
 };
 
 TBAG_CONSTEXPR int const BOX_EXTENSION_SIZE = _BOX_EXT_SIZE;

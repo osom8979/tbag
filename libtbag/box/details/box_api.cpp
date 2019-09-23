@@ -10,9 +10,10 @@
 #include <libtbag/box/details/box_api.hpp>
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/memory/Memory.hpp>
+
 #include <libtbag/box/details/box_cpu.hpp>
+#include <libtbag/box/details/box_cl.hpp>
 #include <libtbag/box/details/box_cuda.hpp>
-#include <libtbag/box/details/box_fbs.hpp>
 
 #include <cassert>
 #include <cstring>
@@ -34,7 +35,6 @@ void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT
     case BD_CPU:  return box_cpu_malloc(byte);
     case BD_CUDA: /* TODO */ return nullptr;
     case BD_CL:   /* TODO */ return nullptr;
-    case BD_GLSL: /* TODO */ return nullptr;
     case BD_NONE:
         TBAG_FALLTHROUGH
     default:
@@ -44,7 +44,7 @@ void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT
     // clang-format on
 }
 
-void * box_data_malloc2(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT
+void * box_data_malloc(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT
 {
     assert(box_support_type(type));
     assert(box_support_device(device));
@@ -62,7 +62,6 @@ void box_data_free(bdev device, void * data) TBAG_NOEXCEPT
     case BD_CPU:  box_cpu_free(data); break;
     case BD_CUDA: /* TODO */ break;
     case BD_CL:   /* TODO */ break;
-    case BD_GLSL: /* TODO */ break;
     case BD_NONE:
         TBAG_FALLTHROUGH
     default:
@@ -104,7 +103,7 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     auto const SIZE = box_dim_get_size(dims, rank);
     assert(SIZE >= 1);
 
-    void * data = box_data_malloc2(type, device, SIZE);
+    void * data = box_data_malloc(type, device, SIZE);
     if (data == nullptr) {
         return E_BADALLOC;
     }
@@ -281,7 +280,7 @@ Err box_resize(box_data * box, btype type, bdev device, ui64 const * ext, ui32 r
         if (box->data) {
             box_data_free(device, box->data);
         }
-        box->data = box_data_malloc2(type, device, SIZE);
+        box->data = box_data_malloc(type, device, SIZE);
         if (box->data == nullptr) {
             box->total_data_byte = 0;
             box->size = 0;

@@ -70,18 +70,6 @@ Box & Box::operator =(Box && obj) TBAG_NOEXCEPT
     return *this;
 }
 
-void Box::swap(Box & obj) TBAG_NOEXCEPT
-{
-    if (this != &obj) {
-        _data.swap(obj._data);
-    }
-}
-
-void Box::reset()
-{
-    _data.reset();
-}
-
 Err Box::setInfo(ui8 const * info, ui32 size)
 {
     return box_info_checked_assign(_data.get(), info, size) ? E_SUCCESS : E_COPY;
@@ -99,18 +87,18 @@ Err Box::setInfo(Buffer const & info)
 
 std::string Box::getInfoString() const
 {
-    if (_data->info == nullptr) {
-        return std::string();
+    if (_data->info) {
+        return std::string(_data->info, _data->info + _data->info_size);
     }
-    return std::string(_data->info, _data->info + _data->info_size);
+    return {};
 }
 
 Box::Buffer Box::getInfoBuffer() const
 {
-    if (_data->info == nullptr) {
-        return Buffer();
+    if (_data->info) {
+        return Buffer(_data->info, _data->info + _data->info_size);
     }
-    return Buffer(_data->info, _data->info + _data->info_size);
+    return {};
 }
 
 Err Box::reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)

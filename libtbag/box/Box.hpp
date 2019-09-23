@@ -282,7 +282,6 @@ public:
     TBAG_CONSTEXPR static btype const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }
     TBAG_CONSTEXPR static btype const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
     TBAG_CONSTEXPR static btype const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }
-    TBAG_CONSTEXPR static btype const device_glsl() TBAG_NOEXCEPT { return libtbag::box::details::BD_GLSL; }
 
 public:
     struct Cursor : public std::forward_iterator_tag
@@ -372,11 +371,23 @@ public:
     Box & operator =(Box && obj) TBAG_NOEXCEPT;
 
 public:
-    void swap(Box & obj) TBAG_NOEXCEPT;
+    inline void reset() TBAG_NOEXCEPT_SP_OP(_data.reset())
+    {
+        _data.reset();
+    }
 
 public:
+    inline void swap(Box & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            _data.swap(obj._data);
+        }
+    }
+
     inline friend void swap(Box & lh, Box & rh) TBAG_NOEXCEPT
-    { lh.swap(rh); }
+    {
+        lh.swap(rh);
+    }
 
 public:
     inline bool exists() const TBAG_NOEXCEPT
@@ -411,6 +422,7 @@ public:
     friend inline bool operator >=(Box const & x, Box const & y) TBAG_NOEXCEPT
     { return x.get() >= y.get(); }
 
+public:
     inline bool operator ==(Box const & obj) const TBAG_NOEXCEPT
     { return get() == obj.get(); }
 
@@ -418,52 +430,8 @@ public:
     { return get() != obj.get(); }
 
 public:
-    void reset();
-
-public:
     inline btype type() const TBAG_NOEXCEPT
     { return _data->type; }
-
-    inline btype device() const TBAG_NOEXCEPT
-    { return _data->device; }
-
-    inline ui64 const * ext() const TBAG_NOEXCEPT
-    { return _data->ext; }
-    inline ui64 ext0() const TBAG_NOEXCEPT
-    { return ext()[0]; }
-    inline ui64 ext1() const TBAG_NOEXCEPT
-    { return ext()[1]; }
-    inline ui64 ext2() const TBAG_NOEXCEPT
-    { return ext()[2]; }
-    inline ui64 ext3() const TBAG_NOEXCEPT
-    { return ext()[3]; }
-
-public:
-    inline ui32 capacity() const TBAG_NOEXCEPT
-    { return _data->total_data_byte; }
-
-    inline ui32 size() const TBAG_NOEXCEPT
-    { return _data->size; }
-
-    inline bool empty() const TBAG_NOEXCEPT
-    { return _data->size == 0; }
-
-public:
-    inline ui32 const * dims() const TBAG_NOEXCEPT
-    { return _data->dims; }
-
-    inline ui32 dims_capacity() const TBAG_NOEXCEPT
-    { return _data->total_dims_byte; }
-
-    inline ui32 rank() const TBAG_NOEXCEPT
-    { return _data->rank; }
-
-public:
-    inline void * opaque() const TBAG_NOEXCEPT
-    { return _data->opaque; }
-
-    inline void setOpaque(void * v) const TBAG_NOEXCEPT
-    { _data->opaque = v; }
 
 public:
     // clang-format off
@@ -481,13 +449,77 @@ public:
     // clang-format on
 
 public:
+    inline btype device() const TBAG_NOEXCEPT
+    { return _data->device; }
+
+public:
     // clang-format off
     inline bool is_device_none() const TBAG_NOEXCEPT { return device() == device_none(); }
     inline bool is_device_cpu () const TBAG_NOEXCEPT { return device() == device_cpu (); }
     inline bool is_device_cuda() const TBAG_NOEXCEPT { return device() == device_cuda(); }
     inline bool is_device_cl  () const TBAG_NOEXCEPT { return device() == device_cl  (); }
-    inline bool is_device_glsl() const TBAG_NOEXCEPT { return device() == device_glsl(); }
     // clang-format on
+
+public:
+    inline ui64 const * ext() const TBAG_NOEXCEPT
+    { return _data->ext; }
+
+public:
+    // clang-format off
+    inline ui64 ext0() const TBAG_NOEXCEPT { return ext()[0]; }
+    inline ui64 ext1() const TBAG_NOEXCEPT { return ext()[1]; }
+    inline ui64 ext2() const TBAG_NOEXCEPT { return ext()[2]; }
+    inline ui64 ext3() const TBAG_NOEXCEPT { return ext()[3]; }
+    // clang-format on
+
+public:
+    inline ui32 capacity() const TBAG_NOEXCEPT
+    { return _data->total_data_byte; }
+
+    inline ui32 size() const TBAG_NOEXCEPT
+    { return _data->size; }
+
+    inline bool empty() const TBAG_NOEXCEPT
+    { return _data->size == 0; }
+
+public:
+    inline ui32 const * dims() const TBAG_NOEXCEPT
+    { return _data->dims; }
+
+    inline ui32 dim(ui32 i) const TBAG_NOEXCEPT
+    {
+        assert(0 <= COMPARE_AND(i) < rank());
+        return *(dims() + i);
+    }
+
+    inline ui32 dims_capacity() const TBAG_NOEXCEPT
+    { return _data->total_dims_byte; }
+
+    inline ui32 rank() const TBAG_NOEXCEPT
+    { return _data->rank; }
+
+public:
+    inline void * opaque() const TBAG_NOEXCEPT
+    { return _data->opaque; }
+
+    inline void setOpaque(void * v) const TBAG_NOEXCEPT
+    { _data->opaque = v; }
+
+    template <typename T>
+    void setOpaque(T v) TBAG_NOEXCEPT
+    {
+        assert(exists());
+        assert(is_btype_equals<T>(type()));
+        libtbag::box::details::box_opaque_set(get(), v);
+    }
+
+    template <typename T>
+    void getOpaque(T * v) const TBAG_NOEXCEPT
+    {
+        assert(exists());
+        assert(is_btype_equals<T>(type()));
+        libtbag::box::details::box_opaque_get(get(), v);
+    }
 
 public:
     inline ui8 * info() TBAG_NOEXCEPT
@@ -843,12 +875,6 @@ public:
         static_assert(sizeof...(Args) >= 1, "At least one Args is required.");
         using namespace libtbag::box::details;
         return offset<ResultType>(box_dim_get_index_args(dims(), sizeof...(Args), std::forward<Args>(args) ...));
-    }
-
-    inline ui32 dim(ui32 i) const TBAG_NOEXCEPT
-    {
-        assert(0 <= COMPARE_AND(i) < rank());
-        return *(dims() + i);
     }
 
 public:
