@@ -283,42 +283,6 @@ public:
     TBAG_CONSTEXPR static btype const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
     TBAG_CONSTEXPR static btype const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }
 
-public:
-    struct Cursor : public std::forward_iterator_tag
-    {
-        box_cursor cursor;
-
-        Cursor(Box & box) TBAG_NOEXCEPT
-        {
-            libtbag::box::details::box_cursor_init(&cursor, box.get());
-        }
-
-        Cursor & operator ++() TBAG_NOEXCEPT
-        {
-            libtbag::box::details::box_cursor_next(&cursor);
-            return *this;
-        }
-
-        inline void * data() TBAG_NOEXCEPT
-        { return cursor.data; }
-
-        inline void const * data() const TBAG_NOEXCEPT
-        { return cursor.data; }
-
-        template <typename T>
-        inline T * cast() TBAG_NOEXCEPT
-        { return static_cast<T*>(data()); }
-
-        template <typename T>
-        inline T const * cast() const TBAG_NOEXCEPT
-        { return static_cast<T const *>(data()); }
-    };
-
-    using iterator = Cursor;
-    using const_iterator = iterator const;
-    using reverse_iterator = std::reverse_iterator<iterator>;
-    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
 private:
     SharedBoxData _data;
 
