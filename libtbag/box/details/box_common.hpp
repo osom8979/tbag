@@ -262,25 +262,31 @@ TBAG_API bool box_data_check_address_raw(void const * data_begin, ui32 size, bty
  *
  * @author zer0
  * @date   2019-05-16
- * @date   2019-09-24 (Update)
+ * @date   2019-09-24 (Update properties)
  */
 struct box_cursor
 {
-    btype type;
+    /** Current data pointer. */
     void * begin;
+
+    /** The exact point where the loop should stop. */
     void * end;
-    int step;
+
+    /** Byte size to jump step by step. */
+    int stride_byte;
 };
 
-TBAG_CONSTEXPR int const BOX_CURSOR_INIT_INDEX = -1;
-
-TBAG_API int  box_index_abs(int dim_size, int index) TBAG_NOEXCEPT;
+TBAG_API int  box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT;
 TBAG_API bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
-TBAG_API bool box_cursor_init(box_data const * box, box_cursor * cursor,
-                              int begin = 0, int end = -1, int step = 1) TBAG_NOEXCEPT;
-TBAG_API void box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_end(box_cursor const * cursor) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box) TBAG_NOEXCEPT;
+
+TBAG_API bool box_cursor_is_end(box_cursor const * cursor) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

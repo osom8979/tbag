@@ -429,16 +429,13 @@ bool box_data_check_address_raw(void const * data_begin, ui32 size, btype type, 
     return (min <= COMPARE_AND(pivot) <= max);
 }
 
-int box_index_abs(int dim_size, int index) TBAG_NOEXCEPT
+int box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT
 {
     assert(dim_size >= 1);
-    if (index >= 0) {
-        assert(index < dim_size);
-        return index;
+    if (dim_index >= 0) {
+        return dim_index;
     }
-    assert(index < 0);
-    assert(-index <= dim_size);
-    return dim_size + index;
+    return dim_size + dim_index;
 }
 
 bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT
@@ -455,48 +452,76 @@ bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT
     return true;
 }
 
-bool box_cursor_init(box_cursor * cursor, btype type, ui32 dim_size, void * data,
+bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index,
                      int begin, int end, int step) TBAG_NOEXCEPT
 {
     assert(cursor != nullptr);
-    assert(box_support_type(type));
-    assert(dim_size >= 1);
+    assert(box != nullptr);
+    assert(box->rank >= 1);
     assert(step != 0);
 
-    auto const type_byte = box_get_type_byte(type);
-    if (type_byte <= 0) {
+    auto const dim_size = box->dims[dim_index];
+    auto const begin_abs = box_index_abs(dim_size, begin);
+    if (begin_abs < 0) {
         return false;
     }
 
-    begin = box_index_abs(dim_size, begin);
-    end = box_index_abs(dim_size, end);
-    if (!(0 <= COMPARE_AND(begin) < dim_size)) {
+    auto const end_abs = box_index_abs(dim_size, end);
+    if (end_abs < 0) {
         return false;
     }
-    if (!(0 <= COMPARE_AND(end) < dim_size)) {
-        return false;
-    }
-    if (!box_index_check(begin, end, step)) {
-        return false;
-    }
-    end = begin + (((end - begin) / step) * step);
 
-    cursor->type  = type;
-    cursor->begin = (void*)((ui8*)data + (type_byte * begin));
-    cursor->end   = (void*)((ui8*)data + (type_byte * end));
-    cursor->step  = step;
+    if (!box_index_check(begin_abs, end_abs, step)) {
+        return false;
+    }
+
+    auto const diff = end_abs - begin_abs;
+    auto const last_one = (diff % step) ? 1 : 0;
+    auto const exact_last_position = begin_abs + ((diff / step + last_one) * step);
+
+    auto const stride = box_dim_get_stride(box->dims, box->rank, dim_index);
+    auto const stride_byte = static_cast<int>(stride * box_get_type_byte(box->type));
+
+    auto const integer_data_pointer = (std::intptr_t)box->data;
+    cursor->begin = (void*)(integer_data_pointer + (stride_byte * begin_abs));
+    cursor->end   = (void*)(integer_data_pointer + (stride_byte * exact_last_position));
+    cursor->stride_byte = stride_byte * step;
     return true;
 }
 
-void box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT
+bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT
 {
-    assert(cursor != nullptr);
-    cursor->begin = (void*)((ui8*)cursor->begin + (box_get_type_byte(cursor->type) * cursor->step));
+    return box_cursor_init(cursor, box, dim_index, begin, end, 1);
 }
 
-bool box_cursor_end(box_cursor const * cursor) TBAG_NOEXCEPT
+bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT
+{
+    assert(box != nullptr);
+    assert(box->rank >= 1);
+    return box_cursor_init(cursor, box, dim_index, begin, box->dims[0]);
+}
+
+bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT
+{
+    return box_cursor_init(cursor, box, dim_index, 0);
+}
+
+bool box_cursor_init(box_cursor * cursor, box_data const * box) TBAG_NOEXCEPT
+{
+    return box_cursor_init(cursor, box, 0);
+}
+
+bool box_cursor_is_end(box_cursor const * cursor) TBAG_NOEXCEPT
 {
     return cursor->begin != cursor->end;
+}
+
+bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT
+{
+    assert(cursor != nullptr);
+    auto const integer_data_pointer = (std::intptr_t)cursor->begin;
+    cursor->begin = (void*)(integer_data_pointer + cursor->stride_byte);
+    return box_cursor_is_end(cursor);
 }
 
 } // namespace details
