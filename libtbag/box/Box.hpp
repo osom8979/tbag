@@ -333,6 +333,7 @@ public:
 public:
     Box & operator =(Box const & obj) TBAG_NOEXCEPT;
     Box & operator =(Box && obj) TBAG_NOEXCEPT;
+    Box & operator =(std::nullptr_t) TBAG_NOEXCEPT;
 
 public:
     inline void reset() TBAG_NOEXCEPT_SP_OP(_data.reset())

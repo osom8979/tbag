@@ -70,6 +70,12 @@ Box & Box::operator =(Box && obj) TBAG_NOEXCEPT
     return *this;
 }
 
+Box & Box::operator =(std::nullptr_t) TBAG_NOEXCEPT
+{
+    _data = nullptr;
+    return *this;
+}
+
 Err Box::setInfo(ui8 const * info, ui32 size)
 {
     return box_info_checked_assign(_data.get(), info, size) ? E_SUCCESS : E_COPY;
