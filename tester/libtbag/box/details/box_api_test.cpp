@@ -369,7 +369,205 @@ TEST(box_api_test, box_cursor_01)
     box_free(&box);
 }
 
+TEST(box_api_test, box_cursor_02)
+{
+    box_data box;
+    box_clear(&box);
+
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 2, 3, 3));
+    for (ui32 i = 0; i < 3*3; ++i) {
+        box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
+    }
+
+    {
+        box_cursor cursor0;
+        box_cursor cursor1;
+        ASSERT_TRUE(box_cursor_init(&cursor0, &box));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(0, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(1, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(2, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_TRUE(box_cursor_next(&cursor0));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(3, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(4, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(5, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_TRUE(box_cursor_next(&cursor0));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(6, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(7, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(8, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_FALSE(box_cursor_next(&cursor0));
+    }
+
+    {
+        box_cursor cursor0;
+        box_cursor cursor1;
+        ASSERT_TRUE(box_cursor_init(&cursor0, &box, 0u, 0, -1));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(0, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(1, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(2, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_TRUE(box_cursor_next(&cursor0));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(3, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(4, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(5, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_FALSE(box_cursor_next(&cursor0));
+    }
+
+    {
+        box_cursor cursor0;
+        box_cursor cursor1;
+        ASSERT_TRUE(box_cursor_init(&cursor0, &box, 0u, 1, 2));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(3, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(4, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(5, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_FALSE(box_cursor_next(&cursor0));
+    }
+
+    {
+        box_cursor cursor0;
+        box_cursor cursor1;
+        ASSERT_TRUE(box_cursor_init(&cursor0, &box, 0u, 0, 3, 2));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(0, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(1, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(2, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_TRUE(box_cursor_next(&cursor0));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_EQ(6, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(7, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(8, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_FALSE(box_cursor_next(&cursor0));
+    }
+
+    {
+        box_cursor cursor0;
+        box_cursor cursor1;
+        ASSERT_TRUE(box_cursor_init(&cursor0, &box, 0u, 0, 3, 2));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1, 1));
+        ASSERT_EQ(1, *(si32*)(cursor1.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+        ASSERT_EQ(2, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_TRUE(box_cursor_next(&cursor0));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1, 1, -1));
+        ASSERT_EQ(7, *(si32*)(cursor1.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_FALSE(box_cursor_next(&cursor0));
+    }
+
+    box_free(&box);
+}
+
 TEST(box_api_test, box_cursor_03)
+{
+    box_data box;
+    box_clear(&box);
+
+    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 3, 2, 2));
+    for (ui32 i = 0; i < 3*2*2; ++i) {
+        box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
+    }
+
+    {
+        box_cursor cursor0;
+        box_cursor cursor1;
+        box_cursor cursor2;
+
+        ASSERT_TRUE(box_cursor_init(&cursor0, &box));
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_TRUE(box_cursor_init(&cursor2, &cursor1, &box, 2));
+
+        ASSERT_EQ(0, *(si32*)(cursor2.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor2));
+        ASSERT_EQ(1, *(si32*)(cursor2.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor2));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+
+        ASSERT_TRUE(box_cursor_init(&cursor2, &cursor1, &box, 2));
+        ASSERT_EQ(2, *(si32*)(cursor2.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor2));
+        ASSERT_EQ(3, *(si32*)(cursor2.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor2));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_TRUE(box_cursor_next(&cursor0));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_TRUE(box_cursor_init(&cursor2, &cursor1, &box, 2));
+
+        ASSERT_EQ(4, *(si32*)(cursor2.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor2));
+        ASSERT_EQ(5, *(si32*)(cursor2.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor2));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+
+        ASSERT_TRUE(box_cursor_init(&cursor2, &cursor1, &box, 2));
+        ASSERT_EQ(6, *(si32*)(cursor2.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor2));
+        ASSERT_EQ(7, *(si32*)(cursor2.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor2));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_TRUE(box_cursor_next(&cursor0));
+
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        ASSERT_TRUE(box_cursor_init(&cursor2, &cursor1, &box, 2));
+
+        ASSERT_EQ(8, *(si32*)(cursor2.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor2));
+        ASSERT_EQ(9, *(si32*)(cursor2.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor2));
+        ASSERT_TRUE(box_cursor_next(&cursor1));
+
+        ASSERT_TRUE(box_cursor_init(&cursor2, &cursor1, &box, 2));
+        ASSERT_EQ(10, *(si32*)(cursor2.begin));
+        ASSERT_TRUE(box_cursor_next(&cursor2));
+        ASSERT_EQ(11, *(si32*)(cursor2.begin));
+        ASSERT_FALSE(box_cursor_next(&cursor2));
+        ASSERT_FALSE(box_cursor_next(&cursor1));
+        ASSERT_FALSE(box_cursor_next(&cursor0));
+    }
+
+    box_free(&box);
+}
+
+TEST(box_api_test, box_cursor_04)
 {
     box_data box;
     box_clear(&box);
@@ -382,34 +580,30 @@ TEST(box_api_test, box_cursor_03)
 
     i = 0;
 
-//    int loop_counter0 = 0;
-//    box_cursor cursor0;
-//    ASSERT_TRUE(box_cursor_init(&cursor0, &box));
-//    while (box_cursor_next(&cursor0)) {
-//
-//        int loop_counter1 = 0;
-//        box_cursor cursor1;
-//        ASSERT_TRUE(box_cursor_init_sub(&cursor1, &cursor0));
-//        while (box_cursor_next(&cursor1)) {
-//
-//            int loop_counter2 = 0;
-//            box_cursor cursor2;
-//            ASSERT_TRUE(box_cursor_init_sub(&cursor2, &cursor1));
-//
-//            while (box_cursor_next(&cursor2)) {
-//                auto * data = (ui32*)(cursor2.data);
-//                ASSERT_NE(nullptr, data);
-//                ASSERT_EQ(i, *data);
-//                ++loop_counter2;
-//                ++i;
-//            }
-//            ASSERT_EQ(2, loop_counter2);
-//            ++loop_counter1;
-//        }
-//        ASSERT_EQ(3, loop_counter1);
-//        ++loop_counter0;
-//    }
-//    ASSERT_EQ(4, loop_counter0);
+    int loop_counter0 = 0;
+    box_cursor cursor0;
+    ASSERT_TRUE(box_cursor_init(&cursor0, &box));
+    do {
+        int loop_counter1 = 0;
+        box_cursor cursor1;
+        ASSERT_TRUE(box_cursor_init(&cursor1, &cursor0, &box, 1));
+        do {
+            int loop_counter2 = 0;
+            box_cursor cursor2;
+            ASSERT_TRUE(box_cursor_init(&cursor2, &cursor1, &box, 2));
+            do {
+                ASSERT_EQ(i, *(si32*)(cursor2.begin));
+                ++i;
+                ++loop_counter2;
+            } while (box_cursor_next(&cursor2));
+            ASSERT_EQ(2, loop_counter2);
+            ++loop_counter1;
+        } while (box_cursor_next(&cursor1));
+        ASSERT_EQ(3, loop_counter1);
+        ++loop_counter0;
+    } while (box_cursor_next(&cursor0));
+    ASSERT_EQ(4, loop_counter0);
+    ASSERT_EQ(24, i);
 
     box_free(&box);
 }

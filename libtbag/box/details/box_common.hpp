@@ -279,11 +279,18 @@ struct box_cursor
 TBAG_API int  box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT;
 TBAG_API bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, void * data, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box) TBAG_NOEXCEPT;
+
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT;
+TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box) TBAG_NOEXCEPT;
 
 TBAG_API bool box_cursor_is_end(box_cursor const * cursor) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT;
