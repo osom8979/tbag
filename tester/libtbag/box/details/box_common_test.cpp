@@ -7,7 +7,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/box/details/box_common.hpp>
+#include <libtbag/box/details/box_api.hpp>
 
 using namespace libtbag;
 using namespace libtbag::box;
