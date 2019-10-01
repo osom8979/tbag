@@ -46,7 +46,7 @@ std::string writeFast(Json::Value const & value)
     builder["commentStyle"] = "None";
     builder["indentation"] = "";
     builder["enableYAMLCompatibility"] = false;
-    builder["dropNullPlaceholders"] = true;
+    builder["dropNullPlaceholders"] = false;
     builder["useSpecialFloats"] = false;
     return Json::writeString(builder, value);
 }

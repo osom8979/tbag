@@ -21,3 +21,12 @@ TEST(JsonUtilsTest, Default)
     ASSERT_STREQ(TEST_JSON_TEXT, JSON_TEXT.c_str());
 }
 
+TEST(JsonUtilsTest, DoNotUseTheDropNull)
+{
+    char const * const TEST_JSON_TEXT = R"({"key":null})";
+    Json::Value value;
+    ASSERT_TRUE(parse(TEST_JSON_TEXT, value));
+    auto const JSON_TEXT = writeFast(value);
+    ASSERT_STREQ(TEST_JSON_TEXT, JSON_TEXT.c_str());
+}
+
