@@ -35,7 +35,7 @@ struct TBAG_API JsonHelper
 {
     using Value = Json::Value;
 
-    static bool parseFromJsonText(std::string const & json, Value & result);
+    static bool parseFromJsonText(std::string const & json, Value & result, std::string * error_message = nullptr);
     static bool testFromJsonText(std::string const & json);
     static Value getJsonValueFromJsonText(std::string const & json);
 

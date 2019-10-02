@@ -14,9 +14,9 @@ NAMESPACE_LIBTBAG_OPEN
 namespace dom  {
 namespace json {
 
-bool JsonHelper::parseFromJsonText(std::string const & json, Value & result)
+bool JsonHelper::parseFromJsonText(std::string const & json, Value & result, std::string * error_message)
 {
-    return libtbag::dom::json::parse(json, result);
+    return libtbag::dom::json::parse(json, result, error_message);
 }
 
 bool JsonHelper::testFromJsonText(std::string const & json)

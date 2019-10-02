@@ -15,14 +15,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace dom  {
 namespace json {
 
-bool parse(std::string const & json, Json::Value & result)
+bool parse(std::string const & json, Json::Value & result, std::string * error_message)
 {
     Json::CharReaderBuilder builder;
     builder["collectComments"] = false;
     auto * reader = builder.newCharReader();
     auto * json_text = json.c_str();
-    std::string error;
-    return reader->parse(json_text, json_text + json.size(), &result, &error);
+    return reader->parse(json_text, json_text + json.size(), &result, error_message);
 }
 
 bool testJsonText(std::string const & json)

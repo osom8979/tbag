@@ -26,7 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace dom  {
 namespace json {
 
-TBAG_API bool parse(std::string const & json, Json::Value & result);
+TBAG_API bool parse(std::string const & json, Json::Value & result, std::string * error_message = nullptr);
 TBAG_API bool testJsonText(std::string const & json);
 TBAG_API Json::Value getJsonValue(std::string const & json);
 
