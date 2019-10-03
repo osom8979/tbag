@@ -135,7 +135,7 @@ bool FileKeyStore::set(std::string const & key, std::string const & value, bool 
     std::string salt;
     std::string update_value;
     if (encrypt) {
-        salt  = crypto::generatePseudoRandomString(getSaltSize());
+        salt = crypto::generatePseudoRandomString(getSaltSize());
         update_value = crypto::generatePbkdf2String(value, salt, getHashSize());
     } else {
         update_value = value;
