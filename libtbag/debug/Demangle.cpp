@@ -43,7 +43,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace debug {
 
-std::string getAbiDemangle(char const * name)
+bool enableAbiDemangle() TBAG_NOEXCEPT
+{
+#if defined(_HAVE_CXXABI_H)
+    return true;
+#else
+    return false;
+#endif
+}
+
+std::string getAbiDemangle(char const * name, int * output_status)
 {
     std::string result;
 
@@ -55,17 +64,21 @@ std::string getAbiDemangle(char const * name)
     // https://gcc.gnu.org/onlinedocs/libstdc++/libstdc++-html-USERS-4.3/a01696.html
     demangle = abi::__cxa_demangle(name, nullptr, &size, &status);
 
+    if (output_status) {
+        *output_status = status;
+    }
+
     if (status != 0) {
         if (status == -1) {
-            tDLogE("getDemangle({}) A memory allocation failiure occurred", name);
+            // A memory allocation failiure occurred
         } else if (status == -2) {
-            tDLogE("getDemangle({}) Name is not a valid name under the C++ ABI mangling rules", name);
+            // Name is not a valid name under the C++ ABI mangling rules
         } else if (status == -3) {
-            tDLogE("getDemangle({}) One of the arguments is invalid", name);
+            // One of the arguments is invalid
         } else {
-            tDLogE("getDemangle({}) Unknown error code: {}", name, status);
+            // Unknown error code
         }
-        return std::string();
+        return {};
     }
 
     // The demangling operation succeeded.
@@ -77,15 +90,36 @@ std::string getAbiDemangle(char const * name)
     return result;
 }
 
+std::string getGtestDemangle(char const * name, int * output_status)
+{
+    char buffer[GTEST_DEMANGLE_BUFFER_SIZE+1/*NULL_CHAR*/] = {0,};
+    auto const status = ::Demangle(name, buffer, GTEST_DEMANGLE_BUFFER_SIZE) ? 0 : 1;
+    if (output_status) {
+        *output_status = status;
+    }
+    if (status) {
+        return buffer;
+    }
+    return {};
+}
+
 std::string getDemangle(char const * name)
 {
-    int const BUFFER_SIZE = 256;
-    char buffer[BUFFER_SIZE + 1/*NULL_CHAR*/] = {0,};
-    if (!::Demangle(name, buffer, BUFFER_SIZE)) {
-        tDLogE("getDemangle({}) demangle failure.", name);
-        return std::string();
+    if (enableAbiDemangle()) {
+        int abi_status = 0;
+        auto const result = getAbiDemangle(name, &abi_status);
+        if (!abi_status) {
+            return result;
+        }
     }
-    return std::string(buffer);
+
+    int gtest_status = 0;
+    auto const result = getGtestDemangle(name, &gtest_status);
+    if (!gtest_status) {
+        return result;
+    }
+
+    return name;
 }
 
 // ------------------------

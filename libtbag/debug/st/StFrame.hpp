@@ -41,8 +41,8 @@ TBAG_CONSTEXPR int const DEFAULT_MAX_DEPTH_OF_STACKTRACE = 64;
 class TBAG_API StFrame
 {
 public:
-    TBAG_CONSTEXPR static std::size_t const NAME_MEM_SIZE   =  64;
-    TBAG_CONSTEXPR static std::size_t const SOURCE_MEM_SIZE = 256;
+    TBAG_CONSTEXPR static std::size_t const NAME_MEM_SIZE   = 2048;
+    TBAG_CONSTEXPR static std::size_t const SOURCE_MEM_SIZE = 2048;
 
 public:
     TBAG_CONSTEXPR static std::size_t getNameMemSize() TBAG_NOEXCEPT { return NAME_MEM_SIZE; }

@@ -8,8 +8,7 @@
 #include <libtbag/debug/st/StFrame.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/string/StringUtils.hpp>
-
-#include <demangle.h>
+#include <libtbag/debug/Demangle.hpp>
 
 #include <cstring>
 #include <cstdlib>
@@ -95,13 +94,10 @@ std::string StFrame::toAddressString() const
 
 void StFrame::demangleAssign(char const * symbol, std::size_t symbol_size)
 {
-    if (::Demangle(symbol, source, static_cast<int>(SOURCE_MEM_SIZE))) {
-        return;
-    }
-
-    std::size_t const SIZE = (symbol_size <= (SOURCE_MEM_SIZE - 1) ? symbol_size : (SOURCE_MEM_SIZE - 1));
-    std::memcpy(source, symbol, SIZE);
-    source[SIZE] = '\0';
+    auto const demangle_symbol = getDemangle(symbol);
+    auto const size = demangle_symbol.size() <= (SOURCE_MEM_SIZE-1) ? demangle_symbol.size() : (SOURCE_MEM_SIZE-1);
+    std::memcpy(source, demangle_symbol.c_str(), size);
+    source[size] = '\0';
 }
 
 std::string StFrame::toString() const

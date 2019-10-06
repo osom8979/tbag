@@ -25,7 +25,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace debug {
 
-TBAG_API std::string getAbiDemangle(char const * name);
+TBAG_CONSTEXPR int const GTEST_DEMANGLE_BUFFER_SIZE = 2048;
+
+TBAG_API bool enableAbiDemangle() TBAG_NOEXCEPT;
+
+TBAG_API std::string getAbiDemangle(char const * name, int * output_status = nullptr);
+TBAG_API std::string getGtestDemangle(char const * name, int * output_status = nullptr);
 TBAG_API std::string getDemangle(char const * name);
 
 /**

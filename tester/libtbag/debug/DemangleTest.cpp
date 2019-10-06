@@ -28,9 +28,9 @@ TEST(DemangleTest, Default)
 TEST(DemangleTest, Demangler)
 {
     ASSERT_STREQ("f()", getDemangle("_Z1fv").c_str());
-    ASSERT_STREQ("f()", getDemangle("_Z1fi").c_str());
+    ASSERT_STREQ("f(int)", getDemangle("_Z1fi").c_str());
     ASSERT_STREQ("Foo::Bar()", getDemangle("_ZN3Foo3BarEv").c_str());
-    ASSERT_STREQ("operator%()", getDemangle("_Zrm1XS_").c_str());
+    ASSERT_STREQ("operator%(X, X)", getDemangle("_Zrm1XS_").c_str());
     ASSERT_STREQ("Foo::Foo()", getDemangle("_ZN3FooC1Ev").c_str());
 }
 

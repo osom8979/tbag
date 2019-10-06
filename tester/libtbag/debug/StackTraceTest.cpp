@@ -92,6 +92,31 @@ TEST(StackTraceTest, Default)
     std::cout << getStackTraceString() << std::endl;
 }
 
+template <typename T>
+struct TestLambda
+{
+    using Callback = std::function<std::string(T, std::string const &)>;
+
+    Callback callback;
+
+    TestLambda()
+    {
+        callback = std::bind(&TestLambda::test_lambda, this, std::placeholders::_1, std::placeholders::_2);
+    }
+
+    std::string test_lambda(T temp1, std::string const & temp2)
+    {
+        std::cout << getStackTraceString() << std::endl;
+        return temp2;
+    }
+};
+
+TEST(StackTraceTest, ComplexStackTrace)
+{
+    TestLambda<int> obj;
+    obj.callback(0, std::string());
+}
+
 TEST(StackTraceTest, ClangSymbolize)
 {
     char const * const TEST_STACK = "5   libtbag.0.dylib   0x000000010de59128 _ZN7testing8TestInfo3RunEv + 216";
