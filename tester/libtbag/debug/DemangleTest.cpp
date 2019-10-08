@@ -11,27 +11,32 @@
 using namespace libtbag;
 using namespace libtbag::debug;
 
+TEST(DemangleTest, EnableAbiDemangle)
+{
+    std::cout << "Enable ABI Demangle: " << enableAbiDemangle() << std::endl;
+}
+
 TEST(DemangleTest, Default)
 {
     std::string const TEST_NAME = "_ZN3FooC1Ev";
     std::string const RESULT_NAME = "Foo::Foo()";
 
     std::string const ABI_DEMANGLE  = getAbiDemangle(TEST_NAME.c_str());
-    std::string const DEMANGLE_NAME = getDemangle(TEST_NAME.c_str());
+    std::string const GTEST_DEMANGLE_NAME = getGtestDemangle(TEST_NAME.c_str());
 
     std::cout << "getAbiDemangle(" << TEST_NAME << "): " << ABI_DEMANGLE << std::endl;
-    std::cout << "getDemangle(" << TEST_NAME << "): " << DEMANGLE_NAME << std::endl;
+    std::cout << "getGtestDemangle(" << TEST_NAME << "): " << GTEST_DEMANGLE_NAME << std::endl;
 
-    ASSERT_EQ(RESULT_NAME, DEMANGLE_NAME);
+    ASSERT_EQ(RESULT_NAME, GTEST_DEMANGLE_NAME);
 }
 
 TEST(DemangleTest, Demangler)
 {
-    ASSERT_STREQ("f()", getDemangle("_Z1fv").c_str());
-    ASSERT_STREQ("f(int)", getDemangle("_Z1fi").c_str());
-    ASSERT_STREQ("Foo::Bar()", getDemangle("_ZN3Foo3BarEv").c_str());
-    ASSERT_STREQ("operator%(X, X)", getDemangle("_Zrm1XS_").c_str());
-    ASSERT_STREQ("Foo::Foo()", getDemangle("_ZN3FooC1Ev").c_str());
+    EXPECT_STREQ("f()", getDemangle("_Z1fv").c_str());
+    EXPECT_STREQ("f(int)", getDemangle("_Z1fi").c_str());
+    EXPECT_STREQ("Foo::Bar()", getDemangle("_ZN3Foo3BarEv").c_str());
+    EXPECT_STREQ("operator%(X, X)", getDemangle("_Zrm1XS_").c_str());
+    EXPECT_STREQ("Foo::Foo()", getDemangle("_ZN3FooC1Ev").c_str());
 }
 
 TEST(DemangleTest, ComplexDemangle)
