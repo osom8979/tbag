@@ -93,11 +93,11 @@ std::string getAbiDemangle(char const * name, int * output_status)
 std::string getGtestDemangle(char const * name, int * output_status)
 {
     char buffer[GTEST_DEMANGLE_BUFFER_SIZE+1/*NULL_CHAR*/] = {0,};
-    auto const status = ::Demangle(name, buffer, GTEST_DEMANGLE_BUFFER_SIZE) ? 0 : 1;
+    bool const demangle_result = ::Demangle(name, buffer, GTEST_DEMANGLE_BUFFER_SIZE);
     if (output_status) {
-        *output_status = status ? 0 : -1;
+        *output_status = demangle_result ? 0 : -1;
     }
-    if (status) {
+    if (demangle_result) {
         return buffer;
     }
     return {};
