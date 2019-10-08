@@ -11,7 +11,9 @@
 #include <libtbag/debug/st/UnwindStackTrace.hpp>
 #include <libtbag/debug/st/WindbgStackTrace.hpp>
 #include <libtbag/debug/StackTrace.hpp>
+
 #include <iostream>
+#include <functional>
 
 using namespace libtbag;
 using namespace libtbag::debug;
