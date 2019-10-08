@@ -95,7 +95,7 @@ std::string getGtestDemangle(char const * name, int * output_status)
     char buffer[GTEST_DEMANGLE_BUFFER_SIZE+1/*NULL_CHAR*/] = {0,};
     auto const status = ::Demangle(name, buffer, GTEST_DEMANGLE_BUFFER_SIZE) ? 0 : 1;
     if (output_status) {
-        *output_status = status;
+        *output_status = status ? 0 : -1;
     }
     if (status) {
         return buffer;
