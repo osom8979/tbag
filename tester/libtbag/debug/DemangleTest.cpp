@@ -32,11 +32,11 @@ TEST(DemangleTest, Default)
 
 TEST(DemangleTest, Demangler)
 {
-    EXPECT_STREQ("f()", getDemangle("_Z1fv").c_str());
-    EXPECT_STREQ("f(int)", getDemangle("_Z1fi").c_str());
-    EXPECT_STREQ("Foo::Bar()", getDemangle("_ZN3Foo3BarEv").c_str());
-    EXPECT_STREQ("operator%(X, X)", getDemangle("_Zrm1XS_").c_str());
-    EXPECT_STREQ("Foo::Foo()", getDemangle("_ZN3FooC1Ev").c_str());
+    EXPECT_STREQ("f()", getGtestDemangle("_Z1fv").c_str());
+    EXPECT_STREQ("f()", getGtestDemangle("_Z1fi").c_str());
+    EXPECT_STREQ("Foo::Bar()", getGtestDemangle("_ZN3Foo3BarEv").c_str());
+    EXPECT_STREQ("operator%()", getGtestDemangle("_Zrm1XS_").c_str());
+    EXPECT_STREQ("Foo::Foo()", getGtestDemangle("_ZN3FooC1Ev").c_str());
 }
 
 TEST(DemangleTest, ComplexDemangle)
