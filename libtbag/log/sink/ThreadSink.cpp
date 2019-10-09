@@ -26,7 +26,9 @@ ThreadSink::~ThreadSink()
 {
     _lock.lock();
     _exit = true;
+    _condition.signal();
     _lock.unlock();
+
     join(false);
 }
 
@@ -65,18 +67,22 @@ void ThreadSink::onRunner()
             find_message = false;
         } else {
             find_message = true;
-            current.level = _queue.front().level;
-            current.message = std::move(_queue.front().message);
-            current.flush = _queue.front().flush;
+            auto & front = _queue.front();
+            current.level = front.level;
+            current.message = std::move(front.message);
+            current.flush = front.flush;
+            _queue.pop_front();
         }
         _lock.unlock();
 
         while (find_message) {
-            if (!current.message.empty()) {
-                _sink->write(current.level, current.message.c_str(), current.message.size());
-            }
-            if (current.flush) {
-                _sink->flush();
+            if (_sink) {
+                if (!current.message.empty()) {
+                    _sink->write(current.level, current.message.c_str(), current.message.size());
+                }
+                if (current.flush) {
+                    _sink->flush();
+                }
             }
 
             _lock.lock();
@@ -84,9 +90,11 @@ void ThreadSink::onRunner()
                 find_message = false;
             } else {
                 find_message = true;
-                current.level = _queue.front().level;
-                current.message = std::move(_queue.front().message);
-                current.flush = _queue.front().flush;
+                auto & front = _queue.front();
+                current.level = front.level;
+                current.message = std::move(front.message);
+                current.flush = front.flush;
+                _queue.pop_front();
             }
             _lock.unlock();
         }
