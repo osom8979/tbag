@@ -62,11 +62,11 @@ TEST(ReuseQueueTest, Default)
 
     queue.push(300);
     ASSERT_EQ(2U, queue.size());
-    ASSERT_EQ(0U, queue.sizeOfReady());
+    ASSERT_EQ(1U, queue.sizeOfReady());
 
     queue.push(400);
     ASSERT_EQ(3U, queue.size());
-    ASSERT_EQ(0U, queue.sizeOfReady());
+    ASSERT_EQ(1U, queue.sizeOfReady());
 
     queue.clear();
     ASSERT_TRUE(queue.empty());
