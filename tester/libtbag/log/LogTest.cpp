@@ -109,7 +109,7 @@ TEST(LogTest, RotateFileSink)
         <loggers>
             <logger>
                 <name>test-logger-rotate</name>
-                <sink>rotate</sink>
+                <sink>rotate_file</sink>
                 <arguments>size=8 archive=.zip counter=${LOG_DIR},.logging,1</arguments>
                 <generator>raw</generator>
                 <line_feed>none</line_feed>

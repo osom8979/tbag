@@ -18,32 +18,42 @@ namespace sink {
 
 ConsoleSink::ConsoleType ConsoleSink::getConsoleType(std::string const & type)
 {
-    auto const LOWER = libtbag::string::lower(libtbag::string::trim(type));
-    if (LOWER == STDERR_TEXT || LOWER == "2") {
+    using namespace libtbag::string;
+    auto const type_text = lower(trim(type));
+    if (type_text == STDOUT_TEXT || type_text == "1") {
+        return ConsoleType::CT_STDOUT;
+    } else if (type_text == STDERR_TEXT || type_text == "2") {
         return ConsoleType::CT_STDERR;
     }
-    return ConsoleType::CT_STDOUT;
+    return ConsoleType::CT_UNKNOWN;
 }
 
-char const * const ConsoleSink::getConsoleTypeName(ConsoleType t) TBAG_NOEXCEPT
+char const * ConsoleSink::getConsoleTypeName(ConsoleType t) TBAG_NOEXCEPT
 {
-    // clang-format off
     switch (t) {
-    case ConsoleType::CT_STDOUT: return STDOUT_TEXT;
-    case ConsoleType::CT_STDERR: return STDERR_TEXT;
-    default:                     return "";
+    case ConsoleType::CT_STDOUT:
+        return STDOUT_TEXT;
+    case ConsoleType::CT_STDERR:
+        return STDERR_TEXT;
+    default:
+        return "";
     }
-    // clang-format on
 }
+
+// -----------
+// ConsoleSink
+// -----------
 
 ConsoleSink::ConsoleSink(ConsoleType type)
         : CONSOLE_TYPE(type)
 {
-    // EMPTY.
+    if (CONSOLE_TYPE == ConsoleType::CT_UNKNOWN) {
+        throw std::bad_alloc();
+    }
 }
 
-ConsoleSink::ConsoleSink(std::string const & type)
-        : CONSOLE_TYPE(getConsoleType(type))
+ConsoleSink::ConsoleSink(std::string const & arguments)
+        : ConsoleSink(getConsoleType(arguments))
 {
     // EMPTY.
 }
@@ -55,12 +65,28 @@ ConsoleSink::~ConsoleSink()
 
 bool ConsoleSink::write(int level, char const * message, int size)
 {
-    return ::fwrite(message, size, 1, CONSOLE_TYPE == ConsoleType::CT_STDOUT ? stdout : stderr) == 1;
+    switch (CONSOLE_TYPE) {
+    case ConsoleType::CT_STDOUT:
+        return ::fwrite(message, size, 1, stdout) == 1;
+    case ConsoleType::CT_STDERR:
+        return ::fwrite(message, size, 1, stderr) == 1;
+    case ConsoleType::CT_UNKNOWN:
+        return false;
+    default:
+        return false;
+    }
 }
 
 void ConsoleSink::flush()
 {
-    ::fflush(CONSOLE_TYPE == ConsoleType::CT_STDOUT ? stdout : stderr);
+    switch (CONSOLE_TYPE) {
+    case ConsoleType::CT_STDOUT:
+        ::fflush(stdout);
+    case ConsoleType::CT_STDERR:
+        ::fflush(stderr);
+    default:
+        break;
+    }
 }
 
 } // namespace sink

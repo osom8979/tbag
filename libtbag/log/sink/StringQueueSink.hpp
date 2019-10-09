@@ -37,12 +37,21 @@ namespace sink {
 class TBAG_API StringQueueSink : public Sink
 {
 public:
+    TBAG_CONSTEXPR static char const * sink_name() TBAG_NOEXCEPT
+    { return "string_queue"; }
+
+public:
     using Deque = std::deque<std::string>;
 
 public:
     TBAG_CONSTEXPR static std::size_t const DEFAULT_SIZE = 1024;
     TBAG_CONSTEXPR static std::size_t const INFINITY_SIZE =
             libtbag::type::TypeInfo<std::size_t>::maximum();
+
+public:
+    TBAG_CONSTEXPR static char const * const INFINITY_ARGUMENTS_01 = "inf";
+    TBAG_CONSTEXPR static char const * const INFINITY_ARGUMENTS_02 = "infinity";
+    TBAG_CONSTEXPR static char const * const INFINITY_ARGUMENTS_03 = "infinity_size";
 
 public:
     std::size_t const MAX_SIZE;
@@ -63,8 +72,8 @@ public:
     inline Deque const & deque() const TBAG_NOEXCEPT { return _deque; }
 
 public:
-    virtual bool write(int level, char const * message, int size) override;
-    virtual void flush() override;
+    bool write(int level, char const * message, int size) override;
+    void flush() override;
 };
 
 } // namespace sink

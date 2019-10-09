@@ -22,7 +22,9 @@ std::size_t StringQueueSink::parseArguments(std::string const & arguments)
     }
     using namespace libtbag::string;
     auto const lower_arguments = lower(trim(arguments));
-    if (lower_arguments == "inf" || lower_arguments == "infinity" || lower_arguments == "infinity_size") {
+    if (/**/lower_arguments == INFINITY_ARGUMENTS_01 ||
+            lower_arguments == INFINITY_ARGUMENTS_02 ||
+            lower_arguments == INFINITY_ARGUMENTS_03) {
         return INFINITY_SIZE;
     }
     return libtbag::string::toValue<int>(arguments, DEFAULT_SIZE);

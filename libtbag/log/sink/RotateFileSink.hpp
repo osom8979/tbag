@@ -39,33 +39,26 @@ namespace sink {
 class TBAG_API RotateFileSink : public Sink
 {
 public:
+    TBAG_CONSTEXPR static char const * sink_name() TBAG_NOEXCEPT
+    { return "rotate_file"; }
+
+public:
     using RotatePath = libtbag::filesystem::RotatePath;
-
-public:
-    struct default_init_t { /* EMPTY. */ };
-
-public:
-    TBAG_CONSTEXPR static default_init_t const default_init = {};
-
-public:
-    TBAG_CONSTEXPR static default_init_t const init() TBAG_NOEXCEPT
-    { return default_init; }
 
 private:
     RotatePath _rotate;
 
 public:
-    static std::string getDefaultArguments(std::string const & path);
+    static std::string getDefaultArguments();
 
 public:
     RotateFileSink();
-    RotateFileSink(default_init_t, std::string const & path);
     RotateFileSink(std::string const & arguments);
     virtual ~RotateFileSink();
 
 public:
-    virtual bool write(int level, char const * message, int size) override;
-    virtual void flush() override;
+    bool write(int level, char const * message, int size) override;
+    void flush() override;
 };
 
 } // namespace sink

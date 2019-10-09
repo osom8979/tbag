@@ -253,16 +253,17 @@ bool getAutoFlush(std::string const & name)
 
 bool existsSinkName(std::string const & name)
 {
-    auto const LOWER = libtbag::string::lower(libtbag::string::trim(name));
-    if (LOWER == SINK_CONSOLE) {
+    using namespace libtbag::log::sink;
+    auto const lower = libtbag::string::lower(libtbag::string::trim(name));
+    if (lower == ConsoleSink::sink_name()) {
         return true;
-    } else if (LOWER == SINK_FILE) {
+    } else if (lower == FileSink::sink_name()) {
         return true;
-    } else if (LOWER == SINK_NULL) {
+    } else if (lower == NullSink::sink_name()) {
         return true;
-    } else if (LOWER == SINK_ROTATE) {
+    } else if (lower == RotateFileSink::sink_name()) {
         return true;
-    } else if (LOWER == SINK_STRING_QUEUE) {
+    } else if (lower == StringQueueSink::sink_name()) {
         return true;
     }
     return false;
@@ -270,40 +271,30 @@ bool existsSinkName(std::string const & name)
 
 bool existsGeneratorName(std::string const & name)
 {
-    auto const LOWER = libtbag::string::lower(libtbag::string::trim(name));
-    if (LOWER == GENERATOR_DEFAULT) {
+    auto const lower = libtbag::string::lower(libtbag::string::trim(name));
+    if (lower == GENERATOR_DEFAULT) {
         return true;
-    } else if (LOWER == GENERATOR_DEFAULT_COLOR) {
+    } else if (lower == GENERATOR_DEFAULT_COLOR) {
         return true;
-    } else if (LOWER == GENERATOR_RAW) {
+    } else if (lower == GENERATOR_RAW) {
         return true;
     }
     return false;
 }
 
-Logger::SharedSink newSink(std::string const & name, std::string const & dest, std::string const & args)
+Logger::SharedSink newSink(std::string const & name, std::string const & args)
 {
-    auto const LOWER = libtbag::string::lower(libtbag::string::trim(name));
-    if (LOWER == SINK_CONSOLE) {
-        return std::make_shared<ConsoleSink>(dest);
-    } else if (LOWER == SINK_FILE) {
-        return std::make_shared<FileSink>(dest);
-    } else if (LOWER == SINK_NULL) {
+    auto const lower = libtbag::string::lower(libtbag::string::trim(name));
+    if (lower == ConsoleSink::sink_name()) {
+        return std::make_shared<ConsoleSink>(args);
+    } else if (lower == FileSink::sink_name()) {
+        return std::make_shared<FileSink>(args);
+    } else if (lower == NullSink::sink_name()) {
         return std::make_shared<NullSink>();
-    } else if (LOWER == SINK_ROTATE) {
-        if (!args.empty()) {
-            return std::make_shared<RotateFileSink>(args);
-        }
-        if (!dest.empty()) {
-            return std::make_shared<RotateFileSink>(RotateFileSink::init(), dest);
-        }
-        return std::make_shared<RotateFileSink>();
-    } else if (LOWER == SINK_STRING_QUEUE) {
-        if (args.empty()) {
-            return std::make_shared<StringQueueSink>();
-        } else {
-            return std::make_shared<StringQueueSink>(args);
-        }
+    } else if (lower == RotateFileSink::sink_name()) {
+        return std::make_shared<RotateFileSink>(args);
+    } else if (lower == StringQueueSink::sink_name()) {
+        return std::make_shared<StringQueueSink>(args);
     } else {
         return Logger::SharedSink(nullptr);
     }
@@ -311,12 +302,12 @@ Logger::SharedSink newSink(std::string const & name, std::string const & dest, s
 
 Logger::SharedGenerator newGenerator(std::string const & name, std::string const & line_feed)
 {
-    auto const LOWER = libtbag::string::lower(libtbag::string::trim(name));
-    if (LOWER == GENERATOR_DEFAULT) {
+    auto const lower = libtbag::string::lower(libtbag::string::trim(name));
+    if (lower == GENERATOR_DEFAULT) {
         return std::make_shared<DefaultGenerator>(line_feed);
-    } else if (LOWER == GENERATOR_DEFAULT_COLOR) {
+    } else if (lower == GENERATOR_DEFAULT_COLOR) {
         return std::make_shared<DefaultColorGenerator>(line_feed);
-    } else if (LOWER == GENERATOR_RAW) {
+    } else if (lower == GENERATOR_RAW) {
         return std::make_shared<RawGenerator>(line_feed);
     } else {
         return Logger::SharedGenerator(nullptr);
@@ -335,7 +326,7 @@ Logger * createLogger(LoggerInitParams const & params, libtbag::string::Environm
         return nullptr;
     }
 
-    auto sink = newSink(params.sink, envs.convert(params.destination), envs.convert(params.arguments));
+    auto sink = newSink(params.sink, envs.convert(params.arguments));
     assert(sink);
     auto gen = newGenerator(params.generator, params.line_feed);
 

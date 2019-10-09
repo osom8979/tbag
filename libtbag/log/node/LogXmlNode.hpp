@@ -61,10 +61,7 @@ namespace node {
  *       <!-- ${EXE_DIR}  : EXE directory         -->
  *       <!-- ${WORK_DIR} : Working directory     -->
  *       <!-- ${HOME_DIR} : User's HOME directory -->
- *       <destination>${EXE_DIR}/tbag-logger-test.log</destination>
- *
- *       <!-- Arguments -->
- *       <arguments> ... </arguments>
+ *       <arguments>${EXE_DIR}/tbag-logger-test.log</arguments>
  *
  *       <!-- Log message generator                                 -->
  *       <!--  default        (Default log message)                 -->
@@ -111,14 +108,13 @@ public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGERS_NAME = "loggers";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGER_NAME  = "logger";
 
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_NAME        = "name";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SINK        = "sink";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_DESTINATION = "destination";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_ARGUMENTS   = "arguments";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_GENERATOR   = "generator";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_LINE_FEED   = "line_feed";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY    = "severity";
-    TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH  = "auto_flush";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_NAME       = "name";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SINK       = "sink";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_ARGUMENTS  = "arguments";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_GENERATOR  = "generator";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_LINE_FEED  = "line_feed";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY   = "severity";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH = "auto_flush";
 
 private:
     Environments _envs;

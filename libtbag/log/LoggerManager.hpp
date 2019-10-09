@@ -146,12 +146,6 @@ TBAG_API void setAutoFlush(std::string const & name, bool flag = true);
 TBAG_API bool getAutoFlush(LoggerId id);
 TBAG_API bool getAutoFlush(std::string const & name);
 
-TBAG_CONSTEXPR char const * const SINK_CONSOLE      = "console";
-TBAG_CONSTEXPR char const * const SINK_FILE         = "file";
-TBAG_CONSTEXPR char const * const SINK_NULL         = "null";
-TBAG_CONSTEXPR char const * const SINK_ROTATE       = "rotate";
-TBAG_CONSTEXPR char const * const SINK_STRING_QUEUE = "string_queue";
-
 TBAG_CONSTEXPR char const * const GENERATOR_DEFAULT       = "default";
 TBAG_CONSTEXPR char const * const GENERATOR_DEFAULT_COLOR = "default_color";
 TBAG_CONSTEXPR char const * const GENERATOR_RAW           = "raw";
@@ -160,18 +154,18 @@ struct LoggerInitParams
 {
     std::string name;
     std::string sink;
-    std::string destination;
     std::string arguments;
     std::string generator;
     std::string line_feed;
     std::string severity;
     std::string auto_flush;
+    std::string thread;
 };
 
 TBAG_API bool existsSinkName(std::string const & name);
 TBAG_API bool existsGeneratorName(std::string const & name);
 
-TBAG_API Logger::SharedSink newSink(std::string const & name, std::string const & dest, std::string const & args);
+TBAG_API Logger::SharedSink newSink(std::string const & name, std::string const & args);
 TBAG_API Logger::SharedGenerator newGenerator(std::string const & name, std::string const & line_feed);
 
 TBAG_API Logger * createLogger(LoggerInitParams const & params, libtbag::string::Environments const & envs);

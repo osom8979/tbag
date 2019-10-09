@@ -7,7 +7,6 @@
 
 #include <libtbag/log/node/LogXmlNode.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/filesystem/Path.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -51,14 +50,13 @@ void LogXmlNode::save(Element & element) const
     for (auto & info : _infos) {
         newElement(element, XML_ELEMENT_LOGGER_NAME, [&](Element & e){
             // clang-format off
-            set(e, XML_ELEMENT_NAME       , info.name       );
-            set(e, XML_ELEMENT_SINK       , info.sink       );
-            set(e, XML_ELEMENT_DESTINATION, info.destination);
-            set(e, XML_ELEMENT_ARGUMENTS  , info.arguments  );
-            set(e, XML_ELEMENT_GENERATOR  , info.generator  );
-            set(e, XML_ELEMENT_LINE_FEED  , info.line_feed  );
-            set(e, XML_ELEMENT_SEVERITY   , info.severity   );
-            set(e, XML_ELEMENT_AUTO_FLUSH , info.auto_flush );
+            set(e, XML_ELEMENT_NAME      , info.name      );
+            set(e, XML_ELEMENT_SINK      , info.sink      );
+            set(e, XML_ELEMENT_ARGUMENTS , info.arguments );
+            set(e, XML_ELEMENT_GENERATOR , info.generator );
+            set(e, XML_ELEMENT_LINE_FEED , info.line_feed );
+            set(e, XML_ELEMENT_SEVERITY  , info.severity  );
+            set(e, XML_ELEMENT_AUTO_FLUSH, info.auto_flush);
             // clang-format on
         });
     }
@@ -108,14 +106,13 @@ LogXmlNode::Info LogXmlNode::getLogInfo(Element const & element)
 {
     Info info;
     // clang-format off
-    info.name        = get<std::string>(element, XML_ELEMENT_NAME       );
-    info.sink        = get<std::string>(element, XML_ELEMENT_SINK       );
-    info.destination = get<std::string>(element, XML_ELEMENT_DESTINATION);
-    info.arguments   = get<std::string>(element, XML_ELEMENT_ARGUMENTS  );
-    info.generator   = get<std::string>(element, XML_ELEMENT_GENERATOR  );
-    info.line_feed   = get<std::string>(element, XML_ELEMENT_LINE_FEED  );
-    info.severity    = get<std::string>(element, XML_ELEMENT_SEVERITY   );
-    info.auto_flush  = get<std::string>(element, XML_ELEMENT_AUTO_FLUSH );
+    info.name       = get<std::string>(element, XML_ELEMENT_NAME      );
+    info.sink       = get<std::string>(element, XML_ELEMENT_SINK      );
+    info.arguments  = get<std::string>(element, XML_ELEMENT_ARGUMENTS );
+    info.generator  = get<std::string>(element, XML_ELEMENT_GENERATOR );
+    info.line_feed  = get<std::string>(element, XML_ELEMENT_LINE_FEED );
+    info.severity   = get<std::string>(element, XML_ELEMENT_SEVERITY  );
+    info.auto_flush = get<std::string>(element, XML_ELEMENT_AUTO_FLUSH);
     // clang-format on
     return info;
 }

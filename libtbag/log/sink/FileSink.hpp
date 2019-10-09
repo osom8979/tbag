@@ -37,17 +37,21 @@ namespace sink {
  */
 class TBAG_API FileSink : public Sink
 {
+public:
+    TBAG_CONSTEXPR static char const * sink_name() TBAG_NOEXCEPT
+    { return "file"; }
+
 private:
     FILE * _file;
 
 public:
-    FileSink(char const * path);
-    FileSink(std::string const & path);
+    explicit FileSink(char const * path);
+    explicit FileSink(std::string const & arguments);
     virtual ~FileSink();
 
 public:
-    virtual bool write(int level, char const * message, int size) override;
-    virtual void flush() override;
+    bool write(int level, char const * message, int size) override;
+    void flush() override;
 };
 
 } // namespace sink

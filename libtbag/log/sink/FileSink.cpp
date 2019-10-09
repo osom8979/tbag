@@ -24,8 +24,8 @@ FileSink::FileSink(char const * path)
     }
 }
 
-FileSink::FileSink(std::string const & path)
-        : FileSink(path.c_str())
+FileSink::FileSink(std::string const & arguments)
+        : FileSink(arguments.c_str())
 {
     // EMPTY.
 }

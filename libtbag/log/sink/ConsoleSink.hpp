@@ -39,9 +39,14 @@ class TBAG_API ConsoleSink : public Sink
 public:
     enum class ConsoleType
     {
+        CT_UNKNOWN,
         CT_STDOUT,
         CT_STDERR,
     };
+
+public:
+    TBAG_CONSTEXPR static char const * sink_name() TBAG_NOEXCEPT
+    { return "console"; }
 
 public:
     TBAG_CONSTEXPR static char const * const STDOUT_TEXT = "stdout";
@@ -49,19 +54,19 @@ public:
 
 public:
     static ConsoleType getConsoleType(std::string const & type);
-    static char const * const getConsoleTypeName(ConsoleType t) TBAG_NOEXCEPT;
+    static char const * getConsoleTypeName(ConsoleType t) TBAG_NOEXCEPT;
 
 public:
     ConsoleType const CONSOLE_TYPE;
 
 public:
     ConsoleSink(ConsoleType type = ConsoleType::CT_STDOUT);
-    ConsoleSink(std::string const & type);
+    ConsoleSink(std::string const & arguments);
     virtual ~ConsoleSink();
 
 public:
-    virtual bool write(int level, char const * message, int size) override;
-    virtual void flush() override;
+    bool write(int level, char const * message, int size) override;
+    void flush() override;
 };
 
 } // namespace sink

@@ -18,6 +18,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/log/sink/Sink.hpp>
 
+#include <string>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -35,12 +37,17 @@ namespace sink {
 class TBAG_API NullSink : public Sink
 {
 public:
+    TBAG_CONSTEXPR static char const * sink_name() TBAG_NOEXCEPT
+    { return "null"; }
+
+public:
     NullSink();
+    NullSink(std::string const & UNUSED_PARAM(arguments));
     virtual ~NullSink();
 
 public:
-    virtual bool write(int level, char const * message, int size) override;
-    virtual void flush() override;
+    bool write(int level, char const * message, int size) override;
+    void flush() override;
 };
 
 } // namespace sink

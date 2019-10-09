@@ -21,6 +21,12 @@ FunctionalSink::FunctionalSink(WriteCallback const & wcb, FlushCallback const & 
     assert(WRITE_CALLBACK);
 }
 
+FunctionalSink::FunctionalSink(std::string const & UNUSED_PARAM(arguments))
+        : FunctionalSink(nullptr, nullptr, nullptr)
+{
+    // EMPTY.
+}
+
 FunctionalSink::~FunctionalSink()
 {
     // EMPTY.

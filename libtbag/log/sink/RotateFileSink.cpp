@@ -16,13 +16,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log  {
 namespace sink {
 
-std::string RotateFileSink::getDefaultArguments(std::string const & path)
+std::string RotateFileSink::getDefaultArguments()
 {
     using namespace libtbag::filesystem;
     std::stringstream ss;
     ss << "size=10240m ";
     ss << "archive=.zip ";
-    ss << "time=" << TimeFormatUpdater::getDefaultTimeFormatString(Path(path));
+    ss << "time=" << TimeFormatUpdater::getDefaultTimeFormatString(Path::getExePath());
     return ss.str();
 }
 
@@ -33,14 +33,8 @@ RotateFileSink::RotateFileSink()
     // EMPTY.
 }
 
-RotateFileSink::RotateFileSink(default_init_t, std::string const & path)
-        : _rotate(getDefaultArguments(path))
-{
-    // EMPTY.
-}
-
 RotateFileSink::RotateFileSink(std::string const & arguments)
-        : _rotate(arguments)
+        : _rotate(arguments.empty() ? getDefaultArguments() : arguments)
 {
     // EMPTY.
 }

@@ -6,7 +6,7 @@
  */
 
 #include <libtbag/log/sink/CallbackSink.hpp>
-#include <cassert>
+#include <libtbag/debug/Assert.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -19,6 +19,12 @@ CallbackSink::CallbackSink(WriteCallback const & wcb, FlushCallback const & fcb,
         : WRITE_CALLBACK(wcb), FLUSH_CALLBACK(fcb), USER_DATA(user)
 {
     assert(WRITE_CALLBACK != nullptr);
+}
+
+CallbackSink::CallbackSink(std::string const & UNUSED_PARAM(arguments))
+        : CallbackSink(nullptr, nullptr, nullptr)
+{
+    // EMPTY.
 }
 
 CallbackSink::~CallbackSink()

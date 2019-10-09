@@ -19,6 +19,11 @@ NullSink::NullSink()
     // EMPTY.
 }
 
+NullSink::NullSink(std::string const & UNUSED_PARAM(arguments))
+{
+    // EMPTY.
+}
+
 NullSink::~NullSink()
 {
     // EMPTY.

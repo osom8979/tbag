@@ -22,7 +22,7 @@ TEST(LogXmlNodeTest, XmlString)
             <logger>
                 <name>test-logger-cout</name>
                 <sink>console</sink>
-                <destination>stdout</destination>
+                <arguments>stdout</arguments>
                 <generator>default_color</generator>
                 <severity>debug</severity>
                 <auto_flush>false</auto_flush>
@@ -30,7 +30,7 @@ TEST(LogXmlNodeTest, XmlString)
             <logger>
                 <name>test-logger-file</name>
                 <sink>file</sink>
-                <destination>${EXE_DIR}/tbag-logger-test.log</destination>
+                <arguments>${EXE_DIR}/tbag-logger-test.log</arguments>
                 <generator>default</generator>
                 <severity>critical</severity>
                 <auto_flush>true</auto_flush>
@@ -67,7 +67,7 @@ TEST(LogXmlNodeTest, RecreateIfExists)
             <logger>
                 <name>test-logger-cout</name>
                 <sink>console</sink>
-                <destination>stdout</destination>
+                <arguments>stdout</arguments>
                 <generator>default_color</generator>
                 <severity>OFF</severity>
                 <auto_flush>false</auto_flush>
@@ -116,8 +116,7 @@ struct LogXmlNodeTest : public LogXmlNode
         // clang-format off
         param.name        = TEST_LOG_NAME;
         param.sink        = "file";
-        param.destination = "${TEST_DIR}/test.log";
-        param.arguments   = "";
+        param.arguments   = "${TEST_DIR}/test.log";
         param.generator   = "default";
         param.line_feed   = "unix";
         param.severity    = "info";

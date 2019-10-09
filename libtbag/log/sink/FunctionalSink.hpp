@@ -29,30 +29,38 @@ namespace sink {
 /**
  * FunctionalSink class prototype.
  *
+ * @details
+ *  This sink is for C-API. Creation using XML nodes is not possible.
+ *
  * @author zer0
  * @date   2019-07-03
  */
 class TBAG_API FunctionalSink : public Sink
 {
 public:
-    using UserData = void *;
+    TBAG_CONSTEXPR static char const * sink_name() TBAG_NOEXCEPT
+    { return "functional"; }
+
+public:
+    using UserData = void*;
     using WriteCallback = std::function<bool(int, char const *, int, UserData)>;
     using FlushCallback = std::function<void(UserData)>;
 
 public:
     WriteCallback const WRITE_CALLBACK;
     FlushCallback const FLUSH_CALLBACK;
-
-public:
     UserData const USER_DATA;
 
 public:
-    FunctionalSink(WriteCallback const & wcb, FlushCallback const & fcb = nullptr, void * user = nullptr);
+    FunctionalSink(WriteCallback const & wcb,
+                   FlushCallback const & fcb = nullptr,
+                   void * user = nullptr);
+    FunctionalSink(std::string const & UNUSED_PARAM(arguments));
     virtual ~FunctionalSink();
 
 public:
-    virtual bool write(int level, char const * message, int size) override;
-    virtual void flush() override;
+    bool write(int level, char const * message, int size) override;
+    void flush() override;
 };
 
 } // namespace sink
