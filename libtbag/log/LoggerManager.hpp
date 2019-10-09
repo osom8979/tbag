@@ -166,6 +166,7 @@ TBAG_API bool existsSinkName(std::string const & name);
 TBAG_API bool existsGeneratorName(std::string const & name);
 
 TBAG_API Logger::SharedSink newSink(std::string const & name, std::string const & args);
+TBAG_API Logger::SharedSink newThreadSink(std::string const & name, std::string const & args);
 TBAG_API Logger::SharedGenerator newGenerator(std::string const & name, std::string const & line_feed);
 
 TBAG_API Logger * createLogger(LoggerInitParams const & params, libtbag::string::Environments const & envs);

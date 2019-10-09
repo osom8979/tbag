@@ -14,12 +14,12 @@
 #include <libtbag/log/msg/DefaultGenerator.hpp>
 #include <libtbag/log/msg/RawGenerator.hpp>
 
-#include <libtbag/log/sink/CallbackSink.hpp>
 #include <libtbag/log/sink/ConsoleSink.hpp>
 #include <libtbag/log/sink/FileSink.hpp>
 #include <libtbag/log/sink/NullSink.hpp>
 #include <libtbag/log/sink/RotateFileSink.hpp>
 #include <libtbag/log/sink/StringQueueSink.hpp>
+#include <libtbag/log/sink/ThreadSink.hpp>
 
 #include <cassert>
 
@@ -300,6 +300,11 @@ Logger::SharedSink newSink(std::string const & name, std::string const & args)
     }
 }
 
+Logger::SharedSink newThreadSink(std::string const & name, std::string const & args)
+{
+    return std::make_shared<ThreadSink>(newSink(name, args));
+}
+
 Logger::SharedGenerator newGenerator(std::string const & name, std::string const & line_feed)
 {
     auto const lower = libtbag::string::lower(libtbag::string::trim(name));
@@ -326,10 +331,21 @@ Logger * createLogger(LoggerInitParams const & params, libtbag::string::Environm
         return nullptr;
     }
 
-    auto sink = newSink(params.sink, envs.convert(params.arguments));
-    assert(sink);
-    auto gen = newGenerator(params.generator, params.line_feed);
+    bool enable_thread_logging = false;
+    libtbag::string::toVal(params.thread, enable_thread_logging);
 
+    auto const converted_arguments = envs.convert(params.arguments);
+    Logger::SharedSink sink;
+    if (enable_thread_logging) {
+        sink = newThreadSink(params.sink, converted_arguments);
+    } else {
+        sink = newSink(params.sink, converted_arguments);
+    }
+    if (!sink) {
+        return nullptr;
+    }
+
+    auto gen = newGenerator(params.generator, params.line_feed);
     auto const name = libtbag::string::trim(params.name);
     auto const severity = findSeverity(params.severity);
     auto const auto_flush = libtbag::string::toValue<bool>(params.auto_flush, false);

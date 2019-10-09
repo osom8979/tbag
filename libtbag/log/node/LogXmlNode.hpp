@@ -115,6 +115,7 @@ public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_LINE_FEED  = "line_feed";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_SEVERITY   = "severity";
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_AUTO_FLUSH = "auto_flush";
+    TBAG_CONSTEXPR static char const * const XML_ELEMENT_THREAD     = "thread";
 
 private:
     Environments _envs;

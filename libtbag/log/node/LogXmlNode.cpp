@@ -57,6 +57,7 @@ void LogXmlNode::save(Element & element) const
             set(e, XML_ELEMENT_LINE_FEED , info.line_feed );
             set(e, XML_ELEMENT_SEVERITY  , info.severity  );
             set(e, XML_ELEMENT_AUTO_FLUSH, info.auto_flush);
+            set(e, XML_ELEMENT_THREAD    , info.thread);
             // clang-format on
         });
     }
@@ -113,6 +114,7 @@ LogXmlNode::Info LogXmlNode::getLogInfo(Element const & element)
     info.line_feed  = get<std::string>(element, XML_ELEMENT_LINE_FEED );
     info.severity   = get<std::string>(element, XML_ELEMENT_SEVERITY  );
     info.auto_flush = get<std::string>(element, XML_ELEMENT_AUTO_FLUSH);
+    info.thread     = get<std::string>(element, XML_ELEMENT_THREAD    );
     // clang-format on
     return info;
 }
