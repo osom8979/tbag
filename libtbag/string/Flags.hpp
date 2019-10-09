@@ -50,45 +50,50 @@ namespace string {
 class TBAG_API Flags
 {
 public:
-    struct Flag
+    struct Flag TBAG_FINAL
     {
         std::string key;
         std::string value;
 
-        Flag() : key(), value()
+        explicit Flag() : key(), value()
         { /* EMPTY. */ }
-        Flag(std::string const & k) : key(k), value()
+        explicit Flag(std::string const & k) : key(k), value()
         { /* EMPTY. */ }
-        Flag(std::string const & k, std::string const & v) : key(k), value(v)
+        explicit Flag(std::string const & k, std::string const & v) : key(k), value(v)
+        { /* EMPTY. */ }
+
+        explicit Flag(std::string && k) TBAG_NOEXCEPT : key(std::move(k)), value()
+        { /* EMPTY. */ }
+        explicit Flag(std::string && k, std::string && v) TBAG_NOEXCEPT : key(std::move(k)), value(std::move(v))
         { /* EMPTY. */ }
     };
 
-    using FlagVector = std::vector<Flag>;
-    using ArgvVector = std::vector<char*>;
-
-    struct Argv
+    struct Argv TBAG_FINAL
     {
     public:
         friend class Flags;
 
-    private:
-        std::vector<std::string> _strings;
-        ArgvVector _arguments;
+    public:
+        std::vector<std::string> strings;
+        std::vector<char*> arguments;
 
     public:
-        inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_arguments.size())
-        { return _arguments.size(); }
+        inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(arguments.size())
+        { return arguments.size(); }
 
     public:
-        inline int argc() const TBAG_NOEXCEPT_SP_OP(_arguments.size())
-        { return static_cast<int>(_arguments.size()); }
-        inline char ** argv() TBAG_NOEXCEPT_SP_OP(_arguments.data())
-        { return _arguments.data(); }
+        inline int argc() const TBAG_NOEXCEPT_SP_OP(arguments.size())
+        { return static_cast<int>(arguments.size()); }
+        inline char ** argv() TBAG_NOEXCEPT_SP_OP(arguments.data())
+        { return arguments.data(); }
     };
 
 public:
     TBAG_CONSTEXPR static char const * const DEFAULT_PREFIX = "--";
     TBAG_CONSTEXPR static char const * const DEFAULT_DELIMITER = "=";
+
+public:
+    using FlagVector = std::vector<Flag>;
 
 private:
     FlagVector _flags;
@@ -112,27 +117,39 @@ public:
     Flags & operator =(Flags && obj) TBAG_NOEXCEPT;
 
 public:
-    inline void        clear()       TBAG_NOEXCEPT_SP_OP(_flags.clear()) {        _flags.clear(); }
-    inline std::size_t  size() const TBAG_NOEXCEPT_SP_OP(_flags.size ()) { return _flags.size (); }
-    inline bool        empty() const TBAG_NOEXCEPT_SP_OP(_flags.empty()) { return _flags.empty(); }
+    inline void clear() TBAG_NOEXCEPT_SP_OP(_flags.clear())
+    { _flags.clear(); }
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_flags.size())
+    { return _flags.size(); }
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_flags.empty())
+    { return _flags.empty(); }
 
 public:
-    inline void push(Flag const & flag) { _flags.push_back(flag); }
+    inline void push(Flag const & flag)
+    { _flags.emplace_back(flag); }
+    inline void push(Flag && flag)
+    { _flags.emplace_back(std::move(flag)); }
+    inline void push(std::string const & key, std::string const & val)
+    { _flags.emplace_back(key, val); }
+    inline void push(std::string && key, std::string && val)
+    { _flags.emplace_back(std::move(key), std::move(val)); }
 
 public:
-    inline Flag       & at(std::size_t index)       { return _flags.at(index); }
-    inline Flag const & at(std::size_t index) const { return _flags.at(index); }
+    inline Flag & at(std::size_t index)
+    { return _flags.at(index); }
+    inline Flag const & at(std::size_t index) const
+    { return _flags.at(index); }
 
 public:
     void swap(Flags & obj) TBAG_NOEXCEPT;
 
 public:
-    friend void swap(Flags & lh, Flags & rh) TBAG_NOEXCEPT { lh.swap(rh); }
+    friend void swap(Flags & lh, Flags & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
-    Flag find(FlagVector::const_iterator itr) const;
-    Flag findWithKey(std::string const & key) const;
-    Flag findWithValue(std::string const & value) const;
+    Flag findByKey(std::string const & key) const;
+    Flag findByValue(std::string const & value) const;
 
 public:
     bool get(std::string const & key, std::string & val) const;
@@ -143,11 +160,11 @@ public:
     bool remove(std::string const & key);
 
 public:
-    bool existsWithKey(std::string const & key) const;
-    bool existsWithValue(std::string const & value) const;
+    bool existsByKey(std::string const & key) const;
+    bool existsByValue(std::string const & value) const;
 
 public:
-    std::vector<std::string> getNamedKeys() const;
+    std::vector<std::string> keys() const;
     std::vector<std::string> getUnnamedValues() const;
 
 public:
@@ -162,25 +179,41 @@ public:
     Argv getArgv(std::string const & prefix, std::string const & delimiter, bool last_null = false) const;
     Argv getArgv(bool last_null = false) const;
 
-// ---------------
-// Static methods.
-// ---------------
-
 public:
-    static Flag convertFlag(std::string const & str, std::string const & prefix, std::string const & delimiter);
-    static Flag convertFlag(std::string const & str);
+    /**
+     * String to flag.
+     *
+     * Input:
+     *  - str: <code>"--verbose=true"</code>
+     *  - prefix: <code>"--"</code>
+     *  - delimiter: <code>"="</code>
+     * Result:
+     *  - <code>Flag{key="verbose", value="true"}</code>
+     */
+    static Flag convertStringToFlag(std::string const & str, std::string const & prefix, std::string const & delimiter);
+    static Flag convertStringToFlag(std::string const & str);
 
-    static std::string convertString(Flag const & flag, std::string const & prefix, std::string const & delimiter);
-    static std::string convertString(Flag const & flag);
+    /**
+     * Flag to string.
+     *
+     * Input:
+     *  - flag: <code>Flag{key="verbose", value="true"}</code>
+     *  - prefix: <code>"--"</code>
+     *  - delimiter: <code>"="</code>
+     * Return:
+     *  - <code>"--verbose=true"</code>
+     */
+    static std::string convertFlagToString(Flag const & flag, std::string const & prefix, std::string const & delimiter);
+    static std::string convertFlagToString(Flag const & flag);
 
 public:
     static std::vector<std::string> splitTokens(std::string const & args);
 
 public:
-    static TBAG_CONSTEXPR char const        ESCAPE = '\\';
-    static TBAG_CONSTEXPR char const DOUBLE_QUOTES = '"';
-    static TBAG_CONSTEXPR char const SINGLE_QUOTES = '\'';
-    static TBAG_CONSTEXPR char const  SPACE_QUOTES = ' ';
+    TBAG_CONSTEXPR static char const ESCAPE = '\\';
+    TBAG_CONSTEXPR static char const DOUBLE_QUOTES = '"';
+    TBAG_CONSTEXPR static char const SINGLE_QUOTES = '\'';
+    TBAG_CONSTEXPR static char const SPACE_QUOTES = ' ';
 
     static std::string splitFirst(std::string const & args, std::size_t * process_count = nullptr);
 };

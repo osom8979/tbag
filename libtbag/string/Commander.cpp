@@ -109,7 +109,7 @@ Commander::ArgsVector Commander::parseArguments(Flags const & flags,
         auto & flag = flags.at(index);
         Arguments arguments;
         arguments.name = flag.key;
-        arguments.full = Flags::convertString(flag, prefix, delimiter);
+        arguments.full = Flags::convertFlagToString(flag, prefix, delimiter);
         arguments.parse(flag.value);
         result.push_back(std::move(arguments));
     }

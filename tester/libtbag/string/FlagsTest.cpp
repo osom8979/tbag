@@ -23,30 +23,30 @@ TEST(FlagsTest, SplitTokens)
 
     auto result = Flags::splitTokens(args);
     ASSERT_EQ(10U, result.size());
-    ASSERT_STREQ(                  "temp", result[0].c_str());
-    ASSERT_STREQ(           "--arg1=temp", result[1].c_str());
-    ASSERT_STREQ(     "--arg2=space temp", result[2].c_str());
+    ASSERT_STREQ("temp", result[0].c_str());
+    ASSERT_STREQ("--arg1=temp", result[1].c_str());
+    ASSERT_STREQ("--arg2=space temp", result[2].c_str());
     ASSERT_STREQ("--arg3=\"value quoting", result[3].c_str());
-    ASSERT_STREQ( "--arg4='single quotes", result[4].c_str());
-    ASSERT_STREQ(                     "1", result[5].c_str());
-    ASSERT_STREQ(                     "2", result[6].c_str());
-    ASSERT_STREQ(                     "3", result[7].c_str());
-    ASSERT_STREQ(                "noarg1", result[8].c_str());
-    ASSERT_STREQ(                "noarg2", result[9].c_str());
+    ASSERT_STREQ("--arg4='single quotes", result[4].c_str());
+    ASSERT_STREQ("1", result[5].c_str());
+    ASSERT_STREQ("2", result[6].c_str());
+    ASSERT_STREQ("3", result[7].c_str());
+    ASSERT_STREQ("noarg1", result[8].c_str());
+    ASSERT_STREQ("noarg2", result[9].c_str());
 }
 
 TEST(FlagsTest, ConvertFlag)
 {
-    auto t1 = Flags::convertFlag("--arg1=temp");
+    auto t1 = Flags::convertStringToFlag("--arg1=temp");
     ASSERT_STREQ("arg1", t1.key.c_str());
     ASSERT_STREQ("temp", t1.value.c_str());
 
-    auto t2 = Flags::convertFlag("--arg1_temp");
+    auto t2 = Flags::convertStringToFlag("--arg1_temp");
     ASSERT_STREQ("arg1_temp", t2.key.c_str());
-    ASSERT_STREQ(         "", t2.value.c_str());
+    ASSERT_STREQ("", t2.value.c_str());
 
-    auto t3 = Flags::convertFlag("value=temp");
-    ASSERT_STREQ(          "", t3.key.c_str());
+    auto t3 = Flags::convertStringToFlag("value=temp");
+    ASSERT_STREQ("", t3.key.c_str());
     ASSERT_STREQ("value=temp", t3.value.c_str());
 }
 
@@ -67,38 +67,38 @@ TEST(FlagsTest, At)
 
 TEST(FlagsTest, Parse_Find)
 {
-    std::string args = "value --arg1 --arg2=temp";
+    std::string const args = "value --arg1 --arg2=temp";
     Flags flags;
     flags.parse(args);
 
     ASSERT_EQ(3U, flags.size());
 
-    auto flag1_1 = flags.findWithKey("value");
-    ASSERT_FALSE(flags.existsWithKey("value"));
+    auto flag1_1 = flags.findByKey("value");
+    ASSERT_FALSE(flags.existsByKey("value"));
     ASSERT_STREQ("", flag1_1.key.c_str());
     ASSERT_STREQ("", flag1_1.value.c_str());
 
-    auto flag1_2 = flags.findWithValue("value");
-    ASSERT_TRUE(flags.existsWithValue("value"));
-    ASSERT_STREQ(     "", flag1_2.key.c_str());
+    auto flag1_2 = flags.findByValue("value");
+    ASSERT_TRUE(flags.existsByValue("value"));
+    ASSERT_STREQ("", flag1_2.key.c_str());
     ASSERT_STREQ("value", flag1_2.value.c_str());
 
     auto unnamed = flags.getUnnamedValues();
-    ASSERT_EQ(      1, unnamed.size());
+    ASSERT_EQ(1, unnamed.size());
     ASSERT_EQ("value", unnamed.at(0));
 
-    auto flag2 = flags.findWithKey("arg1");
-    ASSERT_TRUE(flags.existsWithKey("arg1"));
+    auto flag2 = flags.findByKey("arg1");
+    ASSERT_TRUE(flags.existsByKey("arg1"));
     ASSERT_STREQ("arg1", flag2.key.c_str());
-    ASSERT_STREQ(    "", flag2.value.c_str());
+    ASSERT_STREQ("", flag2.value.c_str());
 
-    auto flag3 = flags.findWithKey("arg2");
-    ASSERT_TRUE(flags.existsWithKey("arg2"));
+    auto flag3 = flags.findByKey("arg2");
+    ASSERT_TRUE(flags.existsByKey("arg2"));
     ASSERT_STREQ("arg2", flag3.key.c_str());
     ASSERT_STREQ("temp", flag3.value.c_str());
 
-    auto flag4 = flags.findWithValue("temp");
-    ASSERT_TRUE(flags.existsWithValue("temp"));
+    auto flag4 = flags.findByValue("temp");
+    ASSERT_TRUE(flags.existsByValue("temp"));
     ASSERT_STREQ("arg2", flag4.key.c_str());
     ASSERT_STREQ("temp", flag4.value.c_str());
 }
@@ -125,23 +125,23 @@ TEST(FlagsTest, Remove)
 
 TEST(FlagsTest, Argv)
 {
-    std::string args = "value --arg1 --arg2=arg1";
+    std::string const args = "value --arg1 --arg2=arg1";
     Flags flags;
     flags.parse(args);
 
     auto argv_obj = flags.getArgv();
     ASSERT_EQ(3, argv_obj.argc());
-    ASSERT_STREQ(      "value", *(argv_obj.argv() + 0));
-    ASSERT_STREQ(     "--arg1", *(argv_obj.argv() + 1));
+    ASSERT_STREQ("value", *(argv_obj.argv() + 0));
+    ASSERT_STREQ("--arg1", *(argv_obj.argv() + 1));
     ASSERT_STREQ("--arg2=arg1", *(argv_obj.argv() + 2));
 
     Flags flags2(argv_obj.argc(), argv_obj.argv());
     ASSERT_EQ(3U, flags.size());
-    ASSERT_STREQ(     "", flags2.at(0).key.c_str());
+    ASSERT_STREQ("", flags2.at(0).key.c_str());
     ASSERT_STREQ("value", flags2.at(0).value.c_str());
-    ASSERT_STREQ( "arg1", flags2.at(1).key.c_str());
-    ASSERT_STREQ(     "", flags2.at(1).value.c_str());
-    ASSERT_STREQ( "arg2", flags2.at(2).key.c_str());
-    ASSERT_STREQ( "arg1", flags2.at(2).value.c_str());
+    ASSERT_STREQ("arg1", flags2.at(1).key.c_str());
+    ASSERT_STREQ("", flags2.at(1).value.c_str());
+    ASSERT_STREQ("arg2", flags2.at(2).key.c_str());
+    ASSERT_STREQ("arg1", flags2.at(2).value.c_str());
 }
 

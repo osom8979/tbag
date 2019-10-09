@@ -25,35 +25,35 @@ Environments::Environments()
 
 Environments::Environments(char ** envs)
 {
-    if (parse(envs) == false) {
+    if (!parse(envs)) {
         throw std::bad_alloc();
     }
 }
 
 Environments::Environments(char ** envs, std::string const & delimiter)
 {
-    if (parse(envs, delimiter) == false) {
+    if (!parse(envs, delimiter)) {
         throw std::bad_alloc();
     }
 }
 
 Environments::Environments(std::string const & envs)
 {
-    if (parse(envs) == false) {
+    if (!parse(envs)) {
         throw std::bad_alloc();
     }
 }
 
 Environments::Environments(std::string const & envs, std::string const & delimiter)
 {
-    if (parse(envs, delimiter) == false) {
+    if (!parse(envs, delimiter)) {
         throw std::bad_alloc();
     }
 }
 
 Environments::Environments(std::vector<std::string> const & envs, std::string const & delimiter)
 {
-    if (parse(envs, delimiter) == false) {
+    if (!parse(envs, delimiter)) {
         throw std::bad_alloc();
     }
 }
@@ -117,7 +117,7 @@ Environments & Environments::operator =(Flags && flags) TBAG_NOEXCEPT
 
 std::vector<std::string> Environments::keys() const
 {
-    return _flags.getNamedKeys();
+    return _flags.keys();
 }
 
 bool Environments::get(std::string const & key, std::string & val) const
