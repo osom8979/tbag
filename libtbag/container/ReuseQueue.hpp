@@ -34,144 +34,6 @@ namespace container {
  *
  * @author zer0
  * @date   2016-08-03
- */
-template <typename ValueType>
-class ReuseQueue
-{
-public:
-    using Value = ValueType;
-    using Queue = std::deque<Value>;
-
-private:
-    Queue _active;
-    Queue _ready;
-
-public:
-    ReuseQueue() : _active(), _ready()
-    {
-        // EMPTY.
-    }
-
-    ReuseQueue(ReuseQueue const & obj) : ReuseQueue()
-    {
-        (*this) = obj;
-    }
-
-    ReuseQueue(ReuseQueue && obj) : ReuseQueue()
-    {
-        (*this) = std::move(obj);
-    }
-
-    ~ReuseQueue()
-    {
-        // EMPTY.
-    }
-
-public:
-    ReuseQueue & operator =(ReuseQueue const & obj)
-    {
-        if (this != &obj) {
-            _active = obj._active;
-            _ready = obj._ready;
-        }
-        return *this;
-    }
-
-    ReuseQueue & operator =(ReuseQueue && obj)
-    {
-        if (this != &obj) {
-            swap(obj);
-        }
-        return *this;
-    }
-
-public:
-    void swap(ReuseQueue & obj)
-    {
-        _active.swap(obj._active);
-        _ready.swap(obj._ready);
-    }
-
-    friend void swap(ReuseQueue & lh, ReuseQueue & rh)
-    {
-        lh.swap(rh);
-    }
-
-public:
-    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_active.empty())
-    { return _active.size(); }
-    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_active.empty())
-    { return _active.empty(); }
-
-public:
-    inline std::size_t sizeOfReadyQueue() const TBAG_NOEXCEPT_SP_OP(_ready.size())
-    { return _ready.size(); }
-    inline bool emptyOfReadyQueue() const TBAG_NOEXCEPT_SP_OP(_ready.empty())
-    { return _ready.empty(); }
-
-public:
-    void clear()
-    {
-        _active.clear();
-        _ready.clear();
-    }
-
-public:
-    inline Value       & frontRef()       TBAG_NOEXCEPT_SP_OP(_active.front()) { return _active.front(); }
-    inline Value const & frontRef() const TBAG_NOEXCEPT_SP_OP(_active.front()) { return _active.front(); }
-
-    Err front(Value & result)
-    {
-        if (_active.empty()) {
-            return E_QUEUE;
-        }
-        result = _active.front();
-        return E_SUCCESS;
-    }
-
-public:
-    template <typename ... Args>
-    Value & push(Args && ... args)
-    {
-        if (_ready.empty()) {
-            _active.emplace_back(std::forward<Args>(args) ...);
-        } else {
-            _active.push_back(_ready.front());
-            _ready.pop_front();
-        }
-        return _active.back();
-    }
-
-    Err pop()
-    {
-        if (_active.empty()) {
-            return E_QUEUE;
-        }
-        _ready.push_back(_active.front());
-        _active.pop_front();
-        return E_SUCCESS;
-    }
-
-public:
-    Err frontAndPop(Value & result)
-    {
-        if (_active.empty()) {
-            return E_QUEUE;
-        }
-        result = _active.front();
-        _ready.push_back(_active.front());
-        _active.pop_front();
-        return E_SUCCESS;
-    }
-};
-
-namespace tr {
-
-/**
- * ReuseQueue class prototype.
- *
- * @author zer0
- * @date   2016-08-03
  * @date   2017-11-14 (Use the std::shared_ptr)
  */
 template <typename ValueType>
@@ -245,21 +107,21 @@ public:
     }
 
 public:
-    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_active.size())
+    inline size_type size() const TBAG_NOEXCEPT_SP_OP(_active.size())
     { return _active.size(); }
 
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(_active.empty())
     { return _active.empty(); }
 
 public:
-    inline std::size_t sizeOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.size())
+    inline size_type sizeOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.size())
     { return _ready.size(); }
 
     inline bool emptyOfReady() const TBAG_NOEXCEPT_SP_OP(_ready.empty())
     { return _ready.empty(); }
 
 public:
-    inline std::size_t sizeOfTotal() const
+    inline size_type sizeOfTotal() const
     TBAG_NOEXCEPT_SPECIFIER(TBAG_NOEXCEPT_OPERATOR(_active.size()) &&
                             TBAG_NOEXCEPT_OPERATOR(_ready.size()))
     { return _active.size() + _ready.size(); }
@@ -270,11 +132,11 @@ public:
     { return _active.empty() && _ready.empty(); }
 
 public:
-    inline Value       & front()       { return _active.front(); }
-    inline Value const & front() const { return _active.front(); }
+    inline       reference front()       { return _active.front(); }
+    inline const_reference front() const { return _active.front(); }
 
-    inline Value       & back()       { return _active.back(); }
-    inline Value const & back() const { return _active.back(); }
+    inline       reference back()       { return _active.back(); }
+    inline const_reference back() const { return _active.back(); }
 
 public:
     // clang-format off
@@ -298,13 +160,29 @@ public:
     template <typename Predicated>
     void push(Predicated predicated)
     {
-        Value temp;
-        if (!_ready.empty()) {
-            temp = _ready.front();
+        static_assert(!std::is_same<typename remove_cr<Predicated>::type, value_type>::value,
+                      "Predicated type must be the same type as value_type");
+
+        if (_ready.empty()) {
+            value_type temp;
+            predicated(temp);
+            push(std::move(temp));
+        } else {
+            reference temp = _ready.front();
+            predicated(temp);
+            push(temp);
             _ready.pop_front();
         }
-        predicated(temp);
-        _active.push_back(temp);
+    }
+
+    void push(value_type && val)
+    {
+        _active.emplace_back(std::move(val));
+    }
+
+    void push(const_reference val)
+    {
+        _active.emplace_back(val);
     }
 
     bool pop()
@@ -334,7 +212,7 @@ public:
     // Extension methods.
     // ------------------
 
-    bool frontAndPop(Value * result = nullptr)
+    bool frontAndPop(pointer result = nullptr)
     {
         if (_active.empty()) {
             return false;
@@ -346,14 +224,7 @@ public:
         _active.pop_front();
         return true;
     }
-
-    bool frontAndPop(Value & result)
-    {
-        return frontAndPop(&result);
-    }
 };
-
-} // namespace tr
 
 } // namespace container
 
