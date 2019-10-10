@@ -30,11 +30,6 @@ NAMESPACE_LIBTBAG_OPEN
 namespace dom {
 namespace xml {
 
-TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
-{
-    return false;
-}
-
 /**
  * Resource class prototype.
  *
@@ -44,35 +39,31 @@ TBAG_CONSTEXPR bool isCompactXmlFile() TBAG_NOEXCEPT
 class TBAG_API Resource
 {
 public:
-    TBAG_CONSTEXPR static char const * const ROOT_TAG_NAME      = "resource";
-    TBAG_CONSTEXPR static char const * const PROPERTY_TAG_NAME  = "property";
-    TBAG_CONSTEXPR static char const * const ATTRIBUTE_NAME     = "name";
-
-public:
-    TBAG_CONSTEXPR static char const * const getRootTagName    () TBAG_NOEXCEPT { return ROOT_TAG_NAME;     }
-    TBAG_CONSTEXPR static char const * const getPropertyTagName() TBAG_NOEXCEPT { return PROPERTY_TAG_NAME; }
-    TBAG_CONSTEXPR static char const * const getAttributeName  () TBAG_NOEXCEPT { return ATTRIBUTE_NAME;    }
+    TBAG_CONSTEXPR static char const * const ROOT_TAG_NAME = "resource";
+    TBAG_CONSTEXPR static char const * const PROPERTY_TAG_NAME = "property";
+    TBAG_CONSTEXPR static char const * const ATTRIBUTE_NAME = "name";
 
 public:
     using Document = tinyxml2::XMLDocument;
-    using Printer  = tinyxml2::XMLPrinter;
-    using Element  = tinyxml2::XMLElement;
-    using Node     = tinyxml2::XMLNode;
+    using Printer = tinyxml2::XMLPrinter;
+    using Element = tinyxml2::XMLElement;
+    using Node = tinyxml2::XMLNode;
 
 public:
     using Map = std::unordered_map<std::string, std::string>;
 
-private:
-    std::string _root;
-    std::string _tag;
-    std::string _attr;
-    Map         _map;
+public:
+    std::string root;
+    std::string tag;
+    std::string attr;
 
 public:
-    Resource();
-    Resource(std::string const & root);
-    Resource(std::string const & root, std::string const & tag);
-    Resource(std::string const & root, std::string const & tag, std::string const & attr);
+    Map map;
+
+public:
+    Resource(std::string const & r = ROOT_TAG_NAME,
+             std::string const & t = PROPERTY_TAG_NAME,
+             std::string const & a = ATTRIBUTE_NAME);
     Resource(Resource const & obj);
     Resource(Resource && obj) TBAG_NOEXCEPT;
     virtual ~Resource();
@@ -82,59 +73,65 @@ public:
     Resource & operator =(Resource && obj) TBAG_NOEXCEPT;
 
 public:
-    Resource & copy(Resource const & obj);
+    void copyFrom(Resource const & obj);
+    void copyTo(Resource & obj) const;
+
+public:
     void swap(Resource & obj) TBAG_NOEXCEPT;
+    inline friend void swap(Resource & lh, Resource & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
-    void clear();
-    std::size_t size() const;
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(map.empty())
+    { return map.empty(); }
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(map.size())
+    { return map.size(); }
 
 public:
-    TBAG_ATTRIBUTE_DEPRECATED inline std::string get_tag() const { return _tag; }
-    TBAG_ATTRIBUTE_DEPRECATED inline void set_tag(std::string const & tag) { _tag = tag; }
+    void clear()
+    { map.clear(); }
 
 public:
-    inline std::string getTag() const { return _tag; }
-    inline void setTag(std::string const & tag) { _tag = tag; }
-
-    inline std::string getRoot() const { return _root; }
-    inline void setRoot(std::string const & root) { _root = root; }
+    bool exists(std::string const & key) const
+    { return map.find(key) != map.end(); }
 
 public:
-    inline Map       & map()       TBAG_NOEXCEPT { return _map; }
-    inline Map const & map() const TBAG_NOEXCEPT { return _map; }
+    std::string & at(std::string const & key)
+    { return map.at(key); }
+    std::string const & at(std::string const & key) const
+    { return map.at(key); }
 
 public:
     std::vector<std::string> keys() const;
-
-// XML.
-public:
-    bool readFile(std::string const & path);
-    bool readString(std::string const & xml);
-    bool readDocument(Document const & document);
-    bool readElement(Element const & element);
+    std::vector<std::string> values() const;
 
 public:
-    bool saveFile(std::string const & path) const;
+    bool readFromXmlString(std::string const & xml);
+    bool readFromXmlFile(std::string const & path);
+    bool readFromXmlDocument(Document const & document);
+    bool readFromXmlElement(Element const & element);
 
 public:
-    std::string getXmlString() const;
+    bool saveToXmlString(std::string & xml) const;
+    bool saveToXmlFile(std::string const & path, bool compact = false) const;
 
-// Accessor.
+public:
+    bool get(std::string const & key, std::string & result) const;
+    std::string opt(std::string const & key, std::string const & default_value) const;
+
 public:
     template <typename Type, typename Converter>
     bool getValue(std::string const & key, Type * result, Converter func) const
     {
-        auto find_value = this->_map.find(key);
-        if (find_value == this->_map.end()) {
+        auto itr = map.find(key);
+        if (itr == map.end()) {
             return false;
         }
 
         Type convert = 0;
         try {
-            convert = func(find_value->second);
+            convert = func(itr->second);
         } catch (...) {
-            // (std::invalid_argument & e) { e.what(); }
             return false;
         }
 
@@ -144,100 +141,66 @@ public:
         return true;
     }
 
-public:
-    bool getString(std::string const & key, std::string * result) const;
-    std::string getString(std::string const & key, std::string default_value) const;
-    std::string getString(std::string const & key) const;
-
-public:
-    std::string get(std::string const & key, std::string const & default_value) const;
-
-#ifndef __RESOURCE_ACCESSOR_IMPLEMENT
-#define __RESOURCE_ACCESSOR_IMPLEMENT(name, type, func, value)                                      \
-public:                                                                                             \
-    bool get##name(std::string const & key, type * result) const                                    \
-    {                                                                                               \
-        return getValue(key, result, [](std::string const & str) -> type {                          \
-            return func(str);                                                                       \
-        });                                                                                         \
-    }                                                                                               \
-    type get##name(std::string const & key, type default_value = value) const                       \
-    {                                                                                               \
-        type result = 0;                                                                            \
-        if (get##name(key, &result)) {                                                              \
-            return result;                                                                          \
-        }                                                                                           \
-        return default_value;                                                                       \
-    }                                                                                               \
-    auto get(std::string const & key, type default_value = value) const -> decltype(default_value)  \
-    {                                                                                               \
-        return this->get##name(key, default_value);                                                 \
+#ifndef __TBAG_RESOURCE_ACCESSOR_IMPLEMENT
+#define __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(name, type, func, value)             \
+public:                                                                         \
+    bool get##name(std::string const & key, type * result) const                \
+    {                                                                           \
+        return getValue(key, result, [](std::string const & str) -> type {      \
+            return func(str);                                                   \
+        });                                                                     \
+    }                                                                           \
+    type opt##name(std::string const & key, type default_value = value) const   \
+    {                                                                           \
+        type result = 0;                                                        \
+        if (get##name(key, &result)) {                                          \
+            return result;                                                      \
+        }                                                                       \
+        return default_value;                                                   \
+    }                                                                           \
+    type opt(std::string const & key, type default_value = value) const         \
+    {                                                                           \
+        return this->opt##name(key, default_value);                             \
     }
 #endif
+    __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(Integer,    int,                std::stoi,   0);
+    __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(UnInteger,  unsigned int,       std::stoul,  0);
+    __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(LongLong,   long long,          std::stoll,  0);
+    __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(UnLongLong, unsigned long long, std::stoull, 0);
+    __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(Float,      float,       std::stof,  0.0);
+    __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(Double,     double,      std::stod,  0.0);
+    __TBAG_RESOURCE_ACCESSOR_IMPLEMENT(LongDouble, long double, std::stold, 0.0);
+#undef __TBAG_RESOURCE_ACCESSOR_IMPLEMENT
 
-public:
-    __RESOURCE_ACCESSOR_IMPLEMENT(Integer,    int,                std::stoi,   0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(UnInteger,  unsigned int,       std::stoul,  0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(LongLong,   long long,          std::stoll,  0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(UnLongLong, unsigned long long, std::stoull, 0);
-
-    __RESOURCE_ACCESSOR_IMPLEMENT(Float,      float,       std::stof,  0.0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(Double,     double,      std::stod,  0.0);
-    __RESOURCE_ACCESSOR_IMPLEMENT(LongDouble, long double, std::stold, 0.0);
-
-// Mutator.
 public:
     void set(std::string const & key, std::string const & value);
 
-#ifndef __RESOURCE_MUTATOR_IMPLEMENT
-#define __RESOURCE_MUTATOR_IMPLEMENT(type)                  \
+#ifndef __TBAG_RESOURCE_MUTATOR_IMPLEMENT
+#define __TBAG_RESOURCE_MUTATOR_IMPLEMENT(type)             \
 public:                                                     \
     void set(std::string const & key, type const & value)   \
     {                                                       \
         this->set(key, std::to_string(value));              \
     }
 #endif
-
-public:
-    __RESOURCE_MUTATOR_IMPLEMENT(int);
-    __RESOURCE_MUTATOR_IMPLEMENT(unsigned int);
-    __RESOURCE_MUTATOR_IMPLEMENT(long long);
-    __RESOURCE_MUTATOR_IMPLEMENT(unsigned long long);
-
-    __RESOURCE_MUTATOR_IMPLEMENT(float);
-    __RESOURCE_MUTATOR_IMPLEMENT(double);
-    __RESOURCE_MUTATOR_IMPLEMENT(long double);
-
-public:
-    bool exists(std::string const & key) const;
-
-public:
-    std::string       & at(std::string const & key);
-    std::string const & at(std::string const & key) const;
-
-public:
-    static Map readMapFromXmlString(std::string const & xml, std::string const & root,
-                                    std::string const & tag, std::string const & attr);
-    static Map readMapFromXmlFile(std::string const & path, std::string const & root,
-                                  std::string const & tag, std::string const & attr);
-    static Map readFromXmlDocument(Document const & doc, std::string const & root,
-                                   std::string const & tag, std::string const & attr);
-    static Map readFromXmlElement(Element const & elem, std::string const & tag,
-                                  std::string const & attr);
-    static bool saveToXmlFile(std::string const & path, std::string const & root,
-                              std::string const & tag, std::string const & attr, Map const & map);
-    static std::string getXmlString(std::string const & root, std::string const & tag,
-                                    std::string const & attr, Map const & map);
+    __TBAG_RESOURCE_MUTATOR_IMPLEMENT(int);
+    __TBAG_RESOURCE_MUTATOR_IMPLEMENT(unsigned int);
+    __TBAG_RESOURCE_MUTATOR_IMPLEMENT(long long);
+    __TBAG_RESOURCE_MUTATOR_IMPLEMENT(unsigned long long);
+    __TBAG_RESOURCE_MUTATOR_IMPLEMENT(float);
+    __TBAG_RESOURCE_MUTATOR_IMPLEMENT(double);
+    __TBAG_RESOURCE_MUTATOR_IMPLEMENT(long double);
+#undef __TBAG_RESOURCE_MUTATOR_IMPLEMENT
 
 public:
     static Resource createFromXmlString(std::string const & xml,
-                                        std::string const & root = getRootTagName(),
-                                        std::string const & tag = getPropertyTagName(),
-                                        std::string const & attr = getAttributeName());
+                                        std::string const & root = ROOT_TAG_NAME,
+                                        std::string const & tag = PROPERTY_TAG_NAME,
+                                        std::string const & attr = ATTRIBUTE_NAME);
     static Resource createFromXmlFile(std::string const & path,
-                                      std::string const & root = getRootTagName(),
-                                      std::string const & tag = getPropertyTagName(),
-                                      std::string const & attr = getAttributeName());
+                                      std::string const & root = ROOT_TAG_NAME,
+                                      std::string const & tag = PROPERTY_TAG_NAME,
+                                      std::string const & attr = ATTRIBUTE_NAME);
 };
 
 } // namespace xml

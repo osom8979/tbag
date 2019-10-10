@@ -146,7 +146,7 @@ bool GetText::save(std::string const & dir) const
         return false;
     }
     for (auto & cursor : _impl->map) {
-        if (!cursor.second.saveFile(ROOT_DIR / cursor.first)) {
+        if (!cursor.second.saveToXmlFile(ROOT_DIR / cursor.first)) {
             return false;
         }
     }
@@ -201,7 +201,7 @@ std::string GetText::get(std::string const & language, std::string const & name)
     }
     auto itr = _impl->map.find(language);
     if (itr != _impl->map.end()) {
-        return itr->second.getString(name);
+        return itr->second.opt(name, std::string());
     }
     return std::string();
 }
@@ -215,7 +215,7 @@ std::string GetText::get(std::string const & name) const
     if (_current == nullptr) {
         return get(_impl->language, name);
     }
-    return _current->getString(name);
+    return _current->opt(name, std::string());
 }
 
 std::string const & GetText::at(std::string const & language, std::string const & name) const

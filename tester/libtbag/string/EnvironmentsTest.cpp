@@ -13,10 +13,7 @@ using namespace libtbag::string;
 
 TEST(EnvironmentsTest, Default)
 {
-    Flags flags("value --arg1 --arg2=conv");
-    Environments envs;
-
-    envs.assign(flags);
+    Environments envs(Flags("value --arg1 --arg2=conv"));
     ASSERT_STREQ("conv,,conv", envs.convert("${arg2},${arg1},${arg2}").c_str());
 }
 

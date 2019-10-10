@@ -34,10 +34,9 @@ namespace xml {
 class TBAG_API Property : private Noncopyable
 {
 public:
-    static TBAG_CONSTEXPR char const * const getDefaultRootName() TBAG_NOEXCEPT
+    static TBAG_CONSTEXPR char const * default_root_name() TBAG_NOEXCEPT
     { return "resource"; }
-
-    static TBAG_CONSTEXPR char const * const getDefaultTagName() TBAG_NOEXCEPT
+    static TBAG_CONSTEXPR char const * default_tag_name() TBAG_NOEXCEPT
     { return "property"; }
 
 private:
@@ -48,9 +47,9 @@ public:
     virtual ~Property();
 
 protected:
-    inline Resource & getResource()
+    inline Resource & res() TBAG_NOEXCEPT
     { return _res; }
-    inline Resource const & getResource() const
+    inline Resource const & res() const TBAG_NOEXCEPT
     { return _res; }
 
 public:
@@ -69,15 +68,19 @@ public:
 } // namespace xml
 } // namespace dom
 
+/**
+ * @def CREATE_PROPERTY
+ *
+ * Create a property accessor & mutator macro.
+ */
 #ifndef CREATE_PROPERTY
-/** Create a property accessor & mutator macro. */
-#define CREATE_PROPERTY(type, name, default_value)                                          \
-    public:                                                                                 \
-        type get_##name() const {                                                           \
-            return getResource().get(std::string(#name), static_cast<type>(default_value)); \
-        }                                                                                   \
-        void set_##name(type const & value = default_value) {                               \
-            getResource().set(std::string(#name), static_cast<type>(value));                \
+#define CREATE_PROPERTY(type, name, default_value)                                  \
+    public:                                                                         \
+        type get_##name() const {                                                   \
+            return res().opt(std::string(#name), static_cast<type>(default_value)); \
+        }                                                                           \
+        void set_##name(type const & value = default_value) {                       \
+            res().set(std::string(#name), static_cast<type>(value));                \
         }
 #endif
 

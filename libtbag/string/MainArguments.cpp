@@ -7,14 +7,6 @@
 
 #include <libtbag/string/MainArguments.hpp>
 #include <cassert>
-#include <cassert>
-#include <cassert>
-#include <cassert>
-#include <cassert>
-#include <cassert>
-#include <cassert>
-#include <cassert>
-#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

@@ -89,7 +89,7 @@ public:
             if (impl->isEnableVerbose()) {
                 std::cout << "Load <values> XML" << std::endl;
             }
-            resource.readElement(element);
+            resource.readFromXmlElement(element);
         }
     };
 
@@ -313,9 +313,9 @@ public:
     {
         assert(static_cast<bool>(_values));
         RunnerParams params;
-        params.envs    = envs();
-        params.args    = args;
-        params.values  = _values->resource.map();
+        params.envs = envs();
+        params.args = args;
+        params.values = _values->resource.map;
         params.storage = _storages->storage();
         params.verbose = isEnableVerbose();
         if (_runner) {

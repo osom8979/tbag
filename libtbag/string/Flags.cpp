@@ -113,6 +113,22 @@ Flags::Flag Flags::findByValue(std::string const & value) const
     return *itr;
 }
 
+bool Flags::existsByKey(std::string const & key) const
+{
+    auto const itr = std::find_if(_flags.cbegin(), _flags.cend(), [&](Flag const & f) -> bool {
+        return f.key == key;
+    });
+    return itr != _flags.cend();
+}
+
+bool Flags::existsByValue(std::string const & value) const
+{
+    auto const itr = std::find_if(_flags.cbegin(), _flags.cend(), [&](Flag const & f) -> bool {
+        return f.value == value;
+    });
+    return itr != _flags.cend();
+}
+
 bool Flags::get(std::string const & key, std::string & val) const
 {
     auto const itr = std::find_if(_flags.cbegin(), _flags.cend(), [&key](Flag const & flag) -> bool {
@@ -137,6 +153,20 @@ void Flags::set(std::string const & key, std::string const & val)
     }
 }
 
+std::string Flags::opt(std::string const & key, std::string const & default_val) const
+{
+    std::string value;
+    if (get(key, value)) {
+        return value;
+    }
+    return default_val;
+}
+
+std::string Flags::opt(std::string const & key) const
+{
+    return opt(key, {});
+}
+
 bool Flags::remove(std::size_t index)
 {
     if (index < _flags.size()) {
@@ -158,28 +188,23 @@ bool Flags::remove(std::string const & key)
     return false;
 }
 
-bool Flags::existsByKey(std::string const & key) const
-{
-    auto const itr = std::find_if(_flags.cbegin(), _flags.cend(), [&](Flag const & f) -> bool {
-        return f.key == key;
-    });
-    return itr != _flags.cend();
-}
-
-bool Flags::existsByValue(std::string const & value) const
-{
-    auto const itr = std::find_if(_flags.cbegin(), _flags.cend(), [&](Flag const & f) -> bool {
-        return f.value == value;
-    });
-    return itr != _flags.cend();
-}
-
 std::vector<std::string> Flags::keys() const
 {
     std::vector<std::string> result;
     for (auto const & flag : _flags) {
         if (!flag.key.empty()) {
             result.emplace_back(flag.key);
+        }
+    }
+    return result;
+}
+
+std::vector<std::string> Flags::values() const
+{
+    std::vector<std::string> result;
+    for (auto const & flag : _flags) {
+        if (!flag.key.empty()) {
+            result.emplace_back(flag.value);
         }
     }
     return result;
@@ -232,29 +257,29 @@ bool Flags::parse(std::vector<std::string> const & args, std::string const & pre
     return true;
 }
 
-Flags::Argv Flags::getArgv(std::string const & prefix, std::string const & delimiter, bool last_null) const
+Flags::Argv Flags::argv(std::string const & prefix, std::string const & delimiter, bool last_null) const
 {
     auto const size = _flags.size() + (last_null?1:0);
 
-    Argv argv;
-    argv.strings.resize(size);
-    argv.arguments.resize(size);
+    Argv result;
+    result.strings.resize(size);
+    result.arguments.resize(size);
 
     for (std::size_t i = 0u; i < size; ++i) {
-        argv.strings[i] = convertFlagToString(_flags[i], prefix, delimiter);
-        argv.arguments[i] = &(argv.strings[i][0]);
+        result.strings[i] = convertFlagToString(_flags[i], prefix, delimiter);
+        result.arguments[i] = &(result.strings[i][0]);
     }
 
     if (last_null) {
         assert(size >= 1);
-        argv.arguments[size-1] = nullptr;
+        result.arguments[size-1] = nullptr;
     }
-    return argv;
+    return result;
 }
 
-Flags::Argv Flags::getArgv(bool last_null) const
+Flags::Argv Flags::argv(bool last_null) const
 {
-    return getArgv(DEFAULT_PREFIX, DEFAULT_DELIMITER, last_null);
+    return argv(DEFAULT_PREFIX, DEFAULT_DELIMITER, last_null);
 }
 
 Flags::Flag Flags::convertStringToFlag(std::string const & str, std::string const & prefix, std::string const & delimiter)

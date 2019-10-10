@@ -17,7 +17,7 @@ namespace xml {
 
 Property::Property()
 {
-    _res.setTag(getDefaultTagName());
+    _res.tag = default_tag_name();
 }
 
 Property::~Property()
@@ -28,19 +28,19 @@ Property::~Property()
 void Property::setDefault()
 {
     _res.clear();
-    _res.setRoot(getDefaultRootName());
-    _res.setTag(getDefaultTagName());
+    _res.root = default_root_name();
+    _res.tag = default_tag_name();
     updateDefault();
 }
 
 bool Property::load(std::string const & path)
 {
-    return _res.readFile(path);
+    return _res.readFromXmlFile(path);
 }
 
 bool Property::save(std::string const & path)
 {
-    return _res.saveFile(path);
+    return _res.saveToXmlFile(path);
 }
 
 bool Property::loadOrCreate(std::string const & path)
@@ -48,7 +48,6 @@ bool Property::loadOrCreate(std::string const & path)
     if (filesystem::Path(path).exists()) {
         return load(path);
     }
-
     setDefault();
     return save(path);
 }

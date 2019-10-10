@@ -129,14 +129,14 @@ TEST(FlagsTest, Argv)
     Flags flags;
     flags.parse(args);
 
-    auto argv_obj = flags.getArgv();
+    auto argv_obj = flags.argv();
     ASSERT_EQ(3, argv_obj.argc());
     ASSERT_STREQ("value", *(argv_obj.argv() + 0));
     ASSERT_STREQ("--arg1", *(argv_obj.argv() + 1));
     ASSERT_STREQ("--arg2=arg1", *(argv_obj.argv() + 2));
 
     Flags flags2(argv_obj.argc(), argv_obj.argv());
-    ASSERT_EQ(3U, flags.size());
+    ASSERT_EQ(3u, flags2.size());
     ASSERT_STREQ("", flags2.at(0).key.c_str());
     ASSERT_STREQ("value", flags2.at(0).value.c_str());
     ASSERT_STREQ("arg1", flags2.at(1).key.c_str());

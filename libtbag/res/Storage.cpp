@@ -153,7 +153,7 @@ bool Storage::readEnv()
     if (!asset().exists(LAYOUT_ENV)) {
         return false;
     }
-    _impl->envs.readResourceXmlFile(asset().get(LAYOUT_ENV) / _impl->envs_filename);
+    _impl->envs.readFromResourceXmlFile(asset().get(LAYOUT_ENV) / _impl->envs_filename);
     return true;
 }
 
@@ -165,7 +165,7 @@ void Storage::readEnvDefault()
 void Storage::readEnvParams(char ** envs)
 {
     if (envs != nullptr) {
-        _impl->envs.parse(envs);
+        _impl->envs.pushEnvs(envs);
     }
 }
 
@@ -184,7 +184,7 @@ bool Storage::saveEnv()
     if (!ENV_DIR.isDirectory() || !ENV_DIR.isWritable()) {
         return false;
     }
-    return _impl->envs.saveResourceXmlFile(ENV_DIR / _impl->envs_filename);
+    return _impl->envs.saveToResourceXmlFile(ENV_DIR / _impl->envs_filename);
 }
 
 void Storage::addAssetsToEnv(std::string const & key_prefix, bool make_upper_key)
@@ -235,10 +235,10 @@ bool Storage::readConfig(std::string const & filename, std::string const & key, 
         return false;
     }
     Resource res;
-    if (!res.readFile(asset().get(LAYOUT_CONFIG) / filename)) {
+    if (!res.readFromXmlFile(asset().get(LAYOUT_CONFIG) / filename)) {
         return false;
     }
-    return res.getString(key, &value);
+    return res.get(key, value);
 }
 
 bool Storage::saveConfig(std::string const & filename, std::string const & key, std::string const & value)
@@ -255,9 +255,9 @@ bool Storage::saveConfig(std::string const & filename, std::string const & key, 
     }
     auto const PATH = CONFIG_DIR / filename;
     Resource res;
-    res.readFile(PATH);
+    res.readFromXmlFile(PATH);
     res.set(key, value);
-    return res.saveFile(PATH);
+    return res.saveToXmlFile(PATH);
 }
 
 std::vector<std::string> Storage::getConfigFilenames() const
@@ -270,7 +270,7 @@ std::vector<std::string> Storage::getConfigKeys(std::string const & filename) co
     std::vector<std::string> result;
     if (asset().exists(LAYOUT_CONFIG)) {
         Resource res;
-        if (res.readFile(asset().get(LAYOUT_CONFIG) / filename)) {
+        if (res.readFromXmlFile(asset().get(LAYOUT_CONFIG) / filename)) {
             return res.keys();
         }
     }
@@ -282,8 +282,8 @@ Storage::Resource::Map Storage::getConfigMap(std::string const & filename) const
     Resource::Map result;
     if (asset().exists(LAYOUT_CONFIG)) {
         Resource res;
-        if (res.readFile(asset().get(LAYOUT_CONFIG) / filename)) {
-            return res.map();
+        if (res.readFromXmlFile(asset().get(LAYOUT_CONFIG) / filename)) {
+            return res.map;
         }
     }
     return result;

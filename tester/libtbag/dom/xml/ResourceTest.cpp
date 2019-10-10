@@ -36,12 +36,12 @@ TEST(ResourceTest, Utf8)
 
     Resource res;
     res.set(TEST_NAME, (char*)hangul);
-    res.setTag(TEST_TAG);
-    ASSERT_TRUE(res.saveFile(PATH.toString()));
+    res.tag = TEST_TAG;
+    ASSERT_TRUE(res.saveToXmlFile(PATH.toString()));
 
     res.clear();
-    ASSERT_TRUE(res.readFile(PATH.toString()));
-    ASSERT_EQ(HANGUL_UTF8, res.getString(TEST_NAME));
+    ASSERT_TRUE(res.readFromXmlFile(PATH.toString()));
+    ASSERT_EQ(HANGUL_UTF8, res.opt(TEST_NAME, ""));
 }
 
 class ResourceFixtureTest : public ::testing::Test
@@ -119,9 +119,9 @@ public:
         tag = "value";
         attr = "name";
 
-        res.setRoot(root);
-        res.setTag(tag);
-        res.readString(xml);
+        res.root = root;
+        res.tag = tag;
+        res.readFromXmlString(xml);
     }
 
     virtual void TearDown() override
@@ -139,90 +139,69 @@ TEST_F(ResourceFixtureTest, Clear)
 
 TEST_F(ResourceFixtureTest, GetTag)
 {
-    ASSERT_EQ(tag, res.getTag());
+    ASSERT_EQ(tag, res.tag);
 }
 
 TEST_F(ResourceFixtureTest, GetRoot)
 {
-    ASSERT_EQ(root, res.getRoot());
-}
-
-TEST_F(ResourceFixtureTest, ReadFromXmlString)
-{
-    Resource::Map map;
-    map = Resource::readMapFromXmlString(xml, root, tag, attr);
-
-    ASSERT_EQ(4U, map.size());
-    ASSERT_EQ(value1_2, map.find(attribute1)->second);
-    ASSERT_EQ(value2_2, map.find(attribute2)->second);
-    ASSERT_EQ(value3  , map.find(attribute3)->second);
-}
-
-TEST_F(ResourceFixtureTest, Save)
-{
-    tttDir(true, true);
-    auto const PATH = tttDir_Get() / "utf8.xml";
-
-    Resource::Map map;
-    map = Resource::readMapFromXmlString(xml, root, tag, attr);
-    ASSERT_TRUE(Resource::saveToXmlFile(PATH.toString(), root, tag, attr, map));
+    ASSERT_EQ(root, res.root);
 }
 
 TEST_F(ResourceFixtureTest, GetValue)
 {
-    ASSERT_EQ(value1_2, res.getString(attribute1));
+    ASSERT_EQ(value1_2, res.opt(attribute1, ""));
 
-    ASSERT_EQ(value3_2, res.getInteger(attribute3));
-    ASSERT_EQ(0, res.getInteger(attribute1));
+    ASSERT_EQ(value3_2, res.optInteger(attribute3));
+    ASSERT_EQ(0, res.optInteger(attribute1));
 
-    ASSERT_EQ(static_cast<unsigned int>(value3_2), res.getUnInteger(attribute3));
-    ASSERT_EQ(0U, res.getUnInteger(attribute1));
+    ASSERT_EQ(static_cast<unsigned int>(value3_2), res.optUnInteger(attribute3));
+    ASSERT_EQ(0U, res.optUnInteger(attribute1));
 
-    ASSERT_EQ(value3_2, res.getLongLong(attribute3));
-    ASSERT_EQ(0, res.getLongLong(attribute1));
+    ASSERT_EQ(value3_2, res.optLongLong(attribute3));
+    ASSERT_EQ(0, res.optLongLong(attribute1));
 
-    ASSERT_EQ(static_cast<unsigned long long>(value3_2), res.getUnLongLong(attribute3));
-    ASSERT_EQ(0U, res.getUnLongLong(attribute1));
+    ASSERT_EQ(static_cast<unsigned long long>(value3_2), res.optUnLongLong(attribute3));
+    ASSERT_EQ(0U, res.optUnLongLong(attribute1));
 
-    ASSERT_FLOAT_EQ(value5_2, res.getFloat(attribute5));
-    ASSERT_FLOAT_EQ(0.0, res.getFloat(attribute1));
+    ASSERT_FLOAT_EQ(value5_2, res.optFloat(attribute5));
+    ASSERT_FLOAT_EQ(0.0, res.optFloat(attribute1));
 
     float abs_error = 0.0001f;
 
-    ASSERT_NEAR(value5_2, res.getFloat(attribute5), abs_error);
-    ASSERT_NEAR(     0.0, res.getFloat(attribute1), abs_error);
+    ASSERT_NEAR(value5_2, res.optFloat(attribute5), abs_error);
+    ASSERT_NEAR(     0.0, res.optFloat(attribute1), abs_error);
 
-    ASSERT_NEAR(value5_2, res.getDouble(attribute5), abs_error);
-    ASSERT_NEAR(     0.0, res.getDouble(attribute1), abs_error);
+    ASSERT_NEAR(value5_2, res.optDouble(attribute5), abs_error);
+    ASSERT_NEAR(     0.0, res.optDouble(attribute1), abs_error);
 
-    ASSERT_NEAR(value5_2, res.getLongDouble(attribute5), abs_error);
-    ASSERT_NEAR(     0.0, res.getLongDouble(attribute1), abs_error);
+    ASSERT_NEAR(value5_2, res.optLongDouble(attribute5), abs_error);
+    ASSERT_NEAR(     0.0, res.optLongDouble(attribute1), abs_error);
 }
 
-TEST_F(ResourceFixtureTest, Get)
+TEST_F(ResourceFixtureTest, Opt)
 {
-    ASSERT_EQ(value1_2, res.get(attribute1, ""));
+    ASSERT_EQ(value1_2, res.opt(attribute1, ""));
 
-    ASSERT_EQ(value3_2, res.get(attribute3, static_cast<      int>(0)));
-    ASSERT_EQ(value3_2, res.get(attribute3, static_cast<long long>(0)));
+    ASSERT_EQ(value3_2, res.opt(attribute3, static_cast<int>(0)));
+    ASSERT_EQ(value3_2, res.opt(attribute3, static_cast<long long>(0)));
 
-    ASSERT_EQ(static_cast<unsigned       int>(value3_2), res.get(attribute3, static_cast<unsigned       int>(0)));
-    ASSERT_EQ(static_cast<unsigned long long>(value3_2), res.get(attribute3, static_cast<unsigned long long>(0)));
+    ASSERT_EQ(static_cast<unsigned int>(value3_2), res.opt(attribute3, static_cast<unsigned int>(0)));
+    ASSERT_EQ(static_cast<unsigned long long>(value3_2), res.opt(attribute3, static_cast<unsigned long long>(0)));
 
     float abs_error = 0.0001f;
-    ASSERT_NEAR(value5_2, res.get(attribute5, static_cast<      float>(0)), abs_error);
-    ASSERT_NEAR(value5_2, res.get(attribute5, static_cast<     double>(0)), abs_error);
-    ASSERT_NEAR(value5_2, res.get(attribute5, static_cast<long double>(0)), abs_error);
+    ASSERT_NEAR(value5_2, res.opt(attribute5, static_cast<float>(0)), abs_error);
+    ASSERT_NEAR(value5_2, res.opt(attribute5, static_cast<double>(0)), abs_error);
+    ASSERT_NEAR(value5_2, res.opt(attribute5, static_cast<long double>(0)), abs_error);
 }
 
 TEST_F(ResourceFixtureTest, Set)
 {
     Resource res;
     res.set(attribute3, value3_2);
-    ASSERT_EQ(value3, res.getString(attribute3));
+    ASSERT_EQ(value3, res.opt(attribute3, ""));
 
     res.set(attribute4, value4_2);
-    ASSERT_EQ(value4, res.getString(attribute4));
+    ASSERT_EQ(value4, res.opt(attribute4, ""));
 }
 
 TEST_F(ResourceFixtureTest, At)
@@ -236,7 +215,8 @@ TEST_F(ResourceFixtureTest, At)
 
 TEST_F(ResourceFixtureTest, ToXmlString)
 {
-    auto const XML_STRING = res.getXmlString();
-    ASSERT_FALSE(XML_STRING.empty());
+    std::string xml;
+    ASSERT_TRUE(res.saveToXmlString(xml));
+    ASSERT_FALSE(xml.empty());
 }
 

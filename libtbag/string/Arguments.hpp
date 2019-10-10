@@ -29,6 +29,12 @@ namespace string {
 
 /**
  * Arguments class prototype.
+ * 
+ * Example:
+ * @code{.cpp}
+ * Arguments args;
+ * args.parse("test,1,2.1,9x10,100.10x200.2x300x400,x");
+ * @endcode
  *
  * @author zer0
  * @date   2016-09-23
