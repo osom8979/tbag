@@ -233,6 +233,8 @@ TBAG_API bool isUtf8Match(std::string const & utf8_source, std::string const & r
  *  Decimal digits are any of: 0 1 2 3 4 5 6 7 8 9
  */
 TBAG_API bool isDigit(std::string const & str);
+TBAG_API bool isVariableName(char c);
+TBAG_API bool isVariableName(std::string const & str);
 
 TBAG_API std::string trimLeft(std::string const & str);
 TBAG_API std::string trimRight(std::string const & str);
