@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Flags.hpp>
@@ -28,15 +29,23 @@ namespace string {
 /**
  * Environments class prototype.
  *
+ * Example:
+ * @code{.cpp}
+ * @endcode
+ *
  * @author zer0
  * @date   2017-04-29
  */
 class TBAG_API Environments
 {
 public:
-    TBAG_CONSTEXPR static char const * const DEFAULT_REGEX_PREFIX = "\\$\\{";
-    TBAG_CONSTEXPR static char const * const DEFAULT_REGEX_SUFFIX = "\\}";
     TBAG_CONSTEXPR static char const * const DEFAULT_DELIMITER = "=";
+    TBAG_CONSTEXPR static std::size_t const MAX_VARIABLE_BUFFER_LENGTH = 256;
+
+public:
+    TBAG_CONSTEXPR static char const DEFAULT_PREFIX0 = '$';
+    TBAG_CONSTEXPR static char const DEFAULT_PREFIX1 = '{';
+    TBAG_CONSTEXPR static char const DEFAULT_SUFFIX = '}';
 
 public:
     using Resource = libtbag::dom::xml::Resource;
@@ -144,8 +153,39 @@ public:
     bool saveToResourceXmlFile(std::string const & path);
 
 public:
+    /**
+     * Applies environment variables to the source.
+     */
     std::string convert(std::string const & source) const;
-    std::string convert(std::string const & source, std::string const & regex_prefix, std::string const & regex_suffix) const;
+
+    /**
+     * Use parameter extensions.
+     *
+     * Supported features:
+     * <dl>
+     *   <dt>
+     *     <code>${parameter:-word}</code>
+     *   </dt>
+     *   <dl>
+     *     If parameter is unset or null, the expansion of word is substituted.
+     *     Otherwise, the value of parameter is substituted.
+     *   </dl>
+     * </dl>
+     *
+     * @param[in] variable
+     *      Parameter variable. Prefix(<code>${</code>) and Suffix(<code>}</code>) should be excluded.
+     * @param[in] flags
+     *      Flags object.
+     * @param[out] result
+     *      Extended converted result.
+     *
+     * @return
+     *  Error code.
+     *
+     * @see <https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html>
+     */
+    static Err parameterExpansion(std::string const & variable, Flags const & flags, std::string & result);
+    std::string parameterExpansion(std::string const & variable) const;
 
 public:
     std::vector<std::string> toStrings(std::string const & delimiter) const;
@@ -157,7 +197,7 @@ public:
 public:
     TBAG_CONSTEXPR static char const * const EXE_PATH = "EXE_PATH";
     TBAG_CONSTEXPR static char const * const EXE_NAME = "EXE_NAME";
-    TBAG_CONSTEXPR static char const * const EXE_DIR  = "EXE_DIR";
+    TBAG_CONSTEXPR static char const * const EXE_DIR = "EXE_DIR";
     TBAG_CONSTEXPR static char const * const WORK_DIR = "WORK_DIR";
     TBAG_CONSTEXPR static char const * const HOME_DIR = "HOME_DIR";
 
