@@ -157,34 +157,6 @@ public:
      * Applies environment variables to the source.
      */
     std::string convert(std::string const & source) const;
-
-    /**
-     * Use parameter extensions.
-     *
-     * Supported features:
-     * <dl>
-     *   <dt>
-     *     <code>${parameter:-word}</code>
-     *   </dt>
-     *   <dl>
-     *     If parameter is unset or null, the expansion of word is substituted.
-     *     Otherwise, the value of parameter is substituted.
-     *   </dl>
-     * </dl>
-     *
-     * @param[in] variable
-     *      Parameter variable. Prefix(<code>${</code>) and Suffix(<code>}</code>) should be excluded.
-     * @param[in] flags
-     *      Flags object.
-     * @param[out] result
-     *      Extended converted result.
-     *
-     * @return
-     *  Error code.
-     *
-     * @see <https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html>
-     */
-    static Err parameterExpansion(std::string const & variable, Flags const & flags, std::string & result);
     std::string parameterExpansion(std::string const & variable) const;
 
 public:

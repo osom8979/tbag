@@ -44,9 +44,8 @@ TEST(ResourceTest, Utf8)
     ASSERT_EQ(HANGUL_UTF8, res.opt(TEST_NAME, ""));
 }
 
-class ResourceFixtureTest : public ::testing::Test
+struct ResourceFixtureTest : public ::testing::Test
 {
-public:
     std::string xml;
     std::string root;
     std::string tag;
@@ -72,11 +71,6 @@ public:
 
     Resource res;
 
-public:
-    ResourceFixtureTest() = default;
-    ~ResourceFixtureTest() = default;
-
-public:
     virtual void SetUp() override
     {
         attribute1 = "title1";
