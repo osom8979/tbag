@@ -13,6 +13,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+std::string ArgumentParser::DefaultFormatter::print()
+{
+    return {};
+}
+
 ArgumentParser::ArgumentParser()
 {
     // EMPTY.
