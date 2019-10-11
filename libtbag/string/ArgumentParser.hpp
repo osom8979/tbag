@@ -40,6 +40,7 @@ class TBAG_API ArgumentParser
 public:
     struct Params;
     struct Arg;
+
     using Args = std::vector<Arg>;
     using ErrFlags = ErrPair<Flags>;
 
