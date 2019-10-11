@@ -15,6 +15,8 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/ErrPair.hpp>
+#include <libtbag/string/Flags.hpp>
 
 #include <vector>
 #include <string>
@@ -36,12 +38,17 @@ namespace string {
 class TBAG_API ArgumentParser
 {
 public:
+    struct Params;
+    struct Arg;
+    using Args = std::vector<Arg>;
+    using ErrFlags = ErrPair<Flags>;
+
     struct Formatter
     {
         Formatter() { /* EMPTY. */ }
         virtual ~Formatter() { /* EMPTY. */ }
 
-        virtual std::string print() = 0;
+        virtual std::string print(Params const & params, Args const & args) = 0;
     };
 
     using SharedFormatter = std::shared_ptr<Formatter>;
@@ -51,7 +58,7 @@ public:
         DefaultFormatter() { /* EMPTY. */ }
         virtual ~DefaultFormatter() { /* EMPTY. */ }
 
-        std::string print() override;
+        std::string print(Params const & params, Args const & args) override;
     };
 
     struct Params
@@ -59,28 +66,31 @@ public:
         /** The name of the program. */
         std::string program_name;
 
-        /** The string describing the program usage (default: generated from arguments added to parser) */
+        /** The string describing the program usage. */
         std::string usage;
 
-        /** Text to display before the argument help (default: none) */
+        /** Text to display before the argument help. */
         std::string description;
 
-        /** Text to display after the argument help (default: none) */
+        /** Text to display after the argument help. */
         std::string epilog;
 
-        /** A class for customizing the help output */
+        /** A class for customizing the help output. */
         SharedFormatter formatter;
 
-        /** The set of characters that prefix optional arguments (default: '--') */
+        /** The set of characters that prefix optional arguments. */
         std::string prefix;
 
-        /** The set of characters that prefix files from which additional arguments should be read (default: None) */
+        /** The set of characters that prefix files from which additional arguments should be read. */
         std::string fromfile_prefix;
 
         /** Add a -h/--help option to the parser (default: True) */
         bool add_help = true;
 
-        /** Allows long options to be abbreviated if the abbreviation is unambiguous. (default: True) */
+        /** Add a <code>--</code> option to the parser (default: True) */
+        bool add_stop_parsing = true;
+
+        /** Allows long options to be abbreviated if the abbreviation is unambiguous. */
         bool allow_abbrev = true;
     };
 
@@ -101,7 +111,6 @@ public:
         /** This counts the number of times a keyword argument occurs. */
         AT_COUNT,
 
-        AT_LAMBDA,
         AT_HELP,
         AT_VERSION,
     };
@@ -140,13 +149,50 @@ public:
 
         /** The name of the attribute to be added. */
         std::string dest;
-
-        std::function<void(void)> callback;
     };
+
+private:
+    Params _params;
+    Args _args;
 
 public:
     ArgumentParser();
+    explicit ArgumentParser(Params const & params);
+    explicit ArgumentParser(Params && params);
+    ArgumentParser(ArgumentParser const & obj);
+    ArgumentParser(ArgumentParser && obj) TBAG_NOEXCEPT;
     virtual ~ArgumentParser();
+
+public:
+    ArgumentParser & operator =(ArgumentParser const & obj);
+    ArgumentParser & operator =(ArgumentParser && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(ArgumentParser & obj) TBAG_NOEXCEPT;
+    inline friend void swap(ArgumentParser & lh, ArgumentParser & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
+
+public:
+    Params const & params() const TBAG_NOEXCEPT
+    { return _params; }
+    Args const & args() const TBAG_NOEXCEPT
+    { return _args; }
+
+public:
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_args.empty())
+    { return _args.empty(); }
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_args.size())
+    { return _args.size(); }
+
+public:
+    void clearArgs();
+    void addArg(Arg const & arg);
+    void addArg(Arg && arg);
+
+public:
+    ErrFlags parse(int argc, char ** argv, bool ignore_first = true);
+    ErrFlags parse(std::string const & argv, bool ignore_first = true);
+    ErrFlags parse(std::vector<std::string> const & argv, bool ignore_first = true);
 };
 
 } // namespace string
