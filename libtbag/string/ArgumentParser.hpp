@@ -16,12 +16,12 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/ErrPair.hpp>
-#include <libtbag/string/Flags.hpp>
 
 #include <vector>
 #include <string>
 #include <functional>
 #include <memory>
+#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -40,9 +40,18 @@ class TBAG_API ArgumentParser
 public:
     struct Params;
     struct Arg;
+    struct Arguments;
 
     using Args = std::vector<Arg>;
-    using ErrFlags = ErrPair<Flags>;
+    using ErrArguments = ErrPair<Arguments>;
+    using ErrString = ErrPair<std::string>;
+
+    struct Arguments
+    {
+        std::map<std::string, std::string> optional;
+        std::map<std::string, std::string> positional;
+        std::vector<std::string> remain;
+    };
 
     struct Formatter
     {
@@ -62,6 +71,12 @@ public:
         std::string print(Params const & params, Args const & args) override;
     };
 
+    TBAG_CONSTEXPR static char const * const ARGUMENT_DELIMITER = " ";
+    TBAG_CONSTEXPR static char const * const KEY_VAL_DELIMITER = "=";
+
+    TBAG_CONSTEXPR static char const DEFAULT_PREFIX = '-';
+    TBAG_CONSTEXPR static char const DEFAULT_FROM_FILE_PREFIX = '@';
+
     struct Params
     {
         /** The name of the program. */
@@ -80,40 +95,23 @@ public:
         SharedFormatter formatter;
 
         /** The set of characters that prefix optional arguments. */
-        std::string prefix;
+        char prefix = DEFAULT_PREFIX;
 
         /** The set of characters that prefix files from which additional arguments should be read. */
-        std::string fromfile_prefix;
+        char from_file_prefix = DEFAULT_FROM_FILE_PREFIX;
 
-        /** Add a -h/--help option to the parser (default: True) */
-        bool add_help = true;
-
-        /** Add a <code>--</code> option to the parser (default: True) */
+        /** Add a <code>--</code> option to the parser. */
         bool add_stop_parsing = true;
 
-        /** Allows long options to be abbreviated if the abbreviation is unambiguous. */
-        bool allow_abbrev = true;
+        /** The first argument is the program name. */
+        bool first_argument_is_program_name = true;
     };
 
     enum class ActionType
     {
         /** This just stores the argument's value. This is the default action. */
         AT_STORE,
-
-        /** This stores the value specified by the const keyword argument. */
-        AT_STORE_CONST,
-        AT_STORE_TRUE,
-        AT_STORE_FALSE,
-
-        /** This stores a list, and appends each argument value to the list. */
-        AT_APPEND,
-        AT_APPEND_CONST,
-
-        /** This counts the number of times a keyword argument occurs. */
-        AT_COUNT,
-
-        AT_HELP,
-        AT_VERSION,
+        AT_STORE_OR_DEFAULT,
     };
 
     struct Arg
@@ -121,35 +119,20 @@ public:
         /** Either a name or a list of option strings, e.g. foo or -f, --foo. */
         std::vector<std::string> names;
 
+        /** The name of the attribute to be added. */
+        std::string key;
+
         /** The basic type of action to be taken when this argument is encountered at the command line. */
         ActionType action = ActionType::AT_STORE;
 
-        /** The number of command-line arguments that should be consumed. */
-        std::string nargs;
-
-        /** A constant value required by some action and nargs selections. */
-        std::string const_value;
-
         /** The value produced if the argument is absent from the command line. */
         std::string default_value;
-
-        /** The type to which the command-line argument should be converted. */
-        std::string type;
-
-        /** A container of the allowable values for the argument. */
-        std::vector<std::string> choices;
-
-        /** Whether or not the command-line option may be omitted (optionals only). */
-        bool required = false;
 
         /** A brief description of what the argument does. */
         std::string help;
 
         /** A name for the argument in usage messages. */
         std::string meta;
-
-        /** The name of the attribute to be added. */
-        std::string dest;
     };
 
 private:
@@ -174,10 +157,12 @@ public:
     { lh.swap(rh); }
 
 public:
-    Params const & params() const TBAG_NOEXCEPT
-    { return _params; }
-    Args const & args() const TBAG_NOEXCEPT
-    { return _args; }
+    inline Params       & params()       TBAG_NOEXCEPT { return _params; }
+    inline Params const & params() const TBAG_NOEXCEPT { return _params; }
+
+public:
+    inline Args       & args()       TBAG_NOEXCEPT { return _args; }
+    inline Args const & args() const TBAG_NOEXCEPT { return _args; }
 
 public:
     inline bool empty() const TBAG_NOEXCEPT_SP_OP(_args.empty())
@@ -186,14 +171,38 @@ public:
     { return _args.size(); }
 
 public:
-    void clearArgs();
-    void addArg(Arg const & arg);
-    void addArg(Arg && arg);
+    void clear();
 
 public:
-    ErrFlags parse(int argc, char ** argv, bool ignore_first = true);
-    ErrFlags parse(std::string const & argv, bool ignore_first = true);
-    ErrFlags parse(std::vector<std::string> const & argv, bool ignore_first = true);
+    void add(Arg const & arg);
+    void add(Arg && arg);
+
+public:
+    ErrArguments parse(int argc, char ** argv) const;
+    ErrArguments parse(std::string const & argv) const;
+    ErrArguments parse(std::vector<std::string> const & argv) const;
+
+public:
+    enum class ParseResultCode
+    {
+        PRC_ERROR,
+        PRC_FROM_FILE_ERROR,
+        PRC_SKIP,
+        PRC_STDIN,
+        PRC_STOP_PARSING,
+        PRC_KEY_VAL,
+        PRC_KEY,
+        PRC_VAL,
+    };
+
+    struct ParseResult
+    {
+        ParseResultCode code;
+        std::string key;
+        std::string value;
+    };
+
+    ParseResult parseSingleArgument(std::string const & arg) const;
 };
 
 } // namespace string

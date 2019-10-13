@@ -7,9 +7,13 @@
 
 #include <libtbag/string/ArgumentParser.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/filesystem/File.hpp>
 
+#include <cassert>
 #include <algorithm>
 #include <utility>
+#include <unordered_map>
+#include <queue>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,7 +30,8 @@ std::string ArgumentParser::DefaultFormatter::print(Params const & params, Args 
 // ArgumentParser
 // --------------
 
-using ErrFlags = ArgumentParser::ErrFlags;
+using ErrArguments = ArgumentParser::ErrArguments;
+using ParseResult = ArgumentParser::ParseResult;
 
 ArgumentParser::ArgumentParser()
 {
@@ -84,22 +89,22 @@ void ArgumentParser::swap(ArgumentParser & obj) TBAG_NOEXCEPT
     _args.swap(obj._args);
 }
 
-void ArgumentParser::clearArgs()
+void ArgumentParser::clear()
 {
     _args.clear();
 }
 
-void ArgumentParser::addArg(Arg const & arg)
+void ArgumentParser::add(Arg const & arg)
 {
     _args.emplace_back(arg);
 }
 
-void ArgumentParser::addArg(Arg && arg)
+void ArgumentParser::add(Arg && arg)
 {
     _args.emplace_back(std::move(arg));
 }
 
-ErrFlags ArgumentParser::parse(int argc, char ** argv, bool ignore_first)
+ErrArguments ArgumentParser::parse(int argc, char ** argv) const
 {
     if (argc <= 0 || argv == nullptr) {
         return E_ILLARGS;
@@ -108,25 +113,195 @@ ErrFlags ArgumentParser::parse(int argc, char ** argv, bool ignore_first)
     for (int i = 0; i < argc; ++i) {
         arguments[i] = argv[i];
     }
-    return parse(arguments, ignore_first);
+    return parse(arguments);
 }
 
-TBAG_CONSTEXPR static char const * const _ARGUMENT_DELIMITER = " ";
-
-ErrFlags ArgumentParser::parse(std::string const & argv, bool ignore_first)
+ErrArguments ArgumentParser::parse(std::string const & argv) const
 {
-    return parse(libtbag::string::splitTokens(argv, _ARGUMENT_DELIMITER), ignore_first);
+    return parse(libtbag::string::splitTokens(argv, ARGUMENT_DELIMITER));
 }
 
-ErrFlags ArgumentParser::parse(std::vector<std::string> const & argv, bool ignore_first)
+enum argument_required_type
+{
+    argument_required_type_none,
+    argument_required_type_wait_optional_value,
+};
+
+ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
 {
     if (argv.empty()) {
         return E_ILLARGS;
     }
 
-    Flags flags;
+    std::queue<std::string> positional_names;
+    COMMENT("Find positional arguments.") {
+        for (auto const & arg : _args) {
+            if (arg.names.size() == 1 && !arg.names[0].empty() && arg.names[0][0] == _params.prefix) {
+                positional_names.emplace(arg.names[0]);
+            }
+        }
+    }
 
-    return { E_SUCCESS, flags };
+    std::unordered_map<std::string, std::string> key_map;
+    COMMENT("Update key map.") {
+        for (auto const & arg : _args) {
+            for (auto const & name : arg.names) {
+                key_map.emplace(name, arg.key);
+            }
+        }
+    }
+
+    argument_required_type req_type = argument_required_type_none;
+    bool stop_parsing = false;
+    std::string selected_key = {};
+    Arguments result = {};
+
+    auto const size = argv.size();
+    assert(size >= 1u);
+
+    for (std::size_t i = _params.first_argument_is_program_name?1u:0u; i < size; ++i) {
+        auto const & arg = argv[i];
+        if (_params.add_stop_parsing && stop_parsing) {
+            result.remain.emplace_back(arg);
+            continue;
+        }
+
+        auto const parse_result = parseSingleArgument(libtbag::string::trim(arg));
+        switch (parse_result.code) {
+        case ParseResultCode::PRC_ERROR:
+            return E_PARSING;
+        case ParseResultCode::PRC_FROM_FILE_ERROR:
+            return E_RDERR;
+
+        case ParseResultCode::PRC_SKIP:
+            break;
+        case ParseResultCode::PRC_STDIN:
+            result.optional.emplace(std::string(1u, _params.prefix), std::string());
+            break;
+        case ParseResultCode::PRC_STOP_PARSING:
+            stop_parsing = true;
+            break;
+
+        case ParseResultCode::PRC_KEY_VAL:
+            if (req_type != argument_required_type_none) {
+                return E_PARSING;
+            }
+            result.optional.emplace(key_map[parse_result.key], parse_result.value);
+            break;
+
+        case ParseResultCode::PRC_KEY:
+            if (req_type == argument_required_type_none) {
+                auto itr = std::find_if(_args.cbegin(), _args.cend(), [&parse_result](Arg const & a) -> bool {
+                    return std::find(a.names.cbegin(), a.names.cend(), parse_result.key) != a.names.cend();
+                });
+                if (itr != _args.cend()) {
+                    switch (itr->action) {
+                    case ActionType::AT_STORE:
+                        selected_key = parse_result.key;
+                        req_type = argument_required_type_wait_optional_value;
+                        break;
+                    case ActionType::AT_STORE_OR_DEFAULT:
+                        result.optional.emplace(key_map[parse_result.key], itr->default_value);
+                        break;
+                    default:
+                        return E_INACCESSIBLE_BLOCK;
+                    }
+                }
+            } else {
+                return E_PARSING;
+            }
+            break;
+
+        case ParseResultCode::PRC_VAL:
+            switch (req_type) {
+            case argument_required_type_none:
+                if (positional_names.empty()) {
+                    result.remain.emplace_back(parse_result.value);
+                } else {
+                    result.positional.emplace(key_map[positional_names.front()], parse_result.value);
+                    positional_names.pop();
+                }
+                break;
+            case argument_required_type_wait_optional_value:
+                result.optional.emplace(key_map[selected_key], parse_result.value);
+                req_type = argument_required_type_none;
+                break;
+            default:
+                return E_INACCESSIBLE_BLOCK;
+            }
+            break;
+
+        default:
+            return E_INACCESSIBLE_BLOCK;
+        }
+    }
+
+    if (!positional_names.empty()) {
+        return E_ILLARGS;
+    }
+
+    return { E_SUCCESS, result };
+}
+
+ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
+{
+    using namespace libtbag::filesystem;
+    auto const arg_size = arg.size();
+    if (arg_size == 0u) {
+        return { ParseResultCode::PRC_SKIP };
+    }
+
+    if (arg_size == 1u) {
+        if (arg[0] == _params.prefix) {
+            return { ParseResultCode::PRC_STDIN };
+        } else {
+            return { ParseResultCode::PRC_VAL, {}, arg };
+        }
+    }
+
+    if (arg_size == 2u) {
+        if (arg[0] == _params.prefix) {
+            if (arg[1] == _params.prefix) {
+                return { ParseResultCode::PRC_STOP_PARSING };
+            } else {
+                return { ParseResultCode::PRC_KEY, arg };
+            }
+        } else if (arg[0] == _params.from_file_prefix) {
+            std::string content;
+            if (isSuccess(readFile(std::string(1u, arg[1]), content))) {
+                return { ParseResultCode::PRC_VAL, {}, content };
+            } else {
+                return { ParseResultCode::PRC_FROM_FILE_ERROR };
+            }
+        } else {
+            return { ParseResultCode::PRC_VAL, {}, arg };
+        }
+    }
+
+    assert(arg_size >= 3u);
+    ParseResult result = {};
+    if (arg[0] == _params.prefix) {
+        auto const split_pos = arg.find(KEY_VAL_DELIMITER);
+        if (split_pos != std::string::npos) {
+            result.code = ParseResultCode::PRC_KEY_VAL;
+            result.key = arg.substr(0, split_pos);
+            if (isSuccess(readFile(arg.substr(split_pos+1), result.value))) {
+                result.code = ParseResultCode::PRC_VAL;
+            } else {
+                return { ParseResultCode::PRC_FROM_FILE_ERROR };
+            }
+        } else {
+            result.code = ParseResultCode::PRC_KEY;
+            result.key = arg;
+        }
+    } else {
+        if (isSuccess(readFile(arg, result.value))) {
+            result.code = ParseResultCode::PRC_VAL;
+        } else {
+            return { ParseResultCode::PRC_FROM_FILE_ERROR };
+        }
+    }
+    return result;
 }
 
 } // namespace string

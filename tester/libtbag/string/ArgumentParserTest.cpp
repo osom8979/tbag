@@ -13,7 +13,10 @@ using namespace libtbag::string;
 
 TEST(ArgumentParserTest, Default)
 {
-    ArgumentParser object;
-    ASSERT_TRUE(true);
+    ArgumentParser parser;
+    parser.add({{"-d", "--device"}, "device", ArgumentParser::ActionType::AT_STORE});
+    auto const result = parser.parse("program -d 0");
+    ASSERT_EQ(E_SUCCESS, result.code);
+    ASSERT_STREQ("0", result.value.optional.at("device").c_str());
 }
 
