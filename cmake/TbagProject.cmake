@@ -196,25 +196,30 @@ endmacro ()
 
 #/// run tbag project.
 #///
-#/// @param __name   [in] Root project name.
+#/// @param NAME ... [in] Root project name.
 #/// @param ROOT ... [in] Root source directory.
 #/// @param LANG ... [in] Languages.
 #/// @param PROJ ... [in] Sub project names.
-macro (tbag_project __name)
+macro (tbag_project)
+    set (__name "${PROJECT_NAME}")
     set (__root_dir "${PROJECT_SOURCE_DIR}")
-    set (__lang_list)
+    set (__lang_list C CXX CXXPCH)
     set (__proj_list)
     set (__argn_switch)
 
     foreach (__cursor ${ARGN})
-        if ("${__cursor}" STREQUAL "ROOT")
+        if ("${__cursor}" STREQUAL "NAME")
+            set (__argn_switch "NAME")
+        elseif ("${__cursor}" STREQUAL "ROOT")
             set (__argn_switch "ROOT")
         elseif ("${__cursor}" STREQUAL "LANG")
             set (__argn_switch "LANG")
         elseif ("${__cursor}" STREQUAL "PROJ")
             set (__argn_switch "PROJ")
         else ()
-            if ("${__argn_switch}" STREQUAL "ROOT")
+            if ("${__argn_switch}" STREQUAL "NAME")
+                set (__name ${__cursor})
+            elseif ("${__argn_switch}" STREQUAL "ROOT")
                 set (__root_dir ${__cursor})
             elseif ("${__argn_switch}" STREQUAL "LANG")
                 list (APPEND __lang_list ${__cursor})
@@ -230,16 +235,17 @@ macro (tbag_project __name)
     tbag_debug_list (tbag_project/lang_list ${__lang_list})
     tbag_debug_list (tbag_project/proj_list ${__proj_list})
 
+    project (${__name} ${__lang_list})
     foreach (__cursor ${__proj_list})
         tbag_project__build ("${__root_dir}" "${__cursor}")
     endforeach ()
-
-    project (${__name} ${__lang_list})
     add_custom_target (${__name} DEPENDS ${__proj_list})
 
+    unset (__name)
     unset (__root_dir)
     unset (__lang_list)
     unset (__proj_list)
     unset (__argn_switch)
 endmacro ()
+
 

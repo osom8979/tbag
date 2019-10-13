@@ -1,6 +1,7 @@
 ## CMake build script.
 
 cmake_minimum_required (VERSION 2.8.8)
+project (tea-bag)
 
 if (POLICY CMP0046)
     cmake_policy (SET CMP0042 NEW)
@@ -237,10 +238,10 @@ endif ()
 
 ## Run project.
 tbag_flags__set_install_rpath () # [WARNING] Do not change the calling sequence.
-tbag_project (tea-bag
-        ROOT "${CMAKE_SOURCE_DIR}"
-        LANG C CXX CXXPCH
-        PROJ ${TBAG_BUILD_PROJECTS})
+tbag_project (NAME "${PROJECT_NAME}"
+              ROOT "${PROJECT_SOURCE_DIR}"
+              LANG C CXX CXXPCH
+              PROJ ${TBAG_BUILD_PROJECTS})
 
 ## libtbag-cmake build packages.
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/cmake"
