@@ -111,7 +111,7 @@ public:
     {
         /** This just stores the argument's value. This is the default action. */
         AT_STORE,
-        AT_STORE_OR_DEFAULT,
+        AT_STORE_CONST,
     };
 
     struct Arg
@@ -120,13 +120,16 @@ public:
         std::vector<std::string> names;
 
         /** The name of the attribute to be added. */
-        std::string key;
+        std::string dest;
 
         /** The basic type of action to be taken when this argument is encountered at the command line. */
         ActionType action = ActionType::AT_STORE;
 
         /** The value produced if the argument is absent from the command line. */
         std::string default_value;
+
+        /** A constant value required by some action and nargs selections. */
+        std::string const_value;
 
         /** A brief description of what the argument does. */
         std::string help;

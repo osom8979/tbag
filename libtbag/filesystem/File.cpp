@@ -23,7 +23,7 @@ File::File() : _file(0), _offset(0)
 File::File(std::string const & path, Flags flags, int mode) : File()
 {
     if (!File::open(path, flags, mode)) {
-        throw std::bad_alloc();
+        throw ErrException(E_OPEN);
     }
 }
 
@@ -125,8 +125,8 @@ namespace impl {
 template <typename StlContainerType>
 static Err readToBuffer(std::string const & path, StlContainerType & result, uint64_t limit_size)
 {
-    File f(path, File::Flags().clear().rdonly());
-    if (f.isOpen() == false) {
+    File f;
+    if (!f.open(path, File::Flags().clear().rdonly())) {
         return E_ENOENT;
     }
 

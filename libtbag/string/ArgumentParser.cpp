@@ -136,25 +136,45 @@ ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
     std::queue<std::string> positional_names;
     COMMENT("Find positional arguments.") {
         for (auto const & arg : _args) {
-            if (arg.names.size() == 1 && !arg.names[0].empty() && arg.names[0][0] == _params.prefix) {
-                positional_names.emplace(arg.names[0]);
+            if (arg.names.size() == 1 && !arg.names[0].empty() && arg.names[0][0] != _params.prefix) {
+                positional_names.push(arg.names[0]);
             }
         }
     }
 
-    std::unordered_map<std::string, std::string> key_map;
+    std::unordered_map<std::string, std::string> key_map = {};
+    std::string selected_key = {};
+    Arguments result = {};
+
     COMMENT("Update key map.") {
         for (auto const & arg : _args) {
             for (auto const & name : arg.names) {
-                key_map.emplace(name, arg.key);
+                key_map[name] = arg.dest;
+            }
+        }
+    }
+
+    COMMENT("Update default variables.") {
+        for (auto const & arg : _args) {
+            if (arg.names.empty()) {
+                continue;
+            }
+            if (arg.names[0].empty()) {
+                continue;
+            }
+            if (arg.default_value.empty()) {
+                continue;
+            }
+            if (arg.names[0][0] == _params.prefix) {
+                result.optional[arg.dest] = arg.default_value;
+            } else {
+                result.positional[arg.dest] = arg.default_value;
             }
         }
     }
 
     argument_required_type req_type = argument_required_type_none;
     bool stop_parsing = false;
-    std::string selected_key = {};
-    Arguments result = {};
 
     auto const size = argv.size();
     assert(size >= 1u);
@@ -176,7 +196,7 @@ ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
         case ParseResultCode::PRC_SKIP:
             break;
         case ParseResultCode::PRC_STDIN:
-            result.optional.emplace(std::string(1u, _params.prefix), std::string());
+            result.optional[std::string(1u, _params.prefix)] = "true";
             break;
         case ParseResultCode::PRC_STOP_PARSING:
             stop_parsing = true;
@@ -186,7 +206,7 @@ ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
             if (req_type != argument_required_type_none) {
                 return E_PARSING;
             }
-            result.optional.emplace(key_map[parse_result.key], parse_result.value);
+            result.optional[key_map[parse_result.key]] = parse_result.value;
             break;
 
         case ParseResultCode::PRC_KEY:
@@ -200,8 +220,8 @@ ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
                         selected_key = parse_result.key;
                         req_type = argument_required_type_wait_optional_value;
                         break;
-                    case ActionType::AT_STORE_OR_DEFAULT:
-                        result.optional.emplace(key_map[parse_result.key], itr->default_value);
+                    case ActionType::AT_STORE_CONST:
+                        result.optional[key_map[parse_result.key]] = itr->const_value;
                         break;
                     default:
                         return E_INACCESSIBLE_BLOCK;
@@ -218,12 +238,12 @@ ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
                 if (positional_names.empty()) {
                     result.remain.emplace_back(parse_result.value);
                 } else {
-                    result.positional.emplace(key_map[positional_names.front()], parse_result.value);
+                    result.positional[key_map[positional_names.front()]] = parse_result.value;
                     positional_names.pop();
                 }
                 break;
             case argument_required_type_wait_optional_value:
-                result.optional.emplace(key_map[selected_key], parse_result.value);
+                result.optional[key_map[selected_key]] = parse_result.value;
                 req_type = argument_required_type_none;
                 break;
             default:
@@ -238,6 +258,9 @@ ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
 
     if (!positional_names.empty()) {
         return E_ILLARGS;
+    }
+    if (req_type != argument_required_type_none) {
+        return E_ILLSTATE;
     }
 
     return { E_SUCCESS, result };
@@ -278,6 +301,7 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
         }
     }
 
+
     assert(arg_size >= 3u);
     ParseResult result = {};
     if (arg[0] == _params.prefix) {
@@ -285,21 +309,29 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
         if (split_pos != std::string::npos) {
             result.code = ParseResultCode::PRC_KEY_VAL;
             result.key = arg.substr(0, split_pos);
-            if (isSuccess(readFile(arg.substr(split_pos+1), result.value))) {
-                result.code = ParseResultCode::PRC_VAL;
+            auto const temp_value = arg.substr(split_pos+1);
+            if (!temp_value.empty() && temp_value[0] == _params.from_file_prefix) {
+                if (isSuccess(readFile(temp_value.substr(1), result.value))) {
+                    result.code = ParseResultCode::PRC_VAL;
+                } else {
+                    return { ParseResultCode::PRC_FROM_FILE_ERROR };
+                }
             } else {
-                return { ParseResultCode::PRC_FROM_FILE_ERROR };
+                result.value = temp_value;
             }
         } else {
             result.code = ParseResultCode::PRC_KEY;
             result.key = arg;
         }
-    } else {
-        if (isSuccess(readFile(arg, result.value))) {
+    } else if (arg[0] == _params.from_file_prefix) {
+        if (isSuccess(readFile(arg.substr(1), result.value))) {
             result.code = ParseResultCode::PRC_VAL;
         } else {
             return { ParseResultCode::PRC_FROM_FILE_ERROR };
         }
+    } else {
+        result.code = ParseResultCode::PRC_VAL;
+        result.value = arg;
     }
     return result;
 }
