@@ -32,6 +32,30 @@ std::string ArgumentParser::DefaultFormatter::print(Params const & params, Args 
 
 using ErrArguments = ArgumentParser::ErrArguments;
 using ParseResult = ArgumentParser::ParseResult;
+using ActionType = ArgumentParser::ActionType;
+
+char const * ArgumentParser::getActionTypeName(ActionType type) TBAG_NOEXCEPT
+{
+    switch (type) {
+    case ActionType::AT_STORE:
+        return ACTION_TYPE_STORE;
+    case ActionType::AT_STORE_CONST:
+        return ACTION_TYPE_STORE_CONST;
+    default:
+        return "";
+    }
+}
+
+ActionType ArgumentParser::getActionType(std::string const & name)
+{
+    if (name == ACTION_TYPE_STORE) {
+        return ActionType::AT_STORE;
+    } else if (name == ACTION_TYPE_STORE_CONST) {
+        return ActionType::AT_STORE_CONST;
+    } else {
+        return ActionType::AT_NONE;
+    }
+}
 
 ArgumentParser::ArgumentParser()
 {
@@ -102,6 +126,15 @@ void ArgumentParser::add(Arg const & arg)
 void ArgumentParser::add(Arg && arg)
 {
     _args.emplace_back(std::move(arg));
+}
+
+void ArgumentParser::add(std::vector<arg_key_val> const & kvs)
+{
+    Arg arg;
+    for (auto const & kv : kvs) {
+        arg << kv;
+    }
+    add(std::move(arg));
 }
 
 ErrArguments ArgumentParser::parse(int argc, char ** argv) const

@@ -50,6 +50,7 @@ TEST(ArgumentParserTest, Optional_01)
 
 TEST(ArgumentParserTest, Optional_02)
 {
+    using ap = ArgumentParser;
     ArgumentParser parser;
     ArgumentParser::Arg arg1;
     arg1.names = {"-d", "--device"};
@@ -57,7 +58,12 @@ TEST(ArgumentParserTest, Optional_02)
     arg1.action = ArgumentParser::ActionType::AT_STORE_CONST;
     arg1.default_value = "1";
     arg1.const_value = "2";
-    parser.add(arg1);
+
+//    parser.add
+//    (
+//            ap::name << "-d",
+//            ap::name << "--device",
+//    );
 
     auto const result1 = parser.parse("program --device 3 test1 test2");
     ASSERT_EQ(E_SUCCESS, result1.code);

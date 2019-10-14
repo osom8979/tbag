@@ -109,10 +109,53 @@ public:
 
     enum class ActionType
     {
+        AT_NONE,
+
         /** This just stores the argument's value. This is the default action. */
         AT_STORE,
+
+        /** This stores the value specified by the const keyword argument. */
         AT_STORE_CONST,
     };
+
+    TBAG_CONSTEXPR static char const * const ACTION_TYPE_STORE = "store";
+    TBAG_CONSTEXPR static char const * const ACTION_TYPE_STORE_CONST = "store_const";
+
+    static char const * getActionTypeName(ActionType type) TBAG_NOEXCEPT;
+    static ActionType getActionType(std::string const & name);
+
+    struct arg_key_val
+    {
+        std::string key;
+        std::string val;
+
+        arg_key_val(std::string const & k) : key(k) { /* EMPTY. */ }
+        ~arg_key_val() { /* EMPTY. */ }
+
+        arg_key_val & operator =(std::string const & v)
+        {
+            val = v;
+            return *this;
+        }
+    };
+
+    TBAG_CONSTEXPR static char const * const ARG_NAME_KEY    = "name";
+    TBAG_CONSTEXPR static char const * const ARG_DEST_KEY    = "dest";
+    TBAG_CONSTEXPR static char const * const ARG_ACTION_KEY  = "action";
+    TBAG_CONSTEXPR static char const * const ARG_DEFAULT_KEY = "default";
+    TBAG_CONSTEXPR static char const * const ARG_CONST_KEY   = "const";
+    TBAG_CONSTEXPR static char const * const ARG_HELP_KEY    = "help";
+    TBAG_CONSTEXPR static char const * const ARG_META_KEY    = "meta";
+
+    // clang-format on
+    struct name          : public arg_key_val { name         () : arg_key_val(ARG_NAME_KEY   ) {} };
+    struct dest          : public arg_key_val { dest         () : arg_key_val(ARG_DEST_KEY   ) {} };
+    struct action        : public arg_key_val { action       () : arg_key_val(ARG_ACTION_KEY ) {} };
+    struct default_value : public arg_key_val { default_value() : arg_key_val(ARG_DEFAULT_KEY) {} };
+    struct const_value   : public arg_key_val { const_value  () : arg_key_val(ARG_CONST_KEY  ) {} };
+    struct help          : public arg_key_val { help         () : arg_key_val(ARG_HELP_KEY   ) {} };
+    struct meta          : public arg_key_val { meta         () : arg_key_val(ARG_META_KEY   ) {} };
+    // clang-format off
 
     struct Arg
     {
@@ -136,6 +179,26 @@ public:
 
         /** A name for the argument in usage messages. */
         std::string meta;
+
+        friend Arg & operator << (Arg & a, arg_key_val const & kv)
+        {
+            if (kv.key == ARG_NAME_KEY) {
+                a.names.emplace_back(kv.val);
+            } else if (kv.key == ARG_DEST_KEY) {
+                a.dest = kv.val;
+            } else if (kv.key == ARG_ACTION_KEY) {
+                a.action = getActionType(kv.val);
+            } else if (kv.key == ARG_DEFAULT_KEY) {
+                a.default_value = kv.val;
+            } else if (kv.key == ARG_CONST_KEY) {
+                a.const_value = kv.val;
+            } else if (kv.key == ARG_HELP_KEY) {
+                a.help = kv.val;
+            } else if (kv.key == ARG_META_KEY) {
+                a.meta = kv.val;
+            }
+            return a;
+        }
     };
 
 private:
@@ -179,6 +242,16 @@ public:
 public:
     void add(Arg const & arg);
     void add(Arg && arg);
+
+public:
+    void add(std::vector<arg_key_val> const & kvs);
+
+public:
+    template <typename ... ArgKeyValT>
+    void add(ArgKeyValT && ... args)
+    {
+        add({std::forward<ArgKeyValT>(args) ...});
+    }
 
 public:
     ErrArguments parse(int argc, char ** argv) const;
