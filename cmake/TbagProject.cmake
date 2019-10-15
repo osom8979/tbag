@@ -235,10 +235,12 @@ macro (tbag_project)
     tbag_debug_list (tbag_project/lang_list ${__lang_list})
     tbag_debug_list (tbag_project/proj_list ${__proj_list})
 
-    project (${__name} ${__lang_list})
     foreach (__cursor ${__proj_list})
         tbag_project__build ("${__root_dir}" "${__cursor}")
     endforeach ()
+
+    # Used as the default project name to be output from CLion.
+    project (${__name} ${__lang_list})
     add_custom_target (${__name} DEPENDS ${__proj_list})
 
     unset (__name)
