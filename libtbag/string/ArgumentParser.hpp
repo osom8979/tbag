@@ -40,13 +40,12 @@ class TBAG_API ArgumentParser
 public:
     struct Params;
     struct Arg;
-    struct Arguments;
+    struct ArgumentResult;
 
     using Args = std::vector<Arg>;
-    using ErrArguments = ErrPair<Arguments>;
-    using ErrString = ErrPair<std::string>;
+    using ErrArgumentResult = ErrPair<ArgumentResult>;
 
-    struct Arguments
+    struct ArgumentResult
     {
         std::map<std::string, std::string> optional;
         std::map<std::string, std::string> positional;
@@ -129,32 +128,38 @@ public:
         std::string key;
         std::string val;
 
-        arg_key_val(std::string const & k) : key(k) { /* EMPTY. */ }
+        arg_key_val(std::string const & k, std::string const & v) : key(k), val(v) { /* EMPTY. */ }
         ~arg_key_val() { /* EMPTY. */ }
+    };
 
-        arg_key_val & operator =(std::string const & v)
+    struct arg_key
+    {
+        char const * key;
+
+        arg_key_val operator =(std::string const & v) const
         {
-            val = v;
-            return *this;
+            return arg_key_val(key, v);
         }
     };
 
-    TBAG_CONSTEXPR static char const * const ARG_NAME_KEY    = "name";
-    TBAG_CONSTEXPR static char const * const ARG_DEST_KEY    = "dest";
-    TBAG_CONSTEXPR static char const * const ARG_ACTION_KEY  = "action";
+    // clang-format on
+    TBAG_CONSTEXPR static char const * const ARG_NAME_KEY = "name";
+    TBAG_CONSTEXPR static char const * const ARG_DEST_KEY = "dest";
+    TBAG_CONSTEXPR static char const * const ARG_ACTION_KEY = "action";
     TBAG_CONSTEXPR static char const * const ARG_DEFAULT_KEY = "default";
-    TBAG_CONSTEXPR static char const * const ARG_CONST_KEY   = "const";
-    TBAG_CONSTEXPR static char const * const ARG_HELP_KEY    = "help";
-    TBAG_CONSTEXPR static char const * const ARG_META_KEY    = "meta";
+    TBAG_CONSTEXPR static char const * const ARG_CONST_KEY = "const";
+    TBAG_CONSTEXPR static char const * const ARG_HELP_KEY = "help";
+    TBAG_CONSTEXPR static char const * const ARG_META_KEY = "meta";
+    // clang-format off
 
     // clang-format on
-    struct name          : public arg_key_val { name         () : arg_key_val(ARG_NAME_KEY   ) {} };
-    struct dest          : public arg_key_val { dest         () : arg_key_val(ARG_DEST_KEY   ) {} };
-    struct action        : public arg_key_val { action       () : arg_key_val(ARG_ACTION_KEY ) {} };
-    struct default_value : public arg_key_val { default_value() : arg_key_val(ARG_DEFAULT_KEY) {} };
-    struct const_value   : public arg_key_val { const_value  () : arg_key_val(ARG_CONST_KEY  ) {} };
-    struct help          : public arg_key_val { help         () : arg_key_val(ARG_HELP_KEY   ) {} };
-    struct meta          : public arg_key_val { meta         () : arg_key_val(ARG_META_KEY   ) {} };
+    static arg_key const name;
+    static arg_key const dest;
+    static arg_key const action;
+    static arg_key const default_value;
+    static arg_key const const_value;
+    static arg_key const help;
+    static arg_key const meta;
     // clang-format off
 
     struct Arg
@@ -244,19 +249,19 @@ public:
     void add(Arg && arg);
 
 public:
-    void addPairs(std::vector<arg_key_val> const & kvs);
+    void addKeyVals(std::vector<arg_key_val> const & kvs);
 
 public:
     template <typename ... ArgKeyValT>
     void addPairs(ArgKeyValT && ... args)
     {
-        add({std::forward<ArgKeyValT>(args) ...});
+        addKeyVals({std::forward<ArgKeyValT>(args) ...});
     }
 
 public:
-    ErrArguments parse(int argc, char ** argv) const;
-    ErrArguments parse(std::string const & argv) const;
-    ErrArguments parse(std::vector<std::string> const & argv) const;
+    ErrArgumentResult parse(int argc, char ** argv) const;
+    ErrArgumentResult parse(std::string const & argv) const;
+    ErrArgumentResult parse(std::vector<std::string> const & argv) const;
 
 public:
     enum class ParseResultCode

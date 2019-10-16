@@ -30,9 +30,19 @@ std::string ArgumentParser::DefaultFormatter::print(Params const & params, Args 
 // ArgumentParser
 // --------------
 
-using ErrArguments = ArgumentParser::ErrArguments;
+using ErrArgumentResult = ArgumentParser::ErrArgumentResult;
 using ParseResult = ArgumentParser::ParseResult;
 using ActionType = ArgumentParser::ActionType;
+
+// clang-format on
+ArgumentParser::arg_key const ArgumentParser::name          = { ArgumentParser::ARG_NAME_KEY    };
+ArgumentParser::arg_key const ArgumentParser::dest          = { ArgumentParser::ARG_DEST_KEY    };
+ArgumentParser::arg_key const ArgumentParser::action        = { ArgumentParser::ARG_ACTION_KEY  };
+ArgumentParser::arg_key const ArgumentParser::default_value = { ArgumentParser::ARG_DEFAULT_KEY };
+ArgumentParser::arg_key const ArgumentParser::const_value   = { ArgumentParser::ARG_CONST_KEY   };
+ArgumentParser::arg_key const ArgumentParser::help          = { ArgumentParser::ARG_HELP_KEY    };
+ArgumentParser::arg_key const ArgumentParser::meta          = { ArgumentParser::ARG_META_KEY    };
+// clang-format off
 
 char const * ArgumentParser::getActionTypeName(ActionType type) TBAG_NOEXCEPT
 {
@@ -128,7 +138,7 @@ void ArgumentParser::add(Arg && arg)
     _args.emplace_back(std::move(arg));
 }
 
-void ArgumentParser::addPairs(std::vector<arg_key_val> const & kvs)
+void ArgumentParser::addKeyVals(std::vector<arg_key_val> const & kvs)
 {
     Arg arg;
     for (auto const & kv : kvs) {
@@ -137,7 +147,7 @@ void ArgumentParser::addPairs(std::vector<arg_key_val> const & kvs)
     add(std::move(arg));
 }
 
-ErrArguments ArgumentParser::parse(int argc, char ** argv) const
+ErrArgumentResult ArgumentParser::parse(int argc, char ** argv) const
 {
     if (argc <= 0 || argv == nullptr) {
         return E_ILLARGS;
@@ -149,7 +159,7 @@ ErrArguments ArgumentParser::parse(int argc, char ** argv) const
     return parse(arguments);
 }
 
-ErrArguments ArgumentParser::parse(std::string const & argv) const
+ErrArgumentResult ArgumentParser::parse(std::string const & argv) const
 {
     return parse(libtbag::string::splitTokens(argv, ARGUMENT_DELIMITER));
 }
@@ -160,7 +170,7 @@ enum argument_required_type
     argument_required_type_wait_optional_value,
 };
 
-ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
+ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) const
 {
     if (argv.empty()) {
         return E_ILLARGS;
@@ -177,7 +187,7 @@ ErrArguments ArgumentParser::parse(std::vector<std::string> const & argv) const
 
     std::unordered_map<std::string, std::string> key_map = {};
     std::string selected_key = {};
-    Arguments result = {};
+    ArgumentResult result = {};
 
     COMMENT("Update key map.") {
         for (auto const & arg : _args) {

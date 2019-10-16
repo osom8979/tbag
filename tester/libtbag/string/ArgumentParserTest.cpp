@@ -51,13 +51,15 @@ TEST(ArgumentParserTest, Optional_01)
 TEST(ArgumentParserTest, Optional_02)
 {
     ArgumentParser parser;
-    ArgumentParser::Arg arg1;
-    arg1.names = {"-d", "--device"};
-    arg1.dest = "device";
-    arg1.action = ArgumentParser::ActionType::AT_STORE_CONST;
-    arg1.default_value = "1";
-    arg1.const_value = "2";
-    parser.add(arg1);
+    using ap = ArgumentParser;
+    parser.addPairs(
+            ap::const_value="2",
+            ap::default_value="1",
+            ap::action="store_const",
+            ap::name="--device",
+            ap::name="-d",
+            ap::dest="device"
+    );
 
     auto const result1 = parser.parse("program --device 3 test1 test2");
     ASSERT_EQ(E_SUCCESS, result1.code);
