@@ -244,11 +244,11 @@ public:
     void add(Arg && arg);
 
 public:
-    void add(std::vector<arg_key_val> const & kvs);
+    void addPairs(std::vector<arg_key_val> const & kvs);
 
 public:
     template <typename ... ArgKeyValT>
-    void add(ArgKeyValT && ... args)
+    void addPairs(ArgKeyValT && ... args)
     {
         add({std::forward<ArgKeyValT>(args) ...});
     }

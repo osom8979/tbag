@@ -128,7 +128,7 @@ void ArgumentParser::add(Arg && arg)
     _args.emplace_back(std::move(arg));
 }
 
-void ArgumentParser::add(std::vector<arg_key_val> const & kvs)
+void ArgumentParser::addPairs(std::vector<arg_key_val> const & kvs)
 {
     Arg arg;
     for (auto const & kv : kvs) {
