@@ -105,6 +105,24 @@ struct remove_cr
     typedef remove_reference_const type;
 };
 
+/**
+ * Tests for a string literal type.
+ *
+ * @remarks
+ *  <code>decltype("some string")</code> of a string literal returns <code>const char (&)[n]</code> type.
+ *
+ * @author zer0
+ * @date   2019-10-17
+ */
+template <typename T>
+struct is_string_literal
+{
+    typedef typename remove_cr<T>::type __base_t;
+    typedef typename std::add_lvalue_reference<const char [std::extent<__base_t>::value]>::type __test_t;
+
+    TBAG_CONSTEXPR static bool value = std::is_same<T, __test_t>::value;
+};
+
 // Test assertion.
 static_assert(!std::is_const<typename remove_cr<int const &>::type>::value
         , "It isn't non-const type.");
