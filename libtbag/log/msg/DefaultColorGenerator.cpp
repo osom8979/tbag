@@ -50,24 +50,23 @@ int DefaultColorGenerator::make(char * buffer, int buffer_size,
     using namespace libtbag::tty;
     // clang-format off
     switch (level) {
-    case       OFF_LEVEL: /*-------------------------------*/ break;
-    case EMERGENCY_LEVEL: ss << DISPLAY_ATTRIBUTE_BG_RED << DISPLAY_ATTRIBUTE_FG_CYAN; break;
-    case     ALERT_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_MAGENTA; break;
-    case  CRITICAL_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED;     break;
-    case     ERROR_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED;     break;
-    case   WARNING_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_YELLOW;  break;
-    case    NOTICE_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN;   break;
-    case      INFO_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN;   break;
-    case     DEBUG_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_BLUE;    break;
-    case   UNKNOWN_LEVEL: /*-------------------------------*/ break;
-    default: /*--------------------------------------------*/ break;
+    case       OFF_LEVEL: /*--------------------------------------*/ break;
+    case EMERGENCY_LEVEL: ss << DISPLAY_ATTRIBUTE_BG_RED << DISPLAY_ATTRIBUTE_FG_CYAN << "M "; break;
+    case     ALERT_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_MAGENTA << "A "; break;
+    case  CRITICAL_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED     << "C "; break;
+    case     ERROR_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED     << "E "; break;
+    case   WARNING_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_YELLOW  << "W "; break;
+    case    NOTICE_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN   << "N "; break;
+    case      INFO_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN   << "I "; break;
+    case     DEBUG_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_BLUE    << "D "; break;
+    case   UNKNOWN_LEVEL: /*--------------------------------------*/ break;
+    default: /*---------------------------------------------------*/ break;
     }
     // clang-format on
 
     ss << libtbag::time::TimePoint::now().toLocalLongString()
        << " @" << std::this_thread::get_id()
-       << " [" << level_name
-       << "] " << std::string(msg, msg + msg_size);
+       << ' ' << std::string(msg, msg + msg_size);
 
     if (EMERGENCY_LEVEL <= COMPARE_AND(level) <= DEBUG_LEVEL) {
         ss << DISPLAY_ATTRIBUTE_RESET;
