@@ -666,6 +666,16 @@ WIN32_DUMMY_INLINE void GetSystemTime(_Out_ LPSYSTEMTIME lpSystemTime)
 { /* EMPTY. */ }
 
 /**
+ * @see <https://docs.microsoft.com/ko-kr/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminatethread?redirectedfrom=MSDN>
+ *
+ * @remarks
+ *  - processthreadsapi.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+WIN32_DUMMY_INLINE BOOL TerminateThread(HANDLE hThread, DWORD dwExitCode)
+{ return FALSE; }
+
+/**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms724948(v=vs.85).aspx>
  *
  * @remarks

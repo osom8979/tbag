@@ -6,9 +6,12 @@
  */
 
 #include <libtbag/thread/Thread.hpp>
-#include <uv.h>
+#include <libtbag/thread/ThreadKill.hpp>
+
 #include <cassert>
 #include <utility>
+
+#include <uv.h>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -180,9 +183,9 @@ Err Thread::waitForRunningOrDone(unsigned long timeout_ms, unsigned long tick_ms
     return waitForRunningOrDone(*this, std::chrono::milliseconds(timeout_ms), std::chrono::milliseconds(tick_ms));
 }
 
-Err Thread::kill()
+Err Thread::kill() const
 {
-    return E_ENOSYS;
+    return killThread(_thread);
 }
 
 } // namespace thread
