@@ -59,6 +59,18 @@ TBAG_CONSTEXPR int const SIGNAL_STD_TERMINATE = INT_MAX; // C++ terminate signal
 TBAG_CONSTEXPR int const FIRST_ORDER = INT_MAX;
 TBAG_CONSTEXPR int const LAST_ORDER  = INT_MIN;
 
+#ifndef TBAG_SIGNAL_KILL_NUMBER
+# if defined(TBAG_PLATFORM_WINDOWS)
+#  define TBAG_SIGNAL_KILL_NUMBER SIGTERM // Windows does not have SIGKILL.
+# elif defined(SIGKILL)
+#  define TBAG_SIGNAL_KILL_NUMBER SIGKILL // kill (cannot be caught or ignored)
+# else
+#  define TBAG_SIGNAL_KILL_NUMBER 9 // SIGKILL is often numbered 9.
+# endif
+#endif
+
+TBAG_CONSTEXPR int const TBAG_SIGNAL_KILL = TBAG_SIGNAL_KILL_NUMBER;
+
 inline bool existSignalNumber(int signal_number) TBAG_NOEXCEPT
 {
     switch (signal_number) {
