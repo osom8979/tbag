@@ -11,10 +11,28 @@
 using namespace libtbag;
 using namespace libtbag::string;
 
+using ap = ArgumentParser;
+using at = ArgumentParser::ActionType;
+
+TEST(ArgumentParserTest, Add)
+{
+    ArgumentParser parser;
+    parser.add({{"-d", "--device"}, ArgumentParser::ActionType::AT_STORE, "device"});
+    parser.add(
+            ap::const_value=2,
+            ap::default_value=1,
+            ap::store_const,
+            ap::name="--input-type",
+            ap::name="-t",
+            ap::dest="input_type"
+    );
+    parser.add("type", at::AT_STORE, "type");
+}
+
 TEST(ArgumentParserTest, Optional_01)
 {
     ArgumentParser parser;
-    parser.add({{"-d", "--device"}, "device", ArgumentParser::ActionType::AT_STORE});
+    parser.add({{"-d", "--device"}, ArgumentParser::ActionType::AT_STORE, "device"});
 
     auto const result1 = parser.parse("program -d 0");
     ASSERT_EQ(E_SUCCESS, result1.code);
@@ -51,11 +69,10 @@ TEST(ArgumentParserTest, Optional_01)
 TEST(ArgumentParserTest, Optional_02)
 {
     ArgumentParser parser;
-    using ap = ArgumentParser;
-    parser.addPairs(
-            ap::const_value="2",
-            ap::default_value="1",
-            ap::action="store_const",
+    parser.add(
+            ap::const_value=2,
+            ap::default_value=1,
+            ap::store_const,
             ap::name="--device",
             ap::name="-d",
             ap::dest="device"
@@ -87,7 +104,7 @@ TEST(ArgumentParserTest, Optional_02)
 TEST(ArgumentParserTest, Positional_01)
 {
     ArgumentParser parser;
-    parser.add({{"type"}, "type"});
+    parser.add("type", at::AT_STORE, "type");
 
     auto const result1 = parser.parse("program bool test1 test2");
     ASSERT_EQ(E_SUCCESS, result1.code);

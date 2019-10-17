@@ -16,12 +16,14 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/ErrPair.hpp>
+#include <libtbag/Type.hpp>
 
 #include <vector>
 #include <string>
+#include <map>
 #include <functional>
 #include <memory>
-#include <map>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -38,15 +40,16 @@ namespace string {
 class TBAG_API ArgumentParser
 {
 public:
-    struct Params;
-    struct Arg;
+    struct InitParams;
+    struct Param;
     struct ArgumentResult;
 
-    using Args = std::vector<Arg>;
+    using Params = std::vector<Param>;
     using ErrArgumentResult = ErrPair<ArgumentResult>;
 
     struct ArgumentResult
     {
+        std::string program_name;
         std::map<std::string, std::string> optional;
         std::map<std::string, std::string> positional;
         std::vector<std::string> remain;
@@ -57,7 +60,7 @@ public:
         Formatter() { /* EMPTY. */ }
         virtual ~Formatter() { /* EMPTY. */ }
 
-        virtual std::string print(Params const & params, Args const & args) = 0;
+        virtual std::string print(InitParams const & init, Params const & params) = 0;
     };
 
     using SharedFormatter = std::shared_ptr<Formatter>;
@@ -67,7 +70,7 @@ public:
         DefaultFormatter() { /* EMPTY. */ }
         virtual ~DefaultFormatter() { /* EMPTY. */ }
 
-        std::string print(Params const & params, Args const & args) override;
+        std::string print(InitParams const & init, Params const & params) override;
     };
 
     TBAG_CONSTEXPR static char const * const ARGUMENT_DELIMITER = " ";
@@ -76,7 +79,7 @@ public:
     TBAG_CONSTEXPR static char const DEFAULT_PREFIX = '-';
     TBAG_CONSTEXPR static char const DEFAULT_FROM_FILE_PREFIX = '@';
 
-    struct Params
+    struct InitParams
     {
         /** The name of the program. */
         std::string program_name;
@@ -123,55 +126,75 @@ public:
     static char const * getActionTypeName(ActionType type) TBAG_NOEXCEPT;
     static ActionType getActionType(std::string const & name);
 
-    struct arg_key_val
+    struct ParamElem
     {
         std::string key;
         std::string val;
-
-        arg_key_val(std::string const & k, std::string const & v) : key(k), val(v) { /* EMPTY. */ }
-        ~arg_key_val() { /* EMPTY. */ }
     };
 
-    struct arg_key
+    struct ParamKey
     {
         char const * key;
 
-        arg_key_val operator =(std::string const & v) const
-        {
-            return arg_key_val(key, v);
-        }
+        ParamElem operator =(char const * v) const
+        { return ParamElem{key, v}; }
+        ParamElem operator =(std::string const & v) const
+        { return ParamElem{key, v}; }
+        ParamElem operator =(std::string && v) const
+        { return ParamElem{key, std::move(v)}; }
+
+        // clang-format off
+        ParamElem operator =(bool           v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(char           v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(short          v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(int            v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(long           v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(unsigned char  v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(unsigned short v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(unsigned int   v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(unsigned long  v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(float          v) const { return ParamElem{key, std::to_string(v)}; }
+        ParamElem operator =(double         v) const { return ParamElem{key, std::to_string(v)}; }
+        // clang-format on
     };
 
     // clang-format on
     TBAG_CONSTEXPR static char const * const ARG_NAME_KEY = "name";
     TBAG_CONSTEXPR static char const * const ARG_DEST_KEY = "dest";
     TBAG_CONSTEXPR static char const * const ARG_ACTION_KEY = "action";
+    TBAG_CONSTEXPR static char const * const ARG_STORE_KEY = "store";
+    TBAG_CONSTEXPR static char const * const ARG_STORE_CONST_KEY = "store_const";
     TBAG_CONSTEXPR static char const * const ARG_DEFAULT_KEY = "default";
     TBAG_CONSTEXPR static char const * const ARG_CONST_KEY = "const";
     TBAG_CONSTEXPR static char const * const ARG_HELP_KEY = "help";
     TBAG_CONSTEXPR static char const * const ARG_META_KEY = "meta";
     // clang-format off
 
-    // clang-format on
-    static arg_key const name;
-    static arg_key const dest;
-    static arg_key const action;
-    static arg_key const default_value;
-    static arg_key const const_value;
-    static arg_key const help;
-    static arg_key const meta;
-    // clang-format off
+    /**
+     * @defgroup __DOXYGEN_GROUP__ARGUMENT_PARSER_DICTIONARY__ ArgumentParser Dictionary
+     * @{
+     */
+    static ParamKey  const name;
+    static ParamKey  const dest;
+    static ParamKey  const action;
+    static ParamKey  const default_value;
+    static ParamKey  const const_value;
+    static ParamKey  const help;
+    static ParamKey  const meta;
+    static ParamElem const store;
+    static ParamElem const store_const;
+    /** @} */
 
-    struct Arg
+    struct Param TBAG_FINAL
     {
-        /** Either a name or a list of option strings, e.g. foo or -f, --foo. */
+        /** Either a name or a list of option strings, e.g. foo or <code>-f</code>, <code>--foo</code>. */
         std::vector<std::string> names;
-
-        /** The name of the attribute to be added. */
-        std::string dest;
 
         /** The basic type of action to be taken when this argument is encountered at the command line. */
         ActionType action = ActionType::AT_STORE;
+
+        /** The name of the attribute to be added. */
+        std::string dest;
 
         /** The value produced if the argument is absent from the command line. */
         std::string default_value;
@@ -185,35 +208,39 @@ public:
         /** A name for the argument in usage messages. */
         std::string meta;
 
-        friend Arg & operator << (Arg & a, arg_key_val const & kv)
+        friend Param & operator << (Param & a, ParamElem const & elem)
         {
-            if (kv.key == ARG_NAME_KEY) {
-                a.names.emplace_back(kv.val);
-            } else if (kv.key == ARG_DEST_KEY) {
-                a.dest = kv.val;
-            } else if (kv.key == ARG_ACTION_KEY) {
-                a.action = getActionType(kv.val);
-            } else if (kv.key == ARG_DEFAULT_KEY) {
-                a.default_value = kv.val;
-            } else if (kv.key == ARG_CONST_KEY) {
-                a.const_value = kv.val;
-            } else if (kv.key == ARG_HELP_KEY) {
-                a.help = kv.val;
-            } else if (kv.key == ARG_META_KEY) {
-                a.meta = kv.val;
+            if (elem.key == ARG_NAME_KEY) {
+                a.names.emplace_back(elem.val);
+            } else if (elem.key == ARG_DEST_KEY) {
+                a.dest = elem.val;
+            } else if (elem.key == ARG_ACTION_KEY) {
+                a.action = getActionType(elem.val);
+            } else if (elem.key == ARG_STORE_KEY) {
+                a.action = ActionType::AT_STORE;
+            } else if (elem.key == ARG_STORE_CONST_KEY) {
+                a.action = ActionType::AT_STORE_CONST;
+            } else if (elem.key == ARG_DEFAULT_KEY) {
+                a.default_value = elem.val;
+            } else if (elem.key == ARG_CONST_KEY) {
+                a.const_value = elem.val;
+            } else if (elem.key == ARG_HELP_KEY) {
+                a.help = elem.val;
+            } else if (elem.key == ARG_META_KEY) {
+                a.meta = elem.val;
             }
             return a;
         }
     };
 
 private:
+    InitParams _init;
     Params _params;
-    Args _args;
 
 public:
     ArgumentParser();
-    explicit ArgumentParser(Params const & params);
-    explicit ArgumentParser(Params && params);
+    explicit ArgumentParser(InitParams const & params);
+    explicit ArgumentParser(InitParams && params);
     ArgumentParser(ArgumentParser const & obj);
     ArgumentParser(ArgumentParser && obj) TBAG_NOEXCEPT;
     virtual ~ArgumentParser();
@@ -232,30 +259,101 @@ public:
     inline Params const & params() const TBAG_NOEXCEPT { return _params; }
 
 public:
-    inline Args       & args()       TBAG_NOEXCEPT { return _args; }
-    inline Args const & args() const TBAG_NOEXCEPT { return _args; }
-
-public:
-    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_args.empty())
-    { return _args.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_args.size())
-    { return _args.size(); }
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_params.empty())
+    { return _params.empty(); }
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_params.size())
+    { return _params.size(); }
 
 public:
     void clear();
 
-public:
-    void add(Arg const & arg);
-    void add(Arg && arg);
+private:
+    void add_param(Param const & arg);
+    void add_param(Param && arg);
+    void add_elems(std::vector<ParamElem> const & elems);
 
-public:
-    void addKeyVals(std::vector<arg_key_val> const & kvs);
+    struct add_param_t { /* EMPTY. */ };
+    struct add_first_string_param_t { /* EMPTY. */ };
+    struct add_param_elems_t { /* EMPTY. */ };
 
-public:
-    template <typename ... ArgKeyValT>
-    void addPairs(ArgKeyValT && ... args)
+    template <typename ... ArgsT>
+    void add_select(add_param_elems_t, ArgsT && ... args)
     {
-        addKeyVals({std::forward<ArgKeyValT>(args) ...});
+        add_elems({std::forward<ArgsT>(args) ...});
+    }
+
+    template <typename ... ArgsT>
+    void add_select(add_first_string_param_t, std::string const & name, ArgsT && ... args)
+    {
+        add_param(Param{{name}, std::forward<ArgsT>(args) ...});
+    }
+
+    template <typename ... ArgsT>
+    void add_select(add_param_t, ArgsT && ... args)
+    {
+        add_param(Param{std::forward<ArgsT>(args) ...});
+    }
+
+    template <typename ... T>
+    struct is_all_param_elem;
+
+    template <typename Head, typename ... Tail>
+    struct is_all_param_elem<Head, Tail...>
+    {
+        TBAG_CONSTEXPR static bool const value = is_all_param_elem<Head>::value && is_all_param_elem<Tail ...>::value;
+    };
+
+    template <typename T>
+    struct is_all_param_elem<T>
+    {
+        TBAG_CONSTEXPR static bool const value = std::is_same<
+                typename libtbag::remove_cr<T>::type,
+                ParamElem
+        >::value;
+    };
+
+    template <typename ... T>
+    struct is_first_string;
+
+    template <typename Head, typename ... Tail>
+    struct is_first_string<Head, Tail...>
+    {
+        TBAG_CONSTEXPR static bool const value = is_first_string<Head>::value;
+    };
+
+    template <typename T>
+    struct is_first_string<T>
+    {
+        TBAG_CONSTEXPR static bool const value =
+                std::is_same<typename remove_cr<T>::type, std::string>::value ||
+                is_string_literal<T>::value;
+    };
+
+public:
+    template <typename ... ArgsT>
+    void add(ArgsT && ... args)
+    {
+        using __select_t = typename std::conditional<
+                is_all_param_elem<ArgsT ...>::value,
+                add_param_elems_t,
+                typename std::conditional<
+                        is_first_string<ArgsT ...>::value,
+                        add_first_string_param_t,
+                        add_param_t
+                >::type
+        >::type;
+        static_assert(sizeof...(ArgsT) >= 1u, "Greater one template argument is required.");
+        add_select(__select_t{}, std::forward<ArgsT>(args) ...);
+    }
+
+    void add(Param const & arg)
+    {
+        add_param(arg);
+    }
+
+    void add(Param && arg)
+    {
+        add_param(std::move(arg));
     }
 
 public:

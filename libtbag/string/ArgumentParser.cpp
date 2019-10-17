@@ -21,7 +21,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
-std::string ArgumentParser::DefaultFormatter::print(Params const & params, Args const & args)
+std::string ArgumentParser::DefaultFormatter::print(InitParams const & init, Params const & params)
 {
     return {};
 }
@@ -35,13 +35,15 @@ using ParseResult = ArgumentParser::ParseResult;
 using ActionType = ArgumentParser::ActionType;
 
 // clang-format on
-ArgumentParser::arg_key const ArgumentParser::name          = { ArgumentParser::ARG_NAME_KEY    };
-ArgumentParser::arg_key const ArgumentParser::dest          = { ArgumentParser::ARG_DEST_KEY    };
-ArgumentParser::arg_key const ArgumentParser::action        = { ArgumentParser::ARG_ACTION_KEY  };
-ArgumentParser::arg_key const ArgumentParser::default_value = { ArgumentParser::ARG_DEFAULT_KEY };
-ArgumentParser::arg_key const ArgumentParser::const_value   = { ArgumentParser::ARG_CONST_KEY   };
-ArgumentParser::arg_key const ArgumentParser::help          = { ArgumentParser::ARG_HELP_KEY    };
-ArgumentParser::arg_key const ArgumentParser::meta          = { ArgumentParser::ARG_META_KEY    };
+ArgumentParser::ParamKey  const ArgumentParser::name          = { ArgumentParser::ARG_NAME_KEY        };
+ArgumentParser::ParamKey  const ArgumentParser::dest          = { ArgumentParser::ARG_DEST_KEY        };
+ArgumentParser::ParamKey  const ArgumentParser::action        = { ArgumentParser::ARG_ACTION_KEY      };
+ArgumentParser::ParamKey  const ArgumentParser::default_value = { ArgumentParser::ARG_DEFAULT_KEY     };
+ArgumentParser::ParamKey  const ArgumentParser::const_value   = { ArgumentParser::ARG_CONST_KEY       };
+ArgumentParser::ParamKey  const ArgumentParser::help          = { ArgumentParser::ARG_HELP_KEY        };
+ArgumentParser::ParamKey  const ArgumentParser::meta          = { ArgumentParser::ARG_META_KEY        };
+ArgumentParser::ParamElem const ArgumentParser::store         = { ArgumentParser::ARG_STORE_KEY       };
+ArgumentParser::ParamElem const ArgumentParser::store_const   = { ArgumentParser::ARG_STORE_CONST_KEY };
 // clang-format off
 
 char const * ArgumentParser::getActionTypeName(ActionType type) TBAG_NOEXCEPT
@@ -72,24 +74,24 @@ ArgumentParser::ArgumentParser()
     // EMPTY.
 }
 
-ArgumentParser::ArgumentParser(Params const & params) : _params(params)
+ArgumentParser::ArgumentParser(InitParams const & params) : _init(params)
 {
     // EMPTY.
 }
 
-ArgumentParser::ArgumentParser(Params && params) : _params(std::move(params))
+ArgumentParser::ArgumentParser(InitParams && params) : _init(std::move(params))
 {
     // EMPTY.
 }
 
 ArgumentParser::ArgumentParser(ArgumentParser const & obj)
-        : _params(obj._params), _args(obj._args)
+        : _init(obj._init), _params(obj._params)
 {
     // EMPTY.
 }
 
 ArgumentParser::ArgumentParser(ArgumentParser && obj) TBAG_NOEXCEPT
-        : _params(std::move(obj._params)), _args(std::move(obj._args))
+        : _init(std::move(obj._init)), _params(std::move(obj._params))
 {
     // EMPTY.
 }
@@ -102,8 +104,8 @@ ArgumentParser::~ArgumentParser()
 ArgumentParser & ArgumentParser::operator =(ArgumentParser const & obj)
 {
     if (this != &obj) {
+        _init = obj._init;
         _params = obj._params;
-        _args = obj._args;
     }
     return *this;
 }
@@ -111,38 +113,38 @@ ArgumentParser & ArgumentParser::operator =(ArgumentParser const & obj)
 ArgumentParser & ArgumentParser::operator =(ArgumentParser && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
+        _init = std::move(obj._init);
         _params = std::move(obj._params);
-        _args = std::move(obj._args);
     }
     return *this;
 }
 
 void ArgumentParser::swap(ArgumentParser & obj) TBAG_NOEXCEPT
 {
-    std::swap(_params, obj._params);
-    _args.swap(obj._args);
+    std::swap(_init, obj._init);
+    _params.swap(obj._params);
 }
 
 void ArgumentParser::clear()
 {
-    _args.clear();
+    _params.clear();
 }
 
-void ArgumentParser::add(Arg const & arg)
+void ArgumentParser::add_param(Param const & arg)
 {
-    _args.emplace_back(arg);
+    _params.emplace_back(arg);
 }
 
-void ArgumentParser::add(Arg && arg)
+void ArgumentParser::add_param(Param && arg)
 {
-    _args.emplace_back(std::move(arg));
+    _params.emplace_back(std::move(arg));
 }
 
-void ArgumentParser::addKeyVals(std::vector<arg_key_val> const & kvs)
+void ArgumentParser::add_elems(std::vector<ParamElem> const & elems)
 {
-    Arg arg;
-    for (auto const & kv : kvs) {
-        arg << kv;
+    Param arg;
+    for (auto const & e : elems) {
+        arg << e;
     }
     add(std::move(arg));
 }
@@ -178,8 +180,8 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
 
     std::queue<std::string> positional_names;
     COMMENT("Find positional arguments.") {
-        for (auto const & arg : _args) {
-            if (arg.names.size() == 1 && !arg.names[0].empty() && arg.names[0][0] != _params.prefix) {
+        for (auto const & arg : _params) {
+            if (arg.names.size() == 1 && !arg.names[0].empty() && arg.names[0][0] != _init.prefix) {
                 positional_names.push(arg.names[0]);
             }
         }
@@ -190,7 +192,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
     ArgumentResult result = {};
 
     COMMENT("Update key map.") {
-        for (auto const & arg : _args) {
+        for (auto const & arg : _params) {
             for (auto const & name : arg.names) {
                 key_map[name] = arg.dest;
             }
@@ -198,7 +200,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
     }
 
     COMMENT("Update default variables.") {
-        for (auto const & arg : _args) {
+        for (auto const & arg : _params) {
             if (arg.names.empty()) {
                 continue;
             }
@@ -208,7 +210,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
             if (arg.default_value.empty()) {
                 continue;
             }
-            if (arg.names[0][0] == _params.prefix) {
+            if (arg.names[0][0] == _init.prefix) {
                 result.optional[arg.dest] = arg.default_value;
             } else {
                 result.positional[arg.dest] = arg.default_value;
@@ -222,9 +224,9 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
     auto const size = argv.size();
     assert(size >= 1u);
 
-    for (std::size_t i = _params.first_argument_is_program_name?1u:0u; i < size; ++i) {
+    for (std::size_t i = _init.first_argument_is_program_name?1u:0u; i < size; ++i) {
         auto const & arg = argv[i];
-        if (_params.add_stop_parsing && stop_parsing) {
+        if (_init.add_stop_parsing && stop_parsing) {
             result.remain.emplace_back(arg);
             continue;
         }
@@ -239,7 +241,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
         case ParseResultCode::PRC_SKIP:
             break;
         case ParseResultCode::PRC_STDIN:
-            result.optional[std::string(1u, _params.prefix)] = "true";
+            result.optional[std::string(1u, _init.prefix)] = "true";
             break;
         case ParseResultCode::PRC_STOP_PARSING:
             stop_parsing = true;
@@ -254,10 +256,10 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
 
         case ParseResultCode::PRC_KEY:
             if (req_type == argument_required_type_none) {
-                auto itr = std::find_if(_args.cbegin(), _args.cend(), [&parse_result](Arg const & a) -> bool {
+                auto itr = std::find_if(_params.cbegin(), _params.cend(), [&parse_result](Param const & a) -> bool {
                     return std::find(a.names.cbegin(), a.names.cend(), parse_result.key) != a.names.cend();
                 });
-                if (itr != _args.cend()) {
+                if (itr != _params.cend()) {
                     switch (itr->action) {
                     case ActionType::AT_STORE:
                         selected_key = parse_result.key;
@@ -318,7 +320,7 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
     }
 
     if (arg_size == 1u) {
-        if (arg[0] == _params.prefix) {
+        if (arg[0] == _init.prefix) {
             return { ParseResultCode::PRC_STDIN };
         } else {
             return { ParseResultCode::PRC_VAL, {}, arg };
@@ -326,13 +328,13 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
     }
 
     if (arg_size == 2u) {
-        if (arg[0] == _params.prefix) {
-            if (arg[1] == _params.prefix) {
+        if (arg[0] == _init.prefix) {
+            if (arg[1] == _init.prefix) {
                 return { ParseResultCode::PRC_STOP_PARSING };
             } else {
                 return { ParseResultCode::PRC_KEY, arg };
             }
-        } else if (arg[0] == _params.from_file_prefix) {
+        } else if (arg[0] == _init.from_file_prefix) {
             std::string content;
             if (isSuccess(readFile(std::string(1u, arg[1]), content))) {
                 return { ParseResultCode::PRC_VAL, {}, content };
@@ -347,13 +349,13 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
 
     assert(arg_size >= 3u);
     ParseResult result = {};
-    if (arg[0] == _params.prefix) {
+    if (arg[0] == _init.prefix) {
         auto const split_pos = arg.find(KEY_VAL_DELIMITER);
         if (split_pos != std::string::npos) {
             result.code = ParseResultCode::PRC_KEY_VAL;
             result.key = arg.substr(0, split_pos);
             auto const temp_value = arg.substr(split_pos+1);
-            if (!temp_value.empty() && temp_value[0] == _params.from_file_prefix) {
+            if (!temp_value.empty() && temp_value[0] == _init.from_file_prefix) {
                 if (isSuccess(readFile(temp_value.substr(1), result.value))) {
                     result.code = ParseResultCode::PRC_VAL;
                 } else {
@@ -366,7 +368,7 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
             result.code = ParseResultCode::PRC_KEY;
             result.key = arg;
         }
-    } else if (arg[0] == _params.from_file_prefix) {
+    } else if (arg[0] == _init.from_file_prefix) {
         if (isSuccess(readFile(arg.substr(1), result.value))) {
             result.code = ParseResultCode::PRC_VAL;
         } else {
