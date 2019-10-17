@@ -16,11 +16,12 @@ TEST(DefaultColorGeneratorTest, Default)
 {
     DefaultColorGenerator gen(DefaultColorGenerator::LineFeedStyle::LFS_NONE);
     auto const msg = gen.make_string("A", 8, "D", "abcdefg", 4);
+    std::cout << "Generated message: " << msg << std::endl;
     auto const tokens = libtbag::string::splitTokens(msg, " ");
     ASSERT_EQ(4, tokens.size());
-    ASSERT_FALSE(tokens[0].empty());
-    ASSERT_EQ('@', tokens[1][0]);
-    ASSERT_STREQ("[D]", tokens[2].c_str());
+    ASSERT_EQ('D', tokens[0].back());
+    ASSERT_FALSE(tokens[1].empty());
+    ASSERT_EQ('@', tokens[2][0]);
     ASSERT_STREQ("abcd", tokens[3].substr(0, 4).c_str());
 }
 

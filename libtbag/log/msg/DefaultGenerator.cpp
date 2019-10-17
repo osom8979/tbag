@@ -45,24 +45,8 @@ int DefaultGenerator::make(char * buffer, int buffer_size,
                            char const * msg, int msg_size) const
 {
     std::stringstream ss;
-
-    // clang-format off
-    switch (level) {
-    case       OFF_LEVEL: /*-------*/ break;
-    case EMERGENCY_LEVEL: ss << "M "; break;
-    case     ALERT_LEVEL: ss << "A "; break;
-    case  CRITICAL_LEVEL: ss << "C "; break;
-    case     ERROR_LEVEL: ss << "E "; break;
-    case   WARNING_LEVEL: ss << "W "; break;
-    case    NOTICE_LEVEL: ss << "N "; break;
-    case      INFO_LEVEL: ss << "I "; break;
-    case     DEBUG_LEVEL: ss << "D "; break;
-    case   UNKNOWN_LEVEL: /*-------*/ break;
-    default: /*--------------------*/ break;
-    }
-    // clang-format on
-
-    ss << libtbag::time::TimePoint::now().toLocalLongString()
+    ss << getShortPrefix(level)
+       << ' ' << libtbag::time::TimePoint::now().toLocalLongString()
        << " @" << std::this_thread::get_id()
        << ' ' << std::string(msg, msg + msg_size);
 

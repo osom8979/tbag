@@ -40,36 +40,46 @@ DefaultColorGenerator::~DefaultColorGenerator()
     // EMPTY.
 }
 
+inline static char const * __get_color_prefix(int level) TBAG_NOEXCEPT
+{
+#ifndef _EMERGENCY_ATTRIBUTE_BG
+#define _EMERGENCY_ATTRIBUTE_BG \
+    TBAG_TTY_DISPLAY_ATTRIBUTE_BG_RED \
+    TBAG_TTY_DISPLAY_ATTRIBUTE_FG_CYAN
+#endif
+    using namespace libtbag::tty;
+    // clang-format off
+    switch (level) {
+    case       OFF_LEVEL: return "";
+    case EMERGENCY_LEVEL: return _EMERGENCY_ATTRIBUTE_BG;
+    case     ALERT_LEVEL: return DISPLAY_ATTRIBUTE_FG_MAGENTA;
+    case  CRITICAL_LEVEL: return DISPLAY_ATTRIBUTE_FG_RED;
+    case     ERROR_LEVEL: return DISPLAY_ATTRIBUTE_FG_RED;
+    case   WARNING_LEVEL: return DISPLAY_ATTRIBUTE_FG_YELLOW;
+    case    NOTICE_LEVEL: return DISPLAY_ATTRIBUTE_FG_GREEN;
+    case      INFO_LEVEL: return DISPLAY_ATTRIBUTE_FG_GREEN;
+    case     DEBUG_LEVEL: return DISPLAY_ATTRIBUTE_FG_BLUE;
+    case   UNKNOWN_LEVEL: return "";
+    default: /*--------*/ return "";
+    }
+    // clang-format on
+#undef _EMERGENCY_ATTRIBUTE_BG
+}
+
 int DefaultColorGenerator::make(char * buffer, int buffer_size,
                                 char const * UNUSED_PARAM(logger),
-                                int level, char const * level_name,
+                                int level, char const * UNUSED_PARAM(level_name),
                                 char const * msg, int msg_size) const
 {
     std::stringstream ss;
 
-    using namespace libtbag::tty;
-    // clang-format off
-    switch (level) {
-    case       OFF_LEVEL: /*--------------------------------------*/ break;
-    case EMERGENCY_LEVEL: ss << DISPLAY_ATTRIBUTE_BG_RED << DISPLAY_ATTRIBUTE_FG_CYAN << "M "; break;
-    case     ALERT_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_MAGENTA << "A "; break;
-    case  CRITICAL_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED     << "C "; break;
-    case     ERROR_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_RED     << "E "; break;
-    case   WARNING_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_YELLOW  << "W "; break;
-    case    NOTICE_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN   << "N "; break;
-    case      INFO_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_GREEN   << "I "; break;
-    case     DEBUG_LEVEL: ss << DISPLAY_ATTRIBUTE_FG_BLUE    << "D "; break;
-    case   UNKNOWN_LEVEL: /*--------------------------------------*/ break;
-    default: /*---------------------------------------------------*/ break;
-    }
-    // clang-format on
-
-    ss << libtbag::time::TimePoint::now().toLocalLongString()
+    ss << __get_color_prefix(level) << getShortPrefix(level)
+       << ' ' << libtbag::time::TimePoint::now().toLocalLongString()
        << " @" << std::this_thread::get_id()
        << ' ' << std::string(msg, msg + msg_size);
 
     if (EMERGENCY_LEVEL <= COMPARE_AND(level) <= DEBUG_LEVEL) {
-        ss << DISPLAY_ATTRIBUTE_RESET;
+        ss << libtbag::tty::DISPLAY_ATTRIBUTE_RESET;
     }
 
     if (LINE_FEED == LineFeedStyle::LFS_AUTO) {
