@@ -92,6 +92,16 @@ void ThreadGroup::joinAll(bool rethrow)
     }
 }
 
+Err ThreadGroup::kill(uthread const & tid)
+{
+    for (auto & t : _threads) {
+        if (t && t->equal(tid)) {
+            return t->kill();
+        }
+    }
+    return E_NFOUND;
+}
+
 } // namespace thread
 
 // --------------------

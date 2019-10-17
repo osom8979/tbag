@@ -70,7 +70,7 @@ public:
     const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(_threads.cbegin())
     { return _threads.cbegin(); }
     const_iterator cend() const TBAG_NOEXCEPT_SP_OP(_threads.cend())
-    { return _threads.  cend(); }
+    { return _threads.cend(); }
 
 public:
     void clear();
@@ -89,6 +89,9 @@ public:
 
 public:
     void joinAll(bool rethrow = false);
+
+public:
+    Err kill(uthread const & tid);
 };
 
 } // namespace thread

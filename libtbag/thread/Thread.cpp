@@ -180,6 +180,11 @@ Err Thread::waitForRunningOrDone(unsigned long timeout_ms, unsigned long tick_ms
     return waitForRunningOrDone(*this, std::chrono::milliseconds(timeout_ms), std::chrono::milliseconds(tick_ms));
 }
 
+Err Thread::kill()
+{
+    return E_ENOSYS;
+}
+
 } // namespace thread
 
 // --------------------
