@@ -155,6 +155,25 @@ Severity findSeverity(std::string const & name)
     return UNKNOWN_SEVERITY;
 }
 
+char getShortPrefix(int level) TBAG_NOEXCEPT
+{
+    // clang-format off
+    switch (level) {
+    case       OFF_LEVEL: return '.';
+    case EMERGENCY_LEVEL: return 'M';
+    case     ALERT_LEVEL: return 'A';
+    case  CRITICAL_LEVEL: return 'C';
+    case     ERROR_LEVEL: return 'E';
+    case   WARNING_LEVEL: return 'W';
+    case    NOTICE_LEVEL: return 'N';
+    case      INFO_LEVEL: return 'I';
+    case     DEBUG_LEVEL: return 'D';
+    case   UNKNOWN_LEVEL: return '_';
+    default: /*--------*/ return '?';
+    }
+    // clang-format on
+}
+
 } // namespace log
 
 // --------------------

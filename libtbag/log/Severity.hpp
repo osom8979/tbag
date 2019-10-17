@@ -179,6 +179,7 @@ TBAG_API char const * const getTextWithLevelStep(int level) TBAG_NOEXCEPT;
 TBAG_API char const * const getDetailsWithLevelStep(int level) TBAG_NOEXCEPT;
 TBAG_API Severity getSeverityWithLevelStep(int level) TBAG_NOEXCEPT;
 TBAG_API Severity findSeverity(std::string const & name);
+TBAG_API char getShortPrefix(int level) TBAG_NOEXCEPT;
 
 } // namespace log
 
