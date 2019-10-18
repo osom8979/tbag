@@ -84,20 +84,21 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_SEND                   , 10047, "Send error"                                             )\
     _TBAG_XX(_RECV                   , 10048, "Recv error"                                             )\
     _TBAG_XX(_INACCES                , 10049, "Inaccessible error"                                     )\
-    _TBAG_XX(_EXITPROC               , 10050, "Exit process"                                           )\
-    _TBAG_XX(_EXCHANGE               , 10051, "Error exchange"                                         )\
-    _TBAG_XX(_FILTERED               , 10052, "Filtered."                                              )\
-    _TBAG_XX(_VERSION                , 10053, "Incompatible version error"                             )\
-    _TBAG_XX(_CONNECTION_RESET       , 10054, "A connection was forcibly closed by a peer"             )\
-    _TBAG_XX(_NO_RESPONSE            , 10055, "No response"                                            )\
-    _TBAG_XX(_NOT_WS_RESPONSE        , 10056, "Not WebSocket response"                                 )\
-    _TBAG_XX(_UNKNOWN_ID             , 10057, "Unknown id"                                             )\
-    _TBAG_XX(_REJECTED               , 10058, "Rejected"                                               )\
-    _TBAG_XX(_NETWORK                , 10059, "Unknown network error"                                  )\
-    _TBAG_XX(_MODIFY                 , 10060, "Modify error"                                           )\
-    _TBAG_XX(_RESOURCE_EXHAUSTED     , 10061, "Some resource has been exhausted"                       )\
-    _TBAG_XX(_INACCESSIBLE_BLOCK     , 10062, "Inaccessible block"                                     )\
-    _TBAG_XX(_SCRIPT                 , 10063, "Script error"                                           )\
+    _TBAG_XX(_EXITPROC               , 10050, "Terminated process"                                     )\
+    _TBAG_XX(_EEXITPROC              , 10051, "Abnormally terminated process"                          )\
+    _TBAG_XX(_EXCHANGE               , 10052, "Error exchange"                                        )\
+    _TBAG_XX(_FILTERED               , 10053, "Filtered."                                              )\
+    _TBAG_XX(_VERSION                , 10054, "Incompatible version error"                             )\
+    _TBAG_XX(_CONNECTION_RESET       , 10055, "A connection was forcibly closed by a peer"             )\
+    _TBAG_XX(_NO_RESPONSE            , 10056, "No response"                                            )\
+    _TBAG_XX(_NOT_WS_RESPONSE        , 10057, "Not WebSocket response"                                 )\
+    _TBAG_XX(_UNKNOWN_ID             , 10058, "Unknown id"                                             )\
+    _TBAG_XX(_REJECTED               , 10059, "Rejected"                                               )\
+    _TBAG_XX(_NETWORK                , 10060, "Unknown network error"                                  )\
+    _TBAG_XX(_MODIFY                 , 10061, "Modify error"                                           )\
+    _TBAG_XX(_RESOURCE_EXHAUSTED     , 10062, "Some resource has been exhausted"                       )\
+    _TBAG_XX(_INACCESSIBLE_BLOCK     , 10063, "Inaccessible block"                                     )\
+    _TBAG_XX(_SCRIPT                 , 10064, "Script error"                                           )\
     /* OpenSSL/ReSSL error code ***********************************************************************/\
     _TBAG_XX(_SSL                    , 11000, "SSL library error"                                      )\
     _TBAG_XX(_SSL_NONE               , 11001, "SSL I/O operation completed"                            )\
