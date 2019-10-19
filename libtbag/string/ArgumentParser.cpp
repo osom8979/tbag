@@ -377,6 +377,14 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
     return { E_SUCCESS, result };
 }
 
+std::string ArgumentParser::print() const
+{
+    if (!_init.formatter) {
+        return {};
+    }
+    return _init.formatter->print(_init, _params);
+}
+
 ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
 {
     using namespace libtbag::filesystem;
@@ -411,7 +419,6 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
             return { ParseResultCode::PRC_VAL, {}, arg };
         }
     }
-
 
     assert(arg_size >= 3u);
     ParseResult result = {};

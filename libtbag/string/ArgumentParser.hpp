@@ -370,6 +370,9 @@ public:
     ErrArgumentResult parse(std::vector<std::string> const & argv) const;
 
 public:
+    std::string print() const;
+
+public:
     enum class ParseResultCode
     {
         PRC_ERROR,
