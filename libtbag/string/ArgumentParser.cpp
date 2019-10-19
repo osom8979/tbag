@@ -7,6 +7,7 @@
 
 #include <libtbag/string/ArgumentParser.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Format.hpp>
 #include <libtbag/filesystem/File.hpp>
 
 #include <cassert>
@@ -30,6 +31,8 @@ std::string ArgumentParser::DefaultFormatter::print(InitParams const & init, Par
 // ArgumentParser
 // --------------
 
+using Param = ArgumentParser::Param;
+using Params = ArgumentParser::Params;
 using ErrArgumentResult = ArgumentParser::ErrArgumentResult;
 using ParseResult = ArgumentParser::ParseResult;
 using ActionType = ArgumentParser::ActionType;
@@ -130,23 +133,80 @@ void ArgumentParser::clear()
     _params.clear();
 }
 
-void ArgumentParser::add_param(Param const & arg)
+Params::iterator ArgumentParser::findParameter(std::string const & name)
 {
+    return std::find_if(_params.begin(), _params.end(), [&name](Params::const_reference p) -> bool {
+        return std::find(p.names.begin(), p.names.end(), name) != p.names.cend();
+    });
+}
+
+Params::const_iterator ArgumentParser::findConstantParameter(std::string const & name) const
+{
+    return std::find_if(_params.cbegin(), _params.cend(), [&name](Params::const_reference p) -> bool {
+        return std::find(p.names.cbegin(), p.names.cend(), name) != p.names.cend();
+    });
+}
+
+std::string ArgumentParser::removePrefix(std::string const & text)
+{
+    std::size_t i = 0u;
+    for (; i < text.size(); ++i) {
+        if (text[i] != _init.prefix) {
+            break;
+        }
+    }
+    return text.substr(i);
+}
+
+Err ArgumentParser::updateParam(Param & arg)
+{
+    if (arg.names.empty()) {
+        return E_ILLARGS;
+    }
+    if (arg.dest.empty()) {
+        std::string longest_name;
+        for (auto const & name : arg.names) {
+            auto const updated_name = removePrefix(name);
+            if (updated_name.size() > longest_name.size()) {
+                longest_name = updated_name;
+            }
+        }
+        arg.dest = longest_name;
+        if (arg.dest.empty()) {
+            return E_ILLARGS;
+        }
+    }
+    return E_SUCCESS;
+}
+
+Err ArgumentParser::add_param(Param const & arg)
+{
+    Param updated_arg = arg;
+    auto const code = updateParam(updated_arg);
+    if (isFailure(code)) {
+        return code;
+    }
+    _params.emplace_back(std::move(updated_arg));
+    return E_SUCCESS;
+}
+
+Err ArgumentParser::add_param(Param && arg)
+{
+    auto const code = updateParam(arg);
+    if (isFailure(code)) {
+        return code;
+    }
     _params.emplace_back(arg);
+    return E_SUCCESS;
 }
 
-void ArgumentParser::add_param(Param && arg)
-{
-    _params.emplace_back(std::move(arg));
-}
-
-void ArgumentParser::add_elems(std::vector<ParamElem> const & elems)
+Err ArgumentParser::add_elems(std::vector<ParamElem> const & elems)
 {
     Param arg;
     for (auto const & e : elems) {
         arg << e;
     }
-    add(std::move(arg));
+    return add(std::move(arg));
 }
 
 ErrArgumentResult ArgumentParser::parse(int argc, char ** argv) const
@@ -187,7 +247,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
         }
     }
 
-    std::unordered_map<std::string, std::string> key_map = {};
+    std::unordered_map<std::string, std::string> key_map;
     std::string selected_key = {};
     ArgumentResult result = {};
 
@@ -256,9 +316,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
 
         case ParseResultCode::PRC_KEY:
             if (req_type == argument_required_type_none) {
-                auto itr = std::find_if(_params.cbegin(), _params.cend(), [&parse_result](Param const & a) -> bool {
-                    return std::find(a.names.cbegin(), a.names.cend(), parse_result.key) != a.names.cend();
-                });
+                auto const itr = findConstantParameter(parse_result.key);
                 if (itr != _params.cend()) {
                     switch (itr->action) {
                     case ActionType::AT_STORE:
@@ -301,9 +359,17 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
         }
     }
 
-    if (!positional_names.empty()) {
-        return E_ILLARGS;
+    while (!positional_names.empty()) {
+        auto const name = positional_names.front();
+        auto const itr = findConstantParameter(name);
+        assert(itr != _params.cend());
+        if (itr->default_value.empty()) {
+            return E_ILLARGS;
+        }
+        result.positional[key_map[name]] = itr->default_value;
+        positional_names.pop();
     }
+
     if (req_type != argument_required_type_none) {
         return E_ILLSTATE;
     }

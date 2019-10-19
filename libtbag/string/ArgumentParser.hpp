@@ -267,31 +267,39 @@ public:
 public:
     void clear();
 
+public:
+    Params::iterator findParameter(std::string const & name);
+    Params::const_iterator findConstantParameter(std::string const & name) const;
+
+public:
+    std::string removePrefix(std::string const & text);
+    Err updateParam(Param & arg);
+
 private:
-    void add_param(Param const & arg);
-    void add_param(Param && arg);
-    void add_elems(std::vector<ParamElem> const & elems);
+    Err add_param(Param const & arg);
+    Err add_param(Param && arg);
+    Err add_elems(std::vector<ParamElem> const & elems);
 
     struct add_param_t { /* EMPTY. */ };
     struct add_first_string_param_t { /* EMPTY. */ };
     struct add_param_elems_t { /* EMPTY. */ };
 
     template <typename ... ArgsT>
-    void add_select(add_param_elems_t, ArgsT && ... args)
+    Err add_select(add_param_elems_t, ArgsT && ... args)
     {
-        add_elems({std::forward<ArgsT>(args) ...});
+        return add_elems({std::forward<ArgsT>(args) ...});
     }
 
     template <typename ... ArgsT>
-    void add_select(add_first_string_param_t, std::string const & name, ArgsT && ... args)
+    Err add_select(add_first_string_param_t, std::string const & name, ArgsT && ... args)
     {
-        add_param(Param{{name}, std::forward<ArgsT>(args) ...});
+        return add_param(Param{{name}, std::forward<ArgsT>(args) ...});
     }
 
     template <typename ... ArgsT>
-    void add_select(add_param_t, ArgsT && ... args)
+    Err add_select(add_param_t, ArgsT && ... args)
     {
-        add_param(Param{std::forward<ArgsT>(args) ...});
+        return add_param(Param{std::forward<ArgsT>(args) ...});
     }
 
     template <typename ... T>
@@ -331,7 +339,7 @@ private:
 
 public:
     template <typename ... ArgsT>
-    void add(ArgsT && ... args)
+    Err add(ArgsT && ... args)
     {
         using __select_t = typename std::conditional<
                 is_all_param_elem<ArgsT ...>::value,
@@ -343,17 +351,17 @@ public:
                 >::type
         >::type;
         static_assert(sizeof...(ArgsT) >= 1u, "Greater one template argument is required.");
-        add_select(__select_t{}, std::forward<ArgsT>(args) ...);
+        return add_select(__select_t{}, std::forward<ArgsT>(args) ...);
     }
 
-    void add(Param const & arg)
+    Err add(Param const & arg)
     {
-        add_param(arg);
+        return add_param(arg);
     }
 
-    void add(Param && arg)
+    Err add(Param && arg)
     {
-        add_param(std::move(arg));
+        return add_param(std::move(arg));
     }
 
 public:
