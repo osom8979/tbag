@@ -59,7 +59,11 @@ using ErrResourceUsage = ErrPair<ResourceUsage>;
  * On Windows not all fields are set, the unsupported fields are filled with zeroes.
 */
 TBAG_API ErrResourceUsage getResourceUsage();
-TBAG_API ErrResourceUsage getResourceUsage(int pid);
+
+/**
+ * Get memory usage.
+ */
+TBAG_API unsigned long getMemoryUsage(int pid);
 
 } // namespace system
 

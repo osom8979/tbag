@@ -6,6 +6,8 @@
  */
 
 #include <libtbag/system/ResourceUsage.hpp>
+#include <libtbag/system/SysInfo.hpp>
+#include <libtbag/system/linux/ProcessState.hpp>
 #include <uv.h>
 
 // -------------------
@@ -44,30 +46,33 @@ ErrResourceUsage getResourceUsage()
     return { E_SUCCESS, result };
 }
 
-static ErrResourceUsage __get_resource_usage_windows(int pid)
+static unsigned long __get_memory_usage_windows(int pid)
 {
-    return E_ENOSYS;
+    return 0;
 }
 
-static ErrResourceUsage __get_resource_usage_macos(int pid)
+static unsigned long __get_memory_usage_macos(int pid)
 {
-    return E_ENOSYS;
+    return 0;
 }
 
-static ErrResourceUsage __get_resource_usage_linux(int pid)
+static unsigned long __get_memory_usage_linux(int pid)
 {
-    return E_ENOSYS;
+    auto const state = libtbag::system::linux::getProcessState(pid);
+    if (!state) {
+        return 0;
+    }
+    return getPageSize() * state.value.rss;
 }
 
-ErrResourceUsage getResourceUsage(int pid)
+unsigned long getMemoryUsage(int pid)
 {
-    ResourceUsage result = {};
 #if defined(TBAG_PLATFORM_WINDOWS)
-    return __get_resource_usage_windows(pid);
+    return __get_memory_usage_windows(pid);
 #elif defined(TBAG_PLATFORM_MACOS)
-    return __get_resource_usage_macos(pid);
+    return __get_memory_usage_macos(pid);
 #elif defined(TBAG_PLATFORM_LINUX)
-    return __get_resource_usage_linux(pid);
+    return __get_memory_usage_linux(pid);
 #else
     return E_ENOSYS;
 #endif

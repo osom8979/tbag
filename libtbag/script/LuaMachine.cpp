@@ -19,6 +19,7 @@
 #include <libtbag/script/lua/RayGuiNodesLua.hpp>
 #include <libtbag/script/lua/LogLua.hpp>
 #include <libtbag/script/lua/StringLua.hpp>
+#include <libtbag/script/lua/SystemLua.hpp>
 
 #include <libtbag/config-ex.h>
 
@@ -180,6 +181,9 @@ void LuaMachine::initDefault()
     }
     if (!libtbag::script::lua::luaE_open_string(L)) {
         tDLogW("LuaMachine::initDefault() String bind failed.");
+    }
+    if (!libtbag::script::lua::luaE_open_system(L)) {
+        tDLogW("LuaMachine::initDefault() System bind failed.");
     }
 }
 
