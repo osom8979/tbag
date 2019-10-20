@@ -41,7 +41,7 @@ struct ProcessState
      * The filename of the executable, in parentheses.
      * This is visible whether or not the executable is swapped out.
      */
-    std::string comm;
+    char comm[2048] = {0,};
 
     /**
      * One of the following characters, indicating process state:

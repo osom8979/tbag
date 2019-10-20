@@ -36,26 +36,110 @@ ErrProcessState getProcessState(int pid)
         return E_RDERR;
     }
 
-    std::string content;
-    auto const code = libtbag::filesystem::readFile(path, content);
-    if (isFailure(code)) {
-        return code;
-    }
-    assert(!content.empty());
-
-    std::istringstream ss(content);
     ProcessState result;
-    ss >> result.pid >> result.comm >> result.state >> result.ppid >> result.pgrp
-       >> result.session >> result.tty_nr >> result.tpgid >> result.flags >> result.minflt
-       >> result.cminflt >> result.majflt >> result.cmajflt >> result.utime >> result.stime
-       >> result.cutime >> result.cstime >> result.priority >> result.nice >> result.num_threads
-       >> result.itrealvalue >> result.starttime >> result.vsize >> result.rss >> result.rsslim
-       >> result.startcode >> result.endcode >> result.startstack >> result.kstkesp >> result.kstkeip
-       >> result.signal >> result.blocked >> result.sigignore >> result.sigcatch >> result.wchan
-       >> result.nswap >> result.cnswap >> result.exit_signal >> result.processor >> result.rt_priority
-       >> result.policy >> result.delayacct_blkio_ticks >> result.guest_time >> result.cguest_time >> result.start_data
-       >> result.end_data >> result.start_brk >> result.arg_start >> result.arg_end >> result.env_start
-       >> result.env_end >> result.exit_code;
+    auto * f = fopen(path.c_str(), "r");
+    if (f == nullptr) {
+        return E_OPEN;
+    }
+
+    // (1) pid  %d
+    // (2) comm  %s
+    // (3) state  %c
+    // (4) ppid  %d
+    // (5) pgrp  %d
+    // (6) session  %d
+    // (7) tty_nr  %d
+    // (8) tpgid  %d
+    // (9) flags  %u
+    // (10) minflt  %lu
+    // (11) cminflt  %lu
+    // (12) majflt  %lu
+    // (13) cmajflt  %lu
+    // (14) utime  %lu
+    // (15) stime  %lu
+    // (16) cutime  %ld
+    // (17) cstime  %ld
+    // (18) priority  %ld
+    // (19) nice  %ld
+    // (20) num_threads  %ld
+    // (21) itrealvalue  %ld
+    // (22) starttime  %llu
+    // (23) vsize  %lu
+    // (24) rss  %ld
+    // (25) rsslim  %lu
+    // (26) startcode  %lu  [PT]
+    // (27) endcode  %lu  [PT]
+    // (28) startstack  %lu  [PT]
+    // (29) kstkesp  %lu  [PT]
+    // (30) kstkeip  %lu  [PT]
+    // (31) signal  %lu
+    // (32) blocked  %lu
+    // (33) sigignore  %lu
+    // (34) sigcatch  %lu
+    // (35) wchan  %lu  [PT]
+    // (36) nswap  %lu
+    // (37) cnswap  %lu
+    // (38) exit_signal  %d  (since Linux 2.1.22)
+    // (39) processor  %d  (since Linux 2.2.8)
+    // (40) rt_priority  %u  (since Linux 2.5.19)
+    // (41) policy  %u  (since Linux 2.5.19)
+    // (42) delayacct_blkio_ticks  %llu  (since Linux 2.6.18)
+    // (43) guest_time  %lu  (since Linux 2.6.24)
+    // (44) cguest_time  %ld  (since Linux 2.6.24)
+    // (45) start_data  %lu  (since Linux 3.3)  [PT]
+    // (46) end_data  %lu  (since Linux 3.3)  [PT]
+    // (47) start_brk  %lu  (since Linux 3.3)  [PT]
+    // (48) arg_start  %lu  (since Linux 3.5)  [PT]
+    // (49) arg_end  %lu  (since Linux 3.5)  [PT]
+    // (50) env_start  %lu  (since Linux 3.5)  [PT]
+    // (51) env_end  %lu  (since Linux 3.5)  [PT]
+    // (52) exit_code  %d  (since Linux 3.5)  [PT]
+    TBAG_CONSTEXPR static char const * const scan_format =
+            "%d "    "%s "    "%c "   "%d "   "%d "
+            "%d "    "%d "    "%d "   "%u "   "%lu "
+            "%lu "   "%lu "   "%lu "  "%lu "  "%lu "
+            "%ld "   "%ld "   "%ld "  "%ld "  "%ld "
+            "%ld "   "%llu "  "%lu "  "%ld "  "%lu "
+            "%lu "   "%lu "   "%lu "  "%lu "  "%lu "
+            "%lu "   "%lu "   "%lu "  "%lu "  "%lu "
+            "%lu "   "%lu "   "%d "   "%d "   "%u "
+            "%u "    "%llu "  "%lu "  "%ld "  "%lu "
+            "%lu "   "%lu "   "%lu "  "%lu "  "%lu "
+            "%lu "   "%d";
+
+    ::fscanf(f, scan_format,
+             &result.pid, result.comm, &result.state, &result.ppid, &result.pgrp,
+             &result.session, &result.tty_nr, &result.tpgid, &result.flags, &result.minflt,
+             &result.cminflt, &result.majflt, &result.cmajflt, &result.utime, &result.stime,
+             &result.cutime, &result.cstime, &result.priority, &result.nice, &result.num_threads,
+             &result.itrealvalue, &result.starttime, &result.vsize, &result.rss, &result.rsslim,
+             &result.startcode, &result.endcode, &result.startstack, &result.kstkesp, &result.kstkeip,
+             &result.signal, &result.blocked, &result.sigignore, &result.sigcatch, &result.wchan,
+             &result.nswap, &result.cnswap, &result.exit_signal, &result.processor, &result.rt_priority,
+             &result.policy, &result.delayacct_blkio_ticks, &result.guest_time, &result.cguest_time, &result.start_data,
+             &result.end_data, &result.start_brk, &result.arg_start, &result.arg_end, &result.env_start,
+             &result.env_end, &result.exit_code);
+    ::fclose(f);
+
+//    std::string content;
+//    auto const code = libtbag::filesystem::readFile(path, content);
+//    if (isFailure(code)) {
+//        return code;
+//    }
+//    assert(!content.empty());
+
+//    std::istringstream ss(content);
+//    ss >> result.pid >> result.comm >> result.state >> result.ppid >> result.pgrp
+//       >> result.session >> result.tty_nr >> result.tpgid >> result.flags >> result.minflt
+//       >> result.cminflt >> result.majflt >> result.cmajflt >> result.utime >> result.stime
+//       >> result.cutime >> result.cstime >> result.priority >> result.nice >> result.num_threads
+//       >> result.itrealvalue >> result.starttime >> result.vsize >> result.rss >> result.rsslim
+//       >> result.startcode >> result.endcode >> result.startstack >> result.kstkesp >> result.kstkeip
+//       >> result.signal >> result.blocked >> result.sigignore >> result.sigcatch >> result.wchan
+//       >> result.nswap >> result.cnswap >> result.exit_signal >> result.processor >> result.rt_priority
+//       >> result.policy >> result.delayacct_blkio_ticks >> result.guest_time >> result.cguest_time >> result.start_data
+//       >> result.end_data >> result.start_brk >> result.arg_start >> result.arg_end >> result.env_start
+//       >> result.env_end >> result.exit_code;
     return { E_SUCCESS, result };
 }
 
