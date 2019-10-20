@@ -9,8 +9,8 @@
 #include <libtbag/net/SocketAddress.hpp>
 #include <libtbag/net/Ip.hpp>
 #include <libtbag/bitwise/Endian.hpp>
+#include <libtbag/system/SysInfo.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
-#include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/uvpp/Dns.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/log/Log.hpp>
@@ -222,7 +222,7 @@ Err findHostNameOfConnectedInterfaceByIpAddress(std::string const & ip, int flag
     libtbag::uvpp::Loop loop;
     libtbag::uvpp::DnsNameInfo name;
 
-    for (auto const & interface : libtbag::uvpp::getInterfaceAddresses()) {
+    for (auto const & interface : libtbag::system::getInterfaceAddresses()) {
         auto const addr_family = interface.address.common.sa_family;
         auto const mask_family = interface.netmask.common.sa_family;
 
