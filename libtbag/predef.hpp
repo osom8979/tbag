@@ -55,6 +55,15 @@ inline TBAG_CONSTEXPR bool isWindowsPlatform() TBAG_NOEXCEPT
 #endif
 }
 
+inline TBAG_CONSTEXPR bool isLinuxPlatform() TBAG_NOEXCEPT
+{
+#if defined(TBAG_PLATFORM_LINUX)
+    return true;
+#else
+    return false;
+#endif
+}
+
 inline TBAG_CONSTEXPR bool isUnixLikePlatform() TBAG_NOEXCEPT
 {
 #if defined(TBAG_PLATFORM_UNIX_LIKE)
