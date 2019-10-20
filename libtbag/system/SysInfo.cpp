@@ -149,46 +149,6 @@ double getUptime()
     return uptime;
 }
 
-ResourceUsage getResourceUsage()
-{
-    uv_rusage_t rusage = {0,};
-    int const CODE = ::uv_getrusage(&rusage);
-    if (CODE != 0) {
-        tDLogE("getResourceUsage() {} error", getUvErrorName(CODE));
-    }
-
-    ResourceUsage result = {};
-    result.utime.sec  = rusage.ru_utime.tv_sec;
-    result.utime.usec = rusage.ru_utime.tv_usec;
-    result.stime.sec  = rusage.ru_stime.tv_sec;
-    result.stime.usec = rusage.ru_stime.tv_usec;
-    result.maxrss     = rusage.ru_maxrss;
-    result.ixrss      = rusage.ru_ixrss;
-    result.idrss      = rusage.ru_idrss;
-    result.isrss      = rusage.ru_isrss;
-    result.minflt     = rusage.ru_minflt;
-    result.majflt     = rusage.ru_majflt;
-    result.nswap      = rusage.ru_nswap;
-    result.inblock    = rusage.ru_inblock;
-    result.oublock    = rusage.ru_oublock;
-    result.msgsnd     = rusage.ru_msgsnd;
-    result.msgrcv     = rusage.ru_msgrcv;
-    result.nsignals   = rusage.ru_nsignals;
-    result.nvcsw      = rusage.ru_nvcsw;
-    result.nivcsw     = rusage.ru_nivcsw;
-    return result;
-}
-
-ResourceUsage getResourceUsage(int pid)
-{
-    ResourceUsage result = {};
-#if defined(TBAG_PLATFORM_WINDOWS)
-#elif defined(TBAG_PLATFORM_LINUX)
-#else
-#endif
-    return result;
-}
-
 std::vector<CpuInfo> getCpuInfos()
 {
     uv_cpu_info_t * infos = nullptr;

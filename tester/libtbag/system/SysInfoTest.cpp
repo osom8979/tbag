@@ -64,30 +64,6 @@ TEST(SysInfoTest, Uptime)
     ASSERT_LT(0.0f, TIME);
 }
 
-TEST(SysInfoTest, ResourceUsage)
-{
-    auto res = getResourceUsage();
-#if !defined(TBAG_PLATFORM_WINDOWS)
-    std::cout << "Resource Usage:\n"
-              << "utime: " << res.utime.sec << "." << res.utime.usec << std::endl
-              << "stime: " << res.stime.sec << "." << res.stime.usec << std::endl
-              << "maxrss: "   << res.maxrss   << std::endl
-              << "ixrss: "    << res.ixrss    << std::endl
-              << "idrss: "    << res.idrss    << std::endl
-              << "isrss: "    << res.isrss    << std::endl
-              << "minflt: "   << res.minflt   << std::endl
-              << "majflt: "   << res.majflt   << std::endl
-              << "nswap: "    << res.nswap    << std::endl
-              << "inblock: "  << res.inblock  << std::endl
-              << "oublock: "  << res.oublock  << std::endl
-              << "msgsnd: "   << res.msgsnd   << std::endl
-              << "msgrcv: "   << res.msgrcv   << std::endl
-              << "nsignals: " << res.nsignals << std::endl
-              << "nvcsw: "    << res.nvcsw    << std::endl
-              << "nivcsw: "   << res.nivcsw   << std::endl;
-#endif
-}
-
 TEST(SysInfoTest, CpuInfo)
 {
     auto infos = getCpuInfos();

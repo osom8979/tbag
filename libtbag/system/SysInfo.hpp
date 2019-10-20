@@ -85,42 +85,6 @@ TBAG_API std::size_t getResidentSetMemory();
 /** Gets the current system uptime. */
 TBAG_API double getUptime();
 
-struct TimeVal
-{
-    long sec;
-    long usec;
-};
-
-/** Data type for resource usage results. */
-struct ResourceUsage
-{
-    TimeVal  utime;     ///< user CPU time used
-    TimeVal  stime;     ///< system CPU time used
-    uint64_t maxrss;    ///< maximum resident set size
-    uint64_t ixrss;     ///< integral shared memory size (X)
-    uint64_t idrss;     ///< integral unshared data size (X)
-    uint64_t isrss;     ///< integral unshared stack size (X)
-    uint64_t minflt;    ///< page reclaims (soft page faults) (X)
-    uint64_t majflt;    ///< page faults (hard page faults)
-    uint64_t nswap;     ///< swaps (X)
-    uint64_t inblock;   ///< block input operations
-    uint64_t oublock;   ///< block output operations
-    uint64_t msgsnd;    ///< IPC messages sent (X)
-    uint64_t msgrcv;    ///< IPC messages received (X)
-    uint64_t nsignals;  ///< signals received (X)
-    uint64_t nvcsw;     ///< voluntary context switches (X)
-    uint64_t nivcsw;    ///< involuntary context switches (X)
-};
-
-/**
- * Gets the resource usage measures for the current process.
- *
- * @warning
- * On Windows not all fields are set, the unsupported fields are filled with zeroes.
-*/
-TBAG_API ResourceUsage getResourceUsage();
-TBAG_API ResourceUsage getResourceUsage(int pid);
-
 struct CpuTimes
 {
     uint64_t user;
