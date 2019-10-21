@@ -124,7 +124,7 @@ public:
     TBAG_CONSTEXPR static char const * const ACTION_TYPE_STORE_CONST = "store_const";
 
     static char const * getActionTypeName(ActionType type) TBAG_NOEXCEPT;
-    static ActionType getActionType(std::string const & name);
+    static ActionType getActionType(std::string const & action_name);
 
     struct ParamElem
     {
@@ -268,8 +268,8 @@ public:
     void clear();
 
 public:
-    Params::iterator findParameter(std::string const & name);
-    Params::const_iterator findConstantParameter(std::string const & name) const;
+    Params::iterator findParameter(std::string const & option_name);
+    Params::const_iterator findConstantParameter(std::string const & option_name) const;
 
 public:
     std::string removePrefix(std::string const & text);

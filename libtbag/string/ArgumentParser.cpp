@@ -61,11 +61,11 @@ char const * ArgumentParser::getActionTypeName(ActionType type) TBAG_NOEXCEPT
     }
 }
 
-ActionType ArgumentParser::getActionType(std::string const & name)
+ActionType ArgumentParser::getActionType(std::string const & action_name)
 {
-    if (name == ACTION_TYPE_STORE) {
+    if (action_name == ACTION_TYPE_STORE) {
         return ActionType::AT_STORE;
-    } else if (name == ACTION_TYPE_STORE_CONST) {
+    } else if (action_name == ACTION_TYPE_STORE_CONST) {
         return ActionType::AT_STORE_CONST;
     } else {
         return ActionType::AT_NONE;
@@ -133,17 +133,17 @@ void ArgumentParser::clear()
     _params.clear();
 }
 
-Params::iterator ArgumentParser::findParameter(std::string const & name)
+Params::iterator ArgumentParser::findParameter(std::string const & option_name)
 {
-    return std::find_if(_params.begin(), _params.end(), [&name](Params::const_reference p) -> bool {
-        return std::find(p.names.begin(), p.names.end(), name) != p.names.cend();
+    return std::find_if(_params.begin(), _params.end(), [&option_name](Params::const_reference p) -> bool {
+        return std::find(p.names.begin(), p.names.end(), option_name) != p.names.cend();
     });
 }
 
-Params::const_iterator ArgumentParser::findConstantParameter(std::string const & name) const
+Params::const_iterator ArgumentParser::findConstantParameter(std::string const & option_name) const
 {
-    return std::find_if(_params.cbegin(), _params.cend(), [&name](Params::const_reference p) -> bool {
-        return std::find(p.names.cbegin(), p.names.cend(), name) != p.names.cend();
+    return std::find_if(_params.cbegin(), _params.cend(), [&option_name](Params::const_reference p) -> bool {
+        return std::find(p.names.cbegin(), p.names.cend(), option_name) != p.names.cend();
     });
 }
 
@@ -165,8 +165,8 @@ Err ArgumentParser::updateParam(Param & arg)
     }
     if (arg.dest.empty()) {
         std::string longest_name;
-        for (auto const & name : arg.names) {
-            auto const updated_name = removePrefix(name);
+        for (auto const & n : arg.names) {
+            auto const updated_name = removePrefix(n);
             if (updated_name.size() > longest_name.size()) {
                 longest_name = updated_name;
             }
@@ -253,8 +253,8 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
 
     COMMENT("Update key map.") {
         for (auto const & arg : _params) {
-            for (auto const & name : arg.names) {
-                key_map[name] = arg.dest;
+            for (auto const & n : arg.names) {
+                key_map[n] = arg.dest;
             }
         }
     }
@@ -360,13 +360,13 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
     }
 
     while (!positional_names.empty()) {
-        auto const name = positional_names.front();
-        auto const itr = findConstantParameter(name);
+        auto const n = positional_names.front();
+        auto const itr = findConstantParameter(n);
         assert(itr != _params.cend());
         if (itr->default_value.empty()) {
             return E_ILLARGS;
         }
-        result.positional[key_map[name]] = itr->default_value;
+        result.positional[key_map[n]] = itr->default_value;
         positional_names.pop();
     }
 

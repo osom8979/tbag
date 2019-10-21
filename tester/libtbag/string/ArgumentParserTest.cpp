@@ -17,16 +17,16 @@ using at = ArgumentParser::ActionType;
 TEST(ArgumentParserTest, Add)
 {
     ArgumentParser parser;
-    parser.add({{"-d", "--device"},
-                ArgumentParser::ActionType::AT_STORE,
-                "device"});
-    parser.add(ap::const_value=2,
-               ap::default_value=1,
-               ap::store_const,
-               ap::name="--input-type",
-               ap::name="-t",
-               ap::dest="input_type");
-    parser.add("type", at::AT_STORE, "type");
+    ASSERT_EQ(E_SUCCESS, parser.add({{"-d", "--device"},
+                                     ArgumentParser::ActionType::AT_STORE,
+                                     "device"}));
+    ASSERT_EQ(E_SUCCESS, parser.add(ap::const_value=2,
+                                    ap::default_value=1,
+                                    ap::store_const,
+                                    ap::name="--input-type",
+                                    ap::name="-t",
+                                    ap::dest="input_type"));
+    ASSERT_EQ(E_SUCCESS, parser.add("type", at::AT_STORE, "type"));
 }
 
 TEST(ArgumentParserTest, Optional_01)
@@ -143,5 +143,41 @@ TEST(ArgumentParserTest, Positional_02)
 
     auto const result3 = parser.parse("program");
     ASSERT_EQ(E_ILLARGS, result3.code);
+}
+
+struct ArgumentParserTestFixture : public testing::Test
+{
+    ArgumentParser parser;
+
+    void SetUp() override
+    {
+        parser.add(ap::name="--input", ap::name="-i");
+        parser.add(ap::name="--output", ap::name="-o");
+        parser.add(ap::name="--threshold", ap::name="-t", ap::default_value=0.5);
+        parser.add(ap::name="--verbose", ap::name="-v", ap::store_const, ap::const_value=true);
+        parser.add(ap::name="cmd1");
+        parser.add(ap::name="cmd2", ap::default_value="empty");
+    }
+
+    void TearDown() override
+    {
+        // EMPTY.
+    }
+};
+
+TEST_F(ArgumentParserTestFixture, Default)
+{
+    auto const result1 = parser.parse("program -i test -o result -v -t 0.7 kkk zzz xxx");
+    ASSERT_EQ(E_SUCCESS, result1.code);
+    ASSERT_EQ(4, result1.value.optional.size());
+    ASSERT_STREQ("test", result1.value.optional.at("input").c_str());
+    ASSERT_STREQ("result", result1.value.optional.at("output").c_str());
+    ASSERT_STREQ("1", result1.value.optional.at("verbose").c_str());
+    ASSERT_STREQ("0.7", result1.value.optional.at("threshold").c_str());
+    ASSERT_EQ(2, result1.value.positional.size());
+    ASSERT_STREQ("kkk", result1.value.positional.at("cmd1").c_str());
+    ASSERT_STREQ("zzz", result1.value.positional.at("cmd2").c_str());
+    ASSERT_EQ(1, result1.value.remain.size());
+    ASSERT_STREQ("xxx", result1.value.remain[0].c_str());
 }
 
