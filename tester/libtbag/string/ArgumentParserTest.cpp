@@ -165,19 +165,39 @@ struct ArgumentParserTestFixture : public testing::Test
     }
 };
 
-TEST_F(ArgumentParserTestFixture, Default)
+TEST_F(ArgumentParserTestFixture, Parse_Complex)
 {
-    auto const result1 = parser.parse("program -i test -o result -v -t 0.7 kkk zzz xxx");
-    ASSERT_EQ(E_SUCCESS, result1.code);
-    ASSERT_EQ(4, result1.value.optional.size());
-    ASSERT_STREQ("test", result1.value.optional.at("input").c_str());
-    ASSERT_STREQ("result", result1.value.optional.at("output").c_str());
-    ASSERT_STREQ("1", result1.value.optional.at("verbose").c_str());
-    ASSERT_STREQ("0.7", result1.value.optional.at("threshold").c_str());
-    ASSERT_EQ(2, result1.value.positional.size());
-    ASSERT_STREQ("kkk", result1.value.positional.at("cmd1").c_str());
-    ASSERT_STREQ("zzz", result1.value.positional.at("cmd2").c_str());
-    ASSERT_EQ(1, result1.value.remain.size());
-    ASSERT_STREQ("xxx", result1.value.remain[0].c_str());
+    auto const result = parser.parse("program -i test kkk -o result zzz -v xxx -t 0.7 vvv");
+    ASSERT_EQ(E_SUCCESS, result.code);
+    ASSERT_EQ(4, result.value.optional.size());
+    ASSERT_STREQ("test", result.value.optional.at("input").c_str());
+    ASSERT_STREQ("result", result.value.optional.at("output").c_str());
+    ASSERT_STREQ("1", result.value.optional.at("verbose").c_str());
+    ASSERT_STREQ("0.7", result.value.optional.at("threshold").c_str());
+    ASSERT_EQ(2, result.value.positional.size());
+    ASSERT_STREQ("kkk", result.value.positional.at("cmd1").c_str());
+    ASSERT_STREQ("zzz", result.value.positional.at("cmd2").c_str());
+    ASSERT_EQ(2, result.value.remain.size());
+    ASSERT_STREQ("xxx", result.value.remain[0].c_str());
+    ASSERT_STREQ("vvv", result.value.remain[1].c_str());
+}
+
+TEST_F(ArgumentParserTestFixture, StopParsing)
+{
+    auto const result = parser.parse("program kkk -o result -- -v -t 0.7 kkk zzz xxx");
+    ASSERT_EQ(E_SUCCESS, result.code);
+    ASSERT_EQ(2, result.value.optional.size());
+    ASSERT_STREQ("result", result.value.optional.at("output").c_str());
+    ASSERT_STREQ("0.5", result.value.optional.at("threshold").substr(0, 3).c_str());
+    ASSERT_EQ(2, result.value.positional.size());
+    ASSERT_STREQ("kkk", result.value.positional.at("cmd1").c_str());
+    ASSERT_STREQ("empty", result.value.positional.at("cmd2").c_str());
+    ASSERT_EQ(6, result.value.remain.size());
+    ASSERT_STREQ("-v", result.value.remain[0].c_str());
+    ASSERT_STREQ("-t", result.value.remain[1].c_str());
+    ASSERT_STREQ("0.7", result.value.remain[2].c_str());
+    ASSERT_STREQ("kkk", result.value.remain[3].c_str());
+    ASSERT_STREQ("zzz", result.value.remain[4].c_str());
+    ASSERT_STREQ("xxx", result.value.remain[5].c_str());
 }
 
