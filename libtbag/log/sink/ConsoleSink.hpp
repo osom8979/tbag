@@ -39,7 +39,7 @@ class TBAG_API ConsoleSink : public Sink
 public:
     enum class ConsoleType
     {
-        CT_UNKNOWN,
+        CT_AUTO,
         CT_STDOUT,
         CT_STDERR,
     };
@@ -49,8 +49,15 @@ public:
     { return "console"; }
 
 public:
+    TBAG_CONSTEXPR static char const * const AUTO_TEXT = "auto";
+
     TBAG_CONSTEXPR static char const * const STDOUT_TEXT = "stdout";
+    TBAG_CONSTEXPR static char const * const STDOUT_TEXT2 = "out";
+    TBAG_CONSTEXPR static char const * const STDOUT_TEXT3 = "1";
+
     TBAG_CONSTEXPR static char const * const STDERR_TEXT = "stderr";
+    TBAG_CONSTEXPR static char const * const STDERR_TEXT2 = "err";
+    TBAG_CONSTEXPR static char const * const STDERR_TEXT3 = "2";
 
 public:
     static ConsoleType getConsoleType(std::string const & type);
