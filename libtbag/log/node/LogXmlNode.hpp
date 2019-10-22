@@ -46,7 +46,7 @@ namespace node {
  *       <name>your_logger_name</name>
  *
  *       <!-- Select the sink to which you want to send log messages -->
- *       <!--  console      (Stdout console output)                  -->
+ *       <!--  console      (console output)                         -->
  *       <!--  file         (File output)                            -->
  *       <!--  null         (Null sink)                              -->
  *       <sink>file</sink>
