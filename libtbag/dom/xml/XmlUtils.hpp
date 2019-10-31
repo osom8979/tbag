@@ -31,6 +31,7 @@ using Document = tinyxml2::XMLDocument;
 using Element = tinyxml2::XMLElement;
 using Node = tinyxml2::XMLNode;
 
+TBAG_API std::string name(Element const & elem);
 TBAG_API std::string text(Element const & element);
 TBAG_API void text(Element & element, std::string const & value);
 TBAG_API void text(Element & element, char const * value);
@@ -81,7 +82,8 @@ TBAG_API Node * insertElement(Document & doc, Node * node);
 TBAG_API Node * insertElement(Element & element, Node * node);
 
 TBAG_API Err readFromXmlText(Document & doc, std::string const & xml);
-TBAG_API Err writeToXmlText(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
+TBAG_API Err writeDocumentToXmlText(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
+TBAG_API Err writeElementToXmlText(Element const & elem, std::string & xml, bool compact = false, int depth = 0);
 
 } // namespace xml
 } // namespace dom

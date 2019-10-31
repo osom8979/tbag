@@ -14,6 +14,11 @@ NAMESPACE_LIBTBAG_OPEN
 namespace dom {
 namespace xml {
 
+std::string XmlHelper::name(Element const & element)
+{
+    return libtbag::dom::xml::name(element);
+}
+
 std::string XmlHelper::text(Element const & element)
 {
     return libtbag::dom::xml::text(element);
@@ -229,9 +234,14 @@ Err XmlHelper::readFromXmlText(Document & doc, std::string const & xml)
     return libtbag::dom::xml::readFromXmlText(doc, xml);
 }
 
-Err XmlHelper::writeToXmlText(Document const & doc, std::string & xml, bool compact, int depth)
+Err XmlHelper::writeDocumentToXmlText(Document const & doc, std::string & xml, bool compact, int depth)
 {
-    return libtbag::dom::xml::writeToXmlText(doc, xml, compact, depth);
+    return libtbag::dom::xml::writeDocumentToXmlText(doc, xml, compact, depth);
+}
+
+Err XmlHelper::writeElementToXmlText(Element const & elem, std::string & xml, bool compact, int depth)
+{
+    return libtbag::dom::xml::writeElementToXmlText(elem, xml, compact, depth);
 }
 
 } // namespace xml

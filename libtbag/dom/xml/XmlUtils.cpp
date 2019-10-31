@@ -74,6 +74,15 @@ static Err __query_attribute(Element const & element,
     return E_SUCCESS;
 }
 
+std::string name(Element const & elem)
+{
+    auto const * name = elem.Name();
+    if (name != nullptr) {
+        return name;
+    }
+    return {};
+}
+
 std::string text(Element const & element)
 {
     if (element.GetText() != nullptr) {
@@ -241,10 +250,20 @@ Err readFromXmlText(Document & doc, std::string const & xml)
     return E_PARSING;
 }
 
-Err writeToXmlText(Document const & doc, std::string & xml, bool compact, int depth)
+Err writeDocumentToXmlText(Document const & doc, std::string & xml, bool compact, int depth)
 {
-    tinyxml2::XMLPrinter printer(0, compact, depth);
+    tinyxml2::XMLPrinter printer(nullptr, compact, depth);
     if (doc.Accept(&printer)) {
+        xml.assign(printer.CStr(), printer.CStr() + printer.CStrSize());
+        return E_SUCCESS;
+    }
+    return E_UNKNOWN;
+}
+
+Err writeElementToXmlText(Element const & elem, std::string & xml, bool compact, int depth)
+{
+    tinyxml2::XMLPrinter printer(nullptr, compact, depth);
+    if (elem.Accept(&printer)) {
         xml.assign(printer.CStr(), printer.CStr() + printer.CStrSize());
         return E_SUCCESS;
     }

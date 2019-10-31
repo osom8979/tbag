@@ -108,7 +108,7 @@ Err TmxPointsCommon::writeFromPoints(std::string const & tag, Points const & poi
         return CODE;
     }
     insertElement(doc, new_elem);
-    return writeToXmlText(doc, xml);
+    return writeDocumentToXmlText(doc, xml);
 }
 
 } // namespace details

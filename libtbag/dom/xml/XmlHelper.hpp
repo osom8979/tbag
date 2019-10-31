@@ -41,6 +41,7 @@ struct TBAG_API XmlHelper
     using Element = libtbag::dom::xml::Element;
     using Node = libtbag::dom::xml::Node;
 
+    static std::string name(Element const & element);
     static std::string text(Element const & element);
     static void text(Element & element, std::string const & value);
     static void text(Element & element, char const * value);
@@ -124,7 +125,8 @@ struct TBAG_API XmlHelper
     }
 
     static Err readFromXmlText(Document & doc, std::string const & xml);
-    static Err writeToXmlText(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
+    static Err writeDocumentToXmlText(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
+    static Err writeElementToXmlText(Element const & elem, std::string & xml, bool compact = false, int depth = 0);
 
     template <typename Predicated>
     static bool readFromXmlFile(std::string const & path, std::string const & tag, Predicated predicated)
@@ -175,7 +177,7 @@ struct TBAG_API XmlHelper
         assert(element != nullptr);
         predicated(*element);
         doc.InsertFirstChild(element);
-        return writeToXmlText(doc, xml, compact) == E_SUCCESS;
+        return writeDocumentToXmlText(doc, xml, compact) == E_SUCCESS;
     }
 };
 

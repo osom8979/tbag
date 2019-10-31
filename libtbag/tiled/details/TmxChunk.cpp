@@ -107,7 +107,7 @@ Err TmxChunk::write(std::string & xml, TileLayerFormat f) const
         return CODE;
     }
     insertElement(doc, new_elem);
-    return writeToXmlText(doc, xml);
+    return writeDocumentToXmlText(doc, xml);
 }
 
 Err TmxChunk::write(std::string & xml, Encoding e, Compression c) const
