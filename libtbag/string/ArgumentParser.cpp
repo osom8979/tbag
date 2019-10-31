@@ -47,6 +47,7 @@ ArgumentParser::ParamKey  const ArgumentParser::help          = { ArgumentParser
 ArgumentParser::ParamKey  const ArgumentParser::meta          = { ArgumentParser::ARG_META_KEY        };
 ArgumentParser::ParamElem const ArgumentParser::store         = { ArgumentParser::ARG_STORE_KEY       };
 ArgumentParser::ParamElem const ArgumentParser::store_const   = { ArgumentParser::ARG_STORE_CONST_KEY };
+ArgumentParser::ParamElem const ArgumentParser::append        = { ArgumentParser::ARG_APPEND          };
 // clang-format off
 
 char const * ArgumentParser::getActionTypeName(ActionType type) TBAG_NOEXCEPT
@@ -56,6 +57,8 @@ char const * ArgumentParser::getActionTypeName(ActionType type) TBAG_NOEXCEPT
         return ACTION_TYPE_STORE;
     case ActionType::AT_STORE_CONST:
         return ACTION_TYPE_STORE_CONST;
+    case ActionType::AT_APPEND:
+        return ACTION_TYPE_APPEND;
     default:
         return "";
     }
@@ -67,6 +70,8 @@ ActionType ArgumentParser::getActionType(std::string const & action_name)
         return ActionType::AT_STORE;
     } else if (action_name == ACTION_TYPE_STORE_CONST) {
         return ActionType::AT_STORE_CONST;
+    } else if (action_name == ACTION_TYPE_APPEND) {
+        return ActionType::AT_APPEND;
     } else {
         return ActionType::AT_NONE;
     }
@@ -179,6 +184,28 @@ Err ArgumentParser::updateParam(Param & arg)
     return E_SUCCESS;
 }
 
+bool ArgumentParser::insertToOptional(Optionals & optional, std::string const & dest_name, std::string const & val) const
+{
+    auto param_itr = std::find_if(_params.cbegin(), _params.cend(), [&dest_name](Params::const_reference p) -> bool {
+        return p.dest == dest_name;
+    });
+    if (param_itr == _params.cend()) {
+        return false;
+    }
+
+    if (param_itr->action == ActionType::AT_APPEND) {
+        optional.emplace(dest_name, val);
+    } else {
+        auto optional_itr = optional.find(dest_name);
+        if (optional_itr == optional.end()) {
+            optional.emplace(dest_name, val);
+        } else {
+            optional_itr->second.assign(val);
+        }
+    }
+    return true;
+}
+
 Err ArgumentParser::add_param(Param const & arg)
 {
     Param updated_arg = arg;
@@ -271,7 +298,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
                 continue;
             }
             if (arg.names[0][0] == _init.prefix) {
-                result.optional[arg.dest] = arg.default_value;
+                insertToOptional(result.optional, arg.dest, arg.default_value);
             } else {
                 result.positional[arg.dest] = arg.default_value;
             }
@@ -284,6 +311,12 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
     auto const size = argv.size();
     assert(size >= 1u);
 
+    if (_init.first_argument_is_program_name) {
+        result.program_name = argv[0];
+    } else {
+        result.program_name = _init.program_name;
+    }
+
     for (std::size_t i = _init.first_argument_is_program_name?1u:0u; i < size; ++i) {
         auto const & arg = argv[i];
         if (_init.add_stop_parsing && stop_parsing) {
@@ -295,23 +328,41 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
         switch (parse_result.code) {
         case ParseResultCode::PRC_ERROR:
             return E_PARSING;
+
         case ParseResultCode::PRC_FROM_FILE_ERROR:
             return E_RDERR;
 
         case ParseResultCode::PRC_SKIP:
             break;
-        case ParseResultCode::PRC_STDIN:
-            result.optional[std::string(1u, _init.prefix)] = "true";
+
+        case ParseResultCode::PRC_SINGLE_PREFIX:
+            assert(std::string(1u, _init.prefix) == parse_result.key);
+            if (req_type == argument_required_type_wait_optional_value) {
+                insertToOptional(result.optional, key_map[selected_key], parse_result.key);
+                req_type = argument_required_type_none;
+            } else {
+                assert(req_type == argument_required_type_none);
+                insertToOptional(result.optional, parse_result.key, VAL_TRUE_TEXT);
+            }
             break;
-        case ParseResultCode::PRC_STOP_PARSING:
-            stop_parsing = true;
+
+        case ParseResultCode::PRC_DOUBLE_PREFIX:
+            assert(std::string(2u, _init.prefix) == parse_result.key);
+            if (req_type == argument_required_type_wait_optional_value) {
+                insertToOptional(result.optional, key_map[selected_key], parse_result.key);
+                req_type = argument_required_type_none;
+            } else {
+                assert(req_type == argument_required_type_none);
+                insertToOptional(result.optional, parse_result.key, VAL_TRUE_TEXT);
+                stop_parsing = true;
+            }
             break;
 
         case ParseResultCode::PRC_KEY_VAL:
             if (req_type != argument_required_type_none) {
                 return E_PARSING;
             }
-            result.optional[key_map[parse_result.key]] = parse_result.value;
+            insertToOptional(result.optional, key_map[parse_result.key], parse_result.value);
             break;
 
         case ParseResultCode::PRC_KEY:
@@ -320,14 +371,16 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
                 if (itr != _params.cend()) {
                     switch (itr->action) {
                     case ActionType::AT_STORE:
+                        TBAG_FALLTHROUGH
+                    case ActionType::AT_APPEND:
                         selected_key = parse_result.key;
                         req_type = argument_required_type_wait_optional_value;
                         break;
                     case ActionType::AT_STORE_CONST:
-                        result.optional[key_map[parse_result.key]] = itr->const_value;
+                        insertToOptional(result.optional, key_map[parse_result.key], itr->const_value);
                         break;
                     default:
-                        return E_INACCESSIBLE_BLOCK;
+                        break;
                     }
                 }
             } else {
@@ -346,7 +399,7 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
                 }
                 break;
             case argument_required_type_wait_optional_value:
-                result.optional[key_map[selected_key]] = parse_result.value;
+                insertToOptional(result.optional, key_map[selected_key], parse_result.value);
                 req_type = argument_required_type_none;
                 break;
             default:
@@ -395,7 +448,7 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
 
     if (arg_size == 1u) {
         if (arg[0] == _init.prefix) {
-            return { ParseResultCode::PRC_STDIN };
+            return { ParseResultCode::PRC_SINGLE_PREFIX, std::string(1u, _init.prefix) };
         } else {
             return { ParseResultCode::PRC_VAL, {}, arg };
         }
@@ -404,7 +457,7 @@ ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
     if (arg_size == 2u) {
         if (arg[0] == _init.prefix) {
             if (arg[1] == _init.prefix) {
-                return { ParseResultCode::PRC_STOP_PARSING };
+                return { ParseResultCode::PRC_DOUBLE_PREFIX, std::string(2u, _init.prefix) };
             } else {
                 return { ParseResultCode::PRC_KEY, arg };
             }

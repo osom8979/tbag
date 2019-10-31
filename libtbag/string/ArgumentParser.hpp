@@ -23,6 +23,7 @@
 #include <map>
 #include <functional>
 #include <memory>
+#include <iterator>
 #include <type_traits>
 
 // -------------------
@@ -47,12 +48,38 @@ public:
     using Params = std::vector<Param>;
     using ErrArgumentResult = ErrPair<ArgumentResult>;
 
+    using Optionals = std::multimap<std::string, std::string>;
+    using Positionals = std::map<std::string, std::string>;
+
     struct ArgumentResult
     {
         std::string program_name;
-        std::map<std::string, std::string> optional;
-        std::map<std::string, std::string> positional;
+        Optionals optional;
+        Positionals positional;
         std::vector<std::string> remain;
+
+        std::size_t countOptional(std::string const & key) const
+        { return optional.count(key); }
+
+        std::vector<std::string> getOptionals(std::string const & key) const
+        {
+            std::vector<std::string> result;
+            auto const range = optional.equal_range(key);
+            for (auto itr = range.first; itr != range.second; ++itr) {
+                result.emplace_back(itr->second);
+            }
+            return result;
+        }
+
+        std::string getOptional(std::string const & key, std::size_t index = 0) const
+        {
+            auto const range = optional.equal_range(key);
+            auto const size = std::distance(range.first, range.second);
+            if (index >= size) {
+                return {};
+            }
+            return std::next(range.first, index)->second;
+        }
     };
 
     struct Formatter
@@ -118,10 +145,19 @@ public:
 
         /** This stores the value specified by the const keyword argument. */
         AT_STORE_CONST,
+
+        /**
+         * This stores a list, and appends each argument value to the list.
+         * This is useful to allow an option to be specified multiple times.
+         */
+        AT_APPEND,
     };
 
     TBAG_CONSTEXPR static char const * const ACTION_TYPE_STORE = "store";
     TBAG_CONSTEXPR static char const * const ACTION_TYPE_STORE_CONST = "store_const";
+    TBAG_CONSTEXPR static char const * const ACTION_TYPE_APPEND = "append";
+    TBAG_CONSTEXPR static char const * const VAL_TRUE_TEXT = "true";
+    TBAG_CONSTEXPR static char const * const VAL_FALSE_TEXT = "false";
 
     static char const * getActionTypeName(ActionType type) TBAG_NOEXCEPT;
     static ActionType getActionType(std::string const & action_name);
@@ -164,6 +200,7 @@ public:
     TBAG_CONSTEXPR static char const * const ARG_ACTION_KEY = "action";
     TBAG_CONSTEXPR static char const * const ARG_STORE_KEY = "store";
     TBAG_CONSTEXPR static char const * const ARG_STORE_CONST_KEY = "store_const";
+    TBAG_CONSTEXPR static char const * const ARG_APPEND = "append";
     TBAG_CONSTEXPR static char const * const ARG_DEFAULT_KEY = "default";
     TBAG_CONSTEXPR static char const * const ARG_CONST_KEY = "const";
     TBAG_CONSTEXPR static char const * const ARG_HELP_KEY = "help";
@@ -183,6 +220,7 @@ public:
     static ParamKey  const meta;
     static ParamElem const store;
     static ParamElem const store_const;
+    static ParamElem const append;
     /** @} */
 
     struct Param TBAG_FINAL
@@ -220,6 +258,8 @@ public:
                 a.action = ActionType::AT_STORE;
             } else if (elem.key == ARG_STORE_CONST_KEY) {
                 a.action = ActionType::AT_STORE_CONST;
+            } else if (elem.key == ARG_APPEND) {
+                a.action = ActionType::AT_APPEND;
             } else if (elem.key == ARG_DEFAULT_KEY) {
                 a.default_value = elem.val;
             } else if (elem.key == ARG_CONST_KEY) {
@@ -274,6 +314,9 @@ public:
 public:
     std::string removePrefix(std::string const & text);
     Err updateParam(Param & arg);
+
+public:
+    bool insertToOptional(Optionals & optional, std::string const & dest_name, std::string const & val) const;
 
 private:
     Err add_param(Param const & arg);
@@ -378,8 +421,8 @@ public:
         PRC_ERROR,
         PRC_FROM_FILE_ERROR,
         PRC_SKIP,
-        PRC_STDIN,
-        PRC_STOP_PARSING,
+        PRC_SINGLE_PREFIX,
+        PRC_DOUBLE_PREFIX,
         PRC_KEY_VAL,
         PRC_KEY,
         PRC_VAL,

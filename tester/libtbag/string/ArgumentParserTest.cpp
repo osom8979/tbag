@@ -39,21 +39,21 @@ TEST(ArgumentParserTest, Optional_01)
     auto const result1 = parser.parse("program -d 0");
     ASSERT_EQ(E_SUCCESS, result1.code);
     ASSERT_EQ(1, result1.value.optional.size());
-    ASSERT_STREQ("0", result1.value.optional.at("device").c_str());
+    ASSERT_STREQ("0", result1.value.getOptional("device").c_str());
     ASSERT_EQ(0, result1.value.positional.size());
     ASSERT_EQ(0, result1.value.remain.size());
 
     auto const result2 = parser.parse("program --device=1");
     ASSERT_EQ(E_SUCCESS, result2.code);
     ASSERT_EQ(1, result2.value.optional.size());
-    ASSERT_STREQ("1", result2.value.optional.at("device").c_str());
+    ASSERT_STREQ("1", result2.value.getOptional("device").c_str());
     ASSERT_EQ(0, result2.value.positional.size());
     ASSERT_EQ(0, result2.value.remain.size());
 
     auto const result3 = parser.parse("program --device 2");
     ASSERT_EQ(E_SUCCESS, result3.code);
     ASSERT_EQ(1, result3.value.optional.size());
-    ASSERT_STREQ("2", result3.value.optional.at("device").c_str());
+    ASSERT_STREQ("2", result3.value.getOptional("device").c_str());
     ASSERT_EQ(0, result3.value.positional.size());
     ASSERT_EQ(0, result3.value.remain.size());
 
@@ -81,7 +81,7 @@ TEST(ArgumentParserTest, Optional_02)
     auto const result1 = parser.parse("program --device 3 test1 test2");
     ASSERT_EQ(E_SUCCESS, result1.code);
     ASSERT_EQ(1, result1.value.optional.size());
-    ASSERT_STREQ("2", result1.value.optional.at("device").c_str());
+    ASSERT_STREQ("2", result1.value.getOptional("device").c_str());
     ASSERT_EQ(0, result1.value.positional.size());
     ASSERT_EQ(3, result1.value.remain.size());
     ASSERT_STREQ("3", result1.value.remain[0].c_str());
@@ -90,13 +90,13 @@ TEST(ArgumentParserTest, Optional_02)
 
     auto const result2 = parser.parse("program");
     ASSERT_EQ(1, result2.value.optional.size());
-    ASSERT_STREQ("1", result2.value.optional.at("device").c_str());
+    ASSERT_STREQ("1", result2.value.getOptional("device").c_str());
     ASSERT_EQ(0, result2.value.positional.size());
     ASSERT_EQ(0, result2.value.remain.size());
 
     auto const result3 = parser.parse("program -d");
     ASSERT_EQ(1, result3.value.optional.size());
-    ASSERT_STREQ("2", result3.value.optional.at("device").c_str());
+    ASSERT_STREQ("2", result3.value.getOptional("device").c_str());
     ASSERT_EQ(0, result3.value.positional.size());
     ASSERT_EQ(0, result3.value.remain.size());
 }
@@ -170,10 +170,10 @@ TEST_F(ArgumentParserTestFixture, Parse_Complex)
     auto const result = parser.parse("program -i test kkk -o result zzz -v xxx -t 0.7 vvv");
     ASSERT_EQ(E_SUCCESS, result.code);
     ASSERT_EQ(4, result.value.optional.size());
-    ASSERT_STREQ("test", result.value.optional.at("input").c_str());
-    ASSERT_STREQ("result", result.value.optional.at("output").c_str());
-    ASSERT_STREQ("1", result.value.optional.at("verbose").c_str());
-    ASSERT_STREQ("0.7", result.value.optional.at("threshold").c_str());
+    ASSERT_STREQ("test", result.value.getOptional("input").c_str());
+    ASSERT_STREQ("result", result.value.getOptional("output").c_str());
+    ASSERT_STREQ("1", result.value.getOptional("verbose").c_str());
+    ASSERT_STREQ("0.7", result.value.getOptional("threshold").c_str());
     ASSERT_EQ(2, result.value.positional.size());
     ASSERT_STREQ("kkk", result.value.positional.at("cmd1").c_str());
     ASSERT_STREQ("zzz", result.value.positional.at("cmd2").c_str());
@@ -187,8 +187,8 @@ TEST_F(ArgumentParserTestFixture, StopParsing)
     auto const result = parser.parse("program kkk -o result -- -v -t 0.7 kkk zzz xxx");
     ASSERT_EQ(E_SUCCESS, result.code);
     ASSERT_EQ(2, result.value.optional.size());
-    ASSERT_STREQ("result", result.value.optional.at("output").c_str());
-    ASSERT_STREQ("0.5", result.value.optional.at("threshold").substr(0, 3).c_str());
+    ASSERT_STREQ("result", result.value.getOptional("output").c_str());
+    ASSERT_STREQ("0.5", result.value.getOptional("threshold").substr(0, 3).c_str());
     ASSERT_EQ(2, result.value.positional.size());
     ASSERT_STREQ("kkk", result.value.positional.at("cmd1").c_str());
     ASSERT_STREQ("empty", result.value.positional.at("cmd2").c_str());
