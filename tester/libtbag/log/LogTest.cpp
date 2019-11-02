@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/log/node/LogXmlNode.hpp>
+//#include <libtbag/log/node/LogXmlNode.hpp>
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/string/Environments.hpp>
 #include <libtbag/archive/Archive.hpp>
@@ -19,7 +19,7 @@
 
 using namespace libtbag;
 using namespace libtbag::log;
-using namespace libtbag::log::node;
+//using namespace libtbag::log::node;
 
 TEST(LogTest, Coverage)
 {
@@ -99,87 +99,87 @@ TEST(LogTest, FileSink)
     ASSERT_TRUE(PATH.exists());
 }
 
-TEST(LogTest, RotateFileSink)
-{
-    tttDir_Automatic();
-    auto const DIR = tttDir_Get();
-    auto const PREFIX = DIR / "file";
-
-    char const * const TEST_XML_STRING = R"XML(
-        <loggers>
-            <logger>
-                <name>test-logger-rotate</name>
-                <sink>rotate_file</sink>
-                <arguments>size=8 archive=.zip counter=${LOG_DIR},.logging,1</arguments>
-                <generator>raw</generator>
-                <line_feed>none</line_feed>
-                <severity>INFO</severity>
-            </logger>
-        </loggers>)XML";
-    char const * const LOGGER_NAME = "test-logger-rotate";
-
-    auto files = DIR.scanNameOnly();
-    ASSERT_TRUE(files.empty());
-
-    libtbag::string::Environments envs;
-    envs.push("LOG_DIR", PREFIX.getGenericString());
-    ASSERT_EQ(1, createLoggerWithXmlText(TEST_XML_STRING, envs));
-
-    ASSERT_TRUE(existsLogger(LOGGER_NAME));
-    ASSERT_EQ(INFO_SEVERITY, getSeverity(LOGGER_NAME));
-
-    tLogM(LOGGER_NAME, "12345678");
-    files = DIR.scanNameOnly();
-    std::sort(files.begin(), files.end());
-    ASSERT_EQ(2, files.size());
-    ASSERT_STREQ("file1.logging.zip", files[0].c_str());
-    ASSERT_STREQ("file2.logging", files[1].c_str());
-
-    tLogA(LOGGER_NAME, "abcd");
-    ASSERT_EQ(2, DIR.scanNameOnly().size());
-
-    tLogC(LOGGER_NAME, "efgh");
-    files = DIR.scanNameOnly();
-    std::sort(files.begin(), files.end());
-    ASSERT_EQ(3, files.size());
-    ASSERT_STREQ("file1.logging.zip", files[0].c_str());
-    ASSERT_STREQ("file2.logging.zip", files[1].c_str());
-    ASSERT_STREQ("file3.logging", files[2].c_str());
-
-    tLogE(LOGGER_NAME, "i");
-    ASSERT_EQ(3, DIR.scanNameOnly().size());
-    tLogW(LOGGER_NAME, "j");
-    ASSERT_EQ(3, DIR.scanNameOnly().size());
-    tLogN(LOGGER_NAME, "k");
-    ASSERT_EQ(3, DIR.scanNameOnly().size());
-    tLogI(LOGGER_NAME, "l");
-    ASSERT_EQ(3, DIR.scanNameOnly().size());
-
-    tLogD(LOGGER_NAME, "ABCDEFGHIJ");
-    ASSERT_EQ(3, DIR.scanNameOnly().size());
-
-    ASSERT_TRUE(removeLogger(LOGGER_NAME));
-    ASSERT_FALSE(existsLogger(LOGGER_NAME));
-
-    // Last assertion.
-
-    files = DIR.scanNameOnly();
-    std::sort(files.begin(), files.end());
-    ASSERT_EQ(3, files.size());
-    ASSERT_STREQ("file1.logging.zip", files[0].c_str());
-    ASSERT_STREQ("file2.logging.zip", files[1].c_str());
-    ASSERT_STREQ("file3.logging.zip", files[2].c_str());
-
-    auto file1 = libtbag::archive::decompressArchive(DIR / files[0]);
-    auto file2 = libtbag::archive::decompressArchive(DIR / files[1]);
-    auto file3 = libtbag::archive::decompressArchive(DIR / files[2]);
-
-    ASSERT_EQ(1, file1.size());
-    ASSERT_EQ(1, file2.size());
-    ASSERT_EQ(1, file3.size());
-
-    ASSERT_STREQ("12345678", std::string(file1[0].data.begin(), file1[0].data.end()).c_str());
-    ASSERT_STREQ("abcdefgh", std::string(file2[0].data.begin(), file2[0].data.end()).c_str());
-    ASSERT_STREQ("ijkl", std::string(file3[0].data.begin(), file3[0].data.end()).c_str());
-}
+//TEST(LogTest, RotateFileSink)
+//{
+//    tttDir_Automatic();
+//    auto const DIR = tttDir_Get();
+//    auto const PREFIX = DIR / "file";
+//
+//    char const * const TEST_XML_STRING = R"XML(
+//        <loggers>
+//            <logger>
+//                <name>test-logger-rotate</name>
+//                <sink>rotate_file</sink>
+//                <arguments>size=8 archive=.zip counter=${LOG_DIR},.logging,1</arguments>
+//                <generator>raw</generator>
+//                <line_feed>none</line_feed>
+//                <severity>INFO</severity>
+//            </logger>
+//        </loggers>)XML";
+//    char const * const LOGGER_NAME = "test-logger-rotate";
+//
+//    auto files = DIR.scanNameOnly();
+//    ASSERT_TRUE(files.empty());
+//
+//    libtbag::string::Environments envs;
+//    envs.push("LOG_DIR", PREFIX.getGenericString());
+//    ASSERT_EQ(1, createLoggerWithXmlText(TEST_XML_STRING, envs));
+//
+//    ASSERT_TRUE(existsLogger(LOGGER_NAME));
+//    ASSERT_EQ(INFO_SEVERITY, getSeverity(LOGGER_NAME));
+//
+//    tLogM(LOGGER_NAME, "12345678");
+//    files = DIR.scanNameOnly();
+//    std::sort(files.begin(), files.end());
+//    ASSERT_EQ(2, files.size());
+//    ASSERT_STREQ("file1.logging.zip", files[0].c_str());
+//    ASSERT_STREQ("file2.logging", files[1].c_str());
+//
+//    tLogA(LOGGER_NAME, "abcd");
+//    ASSERT_EQ(2, DIR.scanNameOnly().size());
+//
+//    tLogC(LOGGER_NAME, "efgh");
+//    files = DIR.scanNameOnly();
+//    std::sort(files.begin(), files.end());
+//    ASSERT_EQ(3, files.size());
+//    ASSERT_STREQ("file1.logging.zip", files[0].c_str());
+//    ASSERT_STREQ("file2.logging.zip", files[1].c_str());
+//    ASSERT_STREQ("file3.logging", files[2].c_str());
+//
+//    tLogE(LOGGER_NAME, "i");
+//    ASSERT_EQ(3, DIR.scanNameOnly().size());
+//    tLogW(LOGGER_NAME, "j");
+//    ASSERT_EQ(3, DIR.scanNameOnly().size());
+//    tLogN(LOGGER_NAME, "k");
+//    ASSERT_EQ(3, DIR.scanNameOnly().size());
+//    tLogI(LOGGER_NAME, "l");
+//    ASSERT_EQ(3, DIR.scanNameOnly().size());
+//
+//    tLogD(LOGGER_NAME, "ABCDEFGHIJ");
+//    ASSERT_EQ(3, DIR.scanNameOnly().size());
+//
+//    ASSERT_TRUE(removeLogger(LOGGER_NAME));
+//    ASSERT_FALSE(existsLogger(LOGGER_NAME));
+//
+//    // Last assertion.
+//
+//    files = DIR.scanNameOnly();
+//    std::sort(files.begin(), files.end());
+//    ASSERT_EQ(3, files.size());
+//    ASSERT_STREQ("file1.logging.zip", files[0].c_str());
+//    ASSERT_STREQ("file2.logging.zip", files[1].c_str());
+//    ASSERT_STREQ("file3.logging.zip", files[2].c_str());
+//
+//    auto file1 = libtbag::archive::decompressArchive(DIR / files[0]);
+//    auto file2 = libtbag::archive::decompressArchive(DIR / files[1]);
+//    auto file3 = libtbag::archive::decompressArchive(DIR / files[2]);
+//
+//    ASSERT_EQ(1, file1.size());
+//    ASSERT_EQ(1, file2.size());
+//    ASSERT_EQ(1, file3.size());
+//
+//    ASSERT_STREQ("12345678", std::string(file1[0].data.begin(), file1[0].data.end()).c_str());
+//    ASSERT_STREQ("abcdefgh", std::string(file2[0].data.begin(), file2[0].data.end()).c_str());
+//    ASSERT_STREQ("ijkl", std::string(file3[0].data.begin(), file3[0].data.end()).c_str());
+//}
 

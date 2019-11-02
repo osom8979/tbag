@@ -17,12 +17,12 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace res {
 
-Preferences::Preferences() : _model(std::make_shared<DefaultXmlModel>())
+Preferences::Preferences() //: _model(std::make_shared<DefaultXmlModel>())
 {
-    assert(static_cast<bool>(_model));
+//    assert(static_cast<bool>(_model));
 }
 
-Preferences::Preferences(std::nullptr_t) TBAG_NOEXCEPT : _model(nullptr)
+Preferences::Preferences(std::nullptr_t) TBAG_NOEXCEPT //: _model(nullptr)
 {
     // EMPTY.
 }
@@ -57,20 +57,20 @@ Preferences & Preferences::operator =(Preferences && obj) TBAG_NOEXCEPT
 void Preferences::copy(Preferences const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _model = obj._model;
+//        _model = obj._model;
     }
 }
 
 void Preferences::swap(Preferences & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _model.swap(obj._model);
+//        _model.swap(obj._model);
     }
 }
 
 void Preferences::reset()
 {
-    _model.reset();
+//    _model.reset();
 }
 
 } // namespace res
