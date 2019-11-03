@@ -9,7 +9,7 @@ tbag_modules__update_c_family_subdir_objects (
         container crypto database debug dom dummy filesystem flow
         functional game geometry gpu graph graphic http id io iterator
         lib locale lock lockfree log loop macro math media memory mq net
-        network parallel pattern preprocessor process proto random
+        network parallel pattern pref preprocessor process proto random
         ray res rstl scene science script security signal string system
         thread tiled time tmp tty type typography util uvpp uvxx)
 tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
