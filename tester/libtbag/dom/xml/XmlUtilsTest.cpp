@@ -23,7 +23,7 @@ TBAG_CONSTEXPR static char const * const TEST_XML = R"(
 TEST(XmlUtilsTest, WriteElementToXmlText)
 {
     Document doc;
-    ASSERT_EQ(E_SUCCESS, readFromXmlText(doc, TEST_XML));
+    ASSERT_EQ(E_SUCCESS, readDocumentFromXmlText(doc, TEST_XML));
 
     auto * root = doc.FirstChild();
     ASSERT_NE(nullptr, root);
@@ -41,7 +41,7 @@ TEST(XmlUtilsTest, WriteElementToXmlText)
     // std::cout << sub1_xml << std::endl;
 
     Document doc2;
-    ASSERT_EQ(E_SUCCESS, readFromXmlText(doc2, sub1_xml));
+    ASSERT_EQ(E_SUCCESS, readDocumentFromXmlText(doc2, sub1_xml));
 
     auto * doc2_sub1 = doc2.FirstChild();
     ASSERT_NE(nullptr, doc2_sub1);

@@ -242,7 +242,7 @@ Node * insertElement(Element & element, Node * node)
     return element.InsertEndChild(node);
 }
 
-Err readFromXmlText(Document & doc, std::string const & xml)
+Err readDocumentFromXmlText(Document & doc, std::string const & xml)
 {
     if (doc.Parse(xml.c_str()) == tinyxml2::XML_SUCCESS) {
         return E_SUCCESS;

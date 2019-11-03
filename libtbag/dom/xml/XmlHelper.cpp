@@ -231,7 +231,7 @@ XmlHelper::Node * XmlHelper::insertElement(Element & element, Node * node)
 
 Err XmlHelper::readFromXmlText(Document & doc, std::string const & xml)
 {
-    return libtbag::dom::xml::readFromXmlText(doc, xml);
+    return libtbag::dom::xml::readDocumentFromXmlText(doc, xml);
 }
 
 Err XmlHelper::writeDocumentToXmlText(Document const & doc, std::string & xml, bool compact, int depth)
