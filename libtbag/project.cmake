@@ -10,8 +10,8 @@ tbag_modules__update_c_family_subdir_objects (
         functional game geometry gpu graph graphic http id io iterator
         lib locale lock lockfree log loop macro math media memory mq net
         network parallel pattern pref preprocessor process proto random
-        ray res rstl scene science script security signal string system
-        thread tiled time tmp tty type typography util uvpp uvxx)
+        ray res rstl scene science script security service signal string
+        system thread tiled time tmp tty type typography util uvpp uvxx)
 tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
 
 ## TBAG EXPORT API.

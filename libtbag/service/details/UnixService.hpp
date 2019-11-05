@@ -3,10 +3,11 @@
  * @brief  UnixService class prototype.
  * @author zer0
  * @date   2017-05-27
+ * @date   2019-11-05 (Move package: libtbag/app/details -> libtbag/service/details)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_APP_DETAILS_UNIXSERVICE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_APP_DETAILS_UNIXSERVICE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_DETAILS_UNIXSERVICE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_DETAILS_UNIXSERVICE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,8 +16,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/app/details/ServiceInterface.hpp>
-#include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/service/details/ServiceInterface.hpp>
 
 #include <memory>
 
@@ -24,7 +24,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace app     {
+namespace service {
 namespace details {
 
 /**
@@ -32,6 +32,7 @@ namespace details {
  *
  * @author zer0
  * @date   2017-05-27
+ * @date   2019-11-05 (Move package: libtbag/app/details -> libtbag/service/details)
  */
 class TBAG_API UnixService : public ServiceCommon
 {
@@ -53,18 +54,18 @@ public:
     virtual ~UnixService();
 
 public:
-    virtual Err install() override;
-    virtual Err uninstall() override;
-    virtual Err start() override;
-    virtual Err stop() override;
+    Err install() override;
+    Err uninstall() override;
+    Err start() override;
+    Err stop() override;
 };
 
 } // namespace details
-} // namespace app
+} // namespace service
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_APP_DETAILS_UNIXSERVICE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_DETAILS_UNIXSERVICE_HPP__
 

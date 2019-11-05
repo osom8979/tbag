@@ -3,9 +3,10 @@
  * @brief  UnixService class implementation.
  * @author zer0
  * @date   2017-05-27
+ * @date   2019-11-05 (Move package: libtbag/app/details -> libtbag/service/details)
  */
 
-#include <libtbag/app/details/UnixService.hpp>
+#include <libtbag/service/details/UnixService.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
@@ -23,7 +24,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace app     {
+namespace service {
 namespace details {
 
 struct UnixService::Impl : private Noncopyable
@@ -269,7 +270,7 @@ Err UnixService::stop()
 }
 
 } // namespace details
-} // namespace app
+} // namespace service
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

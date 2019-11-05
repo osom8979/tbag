@@ -3,10 +3,11 @@
  * @brief  Service class prototype.
  * @author zer0
  * @date   2017-05-25
+ * @date   2019-11-05 (Move package: libtbag/app -> libtbag/service)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_APP_SERVICE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_APP_SERVICE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_SERVICE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_SERVICE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -16,7 +17,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-#include <libtbag/app/details/ServiceInterface.hpp>
+#include <libtbag/service/details/ServiceInterface.hpp>
 
 #include <memory>
 
@@ -24,13 +25,14 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace app {
+namespace service {
 
 /**
  * Service class prototype.
  *
  * @author zer0
  * @date   2017-05-25
+ * @date   2019-11-05 (Move package: libtbag/app -> libtbag/service)
  */
 class TBAG_API Service : private Noncopyable
 {
@@ -50,23 +52,19 @@ public:
 
 public:
     Err createService(std::string const & name);
-    void registerTerminateHandler();
 
 public:
     Err install();
     Err uninstall();
     Err start();
     Err stop();
-
-public:
-    virtual void onTerminate();
 };
 
-} // namespace app
+} // namespace service
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_APP_SERVICE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_SERVICE_HPP__
 

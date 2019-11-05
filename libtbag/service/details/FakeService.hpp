@@ -3,10 +3,11 @@
  * @brief  FakeService class prototype.
  * @author zer0
  * @date   2017-05-27
+ * @date   2019-11-05 (Move package: libtbag/app/details -> libtbag/service/details)
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_APP_DETAILS_FAKESERVICE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_APP_DETAILS_FAKESERVICE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_DETAILS_FAKESERVICE_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_DETAILS_FAKESERVICE_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -15,13 +16,13 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/app/details/ServiceInterface.hpp>
+#include <libtbag/service/details/ServiceInterface.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace app     {
+namespace service {
 namespace details {
 
 /**
@@ -29,6 +30,7 @@ namespace details {
  *
  * @author zer0
  * @date   2017-05-27
+ * @date   2019-11-05 (Move package: libtbag/app/details -> libtbag/service/details)
  */
 class TBAG_API FakeService : public ServiceCommon
 {
@@ -37,18 +39,18 @@ public:
     virtual ~FakeService();
 
 public:
-    virtual Err install() override;
-    virtual Err uninstall() override;
-    virtual Err start() override;
-    virtual Err stop() override;
+    Err install() override;
+    Err uninstall() override;
+    Err start() override;
+    Err stop() override;
 };
 
 } // namespace details
-} // namespace app
+} // namespace service
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_APP_DETAILS_FAKESERVICE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_SERVICE_DETAILS_FAKESERVICE_HPP__
 

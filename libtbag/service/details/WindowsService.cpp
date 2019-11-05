@@ -3,16 +3,16 @@
  * @brief  WindowsService class implementation.
  * @author zer0
  * @date   2017-05-27
+ * @date   2019-11-05 (Move package: libtbag/app/details -> libtbag/service/details)
  */
 
-#include <libtbag/app/details/WindowsService.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/service/details/WindowsService.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace app     {
+namespace service {
 namespace details {
 
 WindowsService::WindowsService(std::string const & name) : ServiceCommon(name)
@@ -62,7 +62,7 @@ Err WindowsService::stop()
 }
 
 } // namespace details
-} // namespace app
+} // namespace service
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

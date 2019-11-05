@@ -3,16 +3,16 @@
  * @brief  FakeService class implementation.
  * @author zer0
  * @date   2017-05-27
+ * @date   2019-11-05 (Move package: libtbag/app/details -> libtbag/service/details)
  */
 
-#include <libtbag/app/details/FakeService.hpp>
-#include <libtbag/log/Log.hpp>
+#include <libtbag/service/details/FakeService.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace app     {
+namespace service {
 namespace details {
 
 FakeService::FakeService(std::string const & name) : ServiceCommon(name)
@@ -46,7 +46,7 @@ Err FakeService::stop()
 }
 
 } // namespace details
-} // namespace app
+} // namespace service
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
