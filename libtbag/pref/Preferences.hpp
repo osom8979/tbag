@@ -207,6 +207,9 @@ public:
 public:
     Err load(std::string const & path);
     Err save(std::string const & path) const;
+
+public:
+    Err loadOrDefaultSave(std::string const & config_path, bool create_dir = false);
 };
 
 } // namespace pref

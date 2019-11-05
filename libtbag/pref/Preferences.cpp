@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/pref/Preferences.hpp>
+#include <libtbag/filesystem/Path.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -155,6 +156,31 @@ Err Preferences::save(std::string const & path) const
         return E_SUCCESS;
     }
     return E_WRERR;
+}
+
+Err Preferences::loadOrDefaultSave(std::string const & config_path, bool create_dir)
+{
+    libtbag::filesystem::Path path(config_path);
+    if (path.exists()) {
+        if (path.isReadable()) {
+            return load(config_path);
+        } else {
+            return E_RDERR;
+        }
+    }
+
+    auto const PARENT_DIR = path.getParent();
+    if (create_dir && !PARENT_DIR.isDirectory()) {
+        if (!PARENT_DIR.createDir()) {
+            return E_CREATE;
+        }
+    }
+    if (!PARENT_DIR.isWritable()) {
+        return E_WRERR;
+    }
+
+    init();
+    return save(config_path);
 }
 
 } // namespace pref
