@@ -270,6 +270,18 @@ Err writeElementToXmlText(Element const & elem, std::string & xml, bool compact,
     return E_UNKNOWN;
 }
 
+Err writeElementToXmlElement(Element const & elem, Element & output)
+{
+    auto * doc = output.GetDocument();
+    assert(doc != nullptr);
+    auto * new_node = elem.DeepClone(doc);
+    if (!new_node) {
+        return E_UNKNOWN;
+    }
+    output.InsertEndChild(new_node);
+    return E_SUCCESS;
+}
+
 } // namespace xml
 } // namespace dom
 

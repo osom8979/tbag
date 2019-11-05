@@ -168,17 +168,46 @@ bool Resource::saveToXmlString(std::string & xml) const
 bool Resource::saveToXmlFile(std::string const & path, bool compact) const
 {
     Document doc;
-    Node * node = doc.InsertFirstChild(doc.NewElement(root.c_str()));
+    if (!saveToXmlRootElement(*doc.ToElement())) {
+        return false;
+    }
+    return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_SUCCESS;
+}
+
+bool Resource::saveToXmlRootElement(Element & element) const
+{
+    auto * doc = element.GetDocument();
+    if (doc == nullptr) {
+        return false;
+    }
+
+    auto * node = doc->NewElement(root.c_str());
     if (node == nullptr) {
         return false;
     }
-    for (auto const & cursor : map) {
-        Element * element = doc.NewElement(tag.c_str());
-        element->SetAttribute(attr.c_str(), cursor.first.c_str());
-        element->SetText(cursor.second.c_str());
-        node->InsertEndChild(element);
+
+    if (!saveToXmlRootElement(*node)) {
+        return false;
     }
-    return doc.SaveFile(path.c_str(), compact) == tinyxml2::XML_SUCCESS;
+
+    element.InsertEndChild(node);
+    return true;
+}
+
+bool Resource::saveToXmlPropElements(Element & element) const
+{
+    auto * doc = element.GetDocument();
+    if (doc == nullptr) {
+        return false;
+    }
+
+    for (auto const & cursor : map) {
+        auto * prop = doc->NewElement(tag.c_str());
+        prop->SetAttribute(attr.c_str(), cursor.first.c_str());
+        prop->SetText(cursor.second.c_str());
+        element.InsertEndChild(prop);
+    }
+    return true;
 }
 
 bool Resource::get(std::string const & key, std::string & value) const

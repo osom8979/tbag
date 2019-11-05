@@ -244,6 +244,11 @@ Err XmlHelper::writeElementToXmlText(Element const & elem, std::string & xml, bo
     return libtbag::dom::xml::writeElementToXmlText(elem, xml, compact, depth);
 }
 
+Err XmlHelper::writeElementToXmlElement(Element const & elem, Element & output)
+{
+    return libtbag::dom::xml::writeElementToXmlElement(elem, output);
+}
+
 } // namespace xml
 } // namespace dom
 

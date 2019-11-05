@@ -114,6 +114,8 @@ public:
 public:
     bool saveToXmlString(std::string & xml) const;
     bool saveToXmlFile(std::string const & path, bool compact = false) const;
+    bool saveToXmlRootElement(Element & element) const;
+    bool saveToXmlPropElements(Element & element) const;
 
 public:
     bool get(std::string const & key, std::string & result) const;

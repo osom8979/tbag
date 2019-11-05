@@ -73,9 +73,6 @@ class TBAG_API Preferences
 {
 public:
     TBAG_CONSTEXPR static char const * const TAG_APPLICATION = "application";
-    TBAG_CONSTEXPR static char const * const TAG_VALUES      = "values";
-    TBAG_CONSTEXPR static char const * const TAG_VALUE       = "value";
-    TBAG_CONSTEXPR static char const * const TAG_EXTRA       = "extra";
 
 public:
     /**
@@ -136,7 +133,6 @@ private:
 
 public:
     Preferences();
-    Preferences(std::string const & root);
     Preferences(Preferences const & obj);
     Preferences(Preferences && obj) TBAG_NOEXCEPT;
     ~Preferences();

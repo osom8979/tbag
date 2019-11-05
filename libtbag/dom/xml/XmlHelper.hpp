@@ -127,6 +127,7 @@ struct TBAG_API XmlHelper
     static Err readFromXmlText(Document & doc, std::string const & xml);
     static Err writeDocumentToXmlText(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
     static Err writeElementToXmlText(Element const & elem, std::string & xml, bool compact = false, int depth = 0);
+    static Err writeElementToXmlElement(Element const & elem, Element & output);
 
     template <typename Predicated>
     static bool readFromXmlFile(std::string const & path, std::string const & tag, Predicated predicated)

@@ -84,6 +84,7 @@ TBAG_API Node * insertElement(Element & element, Node * node);
 TBAG_API Err readDocumentFromXmlText(Document & doc, std::string const & xml);
 TBAG_API Err writeDocumentToXmlText(Document const & doc, std::string & xml, bool compact = false, int depth = 0);
 TBAG_API Err writeElementToXmlText(Element const & elem, std::string & xml, bool compact = false, int depth = 0);
+TBAG_API Err writeElementToXmlElement(Element const & elem, Element & output);
 
 } // namespace xml
 } // namespace dom
