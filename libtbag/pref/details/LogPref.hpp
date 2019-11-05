@@ -34,18 +34,20 @@ namespace details {
  *  <loggers>
  *    <!-- insert your logger -->
  *    <logger>
- *      <!-- Log name -->
+ *      <!-- Logger name -->
  *      <name>your_logger_name</name>
  *
  *      <!-- Select the sink to which you want to send log messages -->
- *      <!--  console      (console output)                         -->
- *      <!--  file         (File output)                            -->
- *      <!--  null         (Null sink)                              -->
- *      <sink>file</sink>
+ *      <!--  console     (console output)                          -->
+ *      <!--  file        (File output)                             -->
+ *      <!--  null        (Null sink)                               -->
+ *      <!--  rotate_file (Rotate file sink)                        -->
+ *      <sink>rotate_file</sink>
  *
- *      <!-- Specify the detailed path of the sink                 -->
- *      <!--  <sink: console>     case: 'stdout' or 'stderr'       -->
- *      <!--  <sink: file>        case: log file location path     -->
+ *      <!-- Specify the detailed path of the sink                             -->
+ *      <!--  <sink:console>     : 'stdout' or 'stderr' or 'auto'              -->
+ *      <!--  <sink:file>        : log file location path                      -->
+ *      <!--  <sink:rotate_file> : 'size=10240m counter=? time=? archive=.zip' -->
  *      <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *      <!-- Special exchange variable:          -->
  *      <!-- ${EXE_PATH} : EXE file path         -->
@@ -53,7 +55,7 @@ namespace details {
  *      <!-- ${EXE_DIR}  : EXE directory         -->
  *      <!-- ${WORK_DIR} : Working directory     -->
  *      <!-- ${HOME_DIR} : User's HOME directory -->
- *      <arguments>${EXE_DIR}/tbag-logger-test.log</arguments>
+ *      <arguments>/prefix/${EXE_NAME}-$py$pm$pdT$ph$pi$ps_$pl$pc.log</arguments>
  *
  *      <!-- Log message generator                                 -->
  *      <!--  default        (Default log message)                 -->
@@ -83,6 +85,9 @@ namespace details {
  *
  *      <!-- Auto flush flag: 'true' or 'false' -->
  *      <auto_flush>true</auto_flush>
+ *
+ *      <!-- Multi-thread flag: 'true' or 'false' -->
+ *      <thread>true</thread>
  *    </logger>
  *
  *    <!-- More logger information ... -->
@@ -97,8 +102,8 @@ namespace details {
 class TBAG_API LogPref : public libtbag::pref::Preferences::NodeInterface
 {
 public:
-    using Info = libtbag::log::LoggerInitParams;
-    using Infos = std::vector<Info>;
+    using Init = libtbag::log::LoggerInitParams;
+    using Inits = std::vector<Init>;
 
 public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGERS_NAME = "loggers";
@@ -114,25 +119,26 @@ public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_THREAD     = "thread";
 
 public:
-    Infos _infos;
+    Inits _inits;
 
 public:
     LogPref();
     virtual ~LogPref();
 
 public:
-    inline Infos       & infos()       TBAG_NOEXCEPT { return _infos; }
-    inline Infos const & infos() const TBAG_NOEXCEPT { return _infos; }
+    inline Inits       & inits()       TBAG_NOEXCEPT { return _inits; }
+    inline Inits const & inits() const TBAG_NOEXCEPT { return _inits; }
 
 protected:
     std::string name() const override;
     bool init() override;
+    void clear() override;
     void load(Element const & element) override;
     void save(Element & element) const override;
 
 public:
-    Info getLogInfo(Element const & element);
-    Infos getLogInfos(Element const & parent);
+    Init getInit(Element const & element);
+    Inits getInits(Element const & parent);
 };
 
 } // namespace details

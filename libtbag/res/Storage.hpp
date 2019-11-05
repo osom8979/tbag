@@ -211,7 +211,7 @@ public:
     void setLayoutEnv(std::string const & dir, std::string const & filename, bool auto_load = false);
 
     bool readEnv();
-    void readEnvDefault();
+    void readEnvDefault(bool with_system = true);
     void readEnvParams(char ** envs);
     bool saveEnv();
 

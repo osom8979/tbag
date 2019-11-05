@@ -17,22 +17,17 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace pref {
 
-Preferences::Preferences() : Preferences(TAG_APPLICATION)
+Preferences::Preferences()
 {
     // EMPTY.
 }
 
-Preferences::Preferences(std::string const & root) : _root(root)
-{
-    // EMPTY.
-}
-
-Preferences::Preferences(Preferences const & obj) : Preferences()
+Preferences::Preferences(Preferences const & obj)
 {
     (*this) = obj;
 }
 
-Preferences::Preferences(Preferences && obj) TBAG_NOEXCEPT : Preferences()
+Preferences::Preferences(Preferences && obj) TBAG_NOEXCEPT
 {
     (*this) = std::move(obj);
 }
@@ -57,7 +52,6 @@ Preferences & Preferences::operator =(Preferences && obj) TBAG_NOEXCEPT
 void Preferences::copy(Preferences const & obj)
 {
     if (this != &obj) {
-        _root = obj._root;
         _nodes = obj._nodes;
     }
 }
@@ -65,7 +59,6 @@ void Preferences::copy(Preferences const & obj)
 void Preferences::swap(Preferences & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _root.swap(obj._root);
         _nodes.swap(obj._nodes);
     }
 }
@@ -118,7 +111,7 @@ Err Preferences::load(std::string const & path)
         return E_PARSING;
     }
 
-    auto const * root = doc.FirstChildElement(_root.c_str());
+    auto const * root = doc.FirstChildElement(TAG_APPLICATION);
     if (root == nullptr) {
         return E_NFOUND;
     }
@@ -143,7 +136,7 @@ Err Preferences::save(std::string const & path) const
     using namespace libtbag::dom::xml;
 
     Document doc;
-    auto * root = doc.NewElement(_root.c_str());
+    auto * root = doc.NewElement(TAG_APPLICATION);
     for (auto & cursor : _nodes) {
         auto const name = cursor.second->name();
         if (name.empty()) {

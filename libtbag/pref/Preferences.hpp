@@ -34,7 +34,7 @@ namespace pref {
  *
  * All frequently used settings can be passed as parameters.
  *
- * <code>config.xml</code> format:
+ * Default node format:
  * @code{.xml}
  * <?xml version='1.0' encoding='utf-8' ?>
  * <application>
@@ -73,11 +73,9 @@ class TBAG_API Preferences
 {
 public:
     TBAG_CONSTEXPR static char const * const TAG_APPLICATION = "application";
-    TBAG_CONSTEXPR static char const * const TAG_LOGGERS     = "loggers";
     TBAG_CONSTEXPR static char const * const TAG_VALUES      = "values";
     TBAG_CONSTEXPR static char const * const TAG_VALUE       = "value";
     TBAG_CONSTEXPR static char const * const TAG_EXTRA       = "extra";
-    TBAG_CONSTEXPR static char const * const TAG_STORAGE     = "storage";
 
 public:
     /**
@@ -94,6 +92,7 @@ public:
         virtual std::string name() const = 0;
 
         virtual bool init() { return true; }
+        virtual void clear() { /* EMPTY. */ }
         virtual void load(Element const & element) { /* EMPTY. */ }
         virtual void save(Element & element) const { /* EMPTY. */ }
 
@@ -133,7 +132,6 @@ public:
     using NodePair   = NodeMap::value_type;
 
 private:
-    std::string _root;
     NodeMap _nodes;
 
 public:

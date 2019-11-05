@@ -124,7 +124,7 @@ public:
 
 public:
     TBAG_CONSTEXPR static char const * const DEFAULT_STORAGE_ROOT = "${WORK_DIR}/storage";
-    TBAG_CONSTEXPR static char const * const ENV_KEY_STORAGE_ROOT = "STORAGE_ROOT";
+    TBAG_CONSTEXPR static char const * const ENV_KEY_STORAGE_ROOT = "TBAG_STORAGE_ROOT";
 
 public:
     TBAG_CONSTEXPR static char const * const TAG_STORAGE = "storage";
@@ -227,6 +227,7 @@ public:
             // EMPTY.
         };
 
+        str        root;
         env_layout env;
         cfg_layout config;
         mod_layout module;
@@ -235,43 +236,29 @@ public:
         tmp_layout temp;
         key_layout keystore;
         lua_layout lua;
-        def_layout luarocks;
+        def_layout lua_rocks;
 
         using usr_layouts = std::vector<usr_layout>;
         usr_layouts users;
     };
 
 private:
-    char ** _envs;
-    std::string _root;
     Property _prop;
-    Storage _storage;
 
 public:
     StoragePref();
     virtual ~StoragePref();
 
 public:
-    inline std::string       & root()       TBAG_NOEXCEPT { return _root; }
-    inline std::string const & root() const TBAG_NOEXCEPT { return _root; }
-
     inline Property       & property()       TBAG_NOEXCEPT { return _prop; }
     inline Property const & property() const TBAG_NOEXCEPT { return _prop; }
-
-    inline Storage       & storage()       TBAG_NOEXCEPT { return _storage; }
-    inline Storage const & storage() const TBAG_NOEXCEPT { return _storage; }
 
 protected:
     std::string name() const override;
     bool init() override;
+    void clear() override;
     void load(Element const & element) override;
     void save(Element & element) const override;
-
-public:
-    void update();
-    void update(std::string const & root);
-    void update(Property const & prop);
-    void update(std::string const & root, Property const & prop);
 
 public:
     static void readElement(Element const & element, std::string const & tag, Property::env_layout & layout);
@@ -302,7 +289,9 @@ public:
                                Environments const & env, bool abs = false, bool raw = false);
     static std::string getPath(std::string const & root, std::string const & tag,
                                Property::def_layout const & layout, Environments const & env);
-    static Storage loadStorage(std::string const & root, Property const & prop, char ** envs = nullptr);
+
+public:
+    Storage loadStorage() const;
 };
 
 } // namespace details

@@ -157,9 +157,9 @@ bool Storage::readEnv()
     return true;
 }
 
-void Storage::readEnvDefault()
+void Storage::readEnvDefault(bool with_system)
 {
-    _impl->envs = Environments::createDefaultEnvironments();
+    _impl->envs = Environments::createDefaultEnvironments(true);
 }
 
 void Storage::readEnvParams(char ** envs)

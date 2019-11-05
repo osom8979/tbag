@@ -15,8 +15,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace pref    {
 namespace details {
 
-using Info = LogPref::Info;
-using Infos = LogPref::Infos;
+using Init = LogPref::Init;
+using Inits = LogPref::Inits;
 
 LogPref::LogPref()
 {
@@ -35,18 +35,23 @@ std::string LogPref::name() const
 
 bool LogPref::init()
 {
-    _infos.clear();
+    _inits.clear();
     return true;
+}
+
+void LogPref::clear()
+{
+    _inits.clear();
 }
 
 void LogPref::load(Element const & element)
 {
-    _infos = getLogInfos(element);
+    _inits = getInits(element);
 }
 
 void LogPref::save(Element & element) const
 {
-    for (auto & info : _infos) {
+    for (auto & info : _inits) {
         newElement(element, XML_ELEMENT_LOGGER_NAME, [&](Element & e){
             // clang-format off
             set(e, XML_ELEMENT_NAME      , info.name      );
@@ -62,9 +67,9 @@ void LogPref::save(Element & element) const
     }
 }
 
-Info LogPref::getLogInfo(Element const & element)
+Init LogPref::getInit(Element const & element)
 {
-    Info info;
+    Init info;
     // clang-format off
     info.name       = get<std::string>(element, XML_ELEMENT_NAME      );
     info.sink       = get<std::string>(element, XML_ELEMENT_SINK      );
@@ -78,12 +83,12 @@ Info LogPref::getLogInfo(Element const & element)
     return info;
 }
 
-Infos LogPref::getLogInfos(Element const & parent)
+Inits LogPref::getInits(Element const & parent)
 {
-    Infos result;
+    Inits result;
     Element const * cursor = parent.FirstChildElement(XML_ELEMENT_LOGGER_NAME);
     while (cursor != nullptr) {
-        result.push_back(getLogInfo(*cursor));
+        result.push_back(getInit(*cursor));
         cursor = cursor->NextSiblingElement();
     }
     return result;

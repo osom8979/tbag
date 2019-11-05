@@ -32,77 +32,74 @@ std::string StoragePref::name() const
 
 bool StoragePref::init()
 {
-    Property prop;
-
     // clang-format off
-    prop.env     .text = TAG_ENV     ;
-    prop.config  .text = TAG_CONFIG  ;
-    prop.module  .text = TAG_MODULE  ;
-    prop.text    .text = TAG_TEXT    ;
-    prop.sqlite  .text = TAG_SQLITE  ;
-    prop.temp    .text = TAG_TEMP    ;
-    prop.keystore.text = TAG_KEYSTORE;
-    prop.lua     .text = TAG_LUA     ;
-    prop.luarocks.text = TAG_LUAROCKS;
+    _prop.env      .text = TAG_ENV     ;
+    _prop.config   .text = TAG_CONFIG  ;
+    _prop.module   .text = TAG_MODULE  ;
+    _prop.text     .text = TAG_TEXT    ;
+    _prop.sqlite   .text = TAG_SQLITE  ;
+    _prop.temp     .text = TAG_TEMP    ;
+    _prop.keystore .text = TAG_KEYSTORE;
+    _prop.lua      .text = TAG_LUA     ;
+    _prop.lua_rocks.text = TAG_LUAROCKS;
     // clang-format on
 
     // clang-format off
-    prop.env     .exists = true;
-    prop.config  .exists = true;
-    prop.module  .exists = true;
-    prop.text    .exists = true;
-    prop.sqlite  .exists = true;
-    prop.temp    .exists = true;
-    prop.keystore.exists = true;
-    prop.lua     .exists = true;
-    prop.luarocks.exists = true;
+    _prop.env      .exists = true;
+    _prop.config   .exists = true;
+    _prop.module   .exists = true;
+    _prop.text     .exists = true;
+    _prop.sqlite   .exists = true;
+    _prop.temp     .exists = true;
+    _prop.keystore .exists = true;
+    _prop.lua      .exists = true;
+    _prop.lua_rocks.exists = true;
     // clang-format on
 
     // clang-format off
-    prop.env.name      = VAL_DEFAULT_ENV_NAME;
-    prop.module.ext    = VAL_DEFAULT_MODULE_EXT;
-    prop.text.name     = VAL_DEFAULT_TEXT_NAME;
-    prop.sqlite.name   = VAL_DEFAULT_SQLITE_NAME;
-    prop.keystore.name = VAL_DEFAULT_KEYSTORE_NAME;
-    prop.lua.name      = VAL_DEFAULT_LUA_NAME;
-    prop.lua.init      = VAL_DEFAULT_LUA_INIT;
+    _prop.env.name      = VAL_DEFAULT_ENV_NAME;
+    _prop.module.ext    = VAL_DEFAULT_MODULE_EXT;
+    _prop.text.name     = VAL_DEFAULT_TEXT_NAME;
+    _prop.sqlite.name   = VAL_DEFAULT_SQLITE_NAME;
+    _prop.keystore.name = VAL_DEFAULT_KEYSTORE_NAME;
+    _prop.lua.name      = VAL_DEFAULT_LUA_NAME;
+    _prop.lua.init      = VAL_DEFAULT_LUA_INIT;
     // clang-format on
-
-    update(DEFAULT_STORAGE_ROOT, prop);
 
     return true;
 }
 
+void StoragePref::clear()
+{
+    _prop = {};
+}
+
 void StoragePref::load(Element const & element)
 {
-    std::string root;
-    optAttr(element, ATT_ROOT, root);
+    optAttr(element, ATT_ROOT, _prop.root);
 
-    Property prop;
     // clang-format off
-    readElement(element, TAG_ENV      , prop.env);
-    readElement(element, TAG_CONFIG   , prop.config);
-    readElement(element, TAG_MODULE   , prop.module);
-    readElement(element, TAG_TEXT     , prop.text);
-    readElement(element, TAG_SQLITE   , prop.sqlite);
-    readElement(element, TAG_TEMP     , prop.temp);
-    readElement(element, TAG_KEYSTORE , prop.keystore);
-    readElement(element, TAG_LUA      , prop.lua);
-    readElement(element, TAG_LUAROCKS , prop.luarocks);
+    readElement(element, TAG_ENV     , _prop.env);
+    readElement(element, TAG_CONFIG  , _prop.config);
+    readElement(element, TAG_MODULE  , _prop.module);
+    readElement(element, TAG_TEXT    , _prop.text);
+    readElement(element, TAG_SQLITE  , _prop.sqlite);
+    readElement(element, TAG_TEMP    , _prop.temp);
+    readElement(element, TAG_KEYSTORE, _prop.keystore);
+    readElement(element, TAG_LUA     , _prop.lua);
+    readElement(element, TAG_LUAROCKS, _prop.lua_rocks);
     // clang-format on
 
     foreachElement(element, TAG_USER, [&](Element const & node){
         Property::usr_layout user;
         readElement(node, user);
-        prop.users.push_back(user);
+        _prop.users.push_back(user);
     });
-
-    update(root, prop);
 }
 
 void StoragePref::save(Element & element) const
 {
-    setAttr(element, ATT_ROOT, _root);
+    setAttr(element, ATT_ROOT, _prop.root);
 
     // clang-format off
     addNewElement(element, TAG_ENV      , _prop.env);
@@ -113,36 +110,12 @@ void StoragePref::save(Element & element) const
     addNewElement(element, TAG_TEMP     , _prop.temp);
     addNewElement(element, TAG_KEYSTORE , _prop.keystore);
     addNewElement(element, TAG_LUA      , _prop.lua);
-    addNewElement(element, TAG_LUAROCKS , _prop.luarocks);
+    addNewElement(element, TAG_LUAROCKS , _prop.lua_rocks);
     // clang-format on
 
-    for (auto & user : _prop.users) {
+    for (auto const & user : _prop.users) {
         addNewElement(element, TAG_USER, user);
     }
-}
-
-void StoragePref::update()
-{
-    _storage = loadStorage(_root, _prop, _envs);
-}
-
-void StoragePref::update(std::string const & root)
-{
-    _root = root;
-    _storage = loadStorage(root, _prop, _envs);
-}
-
-void StoragePref::update(Property const & prop)
-{
-    _prop = prop;
-    _storage = loadStorage(_root, prop, _envs);
-}
-
-void StoragePref::update(std::string const & root, Property const & prop)
-{
-    _root = root;
-    _prop = prop;
-    _storage = loadStorage(root, prop, _envs);
 }
 
 void StoragePref::readElement(Element const & element, std::string const & tag, Property::env_layout & layout)
@@ -385,32 +358,28 @@ std::string StoragePref::getPath(std::string const & root, std::string const & t
     return getPath(root, tag, layout.text, env, layout.abs, layout.raw);
 }
 
-StoragePref::Storage StoragePref::loadStorage(std::string const & root, Property const & prop, char ** envs)
+StoragePref::Storage StoragePref::loadStorage() const
 {
-    auto const DEFAULT_ENVS = Environments::createDefaultEnvironments();
+    auto const DEFAULT_ENVS = Environments::createDefaultEnvironments(true);
     Storage storage;
 
     std::string updated_root;
-    if (root.empty()) {
+    if (_prop.root.empty()) {
         updated_root = libtbag::filesystem::Path::getWorkDir();
     } else {
-        updated_root = DEFAULT_ENVS.convert(root);
+        updated_root = DEFAULT_ENVS.convert(_prop.root);
     }
 
-    if (prop.env.exists) {
-        storage.setLayoutEnv(getPath(updated_root, TAG_ENV, prop.env.text, DEFAULT_ENVS, prop.env.abs));
+    if (_prop.env.exists) {
+        storage.setLayoutEnv(getPath(updated_root, TAG_ENV, _prop.env.text, DEFAULT_ENVS, _prop.env.abs));
 
-        if (!prop.env.name.empty()) {
-            storage.setEnvFilename(prop.env.name);
+        if (!_prop.env.name.empty()) {
+            storage.setEnvFilename(_prop.env.name);
             storage.readEnv();
         }
 
-        if (prop.env.def) {
-            storage.readEnvDefault();
-        }
-
-        if (prop.env.sys && envs != nullptr) {
-            storage.readEnvParams(envs);
+        if (_prop.env.def) {
+            storage.readEnvDefault(_prop.env.sys);
         }
     } else {
         storage.readEnvDefault();
@@ -421,53 +390,53 @@ StoragePref::Storage StoragePref::loadStorage(std::string const & root, Property
     // ----------------------------------------
 
     // clang-format off
-    if (prop.config  .exists) { storage.setLayoutConfig  (getPath(updated_root, TAG_CONFIG  , prop.config  , ENVIRONMENTS)); }
-    if (prop.module  .exists) { storage.setLayoutModule  (getPath(updated_root, TAG_MODULE  , prop.module  , ENVIRONMENTS)); }
-    if (prop.text    .exists) { storage.setLayoutText    (getPath(updated_root, TAG_TEXT    , prop.text    , ENVIRONMENTS)); }
-    if (prop.sqlite  .exists) { storage.setLayoutSqlite  (getPath(updated_root, TAG_SQLITE  , prop.sqlite  , ENVIRONMENTS)); }
-    if (prop.temp    .exists) { storage.setLayoutTemp    (getPath(updated_root, TAG_TEMP    , prop.temp    , ENVIRONMENTS)); }
-    if (prop.keystore.exists) { storage.setLayoutKeystore(getPath(updated_root, TAG_KEYSTORE, prop.keystore, ENVIRONMENTS)); }
-    if (prop.lua     .exists) { storage.setLayoutLua     (getPath(updated_root, TAG_LUA     , prop.lua     , ENVIRONMENTS)); }
-    if (prop.luarocks.exists) { storage.setLayoutLuaRocks(getPath(updated_root, TAG_LUAROCKS, prop.luarocks, ENVIRONMENTS)); }
+    if (_prop.config   .exists) { storage.setLayoutConfig  (getPath(updated_root, TAG_CONFIG  , _prop.config   , ENVIRONMENTS)); }
+    if (_prop.module   .exists) { storage.setLayoutModule  (getPath(updated_root, TAG_MODULE  , _prop.module   , ENVIRONMENTS)); }
+    if (_prop.text     .exists) { storage.setLayoutText    (getPath(updated_root, TAG_TEXT    , _prop.text     , ENVIRONMENTS)); }
+    if (_prop.sqlite   .exists) { storage.setLayoutSqlite  (getPath(updated_root, TAG_SQLITE  , _prop.sqlite   , ENVIRONMENTS)); }
+    if (_prop.temp     .exists) { storage.setLayoutTemp    (getPath(updated_root, TAG_TEMP    , _prop.temp     , ENVIRONMENTS)); }
+    if (_prop.keystore .exists) { storage.setLayoutKeystore(getPath(updated_root, TAG_KEYSTORE, _prop.keystore , ENVIRONMENTS)); }
+    if (_prop.lua      .exists) { storage.setLayoutLua     (getPath(updated_root, TAG_LUA     , _prop.lua      , ENVIRONMENTS)); }
+    if (_prop.lua_rocks.exists) { storage.setLayoutLuaRocks(getPath(updated_root, TAG_LUAROCKS, _prop.lua_rocks, ENVIRONMENTS)); }
     // clang-format on
 
-    if (prop.config.exists) {
+    if (_prop.config.exists) {
         // EMPTY.
     }
-    if (prop.module.exists) {
-        storage.setModuleExtension(prop.module.ext);
+    if (_prop.module.exists) {
+        storage.setModuleExtension(_prop.module.ext);
     }
-    if (prop.text.exists) {
-        storage.setTextLanguage(prop.text.name);
+    if (_prop.text.exists) {
+        storage.setTextLanguage(_prop.text.name);
         storage.loadText();
     }
-    if (prop.sqlite.exists) {
-        storage.openSqlite(prop.sqlite.name);
+    if (_prop.sqlite.exists) {
+        storage.openSqlite(_prop.sqlite.name);
     }
-    if (prop.temp.exists && prop.temp.auto_clear) {
+    if (_prop.temp.exists && _prop.temp.auto_clear) {
         storage.setAutoClearTempFiles();
     }
-    if (prop.keystore.exists) {
-        storage.openKeyStore(prop.keystore.name);
+    if (_prop.keystore.exists) {
+        storage.openKeyStore(_prop.keystore.name);
     }
-    if (prop.lua.exists) {
-        if (prop.lua.init) {
+    if (_prop.lua.exists) {
+        if (_prop.lua.init) {
             storage.initLuaDefault();
-            if (prop.module.exists) {
+            if (_prop.module.exists) {
                 storage.appendLuaCPath();
             }
             storage.appendLuaPath();
-            if (prop.luarocks.exists) {
+            if (_prop.lua_rocks.exists) {
                 storage.appendLuaRocksPrefix();
             }
         }
-        if (!prop.lua.name.empty()) {
-            storage.runLuaScriptFile(prop.lua.name);
+        if (!_prop.lua.name.empty()) {
+            storage.runLuaScriptFile(_prop.lua.name);
         }
     }
 
     auto & asset = storage.asset();
-    for (auto & user : prop.users) {
+    for (auto & user : _prop.users) {
         if (user.name.empty()) {
             continue;
         }
