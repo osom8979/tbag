@@ -329,7 +329,7 @@ struct TBAG_API RotatePath
 
     struct InitParams
     {
-        SharedWriter  writer;
+        SharedWriter writer;
         SharedUpdater updater;
         SharedCleaner cleaner;
     };
@@ -350,7 +350,7 @@ struct TBAG_API RotatePath
 
     Path path;
 
-    SharedWriter  writer;
+    SharedWriter writer;
     SharedUpdater updater;
     SharedCleaner cleaner;
 

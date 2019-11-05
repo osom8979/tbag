@@ -54,12 +54,7 @@ public:
     TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE3 = "FALSE";
 
 private:
-    std::string _last_parsed; ///< The original string that was last parsed.
     std::vector<std::string> _args;
-
-public:
-    std::string name; ///< This variable does nothing in the logic.
-    std::string full; ///< This variable does nothing in the logic.
 
 public:
     std::string delimiter;
@@ -67,9 +62,7 @@ public:
 
 public:
     Arguments();
-    Arguments(std::string const & arguments);
-    Arguments(std::string const & name,
-              std::string const & arguments,
+    Arguments(std::string const & arguments,
               std::string const & delimiter = DEFAULT_ARGUMENTS_DELIMITER,
               std::string const & point_delimiter = DEFAULT_ARGUMENTS_POINT_DELIMITER);
     Arguments(Arguments const & obj);
@@ -81,34 +74,43 @@ public:
     Arguments & operator =(Arguments && obj) TBAG_NOEXCEPT;
 
 public:
-    inline std::string getOriginalArgumentString() const
-    { return _last_parsed; }
-
-    inline void clear() TBAG_NOEXCEPT
-    { _args.clear(); }
-    inline bool empty() const TBAG_NOEXCEPT
-    { return _args.empty(); }
-    inline std::size_t size() const TBAG_NOEXCEPT
-    { return _args.size(); }
-
-    inline std::string get(std::size_t index) const
-    { return _args.at(index); }
+    inline std::vector<std::string>       & args()       TBAG_NOEXCEPT { return _args; }
+    inline std::vector<std::string> const & args() const TBAG_NOEXCEPT { return _args; }
 
 public:
-    inline void erase(std::size_t index)
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_args.empty())
+    { return _args.empty(); }
+    inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_args.size())
+    { return _args.size(); }
+
+public:
+    inline std::string       & at(std::size_t index)       { return _args.at(index); }
+    inline std::string const & at(std::size_t index) const { return _args.at(index); }
+
+public:
+    void clear()
+    { _args.clear(); }
+
+public:
+    void erase(std::size_t index)
     { _args.erase(_args.begin() + index); }
-    inline void erase(std::string const & argument)
+    void erase(std::string const & argument)
     { _args.erase(std::find(_args.begin(), _args.end(), argument)); }
 
-    inline void push(std::string const & argument)
-    { _args.push_back(argument); }
-    inline void pop()
+public:
+    void push_front(std::string const & argument)
+    { _args.insert(_args.begin(), argument); }
+    void pop_front()
     { erase(0); }
 
 public:
-    void insert(std::size_t index, std::string const & argument);
+    void push_back(std::string const & argument)
+    { _args.push_back(argument); }
+    void pop_back()
+    { _args.pop_back(); }
 
 public:
+    void insert(std::size_t index, std::string const & argument);
     bool parse(std::string const & arguments);
 
 public:
@@ -196,15 +198,6 @@ private:
         }
         return result;
     }
-
-public:
-    std::vector<std::string> getStrings      () const;
-    std::vector<int        > getIntegers     () const;
-    std::vector<double     > getDoubles      () const;
-    std::vector<Pointi     > getIntegerPoints() const;
-    std::vector<Pointd     > getDoublePoints () const;
-    std::vector<Recti      > getIntegerRects () const;
-    std::vector<Rectd      > getDoubleRects  () const;
 
 public:
     // clang-format off

@@ -16,32 +16,16 @@ NAMESPACE_LIBTBAG_OPEN
 namespace string {
 
 Arguments::Arguments()
-        : _last_parsed(), _args(),
-          name(), full(),
-          delimiter(DEFAULT_ARGUMENTS_DELIMITER),
+        : delimiter(DEFAULT_ARGUMENTS_DELIMITER),
           point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
 {
     // EMPTY.
 }
 
-Arguments::Arguments(std::string const & arguments)
-        : _last_parsed(), _args(),
-          name(), full(),
-          delimiter(DEFAULT_ARGUMENTS_DELIMITER),
-          point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
-{
-    if (!parse(arguments)) {
-        throw std::bad_alloc();
-    }
-}
-
-Arguments::Arguments(std::string const & name
-                   , std::string const & arguments
-                   , std::string const & delimiter
-                   , std::string const & point_delimiter)
-        : _last_parsed(), _args(),
-          name(name), full(),
-          delimiter(delimiter),
+Arguments::Arguments(std::string const & arguments,
+                     std::string const & delimiter,
+                     std::string const & point_delimiter)
+        : delimiter(delimiter),
           point_delimiter(point_delimiter)
 {
     if (!parse(arguments)) {
@@ -67,12 +51,9 @@ Arguments::~Arguments()
 Arguments & Arguments::operator =(Arguments const & obj)
 {
     if (this != &obj) {
-        _last_parsed = obj._last_parsed;
-        name = obj.name;
         _args = obj._args;
         delimiter = obj.delimiter;
         point_delimiter = obj.point_delimiter;
-        full = obj.full;
     }
     return *this;
 }
@@ -80,12 +61,9 @@ Arguments & Arguments::operator =(Arguments const & obj)
 Arguments & Arguments::operator =(Arguments && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _last_parsed.swap(obj._last_parsed);
-        name.swap(obj.name);
         _args.swap(obj._args);
         delimiter.swap(obj.delimiter);
         point_delimiter.swap(obj.point_delimiter);
-        full.swap(obj.full);
     }
     return *this;
 }
@@ -97,8 +75,8 @@ void Arguments::insert(std::size_t index, std::string const & argument)
 
 bool Arguments::parse(std::string const & arguments)
 {
-    for (auto & cursor : libtbag::string::splitTokens(arguments, delimiter)) {
-        push(cursor);
+    for (auto const & cursor : libtbag::string::splitTokens(arguments, delimiter)) {
+        push_back(cursor);
     }
     return true;
 }
@@ -111,9 +89,9 @@ std::string Arguments::toString() const
         return _args.at(0);
     }
 
-    std::size_t const SIZE = _args.size();
+    auto const size = _args.size();
     std::string result = _args[0];
-    for (std::size_t index = 1; index < SIZE; ++index) {
+    for (auto index = 1u; index < size; ++index) {
         result += delimiter + _args.at(index);
     }
     return result;
@@ -228,53 +206,6 @@ bool Arguments::optDoubleRect(std::size_t index, Rectd * output, bool check_gram
             throw ParseException();
         }
         return Rectd(std::stod(tokens.at(0)), std::stod(tokens.at(1)), std::stod(tokens.at(2)), std::stod(tokens.at(3)));
-    });
-}
-
-std::vector<std::string> Arguments::getStrings() const
-{
-    return _args;
-}
-
-std::vector<int> Arguments::getIntegers() const
-{
-    return getVector<int>([this](std::size_t index, int * output){
-        return this->optInteger(index, output);
-    });
-}
-
-std::vector<double> Arguments::getDoubles() const
-{
-    return getVector<double>([this](std::size_t index, double * output){
-        return this->optDouble(index, output);
-    });
-}
-
-std::vector<Arguments::Pointi> Arguments::getIntegerPoints() const
-{
-    return getVector<Pointi>([this](std::size_t index, Pointi * output){
-        return this->optIntegerPoint(index, output);
-    });
-}
-
-std::vector<Arguments::Pointd> Arguments::getDoublePoints() const
-{
-    return getVector<Pointd>([this](std::size_t index, Pointd * output){
-        return this->optDoublePoint(index, output);
-    });
-}
-
-std::vector<Arguments::Recti> Arguments::getIntegerRects() const
-{
-    return getVector<Recti>([this](std::size_t index, Recti * output){
-        return this->optIntegerRect(index, output);
-    });
-}
-
-std::vector<Arguments::Rectd> Arguments::getDoubleRects() const
-{
-    return getVector<Rectd>([this](std::size_t index, Rectd * output){
-        return this->optDoubleRect(index, output);
     });
 }
 

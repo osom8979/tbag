@@ -14,7 +14,6 @@ using namespace libtbag::string;
 TEST(ArgumentsTest, OnlyCoverage)
 {
     Arguments args("name", "args");
-    args.name = "";
     args.delimiter = "";
     args.point_delimiter = "";
 
@@ -80,22 +79,11 @@ TEST_F(ArgumentsFixture, ToString)
 
 TEST_F(ArgumentsFixture, ModifyMethods)
 {
-    ASSERT_EQ("test", args.get(0));
-    args.pop();
-    ASSERT_EQ("1", args.get(0));
+    ASSERT_EQ("test", args.at(0));
+    args.pop_front();
+    ASSERT_EQ("1", args.at(0));
     args.insert(0, "test");
-    ASSERT_EQ("test", args.get(0));
-}
-
-TEST_F(ArgumentsFixture, GetVector)
-{
-    ASSERT_EQ(6U, args.getStrings().size());
-    ASSERT_EQ(2U, args.getIntegers().size());
-    ASSERT_EQ(2U, args.getDoubles().size());
-    ASSERT_EQ(1U, args.getIntegerPoints().size());
-    ASSERT_EQ(1U, args.getDoublePoints().size());
-    ASSERT_EQ(1U, args.getIntegerRects().size());
-    ASSERT_EQ(1U, args.getDoubleRects().size());
+    ASSERT_EQ("test", args.at(0));
 }
 
 TEST_F(ArgumentsFixture, OptString)

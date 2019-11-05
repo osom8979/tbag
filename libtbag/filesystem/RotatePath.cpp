@@ -8,7 +8,7 @@
 #include <libtbag/filesystem/RotatePath.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/string/Commander.hpp>
+#include <libtbag/string/Arguments.hpp>
 
 #include <cassert>
 #include <utility>
@@ -91,50 +91,65 @@ RotatePath::~RotatePath()
 
 RotatePath::InitParams RotatePath::createParams(std::string const & arguments, Environments const & envs)
 {
+    TBAG_CONSTEXPR static char const * const DELIMITER = " ";
+    TBAG_CONSTEXPR static char const * const KEY_VAL_DELIMITER = "=";
+
     InitParams result;
+
     using namespace libtbag::string;
-    auto cmd = Commander("", Commander::DEFAULT_DELIMITER);
-    cmd.insert(WRITER_KEY_SIZE, [&](Arguments const & args){
-        if (args.empty()) {
-            result.writer = std::make_shared<MaxSizeWriter>();
-        } else {
-            result.writer = std::make_shared<MaxSizeWriter>(toByteSize(args.get(0)));
+    for (auto const & token : splitTokens(envs.convert(arguments), DELIMITER)) {
+        auto const key_val = splitTokens(trim(token), KEY_VAL_DELIMITER);
+        if (key_val.empty()) {
+            continue;
         }
-    });
-    cmd.insert(UPDATER_KEY_TIME, [&](Arguments const & args){
-        if (args.empty()) {
-            result.updater = std::make_shared<TimeFormatUpdater>();
-        } else {
-            result.updater = std::make_shared<TimeFormatUpdater>(args.get(0));
+
+        Arguments args;
+        if (key_val.size() >= 2u) {
+            args.parse(key_val[1]);
         }
-    });
-    cmd.insert(UPDATER_KEY_COUNTER, [&](Arguments const & args){
-        auto const ARGS_SIZE = args.size();
-        if (ARGS_SIZE == 0U) {
-            result.updater = std::make_shared<CounterUpdater>();
-        } else if (ARGS_SIZE == 1U) {
-            result.updater = std::make_shared<CounterUpdater>(args.get(0));
-        } else if (ARGS_SIZE == 2U) {
-            result.updater = std::make_shared<CounterUpdater>(args.get(0), args.get(1));
-        } else {
-            unsigned long counter = 0;
-            args.opt(2, &counter);
-            result.updater = std::make_shared<CounterUpdater>(args.get(0), args.get(1), counter);
+
+        auto const command = trim(key_val[0]);
+        if (command == WRITER_KEY_SIZE) {
+            if (args.empty()) {
+                result.writer = std::make_shared<MaxSizeWriter>();
+            } else {
+                result.writer = std::make_shared<MaxSizeWriter>(toByteSize(args.at(0)));
+            }
+
+        } else if (command == UPDATER_KEY_TIME) {
+            if (args.empty()) {
+                result.updater = std::make_shared<TimeFormatUpdater>();
+            } else {
+                result.updater = std::make_shared<TimeFormatUpdater>(args.at(0));
+            }
+
+        } else if (command == UPDATER_KEY_COUNTER) {
+            auto const ARGS_SIZE = args.size();
+            if (ARGS_SIZE == 0U) {
+                result.updater = std::make_shared<CounterUpdater>();
+            } else if (ARGS_SIZE == 1U) {
+                result.updater = std::make_shared<CounterUpdater>(args.at(0));
+            } else if (ARGS_SIZE == 2U) {
+                result.updater = std::make_shared<CounterUpdater>(args.at(0), args.at(1));
+            } else {
+                unsigned long counter = 0;
+                args.opt(2, &counter);
+                result.updater = std::make_shared<CounterUpdater>(args.at(0), args.at(1), counter);
+            }
+
+        } else if (command == CLEANER_KEY_ARCHIVE) {
+            auto const ARGS_SIZE = args.size();
+            if (ARGS_SIZE == 0U) {
+                result.cleaner = std::make_shared<ArchiveCleaner>();
+            } else if (ARGS_SIZE == 1U) {
+                result.cleaner = std::make_shared<ArchiveCleaner>(args.at(0));
+            } else {
+                bool remove = true;
+                args.opt(1, &remove);
+                result.cleaner = std::make_shared<ArchiveCleaner>(args.at(0), remove);
+            }
         }
-    });
-    cmd.insert(CLEANER_KEY_ARCHIVE, [&](Arguments const & args){
-        auto const ARGS_SIZE = args.size();
-        if (ARGS_SIZE == 0U) {
-            result.cleaner = std::make_shared<ArchiveCleaner>();
-        } else if (ARGS_SIZE == 1U) {
-            result.cleaner = std::make_shared<ArchiveCleaner>(args.get(0));
-        } else {
-            bool remove = true;
-            args.opt(1, &remove);
-            result.cleaner = std::make_shared<ArchiveCleaner>(args.get(0), remove);
-        }
-    });
-    cmd.request(envs.convert(arguments));
+    }
     return result;
 }
 
