@@ -206,6 +206,9 @@ public:
 
 public:
     Err loadOrDefaultSave(std::string const & config_path, bool create_dir = false);
+
+public:
+    static Preferences createDefault();
 };
 
 } // namespace pref

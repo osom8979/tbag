@@ -8,6 +8,11 @@
 #include <libtbag/pref/Preferences.hpp>
 #include <libtbag/filesystem/Path.hpp>
 
+#include <libtbag/pref/details/ExtraPref.hpp>
+#include <libtbag/pref/details/LogPref.hpp>
+#include <libtbag/pref/details/StoragePref.hpp>
+#include <libtbag/pref/details/ValuesPref.hpp>
+
 #include <cassert>
 #include <algorithm>
 #include <utility>
@@ -181,6 +186,18 @@ Err Preferences::loadOrDefaultSave(std::string const & config_path, bool create_
 
     init();
     return save(config_path);
+}
+
+Preferences Preferences::createDefault()
+{
+    Preferences result;
+    using namespace libtbag::pref::details;
+    result.newAdd<ExtraPref>();
+    result.newAdd<LogPref>();
+    result.newAdd<StoragePref>();
+    result.newAdd<ValuesPref>();
+    assert(result.size() == 4);
+    return result;
 }
 
 } // namespace pref
