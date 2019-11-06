@@ -62,17 +62,21 @@ Tea-bag is Third party extension utility project.
 ## Dependencies
 
 ```bash
-## OpenCL
-sudo apt-get install ocl-icd-opencl-dev
+## x11, xRandr
+sudo apt-get install xorg-dev
 
 ## OpenGL
 sudo apt-get install libglu1-mesa-dev
+```
+
+Optional:
+
+```bash
+## OpenCL
+sudo apt-get install ocl-icd-opencl-dev
 
 ## UDev
 sudo apt-get install libudev-dev
-
-## x11, xRandr
-sudo apt-get install xorg-dev
 
 ## xcb-image
 sudo apt-get install libxcb-image0-dev
