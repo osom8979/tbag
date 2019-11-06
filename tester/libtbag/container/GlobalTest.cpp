@@ -37,13 +37,6 @@ TEST(GlobalTest, Default)
     ASSERT_FALSE(global->empty());
     ASSERT_GT(global->max_size(), global->size());
 
-    auto itr = global->begin();
-    auto end = global->end();
-    ASSERT_NE(itr, end);
-    ++itr;
-    ++itr;
-    ASSERT_EQ(itr, end);
-
     auto shared1_1 = global->find<TestObject>(KEY1).lock();
     auto shared2_1 = global->find<TestObject>(KEY2).lock();
 

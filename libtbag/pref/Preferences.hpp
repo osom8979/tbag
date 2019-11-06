@@ -198,6 +198,12 @@ public:
     }
 
 public:
+    bool newAddExtraPref();
+    bool newAddLogPref();
+    bool newAddStoragePref();
+    bool newAddValuesPref();
+
+public:
     std::size_t init();
 
 public:
@@ -209,6 +215,7 @@ public:
 
 public:
     static Preferences createDefault();
+    static Preferences loadDefault(std::string const & path);
 };
 
 } // namespace pref

@@ -85,7 +85,7 @@ bool Preferences::add(SharedNode node)
 
 bool Preferences::remove(std::string const & name)
 {
-    return _nodes.erase(name) == 1U;
+    return _nodes.erase(name) == 1u;
 }
 
 Preferences::WeakNode Preferences::get(std::string const & name)
@@ -95,6 +95,26 @@ Preferences::WeakNode Preferences::get(std::string const & name)
         return WeakNode();
     }
     return WeakNode(itr->second);
+}
+
+bool Preferences::newAddExtraPref()
+{
+    return static_cast<bool>(newAdd<libtbag::pref::details::ExtraPref>());
+}
+
+bool Preferences::newAddLogPref()
+{
+    return static_cast<bool>(newAdd<libtbag::pref::details::LogPref>());
+}
+
+bool Preferences::newAddStoragePref()
+{
+    return static_cast<bool>(newAdd<libtbag::pref::details::StoragePref>());
+}
+
+bool Preferences::newAddValuesPref()
+{
+    return static_cast<bool>(newAdd<libtbag::pref::details::ValuesPref>());
 }
 
 std::size_t Preferences::init()
@@ -191,13 +211,22 @@ Err Preferences::loadOrDefaultSave(std::string const & config_path, bool create_
 Preferences Preferences::createDefault()
 {
     Preferences result;
-    using namespace libtbag::pref::details;
-    result.newAdd<ExtraPref>();
-    result.newAdd<LogPref>();
-    result.newAdd<StoragePref>();
-    result.newAdd<ValuesPref>();
+    result.newAddExtraPref();
+    result.newAddLogPref();
+    result.newAddStoragePref();
+    result.newAddValuesPref();
     assert(result.size() == 4);
     return result;
+}
+
+Preferences Preferences::loadDefault(std::string const & path)
+{
+    auto pref = createDefault();
+    auto const code = pref.load(path);
+    if (isFailure(code)) {
+        return {};
+    }
+    return pref;
 }
 
 } // namespace pref

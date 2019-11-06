@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <mutex>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -49,27 +50,44 @@ public:
     using MapPair = Map::value_type;
     using MapItr  = Map::iterator;
 
+public:
+    using Mutex = std::mutex;
+    using Guard = std::lock_guard<Mutex>;
+
 private:
+    Mutex mutable _mutex;
     Map _map;
 
 public:
-    // clang-format off
-    inline bool        empty   () const TBAG_NOEXCEPT_SP_OP(_map.empty   ()) { return _map.empty   (); }
-    inline std::size_t size    () const TBAG_NOEXCEPT_SP_OP(_map.size    ()) { return _map.size    (); }
-    inline std::size_t max_size() const TBAG_NOEXCEPT_SP_OP(_map.max_size()) { return _map.max_size(); }
-    // clang-format on
+    bool empty() const
+    {
+        Guard const G(_mutex);
+        return _map.empty();
+    }
 
-public:
-    // clang-format off
-    inline void   clear() { _map.clear();        }
-    inline MapItr begin() { return _map.begin(); }
-    inline MapItr   end() { return _map.end();   }
-    // clang-format on
+    std::size_t size() const
+    {
+        Guard const G(_mutex);
+        return _map.size();
+    }
+
+    std::size_t max_size() const
+    {
+        Guard const G(_mutex);
+        return _map.max_size();
+    }
+
+    void clear()
+    {
+        Guard const G(_mutex);
+        _map.clear();
+    }
 
 public:
     template <typename UpObject>
     std::weak_ptr<UpObject> find(Key const & key)
     {
+        Guard const G(_mutex);
         auto itr = _map.find(key);
         if (itr != _map.end()) {
             return std::weak_ptr<UpObject>(std::static_pointer_cast<UpObject>(itr->second));
@@ -79,11 +97,13 @@ public:
 
     bool erase(Key const & key)
     {
+        Guard const G(_mutex);
         return _map.erase(key) == 1U;
     }
 
     bool insert(Key const & key, Shared h)
     {
+        Guard const G(_mutex);
         return _map.insert(MapPair(key, h)).second;
     }
 
@@ -113,7 +133,7 @@ std::shared_ptr<typename remove_cr<UpObject>::type> newGlobalObject(Global::Key 
 }
 
 template <typename T>
-std::weak_ptr<T> findGlobalObject(std::string const & key)
+std::weak_ptr<T> findGlobalObject(Global::Key const & key)
 {
     return Global::getInstance()->find<T>(key);
 }
