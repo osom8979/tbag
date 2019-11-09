@@ -9,12 +9,14 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
 #include <libtbag/filesystem/File.hpp>
+#include <libtbag/algorithm/MinMax.hpp>
 
 #include <cassert>
 #include <algorithm>
 #include <utility>
 #include <unordered_map>
 #include <queue>
+#include <sstream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,7 +26,71 @@ namespace string {
 
 std::string ArgumentParser::DefaultFormatter::print(InitParams const & init, Params const & params)
 {
-    return {};
+    Params optionals;
+    Params positionals;
+    ArgumentParser::getOptionalsAndPositionals(params, init.prefix, optionals, positionals);
+    auto const padding_string = std::string(padding_size, ' ');
+
+    std::stringstream ss;
+    if (!init.usage.empty()) {
+        ss << init.usage << std::endl;
+    }
+
+    if (!init.description.empty()) {
+        ss << init.description << std::endl;
+    }
+
+    ss << "Optionals:" << std::endl;
+    for (auto const & p : optionals) {
+        auto const name_size = p.names.size();
+        if (name_size == 0u) {
+            continue;
+        }
+        if (name_size >= 1u) {
+            ss << padding_string << p.names[0];
+        }
+        for (std::size_t i = 1u; i < name_size; ++i) {
+            ss << ", " << p.names[i];
+        }
+        if (!p.meta.empty()) {
+            ss << " " << p.meta;
+        }
+        ss << std::endl;
+        if (!p.help.empty()) {
+            ss << padding_string << padding_string << p.help << std::endl;
+        }
+        if (!p.default_value.empty()) {
+            ss << "[Default: " << p.default_value << "]" << std::endl;
+        }
+    }
+
+    auto const positionals_max_name_size = ArgumentParser::calcMaxNameSize(positionals);
+    ss << "Positionals:" << std::endl;
+    for (auto const & p : positionals) {
+        if (p.names.empty()) {
+            continue;
+        }
+        ss << padding_string
+           << p.names[0]
+           << std::string(positionals_max_name_size - p.names[0].size(), ' ')
+           << padding_string;
+        if (!p.help.empty()) {
+            ss << p.help;
+        }
+        if (!p.default_value.empty()) {
+            if (!p.help.empty()) {
+                ss << " ";
+            }
+            ss << "[Default: " << p.default_value << "]";
+        }
+        ss << std::endl;
+    }
+
+    if (!init.epilog.empty()) {
+        ss << init.epilog << std::endl;
+    }
+
+    return ss.str();
 }
 
 // --------------
@@ -136,6 +202,31 @@ void ArgumentParser::swap(ArgumentParser & obj) TBAG_NOEXCEPT
 void ArgumentParser::clear()
 {
     _params.clear();
+}
+
+std::size_t ArgumentParser::calcMaxNameSize(Params const & params)
+{
+    std::size_t result = 0u;
+    for (auto const & p : params) {
+        for (auto const & n : p.names) {
+            result = libtbag::algorithm::getMax(result, n.size());
+        }
+    }
+    return result;
+}
+
+void ArgumentParser::getOptionalsAndPositionals(Params const & params, char prefix, Params & optionals, Params & positionals)
+{
+    for (auto const & p : params) {
+        if (p.names.empty()) {
+            continue;
+        }
+        if (p.names.size() == 1u && !p.names[0].empty() && p.names[0][0] != prefix) {
+            positionals.emplace_back(p);
+        } else {
+            optionals.emplace_back(p);
+        }
+    }
 }
 
 Params::iterator ArgumentParser::findParameter(std::string const & option_name)

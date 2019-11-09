@@ -94,7 +94,9 @@ public:
 
     struct TBAG_API DefaultFormatter : public Formatter
     {
-        DefaultFormatter() { /* EMPTY. */ }
+        int padding_size = 2;
+
+        DefaultFormatter(int p = 0) : padding_size(p) { /* EMPTY. */ }
         virtual ~DefaultFormatter() { /* EMPTY. */ }
 
         std::string print(InitParams const & init, Params const & params) override;
@@ -225,7 +227,10 @@ public:
 
     struct Param TBAG_FINAL
     {
-        /** Either a name or a list of option strings, e.g. foo or <code>-f</code>, <code>--foo</code>. */
+        /**
+         * Either a name or a list of option strings,
+         * e.g. foo or <code>-f</code>, <code>--foo</code>.
+         */
         std::vector<std::string> names;
 
         /** The basic type of action to be taken when this argument is encountered at the command line. */
@@ -306,6 +311,13 @@ public:
 
 public:
     void clear();
+
+public:
+    static std::size_t calcMaxNameSize(Params const & params);
+    static void getOptionalsAndPositionals(Params const & params,
+                                           char prefix,
+                                           Params & optionals,
+                                           Params & positionals);
 
 public:
     Params::iterator findParameter(std::string const & option_name);
