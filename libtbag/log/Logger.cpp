@@ -50,10 +50,10 @@ bool Logger::write(int level, char const * level_name, char const * message, int
     assert(message != nullptr);
     assert(size >= 1);
 
-    char buffer[Generator::BUFFER_SIZE];
+    char buffer[Generator::STACK_BUFFER_SIZE];
     int write_buffer_size;
     if (_generator) {
-        write_buffer_size = _generator->make(buffer, Generator::BUFFER_SIZE, NAME.c_str(),
+        write_buffer_size = _generator->make(buffer, Generator::STACK_BUFFER_SIZE, NAME.c_str(),
                                              level, level_name, message, size);
     } else {
         write_buffer_size = 0;

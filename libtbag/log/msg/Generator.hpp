@@ -54,7 +54,7 @@ public:
     using LineFeedStyle = libtbag::string::LineFeedStyle;
 
 public:
-    TBAG_CONSTEXPR static int const BUFFER_SIZE = 4096;
+    TBAG_CONSTEXPR static int const STACK_BUFFER_SIZE = 10*1024;
 
 public:
     LineFeedStyle const LINE_FEED;
