@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/ErrPair.hpp>
 #include <libtbag/Type.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <vector>
 #include <string>
@@ -71,14 +72,42 @@ public:
             return result;
         }
 
-        std::string getOptional(std::string const & key, std::size_t index = 0) const
+        std::string getOptional(std::string const & key, std::size_t index = 0, Err * code = nullptr) const
         {
             auto const range = optional.equal_range(key);
             auto const size = std::distance(range.first, range.second);
             if (index >= size) {
+                if (code) {
+                    *code = E_INDEX;
+                }
+                return {};
+            } else {
+                if (code) {
+                    *code = E_SUCCESS;
+                }
+                return std::next(range.first, index)->second;
+            }
+        }
+
+        template <typename ResultT>
+        ResultT optOptional(std::string const & key, std::size_t index = 0, ResultT const & def = ResultT{}) const
+        {
+            Err code = E_UNKNOWN;
+            auto const value = getOptional(key, index, &code);
+            if (isFailure(code)) {
+                return def;
+            } else {
+                return libtbag::string::toValue<ResultT>(value, def);
+            }
+        }
+
+        std::string getPositional(std::string const & key) const
+        {
+            auto itr = positional.find(key);
+            if (itr == positional.end()) {
                 return {};
             }
-            return std::next(range.first, index)->second;
+            return itr->second;
         }
     };
 
@@ -427,7 +456,7 @@ public:
 public:
     std::string print() const;
 
-public:
+private:
     enum class ParseResultCode
     {
         PRC_ERROR,

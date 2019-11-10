@@ -7,10 +7,12 @@
 
 #include <libtbag/pref/GlobalPref.hpp>
 #include <libtbag/log/Log.hpp>
+#include <libtbag/filesystem/details/FsTypes.hpp>
 #include <libtbag/container/Global.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 
 #include <cassert>
+#include <cstring>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -18,7 +20,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace pref {
 
-std::string getGlobalPreferencesXmlPath()
+static std::size_t const MAX_PATH_LENGTH = libtbag::filesystem::details::MAX_PATH_LENGTH;
+static char g_global_preferences_xml_path[MAX_PATH_LENGTH+1] = {0,};
+
+std::string getGlobalPreferencesXmlPathFromEnv()
 {
     std::string result;
     if (isSuccess(libtbag::uvpp::getEnv(TBAG_GLOBAL_PREFERENCES_ENV, result))) {
@@ -27,12 +32,28 @@ std::string getGlobalPreferencesXmlPath()
     return {};
 }
 
-bool setGlobalPreferencesXmlPath(std::string const & path)
+bool setGlobalPreferencesXmlPathToEnv(std::string const & path)
 {
     return isSuccess(libtbag::uvpp::setEnv(TBAG_GLOBAL_PREFERENCES_ENV, path));
 }
 
-std::weak_ptr<Preferences> getGlobalPreferences(char const * path, std::size_t length)
+std::string getGlobalPreferencesXmlPath()
+{
+    return g_global_preferences_xml_path;
+}
+
+bool setGlobalPreferencesXmlPath(std::string const & path)
+{
+    auto const path_size = path.size();
+    if (path_size > MAX_PATH_LENGTH) {
+        return false;
+    }
+    ::strncpy(g_global_preferences_xml_path, path.c_str(), path_size);
+    g_global_preferences_xml_path[path_size] = '\0';
+    return true;
+}
+
+std::weak_ptr<Preferences> getGlobalPreferences()
 {
     auto weak = libtbag::container::findGlobalObject<Preferences>(TBAG_GLOBAL_PREFERENCES_KEY);
     if (!weak.expired()) {
@@ -40,29 +61,12 @@ std::weak_ptr<Preferences> getGlobalPreferences(char const * path, std::size_t l
     }
 
     auto shared = libtbag::container::newGlobalObject<Preferences>(TBAG_GLOBAL_PREFERENCES_KEY);
-    if (!shared) {
+    if (shared) {
+        return shared;
+    } else {
         // Perhaps generated in another thread.
         return libtbag::container::findGlobalObject<Preferences>(TBAG_GLOBAL_PREFERENCES_KEY);
     }
-
-    assert(static_cast<bool>(shared));
-
-    std::string default_path;
-    if (path != nullptr && length >= 1u) {
-        default_path = std::string(path, path + length);
-        setGlobalPreferencesXmlPath(default_path);
-        assert(default_path == getGlobalPreferencesXmlPath());
-    } else {
-        default_path = getGlobalPreferencesXmlPath();
-    }
-
-    auto default_pref = Preferences::loadDefault(default_path);
-    assert(!default_pref.empty());
-
-    tDLogI("getGlobalPreferences() Default Preferences loaded: {}", default_path);
-
-    shared->swap(default_pref);
-    return shared;
 }
 
 } // namespace pref

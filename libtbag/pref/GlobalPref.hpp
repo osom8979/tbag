@@ -29,9 +29,11 @@ namespace pref {
 TBAG_CONSTEXPR char const * const TBAG_GLOBAL_PREFERENCES_KEY = "libtbag::pref::Preferences";
 TBAG_CONSTEXPR char const * const TBAG_GLOBAL_PREFERENCES_ENV = "TBAG_GLOBAL_PREFERENCES_XML_PATH";
 
+TBAG_API std::string getGlobalPreferencesXmlPathFromEnv();
+TBAG_API bool setGlobalPreferencesXmlPathToEnv(std::string const & path);
 TBAG_API std::string getGlobalPreferencesXmlPath();
 TBAG_API bool setGlobalPreferencesXmlPath(std::string const & path);
-TBAG_API std::weak_ptr<Preferences> getGlobalPreferences(char const * path = nullptr, std::size_t length = 0u);
+TBAG_API std::weak_ptr<Preferences> getGlobalPreferences();
 
 } // namespace pref
 

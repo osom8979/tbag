@@ -100,7 +100,6 @@ std::string ArgumentParser::DefaultFormatter::print(InitParams const & init, Par
 using Param = ArgumentParser::Param;
 using Params = ArgumentParser::Params;
 using ErrArgumentResult = ArgumentParser::ErrArgumentResult;
-using ParseResult = ArgumentParser::ParseResult;
 using ActionType = ArgumentParser::ActionType;
 
 // clang-format on
@@ -529,7 +528,7 @@ std::string ArgumentParser::print() const
     return _init.formatter->print(_init, _params);
 }
 
-ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
+ArgumentParser::ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
 {
     using namespace libtbag::filesystem;
     auto const arg_size = arg.size();
