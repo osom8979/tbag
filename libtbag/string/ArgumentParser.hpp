@@ -479,6 +479,10 @@ private:
     ParseResult parseSingleArgument(std::string const & arg) const;
 };
 
+TBAG_CONSTEXPR char const * const TBAG_MAIN_ARGUMENT_PARSER_KEY = "libtbag::string::ArgumentParser";
+
+TBAG_API std::weak_ptr<ArgumentParser> getMainArgumentParser();
+
 } // namespace string
 
 // --------------------

@@ -10,6 +10,7 @@
 #include <libtbag/string/Format.hpp>
 #include <libtbag/filesystem/File.hpp>
 #include <libtbag/algorithm/MinMax.hpp>
+#include <libtbag/container/Global.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -595,6 +596,21 @@ ArgumentParser::ParseResult ArgumentParser::parseSingleArgument(std::string cons
         result.value = arg;
     }
     return result;
+}
+
+std::weak_ptr<ArgumentParser> getMainArgumentParser()
+{
+    auto weak = libtbag::container::findGlobalObject<ArgumentParser>(TBAG_MAIN_ARGUMENT_PARSER_KEY);
+    if (!weak.expired()) {
+        return weak;
+    }
+    auto shared = libtbag::container::newGlobalObject<ArgumentParser>(TBAG_MAIN_ARGUMENT_PARSER_KEY);
+    if (shared) {
+        return shared;
+    } else {
+        // Perhaps generated in another thread.
+        return libtbag::container::findGlobalObject<ArgumentParser>(TBAG_MAIN_ARGUMENT_PARSER_KEY);
+    }
 }
 
 } // namespace string
