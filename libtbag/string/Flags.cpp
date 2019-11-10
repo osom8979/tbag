@@ -257,29 +257,18 @@ bool Flags::parse(std::vector<std::string> const & args, std::string const & pre
     return true;
 }
 
-Flags::Argv Flags::argv(std::string const & prefix, std::string const & delimiter, bool last_null) const
+Argv Flags::argv(std::string const & prefix, std::string const & delimiter) const
 {
-    auto const size = _flags.size() + (last_null?1:0);
-
-    Argv result;
-    result.strings.resize(size);
-    result.arguments.resize(size);
-
-    for (std::size_t i = 0u; i < size; ++i) {
-        result.strings[i] = convertFlagToString(_flags[i], prefix, delimiter);
-        result.arguments[i] = &(result.strings[i][0]);
+    std::vector<std::string> strings(_flags.size());
+    for (auto i = 0u; i < _flags.size(); ++i) {
+        strings[i] = convertFlagToString(_flags[i], prefix, delimiter);
     }
-
-    if (last_null) {
-        assert(size >= 1);
-        result.arguments[size-1] = nullptr;
-    }
-    return result;
+    return Argv(strings);
 }
 
-Flags::Argv Flags::argv(bool last_null) const
+Argv Flags::argv() const
 {
-    return argv(DEFAULT_PREFIX, DEFAULT_DELIMITER, last_null);
+    return argv(DEFAULT_PREFIX, DEFAULT_DELIMITER);
 }
 
 Flags::Flag Flags::convertStringToFlag(std::string const & str, std::string const & prefix, std::string const & delimiter)

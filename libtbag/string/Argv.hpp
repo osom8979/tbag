@@ -40,6 +40,9 @@ private:
 
 public:
     Argv();
+    Argv(int argc, char const ** argv);
+    Argv(char const ** argv);
+    Argv(std::vector<std::string> const & argv);
     Argv(Argv const & obj);
     Argv(Argv && obj) TBAG_NOEXCEPT;
     ~Argv();

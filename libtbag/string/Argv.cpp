@@ -23,6 +23,21 @@ Argv::Argv()
     // EMPTY.
 }
 
+Argv::Argv(int argc, char const ** argv)
+{
+    parse(argc, argv);
+}
+
+Argv::Argv(char const ** argv)
+{
+    parse(argv);
+}
+
+Argv::Argv(std::vector<std::string> const & argv)
+{
+    parse(argv);
+}
+
 Argv::Argv(Argv const & obj)
         : _strings(obj._strings),
           _arguments(obj._arguments)
@@ -130,7 +145,6 @@ std::weak_ptr<Argv> getMainArgv()
     if (!weak.expired()) {
         return weak;
     }
-
     auto shared = libtbag::container::newGlobalObject<Argv>(TBAG_MAIN_ARGV_KEY);
     if (shared) {
         return shared;

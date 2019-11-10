@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/string/Argv.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 #include <string>
@@ -66,26 +67,6 @@ public:
         { /* EMPTY. */ }
         explicit Flag(std::string && k, std::string && v) TBAG_NOEXCEPT : key(std::move(k)), value(std::move(v))
         { /* EMPTY. */ }
-    };
-
-    struct Argv TBAG_FINAL
-    {
-    public:
-        friend class Flags;
-
-    public:
-        std::vector<std::string> strings;
-        std::vector<char*> arguments;
-
-    public:
-        inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(arguments.size())
-        { return arguments.size(); }
-
-    public:
-        inline int argc() const TBAG_NOEXCEPT_SP_OP(arguments.size())
-        { return static_cast<int>(arguments.size()); }
-        inline char ** argv() TBAG_NOEXCEPT_SP_OP(arguments.data())
-        { return arguments.data(); }
     };
 
 public:
@@ -180,8 +161,8 @@ public:
     bool parse(std::vector<std::string> const & args, std::string const & prefix, std::string const & delimiter);
 
 public:
-    Argv argv(std::string const & prefix, std::string const & delimiter, bool last_null = false) const;
-    Argv argv(bool last_null = false) const;
+    Argv argv(std::string const & prefix, std::string const & delimiter) const;
+    Argv argv() const;
 
 public:
     /**
