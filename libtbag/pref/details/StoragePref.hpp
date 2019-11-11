@@ -253,7 +253,7 @@ public:
     inline Property       & property()       TBAG_NOEXCEPT { return _prop; }
     inline Property const & property() const TBAG_NOEXCEPT { return _prop; }
 
-protected:
+public:
     std::string name() const override;
     bool init() override;
     void clear() override;

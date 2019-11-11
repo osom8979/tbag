@@ -54,7 +54,7 @@ public:
     inline std::string       & xml()       TBAG_NOEXCEPT { return _xml; }
     inline std::string const & xml() const TBAG_NOEXCEPT { return _xml; }
 
-protected:
+public:
     std::string name() const override;
     bool init() override;
     void clear() override;

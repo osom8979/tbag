@@ -186,9 +186,20 @@ ActionType ArgumentParser::getActionType(std::string const & action_name)
     }
 }
 
-ArgumentParser::ArgumentParser()
+ArgumentParser::ArgumentParser() : _init{}
 {
     // EMPTY.
+}
+
+ArgumentParser::ArgumentParser(std::string const & desc) : _init{}
+{
+    _init.description = desc;
+}
+
+ArgumentParser::ArgumentParser(std::string const & desc, std::string const & epilog) : _init{}
+{
+    _init.description = desc;
+    _init.epilog = epilog;
 }
 
 ArgumentParser::ArgumentParser(InitParams const & params) : _init(params)

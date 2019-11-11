@@ -59,7 +59,7 @@ public:
     ValuesPref();
     virtual ~ValuesPref();
 
-protected:
+public:
     std::string name() const override;
     bool init() override;
     void clear() override;

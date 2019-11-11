@@ -313,6 +313,8 @@ private:
 
 public:
     ArgumentParser();
+    ArgumentParser(std::string const & desc);
+    ArgumentParser(std::string const & desc, std::string const & epilog);
     explicit ArgumentParser(InitParams const & params);
     explicit ArgumentParser(InitParams && params);
     ArgumentParser(ArgumentParser const & obj);

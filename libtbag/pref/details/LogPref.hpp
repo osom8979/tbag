@@ -129,7 +129,7 @@ public:
     inline Inits       & inits()       TBAG_NOEXCEPT { return _inits; }
     inline Inits const & inits() const TBAG_NOEXCEPT { return _inits; }
 
-protected:
+public:
     std::string name() const override;
     bool init() override;
     void clear() override;
