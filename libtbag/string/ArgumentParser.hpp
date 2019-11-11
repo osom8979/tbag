@@ -125,7 +125,7 @@ public:
     {
         int padding_size = 2;
 
-        DefaultFormatter(int p = 0) : padding_size(p) { /* EMPTY. */ }
+        DefaultFormatter(int p = 2) : padding_size(p) { /* EMPTY. */ }
         virtual ~DefaultFormatter() { /* EMPTY. */ }
 
         std::string print(InitParams const & init, Params const & params) override;
@@ -342,18 +342,20 @@ public:
     void clear();
 
 public:
+    static bool isLongOptional(std::string const & name, char prefix);
+    static bool isShortOptional(std::string const & name, char prefix);
+    static bool isPositional(std::string const & name, char prefix);
     static std::size_t calcMaxNameSize(Params const & params);
-    static void getOptionalsAndPositionals(Params const & params,
-                                           char prefix,
-                                           Params & optionals,
-                                           Params & positionals);
+    static std::vector<std::string> normalizeParamNames(std::vector<std::string> const & names, char prefix);
+    static void getOptionalsAndPositionals(Params const & params, char prefix,
+                                           Params & optionals, Params & positionals);
+    static std::string removePrefix(std::string const & text, char prefix);
 
 public:
     Params::iterator findParameter(std::string const & option_name);
     Params::const_iterator findConstantParameter(std::string const & option_name) const;
 
 public:
-    std::string removePrefix(std::string const & text);
     Err updateParam(Param & arg);
 
 public:

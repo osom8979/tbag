@@ -9,6 +9,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
 #include <libtbag/filesystem/File.hpp>
+#include <libtbag/filesystem/Path.hpp>
 #include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/container/Global.hpp>
 
@@ -30,65 +31,98 @@ std::string ArgumentParser::DefaultFormatter::print(InitParams const & init, Par
     Params optionals;
     Params positionals;
     ArgumentParser::getOptionalsAndPositionals(params, init.prefix, optionals, positionals);
+    auto const new_line = libtbag::string::NEW_LINE;
     auto const padding_string = std::string(padding_size, ' ');
 
     std::stringstream ss;
+    ss << new_line;
     if (!init.usage.empty()) {
-        ss << init.usage << std::endl;
+        ss << libtbag::string::trim(init.usage);
+    } else {
+        std::string program_name;
+        if (!init.program_name.empty()) {
+            program_name = libtbag::string::trim(init.program_name);
+        } else {
+            program_name = libtbag::filesystem::Path::getExePath().getName();
+        }
+
+        ss << "Usage: " << program_name;
+        if (!optionals.empty()) {
+            ss << " [options]";
+        }
+        if (!positionals.empty()) {
+            for (auto const & pos : positionals) {
+                ss << " " << pos.names[0];
+            }
+        }
     }
+    ss << new_line << new_line;
 
     if (!init.description.empty()) {
-        ss << init.description << std::endl;
+        ss << libtbag::string::trim(init.description) << new_line << new_line;
     }
 
-    ss << "Optionals:" << std::endl;
-    for (auto const & p : optionals) {
-        auto const name_size = p.names.size();
-        if (name_size == 0u) {
-            continue;
-        }
-        if (name_size >= 1u) {
-            ss << padding_string << p.names[0];
-        }
-        for (std::size_t i = 1u; i < name_size; ++i) {
-            ss << ", " << p.names[i];
-        }
-        if (!p.meta.empty()) {
-            ss << " " << p.meta;
-        }
-        ss << std::endl;
-        if (!p.help.empty()) {
-            ss << padding_string << padding_string << p.help << std::endl;
-        }
-        if (!p.default_value.empty()) {
-            ss << "[Default: " << p.default_value << "]" << std::endl;
-        }
-    }
-
-    auto const positionals_max_name_size = ArgumentParser::calcMaxNameSize(positionals);
-    ss << "Positionals:" << std::endl;
-    for (auto const & p : positionals) {
-        if (p.names.empty()) {
-            continue;
-        }
-        ss << padding_string
-           << p.names[0]
-           << std::string(positionals_max_name_size - p.names[0].size(), ' ')
-           << padding_string;
-        if (!p.help.empty()) {
-            ss << p.help;
-        }
-        if (!p.default_value.empty()) {
-            if (!p.help.empty()) {
-                ss << " ";
+    if (!optionals.empty()) {
+        ss << "Optionals:" << new_line;
+        for (auto const & p : optionals) {
+            auto const name_size = p.names.size();
+            if (name_size == 0u) {
+                continue;
             }
-            ss << "[Default: " << p.default_value << "]";
+            for (std::size_t i = 0u; i < name_size; ++i) {
+                auto const current_name = libtbag::string::trim(p.names[i]);
+                if (i >= 1u) {
+                    ss << ", " << current_name;
+                } else {
+                    ss << padding_string << current_name;
+                }
+                if (!p.meta.empty()) {
+                    if (ArgumentParser::isLongOptional(current_name, init.prefix)) {
+                        ss << "=";
+                    } else {
+                        assert(ArgumentParser::isShortOptional(current_name, init.prefix));
+                        ss << " ";
+                    }
+                    ss << p.meta;
+                }
+            }
+            ss << new_line;
+            if (!p.help.empty()) {
+                ss << padding_string << padding_string << libtbag::string::trim(p.help);
+                if (!p.default_value.empty()) {
+                    ss << " (default: " << p.default_value << ")" << new_line;
+                } else {
+                    ss << new_line;
+                }
+            }
         }
-        ss << std::endl;
+        ss << new_line;
     }
+
+    if (!positionals.empty()) {
+        auto const positionals_max_name_size = ArgumentParser::calcMaxNameSize(positionals);
+        ss << "Positionals:" << new_line;
+        for (auto const & p : positionals) {
+            if (p.names.empty()) {
+                continue;
+            }
+            ss << padding_string
+               << p.names[0]
+               << std::string(positionals_max_name_size - p.names[0].size(), ' ')
+               << padding_string;
+            if (!p.help.empty()) {
+                ss << libtbag::string::trim(p.help);
+                if (!p.default_value.empty()) {
+                    ss << " (default: " << p.default_value << ")";
+                }
+            }
+            ss << new_line;
+        }
+    }
+    ss << new_line;
 
     if (!init.epilog.empty()) {
-        ss << init.epilog << std::endl;
+        ss << libtbag::string::trim(init.epilog) << new_line << new_line;
     }
 
     return ss.str();
@@ -111,9 +145,9 @@ ArgumentParser::ParamKey  const ArgumentParser::default_value = { ArgumentParser
 ArgumentParser::ParamKey  const ArgumentParser::const_value   = { ArgumentParser::ARG_CONST_KEY       };
 ArgumentParser::ParamKey  const ArgumentParser::help          = { ArgumentParser::ARG_HELP_KEY        };
 ArgumentParser::ParamKey  const ArgumentParser::meta          = { ArgumentParser::ARG_META_KEY        };
-ArgumentParser::ParamElem const ArgumentParser::store         = { ArgumentParser::ARG_STORE_KEY       };
-ArgumentParser::ParamElem const ArgumentParser::store_const   = { ArgumentParser::ARG_STORE_CONST_KEY };
-ArgumentParser::ParamElem const ArgumentParser::append        = { ArgumentParser::ARG_APPEND          };
+ArgumentParser::ParamElem const ArgumentParser::store         = { ArgumentParser::ARG_STORE_KEY      , "" };
+ArgumentParser::ParamElem const ArgumentParser::store_const   = { ArgumentParser::ARG_STORE_CONST_KEY, "" };
+ArgumentParser::ParamElem const ArgumentParser::append        = { ArgumentParser::ARG_APPEND         , "" };
 // clang-format off
 
 char const * ArgumentParser::getActionTypeName(ActionType type) TBAG_NOEXCEPT
@@ -204,6 +238,21 @@ void ArgumentParser::clear()
     _params.clear();
 }
 
+bool ArgumentParser::isLongOptional(std::string const & n, char prefix)
+{
+    return n.size() >= 3u && n[0] == prefix && n[1] == prefix && n[2] != prefix;
+}
+
+bool ArgumentParser::isShortOptional(std::string const & n, char prefix)
+{
+    return n.size() >= 2u && n[0] == prefix && n[1] != prefix;
+}
+
+bool ArgumentParser::isPositional(std::string const & n, char prefix)
+{
+    return !n.empty() && n[0] != prefix;
+}
+
 std::size_t ArgumentParser::calcMaxNameSize(Params const & params)
 {
     std::size_t result = 0u;
@@ -215,7 +264,40 @@ std::size_t ArgumentParser::calcMaxNameSize(Params const & params)
     return result;
 }
 
-void ArgumentParser::getOptionalsAndPositionals(Params const & params, char prefix, Params & optionals, Params & positionals)
+std::vector<std::string> ArgumentParser::normalizeParamNames(std::vector<std::string> const & names, char prefix)
+{
+    std::vector<std::string> long_optionals;
+    std::vector<std::string> short_optionals;
+    std::vector<std::string> positionals;
+
+    for (std::size_t i = 0u ; i < names.size(); ++i) {
+        auto const current_name = libtbag::string::trim(names[i]);
+        if (current_name.empty()) {
+            continue;
+        }
+
+        if (isLongOptional(current_name, prefix)) {
+            long_optionals.emplace_back(current_name);
+        } else if (isShortOptional(current_name, prefix)) {
+            short_optionals.emplace_back(current_name);
+        } else if (isPositional(current_name, prefix)) {
+            positionals.emplace_back(current_name);
+        }
+    }
+
+    if (!positionals.empty()) {
+        return positionals;
+    }
+
+    std::vector<std::string> all_optionals = std::move(short_optionals);
+    all_optionals.insert(all_optionals.end(),
+                     std::make_move_iterator(long_optionals.begin()),
+                     std::make_move_iterator(long_optionals.end()));
+    return all_optionals;
+}
+
+void ArgumentParser::getOptionalsAndPositionals(Params const & params, char prefix,
+                                                Params & optionals, Params & positionals)
 {
     for (auto const & p : params) {
         if (p.names.empty()) {
@@ -227,6 +309,17 @@ void ArgumentParser::getOptionalsAndPositionals(Params const & params, char pref
             optionals.emplace_back(p);
         }
     }
+}
+
+std::string ArgumentParser::removePrefix(std::string const & text, char prefix)
+{
+    std::size_t i = 0u;
+    for (; i < text.size(); ++i) {
+        if (text[i] != prefix) {
+            break;
+        }
+    }
+    return text.substr(i);
 }
 
 Params::iterator ArgumentParser::findParameter(std::string const & option_name)
@@ -243,26 +336,17 @@ Params::const_iterator ArgumentParser::findConstantParameter(std::string const &
     });
 }
 
-std::string ArgumentParser::removePrefix(std::string const & text)
-{
-    std::size_t i = 0u;
-    for (; i < text.size(); ++i) {
-        if (text[i] != _init.prefix) {
-            break;
-        }
-    }
-    return text.substr(i);
-}
-
 Err ArgumentParser::updateParam(Param & arg)
 {
+    arg.names = normalizeParamNames(arg.names, _init.prefix);
     if (arg.names.empty()) {
         return E_ILLARGS;
     }
+
     if (arg.dest.empty()) {
         std::string longest_name;
         for (auto const & n : arg.names) {
-            auto const updated_name = removePrefix(n);
+            auto const updated_name = removePrefix(n, _init.prefix);
             if (updated_name.size() > longest_name.size()) {
                 longest_name = updated_name;
             }
