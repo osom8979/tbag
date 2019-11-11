@@ -47,13 +47,13 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_BADALLOC               , 10010, "Bad allocation"                                         )\
     _TBAG_XX(_OORANGE                , 10011, "Out of range"                                           )\
     _TBAG_XX(_NULLPTR                , 10012, "Null pointer exception"                                 )\
-    _TBAG_XX(_BUFFER                 , 10013, "Empty buffer"                                           )\
-    _TBAG_XX(_QUEUE                  , 10014, "Empty queue"                                            )\
+    _TBAG_XX(_BUFFER                 , 10013, "Unknown buffer error"                                   )\
+    _TBAG_XX(_QUEUE                  , 10014, "Unknown queue error"                                    )\
     _TBAG_XX(_NREADY                 , 10015, "Not ready"                                              )\
-    _TBAG_XX(_UNSUPOP                , 10016, "Unsupported operation"                                  )\
+    _TBAG_XX(_EMPTY                  , 10016, "Empty error"                                            )\
     _TBAG_XX(_INIT                   , 10017, "Initialize error"                                       )\
-    _TBAG_XX(_RDERR                  , 10018, "Unknown Read error"                                     )\
-    _TBAG_XX(_WRERR                  , 10019, "Unknown Write error"                                    )\
+    _TBAG_XX(_RDERR                  , 10018, "Unknown read error"                                     )\
+    _TBAG_XX(_WRERR                  , 10019, "Unknown write error"                                    )\
     _TBAG_XX(_READONLY               , 10020, "Read only error"                                        )\
     _TBAG_XX(_WRITEONLY              , 10021, "Write only error"                                       )\
     _TBAG_XX(_CRYPTO                 , 10022, "Cryptographic error"                                    )\
@@ -78,15 +78,15 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_KEYGEN                 , 10041, "Key generator error"                                    )\
     _TBAG_XX(_UNKEXCP                , 10042, "Unknown exception"                                      )\
     _TBAG_XX(_UNKSIG                 , 10043, "Unknown signal"                                         )\
-    _TBAG_XX(_COPY                   , 10044, "Copy error"                                             )\
-    _TBAG_XX(_PUSH                   , 10045, "Push error"                                             )\
-    _TBAG_XX(_POP                    , 10046, "Pop error"                                              )\
-    _TBAG_XX(_SEND                   , 10047, "Send error"                                             )\
-    _TBAG_XX(_RECV                   , 10048, "Recv error"                                             )\
+    _TBAG_XX(_COPY                   , 10044, "Unknown Copy error"                                     )\
+    _TBAG_XX(_PUSH                   , 10045, "Unknown Push error"                                     )\
+    _TBAG_XX(_POP                    , 10046, "Unknown Pop error"                                      )\
+    _TBAG_XX(_SEND                   , 10047, "Unknown Send error"                                     )\
+    _TBAG_XX(_RECV                   , 10048, "Unknown Recv error"                                     )\
     _TBAG_XX(_INACCES                , 10049, "Inaccessible error"                                     )\
     _TBAG_XX(_EXITPROC               , 10050, "Terminated process"                                     )\
     _TBAG_XX(_EEXITPROC              , 10051, "Abnormally terminated process"                          )\
-    _TBAG_XX(_EXCHANGE               , 10052, "Error exchange"                                        )\
+    _TBAG_XX(_EXCHANGE               , 10052, "Error exchange"                                         )\
     _TBAG_XX(_FILTERED               , 10053, "Filtered."                                              )\
     _TBAG_XX(_VERSION                , 10054, "Incompatible version error"                             )\
     _TBAG_XX(_CONNECTION_RESET       , 10055, "A connection was forcibly closed by a peer"             )\
@@ -409,6 +409,19 @@ static_assert(static_cast<int>(Err::E_SUCCESS) == 0, "The success code must be 0
 #define _TBAG_XX(name, num, msg) TBAG_CONSTEXPR Err const E##name = Err::E##name;
 TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
+
+TBAG_CONSTEXPR Err const E_ASYNC_REQUEST = E_ASYNCREQ;
+TBAG_CONSTEXPR Err const E_ENQUEUE_AND_ASYNC = E_ENQASYNC;
+TBAG_CONSTEXPR Err const E_ILLEGAL_ARGUMENTS = E_ILLARGS;
+TBAG_CONSTEXPR Err const E_ILLEGAL_STATE = E_ILLSTATE;
+TBAG_CONSTEXPR Err const E_OUT_OF_RANGE = E_OORANGE;
+TBAG_CONSTEXPR Err const E_NOT_READY = E_NREADY;
+TBAG_CONSTEXPR Err const E_UNSUPPORTED_OPERATION = E_ENOSYS;
+TBAG_CONSTEXPR Err const E_READ_ERROR = E_RDERR;
+TBAG_CONSTEXPR Err const E_WRITE_ERROR = E_WRERR;
+TBAG_CONSTEXPR Err const E_SMALL_BUFFER = E_SMALLBUF;
+TBAG_CONSTEXPR Err const E_UNKNOWN_EXCEPTION = E_UNKEXCP;
+TBAG_CONSTEXPR Err const E_UNKNOWN_SIGNAL = E_UNKSIG;
 
 TBAG_CONSTEXPR Err const E_UNKNOWN_PROCESS_ID = E_EBADF;
 TBAG_CONSTEXPR Err const E_LOCALE_CONVERTER_ERROR = E_ICU_CONV;

@@ -383,7 +383,7 @@ struct Tls::Impl : private Noncopyable
             assert(BIO_READ_RESULT == result.size());
             return E_SUCCESS;
         } else if (BIO_READ_RESULT == -2) {
-            return E_UNSUPOP;
+            return E_ENOSYS;
         } else {
             assert(BIO_READ_RESULT <= 0);
         }
@@ -419,7 +419,7 @@ struct Tls::Impl : private Noncopyable
     {
         int const BIO_WRITE_RESULT = BIO_write(read_bio, data, size);
         if (BIO_WRITE_RESULT == -2) {
-            return E_UNSUPOP;
+            return E_ENOSYS;
         } else if (BIO_WRITE_RESULT <= 0) {
             return E_SSL;
         }
