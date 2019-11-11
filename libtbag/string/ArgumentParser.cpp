@@ -26,6 +26,11 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace string {
 
+TBAG_CONSTEXPR static char const * const STOP_PARSING_REMARKS =
+        "The special option '--' is used to delimit the end of the options." TBAG_NEW_LINE
+        "The getopt utility will place '--' in the arguments at the end of the options," TBAG_NEW_LINE
+        "or recognize it if used explicitly.";
+
 std::string ArgumentParser::DefaultFormatter::print(InitParams const & init, Params const & params)
 {
     Params optionals;
@@ -120,6 +125,10 @@ std::string ArgumentParser::DefaultFormatter::print(InitParams const & init, Par
         }
     }
     ss << new_line;
+
+    if (init.add_stop_parsing) {
+        ss << STOP_PARSING_REMARKS << new_line << new_line;
+    }
 
     if (!init.epilog.empty()) {
         ss << libtbag::string::trim(init.epilog) << new_line << new_line;
@@ -607,10 +616,11 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
 
 std::string ArgumentParser::print() const
 {
-    if (!_init.formatter) {
-        return {};
+    if (_init.formatter) {
+        return _init.formatter->print(_init, _params);
+    } else {
+        return DefaultFormatter().print(_init, _params);
     }
-    return _init.formatter->print(_init, _params);
 }
 
 ArgumentParser::ParseResult ArgumentParser::parseSingleArgument(std::string const & arg) const
