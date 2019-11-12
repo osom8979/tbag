@@ -35,7 +35,7 @@ namespace functional {
  * @date   2019-11-09
  */
 template <typename KeyT, typename FuncT>
-class TBAG_API Commander
+class Commander
 {
 public:
     using Callback = std::function<FuncT>;
