@@ -79,7 +79,7 @@ build_script:
 test_script:
   - cmd: echo Running test...
   - cmd: cd "%TBAG_BUILD%\\Debug"
-  - cmd: tester.exe
+  - cmd: if "%BUILD_TARGET%" == "tester" tester.exe
 
 #---------------------------------#
 #         notifications           #
