@@ -612,9 +612,14 @@ ErrArgumentResult ArgumentParser::parse(std::vector<std::string> const & argv) c
         auto const itr = findConstantParameter(n);
         assert(itr != _params.cend());
         if (itr->default_value.empty()) {
-            return E_ILLARGS;
+            if (_init.not_entered_value.empty()) {
+                return E_ILLARGS;
+            } else {
+                result.positional[key_map[n]] = _init.not_entered_value;
+            }
+        } else {
+            result.positional[key_map[n]] = itr->default_value;
         }
-        result.positional[key_map[n]] = itr->default_value;
         positional_names.pop();
     }
 

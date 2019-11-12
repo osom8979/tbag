@@ -165,6 +165,13 @@ public:
 
         /** The first argument is the program name. */
         bool first_argument_is_program_name = true;
+
+        /**
+         * Default value to represent 'not entered'.
+         *
+         * If this value exists, no error is returned if there is empty 'positional value'.
+         */
+        std::string not_entered_value;
     };
 
     enum class ActionType
@@ -331,6 +338,9 @@ public:
     { lh.swap(rh); }
 
 public:
+    inline InitParams       & init()       TBAG_NOEXCEPT { return _init; }
+    inline InitParams const & init() const TBAG_NOEXCEPT { return _init; }
+
     inline Params       & params()       TBAG_NOEXCEPT { return _params; }
     inline Params const & params() const TBAG_NOEXCEPT { return _params; }
 
