@@ -41,6 +41,7 @@ clone_folder: c:\Project\tbag
 environment:
   TBAG_HOME: c:\Project\tbag
   TBAG_BUILD: c:\Project\tbag\build
+  BUILD_TARGET: libtbag  # 'libtbag' or 'tester'
 
 # build cache to preserve files/folders between builds
 cache:
@@ -68,7 +69,7 @@ before_build:
 build_script:
   - cmd: echo Running build...
   - cmd: cd "%TBAG_BUILD%"
-  - cmd: cmake --build . --target tester -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: cmake --build . --target %BUILD_TARGET% -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 #---------------------------------#
 #       tests configuration       #

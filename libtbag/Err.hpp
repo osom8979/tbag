@@ -92,13 +92,13 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_CONNECTION_RESET                     , 10055, "A connection was forcibly closed by a peer"              )\
     _TBAG_XX(_NO_RESPONSE                          , 10056, "No response"                                             )\
     _TBAG_XX(_NOT_WS_RESPONSE                      , 10057, "Not WebSocket response"                                  )\
-    _TBAG_XX(_UNKNOWN_ID                           , 10058, "Unknown id"                                              )\
+    _TBAG_XX(_UNKNOWN_ID                           , 10058, "Unknown ID"                                              )\
     _TBAG_XX(_REJECTED                             , 10059, "Rejected"                                                )\
     _TBAG_XX(_NETWORK                              , 10060, "Unknown network error"                                   )\
     _TBAG_XX(_MODIFY                               , 10061, "Modify error"                                            )\
     _TBAG_XX(_RESOURCE_EXHAUSTED                   , 10062, "Some resource has been exhausted"                        )\
     _TBAG_XX(_INACCESSIBLE_BLOCK                   , 10063, "Inaccessible block"                                      )\
-    _TBAG_XX(_SCRIPT                               , 10064, "Script error"                                            )\
+    _TBAG_XX(_SCRIPT                               , 10064, "Unknown script error"                                    )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\

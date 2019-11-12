@@ -155,7 +155,7 @@ public:
 
     static std::string getUsageString()
     {
-        return "usage: tpot lua [options]... [script [args]...].\n"
+        return "usage: " + libtbag::filesystem::Path().getExePath().getName() + " [options]... [script [args]...].\n"
                "Available options are:\n"
                "  -e chunk  Execute string 'chunk'.\n"
                "  -l name   Require library 'name'.\n"
