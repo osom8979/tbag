@@ -161,7 +161,14 @@ struct ErrPair
 template <typename T>
 struct ErrMsgPair : public ErrPair<T>
 {
-    using ValueType = typename ErrPair<T>::ValueType;
+    using BaseErrPair = ErrPair<T>;
+    using ValueType = typename BaseErrPair::ValueType;
+
+    TBAG_CONSTEXPR static bool const base_nothrow_move = std::is_nothrow_move_constructible<BaseErrPair>::value;
+    TBAG_CONSTEXPR static bool const base_nothrow_move_assign = std::is_nothrow_move_assignable<BaseErrPair>::value;
+
+    TBAG_CONSTEXPR static bool const str_nothrow_move = std::is_nothrow_move_constructible<std::string>::value;
+    TBAG_CONSTEXPR static bool const str_nothrow_move_assign = std::is_nothrow_move_assignable<std::string>::value;
 
     std::string msg;
 
@@ -182,7 +189,8 @@ struct ErrMsgPair : public ErrPair<T>
 
     ErrMsgPair(ErrMsgPair const & obj) : ErrPair<T>(obj), msg(obj.msg)
     { /* EMPTY. */ }
-    ErrMsgPair(ErrMsgPair && obj) TBAG_NOEXCEPT : ErrPair<T>(std::move(obj)), msg(std::move(obj.msg))
+    ErrMsgPair(ErrMsgPair && obj) TBAG_NOEXCEPT_SPECIFIER(base_nothrow_move && str_nothrow_move)
+            : ErrPair<T>(std::move(obj)), msg(std::move(obj.msg))
     { /* EMPTY. */ }
 
     ~ErrMsgPair()
@@ -197,7 +205,7 @@ struct ErrMsgPair : public ErrPair<T>
         return *this;
     }
 
-    ErrMsgPair & operator =(ErrMsgPair && obj) TBAG_NOEXCEPT
+    ErrMsgPair & operator =(ErrMsgPair && obj) TBAG_NOEXCEPT_SPECIFIER(base_nothrow_move_assign && str_nothrow_move_assign)
     {
         if (this != &obj) {
             ErrPair<T>::operator =(std::move(obj));
