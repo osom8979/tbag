@@ -41,7 +41,7 @@ clone_folder: c:\Project\tbag
 environment:
   TBAG_HOME: c:\Project\tbag
   TBAG_BUILD: c:\Project\tbag\build
-  BUILD_TARGET: tbag  # 'tbag' or 'tester'
+  BUILD_TARGET: tester  # 'tbag' or 'tester'
 
 # build cache to preserve files/folders between builds
 cache:
