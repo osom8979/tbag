@@ -115,6 +115,11 @@ struct ErrPair
         return *this;
     }
 
+    inline bool operator ==(Err c) const TBAG_NOEXCEPT
+    {
+        return code == c;
+    }
+
     char const * name() const TBAG_NOEXCEPT
     {
         return libtbag::getErrName(code);
