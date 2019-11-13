@@ -93,12 +93,16 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_NO_RESPONSE                          , 10056, "No response"                                             )\
     _TBAG_XX(_NOT_WS_RESPONSE                      , 10057, "Not WebSocket response"                                  )\
     _TBAG_XX(_UNKNOWN_ID                           , 10058, "Unknown ID"                                              )\
-    _TBAG_XX(_REJECTED                             , 10059, "Rejected"                                                )\
-    _TBAG_XX(_NETWORK                              , 10060, "Unknown network error"                                   )\
-    _TBAG_XX(_MODIFY                               , 10061, "Modify error"                                            )\
-    _TBAG_XX(_RESOURCE_EXHAUSTED                   , 10062, "Some resource has been exhausted"                        )\
-    _TBAG_XX(_INACCESSIBLE_BLOCK                   , 10063, "Inaccessible block"                                      )\
-    _TBAG_XX(_SCRIPT                               , 10064, "Unknown script error"                                    )\
+    _TBAG_XX(_INVALID_ID                           , 10059, "Invalid ID"                                              )\
+    _TBAG_XX(_UNKNOWN_TYPE                         , 10060, "Unknown Type"                                            )\
+    _TBAG_XX(_INVALID_TYPE                         , 10061, "Invalid Type"                                            )\
+    _TBAG_XX(_REJECTED                             , 10062, "Rejected"                                                )\
+    _TBAG_XX(_NETWORK                              , 10063, "Unknown network error"                                   )\
+    _TBAG_XX(_MODIFY                               , 10064, "Modify error"                                            )\
+    _TBAG_XX(_RESOURCE_EXHAUSTED                   , 10065, "Some resource has been exhausted"                        )\
+    _TBAG_XX(_INACCESSIBLE_BLOCK                   , 10066, "Inaccessible block"                                      )\
+    _TBAG_XX(_SCRIPT                               , 10067, "Unknown script error"                                    )\
+    _TBAG_XX(_MISMATCH                             , 10068, "The data does not match."                                )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\
