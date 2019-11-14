@@ -76,6 +76,13 @@ Box & Box::operator =(std::nullptr_t) TBAG_NOEXCEPT
     return *this;
 }
 
+void Box::clear()
+{
+    _data->size = 0;
+    _data->rank = 0;
+    _data->info_size = 0;
+}
+
 Err Box::setInfo(ui8 const * info, ui32 size)
 {
     return box_info_checked_assign(_data.get(), info, size) ? E_SUCCESS : E_COPY;

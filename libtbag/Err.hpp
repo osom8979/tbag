@@ -87,7 +87,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EXITPROC                             , 10050, "Terminated process"                                      )\
     _TBAG_XX(_EEXITPROC                            , 10051, "Abnormally terminated process"                           )\
     _TBAG_XX(_EXCHANGE                             , 10052, "Error exchange"                                          )\
-    _TBAG_XX(_FILTERED                             , 10053, "Filtered."                                               )\
+    _TBAG_XX(_FILTERED                             , 10053, "Filtered"                                                )\
     _TBAG_XX(_VERSION                              , 10054, "Incompatible version error"                              )\
     _TBAG_XX(_CONNECTION_RESET                     , 10055, "A connection was forcibly closed by a peer"              )\
     _TBAG_XX(_NO_RESPONSE                          , 10056, "No response"                                             )\
@@ -102,7 +102,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_RESOURCE_EXHAUSTED                   , 10065, "Some resource has been exhausted"                        )\
     _TBAG_XX(_INACCESSIBLE_BLOCK                   , 10066, "Inaccessible block"                                      )\
     _TBAG_XX(_SCRIPT                               , 10067, "Unknown script error"                                    )\
-    _TBAG_XX(_MISMATCH                             , 10068, "The data does not match."                                )\
+    _TBAG_XX(_MISMATCH                             , 10068, "The data does not match"                                 )\
+    _TBAG_XX(_SKIP                                 , 10069, "Skip error"                                              )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\

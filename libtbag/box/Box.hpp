@@ -500,6 +500,9 @@ public:
     { return _data->info_size; }
 
 public:
+    void clear();
+
+public:
     Err setInfo(ui8 const * info, ui32 size);
     Err setInfo(std::string const & info);
     Err setInfo(Buffer const & info);
