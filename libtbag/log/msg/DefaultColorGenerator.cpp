@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/log/msg/DefaultColorGenerator.hpp>
-#include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/log/Severity.hpp>
 #include <libtbag/time/TimePoint.hpp>
 #include <libtbag/tty/Tces.hpp>

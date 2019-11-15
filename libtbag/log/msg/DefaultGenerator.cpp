@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/log/msg/DefaultGenerator.hpp>
-#include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/time/TimePoint.hpp>
 #include <libtbag/log/Severity.hpp>
 
@@ -58,10 +57,22 @@ int DefaultGenerator::make(char * buffer, int buffer_size,
         ss << libtbag::string::WINDOWS_NEW_LINE;
     }
 
-    auto const RESULT = ss.str();
-    auto const COPY_SIZE = libtbag::algorithm::getMin<int>(buffer_size, RESULT.size());
-    ::strncpy(buffer, RESULT.c_str(), COPY_SIZE);
-    return COPY_SIZE;
+    auto const result_message = ss.str();
+    auto const result_message_size = result_message.size();
+    if (result_message_size <= buffer_size) {
+        ::strncpy(buffer, result_message.c_str(), result_message_size);
+        return result_message_size;
+    }
+
+    COMMENT("Explicit marking if message is cut off.") {
+        ::strncpy(buffer, result_message.c_str(), buffer_size-4);
+        buffer[buffer_size-4] = ' ';
+        buffer[buffer_size-3] = '.';
+        buffer[buffer_size-2] = '.';
+        buffer[buffer_size-1] = '.';
+    }
+    assert(result_message_size > buffer_size);
+    return buffer_size;
 }
 
 } // namespace msg
