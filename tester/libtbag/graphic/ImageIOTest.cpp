@@ -72,8 +72,7 @@ TEST(ImageIOTest, UseJpeg)
     ASSERT_EQ(E_SUCCESS, readImage(path.getString(), image));
 
     // Save & Load.
-    // tttDir_Automatic();
-    tttDir_AutoCreate();
+    tttDir_Automatic();
     auto const JPEG_PATH = tttDir_Get() / "save.jpg";
     ASSERT_EQ(E_SUCCESS, writeImage(JPEG_PATH.getString(), image));
     ASSERT_TRUE(JPEG_PATH.isRegularFile());

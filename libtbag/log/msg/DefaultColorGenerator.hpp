@@ -32,10 +32,18 @@ namespace msg {
  */
 class TBAG_API DefaultColorGenerator : public Generator
 {
+private:
+    struct _Cache {
+        std::string fixed_suffix;
+    } _cache;
+
 public:
     DefaultColorGenerator(LineFeedStyle line_feed = LineFeedStyle::LFS_UNIX);
     DefaultColorGenerator(std::string const & line_feed);
     virtual ~DefaultColorGenerator();
+
+public:
+    void updateCache();
 
 public:
     virtual int make(char * buffer, int buffer_size,
