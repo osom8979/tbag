@@ -26,3 +26,13 @@ TEST(DefaultGeneratorTest, Default)
     ASSERT_STREQ("abcd\r\n", tokens[3].c_str());
 }
 
+TEST(DefaultGeneratorTest, SmallBuffer)
+{
+    auto const BUFFER_SIZE = 20;
+    char buffer[BUFFER_SIZE] = { 0, };
+    DefaultGenerator gen(DefaultGenerator::LineFeedStyle::LFS_WINDOWS);
+    auto const write_size = gen.make(buffer, BUFFER_SIZE, "logger", 8, "debug", "msg", 3);
+    ASSERT_EQ(BUFFER_SIZE, write_size);
+    std::cout << "Generated message: " << std::string(buffer, buffer + write_size) << std::endl;
+}
+

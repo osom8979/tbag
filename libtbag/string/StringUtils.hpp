@@ -103,10 +103,11 @@ enum class LineFeedStyle
 };
 
 TBAG_API LineFeedStyle getLineFeedStyle(std::string const & name);
-TBAG_API char const * const getLineFeedStyleText(LineFeedStyle style) TBAG_NOEXCEPT;
+TBAG_API char const * getLineFeedStyleText(LineFeedStyle style) TBAG_NOEXCEPT;
 
-TBAG_API bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size, int offset) TBAG_NOEXCEPT;
+TBAG_API std::string getLineFeed(LineFeedStyle style = LineFeedStyle::LFS_AUTO);
 TBAG_API std::string getStdEndLine();
+TBAG_API bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size, int offset) TBAG_NOEXCEPT;
 
 /**
  * Separate tokens.

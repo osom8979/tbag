@@ -32,7 +32,7 @@ LineFeedStyle getLineFeedStyle(std::string const & name)
     if (LOWER == "unix" || LOWER == "linux" || LOWER == "lf") {
         return LineFeedStyle::LFS_UNIX;
     }
-    if (LOWER == "windows" || LOWER == "window" || LOWER == "win32" || LOWER == "crlf") {
+    if (LOWER == "windows" || LOWER == "window" || LOWER == "win32" || LOWER == "win64" || LOWER == "win" || LOWER == "crlf") {
         return LineFeedStyle::LFS_WINDOWS;
     }
     if (LOWER == "auto" || LOWER == "detect" || LOWER == "platform") {
@@ -41,17 +41,44 @@ LineFeedStyle getLineFeedStyle(std::string const & name)
     return LineFeedStyle::LFS_NONE;
 }
 
-char const * const getLineFeedStyleText(LineFeedStyle style) TBAG_NOEXCEPT
+char const * getLineFeedStyleText(LineFeedStyle style) TBAG_NOEXCEPT
 {
-    // clang-format off
     switch (style) {
-    case LineFeedStyle::LFS_NONE:    return "none";
-    case LineFeedStyle::LFS_UNIX:    return "unix";
-    case LineFeedStyle::LFS_WINDOWS: return "windows";
-    case LineFeedStyle::LFS_AUTO:    return "auto";
-    default:                         return "";
+    case LineFeedStyle::LFS_NONE:
+        return "none";
+    case LineFeedStyle::LFS_UNIX:
+        return "unix";
+    case LineFeedStyle::LFS_WINDOWS:
+        return "windows";
+    case LineFeedStyle::LFS_AUTO:
+        return "auto";
+    default:
+        return "";
     }
-    // clang-format on
+}
+
+std::string getLineFeed(LineFeedStyle style)
+{
+    if (style == LineFeedStyle::LFS_AUTO) {
+        if (isWindowsPlatform()) {
+            return TBAG_WINDOWS_NEW_LINE;
+        } else {
+            return UNIX_NEW_LINE;
+        }
+    } else if (style == LineFeedStyle::LFS_UNIX) {
+        return UNIX_NEW_LINE;
+    } else if (style == LineFeedStyle::LFS_WINDOWS) {
+        return WINDOWS_NEW_LINE;
+    } else {
+        return UNIX_NEW_LINE;
+    }
+}
+
+std::string getStdEndLine()
+{
+    std::stringstream ss;
+    ss << std::endl;
+    return ss.str();
 }
 
 bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size, int offset) TBAG_NOEXCEPT
@@ -79,13 +106,6 @@ bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size, int off
 
     assert(style == LineFeedStyle::LFS_NONE);
     return true;
-}
-
-std::string getStdEndLine()
-{
-    std::stringstream ss;
-    ss << std::endl;
-    return ss.str();
 }
 
 std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter, bool remove_empty)

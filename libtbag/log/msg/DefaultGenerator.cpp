@@ -6,10 +6,13 @@
  */
 
 #include <libtbag/log/msg/DefaultGenerator.hpp>
-#include <libtbag/time/TimePoint.hpp>
 #include <libtbag/log/Severity.hpp>
+#include <libtbag/algorithm/MinMax.hpp>
+#include <libtbag/time/TimePoint.hpp>
 
+#include <cassert>
 #include <cstring>
+
 #include <thread>
 #include <sstream>
 #include <string>
@@ -43,19 +46,17 @@ int DefaultGenerator::make(char * buffer, int buffer_size,
                            int level, char const * UNUSED_PARAM(level_name),
                            char const * msg, int msg_size) const
 {
+    assert(buffer != nullptr);
+    assert(buffer_size >= 1);
+    assert(msg != nullptr);
+    assert(msg_size >= 1);
+
     std::stringstream ss;
     ss << getShortPrefix(level)
        << ' ' << libtbag::time::TimePoint::now().toLocalLongString()
        << " @" << std::this_thread::get_id()
-       << ' ' << std::string(msg, msg + msg_size);
-
-    if (LINE_FEED == LineFeedStyle::LFS_AUTO) {
-        ss << (isWindowsPlatform() ? libtbag::string::WINDOWS_NEW_LINE : libtbag::string::UNIX_NEW_LINE);
-    } else if (LINE_FEED == LineFeedStyle::LFS_UNIX) {
-        ss << libtbag::string::UNIX_NEW_LINE;
-    } else if (LINE_FEED == LineFeedStyle::LFS_WINDOWS) {
-        ss << libtbag::string::WINDOWS_NEW_LINE;
-    }
+       << ' ' << std::string(msg, msg + msg_size)
+       << LINE_FEED_STR;
 
     auto const result_message = ss.str();
     auto const result_message_size = result_message.size();
@@ -65,11 +66,15 @@ int DefaultGenerator::make(char * buffer, int buffer_size,
     }
 
     COMMENT("Explicit marking if message is cut off.") {
-        ::strncpy(buffer, result_message.c_str(), buffer_size-4);
-        buffer[buffer_size-4] = ' ';
-        buffer[buffer_size-3] = '.';
-        buffer[buffer_size-2] = '.';
-        buffer[buffer_size-1] = '.';
+        auto const suffix = libtbag::string::fformat("...{}", LINE_FEED_STR);
+        if (suffix.size() > buffer_size) {
+            // The buffer size is very small.
+            auto const write_size = libtbag::algorithm::getMin<int>(msg_size, buffer_size);
+            ::strncpy(buffer, msg, write_size);
+            return write_size;
+        }
+        ::strncpy(buffer, result_message.c_str(), buffer_size-suffix.size());
+        ::strncpy(buffer+buffer_size-suffix.size(), suffix.c_str(), suffix.size());
     }
     assert(result_message_size > buffer_size);
     return buffer_size;

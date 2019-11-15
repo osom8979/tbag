@@ -14,14 +14,14 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 namespace msg {
 
-Generator::Generator(LineFeedStyle line_feed) TBAG_NOEXCEPT
-        : LINE_FEED(line_feed)
+Generator::Generator(LineFeedStyle line_feed)
+        : LINE_FEED(line_feed), LINE_FEED_STR(libtbag::string::getLineFeed(line_feed))
 {
     // EMPTY.
 }
 
 Generator::Generator(std::string const & line_feed)
-        : LINE_FEED(libtbag::string::getLineFeedStyle(line_feed))
+        : Generator(libtbag::string::getLineFeedStyle(line_feed))
 {
     // EMPTY.
 }

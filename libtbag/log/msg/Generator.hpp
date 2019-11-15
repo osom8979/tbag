@@ -58,9 +58,10 @@ public:
 
 public:
     LineFeedStyle const LINE_FEED;
+    std::string const LINE_FEED_STR;
 
 public:
-    Generator(LineFeedStyle line_feed = LineFeedStyle::LFS_UNIX) TBAG_NOEXCEPT;
+    Generator(LineFeedStyle line_feed = LineFeedStyle::LFS_UNIX);
     Generator(std::string const & line_feed);
     virtual ~Generator();
 
