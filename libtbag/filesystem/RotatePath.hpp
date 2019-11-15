@@ -108,6 +108,13 @@ struct MaxSizeWriter : public WriterInterface
 
     virtual bool open(char const * path) override
     {
+        auto const parent = Path(path).getParent();
+        if (!parent.exists()) {
+            parent.createDir();
+            if (!parent.isDirectory()) {
+                return false;
+            }
+        }
         using namespace libtbag::filesystem::details;
         if (file.open(path, File::Flags(FILE_OPEN_FLAG_WRITE_ONLY | FILE_OPEN_CREATE))) {
             file.seek(0);
