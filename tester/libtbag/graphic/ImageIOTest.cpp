@@ -10,6 +10,7 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/graphic/ImageIO.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/File.hpp>
 
 using namespace libtbag;
 using namespace libtbag::graphic;
@@ -71,7 +72,8 @@ TEST(ImageIOTest, UseJpeg)
     ASSERT_EQ(E_SUCCESS, readImage(path.getString(), image));
 
     // Save & Load.
-    tttDir_Automatic();
+    // tttDir_Automatic();
+    tttDir_AutoCreate();
     auto const JPEG_PATH = tttDir_Get() / "save.jpg";
     ASSERT_EQ(E_SUCCESS, writeImage(JPEG_PATH.getString(), image));
     ASSERT_TRUE(JPEG_PATH.isRegularFile());
@@ -79,8 +81,19 @@ TEST(ImageIOTest, UseJpeg)
     Box reload;
     ASSERT_EQ(E_SUCCESS, readImage(JPEG_PATH.getString(), reload));
 
-    ASSERT_EQ(3, reload.dim(2));
-    ASSERT_EQ(512, reload.dim(1));
-    ASSERT_EQ(512, reload.dim(0));
+    auto const channels = reload.dim(2);
+    auto const width = reload.dim(1);
+    auto const height = reload.dim(0);
+
+    ASSERT_EQ(3, channels);
+    ASSERT_EQ(512, width);
+    ASSERT_EQ(512, height);
+
+    // Write To memory:
+    libtbag::util::Buffer buffer;
+    ASSERT_NE(0, writeJpg(width, height, channels, reload.cast<char>(), DEFAULT_JPG_QUALITY, buffer));
+    ASSERT_FALSE(buffer.empty());
+    auto const JPEG_PATH_02 = tttDir_Get() / "save_02.jpg";
+    ASSERT_EQ(E_SUCCESS, libtbag::filesystem::writeFile(JPEG_PATH_02, buffer));
 }
 
