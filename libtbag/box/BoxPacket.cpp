@@ -362,7 +362,14 @@ public:
             auto const * dims_data = dims->data();
             auto const dims_size = dims->size();
 
+            ui32 total_dims = 0;
             if (dims_data != nullptr && dims_size >= 1) {
+                for (auto dims_index = 0; dims_index < dims_size; ++dims_index) {
+                    total_dims += dims_data[dims_index];
+                }
+            }
+
+            if (total_dims >= 1) {
                 auto code = box_resize(box, type, device, ext, dims_size, dims_data);
                 if (isFailure(code)) {
                     return std::make_pair(code, COMPUTED_SIZE);
