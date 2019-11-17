@@ -247,6 +247,10 @@ Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
 
 Err Box::copyFromData(Box const & box)
 {
+    auto const code = reshape_box(box);
+    if (isFailure(code)) {
+        return code;
+    }
     return box_data_copy(get(), box.get());
 }
 
