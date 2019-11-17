@@ -362,32 +362,43 @@ public:
             auto const * dims_data = dims->data();
             auto const dims_size = dims->size();
 
-            auto code = box_resize(box, type, device, ext, dims_size, dims_data);
-            if (isFailure(code)) {
-                return std::make_pair(code, COMPUTED_SIZE);
-            }
-
-            auto const * fbs_table = packet->data();
-            if (fbs_table != nullptr) {
-                // clang-format off
-                switch (data_type) {
-                case AnyArr_ByteArr  : update_data((ByteArr   const *)fbs_table, (si8 *)box->data); break;
-                case AnyArr_ShortArr : update_data((ShortArr  const *)fbs_table, (si16*)box->data); break;
-                case AnyArr_IntArr   : update_data((IntArr    const *)fbs_table, (si32*)box->data); break;
-                case AnyArr_LongArr  : update_data((LongArr   const *)fbs_table, (si64*)box->data); break;
-                case AnyArr_UbyteArr : update_data((UbyteArr  const *)fbs_table, (ui8 *)box->data); break;
-                case AnyArr_UshortArr: update_data((UshortArr const *)fbs_table, (ui16*)box->data); break;
-                case AnyArr_UintArr  : update_data((UintArr   const *)fbs_table, (ui32*)box->data); break;
-                case AnyArr_UlongArr : update_data((UlongArr  const *)fbs_table, (ui64*)box->data); break;
-                case AnyArr_FloatArr : update_data((FloatArr  const *)fbs_table, (fp32*)box->data); break;
-                case AnyArr_DoubleArr: update_data((DoubleArr const *)fbs_table, (fp64*)box->data); break;
-                case AnyArr_NONE:
-                    break;
-                default:
-                    TBAG_INACCESSIBLE_BLOCK_ASSERT();
+            if (dims_data != nullptr && dims_size >= 1) {
+                auto code = box_resize(box, type, device, ext, dims_size, dims_data);
+                if (isFailure(code)) {
+                    return std::make_pair(code, COMPUTED_SIZE);
                 }
-                // clang-format on
+
+                auto const * fbs_table = packet->data();
+                if (fbs_table != nullptr) {
+                    // clang-format off
+                    switch (data_type) {
+                    case AnyArr_ByteArr  : update_data((ByteArr   const *)fbs_table, (si8 *)box->data); break;
+                    case AnyArr_ShortArr : update_data((ShortArr  const *)fbs_table, (si16*)box->data); break;
+                    case AnyArr_IntArr   : update_data((IntArr    const *)fbs_table, (si32*)box->data); break;
+                    case AnyArr_LongArr  : update_data((LongArr   const *)fbs_table, (si64*)box->data); break;
+                    case AnyArr_UbyteArr : update_data((UbyteArr  const *)fbs_table, (ui8 *)box->data); break;
+                    case AnyArr_UshortArr: update_data((UshortArr const *)fbs_table, (ui16*)box->data); break;
+                    case AnyArr_UintArr  : update_data((UintArr   const *)fbs_table, (ui32*)box->data); break;
+                    case AnyArr_UlongArr : update_data((UlongArr  const *)fbs_table, (ui64*)box->data); break;
+                    case AnyArr_FloatArr : update_data((FloatArr  const *)fbs_table, (fp32*)box->data); break;
+                    case AnyArr_DoubleArr: update_data((DoubleArr const *)fbs_table, (fp64*)box->data); break;
+                    case AnyArr_NONE:
+                        break;
+                    default:
+                        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+                    }
+                    // clang-format on
+                } else {
+                    box->size = 0;
+                }
             } else {
+                box->type = type;
+                box->device = device;
+                box->ext[0] = ext[0];
+                box->ext[1] = ext[1];
+                box->ext[2] = ext[2];
+                box->ext[3] = ext[3];
+                box->rank = 0;
                 box->size = 0;
             }
         } else {
