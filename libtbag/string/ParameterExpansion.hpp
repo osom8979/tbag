@@ -56,32 +56,32 @@ enum expansion_state_t
 enum expansion_format_t
 {
     _ef_unknown,
-    _ef_normal,                               ///< <code>${parameter}</code>
-    _ef_sharp_parameter,                      ///< <code>${#parameter}</code>
-    _ef_bang_prefix_asterisk,                 ///< <code>${!prefix*}</code>
-    _ef_bang_prefix_at,                       ///< <code>${!prefix@}</code>
-    _ef_bang_name_at,                         ///< <code>${!name[@]}</code>
-    _ef_bang_name_asterisk,                   ///< <code>${!name[*]}</code>
-    _ef_parameter_colon_minus_word,           ///< <code>${parameter:-word}</code>
-    _ef_parameter_colon_equals_word,          ///< <code>${parameter:=word}</code>
-    _ef_parameter_colon_question_word,        ///< <code>${parameter:?word}</code>
-    _ef_parameter_colon_plus_word,            ///< <code>${parameter:+word}</code>
-    _ef_parameter_colon_offset,               ///< <code>${parameter:offset}</code>
-    _ef_parameter_colon_offset_colon_length,  ///< <code>${parameter:offset:length}</code>
-    _ef_parameter_sharp_word,                 ///< <code>${parameter#word}</code>
-    _ef_parameter_sharp_sharp_word,           ///< <code>${parameter##word}</code>
-    _ef_parameter_percent_word,               ///< <code>${parameter%word}</code>
-    _ef_parameter_percent_percent_word,       ///< <code>${parameter%%word}</code>
-    _ef_parameter_slash_pattern_slash_string, ///< <code>${parameter/pattern/string}</code>
-    _ef_parameter_carat_pattern,              ///< <code>${parameter^pattern}</code>
-    _ef_parameter_carat_carat_pattern,        ///< <code>${parameter^^pattern}</code>
-    _ef_parameter_comma_pattern,              ///< <code>${parameter,pattern}</code>
-    _ef_parameter_comma_comma_pattern,        ///< <code>${parameter,,pattern}</code>
-    _ef_parameter_at_operator_Q,              ///< <code>${parameter@Q}</code>
-    _ef_parameter_at_operator_E,              ///< <code>${parameter@E}</code>
-    _ef_parameter_at_operator_P,              ///< <code>${parameter@P}</code>
-    _ef_parameter_at_operator_A,              ///< <code>${parameter@A}</code>
-    _ef_parameter_at_operator_a,              ///< <code>${parameter@a}</code>
+    _ef_normal,                               ///< @code{.cpp} ${parameter @endcode
+    _ef_sharp_parameter,                      ///< @code{.cpp} ${#parameter @endcode
+    _ef_bang_prefix_asterisk,                 ///< @code{.cpp} ${!prefix* @endcode
+    _ef_bang_prefix_at,                       ///< @code{.cpp} ${!prefix@ @endcode
+    _ef_bang_name_at,                         ///< @code{.cpp} ${!name[@] @endcode
+    _ef_bang_name_asterisk,                   ///< @code{.cpp} ${!name[*] @endcode
+    _ef_parameter_colon_minus_word,           ///< @code{.cpp} ${parameter:-word @endcode
+    _ef_parameter_colon_equals_word,          ///< @code{.cpp} ${parameter:=word @endcode
+    _ef_parameter_colon_question_word,        ///< @code{.cpp} ${parameter:?word @endcode
+    _ef_parameter_colon_plus_word,            ///< @code{.cpp} ${parameter:+word @endcode
+    _ef_parameter_colon_offset,               ///< @code{.cpp} ${parameter:offset @endcode
+    _ef_parameter_colon_offset_colon_length,  ///< @code{.cpp} ${parameter:offset:length @endcode
+    _ef_parameter_sharp_word,                 ///< @code{.cpp} ${parameter#word @endcode
+    _ef_parameter_sharp_sharp_word,           ///< @code{.cpp} ${parameter##word @endcode
+    _ef_parameter_percent_word,               ///< @code{.cpp} ${parameter%word @endcode
+    _ef_parameter_percent_percent_word,       ///< @code{.cpp} ${parameter%%word @endcode
+    _ef_parameter_slash_pattern_slash_string, ///< @code{.cpp} ${parameter/pattern/string @endcode
+    _ef_parameter_carat_pattern,              ///< @code{.cpp} ${parameter^pattern @endcode
+    _ef_parameter_carat_carat_pattern,        ///< @code{.cpp} ${parameter^^pattern @endcode
+    _ef_parameter_comma_pattern,              ///< @code{.cpp} ${parameter,pattern @endcode
+    _ef_parameter_comma_comma_pattern,        ///< @code{.cpp} ${parameter,,pattern @endcode
+    _ef_parameter_at_operator_Q,              ///< @code{.cpp} ${parameter@Q @endcode
+    _ef_parameter_at_operator_E,              ///< @code{.cpp} ${parameter@E @endcode
+    _ef_parameter_at_operator_P,              ///< @code{.cpp} ${parameter@P @endcode
+    _ef_parameter_at_operator_A,              ///< @code{.cpp} ${parameter@A @endcode
+    _ef_parameter_at_operator_a,              ///< @code{.cpp} ${parameter@a @endcode
 };
 // clang-format on
 
@@ -93,10 +93,10 @@ enum expansion_format_t
  *   <dt>
  *     <code>${parameter:-word}</code>
  *   </dt>
- *   <dl>
+ *   <dd>
  *     If parameter is unset or null, the expansion of word is substituted.
  *     Otherwise, the value of parameter is substituted.
- *   </dl>
+ *   </dd>
  * </dl>
  *
  * @param[in] variable
