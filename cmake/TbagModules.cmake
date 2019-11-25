@@ -900,6 +900,12 @@ macro (tbag_modules__apply_ext_blend2d)
     tbag_modules__add_whole_archive (${blend2d_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_openblas)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES openblas)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${openblas_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${openblas_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

@@ -27,22 +27,29 @@ NAMESPACE_LIBTBAG_OPEN
 namespace math {
 namespace blas {
 
+TBAG_API void openblas_set_num_threads(int num_threads);
+TBAG_API void goto_set_num_threads(int num_threads);
+TBAG_API int openblas_get_num_threads();
+TBAG_API int openblas_get_num_procs();
+TBAG_API char const * openblas_get_config();
+TBAG_API char const * openblas_get_corename();
+TBAG_API int openblas_get_parallel();
+
 /** Enumerated and derived types. */
 using CBLAS_INDEX = int;
 
 // clang-format off
 enum class CBLAS_ORDER     : CBLAS_INDEX { CblasRowMajor = 101, CblasColMajor= 102 };
-enum class CBLAS_TRANSPOSE : CBLAS_INDEX { CblasNoTrans  = 111, CblasTrans   = 112, CblasConjTrans = 113 };
+enum class CBLAS_TRANSPOSE : CBLAS_INDEX { CblasNoTrans  = 111, CblasTrans   = 112, CblasConjTrans = 113, CblasConjNoTrans = 114 };
 enum class CBLAS_UPLO      : CBLAS_INDEX { CblasUpper    = 121, CblasLower   = 122 };
 enum class CBLAS_DIAG      : CBLAS_INDEX { CblasNonUnit  = 131, CblasUnit    = 132 };
 enum class CBLAS_SIDE      : CBLAS_INDEX { CblasLeft     = 141, CblasRight   = 142 };
 // clang-format on
 
-///*
-// * ===========================================================================
-// * Prototypes for level 1 BLAS functions (complex are recast as routines)
-// * ===========================================================================
-// */
+// ======================================================================
+// Prototypes for level 1 BLAS functions (complex are recast as routines)
+// ======================================================================
+
 //float  cblas_sdsdot(const int N, const float alpha, const float *X,
 //                    const int incX, const float *Y, const int incY);
 //double cblas_dsdot(const int N, const float *X, const int incX, const float *Y,
@@ -51,7 +58,7 @@ enum class CBLAS_SIDE      : CBLAS_INDEX { CblasLeft     = 141, CblasRight   = 1
 //                  const float  *Y, const int incY);
 //double cblas_ddot(const int N, const double *X, const int incX,
 //                  const double *Y, const int incY);
-//
+
 ///*
 // * Functions having prefixes Z and C only
 // */
