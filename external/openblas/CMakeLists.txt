@@ -199,7 +199,7 @@ foreach (OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
   set_target_properties( ${OpenBLAS_LIBNAME} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_BINARY_DIR}/lib/${OUTPUTCONFIG} )
 endforeach()
 
-enable_testing()
+#enable_testing()
 
 if (USE_THREAD)
   # Add threading library to linker
@@ -211,19 +211,19 @@ if (USE_THREAD)
   target_link_libraries(${OpenBLAS_LIBNAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-#if (MSVC OR NOT NOFORTRAN)
-if (NOT NO_CBLAS)
-  # Broken without fortran on unix
-  add_subdirectory(utest)
-endif()
-
-if (NOT MSVC AND NOT NOFORTRAN)
-  # Build test and ctest
-  add_subdirectory(test)
-  if(NOT NO_CBLAS)
-    add_subdirectory(ctest)
-  endif()
-endif()
+##if (MSVC OR NOT NOFORTRAN)
+#if (NOT NO_CBLAS)
+#  # Broken without fortran on unix
+#  add_subdirectory(utest)
+#endif()
+#
+#if (NOT MSVC AND NOT NOFORTRAN)
+#  # Build test and ctest
+#  add_subdirectory(test)
+#  if(NOT NO_CBLAS)
+#    add_subdirectory(ctest)
+#  endif()
+#endif()
 
 set_target_properties(${OpenBLAS_LIBNAME} PROPERTIES
   VERSION ${OpenBLAS_MAJOR_VERSION}.${OpenBLAS_MINOR_VERSION}
