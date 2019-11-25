@@ -10,7 +10,7 @@
 #include <libtbag/config-ex.h>
 
 extern "C" {
-#if defined(HAVE_UNWIND_H)
+#if defined(TBAG_HAVE_UNWIND_H)
 #include <unwind.h>
 #endif
 }
@@ -30,14 +30,14 @@ struct UnwindState
 
 bool isUnwindSupport() TBAG_NOEXCEPT
 {
-#if defined(HAVE_UNWIND_H)
+#if defined(TBAG_HAVE_UNWIND_H)
     return true;
 #else
     return false;
 #endif
 }
 
-#if defined(HAVE_UNWIND_H)
+#if defined(TBAG_HAVE_UNWIND_H)
 static _Unwind_Reason_Code __unwind_callback__(struct _Unwind_Context * context, void * arg)
 {
     UnwindState * state = static_cast<UnwindState*>(arg);
@@ -53,7 +53,7 @@ static _Unwind_Reason_Code __unwind_callback__(struct _Unwind_Context * context,
 std::vector<void*> getUnwindStackTrace(int max_depth)
 {
     std::vector<void*> result;
-#if defined(HAVE_UNWIND_H)
+#if defined(TBAG_HAVE_UNWIND_H)
     std::vector<void*> stack(max_depth);
     UnwindState state = { stack.data(), stack.data() + max_depth };
     _Unwind_Backtrace(&__unwind_callback__, &state);

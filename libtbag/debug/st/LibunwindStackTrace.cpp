@@ -12,7 +12,7 @@
 #include <atomic>
 
 extern "C" {
-#if defined(HAVE_LIBUNWIND_H)
+#if defined(TBAG_HAVE_LIBUNWIND_H)
 #include <libunwind.h>
 #endif
 }
@@ -26,7 +26,7 @@ namespace st    {
 
 bool isLibunwindSupport() TBAG_NOEXCEPT
 {
-#if defined(HAVE_LIBUNWIND_H)
+#if defined(TBAG_HAVE_LIBUNWIND_H)
     return true;
 #else
     return false;
@@ -45,7 +45,7 @@ static std::atomic_bool g_now_entering(false);
 std::vector<void*> getLibunwindStackTrace(int max_depth)
 {
     std::vector<void*> result;
-#if defined(HAVE_LIBUNWIND_H)
+#if defined(TBAG_HAVE_LIBUNWIND_H)
     bool expected = false;
     if (g_now_entering.compare_exchange_strong(expected, true) == false) {
         return result;

@@ -118,7 +118,7 @@ message (STATUS "Checking instruction sets to run tests for on this host...")
 simdpp_get_runnable_archs (SIMDPP_RUNNABLE_ARCHS)
 message (STATUS "Simdpp runnable archs: ${SIMDPP_RUNNABLE_ARCHS}")
 foreach (__arch_cursor ${SIMDPP_RUNNABLE_ARCHS})
-    set (SIMDPP_RUNNABLE_ARCH_${__arch_cursor} 1)
+    set (TBAG_SIMDPP_RUNNABLE_ARCH_${__arch_cursor} 1)
 endforeach ()
 
 ## Library subproject.
@@ -176,26 +176,26 @@ include (CheckIncludeFile)
 ## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
 ## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
 
-check_include_file (netinet/in.h   HAVE_NETINET_IN_H)
-check_include_file (arpa/inet.h    HAVE_ARPA_INET_H)
-check_include_file (sys/syscall.h  HAVE_SYS_SYSCALL_H)
-check_include_file (sys/sysctl.h   HAVE_SYS_SYSCTL_H)
-check_include_file (sys/statvfs.h  HAVE_SYS_STATVFS_H)
-check_include_file (sys/mman.h     HAVE_SYS_MMAN_H)
-check_include_file (sys/types.h    HAVE_SYS_TYPES_H)
-check_include_file (sys/uio.h      HAVE_SYS_UIO_H)
-check_include_file (syscall.h      HAVE_SYSCALL_H)
-check_include_file (unistd.h       HAVE_UNISTD_H)
-check_include_file (dlfcn.h        HAVE_DLFCN_H)
-check_include_file (execinfo.h     HAVE_EXECINFO_H)
-check_include_file (unwind.h       HAVE_UNWIND_H)
-check_include_file (libunwind.h    HAVE_LIBUNWIND_H)
-check_include_file (Windows.h      HAVE_WINDOWS_H) ## Win32
-check_include_file (Objbase.h      HAVE_OBJBASE_H) ## Win32
-check_include_file (Dbgeng.h       HAVE_DBGENG_H)  ## Win32
-check_include_file (intrin.h       HAVE_INTRIN_H)  ## Win32
-check_include_file (cpuid.h        HAVE_CPUID_H)   ## GCC or CLANG
-check_include_file (endian.h       HAVE_ENDIAN_H)
+check_include_file (netinet/in.h   TBAG_HAVE_NETINET_IN_H)
+check_include_file (arpa/inet.h    TBAG_HAVE_ARPA_INET_H)
+check_include_file (sys/syscall.h  TBAG_HAVE_SYS_SYSCALL_H)
+check_include_file (sys/sysctl.h   TBAG_HAVE_SYS_SYSCTL_H)
+check_include_file (sys/statvfs.h  TBAG_HAVE_SYS_STATVFS_H)
+check_include_file (sys/mman.h     TBAG_HAVE_SYS_MMAN_H)
+check_include_file (sys/types.h    TBAG_HAVE_SYS_TYPES_H)
+check_include_file (sys/uio.h      TBAG_HAVE_SYS_UIO_H)
+check_include_file (syscall.h      TBAG_HAVE_SYSCALL_H)
+check_include_file (unistd.h       TBAG_HAVE_UNISTD_H)
+check_include_file (dlfcn.h        TBAG_HAVE_DLFCN_H)
+check_include_file (execinfo.h     TBAG_HAVE_EXECINFO_H)
+check_include_file (unwind.h       TBAG_HAVE_UNWIND_H)
+check_include_file (libunwind.h    TBAG_HAVE_LIBUNWIND_H)
+check_include_file (Windows.h      TBAG_HAVE_WINDOWS_H) ## Win32
+check_include_file (Objbase.h      TBAG_HAVE_OBJBASE_H) ## Win32
+check_include_file (Dbgeng.h       TBAG_HAVE_DBGENG_H)  ## Win32
+check_include_file (intrin.h       TBAG_HAVE_INTRIN_H)  ## Win32
+check_include_file (cpuid.h        TBAG_HAVE_CPUID_H)   ## GCC or CLANG
+check_include_file (endian.h       TBAG_HAVE_ENDIAN_H)
 
 ## Compile checker.
 include (CheckCSourceCompiles)
@@ -204,23 +204,23 @@ include (CheckCXXSourceCompiles)
 ## - ${CMAKE_REQUIRED_DEFINITIONS}: list of macros to define (-DFOO=bar)
 ## - ${CMAKE_REQUIRED_INCLUDES}: list of include directories
 ## - ${CMAKE_REQUIRED_LIBRARIES}: list of libraries to link
-if (WIN32 AND HAVE_OBJBASE_H)
+if (WIN32 AND TBAG_HAVE_OBJBASE_H)
     check_cxx_source_compiles ("
         #include <Objbase.h>
         #pragma comment(lib, \"ole32.lib\")
         int main() { return ::CoInitializeEx(NULL, COINIT_MULTITHREADED) == S_OK ? 0 : 1; }
-        " HAVE_COINITIALIZEEX_FUNC)
+        " TBAG_HAVE_COINITIALIZEEX_FUNC)
 endif ()
 
-if (HAVE_SYS_UIO_H)
+if (TBAG_HAVE_SYS_UIO_H)
     check_c_source_compiles ("
         #include <sys/uio.h>
         void main() { preadv(0, NULL, 0, 0); }
-        " HAVE_PREADV_FUNC)
+        " TBAG_HAVE_PREADV_FUNC)
     check_c_source_compiles ("
         #include <sys/uio.h>
         void main() { readv(0, NULL, 0); }
-        " HAVE_READV_FUNC)
+        " TBAG_HAVE_READV_FUNC)
 endif ()
 
 ## Type checker.

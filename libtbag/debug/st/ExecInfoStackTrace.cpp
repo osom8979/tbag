@@ -12,7 +12,7 @@
 #include <cstring>
 #include <iterator>
 
-#if defined(HAVE_EXECINFO_H)
+#if defined(TBAG_HAVE_EXECINFO_H)
 #include <execinfo.h>
 #endif
 
@@ -25,7 +25,7 @@ namespace st    {
 
 bool isExecInfoSupport() TBAG_NOEXCEPT
 {
-#if defined(HAVE_EXECINFO_H)
+#if defined(TBAG_HAVE_EXECINFO_H)
     return true;
 #else
     return false;
@@ -35,7 +35,7 @@ bool isExecInfoSupport() TBAG_NOEXCEPT
 std::vector<void*> getExecInfoStackTrace(int max_depth)
 {
     std::vector<void*> result;
-#if defined(HAVE_EXECINFO_H)
+#if defined(TBAG_HAVE_EXECINFO_H)
     std::vector<void*> stack(static_cast<std::size_t>(max_depth));
     int const SIZE = ::backtrace(stack.data(), max_depth);
     result.assign(stack.begin(), stack.begin() + SIZE);
@@ -46,7 +46,7 @@ std::vector<void*> getExecInfoStackTrace(int max_depth)
 std::vector<std::string> getExecInfoSymbolize(std::vector<void*> const & stack)
 {
     std::vector<std::string> result;
-#if defined(HAVE_EXECINFO_H)
+#if defined(TBAG_HAVE_EXECINFO_H)
     int const SIZE = static_cast<int>(stack.size());
     char ** strings = ::backtrace_symbols(stack.data(), SIZE);
     if (strings != nullptr) {

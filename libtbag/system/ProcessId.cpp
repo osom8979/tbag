@@ -11,10 +11,10 @@
 #if defined(TBAG_PLATFORM_WINDOWS)
 #include <Windows.h>
 #endif
-#if defined(HAVE_SYS_TYPES_H)
+#if defined(TBAG_HAVE_SYS_TYPES_H)
 #include <sys/types.h>
 #endif
-#if defined(HAVE_UNISTD_H)
+#if defined(TBAG_HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
 

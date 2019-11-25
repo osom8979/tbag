@@ -16,13 +16,13 @@
 #if defined(TBAG_PLATFORM_WINDOWS)
 #include <Windows.h>
 #endif
-#if defined(HAVE_UNISTD_H)
+#if defined(TBAG_HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
-#if defined(HAVE_SYS_SYSCTL_H)
+#if defined(TBAG_HAVE_SYS_SYSCTL_H)
 #include <sys/sysctl.h>
 #endif
-#if defined(HAVE_SYS_STATVFS_H)
+#if defined(TBAG_HAVE_SYS_STATVFS_H)
 #include <sys/statvfs.h>
 #endif
 
@@ -40,7 +40,7 @@ int getPageSize()
     SYSTEM_INFO info = {0,};
     GetSystemInfo(&info);
     return static_cast<int>(info.dwPageSize);
-#elif defined(HAVE_UNISTD_H)
+#elif defined(TBAG_HAVE_UNISTD_H)
     return static_cast<int>(sysconf(_SC_PAGESIZE));
 #else
     return 0;
@@ -75,7 +75,7 @@ int getCacheLineSize(int cpu_index)
     if (buffer != NULL) {
         ::free(buffer);
     }
-#elif (defined(TBAG_PLATFORM_APPLE) && defined(HAVE_SYS_SYSCTL_H))
+#elif (defined(TBAG_PLATFORM_APPLE) && defined(TBAG_HAVE_SYS_SYSCTL_H))
     std::size_t sizeof_line_size = sizeof(line_size);
     if (::sysctlbyname("hw.cachelinesize", &line_size, &sizeof_line_size, nullptr, 0) != 0) {
         return 0;
@@ -106,7 +106,7 @@ bool getFilesystemInfo(std::string const & path, FilesystemStatistics & result)
         result.used_byte  = total_byte - free_byte;
         return true;
     }
-#elif defined(HAVE_SYS_STATVFS_H)
+#elif defined(TBAG_HAVE_SYS_STATVFS_H)
     struct statvfs buffer = {0,};
     if (::statvfs(path.c_str(), &buffer) == 0) {
         result.bsize      = buffer.f_bsize;

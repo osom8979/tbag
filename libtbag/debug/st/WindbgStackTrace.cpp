@@ -14,7 +14,7 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
 
-#if defined(TBAG_PLATFORM_WINDOWS) && defined(HAVE_DBGENG_H)
+#if defined(TBAG_PLATFORM_WINDOWS) && defined(TBAG_HAVE_DBGENG_H)
 # include <windows.h>
 # include <Dbgeng.h>
 # pragma comment(lib, "ole32.lib")
@@ -38,7 +38,7 @@ using namespace libtbag::lib;
 
 bool isWindbgSupport() TBAG_NOEXCEPT
 {
-#if defined(TBAG_PLATFORM_WINDOWS) && defined(HAVE_DBGENG_H)
+#if defined(TBAG_PLATFORM_WINDOWS) && defined(TBAG_HAVE_DBGENG_H)
     return true;
 #else
     return false;

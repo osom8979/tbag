@@ -16,7 +16,7 @@
 using namespace libtbag::dummy::win32;
 #endif
 
-#if defined(USE_PTHREADS)
+#if defined(TBAG_USE_PTHREADS)
 #include <pthread.h>
 #endif
 
@@ -37,7 +37,7 @@ Err __kill_thread_win32(libtbag::uvpp::uthread id)
 
 Err __kill_thread_pthread(libtbag::uvpp::uthread id)
 {
-#if defined(USE_PTHREADS)
+#if defined(TBAG_USE_PTHREADS)
     return ::pthread_kill((pthread_t)id, libtbag::signal::TBAG_SIGNAL_KILL) == 0 ? E_SUCCESS : E_UNKNOWN;
 #else
     return E_ENOSYS;
@@ -48,7 +48,7 @@ Err killThread(libtbag::uvpp::uthread id)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
     return __kill_thread_win32(id);
-#elif defined(USE_PTHREADS)
+#elif defined(TBAG_USE_PTHREADS)
     return __kill_thread_pthread(id);
 #else
     return E_ENOSYS;

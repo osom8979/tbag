@@ -42,7 +42,7 @@ typedef intptr_t ssize_t;
 # include <netdb.h> // addrinfo
 #endif
 
-#if defined(USE_PTHREADS)
+#if defined(TBAG_USE_PTHREADS)
 #include <pthread.h>
 #endif
 
@@ -72,7 +72,7 @@ using ugroup = uint32_t;
 
 #if defined(TBAG_PLATFORM_WINDOWS)
 using uthread = HANDLE;
-#elif defined(USE_PTHREADS)
+#elif defined(TBAG_USE_PTHREADS)
 using uthread = pthread_t;
 #else
 using uthread = int;

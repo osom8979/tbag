@@ -15,13 +15,13 @@
 #if defined(TBAG_PLATFORM_WINDOWS)
 #include <winsock2.h>
 #endif
-#if defined(HAVE_ENDIAN_H)
+#if defined(TBAG_HAVE_ENDIAN_H)
 #include <endian.h>
 #endif
-#if defined(HAVE_NETINET_IN_H)
+#if defined(TBAG_HAVE_NETINET_IN_H)
 #include <netinet/in.h>
 #endif
-#if defined(HAVE_ARPA_INET_H)
+#if defined(TBAG_HAVE_ARPA_INET_H)
 #include <arpa/inet.h>
 #endif
 

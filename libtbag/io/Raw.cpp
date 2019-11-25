@@ -10,13 +10,13 @@
 #include <cstdarg>
 #include <cstdio>
 
-#if defined(HAVE_SYSCALL_H)
+#if defined(TBAG_HAVE_SYSCALL_H)
 # include <syscall.h>
-#elif defined(HAVE_SYS_SYSCALL_H)
+#elif defined(TBAG_HAVE_SYS_SYSCALL_H)
 # include <sys/syscall.h>
 #endif
 
-#if defined(HAVE_SYSCALL_H) || defined(HAVE_SYS_SYSCALL_H)
+#if defined(TBAG_HAVE_SYSCALL_H) || defined(TBAG_HAVE_SYS_SYSCALL_H)
 # define safe_write(fd, s, len)  syscall(SYS_write, fd, s, len)
 #else
 // Not so safe, but what can you do?

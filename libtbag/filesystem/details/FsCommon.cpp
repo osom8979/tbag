@@ -16,10 +16,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
-#if defined(HAVE_SYS_UIO_H)
+#if defined(TBAG_HAVE_SYS_UIO_H)
 #include <sys/uio.h>
 #endif
-#if defined(HAVE_UNISTD_H)
+#if defined(TBAG_HAVE_UNISTD_H)
 #include <unistd.h>
 #endif
 #include <errno.h>
@@ -464,7 +464,7 @@ int __read_direct(ufile file, binf const * infos, std::size_t infos_size, int64_
         return UV_EINVAL;
     }
 
-#if defined(HAVE_PREADV_FUNC) || (defined(HAVE_READV_FUNC) && defined(HAVE_UNISTD_H))
+#if defined(TBAG_HAVE_PREADV_FUNC) || (defined(TBAG_HAVE_READV_FUNC) && defined(TBAG_HAVE_UNISTD_H))
     int result = -1;
     std::vector<iovec> iovec_bufs;
     iovec_bufs.resize(infos_size);
@@ -473,9 +473,9 @@ int __read_direct(ufile file, binf const * infos, std::size_t infos_size, int64_
         iovec_bufs[i].iov_len  = (infos + i)->size;
     }
 
-# if defined(HAVE_PREADV_FUNC)
+# if defined(TBAG_HAVE_PREADV_FUNC)
     result = preadv(file, &iovec_bufs[0], infos_size, offset);
-# elif defined(HAVE_READV_FUNC) && defined(HAVE_UNISTD_H)
+# elif defined(TBAG_HAVE_READV_FUNC) && defined(TBAG_HAVE_UNISTD_H)
     result = lseek(file, offset, SEEK_SET);
     if (result == -1) {
         return uv_translate_sys_error(errno);
@@ -490,7 +490,7 @@ int __read_direct(ufile file, binf const * infos, std::size_t infos_size, int64_
     }
 #else
     return __read_foreach(file, infos, infos_size, offset);
-#endif // defined(HAVE_PREADV_FUNC) || (defined(HAVE_READV_FUNC) && defined(HAVE_UNISTD_H))
+#endif // defined(TBAG_HAVE_PREADV_FUNC) || (defined(TBAG_HAVE_READV_FUNC) && defined(TBAG_HAVE_UNISTD_H))
 }
 
 #if defined(__DragonFly__)      || \

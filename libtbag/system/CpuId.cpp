@@ -9,10 +9,10 @@
 #include <libtbag/log/Log.hpp>
 #include <libtbag/config-ex.h>
 
-#if defined(HAVE_CPUID_H)
+#if defined(TBAG_HAVE_CPUID_H)
 #include <cpuid.h> // GCC, CLANG
 #endif
-#if defined(HAVE_INTRIN_H)
+#if defined(TBAG_HAVE_INTRIN_H)
 #include <intrin.h> // MSVC
 #endif
 
@@ -117,11 +117,11 @@ bool tbag_cpuid(unsigned int level, unsigned int * eax, unsigned int * ebx, unsi
 
 bool getCpuId(uint32_t level, uint32_t * eax, uint32_t * ebx, uint32_t * ecx, uint32_t * edx)
 {
-#if defined(HAVE_CPUID_H)
+#if defined(TBAG_HAVE_CPUID_H)
     if (__get_cpuid(level, eax, ebx, ecx, edx) == false) {
         return false;
     }
-#elif defined(HAVE_INTRIN_H)
+#elif defined(TBAG_HAVE_INTRIN_H)
     int cpu_info[4] = {0,};
     __cpuid(cpu_info, level);
     *eax = (uint32_t)cpu_info[0];

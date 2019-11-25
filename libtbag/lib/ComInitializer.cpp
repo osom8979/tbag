@@ -8,7 +8,7 @@
 #include <libtbag/lib/ComInitializer.hpp>
 #include <libtbag/config-ex.h>
 
-#if defined(HAVE_COINITIALIZEEX_FUNC)
+#if defined(TBAG_HAVE_COINITIALIZEEX_FUNC)
 #include <Objbase.h>
 #pragma comment(lib, "ole32.lib")
 #else
