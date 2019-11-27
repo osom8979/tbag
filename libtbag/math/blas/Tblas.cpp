@@ -10,12 +10,27 @@
 
 #include <openblas/cblas.h>
 
+#if defined(TBAG_PLATFORM_WINDOWS)
+# include <windows.h>
+BOOL APIENTRY openblas_DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+#else
+# include <libtbag/dummy/Win32.hpp>
+using namespace ::libtbag::dummy::win32;
+BOOL APIENTRY openblas_DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+{ return TRUE; }
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace math {
 namespace blas {
+
+int _openblas_dll_main(void * module, unsigned long reason, void * reserved)
+{
+    return ::openblas_DllMain(module, reason, reserved);
+}
 
 void openblas_set_num_threads(int num_threads)
 {
