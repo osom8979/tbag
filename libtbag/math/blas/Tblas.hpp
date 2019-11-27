@@ -27,7 +27,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace math {
 namespace blas {
 
-TBAG_API int _openblas_dll_main(void * module, unsigned long reason, void * reserved);
+TBAG_API int openblas_dll_main(void * module, unsigned long reason, void * reserved);
 
 TBAG_API void openblas_set_num_threads(int num_threads);
 TBAG_API void goto_set_num_threads(int num_threads);
