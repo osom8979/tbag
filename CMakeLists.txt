@@ -109,6 +109,12 @@ endif ()
 
 ## External project.
 include (${CMAKE_SOURCE_DIR}/external/External.cmake)
+list (APPEND EXTERNAL_TARGETS archive blend2d bzip2 civetweb date)
+list (APPEND EXTERNAL_TARGETS freetype glfw icu lmdb luajit lzma)
+list (APPEND EXTERNAL_TARGETS nng openblas ressl sqlite3 uv zlib)
+add_custom_target (external DEPENDS ${EXTERNAL_TARGETS})
+
+## SIMDPP.
 include (${CMAKE_SOURCE_DIR}/dep/simdpp/cmake/SimdppMultiarch.cmake)
 
 # Check what instruction sets the current host supports. Use them for testing
@@ -126,7 +132,6 @@ add_subdirectory (${CMAKE_SOURCE_DIR}/dep/demangle)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/flatbuffers)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/http-parser)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/icu)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/minizip)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lemon)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/lfds)

@@ -17,7 +17,6 @@ tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
 ## TBAG EXPORT API.
 tbag_modules__append_definitions (
         TBAG_EXPORT_API
-        U_COMBINED_IMPLEMENTATION
         JSON_DLL_BUILD
         TINYXML2_EXPORT
         GL_SILENCE_DEPRECATION)
@@ -43,10 +42,10 @@ tbag_modules__apply_ext_lmdb     ()
 tbag_modules__apply_ext_civetweb ()
 tbag_modules__apply_ext_blend2d  ()
 tbag_modules__apply_ext_openblas ()
+tbag_modules__apply_ext_icu      ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
-tbag_modules__apply_dep_icu         ()
 tbag_modules__apply_dep_minizip     () ## And apply_dep_z
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_flatbuffers ()

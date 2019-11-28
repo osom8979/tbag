@@ -745,3 +745,42 @@ else ()
 endif ()
 add_custom_target (openblas DEPENDS ${openblas_EXT_LIBRARIES})
 
+###########
+## ICU4C ##
+###########
+
+set (icu_EXT_SOURCE_DIR      "${CMAKE_SOURCE_DIR}/external/icu")
+set (icuuc_EXT_INCLUDE_DIR   "${EXT_INSTALL_DIR}/include/icu/common")
+set (icui18n_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include/icu/i18n")
+set (icu_EXT_HEADER          "${icuuc_EXT_INCLUDE_DIR}/unicode/uconfig.h")
+set (icuuc_EXT_STATIC_LIB    "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}icuuc${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (icui18n_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}icui18n${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (icu_EXT_LIBRARIES       "${icuuc_EXT_STATIC_LIB}"
+                             "${icui18n_EXT_STATIC_LIB}")
+exists_files (icu_EXT_EXISTS ${icu_EXT_LIBRARIES} ${icu_EXT_HEADER})
+
+if (icu_EXT_EXISTS)
+    message (STATUS "Skip external/icu/icuuc (Exists: ${icuuc_EXT_STATIC_LIB})")
+    message (STATUS "Skip external/icu/icui18n (Exists: ${icui18n_EXT_STATIC_LIB})")
+else ()
+    message (STATUS "Add external/icu")
+    ExternalProject_Add (icu_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${icu_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS} -DDllMain=icu_DllMain"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output licuing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (icu_ext_output icu_ext ${icu_EXT_LIBRARIES})
+endif ()
+add_custom_target (icu DEPENDS ${icu_EXT_LIBRARIES})
+

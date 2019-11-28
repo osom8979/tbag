@@ -906,6 +906,15 @@ macro (tbag_modules__apply_ext_openblas)
     tbag_modules__add_whole_archive (${openblas_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_icu)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES icu)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS "${icuuc_EXT_INCLUDE_DIR}"
+                                           "${icui18n_EXT_INCLUDE_DIR}")
+    list (APPEND TBAG_PROJECT_DEFINITIONS U_COMBINED_IMPLEMENTATION)
+    tbag_modules__add_whole_archive (${icuuc_EXT_STATIC_LIB})
+    tbag_modules__add_whole_archive (${icui18n_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

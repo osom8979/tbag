@@ -15,7 +15,6 @@ Tea-bag is Third party extension utility project.
 - flatbuffers 1.10.0 (Apache License, Version 2.0)
 - gtest 1.7.0 (BSD 3-clause license)
 - http-parser 2.8.1 (MIT license)
-- icu4c 57.1 (ICU license; http://source.icu-project.org/repos/icu/icu/trunk/LICENSE)
 - minizip 1.1 (zlib license)
 - simdpp 2.1 (Boost Software License, Version 1.0)
 - stb master-e6afb9c (Public Domain or MIT license)
@@ -49,6 +48,7 @@ Tea-bag is Third party extension utility project.
 - asmjit master-5d40561 (zlib license)
 - blend2d master-934d071 (zlib license)
 - OpenBLAS 0.3.7 (BSD 3-Clause license)
+- icu4c 57.1 (ICU license; http://source.icu-project.org/repos/icu/icu/trunk/LICENSE)
 
 ## Inline libraries
 
