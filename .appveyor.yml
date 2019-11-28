@@ -39,13 +39,14 @@ clone_folder: c:\Project\tbag
 
 # environment variables
 environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
   TBAG_HOME: c:\Project\tbag
   TBAG_BUILD: c:\Project\tbag\build
   BUILD_TARGET: tester  # 'tbag' or 'tester'
 
 # build cache to preserve files/folders between builds
 cache:
-  - "%TBAG_BUILD%"
+  - "%TBAG_BUILD%\\external"
 
 #---------------------------------#
 #       build configuration       #
@@ -69,7 +70,9 @@ before_build:
 build_script:
   - cmd: echo Running build...
   - cmd: cd "%TBAG_BUILD%"
-  - cmd: cmake --build . --target %BUILD_TARGET% -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: cmake --build . --target external -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: cmake --build . --target tbag     -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: cmake --build . --target texter   -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 #---------------------------------#
 #       tests configuration       #
