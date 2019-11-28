@@ -770,7 +770,8 @@ else ()
             SOURCE_DIR "${icu_EXT_SOURCE_DIR}"
             CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
                        "-DBUILD_SHARED_LIBS=OFF"
-                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS} -DDllMain=icu_DllMain"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
             #--Output licuing-------------
