@@ -43,6 +43,7 @@ tbag_modules__apply_ext_civetweb ()
 tbag_modules__apply_ext_blend2d  ()
 tbag_modules__apply_ext_openblas ()
 tbag_modules__apply_ext_icu      ()
+tbag_modules__apply_ext_demangle ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
@@ -54,7 +55,6 @@ tbag_modules__apply_dep_lfds        ()
 tbag_modules__apply_dep_imgui       ()
 tbag_modules__apply_dep_imnodes     ()
 tbag_modules__apply_dep_raylib      ()
-tbag_modules__apply_dep_demangle    ()
 
 tbag_modules__check_opengl ()
 tbag_modules__apply_opengl ()

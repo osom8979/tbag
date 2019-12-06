@@ -12,12 +12,24 @@ function (exists_files __result)
     foreach (__lib_cursor ${ARGN})
         if (NOT EXISTS "${__lib_cursor}")
             set (${__result} OFF)
-            break ()
+            message (STATUS "Not found ${__lib_cursor}")
         endif ()
     endforeach ()
 
     # update result.
     set (${__result} ${${__result}} PARENT_SCOPE)
+endfunction ()
+
+#/// Print a file that does not exist.
+#///
+#/// @param __target  [in] Target name.
+#/// @param ...       [in] Files.
+function (print_not_exists_files __target)
+    foreach (__lib_cursor ${ARGN})
+        if (NOT EXISTS "${__lib_cursor}")
+            message (STATUS "Skip external/${__target} (Exists: ${__lib_cursor})")
+        endif ()
+    endforeach ()
 endfunction ()
 
 #/// A fake function to inject dependencies into the output file of ExternalProject.
@@ -64,9 +76,7 @@ set (uv_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}$
 set (uv_EXT_LIBRARIES    "${uv_EXT_STATIC_LIB}")
 exists_files (uv_EXT_EXISTS ${uv_EXT_LIBRARIES})
 
-if (uv_EXT_EXISTS)
-    message (STATUS "Skip external/uv (Exists: ${uv_EXT_STATIC_LIB})")
-else ()
+if (NOT uv_EXT_EXISTS)
     message (STATUS "Add external/uv")
     ExternalProject_Add (uv_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -114,9 +124,7 @@ set (zlib_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX
 set (zlib_EXT_LIBRARIES    "${zlib_EXT_STATIC_LIB}")
 exists_files (zlib_EXT_EXISTS ${zlib_EXT_LIBRARIES})
 
-if (zlib_EXT_EXISTS)
-    message (STATUS "Skip external/zlib (Exists: ${zlib_EXT_STATIC_LIB})")
-else ()
+if (NOT zlib_EXT_EXISTS)
     message (STATUS "Add external/zlib")
     ExternalProject_Add (zlib_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -157,11 +165,7 @@ set (ressl_EXT_LIBRARIES         "${ressl_crypto_EXT_STATIC_LIB}"
                                  "${ressl_tls_EXT_STATIC_LIB}")
 exists_files (ressl_EXT_EXISTS ${ressl_EXT_LIBRARIES})
 
-if (ressl_EXT_EXISTS)
-    message (STATUS "Skip external/ressl_crypto (Exists: ${ressl_crypto_EXT_STATIC_LIB})")
-    message (STATUS "Skip external/ressl_ssl (Exists: ${ressl_ssl_EXT_STATIC_LIB})")
-    message (STATUS "Skip external/ressl_tls (Exists: ${ressl_tls_EXT_STATIC_LIB})")
-else ()
+if (NOT ressl_EXT_EXISTS)
     message (STATUS "Add external/ressl")
     ExternalProject_Add (ressl_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -197,9 +201,7 @@ set (freetype_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PR
 set (freetype_EXT_LIBRARIES    "${freetype_EXT_STATIC_LIB}")
 exists_files (freetype_EXT_EXISTS ${freetype_EXT_LIBRARIES})
 
-if (freetype_EXT_EXISTS)
-    message (STATUS "Skip external/freetype (Exists: ${freetype_EXT_STATIC_LIB})")
-else ()
+if (NOT freetype_EXT_EXISTS)
     message (STATUS "Add external/freetype")
     ExternalProject_Add (freetype_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -240,9 +242,7 @@ set (luajit_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREF
 set (luajit_EXT_LIBRARIES    "${luajit_EXT_STATIC_LIB}")
 exists_files (luajit_EXT_EXISTS ${luajit_EXT_LIBRARIES} ${luajit_EXT_CONF_HEADER})
 
-if (luajit_EXT_EXISTS)
-    message (STATUS "Skip external/luajit (Exists: ${luajit_EXT_STATIC_LIB})")
-else ()
+if (NOT luajit_EXT_EXISTS)
     message (STATUS "Add external/luajit")
     ExternalProject_Add (luajit_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -284,9 +284,7 @@ set (bzip2_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFI
 set (bzip2_EXT_LIBRARIES    "${bzip2_EXT_STATIC_LIB}")
 exists_files (bzip2_EXT_EXISTS ${bzip2_EXT_LIBRARIES} ${bzip2_EXT_HEADER})
 
-if (bzip2_EXT_EXISTS)
-    message (STATUS "Skip external/bzip2 (Exists: ${bzip2_EXT_STATIC_LIB})")
-else ()
+if (NOT bzip2_EXT_EXISTS)
     message (STATUS "Add external/bzip2")
     ExternalProject_Add (bzip2_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -321,9 +319,7 @@ set (lzma_EXT_LIBRARIES    "${lzma_EXT_STATIC_LIB}"
                            "${lzma_EXT_HEADER}")
 exists_files (lzma_EXT_EXISTS ${lzma_EXT_LIBRARIES})
 
-if (lzma_EXT_EXISTS)
-    message (STATUS "Skip external/lzma (Exists: ${lzma_EXT_STATIC_LIB})")
-else ()
+if (NOT lzma_EXT_EXISTS)
     message (STATUS "Add external/lzma")
     ExternalProject_Add (lzma_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -357,9 +353,7 @@ set (archive_EXT_LIBRARIES    "${archive_EXT_STATIC_LIB}"
                               "${archive_EXT_HEADER}")
 exists_files (archive_EXT_EXISTS ${archive_EXT_LIBRARIES})
 
-if (archive_EXT_EXISTS)
-    message (STATUS "Skip external/archive (Exists: ${archive_EXT_STATIC_LIB})")
-else ()
+if (NOT archive_EXT_EXISTS)
     message (STATUS "Add external/archive")
     ExternalProject_Add (archive_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -426,9 +420,7 @@ set (nng_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}
 set (nng_EXT_LIBRARIES    "${nng_EXT_STATIC_LIB}")
 exists_files (nng_EXT_EXISTS ${nng_EXT_LIBRARIES} ${nng_EXT_HEADER})
 
-if (nng_EXT_EXISTS)
-    message (STATUS "Skip external/nng (Exists: ${nng_EXT_STATIC_LIB})")
-else ()
+if (NOT nng_EXT_EXISTS)
     message (STATUS "Add external/nng")
     ExternalProject_Add (nng_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -467,9 +459,7 @@ set (glfw_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX
 set (glfw_EXT_LIBRARIES    "${glfw_EXT_STATIC_LIB}")
 exists_files (glfw_EXT_EXISTS ${glfw_EXT_LIBRARIES} ${glfw_EXT_HEADER})
 
-if (glfw_EXT_EXISTS)
-    message (STATUS "Skip external/glfw (Exists: ${glfw_EXT_STATIC_LIB})")
-else ()
+if (NOT glfw_EXT_EXISTS)
     message (STATUS "Add external/glfw")
     ExternalProject_Add (glfw_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -507,9 +497,7 @@ set (sqlite3_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PRE
 set (sqlite3_EXT_LIBRARIES    "${sqlite3_EXT_STATIC_LIB}")
 exists_files (sqlite3_EXT_EXISTS ${sqlite3_EXT_LIBRARIES} ${sqlite3_EXT_HEADER})
 
-if (sqlite3_EXT_EXISTS)
-    message (STATUS "Skip external/sqlite3 (Exists: ${sqlite3_EXT_STATIC_LIB})")
-else ()
+if (NOT sqlite3_EXT_EXISTS)
     message (STATUS "Add external/sqlite3")
     ExternalProject_Add (sqlite3_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -542,9 +530,7 @@ set (date_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX
 set (date_EXT_LIBRARIES    "${date_EXT_STATIC_LIB}")
 exists_files (date_EXT_EXISTS ${date_EXT_LIBRARIES} ${date_EXT_HEADER})
 
-if (date_EXT_EXISTS)
-    message (STATUS "Skip external/date (Exists: ${date_EXT_STATIC_LIB})")
-else ()
+if (NOT date_EXT_EXISTS)
     message (STATUS "Add external/date")
     ExternalProject_Add (date_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -583,9 +569,7 @@ set (lmdb_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX
 set (lmdb_EXT_LIBRARIES    "${lmdb_EXT_STATIC_LIB}")
 exists_files (lmdb_EXT_EXISTS ${lmdb_EXT_LIBRARIES} ${lmdb_EXT_HEADER})
 
-if (lmdb_EXT_EXISTS)
-    message (STATUS "Skip external/lmdb (Exists: ${lmdb_EXT_STATIC_LIB})")
-else ()
+if (NOT lmdb_EXT_EXISTS)
     message (STATUS "Add external/lmdb")
     ExternalProject_Add (lmdb_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -618,9 +602,7 @@ set (civetweb_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PR
 set (civetweb_EXT_LIBRARIES    "${civetweb_EXT_STATIC_LIB}")
 exists_files (civetweb_EXT_EXISTS ${civetweb_EXT_LIBRARIES} ${civetweb_EXT_HEADER})
 
-if (civetweb_EXT_EXISTS)
-    message (STATUS "Skip external/civetweb (Exists: ${civetweb_EXT_STATIC_LIB})")
-else ()
+if (NOT civetweb_EXT_EXISTS)
     message (STATUS "Add external/civetweb")
     ExternalProject_Add (civetweb_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -675,9 +657,7 @@ set (blend2d_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PRE
 set (blend2d_EXT_LIBRARIES    "${blend2d_EXT_STATIC_LIB}")
 exists_files (blend2d_EXT_EXISTS ${blend2d_EXT_LIBRARIES} ${blend2d_EXT_HEADER})
 
-if (blend2d_EXT_EXISTS)
-    message (STATUS "Skip external/blend2d (Exists: ${blend2d_EXT_STATIC_LIB})")
-else ()
+if (NOT blend2d_EXT_EXISTS)
     message (STATUS "Add external/blend2d")
     ExternalProject_Add (blend2d_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -715,9 +695,7 @@ set (openblas_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PR
 set (openblas_EXT_LIBRARIES    "${openblas_EXT_STATIC_LIB}")
 exists_files (openblas_EXT_EXISTS ${openblas_EXT_LIBRARIES} ${openblas_EXT_HEADER})
 
-if (openblas_EXT_EXISTS)
-    message (STATUS "Skip external/openblas (Exists: ${openblas_EXT_STATIC_LIB})")
-else ()
+if (NOT openblas_EXT_EXISTS)
     message (STATUS "Add external/openblas")
     ExternalProject_Add (openblas_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -759,10 +737,7 @@ set (icu_EXT_LIBRARIES       "${icuuc_EXT_STATIC_LIB}"
                              "${icui18n_EXT_STATIC_LIB}")
 exists_files (icu_EXT_EXISTS ${icu_EXT_LIBRARIES} ${icu_EXT_HEADER})
 
-if (icu_EXT_EXISTS)
-    message (STATUS "Skip external/icu/icuuc (Exists: ${icuuc_EXT_STATIC_LIB})")
-    message (STATUS "Skip external/icu/icui18n (Exists: ${icui18n_EXT_STATIC_LIB})")
-else ()
+if (NOT icu_EXT_EXISTS)
     message (STATUS "Add external/icu")
     ExternalProject_Add (icu_ext
             PREFIX "${EXT_PREFIX_DIR}"
@@ -784,4 +759,38 @@ else ()
     fake_output_library (icu_ext_output icu_ext ${icu_EXT_LIBRARIES})
 endif ()
 add_custom_target (icu DEPENDS ${icu_EXT_LIBRARIES})
+
+##############
+## demangle ##
+##############
+
+set (demangle_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/demangle")
+set (demangle_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
+set (demangle_EXT_HEADER      "${demangle_EXT_INCLUDE_DIR}/demangle.h")
+set (demangle_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}demangle${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (demangle_EXT_LIBRARIES   "${demangle_EXT_STATIC_LIB}")
+exists_files (demangle_EXT_EXISTS ${demangle_EXT_HEADER} ${demangle_EXT_LIBRARIES})
+
+if (NOT demangle_EXT_EXISTS)
+    message (STATUS "Add external/demangle")
+    ExternalProject_Add (demangle_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${demangle_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output ldemangleing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (demangle_ext_output demangle_ext ${demangle_EXT_LIBRARIES})
+endif ()
+add_custom_target (demangle DEPENDS ${demangle_EXT_LIBRARIES})
 

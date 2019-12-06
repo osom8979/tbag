@@ -128,7 +128,6 @@ foreach (__arch_cursor ${SIMDPP_RUNNABLE_ARCHS})
 endforeach ()
 
 ## Library subproject.
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/demangle)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/gtest)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/flatbuffers)
 add_subdirectory (${CMAKE_SOURCE_DIR}/dep/http-parser)
