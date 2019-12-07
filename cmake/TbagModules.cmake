@@ -943,6 +943,12 @@ macro (tbag_modules__apply_ext_lfds)
     tbag_modules__add_whole_archive (${lfds_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_minizip)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES minizip)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${minizip_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${minizip_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

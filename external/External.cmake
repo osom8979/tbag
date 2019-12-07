@@ -150,6 +150,43 @@ if (NOT zlib_EXT_EXISTS)
 endif ()
 add_custom_target (zlib DEPENDS ${zlib_EXT_LIBRARIES})
 
+#############
+## minizip ##
+#############
+
+set (minizip_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/minizip")
+set (minizip_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
+set (minizip_EXT_HEADER      "${minizip_EXT_INCLUDE_DIR}/zip.h")
+set (minizip_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}minizip${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (minizip_EXT_LIBRARIES   "${minizip_EXT_STATIC_LIB}")
+exists_files (minizip_EXT_EXISTS ${minizip_EXT_HEADER} ${minizip_EXT_LIBRARIES})
+
+if (NOT minizip_EXT_EXISTS)
+    message (STATUS "Add external/minizip")
+    ExternalProject_Add (minizip_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${minizip_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+                       "-DZLIB_INCLUDE_DIR=${zlib_EXT_INCLUDE_DIR}"
+                       "-DZLIB_STATIC_LIB=${zlib_EXT_STATIC_LIB}"
+            #--Output lminiziping-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1
+            DEPENDS zlib)
+fake_output_library (minizip_ext_output minizip_ext ${minizip_EXT_LIBRARIES})
+endif ()
+add_custom_target (minizip DEPENDS ${minizip_EXT_LIBRARIES})
+
 ##############
 ## LIBRESSL ##
 ##############
@@ -841,8 +878,8 @@ add_custom_target (flatbuffers DEPENDS ${flatbuffers_EXT_LIBRARIES})
 
 set (lfds_EXT_VERSION     711)
 set (lfds_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/lfds")
-set (lfds_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include/lfds")
-set (lfds_EXT_HEADER      "${lfds_EXT_INCLUDE_DIR}/liblfds${lfds_EXT_VERSION}.h")
+set (lfds_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include/liblfds${lfds_EXT_VERSION}")
+set (lfds_EXT_HEADER      "${EXT_INSTALL_DIR}/include/liblfds${lfds_EXT_VERSION}.h")
 set (lfds_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}lfds${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (lfds_EXT_LIBRARIES   "${lfds_EXT_STATIC_LIB}")
 exists_files (lfds_EXT_EXISTS ${lfds_EXT_HEADER} ${lfds_EXT_LIBRARIES})
