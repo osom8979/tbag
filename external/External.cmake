@@ -942,6 +942,40 @@ endif ()
 add_custom_target (http_parser DEPENDS ${http_parser_EXT_LIBRARIES})
 
 ###########
+## lemon ##
+###########
+
+set (lemon_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/lemon")
+set (lemon_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
+set (lemon_EXT_HEADER      "${lemon_EXT_INCLUDE_DIR}/lemon/config.h")
+set (lemon_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}lemon${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (lemon_EXT_LIBRARIES   "${lemon_EXT_STATIC_LIB}")
+exists_files (lemon_EXT_EXISTS ${lemon_EXT_HEADER} ${lemon_EXT_LIBRARIES})
+
+if (NOT lemon_EXT_EXISTS)
+    message (STATUS "Add external/lemon")
+    ExternalProject_Add (lemon_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${lemon_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output llemoning-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (lemon_ext_output lemon_ext ${lemon_EXT_LIBRARIES})
+endif ()
+add_custom_target (lemon DEPENDS ${lemon_EXT_LIBRARIES})
+
+###########
 ## gtest ##
 ###########
 

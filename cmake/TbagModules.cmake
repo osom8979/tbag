@@ -955,6 +955,28 @@ macro (tbag_modules__apply_ext_http_parser)
     tbag_modules__add_whole_archive (${http_parser_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_lemon)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lemon)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${lemon_EXT_INCLUDE_DIR})
+
+    tbag_modules__add_whole_archive (${lemon_EXT_STATIC_LIB})
+
+    if (HAVE_LONG_LONG)
+        list (APPEND TBAG_PROJECT_DEFINITIONS LEMON_HAVE_LONG_LONG=1)
+    endif ()
+
+    if (CMAKE_USE_PTHREADS_INIT)
+        list (APPEND TBAG_PROJECT_DEFINITIONS LEMON_USE_PTHREAD=1)
+    elseif (CMAKE_USE_WIN32_THREADS_INIT)
+        list (APPEND TBAG_PROJECT_DEFINITIONS LEMON_USE_WIN32_THREADS=1)
+    endif ()
+
+    ## external libraries.
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+endmacro ()
+
 macro (tbag_modules__apply_ext_gtest)
     list (APPEND TBAG_PROJECT_DEPENDENCIES gtest)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${gtest_EXT_INCLUDE_DIR})

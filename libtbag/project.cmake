@@ -48,10 +48,10 @@ tbag_modules__apply_ext_flatbuffers ()
 tbag_modules__apply_ext_lfds        ()
 tbag_modules__apply_ext_minizip     ()
 tbag_modules__apply_ext_http_parser ()
+tbag_modules__apply_ext_lemon       ()
 
 ## Dependencies.
 tbag_modules__apply_dep_stb         ()
-tbag_modules__apply_dep_lemon       ()
 tbag_modules__apply_dep_raylib      ()
 tbag_modules__apply_dep_imgui       ()
 tbag_modules__apply_dep_imnodes     ()

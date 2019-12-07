@@ -9,12 +9,6 @@ if (POLICY CMP0054)
     cmake_policy (SET CMP0054 NEW)
 endif ()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options (-w)
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options (-w)
-endif ()
-
 file (GLOB_RECURSE SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c")
 
 include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/src"
