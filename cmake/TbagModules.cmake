@@ -949,6 +949,12 @@ macro (tbag_modules__apply_ext_minizip)
     tbag_modules__add_whole_archive (${minizip_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_http_parser)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES http_parser)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${http_parser_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${http_parser_EXT_STATIC_LIB})
+endmacro ()
+
 macro (tbag_modules__apply_ext_gtest)
     list (APPEND TBAG_PROJECT_DEPENDENCIES gtest)
     list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${gtest_EXT_INCLUDE_DIR})

@@ -907,6 +907,40 @@ if (NOT lfds_EXT_EXISTS)
 endif ()
 add_custom_target (lfds DEPENDS ${lfds_EXT_LIBRARIES})
 
+#################
+## http-parser ##
+#################
+
+set (http_parser_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/http-parser")
+set (http_parser_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
+set (http_parser_EXT_HEADER      "${http_parser_EXT_INCLUDE_DIR}/http_parser.h")
+set (http_parser_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}http_parser${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (http_parser_EXT_LIBRARIES   "${http_parser_EXT_STATIC_LIB}")
+exists_files (http_parser_EXT_EXISTS ${http_parser_EXT_HEADER} ${http_parser_EXT_LIBRARIES})
+
+if (NOT http_parser_EXT_EXISTS)
+    message (STATUS "Add external/http_parser")
+    ExternalProject_Add (http_parser_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${http_parser_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output lhttp_parsering-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (http_parser_ext_output http_parser_ext ${http_parser_EXT_LIBRARIES})
+endif ()
+add_custom_target (http_parser DEPENDS ${http_parser_EXT_LIBRARIES})
+
 ###########
 ## gtest ##
 ###########

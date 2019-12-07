@@ -47,14 +47,14 @@ tbag_modules__apply_ext_demangle    ()
 tbag_modules__apply_ext_flatbuffers ()
 tbag_modules__apply_ext_lfds        ()
 tbag_modules__apply_ext_minizip     ()
+tbag_modules__apply_ext_http_parser ()
 
 ## Dependencies.
-tbag_modules__apply_dep_http_parser ()
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_lemon       ()
+tbag_modules__apply_dep_raylib      ()
 tbag_modules__apply_dep_imgui       ()
 tbag_modules__apply_dep_imnodes     ()
-tbag_modules__apply_dep_raylib      ()
 
 tbag_modules__check_opengl ()
 tbag_modules__apply_opengl ()
