@@ -907,3 +907,37 @@ if (NOT lfds_EXT_EXISTS)
 endif ()
 add_custom_target (lfds DEPENDS ${lfds_EXT_LIBRARIES})
 
+###########
+## gtest ##
+###########
+
+set (gtest_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/gtest")
+set (gtest_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
+set (gtest_EXT_HEADER      "${gtest_EXT_INCLUDE_DIR}/gtest/gtest.h")
+set (gtest_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}gtest${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (gtest_EXT_LIBRARIES   "${gtest_EXT_STATIC_LIB}")
+exists_files (gtest_EXT_EXISTS ${gtest_EXT_HEADER} ${gtest_EXT_LIBRARIES})
+
+if (NOT gtest_EXT_EXISTS)
+    message (STATUS "Add external/gtest")
+    ExternalProject_Add (gtest_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${gtest_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output lgtesting-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (gtest_ext_output gtest_ext ${gtest_EXT_LIBRARIES})
+endif ()
+add_custom_target (gtest DEPENDS ${gtest_EXT_LIBRARIES})
+

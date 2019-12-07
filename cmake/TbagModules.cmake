@@ -949,6 +949,22 @@ macro (tbag_modules__apply_ext_minizip)
     tbag_modules__add_whole_archive (${minizip_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_gtest)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES gtest)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${gtest_EXT_INCLUDE_DIR})
+
+    tbag_modules__add_whole_archive (${gtest_EXT_STATIC_LIB})
+
+    if (WIN32)
+        list (APPEND TBAG_PROJECT_DEFINITIONS GTEST_OS_WINDOWS)
+    endif ()
+
+    ## external libraries.
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        list (APPEND TBAG_PROJECT_LDFLAGS -lpthread)
+    endif ()
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------
