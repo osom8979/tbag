@@ -937,6 +937,12 @@ macro (tbag_modules__apply_ext_flatbuffers)
     tbag_modules__add_whole_archive (${flatbuffers_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__apply_ext_lfds)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES lfds)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${lfds_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${lfds_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

@@ -45,13 +45,13 @@ tbag_modules__apply_ext_openblas    ()
 tbag_modules__apply_ext_icu         ()
 tbag_modules__apply_ext_demangle    ()
 tbag_modules__apply_ext_flatbuffers ()
+tbag_modules__apply_ext_lfds        ()
 
 ## Dependencies.
 tbag_modules__apply_dep_http_parser ()
 tbag_modules__apply_dep_minizip     () ## And apply_dep_z
 tbag_modules__apply_dep_stb         ()
 tbag_modules__apply_dep_lemon       ()
-tbag_modules__apply_dep_lfds        ()
 tbag_modules__apply_dep_imgui       ()
 tbag_modules__apply_dep_imnodes     ()
 tbag_modules__apply_dep_raylib      ()

@@ -801,11 +801,16 @@ add_custom_target (demangle DEPENDS ${demangle_EXT_LIBRARIES})
 set (flatbuffers_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/flatbuffers")
 set (flatbuffers_EXT_BIN_DIR     "${EXT_INSTALL_DIR}/bin")
 set (flatbuffers_EXT_COMPILER    "${flatbuffers_EXT_BIN_DIR}/flatc")
+set (flatbuffers_EXT_HASH        "${flatbuffers_EXT_BIN_DIR}/flathash")
 set (flatbuffers_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include/flatbuffers")
 set (flatbuffers_EXT_HEADER      "${flatbuffers_EXT_INCLUDE_DIR}/flatbuffers.h")
 set (flatbuffers_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}flatbuffers${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (flatbuffers_EXT_LIBRARIES   "${flatbuffers_EXT_STATIC_LIB}")
-exists_files (flatbuffers_EXT_EXISTS ${flatbuffers_EXT_COMPILER} ${flatbuffers_EXT_HEADER} ${flatbuffers_EXT_LIBRARIES})
+exists_files (flatbuffers_EXT_EXISTS
+        ${flatbuffers_EXT_COMPILER}
+        ${flatbuffers_EXT_HASH}
+        ${flatbuffers_EXT_HEADER}
+        ${flatbuffers_EXT_LIBRARIES})
 
 if (NOT flatbuffers_EXT_EXISTS)
     message (STATUS "Add external/flatbuffers")
@@ -829,4 +834,39 @@ if (NOT flatbuffers_EXT_EXISTS)
     fake_output_library (flatbuffers_ext_output flatbuffers_ext ${flatbuffers_EXT_LIBRARIES})
 endif ()
 add_custom_target (flatbuffers DEPENDS ${flatbuffers_EXT_LIBRARIES})
+
+##########
+## lfds ##
+##########
+
+set (lfds_EXT_VERSION     711)
+set (lfds_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/lfds")
+set (lfds_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include/lfds")
+set (lfds_EXT_HEADER      "${lfds_EXT_INCLUDE_DIR}/liblfds${lfds_EXT_VERSION}.h")
+set (lfds_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}lfds${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set (lfds_EXT_LIBRARIES   "${lfds_EXT_STATIC_LIB}")
+exists_files (lfds_EXT_EXISTS ${lfds_EXT_HEADER} ${lfds_EXT_LIBRARIES})
+
+if (NOT lfds_EXT_EXISTS)
+    message (STATUS "Add external/lfds")
+    ExternalProject_Add (lfds_ext
+            PREFIX "${EXT_PREFIX_DIR}"
+            #--Configure step-------------
+            SOURCE_DIR "${lfds_EXT_SOURCE_DIR}"
+            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
+                       "-DBUILD_SHARED_LIBS=OFF"
+                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
+                       "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
+                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
+                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
+            #--Output llfdsing-------------
+            LOG_DOWNLOAD  1
+            LOG_UPDATE    1
+            LOG_CONFIGURE 1
+            LOG_BUILD     0
+            LOG_TEST      1
+            LOG_INSTALL   1)
+    fake_output_library (lfds_ext_output lfds_ext ${lfds_EXT_LIBRARIES})
+endif ()
+add_custom_target (lfds DEPENDS ${lfds_EXT_LIBRARIES})
 
