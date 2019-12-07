@@ -921,6 +921,22 @@ macro (tbag_modules__apply_ext_demangle)
     tbag_modules__add_whole_archive (${demangle_EXT_STATIC_LIB})
 endmacro ()
 
+macro (tbag_modules__build_ext_flatc_cpp __target __fbs)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES flatbuffers ${__target})
+
+    set (Flatc_SKIP_FOUND ON)
+    set (Flatc_GENERATE_DEPENDS flatbuffers)
+    set (Flatc_SEARCH_PATHS ${flatbuffers_EXT_BIN_DIR})
+    find_package (Flatc QUIET)
+    flatc_generate_target2 (${__target} ${flatbuffers_EXT_COMPILER} cpp ${__fbs})
+endmacro ()
+
+macro (tbag_modules__apply_ext_flatbuffers)
+    list (APPEND TBAG_PROJECT_DEPENDENCIES flatbuffers)
+    list (APPEND TBAG_PROJECT_INCLUDE_DIRS ${flatbuffers_EXT_INCLUDE_DIR})
+    tbag_modules__add_whole_archive (${flatbuffers_EXT_STATIC_LIB})
+endmacro ()
+
 ## ----------------
 ## Other libraries.
 ## ----------------

@@ -4,6 +4,7 @@
 #  Flatc_ROOT
 #  Flatc_SKIP_FOUND
 #  Flatc_INCLUDE_DIRS
+#  Flatc_SEARCH_PATHS
 #  Flatc_GENERATE_DEPENDS (in flatc_generate() function.)
 #
 # The following are set after configuration is done:
@@ -27,10 +28,11 @@ if (NOT Flatc_SKIP_FOUND)
             "$ENV{Flatc_ROOT}/bin"
             "$ENV{Flatc_ROOT}/cmake-build-debug"
             "$ENV{Flatc_ROOT}/cmake-build-release"
-            "$ENV{Flatc_ROOT}/build")
+            "$ENV{Flatc_ROOT}/build"
+            "${Flatc_SEARCH_PATHS}")
 
     find_program (Flatc_COMPILER
-            NAMES "flatc" "libtbag_flatc"
+            NAMES "flatc"
             PATHS ${Flatc_SEARCH_PATHS})
 
     set (LOOKED_FOR Flatc_COMPILER)

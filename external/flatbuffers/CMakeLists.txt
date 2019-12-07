@@ -35,7 +35,7 @@ set (FLATBUFFERS_SRCS
         "${CMAKE_CURRENT_SOURCE_DIR}/src/idl_gen_text.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/reflection.cpp"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/util.cpp")
-add_library (flatbuffers STATIC ${FLATBUFFERS_SRCS})
+add_library (flatbuffers ${FLATBUFFERS_SRCS})
 
 ## flathash
 set (FLATHASH_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/flathash.cpp")
@@ -69,10 +69,10 @@ set (FLATC_SRCS
 add_executable (flatc ${FLATC_SRCS})
 target_link_libraries (flatc PRIVATE flatbuffers)
 
-## Output result.
-set (OUTPUT_FLATC_PATH "${CMAKE_BINARY_DIR}/libtbag_flatc")
-add_custom_command (TARGET flatc
-                    POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:flatc> "${OUTPUT_FLATC_PATH}"
-                    COMMENT "POST_BUILD of flatc: copy target.")
+install (TARGETS flatbuffers flatc flathash
+         RUNTIME DESTINATION bin
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib)
+install (DIRECTORY "${CMAKE_SOURCE_DIR}/include/flatbuffers"
+         DESTINATION include)
 
