@@ -12,15 +12,8 @@ Tea-bag is Third party extension utility project.
 
 ## Dep target
 
-- flatbuffers 1.10.0 (Apache License, Version 2.0)
-- gtest 1.7.0 (BSD 3-clause license)
-- http-parser 2.8.1 (MIT license)
-- minizip 1.1 (zlib license)
 - simdpp 2.1 (Boost Software License, Version 1.0)
 - stb master-e6afb9c (Public Domain or MIT license)
-- demangle (google-glog) 0.3.4 (BSD 3-clause license)
-- lemon 1.3.1 (Boost Software License, Version 1.0)
-- lfds 7.1.1 (Public domain)
 - imgui 1.70 (MIT license)
 - imnodes master-68af72f (MIT license)
 - raylib 2.5-dev (zlib license)
@@ -49,6 +42,13 @@ Tea-bag is Third party extension utility project.
 - blend2d master-934d071 (zlib license)
 - OpenBLAS 0.3.7 (BSD 3-Clause license)
 - icu4c 57.1 (ICU license; http://source.icu-project.org/repos/icu/icu/trunk/LICENSE)
+- flatbuffers 1.10.0 (Apache License, Version 2.0)
+- gtest 1.7.0 (BSD 3-clause license)
+- http-parser 2.8.1 (MIT license)
+- minizip 1.1 (zlib license)
+- demangle (google-glog) 0.3.4 (BSD 3-clause license)
+- lemon 1.3.1 (Boost Software License, Version 1.0)
+- lfds 7.1.1 (Public domain)
 
 ## Inline libraries
 
