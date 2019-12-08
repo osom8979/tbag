@@ -11,6 +11,13 @@ endif ()
 
 add_definitions (-DLEMON_VERSION=1.3.1)
 
+# [issue] AppVeyor build error:
+# include/lemon/time_measure.h(29): fatal error C1083:
+# Cannot open include file: 'unistd.h': No such file or directory
+if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+    add_definitions (-DWIN32)
+endif ()
+
 include (CheckTypeSize)
 check_type_size ("long long" LONG_LONG)
 if (HAVE_LONG_LONG)
