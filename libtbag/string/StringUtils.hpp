@@ -42,6 +42,10 @@
 #define TBAG_NEW_LINE TBAG_UNIX_NEW_LINE
 #endif
 
+#define TBAG_EMPTY_STRING       ""
+#define TBAG_EMPTY_STRING_WIDE  L""
+#define TBAG_SPACE_STRING       " "
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -152,8 +156,8 @@ TBAG_API std::string mergeArgv(char ** argv);
  */
 TBAG_API std::string convertStringWithThreadId(std::thread::id const & id);
 
-TBAG_CONSTEXPR char const * const STRING_EMPTY = "";
-TBAG_CONSTEXPR char const * const STRING_SPACE = " ";
+TBAG_CONSTEXPR char const * const STRING_EMPTY = TBAG_EMPTY_STRING;
+TBAG_CONSTEXPR char const * const STRING_SPACE = TBAG_SPACE_STRING;
 TBAG_CONSTEXPR char const * const STRING_HEX_PREFIX = "0x";
 TBAG_CONSTEXPR int const DEFAULT_LINE_WIDTH = 2 * 8;
 
