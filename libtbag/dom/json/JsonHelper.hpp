@@ -65,6 +65,12 @@ struct TBAG_API JsonHelper
 
     static bool getInt(Json::Value const & v, int * out);
     static bool getInt(Json::Value const & v, std::string const & key, int * out);
+
+    template <typename T>
+    Json::Value toJsonArray(std::vector<T> const & val)
+    {
+        return libtbag::dom::json::toJsonArray<T>(val);
+    }
 };
 
 } // namespace json

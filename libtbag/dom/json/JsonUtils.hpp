@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/dom/json/jsoncpp/json.h>
 
+#include <vector>
 #include <string>
 
 // -------------------
@@ -59,6 +60,16 @@ TBAG_API bool getString(Json::Value const & v, std::string const & key, std::str
 
 TBAG_API bool getInt(Json::Value const & v, int * out);
 TBAG_API bool getInt(Json::Value const & v, std::string const & key, int * out);
+
+template <typename T>
+Json::Value toJsonArray(std::vector<T> const & val)
+{
+    Json::Value result(Json::arrayValue);
+    for (auto const & elem : val) {
+        result.append(elem);
+    }
+    return result;
+}
 
 } // namespace json
 } // namespace dom
