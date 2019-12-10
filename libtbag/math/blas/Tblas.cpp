@@ -10,15 +10,15 @@
 
 #include <openblas/cblas.h>
 
-#if defined(TBAG_PLATFORM_WINDOWS)
-# include <windows.h>
-BOOL APIENTRY openblas_DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
-#else
-# include <libtbag/dummy/Win32.hpp>
-using namespace ::libtbag::dummy::win32;
-BOOL openblas_DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
-{ return TRUE; }
-#endif
+//#if defined(TBAG_PLATFORM_WINDOWS)
+//# include <windows.h>
+//BOOL APIENTRY openblas_DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved);
+//#else
+//# include <libtbag/dummy/Win32.hpp>
+//using namespace ::libtbag::dummy::win32;
+//BOOL openblas_DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+//{ return TRUE; }
+//#endif
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -29,7 +29,8 @@ namespace blas {
 
 int openblas_dll_main(void * module, unsigned long reason, void * reserved)
 {
-    return openblas_DllMain((HMODULE)module, (DWORD)reason, (LPVOID)reserved);
+    //return openblas_DllMain((HMODULE)module, (DWORD)reason, (LPVOID)reserved);
+    return 0;
 }
 
 void openblas_set_num_threads(int num_threads)
