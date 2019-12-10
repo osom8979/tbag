@@ -42,37 +42,37 @@ struct ErrPair
     Err code;
     ValueType value;
 
-    TBAG_CONSTEXPR static bool const nothrow_def = std::is_nothrow_default_constructible<ValueType>::value;
-    TBAG_CONSTEXPR static bool const nothrow_copy = std::is_nothrow_copy_constructible<ValueType>::value;
-    TBAG_CONSTEXPR static bool const nothrow_move = std::is_nothrow_move_constructible<ValueType>::value;
-    TBAG_CONSTEXPR static bool const nothrow_copy_assign = std::is_nothrow_copy_assignable<ValueType>::value;
-    TBAG_CONSTEXPR static bool const nothrow_move_assign = std::is_nothrow_move_assignable<ValueType>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_def = std::is_nothrow_default_constructible<ValueType>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_copy = std::is_nothrow_copy_constructible<ValueType>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_move = std::is_nothrow_move_constructible<ValueType>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_copy_assign = std::is_nothrow_copy_assignable<ValueType>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_move_assign = std::is_nothrow_move_assignable<ValueType>::value;
 
-    ErrPair() TBAG_NOEXCEPT_SPECIFIER(nothrow_def)
+    ErrPair() TBAG_NOEXCEPT_SPECIFIER(_nothrow_def)
             : code(E_UNKNOWN), value()
     { /* EMPTY. */ }
-    ErrPair(Err c) TBAG_NOEXCEPT_SPECIFIER(nothrow_def)
+    ErrPair(Err c) TBAG_NOEXCEPT_SPECIFIER(_nothrow_def)
             : code(c), value()
     { /* EMPTY. */ }
 
-    ErrPair(ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(nothrow_copy)
+    ErrPair(ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy)
             : code(E_UNKNOWN), value(v)
     { /* EMPTY. */ }
-    ErrPair(Err c, ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(nothrow_copy)
+    ErrPair(Err c, ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy)
             : code(c), value(v)
     { /* EMPTY. */ }
 
-    ErrPair(ValueType && v) TBAG_NOEXCEPT_SPECIFIER(nothrow_move)
+    ErrPair(ValueType && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move)
             : code(E_UNKNOWN), value(std::move(v))
     { /* EMPTY. */ }
-    ErrPair(Err c, ValueType && v) TBAG_NOEXCEPT_SPECIFIER(nothrow_move)
+    ErrPair(Err c, ValueType && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move)
             : code(c), value(std::move(v))
     { /* EMPTY. */ }
 
-    ErrPair(ErrPair const & obj) TBAG_NOEXCEPT_SPECIFIER(nothrow_copy)
+    ErrPair(ErrPair const & obj) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy)
             : code(obj.code), value(obj.value)
     { /* EMPTY. */ }
-    ErrPair(ErrPair && obj) TBAG_NOEXCEPT_SPECIFIER(nothrow_move)
+    ErrPair(ErrPair && obj) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move)
             : code(obj.code), value(std::move(obj.value))
     { /* EMPTY. */ }
 
@@ -85,19 +85,19 @@ struct ErrPair
         return *this;
     }
 
-    ErrPair & operator =(ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(nothrow_copy_assign)
+    ErrPair & operator =(ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy_assign)
     {
         value = v;
         return *this;
     }
 
-    ErrPair & operator =(ValueType && v) TBAG_NOEXCEPT_SPECIFIER(nothrow_move_assign)
+    ErrPair & operator =(ValueType && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move_assign)
     {
         value = std::move(v);
         return *this;
     }
 
-    ErrPair & operator =(ErrPair const & obj) TBAG_NOEXCEPT_SPECIFIER(nothrow_copy_assign)
+    ErrPair & operator =(ErrPair const & obj) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy_assign)
     {
         if (this != &obj) {
             code = obj.code;
@@ -106,7 +106,7 @@ struct ErrPair
         return *this;
     }
 
-    ErrPair & operator =(ErrPair && obj) TBAG_NOEXCEPT_SPECIFIER(nothrow_move_assign)
+    ErrPair & operator =(ErrPair && obj) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move_assign)
     {
         if (this != &obj) {
             code = obj.code;
@@ -120,6 +120,11 @@ struct ErrPair
         return code == c;
     }
 
+    inline bool operator !=(Err c) const TBAG_NOEXCEPT
+    {
+        return code != c;
+    }
+
     char const * name() const TBAG_NOEXCEPT
     {
         return libtbag::getErrName(code);
@@ -130,6 +135,16 @@ struct ErrPair
         return libtbag::getErrDetail(code);
     }
 
+    inline bool isSuccess() const TBAG_NOEXCEPT
+    {
+        return ::isSuccess(code);
+    }
+
+    inline bool isFailure() const TBAG_NOEXCEPT
+    {
+        return ::isFailure(code);
+    }
+
     inline operator Err() const TBAG_NOEXCEPT
     {
         return code;
@@ -137,7 +152,7 @@ struct ErrPair
 
     inline operator bool() const TBAG_NOEXCEPT
     {
-        return isSuccess(code);
+        return this->isSuccess();
     }
 
     inline int toInt() const TBAG_NOEXCEPT
@@ -169,11 +184,11 @@ struct ErrMsgPair : public ErrPair<T>
     using BaseErrPair = ErrPair<T>;
     using ValueType = typename BaseErrPair::ValueType;
 
-    TBAG_CONSTEXPR static bool const base_nothrow_move = std::is_nothrow_move_constructible<BaseErrPair>::value;
-    TBAG_CONSTEXPR static bool const base_nothrow_move_assign = std::is_nothrow_move_assignable<BaseErrPair>::value;
+    TBAG_CONSTEXPR static bool const _base_nothrow_move = std::is_nothrow_move_constructible<BaseErrPair>::value;
+    TBAG_CONSTEXPR static bool const _base_nothrow_move_assign = std::is_nothrow_move_assignable<BaseErrPair>::value;
 
-    TBAG_CONSTEXPR static bool const str_nothrow_move = std::is_nothrow_move_constructible<std::string>::value;
-    TBAG_CONSTEXPR static bool const str_nothrow_move_assign = std::is_nothrow_move_assignable<std::string>::value;
+    TBAG_CONSTEXPR static bool const _str_nothrow_move = std::is_nothrow_move_constructible<std::string>::value;
+    TBAG_CONSTEXPR static bool const _str_nothrow_move_assign = std::is_nothrow_move_assignable<std::string>::value;
 
     std::string msg;
 
@@ -194,7 +209,7 @@ struct ErrMsgPair : public ErrPair<T>
 
     ErrMsgPair(ErrMsgPair const & obj) : ErrPair<T>(obj), msg(obj.msg)
     { /* EMPTY. */ }
-    ErrMsgPair(ErrMsgPair && obj) TBAG_NOEXCEPT_SPECIFIER(base_nothrow_move && str_nothrow_move)
+    ErrMsgPair(ErrMsgPair && obj) TBAG_NOEXCEPT_SPECIFIER(_base_nothrow_move && _str_nothrow_move)
             : ErrPair<T>(std::move(obj)), msg(std::move(obj.msg))
     { /* EMPTY. */ }
 
@@ -210,7 +225,8 @@ struct ErrMsgPair : public ErrPair<T>
         return *this;
     }
 
-    ErrMsgPair & operator =(ErrMsgPair && obj) TBAG_NOEXCEPT_SPECIFIER(base_nothrow_move_assign && str_nothrow_move_assign)
+    ErrMsgPair & operator =(ErrMsgPair && obj) TBAG_NOEXCEPT_SPECIFIER(
+            _base_nothrow_move_assign && _str_nothrow_move_assign)
     {
         if (this != &obj) {
             ErrPair<T>::operator =(std::move(obj));
