@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/Err.hpp>
+#include <libtbag/ErrPair.hpp>
 
 #include <limits>
 
@@ -20,5 +21,11 @@ TEST(ErrTest, Default)
     ASSERT_NE(nullptr, getErrDetail(code));
 
     std::cout << "Error code: " << code << std::endl;
+}
+
+TEST(ErrTest, ErrMsg)
+{
+    ErrMsg err;
+    ASSERT_EQ(nullptr, err.value);
 }
 

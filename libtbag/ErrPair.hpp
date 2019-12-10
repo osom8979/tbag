@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/Type.hpp>
 
 #include <type_traits>
 #include <string>
@@ -196,15 +197,21 @@ struct ErrMsgPair : public ErrPair<T>
     { /* EMPTY. */ }
     ErrMsgPair(Err c) : ErrPair<T>(c)
     { /* EMPTY. */ }
+    ErrMsgPair(std::string const & m, Err c) : ErrPair<T>(c), msg(m)
+    { /* EMPTY. */ }
 
     ErrMsgPair(ValueType const & v) : ErrPair<T>(v)
     { /* EMPTY. */ }
     ErrMsgPair(Err c, ValueType const & v) : ErrPair<T>(c, v)
     { /* EMPTY. */ }
+    ErrMsgPair(std::string const & m, Err c, ValueType const & v) : ErrPair<T>(c, v), msg(m)
+    { /* EMPTY. */ }
 
     ErrMsgPair(ValueType && v) : ErrPair<T>(std::move(v))
     { /* EMPTY. */ }
     ErrMsgPair(Err c, ValueType && v) : ErrPair<T>(c, std::move(v))
+    { /* EMPTY. */ }
+    ErrMsgPair(std::string && m, Err c, ValueType && v) : ErrPair<T>(c, std::move(v)), msg(std::move(m))
     { /* EMPTY. */ }
 
     ErrMsgPair(ErrMsgPair const & obj) : ErrPair<T>(obj), msg(obj.msg)
@@ -235,6 +242,9 @@ struct ErrMsgPair : public ErrPair<T>
         return *this;
     }
 };
+
+using ErrMsg = ErrMsgPair<std::nullptr_t>;
+STATIC_ASSERT_CHECK_IS_SAME(typename ErrMsg::ValueType, std::nullptr_t);
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
