@@ -72,7 +72,7 @@ build_script:
   - cmd: cd "%TBAG_BUILD%"
   - cmd: cmake --build . --target external -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
   - cmd: cmake --build . --target tbag     -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
-  - cmd: cmake --build . --target texter   -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+  - cmd: cmake --build . --target tester   -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 #---------------------------------#
 #       tests configuration       #
