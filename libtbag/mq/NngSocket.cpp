@@ -555,6 +555,24 @@ std::string NngSocket::getPrintableInformationText() const
     return ss.str();
 }
 
+void NngSocket::dumpState()
+{
+    nng_stat * stats;
+    nng_stats_get(&stats);
+    nng_stats_dump(stats);
+    nng_stats_free(stats);
+}
+
+std::vector<NngSocket::State> NngSocket::getState()
+{
+    std::vector<State> result;
+    nng_stat * stats;
+    nng_stats_get(&stats);
+    // TODO
+    nng_stats_free(stats);
+    return result;
+}
+
 } // namespace mq
 
 // --------------------

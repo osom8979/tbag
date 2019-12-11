@@ -282,6 +282,16 @@ public:
 
 public:
     std::string getPrintableInformationText() const;
+
+public:
+    struct State
+    {
+        std::string name;
+        std::string desc;
+    };
+
+    static std::vector<State> getState();
+    static void dumpState();
 };
 
 } // namespace mq
