@@ -23,19 +23,10 @@
     assert(false && "Inaccessible block") // NOLINT
 #endif
 
-// -------------------
-NAMESPACE_LIBTBAG_OPEN
-// -------------------
-
-namespace debug {
-
-// EMPTY.
-
-} // namespace debug
-
-// --------------------
-NAMESPACE_LIBTBAG_CLOSE
-// --------------------
+#ifndef UPDATE_DOCUMENT_ASSERT
+#define UPDATE_DOCUMENT_ASSERT(x) \
+    assert(x && "If an error occurs, you must also change the document.") // NOLINT
+#endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_DEBUG_ASSERT_HPP__
 
