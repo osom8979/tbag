@@ -19,6 +19,7 @@
 #include <libtbag/mq/NngBypass.hpp>
 
 #include <string>
+#include <vector>
 #include <memory>
 
 // -------------------

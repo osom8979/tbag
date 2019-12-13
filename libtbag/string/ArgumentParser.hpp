@@ -75,7 +75,7 @@ public:
         std::string getOptional(std::string const & key, std::size_t index = 0, Err * code = nullptr) const
         {
             auto const range = optional.equal_range(key);
-            auto const size = std::distance(range.first, range.second);
+            auto const size = static_cast<std::size_t>(std::distance(range.first, range.second));
             if (index >= size) {
                 if (code) {
                     *code = E_INDEX;

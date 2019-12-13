@@ -251,42 +251,33 @@ NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
 #include <libtbag/macro/debug_stamp.hpp>
-#include <libtbag/preprocessor/details/Cat.hpp>
+#include <libtbag/preprocessor/facilities/Overload.hpp>
+#include <libtbag/preprocessor/facilities/Empty.hpp>
 #include <libtbag/preprocessor/variadic/VariadicSize.hpp>
 
-#ifndef TBAG_MAKE_ERR_MSG3
-# define TBAG_MAKE_ERR_MSG3_DBG(m, c, v) { std::string(TBAG_DEBUG_STAMP_SPACE) + m, c, v }
-# define TBAG_MAKE_ERR_MSG3_REL(m, c, v) { m, c, v }
-# if defined(NDEBUG)
-#  define TBAG_MAKE_ERR_MSG3(m, c, v) TBAG_MAKE_ERR_MSG3_REL(m, c, v)
-# else
-#  define TBAG_MAKE_ERR_MSG3(m, c, v) TBAG_MAKE_ERR_MSG3_DBG(m, c, v)
-# endif
+#define TBAG_MAKE_ERR_MSG3_DBG(m, c, v) { std::string(TBAG_DEBUG_STAMP_SPACE) + m, c, v }
+#define TBAG_MAKE_ERR_MSG3_REL(m, c, v) { m, c, v }
+#define TBAG_MAKE_ERR_MSG2_DBG(m, c) { std::string(TBAG_DEBUG_STAMP_SPACE) + m, c }
+#define TBAG_MAKE_ERR_MSG2_REL(m, c) { m, c }
+#define TBAG_MAKE_ERR_MSG1_DBG(c) { TBAG_DEBUG_STAMP, c }
+#define TBAG_MAKE_ERR_MSG1_REL(c) { c }
+
+#if defined(NDEBUG)
+# define TBAG_MAKE_ERR_MSG3(m, c, v) TBAG_MAKE_ERR_MSG3_REL(m, c, v)
+# define TBAG_MAKE_ERR_MSG2(m, c) TBAG_MAKE_ERR_MSG2_REL(m, c)
+# define TBAG_MAKE_ERR_MSG1(c) TBAG_MAKE_ERR_MSG1_REL(c)
+#else
+# define TBAG_MAKE_ERR_MSG3(m, c, v) TBAG_MAKE_ERR_MSG3_DBG(m, c, v)
+# define TBAG_MAKE_ERR_MSG2(m, c) TBAG_MAKE_ERR_MSG2_DBG(m, c)
+# define TBAG_MAKE_ERR_MSG1(c) TBAG_MAKE_ERR_MSG1_DBG(c)
 #endif
 
-#ifndef TBAG_MAKE_ERR_MSG2
-# define TBAG_MAKE_ERR_MSG2_DBG(m, c) { std::string(TBAG_DEBUG_STAMP_SPACE) + m, c }
-# define TBAG_MAKE_ERR_MSG2_REL(m, c) { m, c }
-# if defined(NDEBUG)
-#  define TBAG_MAKE_ERR_MSG2(m, c) TBAG_MAKE_ERR_MSG2_REL(m, c)
-# else
-#  define TBAG_MAKE_ERR_MSG2(m, c) TBAG_MAKE_ERR_MSG2_DBG(m, c)
-# endif
-#endif
-
-#ifndef TBAG_MAKE_ERR_MSG1
-# define TBAG_MAKE_ERR_MSG1_DBG(c) { TBAG_DEBUG_STAMP, c }
-# define TBAG_MAKE_ERR_MSG1_REL(c) { c }
-# if defined(NDEBUG)
-#  define TBAG_MAKE_ERR_MSG1(c) TBAG_MAKE_ERR_MSG1_REL(c)
-# else
-#  define TBAG_MAKE_ERR_MSG1(c) TBAG_MAKE_ERR_MSG1_DBG(c)
-# endif
-#endif
-
-#ifndef TBAG_MAKE_ERR_MSG
-#define TBAG_MAKE_ERR_MSG(...) \
-    TBAG_PP_CAT(TBAG_MAKE_ERR_MSG, TBAG_PP_VARIADIC_SIZE(__VA_ARGS__))(__VA_ARGS__)
+#if defined(TBAG_COMP_MSVC)
+# define TBAG_MAKE_ERR_MSG(...) TBAG_MAKE_ERR_MSG_I(TBAG_PP_OVERLOAD(TBAG_MAKE_ERR_MSG, __VA_ARGS__), (__VA_ARGS__))
+# define TBAG_MAKE_ERR_MSG_I(m, args) TBAG_MAKE_ERR_MSG_II(m, args)
+# define TBAG_MAKE_ERR_MSG_II(m, args) TBAG_PP_CAT(m ## args, TBAG_PP_EMPTY())
+#else
+# define TBAG_MAKE_ERR_MSG(...) TBAG_PP_OVERLOAD(TBAG_MAKE_ERR_MSG, __VA_ARGS__)(__VA_ARGS__)
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_ERRPAIR_HPP__
