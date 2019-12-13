@@ -175,7 +175,7 @@ if (NOT minizip_EXT_EXISTS)
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
                        "-DZLIB_INCLUDE_DIR=${zlib_EXT_INCLUDE_DIR}"
                        "-DZLIB_STATIC_LIB=${zlib_EXT_STATIC_LIB}"
-            #--Output lminiziping-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -257,7 +257,7 @@ if (NOT freetype_EXT_EXISTS)
                        "-DFT_WITH_PNG=OFF"
                        "-DFT_WITH_ZLIB=OFF"
                        "-DFT_WITH_BZIP2=OFF"
-            #--Output lfreetypeing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -298,7 +298,7 @@ if (NOT luajit_EXT_EXISTS)
                        "-DLUA_INIT=LUA_INIT"
                        "-DLUA_USE_RELATIVE_LOADLIB=OFF"
                        "-DLUA_DIR="
-            #--Output lluajiting-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -332,7 +332,7 @@ if (NOT bzip2_EXT_EXISTS)
                        "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output lbzip2ing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -367,7 +367,7 @@ if (NOT lzma_EXT_EXISTS)
                        "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output llzmaing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -434,7 +434,7 @@ if (NOT archive_EXT_EXISTS)
                        "-DOPENSSL_VERSION=${ressl_EXT_VERSION_STR}"
                        "-DHAVE_LIBCRYPTO=1"
                        "-DHAVE_PKCS5_PBKDF2_HMAC_SHA1=1"
-            #--Output larchiveing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -474,7 +474,7 @@ if (NOT nng_EXT_EXISTS)
                        "-DNNG_ENABLE_STATS=ON"
                        "-DNNG_ENABLE_NNGCAT=OFF"
                        "-DNNG_ENABLE_COVERAGE=OFF"
-            #--Output lnnging-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -512,7 +512,7 @@ if (NOT glfw_EXT_EXISTS)
                        "-DGLFW_BUILD_DOCS=OFF"
                        "-DGLFW_INSTALL=ON"
                        "-DGLFW_VULKAN_STATIC=OFF"
-            #--Output lglfwing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -545,7 +545,7 @@ if (NOT sqlite3_EXT_EXISTS)
                        "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output lsqlite3ing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -584,7 +584,7 @@ if (NOT date_EXT_EXISTS)
                        "-DENABLE_DATE_TESTING=OFF"
                        "-DDISABLE_STRING_VIEW=OFF"
                        "-DCMAKE_CXX_STANDARD=14"
-            #--Output ldateing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -617,7 +617,7 @@ if (NOT lmdb_EXT_EXISTS)
                        "-DCMAKE_C_FLAGS=${EXT_C_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output llmdbing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -670,7 +670,7 @@ if (NOT civetweb_EXT_EXISTS)
                        "-DCIVETWEB_ALLOW_WARNINGS=ON"
                        "-DCIVETWEB_ENABLE_SSL_DYNAMIC_LOADING=OFF"
                        "-DCIVETWEB_ENABLE_SSL=ON"
-            #--Output lcivetwebing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -710,7 +710,7 @@ if (NOT blend2d_EXT_EXISTS)
                        "-DBLEND2D_DIR=${blend2d_EXT_SOURCE_DIR}"
                        "-DBLEND2D_TEST=OFF"
                        "-DBLEND2D_STATIC=ON"
-            #--Output lblend2ding-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -749,7 +749,7 @@ if (NOT openblas_EXT_EXISTS)
                        "-DDYNAMIC_ARCH=OFF"
                        "-DDYNAMIC_OLDER=OFF"
                        "-DBUILD_RELAPACK=OFF"
-            #--Output lopenblasing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -786,7 +786,7 @@ if (NOT icu_EXT_EXISTS)
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output licuing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -820,7 +820,7 @@ if (NOT demangle_EXT_EXISTS)
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output ldemangleing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -839,8 +839,8 @@ set (flatbuffers_EXT_SOURCE_DIR  "${CMAKE_SOURCE_DIR}/external/flatbuffers")
 set (flatbuffers_EXT_BIN_DIR     "${EXT_INSTALL_DIR}/bin")
 set (flatbuffers_EXT_COMPILER    "${flatbuffers_EXT_BIN_DIR}/flatc${CMAKE_EXECUTABLE_SUFFIX}")
 set (flatbuffers_EXT_HASH        "${flatbuffers_EXT_BIN_DIR}/flathash${CMAKE_EXECUTABLE_SUFFIX}")
-set (flatbuffers_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include/flatbuffers")
-set (flatbuffers_EXT_HEADER      "${flatbuffers_EXT_INCLUDE_DIR}/flatbuffers.h")
+set (flatbuffers_EXT_INCLUDE_DIR "${EXT_INSTALL_DIR}/include")
+set (flatbuffers_EXT_HEADER      "${flatbuffers_EXT_INCLUDE_DIR}/flatbuffers/flatbuffers.h")
 set (flatbuffers_EXT_STATIC_LIB  "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}flatbuffers${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set (flatbuffers_EXT_LIBRARIES   "${flatbuffers_EXT_STATIC_LIB}")
 exists_files (flatbuffers_EXT_EXISTS
@@ -861,7 +861,7 @@ if (NOT flatbuffers_EXT_EXISTS)
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output lflatbuffersing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -896,7 +896,7 @@ if (NOT lfds_EXT_EXISTS)
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output llfdsing-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -930,7 +930,7 @@ if (NOT http_parser_EXT_EXISTS)
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output lhttp_parsering-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -964,7 +964,7 @@ if (NOT lemon_EXT_EXISTS)
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output llemoning-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
@@ -998,7 +998,7 @@ if (NOT gtest_EXT_EXISTS)
                        "-DCMAKE_CXX_FLAGS=${EXT_CXX_FLAGS}"
                        "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
                        "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-            #--Output lgtesting-------------
+            #--Output logging-------------
             LOG_DOWNLOAD  1
             LOG_UPDATE    1
             LOG_CONFIGURE 1
