@@ -80,29 +80,29 @@ TEST(box_common_test, opaque)
     ui32 get_value7 = 0;
     ui64 get_value8 = 0;
 
-    box_opaque_set(&box, set_value1);
-    box_opaque_get(&box, &get_value1);
+    box.set_opaque(set_value1);
+    box.get_opaque(&set_value1);
 
-    box_opaque_set(&box, set_value2);
-    box_opaque_get(&box, &get_value2);
+    box.set_opaque(set_value2);
+    box.get_opaque(&set_value2);
 
-    box_opaque_set(&box, set_value3);
-    box_opaque_get(&box, &get_value3);
+    box.set_opaque(set_value3);
+    box.get_opaque(&set_value3);
 
-    box_opaque_set(&box, set_value4);
-    box_opaque_get(&box, &get_value4);
+    box.set_opaque(set_value4);
+    box.get_opaque(&set_value4);
 
-    box_opaque_set(&box, set_value5);
-    box_opaque_get(&box, &get_value5);
+    box.set_opaque(set_value5);
+    box.get_opaque(&set_value5);
 
-    box_opaque_set(&box, set_value6);
-    box_opaque_get(&box, &get_value6);
+    box.set_opaque(set_value6);
+    box.get_opaque(&set_value6);
 
-    box_opaque_set(&box, set_value7);
-    box_opaque_get(&box, &get_value7);
+    box.set_opaque(set_value7);
+    box.get_opaque(&set_value7);
 
-    box_opaque_set(&box, set_value8);
-    box_opaque_get(&box, &get_value8);
+    box.set_opaque(set_value8);
+    box.get_opaque(&set_value8);
 
     ASSERT_EQ(set_value1, set_value1);
     ASSERT_EQ(set_value2, set_value2);

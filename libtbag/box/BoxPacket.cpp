@@ -352,7 +352,7 @@ public:
         auto const device = packet->device();
         auto const * dims = packet->dims();
 
-        ui64 ext[BOX_EXTENSION_SIZE];
+        ui64 ext[TBAG_BOX_EXT_SIZE];
         ext[0] = packet->ext0();
         ext[1] = packet->ext1();
         ext[2] = packet->ext2();

@@ -465,17 +465,17 @@ public:
 
 public:
     inline void * opaque() const TBAG_NOEXCEPT
-    { return _data->opaque; }
+    { return _data->get_opaque_pointer(); }
 
     inline void setOpaque(void * v) const TBAG_NOEXCEPT
-    { _data->opaque = v; }
+    { _data->set_opaque(v); }
 
     template <typename T>
     void setOpaque(T v) TBAG_NOEXCEPT
     {
         assert(exists());
         assert(is_btype_equals<T>(type()));
-        libtbag::box::details::box_opaque_set(get(), v);
+        get()->set_opaque(v);
     }
 
     template <typename T>
@@ -483,7 +483,7 @@ public:
     {
         assert(exists());
         assert(is_btype_equals<T>(type()));
-        libtbag::box::details::box_opaque_get(get(), v);
+        get()->get_opaque(v);
     }
 
 public:

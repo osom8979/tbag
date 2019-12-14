@@ -38,17 +38,17 @@ STATIC_ASSERT_CHECK_SIZEOF(ui64 , 8);
 STATIC_ASSERT_CHECK_SIZEOF(fp32 , 4);
 STATIC_ASSERT_CHECK_SIZEOF(fp64 , 8);
 
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_NONE   , BT_NONE   );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT8   , BT_INT8   );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT16  , BT_INT16  );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT32  , BT_INT32  );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_INT64  , BT_INT64  );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT8  , BT_UINT8  );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT16 , BT_UINT16 );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT32 , BT_UINT32 );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_UINT64 , BT_UINT64 );
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_FLOAT32, BT_FLOAT32);
-STATIC_ASSERT_CHECK_IS_EQUALS(_BOX_TYPE_FLOAT64, BT_FLOAT64);
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_NONE   , BT_NONE   );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_INT8   , BT_INT8   );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_INT16  , BT_INT16  );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_INT32  , BT_INT32  );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_INT64  , BT_INT64  );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_UINT8  , BT_UINT8  );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_UINT16 , BT_UINT16 );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_UINT32 , BT_UINT32 );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_UINT64 , BT_UINT64 );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_FLOAT32, BT_FLOAT32);
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_FLOAT64, BT_FLOAT64);
 
 bool box_support_type(btype type) TBAG_NOEXCEPT
 {
@@ -83,7 +83,7 @@ bool box_support_device(bdev dev) TBAG_NOEXCEPT
     // clang-format on
 }
 
-char const * const box_get_type_name(btype type) TBAG_NOEXCEPT
+char const * box_get_type_name(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
@@ -103,7 +103,7 @@ char const * const box_get_type_name(btype type) TBAG_NOEXCEPT
     // clang-format on
 }
 
-char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT
+char const * box_get_device_name(bdev dev) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (dev) {
@@ -136,43 +136,76 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
     // clang-format on
 }
 
-void box_clear(box_data * box) TBAG_NOEXCEPT
+// -----------------------
+// box_data implementation
+// -----------------------
+
+box_data::box_data()
 {
-    assert(box != nullptr);
-    box->type = BT_NONE;
-    box->device = BD_NONE;
-    box->ext[0] = 0;
-    box->ext[1] = 0;
-    box->ext[2] = 0;
-    box->ext[3] = 0;
-    box->data = nullptr;
-    box->total_data_byte = 0;
-    box->size = 0;
-    box->dims = nullptr;
-    box->total_dims_byte = 0;
-    box->rank = 0;
-    box->info = nullptr;
-    box->total_info_byte = 0;
-    box->info_size = 0;
+    clear();
+    set_opaque(nullptr);
+}
+
+box_data::~box_data()
+{
+    // EMPTY.
+}
+
+void box_data::clear() TBAG_NOEXCEPT
+{
+    type = BT_NONE;
+    device = BD_NONE;
+    ext[0] = 0;
+    ext[1] = 0;
+    ext[2] = 0;
+    ext[3] = 0;
+    data = nullptr;
+    total_data_byte = 0;
+    size = 0;
+    dims = nullptr;
+    total_dims_byte = 0;
+    rank = 0;
+    info = nullptr;
+    total_info_byte = 0;
+    info_size = 0;
 }
 
 // clang-format off
-void box_opaque_set(box_data * box, si8  v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_set(box_data * box, si16 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_set(box_data * box, si32 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_set(box_data * box, si64 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_set(box_data * box, ui8  v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_set(box_data * box, ui16 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_set(box_data * box, ui32 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_set(box_data * box, ui64 v) TBAG_NOEXCEPT { box->opaque = (void*)(std::intptr_t)v; }
-void box_opaque_get(box_data const * box, si8  * v) TBAG_NOEXCEPT { *v = (si8 )(std::intptr_t)box->opaque; }
-void box_opaque_get(box_data const * box, si16 * v) TBAG_NOEXCEPT { *v = (si16)(std::intptr_t)box->opaque; }
-void box_opaque_get(box_data const * box, si32 * v) TBAG_NOEXCEPT { *v = (si32)(std::intptr_t)box->opaque; }
-void box_opaque_get(box_data const * box, si64 * v) TBAG_NOEXCEPT { *v = (si64)(std::intptr_t)box->opaque; }
-void box_opaque_get(box_data const * box, ui8  * v) TBAG_NOEXCEPT { *v = (ui8 )(std::intptr_t)box->opaque; }
-void box_opaque_get(box_data const * box, ui16 * v) TBAG_NOEXCEPT { *v = (ui16)(std::intptr_t)box->opaque; }
-void box_opaque_get(box_data const * box, ui32 * v) TBAG_NOEXCEPT { *v = (ui32)(std::intptr_t)box->opaque; }
-void box_opaque_get(box_data const * box, ui64 * v) TBAG_NOEXCEPT { *v = (ui64)(std::intptr_t)box->opaque; }
+void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer   = v; }
+void box_data::set_opaque(si8    v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
+void box_data::set_opaque(si16   v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
+void box_data::set_opaque(si32   v) TBAG_NOEXCEPT { opaque.data_si32 = v; }
+void box_data::set_opaque(si64   v) TBAG_NOEXCEPT { opaque.data_si64 = v; }
+void box_data::set_opaque(ui8    v) TBAG_NOEXCEPT { opaque.data_ui8  = v; }
+void box_data::set_opaque(ui16   v) TBAG_NOEXCEPT { opaque.data_ui16 = v; }
+void box_data::set_opaque(ui32   v) TBAG_NOEXCEPT { opaque.data_ui32 = v; }
+void box_data::set_opaque(ui64   v) TBAG_NOEXCEPT { opaque.data_ui64 = v; }
+void box_data::set_opaque(fp32   v) TBAG_NOEXCEPT { opaque.data_fp32 = v; }
+void box_data::set_opaque(fp64   v) TBAG_NOEXCEPT { opaque.data_fp64 = v; }
+
+void box_data::get_opaque(void ** v) const TBAG_NOEXCEPT { *v = opaque.pointer  ; }
+void box_data::get_opaque(si8   * v) const TBAG_NOEXCEPT { *v = opaque.data_si8 ; }
+void box_data::get_opaque(si16  * v) const TBAG_NOEXCEPT { *v = opaque.data_si16; }
+void box_data::get_opaque(si32  * v) const TBAG_NOEXCEPT { *v = opaque.data_si32; }
+void box_data::get_opaque(si64  * v) const TBAG_NOEXCEPT { *v = opaque.data_si64; }
+void box_data::get_opaque(ui8   * v) const TBAG_NOEXCEPT { *v = opaque.data_ui8 ; }
+void box_data::get_opaque(ui16  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui16; }
+void box_data::get_opaque(ui32  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui32; }
+void box_data::get_opaque(ui64  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui64; }
+void box_data::get_opaque(fp32  * v) const TBAG_NOEXCEPT { *v = opaque.data_fp32; }
+void box_data::get_opaque(fp64  * v) const TBAG_NOEXCEPT { *v = opaque.data_fp64; }
+
+void * box_data::get_opaque_pointer() const TBAG_NOEXCEPT { return opaque.pointer  ; }
+si8    box_data::get_opaque_si8    () const TBAG_NOEXCEPT { return opaque.data_si8 ; }
+si16   box_data::get_opaque_si16   () const TBAG_NOEXCEPT { return opaque.data_si16; }
+si32   box_data::get_opaque_si32   () const TBAG_NOEXCEPT { return opaque.data_si32; }
+si64   box_data::get_opaque_si64   () const TBAG_NOEXCEPT { return opaque.data_si64; }
+ui8    box_data::get_opaque_ui8    () const TBAG_NOEXCEPT { return opaque.data_ui8 ; }
+ui16   box_data::get_opaque_ui16   () const TBAG_NOEXCEPT { return opaque.data_ui16; }
+ui32   box_data::get_opaque_ui32   () const TBAG_NOEXCEPT { return opaque.data_ui32; }
+ui64   box_data::get_opaque_ui64   () const TBAG_NOEXCEPT { return opaque.data_ui64; }
+fp32   box_data::get_opaque_fp32   () const TBAG_NOEXCEPT { return opaque.data_fp32; }
+fp64   box_data::get_opaque_fp64   () const TBAG_NOEXCEPT { return opaque.data_fp64; }
 // clang-format on
 
 ui32 box_get_size_args(ui32 rank, ...) TBAG_NOEXCEPT
@@ -856,7 +889,7 @@ Err box_free(box_data * box) TBAG_NOEXCEPT
     if (box->info) {
         box_info_free(box->info);
     }
-    box_clear(box);
+    box->clear();
     return E_SUCCESS;
 }
 
@@ -871,12 +904,12 @@ Err box_resize_args(box_data * box, btype type, bdev device, ui64 const * ext, u
 
 Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
-    if (rank <= BOX_TEMP_DIM_STACK_SIZE) {
-        ui32 dims[BOX_TEMP_DIM_STACK_SIZE];
+    if (rank <= TBAG_BOX_TEMP_DIM_STACK_SIZE) {
+        ui32 dims[TBAG_BOX_TEMP_DIM_STACK_SIZE];
         box_dim_set_vargs(dims, rank, ap);
         return box_resize(box, type, device, ext, rank, dims);
     } else {
-        assert(rank > BOX_TEMP_DIM_STACK_SIZE);
+        assert(rank > TBAG_BOX_TEMP_DIM_STACK_SIZE);
         ui32 * dims = box_dim_malloc(rank);
         assert(dims != nullptr);
         box_dim_set_vargs(dims, rank, ap);
@@ -914,9 +947,9 @@ Err box_resize(box_data * box, btype type, bdev device, ui64 const * ext, ui32 r
         return box_malloc_copy_dims(box, type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
     }
 
-    ui64 resize_ext[BOX_EXTENSION_SIZE] = {0,};
+    ui64 resize_ext[TBAG_BOX_EXT_SIZE] = {0,};
     if (ext) {
-        memcpy(resize_ext, ext, sizeof(ui64)*BOX_EXTENSION_SIZE);
+        memcpy(resize_ext, ext, sizeof(ui64)*TBAG_BOX_EXT_SIZE);
     }
     if (box->device != device ||
             box->ext[0] != resize_ext[0] ||

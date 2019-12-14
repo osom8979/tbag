@@ -27,8 +27,8 @@ Box::Box() : _data(nullptr)
 {
     auto * box = (box_data*)::malloc(sizeof(box_data));
     assert(box != nullptr);
-    box_clear(box);
-    box->opaque = nullptr;
+    box->clear();
+    box->set_opaque(nullptr);
 
     _data.reset(box, [](box_data * ptr){
         box_free(ptr);

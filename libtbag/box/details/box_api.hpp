@@ -17,6 +17,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 
 #include <cstdint>
@@ -29,44 +30,77 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
-#define _BOX_TYPE_PREFIX_BIT  0xFF00
-#define _BOX_TYPE_SUFFIX_BIT  0x00FF
+#define TBAG_BOX_TYPE_PREFIX_BIT  0xFF00
+#define TBAG_BOX_TYPE_SUFFIX_BIT  0x00FF
 
-#define _BOX_TYPE_PREFIX_UNKNOWN   0
-#define _BOX_TYPE_PREFIX_BOOLEAN   1
-#define _BOX_TYPE_PREFIX_STRING    2
-#define _BOX_TYPE_PREFIX_SIGNED    3
-#define _BOX_TYPE_PREFIX_UNSIGNED  4
-#define _BOX_TYPE_PREFIX_FLOATING  5
-#define _BOX_TYPE_PREFIX_COMPLEX   6
+#define TBAG_BOX_TYPE_PREFIX_UNKNOWN   0
+#define TBAG_BOX_TYPE_PREFIX_BOOLEAN   1
+#define TBAG_BOX_TYPE_PREFIX_STRING    2
+#define TBAG_BOX_TYPE_PREFIX_SIGNED    3
+#define TBAG_BOX_TYPE_PREFIX_UNSIGNED  4
+#define TBAG_BOX_TYPE_PREFIX_FLOATING  5
+#define TBAG_BOX_TYPE_PREFIX_COMPLEX   6
 
-#define _BOX_TYPE_SIZE_0BIT     0
-#define _BOX_TYPE_SIZE_8BIT     8
-#define _BOX_TYPE_SIZE_16BIT   16
-#define _BOX_TYPE_SIZE_32BIT   32
-#define _BOX_TYPE_SIZE_64BIT   64
-#define _BOX_TYPE_SIZE_128BIT 128
+#define TBAG_BOX_TYPE_SIZE_0BIT     0
+#define TBAG_BOX_TYPE_SIZE_8BIT     8
+#define TBAG_BOX_TYPE_SIZE_16BIT   16
+#define TBAG_BOX_TYPE_SIZE_32BIT   32
+#define TBAG_BOX_TYPE_SIZE_64BIT   64
+#define TBAG_BOX_TYPE_SIZE_128BIT 128
 
-#define _BOX_TYPE_NONE        0x0000
-#define _BOX_TYPE_INT8        0x0308
-#define _BOX_TYPE_INT16       0x0310
-#define _BOX_TYPE_INT32       0x0320
-#define _BOX_TYPE_INT64       0x0340
-#define _BOX_TYPE_UINT8       0x0408
-#define _BOX_TYPE_UINT16      0x0410
-#define _BOX_TYPE_UINT32      0x0420
-#define _BOX_TYPE_UINT64      0x0440
-#define _BOX_TYPE_FLOAT32     0x0520
-#define _BOX_TYPE_FLOAT64     0x0540
-#define _BOX_TYPE_COMPLEX64   0x0640
-#define _BOX_TYPE_COMPLEX128  0x0680
+#define TBAG_BOX_TYPE_NONE        0x0000
+#define TBAG_BOX_TYPE_INT8        0x0308
+#define TBAG_BOX_TYPE_INT16       0x0310
+#define TBAG_BOX_TYPE_INT32       0x0320
+#define TBAG_BOX_TYPE_INT64       0x0340
+#define TBAG_BOX_TYPE_UINT8       0x0408
+#define TBAG_BOX_TYPE_UINT16      0x0410
+#define TBAG_BOX_TYPE_UINT32      0x0420
+#define TBAG_BOX_TYPE_UINT64      0x0440
+#define TBAG_BOX_TYPE_FLOAT32     0x0520
+#define TBAG_BOX_TYPE_FLOAT64     0x0540
+#define TBAG_BOX_TYPE_COMPLEX64   0x0640
+#define TBAG_BOX_TYPE_COMPLEX128  0x0680
 
-#define _BOX_DEVICE_NONE  0
-#define _BOX_DEVICE_CPU   1
-#define _BOX_DEVICE_CUDA  2
-#define _BOX_DEVICE_CL    3
+#define TBAG_BOX_DEVICE_NONE  0
+#define TBAG_BOX_DEVICE_CPU   1
+#define TBAG_BOX_DEVICE_CUDA  2
+#define TBAG_BOX_DEVICE_CL    3
 
-#define _BOX_EXT_SIZE 4
+#define TBAG_BOX_EXT_SIZE 4
+#define TBAG_BOX_TEMP_DIM_STACK_SIZE 16
+
+#define GET_SIZE_TO_TOTAL_INFO_BYTE(size) (size*sizeof(ui8))
+#define GET_TOTAL_INFO_BYTE_TO_SIZE(byte) (byte/sizeof(ui8))
+#define GET_RANK_TO_TOTAL_DIMS_BYTE(rank) (rank*sizeof(ui32))
+#define GET_TOTAL_DIMS_BYTE_TO_RANK(byte) (byte/sizeof(ui32))
+#define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
+    (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
+
+#define TBAG_MAKE_BOX_TYPE(prefix, size) (((prefix)<<(8))|(size))
+
+enum BoxType
+{
+    BT_NONE    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNKNOWN , TBAG_BOX_TYPE_SIZE_0BIT  ),
+    BT_INT8    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_8BIT  ),
+    BT_INT16   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_16BIT ),
+    BT_INT32   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_32BIT ),
+    BT_INT64   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_64BIT ),
+    BT_UINT8   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_8BIT  ),
+    BT_UINT16  = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_16BIT ),
+    BT_UINT32  = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_32BIT ),
+    BT_UINT64  = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_64BIT ),
+    BT_FLOAT32 = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_FLOATING, TBAG_BOX_TYPE_SIZE_32BIT ),
+    BT_FLOAT64 = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_FLOATING, TBAG_BOX_TYPE_SIZE_64BIT ),
+};
+
+enum BoxDevice
+{
+    BD_NONE = TBAG_BOX_DEVICE_NONE,
+    BD_CPU  = TBAG_BOX_DEVICE_CPU,
+    BD_CUDA = TBAG_BOX_DEVICE_CUDA,
+    BD_CL   = TBAG_BOX_DEVICE_CL,
+};
 
 using si8  = int8_t;
 using si16 = int16_t;
@@ -84,32 +118,20 @@ using fp64 = double;
 using btype = ui16;
 using bdev  = ui16;
 
-#define _MAKE_BOX_TYPE(prefix, size) (((prefix)<<(8))|(size))
-
-enum BoxType
+union box_any
 {
-    BT_NONE    = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_UNKNOWN , _BOX_TYPE_SIZE_0BIT  ),
-    BT_INT8    = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_SIGNED  , _BOX_TYPE_SIZE_8BIT  ),
-    BT_INT16   = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_SIGNED  , _BOX_TYPE_SIZE_16BIT ),
-    BT_INT32   = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_SIGNED  , _BOX_TYPE_SIZE_32BIT ),
-    BT_INT64   = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_SIGNED  , _BOX_TYPE_SIZE_64BIT ),
-    BT_UINT8   = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_UNSIGNED, _BOX_TYPE_SIZE_8BIT  ),
-    BT_UINT16  = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_UNSIGNED, _BOX_TYPE_SIZE_16BIT ),
-    BT_UINT32  = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_UNSIGNED, _BOX_TYPE_SIZE_32BIT ),
-    BT_UINT64  = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_UNSIGNED, _BOX_TYPE_SIZE_64BIT ),
-    BT_FLOAT32 = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_FLOATING, _BOX_TYPE_SIZE_32BIT ),
-    BT_FLOAT64 = _MAKE_BOX_TYPE(_BOX_TYPE_PREFIX_FLOATING, _BOX_TYPE_SIZE_64BIT ),
+    void * pointer;
+    si8  data_si8;
+    si16 data_si16;
+    si32 data_si32;
+    si64 data_si64;
+    ui8  data_ui8;
+    ui16 data_ui16;
+    ui32 data_ui32;
+    ui64 data_ui64;
+    fp32 data_fp32;
+    fp64 data_fp64;
 };
-
-enum BoxDevice
-{
-    BD_NONE = _BOX_DEVICE_NONE,
-    BD_CPU  = _BOX_DEVICE_CPU ,
-    BD_CUDA = _BOX_DEVICE_CUDA,
-    BD_CL   = _BOX_DEVICE_CL  ,
-};
-
-TBAG_CONSTEXPR int const BOX_EXTENSION_SIZE = _BOX_EXT_SIZE;
 
 /**
  * Box container information structure.
@@ -121,7 +143,7 @@ TBAG_CONSTEXPR int const BOX_EXTENSION_SIZE = _BOX_EXT_SIZE;
  *  It is an alternative to the 1d vector container. @n
  *  Therefore, the entire memory must be connected in one dimension.
  */
-struct box_data
+struct TBAG_API box_data : private Noncopyable
 {
     /** Data type. */
     btype type;
@@ -131,7 +153,7 @@ struct box_data
 
     /** Device extension information. */
     /** [PARALLEL] 0:Platform, 1:Device, 2:Context 3:Unused*/
-    ui64 ext[BOX_EXTENSION_SIZE];
+    ui64 ext[TBAG_BOX_EXT_SIZE];
 
     /** Real data. */
     void * data;
@@ -170,46 +192,58 @@ struct box_data
     /** Extra information size. */
     ui32 info_size;
 
-    /** User's data pointer. */
-    void * opaque;
+    /** User's data. */
+    box_any opaque;
+
+    box_data();
+    ~box_data();
+
+    void clear() TBAG_NOEXCEPT;
+
+    // clang-format off
+    void set_opaque(void * v) TBAG_NOEXCEPT;
+    void set_opaque(si8    v) TBAG_NOEXCEPT;
+    void set_opaque(si16   v) TBAG_NOEXCEPT;
+    void set_opaque(si32   v) TBAG_NOEXCEPT;
+    void set_opaque(si64   v) TBAG_NOEXCEPT;
+    void set_opaque(ui8    v) TBAG_NOEXCEPT;
+    void set_opaque(ui16   v) TBAG_NOEXCEPT;
+    void set_opaque(ui32   v) TBAG_NOEXCEPT;
+    void set_opaque(ui64   v) TBAG_NOEXCEPT;
+    void set_opaque(fp32   v) TBAG_NOEXCEPT;
+    void set_opaque(fp64   v) TBAG_NOEXCEPT;
+    void get_opaque(void ** v) const TBAG_NOEXCEPT;
+    void get_opaque(si8   * v) const TBAG_NOEXCEPT;
+    void get_opaque(si16  * v) const TBAG_NOEXCEPT;
+    void get_opaque(si32  * v) const TBAG_NOEXCEPT;
+    void get_opaque(si64  * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui8   * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui16  * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui32  * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui64  * v) const TBAG_NOEXCEPT;
+    void get_opaque(fp32  * v) const TBAG_NOEXCEPT;
+    void get_opaque(fp64  * v) const TBAG_NOEXCEPT;
+    void * get_opaque_pointer() const TBAG_NOEXCEPT;
+    si8    get_opaque_si8    () const TBAG_NOEXCEPT;
+    si16   get_opaque_si16   () const TBAG_NOEXCEPT;
+    si32   get_opaque_si32   () const TBAG_NOEXCEPT;
+    si64   get_opaque_si64   () const TBAG_NOEXCEPT;
+    ui8    get_opaque_ui8    () const TBAG_NOEXCEPT;
+    ui16   get_opaque_ui16   () const TBAG_NOEXCEPT;
+    ui32   get_opaque_ui32   () const TBAG_NOEXCEPT;
+    ui64   get_opaque_ui64   () const TBAG_NOEXCEPT;
+    fp32   get_opaque_fp32   () const TBAG_NOEXCEPT;
+    fp64   get_opaque_fp64   () const TBAG_NOEXCEPT;
+    // clang-format on
 };
-
-#define GET_SIZE_TO_TOTAL_INFO_BYTE(size) (size*sizeof(ui8))
-#define GET_TOTAL_INFO_BYTE_TO_SIZE(byte) (byte/sizeof(ui8))
-#define GET_RANK_TO_TOTAL_DIMS_BYTE(rank) (rank*sizeof(ui32))
-#define GET_TOTAL_DIMS_BYTE_TO_RANK(byte) (byte/sizeof(ui32))
-#define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
-    (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
-
-#define BOX_TEMP_DIM_STACK_SIZE 16
 
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
 TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;
 
-TBAG_API char const * const box_get_type_name(btype type) TBAG_NOEXCEPT;
-TBAG_API char const * const box_get_device_name(bdev dev) TBAG_NOEXCEPT;
+TBAG_API char const * box_get_type_name(btype type) TBAG_NOEXCEPT;
+TBAG_API char const * box_get_device_name(bdev dev) TBAG_NOEXCEPT;
 
 TBAG_API ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT;
-TBAG_API void box_clear(box_data * box) TBAG_NOEXCEPT;
-
-// clang-format off
-TBAG_API void box_opaque_set(box_data * box, si8  v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_set(box_data * box, si16 v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_set(box_data * box, si32 v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_set(box_data * box, si64 v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_set(box_data * box, ui8  v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_set(box_data * box, ui16 v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_set(box_data * box, ui32 v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_set(box_data * box, ui64 v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, si8  * v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, si16 * v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, si32 * v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, si64 * v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, ui8  * v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, ui16 * v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, ui32 * v) TBAG_NOEXCEPT;
-TBAG_API void box_opaque_get(box_data const * box, ui64 * v) TBAG_NOEXCEPT;
-// clang-format on
 
 TBAG_API ui32 box_get_size_args(ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API ui32 box_get_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;

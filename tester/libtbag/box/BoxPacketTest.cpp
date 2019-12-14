@@ -17,7 +17,6 @@ using namespace libtbag::box::details;
 TEST(BoxPacketTest, Default)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
@@ -47,7 +46,6 @@ TEST(BoxPacketTest, Default)
     ASSERT_LT(1, size);
 
     box_data box2;
-    box_clear(&box2);
 
     BoxPacket packet2;
     std::size_t computed_size = 0;
@@ -86,7 +84,6 @@ TEST(BoxPacketTest, Default)
 TEST(BoxPacketTest, ToJson)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
@@ -110,7 +107,6 @@ TEST(BoxPacketTest, ToJson)
     ASSERT_EQ(2, root["dims"][2].asInt());
 
     box_data box2;
-    box_clear(&box2);
     BoxPacketParser parser;
     ASSERT_EQ(E_SUCCESS, parser.parseJson(text, &box2));
 

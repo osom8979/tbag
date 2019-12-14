@@ -16,7 +16,6 @@ using namespace libtbag::box::details;
 TEST(box_api_test, Default)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_malloc_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ASSERT_TRUE(box_exists_data(&box));
@@ -40,7 +39,6 @@ TEST(box_api_test, Default)
 TEST(box_api_test, Resize)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 3, 3, 3));
     ASSERT_TRUE(box_exists_data(&box));
@@ -92,7 +90,6 @@ TEST(box_api_test, Resize)
 TEST(box_api_test, SetAndGet)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 * data = (ui32*)box.data;
@@ -169,7 +166,6 @@ TEST(box_api_test, SetAndGet)
 TEST(box_api_test, Clone)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
@@ -178,7 +174,6 @@ TEST(box_api_test, Clone)
     }
 
     box_data box2;
-    box_clear(&box2);
     ASSERT_EQ(E_SUCCESS, box_clone(&box2, &box));
 
     ASSERT_EQ(box.type, box2.type);
@@ -209,7 +204,6 @@ TEST(box_api_test, Clone)
 TEST(box_api_test, box_cursor_01)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 1, 10));
     for (ui32 i = 0; i < 10; ++i) {
@@ -372,7 +366,6 @@ TEST(box_api_test, box_cursor_01)
 TEST(box_api_test, box_cursor_02)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 2, 3, 3));
     for (ui32 i = 0; i < 3*3; ++i) {
@@ -499,7 +492,6 @@ TEST(box_api_test, box_cursor_02)
 TEST(box_api_test, box_cursor_03)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 3, 2, 2));
     for (ui32 i = 0; i < 3*2*2; ++i) {
@@ -570,7 +562,6 @@ TEST(box_api_test, box_cursor_03)
 TEST(box_api_test, box_cursor_04)
 {
     box_data box;
-    box_clear(&box);
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
@@ -611,7 +602,6 @@ TEST(box_api_test, box_cursor_04)
 TEST(box_api_test, box_info)
 {
     box_data box;
-    box_clear(&box);
     ASSERT_EQ(nullptr, box.info);
     ASSERT_EQ(0, box.total_info_byte);
     ASSERT_EQ(0, box.info_size);
