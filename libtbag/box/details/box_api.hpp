@@ -19,6 +19,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
+#include <libtbag/ErrPair.hpp>
 
 #include <cstdint>
 #include <cstdarg>
@@ -142,25 +143,6 @@ union box_any
 struct box_cursor;
 struct box_data;
 
-/**
- * Box container iterator cursor structure.
- *
- * @author zer0
- * @date   2019-05-16
- * @date   2019-09-24 (Update properties)
- */
-struct box_cursor
-{
-    /** Current data pointer. */
-    void * begin;
-
-    /** The exact point where the loop should stop. */
-    void * end;
-
-    /** Byte size to jump step by step. */
-    int stride_byte;
-};
-
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
 TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;
 
@@ -238,7 +220,7 @@ TBAG_API bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
  *  It is an alternative to the 1d vector container. @n
  *  Therefore, the entire memory must be connected in one dimension.
  */
-struct TBAG_API box_data : private Noncopyable
+struct TBAG_API box_data
 {
     /** Data type. */
     btype type;
@@ -346,23 +328,48 @@ struct TBAG_API box_data : private Noncopyable
     fp64 get_opaque_fp64() const TBAG_NOEXCEPT;
 
     ui32 get_dims_total_size() const TBAG_NOEXCEPT;
+
+    ErrPair<box_cursor> init_cursor(void * data, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor() TBAG_NOEXCEPT;
 };
 
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, void * data, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box) TBAG_NOEXCEPT;
+/**
+ * Box container iterator cursor structure.
+ *
+ * @author zer0
+ * @date   2019-05-16
+ * @date   2019-09-24 (Update properties)
+ */
+struct TBAG_API box_cursor
+{
+    /** Original box pointer. */
+    box_data * box;
 
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box) TBAG_NOEXCEPT;
+    /** Current data pointer. */
+    void * begin;
 
-TBAG_API bool box_cursor_is_end(box_cursor const * cursor) TBAG_NOEXCEPT;
-TBAG_API bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT;
+    /** The exact point where the loop should stop. */
+    void * end;
+
+    /** Byte size to jump step by step. */
+    int stride_byte;
+
+    box_cursor();
+    ~box_cursor();
+
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor() TBAG_NOEXCEPT;
+
+    bool is_end() const TBAG_NOEXCEPT;
+    bool next() TBAG_NOEXCEPT;
+};
 
 // CPU
 

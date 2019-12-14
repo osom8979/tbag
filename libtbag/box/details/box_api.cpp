@@ -445,8 +445,8 @@ bool box_data_check_address_raw(void const * data_begin, ui32 size, btype type, 
 
 int box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT
 {
-    assert(dim_size >= 1u);
-    if (dim_index >= 0u) {
+    assert(dim_size >= 1);
+    if (dim_index >= 0) {
         return dim_index;
     }
     return dim_size + dim_index;
@@ -455,11 +455,11 @@ int box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT
 bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT
 {
     if (begin < end) {
-        if (step <= 0u) {
+        if (step <= 0) {
             return false;
         }
     } else {
-        if (step >= 0u) {
+        if (step >= 0) {
             return false;
         }
     }
@@ -551,116 +551,128 @@ ui32 box_data::get_dims_total_size() const TBAG_NOEXCEPT
     return box_dim_get_total_size(dims, rank);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_data const * box, void * data, ui32 dim_index,
-                     int begin, int end, int step) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_data::init_cursor(void * data_pointer, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT
 {
-    assert(cursor != nullptr);
-    assert(box != nullptr);
-    assert(data != nullptr);
-    assert(box->rank >= 1);
+    assert(data_pointer != nullptr);
+    assert(rank >= 1);
     assert(step != 0);
 
-    auto const dim_size = box->dims[dim_index];
+    auto const dim_size = dims[dim_index];
     auto const begin_abs = box_index_abs(dim_size, begin);
     if (begin_abs < 0) {
-        return false;
+        return E_INDEX;
     }
 
     auto const end_abs = box_index_abs(dim_size, end);
     if (end_abs < 0) {
-        return false;
+        return E_INDEX;
     }
 
     if (!box_index_check(begin_abs, end_abs, step)) {
-        return false;
+        return E_INDEX;
     }
 
     auto const diff = end_abs - begin_abs;
     auto const last_one = (diff % step) ? 1 : 0;
     auto const exact_last_position = begin_abs + ((diff / step + last_one) * step);
 
-    auto const stride = box_dim_get_stride(box->dims, box->rank, dim_index);
-    auto const stride_byte = static_cast<int>(stride * box_get_type_byte(box->type));
+    auto const stride = box_dim_get_stride(dims, rank, dim_index);
+    auto const stride_byte = static_cast<int>(stride * box_get_type_byte(type));
 
-    auto const integer_data_pointer = (std::intptr_t)data;
-    cursor->begin = (void*)(integer_data_pointer + (stride_byte * begin_abs));
-    cursor->end = (void*)(integer_data_pointer + (stride_byte * exact_last_position));
-    cursor->stride_byte = stride_byte * step;
-    return true;
+    ErrPair<box_cursor> result;
+    result.code = E_SUCCESS;
+    result.value.box = this;
+    result.value.begin = (void*)(((std::intptr_t)data_pointer) + (stride_byte * begin_abs));
+    result.value.end = (void*)(((std::intptr_t)data_pointer) + (stride_byte * exact_last_position));
+    result.value.stride_byte = stride_byte * step;
+    return result;
 }
 
-bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index,
-                     int begin, int end, int step) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT
 {
-    assert(box != nullptr);
-    return box_cursor_init(cursor, box, box->data, dim_index, begin, end, step);
+    return init_cursor(data, dim_index, begin, end, step);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index, int begin, int end) TBAG_NOEXCEPT
 {
-    return box_cursor_init(cursor, box, dim_index, begin, end, 1);
+    return init_cursor(dim_index, begin, end, 1);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index, int begin) TBAG_NOEXCEPT
 {
-    assert(box != nullptr);
     assert(dim_index >= 0);
-    assert(box->rank >= 1);
-    assert(dim_index < box->rank);
-    return box_cursor_init(cursor, box, dim_index, begin, box->dims[dim_index]);
+    assert(rank >= 1);
+    assert(dim_index < rank);
+    return init_cursor(dim_index, begin, dims[dim_index]);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index) TBAG_NOEXCEPT
 {
-    return box_cursor_init(cursor, box, dim_index, 0);
+    return init_cursor(dim_index, 0);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_data const * box) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_data::init_cursor() TBAG_NOEXCEPT
 {
-    return box_cursor_init(cursor, box, 0);
+    return init_cursor(0);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT
+// -------------------------
+// box_cursor implementation
+// -------------------------
+
+box_cursor::box_cursor()
+        : box(nullptr),
+          begin(nullptr),
+          end(nullptr),
+          stride_byte(0)
 {
-    assert(parent != nullptr);
-    return box_cursor_init(cursor, box, parent->begin, dim_index, begin, end, step);
+    // EMPTY.
 }
 
-bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin, int end) TBAG_NOEXCEPT
+box_cursor::~box_cursor()
 {
-    return box_cursor_init(cursor, parent, box, dim_index, begin, end, 1);
+    // EMPTY.
 }
 
-bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index, int begin) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT
+{
+    return box->init_cursor(this->begin, dim_index, begin, end, step);
+}
+
+ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, int begin, int end) TBAG_NOEXCEPT
+{
+    return init_cursor(dim_index, begin, end, 1);
+}
+
+ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, int begin) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
-    assert(dim_index >= 0);
-    assert(box->rank >= 1);
+    assert(dim_index >= 0u);
+    assert(box->rank >= 1u);
     assert(dim_index < box->rank);
-    return box_cursor_init(cursor, parent, box, dim_index, begin, box->dims[dim_index]);
+    return init_cursor(dim_index, begin, box->dims[dim_index]);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box, ui32 dim_index) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index) TBAG_NOEXCEPT
 {
-    return box_cursor_init(cursor, parent, box, dim_index, 0);
+    return init_cursor(dim_index, 0);
 }
 
-bool box_cursor_init(box_cursor * cursor, box_cursor const * parent, box_data const * box) TBAG_NOEXCEPT
+ErrPair<box_cursor> box_cursor::init_cursor() TBAG_NOEXCEPT
 {
-    return box_cursor_init(cursor, parent, box, 0);
+    return init_cursor(0);
 }
 
-bool box_cursor_is_end(box_cursor const * cursor) TBAG_NOEXCEPT
+bool box_cursor::is_end() const TBAG_NOEXCEPT
 {
-    return cursor->begin != cursor->end;
+    return begin != end;
 }
 
-bool box_cursor_next(box_cursor * cursor) TBAG_NOEXCEPT
+bool box_cursor::next() TBAG_NOEXCEPT
 {
-    assert(cursor != nullptr);
-    auto const integer_data_pointer = (std::intptr_t)cursor->begin;
-    cursor->begin = (void*)(integer_data_pointer + cursor->stride_byte);
-    return box_cursor_is_end(cursor);
+    auto const integer_data_pointer = (std::intptr_t)begin;
+    begin = (void*)(integer_data_pointer + stride_byte);
+    return is_end();
 }
 
 // CPU
