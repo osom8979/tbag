@@ -302,6 +302,10 @@ struct TBAG_API box_data
     Err alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_ext,
                         ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank);
 
+    bool exists_data() const TBAG_NOEXCEPT;
+    bool exists_dims() const TBAG_NOEXCEPT;
+    bool exists_info() const TBAG_NOEXCEPT;
+
     bool support_type() const TBAG_NOEXCEPT
     { return box_support_type(type); }
     bool support_device(bdev dev) const TBAG_NOEXCEPT
@@ -398,9 +402,6 @@ struct TBAG_API box_cursor
 TBAG_API Err box_resize_args (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 TBAG_API Err box_resize      (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims) TBAG_NOEXCEPT;
-
-TBAG_API bool box_exists_data(box_data const * box) TBAG_NOEXCEPT;
-TBAG_API bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT;
 
 TBAG_API Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err box_clone(box_data * dest, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;

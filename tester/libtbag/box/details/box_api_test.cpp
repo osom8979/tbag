@@ -18,8 +18,8 @@ TEST(box_api_test, Default)
     box_data box;
 
     ASSERT_EQ(E_SUCCESS, box.alloc_args(BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
-    ASSERT_TRUE(box_exists_data(&box));
-    ASSERT_TRUE(box_exists_dims(&box));
+    ASSERT_TRUE(box.exists_data());
+    ASSERT_TRUE(box.exists_dims());
     ASSERT_NE(nullptr, box.data);
     ASSERT_EQ(4*3*2, box.size);
     ASSERT_EQ(4*3*2*sizeof(ui32), box.total_data_byte);
@@ -33,8 +33,8 @@ TEST(box_api_test, Resize)
     box_data box;
 
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 3, 3, 3));
-    ASSERT_TRUE(box_exists_data(&box));
-    ASSERT_TRUE(box_exists_dims(&box));
+    ASSERT_TRUE(box.exists_data());
+    ASSERT_TRUE(box.exists_dims());
     ASSERT_NE(nullptr, box.data);
     ASSERT_EQ(3*3*3, box.size);
     ASSERT_EQ(3*3*3*sizeof(ui32), box.total_data_byte);
@@ -48,8 +48,8 @@ TEST(box_api_test, Resize)
 
     // Down size.
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 2, 2, 2));
-    ASSERT_TRUE(box_exists_data(&box));
-    ASSERT_TRUE(box_exists_dims(&box));
+    ASSERT_TRUE(box.exists_data());
+    ASSERT_TRUE(box.exists_dims());
     ASSERT_EQ(data, box.data);
     ASSERT_EQ(2*2, box.size);
     ASSERT_EQ(total_data_byte, box.total_data_byte);
@@ -59,8 +59,8 @@ TEST(box_api_test, Resize)
 
     // Up size.
     ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_FLOAT64, BD_CPU, nullptr, 4, 4, 4, 4, 4));
-    ASSERT_TRUE(box_exists_data(&box));
-    ASSERT_TRUE(box_exists_dims(&box));
+    ASSERT_TRUE(box.exists_data());
+    ASSERT_TRUE(box.exists_dims());
     // ASSERT_NE(data, box.data); // Can be assigned to the same address.
     ASSERT_NE(nullptr, box.data);
     ASSERT_EQ(4*4*4*4, box.size);

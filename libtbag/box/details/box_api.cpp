@@ -802,6 +802,21 @@ Err box_data::alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_
     return E_SUCCESS;
 }
 
+bool box_data::exists_data() const TBAG_NOEXCEPT
+{
+    return data != nullptr && total_data_byte >= 1u && size >= 1u;
+}
+
+bool box_data::exists_dims() const TBAG_NOEXCEPT
+{
+    return dims != nullptr && total_dims_byte >= 1u && rank >= 1u;
+}
+
+bool box_data::exists_info() const TBAG_NOEXCEPT
+{
+    return info != nullptr && total_info_byte >= 1u && info_size >= 1u;
+}
+
 void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
 void box_data::set_opaque(si8  v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
 void box_data::set_opaque(si16 v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
@@ -1099,18 +1114,6 @@ Err box_resize(box_data * box, btype type, bdev device, ui64 const * ext, ui32 r
     assert(box->data != nullptr);
     assert(box->size == size);
     return E_SUCCESS;
-}
-
-bool box_exists_data(box_data const * box) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    return box->data != nullptr && box->total_data_byte >= 1 && box->size >= 1;
-}
-
-bool box_exists_dims(box_data const * box) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    return box->dims != nullptr && box->total_dims_byte >= 1 && box->rank >= 1;
 }
 
 Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT
