@@ -47,13 +47,13 @@ TEST(box_common_test, box_dim_get_index_args)
 
     auto * dims1 = box_dim_malloc_args(2, HEIGHT, WIDTH);
     ASSERT_NE(nullptr, dims1);
-    auto index1 = box_dim_get_index_args(dims1, 2, 1, 2);
+    auto index1 = box_dim_get_offset_args(dims1, 2, 1, 2);
     ASSERT_EQ((1*WIDTH)+2, index1);
     box_dim_free(dims1);
 
     auto * dims2 = box_dim_malloc_args(3, DEPTH, HEIGHT, WIDTH);
     ASSERT_NE(nullptr, dims1);
-    auto index2 = box_dim_get_index_args(dims2, 3, 3, 2, 1);
+    auto index2 = box_dim_get_offset_args(dims2, 3, 3, 2, 1);
     ASSERT_EQ((3*HEIGHT*WIDTH)+(2*WIDTH)+1, index2);
     box_dim_free(dims2);
 }

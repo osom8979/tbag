@@ -302,8 +302,8 @@ struct TBAG_API box_data : private Noncopyable
  *
  * Calculated from inside parentheses.
  */
-TBAG_API ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
 TBAG_API ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
 TBAG_API void  box_info_free(ui8 * info) TBAG_NOEXCEPT;

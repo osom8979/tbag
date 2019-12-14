@@ -430,18 +430,18 @@ ui32 box_data::get_dims_total_size() const TBAG_NOEXCEPT
     return box_dim_get_total_size(dims, rank);
 }
 
-ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
+ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
     assert(rank >= 1);
     va_list ap;
     va_start(ap, rank);
-    auto const index = box_dim_get_index_vargs(dims, rank, ap);
+    auto const index = box_dim_get_offset_vargs(dims, rank, ap);
     va_end(ap);
     return index;
 }
 
-ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT
+ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
     assert(rank >= 1);
@@ -1142,7 +1142,7 @@ Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev 
     assert(box_support_type(data_type));
     assert(box_support_device(data_device));
     assert(rank >= 1);
-    return box_data_set(box, data, data_type, data_device, ext, box_dim_get_index_vargs(box->dims, rank, ap));
+    return box_data_set(box, data, data_type, data_device, ext, box_dim_get_offset_vargs(box->dims, rank, ap));
 }
 
 Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT
@@ -1181,7 +1181,7 @@ Err box_data_get_vargs(box_data const * box, void * data, btype data_type, bdev 
     assert(box_support_type(data_type));
     assert(box_support_device(data_device));
     assert(rank >= 1);
-    return box_data_get(box, data, data_type, data_device, ext, box_dim_get_index_vargs(box->dims, rank, ap));
+    return box_data_get(box, data, data_type, data_device, ext, box_dim_get_offset_vargs(box->dims, rank, ap));
 }
 
 Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 size) TBAG_NOEXCEPT

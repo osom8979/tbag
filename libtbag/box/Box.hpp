@@ -833,7 +833,7 @@ public:
         using ResultType = typename libtbag::remove_cr<T>::type;
         static_assert(sizeof...(Args) >= 1, "At least one Args is required.");
         using namespace libtbag::box::details;
-        return offset<ResultType>(box_dim_get_index_args(dims(), sizeof...(Args), std::forward<Args>(args) ...));
+        return offset<ResultType>(box_dim_get_offset_args(dims(), sizeof...(Args), std::forward<Args>(args) ...));
     }
 
     template <typename T, typename ... Args>
@@ -842,7 +842,7 @@ public:
         using ResultType = typename libtbag::remove_cr<T>::type;
         static_assert(sizeof...(Args) >= 1, "At least one Args is required.");
         using namespace libtbag::box::details;
-        return offset<ResultType>(box_dim_get_index_args(dims(), sizeof...(Args), std::forward<Args>(args) ...));
+        return offset<ResultType>(box_dim_get_offset_args(dims(), sizeof...(Args), std::forward<Args>(args) ...));
     }
 
 public:
