@@ -47,15 +47,23 @@ TEST(box_common_test, box_dim_get_index_args)
 
     auto * dims1 = box_dim_malloc_args(2, HEIGHT, WIDTH);
     ASSERT_NE(nullptr, dims1);
-    auto index1 = box_dim_get_offset_args(dims1, 2, 1, 2);
-    ASSERT_EQ((1*WIDTH)+2, index1);
+    auto offset1 = box_dim_get_offset_args(dims1, 2, 1, 2);
+    ASSERT_EQ((1*WIDTH)+2, offset1);
     box_dim_free(dims1);
 
     auto * dims2 = box_dim_malloc_args(3, DEPTH, HEIGHT, WIDTH);
-    ASSERT_NE(nullptr, dims1);
-    auto index2 = box_dim_get_offset_args(dims2, 3, 3, 2, 1);
-    ASSERT_EQ((3*HEIGHT*WIDTH)+(2*WIDTH)+1, index2);
+    ASSERT_NE(nullptr, dims2);
+    auto offset2 = box_dim_get_offset_args(dims2, 3, 3, 2, 1);
+    ASSERT_EQ((3*HEIGHT*WIDTH)+(2*WIDTH)+1, offset2);
     box_dim_free(dims2);
+
+    ui32 const dims3_size[] = {DEPTH, HEIGHT, WIDTH};
+    auto * dims3 = box_dim_malloc_dims(3, dims3_size);
+    ASSERT_NE(nullptr, dims3);
+    ui32 const indexes3[] = {3, 2, 1};
+    auto offset3 = box_dim_get_offset_dims(dims3, 3, indexes3);
+    ASSERT_EQ((3*HEIGHT*WIDTH)+(2*WIDTH)+1, offset3);
+    box_dim_free(dims3);
 }
 
 TEST(box_common_test, opaque)

@@ -344,6 +344,50 @@ ui32 box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXC
     return stride;
 }
 
+ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
+{
+    assert(dims != nullptr);
+    assert(rank >= 1u);
+    va_list ap;
+    va_start(ap, rank);
+    auto const offset = box_dim_get_offset_vargs(dims, rank, ap);
+    va_end(ap);
+    return offset;
+}
+
+ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    assert(dims != nullptr);
+    assert(rank >= 1u);
+    va_list ap2;
+    va_copy(ap2, ap);
+    ui32 offset = 0u;
+    while (rank >= 2u) {
+        ++dims;
+        --rank;
+        offset = (va_arg(ap2, ui32) + offset) * (*dims);
+    }
+    assert(rank == 1u);
+    offset += va_arg(ap2, ui32);
+    va_end(ap2);
+    return offset;
+}
+
+ui32 box_dim_get_offset_dims(ui32 const * dims, ui32 rank, ui32 const * indexes) TBAG_NOEXCEPT
+{
+    assert(dims != nullptr);
+    assert(rank >= 1u);
+    ui32 offset = 0u;
+    while (rank >= 2u) {
+        ++dims;
+        --rank;
+        offset = (*indexes + offset) * (*dims);
+        ++indexes;
+    }
+    assert(rank == 1u);
+    offset += *indexes;
+    return offset;
+}
 
 // -----------------------
 // box_data implementation
@@ -428,36 +472,6 @@ ui32 box_data::get_dims_total_size() const TBAG_NOEXCEPT
     assert(rank >= 1u);
     assert(dims != nullptr);
     return box_dim_get_total_size(dims, rank);
-}
-
-ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    assert(rank >= 1);
-    va_list ap;
-    va_start(ap, rank);
-    auto const index = box_dim_get_offset_vargs(dims, rank, ap);
-    va_end(ap);
-    return index;
-}
-
-ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    assert(rank >= 1);
-
-    va_list ap2;
-    va_copy(ap2, ap);
-    ui32 index = 0;
-    while (rank >= 2) {
-        ++dims;
-        --rank;
-        index = (va_arg(ap2, ui32) + index) * (*dims);
-    }
-    assert(rank == 1);
-    index += va_arg(ap2, ui32);
-    va_end(ap2);
-    return index;
 }
 
 ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT

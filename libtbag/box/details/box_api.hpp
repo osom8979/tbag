@@ -166,6 +166,27 @@ TBAG_API ui32 box_dim_get_total_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;
 TBAG_API ui32 box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXCEPT;
 
 /**
+ * The formula to obtain the index is as follows:
+ * calc 1rank offset: x
+ * calc 2rank offset: x + (y * width)
+ * calc 3rank offset: x + (y * width) + (z * width * height)
+ * calc 4rank offset: x + (y * width) + (z * width * height) + (w * width * height * depth)
+ * ...
+ *
+ * Therefore, it can be converted into the following formula:
+ * ...
+ * calc 4rank offset: x + ((y + (z + (w * depth)) * height) * width)
+ * calc 3rank offset: x + (y + (z * height)) * width
+ * calc 2rank offset: x + (y * width)
+ * calc 1rank offset: x
+ *
+ * Calculated from inside parentheses.
+ */
+TBAG_API ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_offset_dims(ui32 const * dims, ui32 rank, ui32 const * indexes) TBAG_NOEXCEPT;
+
+/**
  * Box container information structure.
  *
  * @author zer0
@@ -284,26 +305,6 @@ struct TBAG_API box_data : private Noncopyable
 
     ui32 get_dims_total_size() const TBAG_NOEXCEPT;
 };
-
-/**
- * The formula to obtain the index is as follows:
- * calc 1rank index: x
- * calc 2rank index: x + (y * width)
- * calc 3rank index: x + (y * width) + (z * width * height)
- * calc 4rank index: x + (y * width) + (z * width * height) + (w * width * height * depth)
- * ...
- *
- * Therefore, it can be converted into the following formula:
- * ...
- * calc 4rank index: x + ((y + (z + (w * depth)) * height) * width)
- * calc 3rank index: x + (y + (z * height)) * width
- * calc 2rank index: x + (y * width)
- * calc 1rank index: x
- *
- * Calculated from inside parentheses.
- */
-TBAG_API ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
 TBAG_API ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
 TBAG_API void  box_info_free(ui8 * info) TBAG_NOEXCEPT;
