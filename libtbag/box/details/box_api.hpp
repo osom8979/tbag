@@ -133,6 +133,38 @@ union box_any
     fp64 data_fp64;
 };
 
+TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
+TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;
+
+TBAG_API char const * box_get_type_name(btype type) TBAG_NOEXCEPT;
+TBAG_API char const * box_get_device_name(bdev dev) TBAG_NOEXCEPT;
+
+TBAG_API ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT;
+
+TBAG_API ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_malloc_dims(ui32 rank, ui32 const * dims) TBAG_NOEXCEPT;
+TBAG_API void   box_dim_free(ui32 * dims) TBAG_NOEXCEPT;
+
+TBAG_API void box_dim_set_args(ui32 * TBAG_RESTRICT result, ui32 args_count, ...) TBAG_NOEXCEPT;
+TBAG_API void box_dim_set_vargs(ui32 * TBAG_RESTRICT result, ui32 args_count, va_list ap) TBAG_NOEXCEPT;
+TBAG_API void box_dim_set_dims(ui32 * TBAG_RESTRICT result, ui32 args_count, ui32 const * dims) TBAG_NOEXCEPT;
+
+TBAG_API void box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+
+TBAG_API ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 * box_dim_clone_with_alloc_size(ui32 const * src, ui32 alloc_size, ui32 rank) TBAG_NOEXCEPT;
+
+TBAG_API bool box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT;
+TBAG_API bool box_dim_is_equals_args(ui32 const * dims1, ui32 rank1, ui32 rank2, ...) TBAG_NOEXCEPT;
+TBAG_API bool box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list ap) TBAG_NOEXCEPT;
+
+TBAG_API ui32 box_dim_get_total_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_total_size_args(ui32 rank, ...) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_total_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;
+TBAG_API ui32 box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXCEPT;
+
 /**
  * Box container information structure.
  *
@@ -199,69 +231,59 @@ struct TBAG_API box_data : private Noncopyable
     ~box_data();
 
     void clear() TBAG_NOEXCEPT;
+    void clear_opaque() TBAG_NOEXCEPT;
 
-    // clang-format off
+    bool support_type() const TBAG_NOEXCEPT
+    { return box_support_type(type); }
+    bool support_device(bdev dev) const TBAG_NOEXCEPT
+    { return box_support_device(device); }
+
+    char const * get_type_name(btype type) const TBAG_NOEXCEPT
+    { return box_get_type_name(type); }
+    char const * get_device_name() const TBAG_NOEXCEPT
+    { return box_get_device_name(device); }
+
+    ui32 get_type_byte() const TBAG_NOEXCEPT
+    { return box_get_type_byte(type); }
+
     void set_opaque(void * v) TBAG_NOEXCEPT;
-    void set_opaque(si8    v) TBAG_NOEXCEPT;
-    void set_opaque(si16   v) TBAG_NOEXCEPT;
-    void set_opaque(si32   v) TBAG_NOEXCEPT;
-    void set_opaque(si64   v) TBAG_NOEXCEPT;
-    void set_opaque(ui8    v) TBAG_NOEXCEPT;
-    void set_opaque(ui16   v) TBAG_NOEXCEPT;
-    void set_opaque(ui32   v) TBAG_NOEXCEPT;
-    void set_opaque(ui64   v) TBAG_NOEXCEPT;
-    void set_opaque(fp32   v) TBAG_NOEXCEPT;
-    void set_opaque(fp64   v) TBAG_NOEXCEPT;
+    void set_opaque(si8  v) TBAG_NOEXCEPT;
+    void set_opaque(si16 v) TBAG_NOEXCEPT;
+    void set_opaque(si32 v) TBAG_NOEXCEPT;
+    void set_opaque(si64 v) TBAG_NOEXCEPT;
+    void set_opaque(ui8  v) TBAG_NOEXCEPT;
+    void set_opaque(ui16 v) TBAG_NOEXCEPT;
+    void set_opaque(ui32 v) TBAG_NOEXCEPT;
+    void set_opaque(ui64 v) TBAG_NOEXCEPT;
+    void set_opaque(fp32 v) TBAG_NOEXCEPT;
+    void set_opaque(fp64 v) TBAG_NOEXCEPT;
+
     void get_opaque(void ** v) const TBAG_NOEXCEPT;
-    void get_opaque(si8   * v) const TBAG_NOEXCEPT;
-    void get_opaque(si16  * v) const TBAG_NOEXCEPT;
-    void get_opaque(si32  * v) const TBAG_NOEXCEPT;
-    void get_opaque(si64  * v) const TBAG_NOEXCEPT;
-    void get_opaque(ui8   * v) const TBAG_NOEXCEPT;
-    void get_opaque(ui16  * v) const TBAG_NOEXCEPT;
-    void get_opaque(ui32  * v) const TBAG_NOEXCEPT;
-    void get_opaque(ui64  * v) const TBAG_NOEXCEPT;
-    void get_opaque(fp32  * v) const TBAG_NOEXCEPT;
-    void get_opaque(fp64  * v) const TBAG_NOEXCEPT;
+    void get_opaque(si8  * v) const TBAG_NOEXCEPT;
+    void get_opaque(si16 * v) const TBAG_NOEXCEPT;
+    void get_opaque(si32 * v) const TBAG_NOEXCEPT;
+    void get_opaque(si64 * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui8  * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui16 * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui32 * v) const TBAG_NOEXCEPT;
+    void get_opaque(ui64 * v) const TBAG_NOEXCEPT;
+    void get_opaque(fp32 * v) const TBAG_NOEXCEPT;
+    void get_opaque(fp64 * v) const TBAG_NOEXCEPT;
+
     void * get_opaque_pointer() const TBAG_NOEXCEPT;
-    si8    get_opaque_si8    () const TBAG_NOEXCEPT;
-    si16   get_opaque_si16   () const TBAG_NOEXCEPT;
-    si32   get_opaque_si32   () const TBAG_NOEXCEPT;
-    si64   get_opaque_si64   () const TBAG_NOEXCEPT;
-    ui8    get_opaque_ui8    () const TBAG_NOEXCEPT;
-    ui16   get_opaque_ui16   () const TBAG_NOEXCEPT;
-    ui32   get_opaque_ui32   () const TBAG_NOEXCEPT;
-    ui64   get_opaque_ui64   () const TBAG_NOEXCEPT;
-    fp32   get_opaque_fp32   () const TBAG_NOEXCEPT;
-    fp64   get_opaque_fp64   () const TBAG_NOEXCEPT;
-    // clang-format on
+    si8  get_opaque_si8 () const TBAG_NOEXCEPT;
+    si16 get_opaque_si16() const TBAG_NOEXCEPT;
+    si32 get_opaque_si32() const TBAG_NOEXCEPT;
+    si64 get_opaque_si64() const TBAG_NOEXCEPT;
+    ui8  get_opaque_ui8 () const TBAG_NOEXCEPT;
+    ui16 get_opaque_ui16() const TBAG_NOEXCEPT;
+    ui32 get_opaque_ui32() const TBAG_NOEXCEPT;
+    ui64 get_opaque_ui64() const TBAG_NOEXCEPT;
+    fp32 get_opaque_fp32() const TBAG_NOEXCEPT;
+    fp64 get_opaque_fp64() const TBAG_NOEXCEPT;
+
+    ui32 get_dims_total_size() const TBAG_NOEXCEPT;
 };
-
-TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
-TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;
-
-TBAG_API char const * box_get_type_name(btype type) TBAG_NOEXCEPT;
-TBAG_API char const * box_get_device_name(bdev dev) TBAG_NOEXCEPT;
-
-TBAG_API ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT;
-
-TBAG_API ui32 box_get_size_args(ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API ui32 box_get_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;
-
-TBAG_API ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT;
-TBAG_API ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;
-TBAG_API void   box_dim_free(ui32 * dims) TBAG_NOEXCEPT;
-TBAG_API void   box_dim_set_args(ui32 * TBAG_RESTRICT dims, ui32 args_count, ...) TBAG_NOEXCEPT;
-TBAG_API void   box_dim_set_vargs(ui32 * TBAG_RESTRICT dims, ui32 args_count, va_list ap) TBAG_NOEXCEPT;
-TBAG_API void   box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API ui32 * box_dim_clone_with_mem_size(ui32 const * src, ui32 dims_size, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API bool   box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT;
-TBAG_API bool   box_dim_is_equals_args(ui32 const * dims1, ui32 rank1, ui32 rank2, ...) TBAG_NOEXCEPT;
-TBAG_API bool   box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list ap) TBAG_NOEXCEPT;
-TBAG_API ui32   box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API ui32   box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXCEPT;
 
 /**
  * The formula to obtain the index is as follows:

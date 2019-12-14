@@ -136,6 +136,215 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
     // clang-format on
 }
 
+ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
+{
+    if (rank == 0u) {
+        return nullptr;
+    }
+    assert(rank >= 1u);
+    return (ui32*)tbMalloc(GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
+}
+
+ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT
+{
+    if (rank == 0u) {
+        return nullptr;
+    }
+    assert(rank >= 1u);
+    va_list ap;
+    va_start(ap, rank);
+    auto * result = box_dim_malloc_vargs(rank, ap);
+    assert(result != nullptr);
+    va_end(ap);
+    return result;
+}
+
+ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    if (rank == 0u) {
+        return nullptr;
+    }
+    assert(rank >= 1u);
+    auto * result = box_dim_malloc(rank);
+    assert(result != nullptr);
+    box_dim_set_vargs(result, rank, ap);
+    return result;
+}
+
+ui32 * box_dim_malloc_dims(ui32 rank, ui32 const * dims) TBAG_NOEXCEPT
+{
+    if (rank == 0u) {
+        return nullptr;
+    }
+    assert(rank >= 1u);
+    auto * result = box_dim_malloc(rank);
+    assert(dims != nullptr);
+    box_dim_set_dims(result, rank, dims);
+    return result;
+}
+
+void box_dim_free(ui32 * dims) TBAG_NOEXCEPT
+{
+    assert(dims != nullptr);
+    tbFree(dims);
+}
+
+void box_dim_set_args(ui32 * TBAG_RESTRICT result, ui32 args_count, ...) TBAG_NOEXCEPT
+{
+    assert(result != nullptr);
+    va_list ap;
+    va_start(ap, args_count);
+    box_dim_set_vargs(result, args_count, ap);
+    va_end(ap);
+}
+
+void box_dim_set_vargs(ui32 * TBAG_RESTRICT result, ui32 args_count, va_list ap) TBAG_NOEXCEPT
+{
+    assert(result != nullptr);
+    va_list ap2;
+    va_copy(ap2, ap);
+    for (ui32 i = 0; i < args_count; ++i) {
+        result[i] = va_arg(ap2, ui32);
+    }
+    va_end(ap2);
+}
+
+void box_dim_set_dims(ui32 * TBAG_RESTRICT result, ui32 args_count, ui32 const * dims) TBAG_NOEXCEPT
+{
+    assert(result != nullptr);
+    va_list ap2;
+    for (ui32 i = 0; i < args_count; ++i) {
+        result[i] = dims[i];
+    }
+}
+
+void box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT
+{
+    assert(dest != nullptr);
+    assert(src != nullptr);
+    assert(rank >= 1u);
+    while (rank) {
+        *dest = *src;
+        ++dest;
+        ++src;
+        --rank;
+    }
+}
+
+ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT
+{
+    assert(src != nullptr);
+    assert(rank >= 1u);
+    return box_dim_clone_with_alloc_size(src, rank, rank);
+}
+
+ui32 * box_dim_clone_with_alloc_size(ui32 const * src, ui32 alloc_size, ui32 rank) TBAG_NOEXCEPT
+{
+    assert(src != nullptr);
+    assert(alloc_size >= 1u);
+    assert(rank >= 1u);
+    assert(alloc_size >= rank);
+    ui32 * result = box_dim_malloc(alloc_size);
+    assert(result != nullptr);
+    box_dim_copy(result, src, rank);
+    return result;
+}
+
+bool box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT
+{
+    assert(dims1 != nullptr);
+    assert(dims2 != nullptr);
+    if (rank1 != rank2) {
+        return false;
+    }
+    assert(rank1 == rank2);
+    if (dims1 == dims2) {
+        return true;
+    }
+    assert(dims1 != dims2);
+    for (ui32 i = 0u; i < rank1; ++i) {
+        if (dims1[i] != dims2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool box_dim_is_equals_args(ui32 const * dims1, ui32 rank1, ui32 rank2, ...) TBAG_NOEXCEPT
+{
+    va_list ap;
+    va_start(ap, rank2);
+    auto const is_equals = box_dim_is_equals_vargs(dims1, rank1, rank2, ap);
+    va_end(ap);
+    return is_equals;
+}
+
+bool box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list ap) TBAG_NOEXCEPT
+{
+    assert(dims1 != nullptr);
+    if (rank1 != rank2) {
+        return false;
+    }
+    assert(rank1 == rank2);
+    va_list ap2;
+    va_copy(ap2, ap);
+    for (ui32 i = 0u; i < rank1; ++i) {
+        if (dims1[i] != va_arg(ap2, ui32)) {
+            return false;
+        }
+    }
+    va_end(ap2);
+    return true;
+}
+
+ui32 box_dim_get_total_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
+{
+    assert(dims != nullptr);
+    assert(rank >= 1u);
+    auto size = dims[0];
+    for (auto i = 1u; i < rank; ++i) {
+        size *= dims[i];
+    }
+    return size;
+}
+
+ui32 box_dim_get_total_size_args(ui32 rank, ...) TBAG_NOEXCEPT
+{
+    assert(rank >= 1u);
+    va_list ap;
+    va_start(ap, rank);
+    auto const size = box_dim_get_total_size_vargs(rank, ap);
+    va_end(ap);
+    return size;
+}
+
+ui32 box_dim_get_total_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
+{
+    assert(rank >= 1u);
+    va_list ap2;
+    va_copy(ap2, ap);
+    auto size = va_arg(ap2, ui32);
+    for (ui32 i = 1u; i < rank; ++i) {
+        size *= va_arg(ap2, ui32);
+    }
+    va_end(ap2);
+    return size;
+}
+
+ui32 box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXCEPT
+{
+    assert(dims != nullptr);
+    assert(rank >= 1);
+    assert(dim_index < rank);
+
+    ui32 stride = 1;
+    for (auto i = dim_index+1; i < rank; ++i) {
+        stride *= dims[i];
+    }
+    return stride;
+}
+
+
 // -----------------------
 // box_data implementation
 // -----------------------
@@ -143,7 +352,7 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
 box_data::box_data()
 {
     clear();
-    set_opaque(nullptr);
+    clear_opaque();
 }
 
 box_data::~box_data()
@@ -170,220 +379,55 @@ void box_data::clear() TBAG_NOEXCEPT
     info_size = 0;
 }
 
-// clang-format off
-void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer   = v; }
-void box_data::set_opaque(si8    v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
-void box_data::set_opaque(si16   v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
-void box_data::set_opaque(si32   v) TBAG_NOEXCEPT { opaque.data_si32 = v; }
-void box_data::set_opaque(si64   v) TBAG_NOEXCEPT { opaque.data_si64 = v; }
-void box_data::set_opaque(ui8    v) TBAG_NOEXCEPT { opaque.data_ui8  = v; }
-void box_data::set_opaque(ui16   v) TBAG_NOEXCEPT { opaque.data_ui16 = v; }
-void box_data::set_opaque(ui32   v) TBAG_NOEXCEPT { opaque.data_ui32 = v; }
-void box_data::set_opaque(ui64   v) TBAG_NOEXCEPT { opaque.data_ui64 = v; }
-void box_data::set_opaque(fp32   v) TBAG_NOEXCEPT { opaque.data_fp32 = v; }
-void box_data::set_opaque(fp64   v) TBAG_NOEXCEPT { opaque.data_fp64 = v; }
-
-void box_data::get_opaque(void ** v) const TBAG_NOEXCEPT { *v = opaque.pointer  ; }
-void box_data::get_opaque(si8   * v) const TBAG_NOEXCEPT { *v = opaque.data_si8 ; }
-void box_data::get_opaque(si16  * v) const TBAG_NOEXCEPT { *v = opaque.data_si16; }
-void box_data::get_opaque(si32  * v) const TBAG_NOEXCEPT { *v = opaque.data_si32; }
-void box_data::get_opaque(si64  * v) const TBAG_NOEXCEPT { *v = opaque.data_si64; }
-void box_data::get_opaque(ui8   * v) const TBAG_NOEXCEPT { *v = opaque.data_ui8 ; }
-void box_data::get_opaque(ui16  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui16; }
-void box_data::get_opaque(ui32  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui32; }
-void box_data::get_opaque(ui64  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui64; }
-void box_data::get_opaque(fp32  * v) const TBAG_NOEXCEPT { *v = opaque.data_fp32; }
-void box_data::get_opaque(fp64  * v) const TBAG_NOEXCEPT { *v = opaque.data_fp64; }
-
-void * box_data::get_opaque_pointer() const TBAG_NOEXCEPT { return opaque.pointer  ; }
-si8    box_data::get_opaque_si8    () const TBAG_NOEXCEPT { return opaque.data_si8 ; }
-si16   box_data::get_opaque_si16   () const TBAG_NOEXCEPT { return opaque.data_si16; }
-si32   box_data::get_opaque_si32   () const TBAG_NOEXCEPT { return opaque.data_si32; }
-si64   box_data::get_opaque_si64   () const TBAG_NOEXCEPT { return opaque.data_si64; }
-ui8    box_data::get_opaque_ui8    () const TBAG_NOEXCEPT { return opaque.data_ui8 ; }
-ui16   box_data::get_opaque_ui16   () const TBAG_NOEXCEPT { return opaque.data_ui16; }
-ui32   box_data::get_opaque_ui32   () const TBAG_NOEXCEPT { return opaque.data_ui32; }
-ui64   box_data::get_opaque_ui64   () const TBAG_NOEXCEPT { return opaque.data_ui64; }
-fp32   box_data::get_opaque_fp32   () const TBAG_NOEXCEPT { return opaque.data_fp32; }
-fp64   box_data::get_opaque_fp64   () const TBAG_NOEXCEPT { return opaque.data_fp64; }
-// clang-format on
-
-ui32 box_get_size_args(ui32 rank, ...) TBAG_NOEXCEPT
+void box_data::clear_opaque() TBAG_NOEXCEPT
 {
-    assert(rank >= 1);
-    va_list ap;
-    va_start(ap, rank);
-    auto const SIZE = box_get_size_vargs(rank, ap);
-    va_end(ap);
-    return SIZE;
+    memset(&opaque, 0x00, sizeof(opaque));
 }
 
-ui32 box_get_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
+void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
+void box_data::set_opaque(si8  v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
+void box_data::set_opaque(si16 v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
+void box_data::set_opaque(si32 v) TBAG_NOEXCEPT { opaque.data_si32 = v; }
+void box_data::set_opaque(si64 v) TBAG_NOEXCEPT { opaque.data_si64 = v; }
+void box_data::set_opaque(ui8  v) TBAG_NOEXCEPT { opaque.data_ui8  = v; }
+void box_data::set_opaque(ui16 v) TBAG_NOEXCEPT { opaque.data_ui16 = v; }
+void box_data::set_opaque(ui32 v) TBAG_NOEXCEPT { opaque.data_ui32 = v; }
+void box_data::set_opaque(ui64 v) TBAG_NOEXCEPT { opaque.data_ui64 = v; }
+void box_data::set_opaque(fp32 v) TBAG_NOEXCEPT { opaque.data_fp32 = v; }
+void box_data::set_opaque(fp64 v) TBAG_NOEXCEPT { opaque.data_fp64 = v; }
+
+void box_data::get_opaque(void ** v) const TBAG_NOEXCEPT { *v = opaque.pointer; }
+void box_data::get_opaque(si8  * v) const TBAG_NOEXCEPT { *v = opaque.data_si8 ; }
+void box_data::get_opaque(si16 * v) const TBAG_NOEXCEPT { *v = opaque.data_si16; }
+void box_data::get_opaque(si32 * v) const TBAG_NOEXCEPT { *v = opaque.data_si32; }
+void box_data::get_opaque(si64 * v) const TBAG_NOEXCEPT { *v = opaque.data_si64; }
+void box_data::get_opaque(ui8  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui8 ; }
+void box_data::get_opaque(ui16 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui16; }
+void box_data::get_opaque(ui32 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui32; }
+void box_data::get_opaque(ui64 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui64; }
+void box_data::get_opaque(fp32 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp32; }
+void box_data::get_opaque(fp64 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp64; }
+
+void * box_data::get_opaque_pointer() const TBAG_NOEXCEPT { return opaque.pointer; }
+si8  box_data::get_opaque_si8 () const TBAG_NOEXCEPT { return opaque.data_si8 ; }
+si16 box_data::get_opaque_si16() const TBAG_NOEXCEPT { return opaque.data_si16; }
+si32 box_data::get_opaque_si32() const TBAG_NOEXCEPT { return opaque.data_si32; }
+si64 box_data::get_opaque_si64() const TBAG_NOEXCEPT { return opaque.data_si64; }
+ui8  box_data::get_opaque_ui8 () const TBAG_NOEXCEPT { return opaque.data_ui8 ; }
+ui16 box_data::get_opaque_ui16() const TBAG_NOEXCEPT { return opaque.data_ui16; }
+ui32 box_data::get_opaque_ui32() const TBAG_NOEXCEPT { return opaque.data_ui32; }
+ui64 box_data::get_opaque_ui64() const TBAG_NOEXCEPT { return opaque.data_ui64; }
+fp32 box_data::get_opaque_fp32() const TBAG_NOEXCEPT { return opaque.data_fp32; }
+fp64 box_data::get_opaque_fp64() const TBAG_NOEXCEPT { return opaque.data_fp64; }
+
+ui32 box_data::get_dims_total_size() const TBAG_NOEXCEPT
 {
-    assert(rank >= 1);
-    va_list ap2;
-    va_copy(ap2, ap);
-    auto size = va_arg(ap2, ui32);
-    for (ui32 i = 1; i < rank; ++i) {
-        size *= va_arg(ap2, ui32);
+    if (rank == 0u) {
+        return 0u;
     }
-    va_end(ap2);
-    return size;
-}
-
-ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
-{
-    assert(rank >= 1);
-    return (ui32*)tbMalloc(GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
-}
-
-ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT
-{
-    assert(rank >= 1);
-    va_list ap;
-    va_start(ap, rank);
-    auto * dims = box_dim_malloc_vargs(rank, ap);
+    assert(rank >= 1u);
     assert(dims != nullptr);
-    va_end(ap);
-    return dims;
-}
-
-ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
-{
-    assert(rank >= 1);
-    auto * dims = box_dim_malloc(rank);
-    assert(dims != nullptr);
-    box_dim_set_vargs(dims, rank, ap);
-    return dims;
-}
-
-void box_dim_free(ui32 * dims) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    tbFree(dims);
-}
-
-void box_dim_set_args(ui32 * TBAG_RESTRICT dims, ui32 args_count, ...) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    va_list ap;
-    va_start(ap, args_count);
-    box_dim_set_vargs(dims, args_count, ap);
-    va_end(ap);
-}
-
-void box_dim_set_vargs(ui32 * TBAG_RESTRICT dims, ui32 args_count, va_list ap) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    va_list ap2;
-    va_copy(ap2, ap);
-    for (ui32 i = 0; i < args_count; ++i) {
-        dims[i] = va_arg(ap2, ui32);
-    }
-    va_end(ap2);
-}
-
-void box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    assert(rank >= 1);
-    while (rank) {
-        *dest = *src;
-        ++dest;
-        ++src;
-        --rank;
-    }
-}
-
-ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT
-{
-    assert(src != nullptr);
-    assert(rank >= 1);
-    return box_dim_clone_with_mem_size(src, rank, rank);
-}
-
-TBAG_API ui32 * box_dim_clone_with_mem_size(ui32 const * src, ui32 dims_size, ui32 rank) TBAG_NOEXCEPT
-{
-    assert(src != nullptr);
-    assert(rank >= 1);
-    assert(dims_size >= rank);
-    ui32 * result = box_dim_malloc(dims_size);
-    assert(result != nullptr);
-    box_dim_copy(result, src, rank);
-    return result;
-}
-
-bool box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 rank2) TBAG_NOEXCEPT
-{
-    assert(dims1 != nullptr);
-    assert(dims2 != nullptr);
-    if (rank1 != rank2) {
-        return false;
-    }
-    assert(rank1 == rank2);
-    if (dims1 == dims2) {
-        return true;
-    }
-    assert(dims1 != dims2);
-    for (ui32 i = 0; i < rank1; ++i) {
-        if (dims1[i] != dims2[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool box_dim_is_equals_args(ui32 const * dims1, ui32 rank1, ui32 rank2, ...) TBAG_NOEXCEPT
-{
-    va_list ap;
-    va_start(ap, rank2);
-    auto const EQUALS = box_dim_is_equals_vargs(dims1, rank1, rank2, ap);
-    va_end(ap);
-    return EQUALS;
-}
-
-bool box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list ap) TBAG_NOEXCEPT
-{
-    assert(dims1 != nullptr);
-    if (rank1 != rank2) {
-        return false;
-    }
-    assert(rank1 == rank2);
-
-    va_list ap2;
-    va_copy(ap2, ap);
-    for (ui32 i = 0; i < rank1; ++i) {
-        if (dims1[i] != va_arg(ap2, ui32)) {
-            return false;
-        }
-    }
-    va_end(ap2);
-    return true;
-}
-
-ui32 box_dim_get_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    assert(rank >= 1);
-    auto size = dims[0];
-    for (auto i = 1; i < rank; ++i) {
-        size *= dims[i];
-    }
-    return size;
-}
-
-ui32 box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXCEPT
-{
-    assert(dims != nullptr);
-    assert(rank >= 1);
-    assert(dim_index < rank);
-
-    ui32 stride = 1;
-    for (auto i = dim_index+1; i < rank; ++i) {
-        stride *= dims[i];
-    }
-    return stride;
+    return box_dim_get_total_size(dims, rank);
 }
 
 ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
@@ -392,9 +436,9 @@ ui32 box_dim_get_index_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
     assert(rank >= 1);
     va_list ap;
     va_start(ap, rank);
-    auto const INDEX = box_dim_get_index_vargs(dims, rank, ap);
+    auto const index = box_dim_get_index_vargs(dims, rank, ap);
     va_end(ap);
-    return INDEX;
+    return index;
 }
 
 ui32 box_dim_get_index_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT
@@ -802,7 +846,7 @@ Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * e
     assert(box_support_type(type));
     assert(box_support_device(device));
 
-    auto * cloned_box_dims = box_dim_clone_with_mem_size(dims, GET_TOTAL_DIMS_BYTE_TO_RANK(dims_byte), rank);
+    auto * cloned_box_dims = box_dim_clone_with_alloc_size(dims, GET_TOTAL_DIMS_BYTE_TO_RANK(dims_byte), rank);
     assert(cloned_box_dims != nullptr);
     auto const CODE = box_malloc_move_dims(box, type, device, ext, cloned_box_dims, dims_byte, rank);
     if (isFailure(CODE)) {
@@ -821,10 +865,10 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
     assert(box_support_type(type));
     assert(box_support_device(device));
 
-    auto const SIZE = box_dim_get_size(dims, rank);
-    assert(SIZE >= 1);
+    auto const size = box_dim_get_total_size(dims, rank);
+    assert(size >= 1u);
 
-    void * data = box_data_malloc(type, device, SIZE);
+    void * data = box_data_malloc(type, device, size);
     if (data == nullptr) {
         return E_BADALLOC;
     }
@@ -844,8 +888,8 @@ Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * e
         box->ext[3] = 0;
     }
     box->data = data;
-    box->total_data_byte = box_get_type_byte(type) * SIZE;
-    box->size = SIZE;
+    box->total_data_byte = box_get_type_byte(type) * size;
+    box->size = size;
     box->dims = dims;
     box->total_dims_byte = dims_byte;
     box->rank = rank;
@@ -992,30 +1036,30 @@ Err box_resize(box_data * box, btype type, bdev device, ui64 const * ext, ui32 r
     assert(box->rank == rank);
     assert(box_dim_is_equals(box->dims, box->rank, dims, rank));
 
-    auto const SIZE = box_dim_get_size(box->dims, rank);
-    assert(SIZE >= 1);
-    auto const TOTAL_BYTE = box_get_type_byte(type) * SIZE;
+    auto const size = box_dim_get_total_size(box->dims, rank);
+    assert(size >= 1u);
+    auto const TOTAL_BYTE = box_get_type_byte(type) * size;
     assert(TOTAL_BYTE >= 1);
 
     if (box->total_data_byte < TOTAL_BYTE) {
         if (box->data) {
             box_data_free(device, box->data);
         }
-        box->data = box_data_malloc(type, device, SIZE);
+        box->data = box_data_malloc(type, device, size);
         if (box->data == nullptr) {
             box->total_data_byte = 0;
             box->size = 0;
             return E_BADALLOC;
         }
         box->total_data_byte = TOTAL_BYTE;
-        box->size = SIZE;
+        box->size = size;
     } else {
-        box->size = SIZE;
+        box->size = size;
     }
     box->type = type;
     assert(box->total_data_byte >= TOTAL_BYTE);
     assert(box->data != nullptr);
-    assert(box->size == SIZE);
+    assert(box->size == size);
     return E_SUCCESS;
 }
 
