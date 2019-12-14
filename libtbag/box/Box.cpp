@@ -23,17 +23,9 @@ namespace box {
 
 using namespace libtbag::box::details;
 
-Box::Box() : _data(nullptr)
+Box::Box() : _data(std::make_shared<box_data>())
 {
-    auto * box = (box_data*)::malloc(sizeof(box_data));
-    assert(box != nullptr);
-    box->clear();
-    box->set_opaque(nullptr);
-
-    _data.reset(box, [](box_data * ptr){
-        box_free(ptr);
-        ::free(ptr);
-    });
+    // EMPTY.
 }
 
 Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
@@ -305,7 +297,7 @@ Box Box::clone() const
 Box Box::astype(btype type) const
 {
     Box result;
-    auto code = box_malloc_copy_dims(result.get(), type, device(), ext(), dims(), dims_capacity(), rank());
+    auto code = result->alloc_copy_dims(type, device(), ext(), dims(), dims_capacity(), rank());
     if (isFailure(code)) {
         return Box(nullptr);
     }

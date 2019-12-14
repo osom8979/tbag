@@ -17,7 +17,7 @@ TEST(box_api_test, Default)
 {
     box_data box;
 
-    ASSERT_EQ(E_SUCCESS, box_malloc_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box.alloc_args(BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ASSERT_TRUE(box_exists_data(&box));
     ASSERT_TRUE(box_exists_dims(&box));
     ASSERT_NE(nullptr, box.data);
@@ -26,14 +26,6 @@ TEST(box_api_test, Default)
     ASSERT_NE(nullptr, box.dims);
     ASSERT_EQ(3, box.rank);
     ASSERT_EQ(3*sizeof(ui32), box.total_dims_byte);
-
-    box_free(&box);
-    ASSERT_EQ(nullptr, box.data);
-    ASSERT_EQ(0, box.size);
-    ASSERT_EQ(0, box.total_data_byte);
-    ASSERT_EQ(nullptr, box.dims);
-    ASSERT_EQ(0, box.rank);
-    ASSERT_EQ(0, box.total_dims_byte);
 }
 
 TEST(box_api_test, Resize)
@@ -77,14 +69,6 @@ TEST(box_api_test, Resize)
     ASSERT_NE(nullptr, box.dims);
     ASSERT_EQ(4, box.rank);
     ASSERT_EQ(4*sizeof(ui32), box.total_dims_byte);
-
-    box_free(&box);
-    ASSERT_EQ(nullptr, box.data);
-    ASSERT_EQ(0, box.size);
-    ASSERT_EQ(0, box.total_data_byte);
-    ASSERT_EQ(nullptr, box.dims);
-    ASSERT_EQ(0, box.rank);
-    ASSERT_EQ(0, box.total_dims_byte);
 }
 
 TEST(box_api_test, SetAndGet)
@@ -159,8 +143,6 @@ TEST(box_api_test, SetAndGet)
         ASSERT_EQ(i, getter[i]);
         ASSERT_EQ(i, data[i]);
     }
-
-    box_free(&box);
 }
 
 TEST(box_api_test, Clone)
@@ -196,9 +178,6 @@ TEST(box_api_test, Clone)
         ASSERT_EQ(i, box_data);
         ASSERT_EQ(i, box2_data);
     }
-
-    box_free(&box);
-    box_free(&box2);
 }
 
 TEST(box_api_test, box_info)
@@ -233,7 +212,5 @@ TEST(box_api_test, box_info)
     ASSERT_EQ(test_info_data_long_length, box.total_info_byte);
     ASSERT_EQ(test_info_data_short_length, box.info_size);
     ASSERT_EQ(0, strncmp(test_info_data_short, (char const *)box.info, test_info_data_short_length));
-
-    box_free(&box);
 }
 

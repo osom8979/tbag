@@ -76,9 +76,6 @@ TEST(BoxPacketTest, Default)
         ASSERT_EQ(i, box2_data);
         ASSERT_EQ(i, ((si32*)box2.data)[i]);
     }
-
-    box_free(&box);
-    box_free(&box2);
 }
 
 TEST(BoxPacketTest, ToJson)
@@ -126,8 +123,5 @@ TEST(BoxPacketTest, ToJson)
     for (i = 0; i < 24; ++i) {
         ASSERT_EQ(((si32*)box.data)[i], ((si32*)box2.data)[i]);
     }
-
-    box_free(&box);
-    box_free(&box2);
 }
 

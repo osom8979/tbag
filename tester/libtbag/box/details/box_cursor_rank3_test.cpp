@@ -30,7 +30,7 @@ struct box_cursor_rank3_fixture : public testing::Test
 
     void TearDown() override
     {
-        box_free(&box);
+        // EMPTY.
     }
 };
 

@@ -290,8 +290,18 @@ struct TBAG_API box_data
     box_data();
     ~box_data();
 
+    void release();
+
     void clear() TBAG_NOEXCEPT;
     void clear_opaque() TBAG_NOEXCEPT;
+
+    Err alloc_copy_dims(btype src_type, bdev src_device, ui64 const * src_ext,
+                        ui32 const * src_dims, ui32 src_dims_byte, ui32 src_rank);
+    Err alloc_move_dims(btype src_type, bdev src_device, ui64 const * src_ext,
+                        ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank);
+
+    Err alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...);
+    Err alloc_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap);
 
     bool support_type() const TBAG_NOEXCEPT
     { return box_support_type(type); }
@@ -376,23 +386,15 @@ struct TBAG_API box_cursor
     box_cursor();
     ~box_cursor();
 
-    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
-    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
-    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin_index, int end_index, int step_index) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin_index, int end_index) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin_index) TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index) TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor() TBAG_NOEXCEPT;
 
     bool is_end() const TBAG_NOEXCEPT;
     bool next() TBAG_NOEXCEPT;
 };
-
-// API
-
-TBAG_API Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 const * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT;
-TBAG_API Err box_malloc_args     (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API Err box_malloc_vargs    (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
-TBAG_API Err box_free(box_data * box) TBAG_NOEXCEPT;
 
 TBAG_API Err box_resize_args (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
