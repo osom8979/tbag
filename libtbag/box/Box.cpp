@@ -297,7 +297,7 @@ Box Box::clone() const
 Box Box::astype(btype type) const
 {
     Box result;
-    auto code = result->alloc_copy_dims(type, device(), ext(), dims(), dims_capacity(), rank());
+    auto code = result->alloc_dims_copy(type, device(), ext(), dims(), dims_capacity(), rank());
     if (isFailure(code)) {
         return Box(nullptr);
     }

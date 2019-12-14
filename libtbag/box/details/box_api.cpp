@@ -710,7 +710,33 @@ void box_data::clear_opaque() TBAG_NOEXCEPT
     memset(&opaque, 0x00, sizeof(opaque));
 }
 
-Err box_data::alloc_copy_dims(btype src_type, bdev src_device, ui64 const * src_ext,
+Err box_data::alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...)
+{
+    va_list ap;
+    va_start(ap, src_rank);
+    auto const code = alloc_vargs(src_type, src_device, src_ext, src_rank, ap);
+    va_end(ap);
+    return code;
+}
+
+Err box_data::alloc_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap)
+{
+    assert(src_rank >= 1u);
+    assert(box_support_type(src_type));
+    assert(box_support_device(src_device));
+
+    auto * allocated_dims = box_dim_malloc_vargs(src_rank, ap);
+    assert(allocated_dims != nullptr);
+
+    auto const src_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank);
+    auto const code = alloc_dims_move(src_type, src_device, src_ext, allocated_dims, src_dims_byte, src_rank);
+    if (isFailure(code)) {
+        box_dim_free(allocated_dims);
+    }
+    return code;
+}
+
+Err box_data::alloc_dims_copy(btype src_type, bdev src_device, ui64 const * src_ext,
                               ui32 const * src_dims, ui32 src_dims_byte, ui32 src_rank)
 {
     assert(src_dims != nullptr);
@@ -724,14 +750,14 @@ Err box_data::alloc_copy_dims(btype src_type, bdev src_device, ui64 const * src_
     auto * cloned_box_dims = box_dim_clone_with_alloc_size(src_dims, alloc_size, src_rank);
     assert(cloned_box_dims != nullptr);
 
-    auto const code = alloc_move_dims(src_type, src_device, src_ext, cloned_box_dims, src_dims_byte, src_rank);
+    auto const code = alloc_dims_move(src_type, src_device, src_ext, cloned_box_dims, src_dims_byte, src_rank);
     if (isFailure(code)) {
         box_dim_free(cloned_box_dims);
     }
     return code;
 }
 
-Err box_data::alloc_move_dims(btype src_type, bdev src_device, ui64 const * src_ext,
+Err box_data::alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_ext,
                               ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank)
 {
     assert(src_dims != nullptr);
@@ -774,32 +800,6 @@ Err box_data::alloc_move_dims(btype src_type, bdev src_device, ui64 const * src_
     rank = src_rank;
 
     return E_SUCCESS;
-}
-
-Err box_data::alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...)
-{
-    va_list ap;
-    va_start(ap, src_rank);
-    auto const code = alloc_vargs(src_type, src_device, src_ext, src_rank, ap);
-    va_end(ap);
-    return code;
-}
-
-Err box_data::alloc_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap)
-{
-    assert(src_rank >= 1u);
-    assert(box_support_type(src_type));
-    assert(box_support_device(src_device));
-
-    auto * allocated_dims = box_dim_malloc_vargs(src_rank, ap);
-    assert(allocated_dims != nullptr);
-
-    auto const src_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank);
-    auto const code = alloc_move_dims(src_type, src_device, src_ext, allocated_dims, src_dims_byte, src_rank);
-    if (isFailure(code)) {
-        box_dim_free(allocated_dims);
-    }
-    return code;
 }
 
 void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
@@ -1026,7 +1026,7 @@ Err box_resize(box_data * box, btype type, bdev device, ui64 const * ext, ui32 r
     assert(box_support_type(type));
     assert(box_support_device(device));
     if (box->data == nullptr && box->dims == nullptr) {
-        return box->alloc_copy_dims(type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
+        return box->alloc_dims_copy(type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
     }
 
     ui64 resize_ext[TBAG_BOX_EXT_SIZE] = {0,};
@@ -1044,7 +1044,7 @@ Err box_resize(box_data * box, btype type, bdev device, ui64 const * ext, ui32 r
         if (box->dims) {
             box_dim_free(box->dims);
         }
-        return box->alloc_copy_dims(type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
+        return box->alloc_dims_copy(type, device, ext, dims, GET_RANK_TO_TOTAL_DIMS_BYTE(rank), rank);
     }
 
     assert(box->device == device);
@@ -1118,7 +1118,7 @@ Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_d
     assert(dest != nullptr);
     assert(src != nullptr);
     assert(dest->data == nullptr);
-    auto const code = dest->alloc_copy_dims(type, device, ext, src->dims, src->total_dims_byte, src->rank);
+    auto const code = dest->alloc_dims_copy(type, device, ext, src->dims, src->total_dims_byte, src->rank);
     if (isFailure(code)) {
         return code;
     }

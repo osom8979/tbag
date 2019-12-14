@@ -295,13 +295,12 @@ struct TBAG_API box_data
     void clear() TBAG_NOEXCEPT;
     void clear_opaque() TBAG_NOEXCEPT;
 
-    Err alloc_copy_dims(btype src_type, bdev src_device, ui64 const * src_ext,
-                        ui32 const * src_dims, ui32 src_dims_byte, ui32 src_rank);
-    Err alloc_move_dims(btype src_type, bdev src_device, ui64 const * src_ext,
-                        ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank);
-
     Err alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...);
     Err alloc_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap);
+    Err alloc_dims_copy(btype src_type, bdev src_device, ui64 const * src_ext,
+                        ui32 const * src_dims, ui32 src_dims_byte, ui32 src_rank);
+    Err alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_ext,
+                        ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank);
 
     bool support_type() const TBAG_NOEXCEPT
     { return box_support_type(type); }
