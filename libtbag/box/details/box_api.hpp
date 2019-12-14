@@ -210,6 +210,21 @@ TBAG_API bool box_data_check_address_raw(void const * data_begin, ui32 size, bty
 TBAG_API int  box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT;
 TBAG_API bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
+TBAG_API void * box_cpu_malloc(ui32 byte_size) TBAG_NOEXCEPT;
+TBAG_API void box_cpu_free(void * ptr) TBAG_NOEXCEPT;
+TBAG_API void box_cpu_memcpy(void * TBAG_RESTRICT dest,
+                             void const * TBAG_RESTRICT src,
+                             ui32 byte) TBAG_NOEXCEPT;
+TBAG_API void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
+                                   void const * TBAG_RESTRICT src, btype src_type,
+                                   ui32 size) TBAG_NOEXCEPT;
+TBAG_API void box_cpu_set(void * TBAG_RESTRICT dest, btype dest_type,
+                          void const * TBAG_RESTRICT src, btype src_type) TBAG_NOEXCEPT;
+
+TBAG_API void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT;
+TBAG_API void * box_data_malloc(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT;
+TBAG_API void   box_data_free(bdev device, void * data) TBAG_NOEXCEPT;
+
 /**
  * Box container information structure.
  *
@@ -371,21 +386,7 @@ struct TBAG_API box_cursor
     bool next() TBAG_NOEXCEPT;
 };
 
-// CPU
-
-TBAG_API void * box_cpu_malloc(ui32 byte_size) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_free(void * ptr) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_memcpy(void * TBAG_RESTRICT dest, void const * TBAG_RESTRICT src, ui32 byte) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
-                                   void const * TBAG_RESTRICT src, btype src_type, ui32 size) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_set(void * TBAG_RESTRICT dest, btype dest_type,
-                          void const * TBAG_RESTRICT src, btype src_type) TBAG_NOEXCEPT;
-
 // API
-
-TBAG_API void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT;
-TBAG_API void * box_data_malloc(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT;
-TBAG_API void box_data_free(bdev device, void * data) TBAG_NOEXCEPT;
 
 TBAG_API Err box_malloc_copy_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 const * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT;
 TBAG_API Err box_malloc_move_dims(box_data * box, btype type, bdev device, ui64 const * ext, ui32 * dims, ui32 dims_byte, ui32 rank) TBAG_NOEXCEPT;
