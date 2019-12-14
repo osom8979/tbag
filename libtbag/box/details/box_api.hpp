@@ -118,6 +118,12 @@ using fp64 = double;
 using btype = ui16;
 using bdev  = ui16;
 
+/**
+ * Box any container.
+ *
+ * @author zer0
+ * @date   2019-12-14
+ */
 union box_any
 {
     void * pointer;
@@ -131,6 +137,28 @@ union box_any
     ui64 data_ui64;
     fp32 data_fp32;
     fp64 data_fp64;
+};
+
+struct box_cursor;
+struct box_data;
+
+/**
+ * Box container iterator cursor structure.
+ *
+ * @author zer0
+ * @date   2019-05-16
+ * @date   2019-09-24 (Update properties)
+ */
+struct box_cursor
+{
+    /** Current data pointer. */
+    void * begin;
+
+    /** The exact point where the loop should stop. */
+    void * end;
+
+    /** Byte size to jump step by step. */
+    int stride_byte;
 };
 
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
@@ -185,6 +213,20 @@ TBAG_API ui32 box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) T
 TBAG_API ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 TBAG_API ui32 box_dim_get_offset_dims(ui32 const * dims, ui32 rank, ui32 const * indexes) TBAG_NOEXCEPT;
+
+TBAG_API ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
+TBAG_API void  box_info_free(ui8 * info) TBAG_NOEXCEPT;
+TBAG_API bool  box_info_assign_buffer(ui8 * dest, ui32 dest_size, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT;
+TBAG_API bool  box_info_assign_string(ui8 * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT;
+
+TBAG_API void       * box_data_ptr_offset_raw(void       * data, btype type, ui32 offset) TBAG_NOEXCEPT;
+TBAG_API void const * box_data_ptr_offset_raw(void const * data, btype type, ui32 offset) TBAG_NOEXCEPT;
+
+TBAG_API bool box_data_check_address_raw(void const * data_begin, ui32 size, btype type,
+                                         void const * check_data) TBAG_NOEXCEPT;
+
+TBAG_API int  box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT;
+TBAG_API bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
 /**
  * Box container information structure.
@@ -305,39 +347,6 @@ struct TBAG_API box_data : private Noncopyable
 
     ui32 get_dims_total_size() const TBAG_NOEXCEPT;
 };
-
-TBAG_API ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT;
-TBAG_API void  box_info_free(ui8 * info) TBAG_NOEXCEPT;
-TBAG_API bool  box_info_assign(ui8 * dest, ui32 dest_size, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT;
-TBAG_API bool  box_info_assign_string(ui8 * dest, ui32 dest_size, char const * src) TBAG_NOEXCEPT;
-
-TBAG_API void       * box_data_ptr_offset_raw(void       * data, btype type, ui32 offset) TBAG_NOEXCEPT;
-TBAG_API void const * box_data_ptr_offset_raw(void const * data, btype type, ui32 offset) TBAG_NOEXCEPT;
-
-TBAG_API bool box_data_check_address_raw(void const * data_begin, ui32 size, btype type,
-                                         void const * check_data) TBAG_NOEXCEPT;
-
-/**
- * Box container iterator cursor structure.
- *
- * @author zer0
- * @date   2019-05-16
- * @date   2019-09-24 (Update properties)
- */
-struct box_cursor
-{
-    /** Current data pointer. */
-    void * begin;
-
-    /** The exact point where the loop should stop. */
-    void * end;
-
-    /** Byte size to jump step by step. */
-    int stride_byte;
-};
-
-TBAG_API int  box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT;
-TBAG_API bool box_index_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, void * data, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
 TBAG_API bool box_cursor_init(box_cursor * cursor, box_data const * box, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
