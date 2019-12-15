@@ -24,6 +24,8 @@
 #include <cstdint>
 #include <cstdarg>
 
+#include <utility>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -387,6 +389,14 @@ struct TBAG_API box_data
     void const * get_data_ptr_by_offset(ui32 offset) const TBAG_NOEXCEPT;
 
     bool check_data_address(void const * test_data_pointer) const TBAG_NOEXCEPT;
+
+    template <typename ... Args>
+    ui32 get_offset_args(Args && ... args) const TBAG_NOEXCEPT
+    { return box_dim_get_offset_args(dims, rank, std::forward<Args>(args) ...); }
+    ui32 get_offset_vargs(va_list ap) const TBAG_NOEXCEPT
+    { return box_dim_get_offset_vargs(dims, rank, ap); }
+    ui32 get_offset_dims(ui32 const * indexes) const TBAG_NOEXCEPT
+    { return box_dim_get_offset_dims(dims, rank, indexes); }
 
     bool checked_assign_info_buffer(ui8 const * src, ui32 src_size);
     bool checked_assign_info_string(char const * src);
