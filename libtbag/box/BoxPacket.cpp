@@ -370,7 +370,7 @@ public:
             }
 
             if (total_dims >= 1) {
-                auto code = box_resize(box, type, device, ext, dims_size, dims_data);
+                auto code = box->resize_dims(type, device, ext, dims_size, dims_data);
                 if (isFailure(code)) {
                     return std::make_pair(code, COMPUTED_SIZE);
                 }

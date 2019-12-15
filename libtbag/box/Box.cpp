@@ -126,7 +126,7 @@ Err Box::reshape_args(btype type, ui32 rank, ...)
 
 Err Box::reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
 {
-    return box_resize_vargs(_data.get(), type, device, ext, rank, ap);
+    return get()->resize_vargs(type, device, ext, rank, ap);
 }
 
 Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
@@ -144,7 +144,7 @@ Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
 
 Err Box::reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
 {
-    return box_resize(_data.get(), type, device, ext, rank, dims);
+    return get()->resize_dims(type, device, ext, rank, dims);
 }
 
 Err Box::reshape_dims(btype type, ui32 rank, ui32 const * dims)

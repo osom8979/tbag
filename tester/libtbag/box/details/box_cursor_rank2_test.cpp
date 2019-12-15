@@ -21,7 +21,7 @@ struct box_cursor_rank2_fixture : public testing::Test
 
     void SetUp() override
     {
-        box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 2, DIM0, DIM1);
+        box.resize_args(BT_INT32, BD_CPU, nullptr, 2, DIM0, DIM1);
         for (int i = 0; i < DIM0*DIM1; ++i) {
             box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
         }

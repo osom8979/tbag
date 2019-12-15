@@ -363,6 +363,10 @@ struct TBAG_API box_data
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin) TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index) TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor() TBAG_NOEXCEPT;
+
+    Err resize_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...);
+    Err resize_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap);
+    Err resize_dims(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ui32 const * src_dims);
 };
 
 /**
@@ -398,10 +402,6 @@ struct TBAG_API box_cursor
     bool is_end() const TBAG_NOEXCEPT;
     bool next() TBAG_NOEXCEPT;
 };
-
-TBAG_API Err box_resize_args (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API Err box_resize_vargs(box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
-TBAG_API Err box_resize      (box_data * box, btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims) TBAG_NOEXCEPT;
 
 TBAG_API Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;
 TBAG_API Err box_clone(box_data * dest, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;

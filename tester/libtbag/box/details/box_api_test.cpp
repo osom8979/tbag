@@ -32,7 +32,7 @@ TEST(box_api_test, Resize)
 {
     box_data box;
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 3, 3, 3));
+    ASSERT_EQ(E_SUCCESS, box.resize_args(BT_INT32, BD_CPU, nullptr, 3, 3, 3, 3));
     ASSERT_TRUE(box.exists_data());
     ASSERT_TRUE(box.exists_dims());
     ASSERT_NE(nullptr, box.data);
@@ -47,7 +47,7 @@ TEST(box_api_test, Resize)
     auto const total_dims_byte = box.total_dims_byte;
 
     // Down size.
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 2, 2, 2));
+    ASSERT_EQ(E_SUCCESS, box.resize_args(BT_INT32, BD_CPU, nullptr, 2, 2, 2));
     ASSERT_TRUE(box.exists_data());
     ASSERT_TRUE(box.exists_dims());
     ASSERT_EQ(data, box.data);
@@ -58,7 +58,7 @@ TEST(box_api_test, Resize)
     ASSERT_EQ(total_dims_byte, box.total_dims_byte);
 
     // Up size.
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_FLOAT64, BD_CPU, nullptr, 4, 4, 4, 4, 4));
+    ASSERT_EQ(E_SUCCESS, box.resize_args(BT_FLOAT64, BD_CPU, nullptr, 4, 4, 4, 4, 4));
     ASSERT_TRUE(box.exists_data());
     ASSERT_TRUE(box.exists_dims());
     // ASSERT_NE(data, box.data); // Can be assigned to the same address.
@@ -75,7 +75,7 @@ TEST(box_api_test, SetAndGet)
 {
     box_data box;
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box.resize_args(BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 * data = (ui32*)box.data;
     ASSERT_NE(nullptr, data);
 
@@ -149,7 +149,7 @@ TEST(box_api_test, Clone)
 {
     box_data box;
 
-    ASSERT_EQ(E_SUCCESS, box_resize_args(&box, BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
+    ASSERT_EQ(E_SUCCESS, box.resize_args(BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
     for (i = 0; i < 24; ++i) {
         box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
