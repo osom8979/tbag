@@ -68,11 +68,11 @@ TEST(BoxPacketTest, Default)
 
     for (i = 0; i < 24; ++i) {
         si32 box_data;
-        box_data_get(&box, &box_data, BT_INT32, BD_CPU, nullptr, i);
+        box.get_data(&box_data, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, box_data);
 
         si32 box2_data;
-        box_data_get(&box2, &box2_data, BT_INT32, BD_CPU, nullptr, i);
+        box2.get_data(&box2_data, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, box2_data);
         ASSERT_EQ(i, ((si32*)box2.data)[i]);
     }

@@ -113,30 +113,30 @@ TEST(box_api_test, SetAndGet)
 
     ui32 getter[24] = {0,};
     i = 0;
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 1);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 0);
-    box_data_get_args(&box, &getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 1);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 0);
+    box.get_data_args(&getter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 1);
 
     for (i = 0; i < 24; ++i) {
         ASSERT_EQ(i, setter[i]);
@@ -174,8 +174,8 @@ TEST(box_api_test, Clone)
     for (i = 0; i < 24; ++i) {
         si32 box_data;
         si32 box2_data;
-        box_data_get(&box, &box_data, BT_INT32, BD_CPU, nullptr, i);
-        box_data_get(&box2, &box2_data, BT_INT32, BD_CPU, nullptr, i);
+        box.get_data(&box_data, BT_INT32, BD_CPU, nullptr, i);
+        box2.get_data(&box2_data, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, box_data);
         ASSERT_EQ(i, box2_data);
     }
