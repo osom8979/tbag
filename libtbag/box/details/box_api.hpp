@@ -382,6 +382,11 @@ struct TBAG_API box_data
     ErrPair<box_data> clone(btype change_device, ui64 const * change_ext) const;
     ErrPair<box_data> clone(btype change_type) const;
     ErrPair<box_data> clone() const;
+
+    void       * get_data_ptr_by_offset(ui32 offset)       TBAG_NOEXCEPT;
+    void const * get_data_ptr_by_offset(ui32 offset) const TBAG_NOEXCEPT;
+
+    bool check_data_address(void const * test_data_pointer) const TBAG_NOEXCEPT;
 };
 
 /**
@@ -429,11 +434,6 @@ TBAG_API Err box_data_get_vargs(box_data const * box, void * data, btype data_ty
 TBAG_API Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 size) TBAG_NOEXCEPT;
 TBAG_API Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT;
 TBAG_API Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
-
-TBAG_API void       * box_data_ptr_offset(box_data       * box, ui32 offset) TBAG_NOEXCEPT;
-TBAG_API void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT;
-
-TBAG_API bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCEPT;
 
 TBAG_API bool box_info_checked_assign(box_data * dest, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT;
 TBAG_API bool box_info_checked_assign(box_data * dest, box_data const * src) TBAG_NOEXCEPT;

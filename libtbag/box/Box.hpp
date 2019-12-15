@@ -806,7 +806,7 @@ public:
         assert(exists());
         assert(is_btype_equals<ResultType>(type()));
         assert(0 <= COMPARE_AND(i) < size());
-        return *((ResultType*)libtbag::box::details::box_data_ptr_offset(get(), i));
+        return *((ResultType*)get()->get_data_ptr_by_offset(i));
     }
 
     template <typename T>
@@ -816,7 +816,7 @@ public:
         assert(exists());
         assert(is_btype_equals<ResultType>(type()));
         assert(0 <= COMPARE_AND(i) < size());
-        return *((ResultType*)libtbag::box::details::box_data_ptr_offset(get(), i));
+        return *((ResultType*)get()->get_data_ptr_by_offset(i));
     }
 
     template <typename T>

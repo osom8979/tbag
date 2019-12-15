@@ -1126,6 +1126,21 @@ ErrPair<box_data> box_data::clone() const
     return clone(type, device, ext);
 }
 
+void * box_data::get_data_ptr_by_offset(ui32 offset) TBAG_NOEXCEPT
+{
+    return box_data_ptr_offset_raw(data, type, offset);
+}
+
+void const * box_data::get_data_ptr_by_offset(ui32 offset) const TBAG_NOEXCEPT
+{
+    return box_data_ptr_offset_raw(data, type, offset);
+}
+
+bool box_data::check_data_address(void const * test_data_pointer) const TBAG_NOEXCEPT
+{
+    return box_data_check_address_raw(data, size, type, test_data_pointer);
+}
+
 // -------------------------
 // box_cursor implementation
 // -------------------------
@@ -1194,7 +1209,7 @@ Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_d
     assert(box_support_device(data_device));
 
     if (box->device == BD_CPU && data_device == BD_CPU) {
-        box_cpu_set(box_data_ptr_offset(box, box_data_offset), box->type, data, data_type);
+        box_cpu_set(box->get_data_ptr_by_offset(box_data_offset), box->type, data, data_type);
         return E_SUCCESS;
     }
     return E_ENOSYS;
@@ -1233,7 +1248,7 @@ Err box_data_get(box_data const * box, void * data, btype data_type, bdev data_d
     assert(box_support_device(data_device));
 
     if (box->device == BD_CPU && data_device == BD_CPU) {
-        box_cpu_set(data, data_type, box_data_ptr_offset(box, box_data_offset), box->type);
+        box_cpu_set(data, data_type, box->get_data_ptr_by_offset(box_data_offset), box->type);
         return E_SUCCESS;
     }
     return E_ENOSYS;
@@ -1315,25 +1330,6 @@ Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     assert(dest != nullptr);
     assert(src != nullptr);
     return box_data_copy(dest, src, src->size);
-}
-
-void * box_data_ptr_offset(box_data * box, ui32 offset) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    return box_data_ptr_offset_raw(box->data, box->type, offset);
-}
-
-void const * box_data_ptr_offset(box_data const * box, ui32 offset) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    return box_data_ptr_offset_raw((void const *)box->data, box->type, offset);
-}
-
-bool box_data_check_address(box_data const * box, void const * data) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    assert(data != nullptr);
-    return box_data_check_address_raw(box->data, box->size, box->type, data);
 }
 
 bool box_info_checked_assign(box_data * dest, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT
