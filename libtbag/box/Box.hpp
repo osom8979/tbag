@@ -612,7 +612,7 @@ public:
         } else {
             ui32 offset = 0;
             for (; begin != end; ++begin) {
-                libtbag::box::details::box_data_set(get(), begin, type, device, ext, offset);
+                get()->set_data(begin, type, device, ext, offset);
                 ++offset;
             }
         }
@@ -657,7 +657,7 @@ public:
             for (auto & i1 : items) {
                 assert(i1.size() == dim_2d);
                 for (auto & i2 : i1) {
-                    libtbag::box::details::box_data_set(get(), &i2, type, device, ext, offset);
+                    get()->set_data(&i2, type, device, ext, offset);
                     ++offset;
                 }
             }
@@ -697,7 +697,7 @@ public:
                 for (auto & i2 : i1) {
                     assert(i2.size() == dim_3d);
                     for (auto & i3 : i2) {
-                        libtbag::box::details::box_data_set(get(), &i3, type, device, ext, offset);
+                        get()->set_data(&i3, type, device, ext, offset);
                         ++offset;
                     }
                 }
@@ -744,7 +744,7 @@ public:
                     for (auto & i3 : i2) {
                         assert(i3.size() == dim_4d);
                         for (auto & i4 : i3) {
-                            libtbag::box::details::box_data_set(get(), &i4, type, device, ext, offset);
+                            get()->set_data(&i4, type, device, ext, offset);
                             ++offset;
                         }
                     }

@@ -21,7 +21,7 @@ TEST(BoxPacketTest, Default)
     ASSERT_EQ(E_SUCCESS, box.resize_args(BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
     for (i = 0; i < 24; ++i) {
-        box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
+        box.set_data(&i, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, ((si32*)box.data)[i]);
     }
 
@@ -85,7 +85,7 @@ TEST(BoxPacketTest, ToJson)
     ASSERT_EQ(E_SUCCESS, box.resize_args(BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
     for (i = 0; i < 24; ++i) {
-        box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
+        box.set_data(&i, BT_INT32, BD_CPU, nullptr, i);
         ASSERT_EQ(i, ((si32*)box.data)[i]);
     }
 

@@ -391,6 +391,15 @@ struct TBAG_API box_data
     bool checked_assign_info_buffer(ui8 const * src, ui32 src_size);
     bool checked_assign_info_string(char const * src);
     bool checked_assign_info_box(box_data const * src);
+
+    Err set_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
+                 ui32 dest_data_offset) TBAG_NOEXCEPT;
+    Err set_data_args(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
+                      ui32 dest_rank, ...) TBAG_NOEXCEPT;
+    Err set_data_vargs(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
+                       ui32 dest_rank, va_list dest_ap) TBAG_NOEXCEPT;
+    Err set_data_dims(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
+                      ui32 dest_rank, ui32 const * dest_indexes) TBAG_NOEXCEPT;
 };
 
 /**
@@ -426,10 +435,6 @@ struct TBAG_API box_cursor
     bool is_end() const TBAG_NOEXCEPT;
     bool next() TBAG_NOEXCEPT;
 };
-
-TBAG_API Err box_data_set      (box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT;
-TBAG_API Err box_data_set_args (box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;
-TBAG_API Err box_data_set_vargs(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, va_list ap) TBAG_NOEXCEPT;
 
 TBAG_API Err box_data_get      (box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT;
 TBAG_API Err box_data_get_args (box_data const * box, void * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;

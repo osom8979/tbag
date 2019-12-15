@@ -86,30 +86,30 @@ TEST(box_api_test, SetAndGet)
     }
 
     i = 0;
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 1);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 0);
-    box_data_set_args(&box, &setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 0, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 1, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 0, 2, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 0, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 1, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 1, 2, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 0, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 1, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 2, 2, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 0, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 1, 1);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 0);
+    box.set_data_args(&setter[i++], BT_INT32, BD_CPU, nullptr, 3, 3, 2, 1);
 
     ui32 getter[24] = {0,};
     i = 0;
@@ -152,7 +152,7 @@ TEST(box_api_test, Clone)
     ASSERT_EQ(E_SUCCESS, box.resize_args(BT_INT32, BD_CPU, nullptr, 3, 4, 3, 2));
     ui32 i = 0;
     for (i = 0; i < 24; ++i) {
-        box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
+        box.set_data(&i, BT_INT32, BD_CPU, nullptr, i);
     }
 
     auto err_box2 = box.clone();

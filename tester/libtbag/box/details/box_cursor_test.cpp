@@ -24,7 +24,7 @@ struct box_cursor_fixture : public testing::Test
     {
         box.resize_args(BT_INT32, BD_CPU, nullptr, 3, DIM0, DIM1, DIM2);
         for (int i = 0; i < DIM0*DIM1*DIM2; ++i) {
-            box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
+            box.set_data(&i, BT_INT32, BD_CPU, nullptr, i);
         }
     }
 
