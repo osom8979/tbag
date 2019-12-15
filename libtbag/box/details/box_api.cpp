@@ -1102,11 +1102,12 @@ ErrPair<box_data> box_data::clone(btype change_type, btype change_device, ui64 c
     if (isFailure(code1)) {
         return code1;
     }
-    auto const code2 = box_data_copy(&result.value, this);
+
+    auto const code2 = copy_to_data(&result.value);
     if (isFailure(code2)) {
         return code2;
     }
-    // TODO
+    // TODO: info copy
     result.code = E_SUCCESS;
     return result;
 }
@@ -1185,7 +1186,7 @@ bool box_data::checked_assign_info_box(box_data const * src)
 }
 
 Err box_data::set_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                       ui32 box_data_offset) TBAG_NOEXCEPT
+                       ui32 box_data_offset)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1202,7 +1203,7 @@ Err box_data::set_data(void const * src_data, btype src_type, bdev src_device, u
 }
 
 Err box_data::set_data_args(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                            ui32 box_rank, ...) TBAG_NOEXCEPT
+                            ui32 box_rank, ...)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1216,7 +1217,7 @@ Err box_data::set_data_args(void const * src_data, btype src_type, bdev src_devi
 }
 
 Err box_data::set_data_vargs(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                             ui32 box_rank, va_list box_ap) TBAG_NOEXCEPT
+                             ui32 box_rank, va_list box_ap)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1226,7 +1227,7 @@ Err box_data::set_data_vargs(void const * src_data, btype src_type, bdev src_dev
 }
 
 Err box_data::set_data_dims(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                            ui32 box_rank, ui32 const * box_indexes) TBAG_NOEXCEPT
+                            ui32 box_rank, ui32 const * box_indexes)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1236,7 +1237,7 @@ Err box_data::set_data_dims(void const * src_data, btype src_type, bdev src_devi
 }
 
 Err box_data::get_data(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                       ui32 box_data_offset) const TBAG_NOEXCEPT
+                       ui32 box_data_offset) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
@@ -1253,7 +1254,7 @@ Err box_data::get_data(void * out_data, btype out_type, bdev out_device, ui64 co
 }
 
 Err box_data::get_data_args(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                            ui32 box_rank, ...) const TBAG_NOEXCEPT
+                            ui32 box_rank, ...) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
@@ -1267,7 +1268,7 @@ Err box_data::get_data_args(void * out_data, btype out_type, bdev out_device, ui
 }
 
 Err box_data::get_data_vargs(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                             ui32 box_rank, va_list box_ap) const TBAG_NOEXCEPT
+                             ui32 box_rank, va_list box_ap) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
@@ -1278,7 +1279,7 @@ Err box_data::get_data_vargs(void * out_data, btype out_type, bdev out_device, u
 }
 
 Err box_data::get_data_dims(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                            ui32 box_rank, ui32 const * box_indexes) const TBAG_NOEXCEPT
+                            ui32 box_rank, ui32 const * box_indexes) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
@@ -1286,6 +1287,57 @@ Err box_data::get_data_dims(void * out_data, btype out_type, bdev out_device, ui
     assert(rank >= 1u);
     auto const box_data_offset = box_dim_get_offset_dims(dims, box_rank, box_indexes);
     return get_data(out_data, out_type, out_device, out_ext, box_data_offset);
+}
+
+Err box_data::copy_from_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_size)
+{
+    assert(src_data != nullptr);
+    assert(data != src_data);
+    assert(box_support_type(src_type));
+    assert(box_support_device(src_device));
+    assert(src_size >= 1u);
+
+    if (size < src_size) {
+        return E_ILLARGS;
+    }
+
+    if (device == BD_CPU && src_device == BD_CPU) {
+        if (type == src_type) {
+            box_cpu_memcpy(data, src_data, box_get_type_byte(src_type)*src_size);
+        } else {
+            box_cpu_element_copy(data, type, src_data, src_type, src_size);
+        }
+        return E_SUCCESS;
+    } else if (device == BD_CUDA && src_device == BD_CUDA) {
+        // TODO
+    } else if (device == BD_CL && src_device == BD_CL) {
+        // TODO
+    }
+    return E_ENOSYS;
+}
+
+Err box_data::copy_to_data(box_data * dest, ui32 data_size) const
+{
+    assert(dest != nullptr);
+    if (data_size < 1u) {
+        return E_ILLARGS;
+    }
+    if (dest->size < data_size) {
+        return E_ILLARGS;
+    }
+    if (size < data_size) {
+        return E_ILLARGS;
+    }
+    if (this == dest) {
+        return E_SUCCESS;
+    }
+    return dest->copy_from_data(data, type, device, ext, data_size);
+}
+
+Err box_data::copy_to_data(box_data * dest) const
+{
+    assert(dest != nullptr);
+    return copy_to_data(dest, size);
 }
 
 // -------------------------
@@ -1346,59 +1398,6 @@ bool box_cursor::next() TBAG_NOEXCEPT
     auto const integer_data_pointer = (std::intptr_t)begin;
     begin = (void*)(integer_data_pointer + stride_byte);
     return is_end();
-}
-
-Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 size) TBAG_NOEXCEPT
-{
-    assert(box != nullptr);
-    assert(data != nullptr);
-    assert(box->data != data);
-    assert(box_support_type(data_type));
-    assert(box_support_device(data_device));
-    assert(size >= 1);
-
-    if (box->size < size) {
-        return E_ILLARGS;
-    }
-
-    if (box->device == BD_CPU && data_device == BD_CPU) {
-        if (box->type == data_type) {
-            box_cpu_memcpy(box->data, data, box_get_type_byte(data_type)*size);
-        } else {
-            box_cpu_element_copy(box->data, box->type, data, data_type, size);
-        }
-        return E_SUCCESS;
-    }
-    return E_ENOSYS;
-}
-
-Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-
-    if (size < 1) {
-        return E_ILLARGS;
-    }
-    if (dest->size < size) {
-        return E_ILLARGS;
-    }
-    if (src->size < size) {
-        return E_ILLARGS;
-    }
-    if (dest == src) {
-        return E_SUCCESS;
-    }
-
-    assert(dest != src);
-    return box_data_copy(dest, src->data, src->type, src->device, src->ext, size);
-}
-
-Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    return box_data_copy(dest, src, src->size);
 }
 
 } // namespace details

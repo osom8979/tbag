@@ -393,22 +393,26 @@ struct TBAG_API box_data
     bool checked_assign_info_box(box_data const * src);
 
     Err set_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                 ui32 box_data_offset) TBAG_NOEXCEPT;
+                 ui32 box_data_offset);
     Err set_data_args(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                      ui32 box_rank, ...) TBAG_NOEXCEPT;
+                      ui32 box_rank, ...);
     Err set_data_vargs(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                       ui32 box_rank, va_list box_ap) TBAG_NOEXCEPT;
+                       ui32 box_rank, va_list box_ap);
     Err set_data_dims(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                      ui32 box_rank, ui32 const * box_indexes) TBAG_NOEXCEPT;
+                      ui32 box_rank, ui32 const * box_indexes);
 
     Err get_data(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                 ui32 box_data_offset) const TBAG_NOEXCEPT;
+                 ui32 box_data_offset) const;
     Err get_data_args(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                      ui32 box_rank, ...) const TBAG_NOEXCEPT;
+                      ui32 box_rank, ...) const;
     Err get_data_vargs(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                       ui32 box_rank, va_list box_ap) const TBAG_NOEXCEPT;
+                       ui32 box_rank, va_list box_ap) const;
     Err get_data_dims(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                      ui32 box_rank, ui32 const * box_indexes) const TBAG_NOEXCEPT;
+                      ui32 box_rank, ui32 const * box_indexes) const;
+
+    Err copy_from_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_size);
+    Err copy_to_data(box_data * dest, ui32 data_size) const;
+    Err copy_to_data(box_data * dest) const;
 };
 
 /**
@@ -444,10 +448,6 @@ struct TBAG_API box_cursor
     bool is_end() const TBAG_NOEXCEPT;
     bool next() TBAG_NOEXCEPT;
 };
-
-TBAG_API Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 size) TBAG_NOEXCEPT;
-TBAG_API Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT;
-TBAG_API Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box

@@ -243,7 +243,7 @@ Err Box::copyFromData(Box const & box)
     if (isFailure(code)) {
         return code;
     }
-    return box_data_copy(get(), box.get());
+    return box->copy_to_data(get());
 }
 
 Err Box::copyToData(Box & box) const
