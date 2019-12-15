@@ -1141,6 +1141,49 @@ bool box_data::check_data_address(void const * test_data_pointer) const TBAG_NOE
     return box_data_check_address_raw(data, size, type, test_data_pointer);
 }
 
+bool box_data::checked_assign_info_buffer(ui8 const * src, ui32 src_size)
+{
+    if (src == nullptr || src_size == 0) {
+        if (info && total_info_byte >= 1) {
+            info[0] = '\0';
+        }
+        info_size = 0u;
+        return true;
+    }
+
+    if (info != nullptr && total_info_byte < src_size) {
+        box_info_free(info);
+        info = nullptr;
+        total_info_byte = 0u;
+        size = 0u;
+    }
+    if (info == nullptr) {
+        info = box_info_malloc(src_size);
+        assert(info != nullptr);
+        total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
+        assert(total_info_byte >= 1u);
+    }
+
+    assert(info != nullptr);
+    assert(total_info_byte >= GET_SIZE_TO_TOTAL_INFO_BYTE(src_size));
+    auto const result = box_info_assign_buffer(info, GET_TOTAL_INFO_BYTE_TO_SIZE(total_info_byte), src, src_size);
+    assert(result);
+    info_size = src_size;
+    return true;
+}
+
+bool box_data::checked_assign_info_string(char const * src)
+{
+    assert(src != nullptr);
+    return checked_assign_info_buffer((ui8 const *)src, strlen(src)*sizeof(char));
+}
+
+bool box_data::checked_assign_info_box(box_data const * src)
+{
+    assert(src != nullptr);
+    return checked_assign_info_buffer(src->info, src->info_size);
+}
+
 // -------------------------
 // box_cursor implementation
 // -------------------------
@@ -1330,52 +1373,6 @@ Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT
     assert(dest != nullptr);
     assert(src != nullptr);
     return box_data_copy(dest, src, src->size);
-}
-
-bool box_info_checked_assign(box_data * dest, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    if (src == nullptr || src_size == 0) {
-        if (dest->info && dest->total_info_byte >= 1) {
-            dest->info[0] = '\0';
-        }
-        dest->info_size = 0;
-        return true;
-    }
-
-    if (dest->info != nullptr && dest->total_info_byte < src_size) {
-        box_info_free(dest->info);
-        dest->info = nullptr;
-        dest->total_info_byte = 0;
-        dest->size = 0;
-    }
-    if (dest->info == nullptr) {
-        dest->info = box_info_malloc(src_size);
-        assert(dest->info != nullptr);
-        dest->total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
-        assert(dest->total_info_byte >= 1);
-    }
-
-    assert(dest->info != nullptr);
-    assert(dest->total_info_byte >= GET_SIZE_TO_TOTAL_INFO_BYTE(src_size));
-    auto const code = box_info_assign_buffer(dest->info, GET_TOTAL_INFO_BYTE_TO_SIZE(dest->total_info_byte), src, src_size);
-    assert(code);
-    dest->info_size = src_size;
-    return true;
-}
-
-bool box_info_checked_assign(box_data * dest, box_data const * src) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    return box_info_checked_assign(dest, src->info, src->info_size);
-}
-
-bool box_info_checked_assign_string(box_data * dest, char const * src) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    return box_info_checked_assign(dest, (ui8 const *)src, strlen(src)*sizeof(char));
 }
 
 } // namespace details

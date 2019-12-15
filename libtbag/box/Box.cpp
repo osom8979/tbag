@@ -77,7 +77,7 @@ void Box::clear()
 
 Err Box::setInfo(ui8 const * info, ui32 size)
 {
-    return box_info_checked_assign(_data.get(), info, size) ? E_SUCCESS : E_COPY;
+    return _data.get()->checked_assign_info_buffer(info, size) ? E_SUCCESS : E_COPY;
 }
 
 Err Box::setInfo(std::string const & info)
@@ -253,7 +253,7 @@ Err Box::copyToData(Box & box) const
 
 Err Box::copyFromInfo(Box const & box)
 {
-    return box_info_checked_assign(get(), box.get()) ? E_SUCCESS : E_COPY;
+    return get()->checked_assign_info_box(box.get()) ? E_SUCCESS : E_COPY;
 }
 
 Err Box::copyToInfo(Box & box) const

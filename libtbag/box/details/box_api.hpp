@@ -387,6 +387,10 @@ struct TBAG_API box_data
     void const * get_data_ptr_by_offset(ui32 offset) const TBAG_NOEXCEPT;
 
     bool check_data_address(void const * test_data_pointer) const TBAG_NOEXCEPT;
+
+    bool checked_assign_info_buffer(ui8 const * src, ui32 src_size);
+    bool checked_assign_info_string(char const * src);
+    bool checked_assign_info_box(box_data const * src);
 };
 
 /**
@@ -434,10 +438,6 @@ TBAG_API Err box_data_get_vargs(box_data const * box, void * data, btype data_ty
 TBAG_API Err box_data_copy(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 size) TBAG_NOEXCEPT;
 TBAG_API Err box_data_copy(box_data * dest, box_data const * src, ui32 size) TBAG_NOEXCEPT;
 TBAG_API Err box_data_copy(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
-
-TBAG_API bool box_info_checked_assign(box_data * dest, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT;
-TBAG_API bool box_info_checked_assign(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
-TBAG_API bool box_info_checked_assign_string(box_data * dest, char const * src) TBAG_NOEXCEPT;
 
 } // namespace details
 } // namespace box
