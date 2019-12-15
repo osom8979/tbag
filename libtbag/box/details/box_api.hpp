@@ -287,8 +287,18 @@ struct TBAG_API box_data
     /** User's data. */
     box_any opaque;
 
-    box_data();
+    box_data() TBAG_NOEXCEPT;
+    box_data(box_data const & obj) = delete;
+    box_data(box_data && obj) TBAG_NOEXCEPT;
     ~box_data();
+
+    box_data & operator =(box_data const & obj) = delete;
+    box_data & operator =(box_data && obj) TBAG_NOEXCEPT;
+
+    void swap(box_data & obj) TBAG_NOEXCEPT;
+
+    friend inline void swap(box_data & lh, box_data & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
     void release();
 
@@ -367,6 +377,11 @@ struct TBAG_API box_data
     Err resize_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...);
     Err resize_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap);
     Err resize_dims(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ui32 const * src_dims);
+
+    ErrPair<box_data> clone(btype change_type, btype change_device, ui64 const * change_ext) const;
+    ErrPair<box_data> clone(btype change_device, ui64 const * change_ext) const;
+    ErrPair<box_data> clone(btype change_type) const;
+    ErrPair<box_data> clone() const;
 };
 
 /**
@@ -402,11 +417,6 @@ struct TBAG_API box_cursor
     bool is_end() const TBAG_NOEXCEPT;
     bool next() TBAG_NOEXCEPT;
 };
-
-TBAG_API Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;
-TBAG_API Err box_clone(box_data * dest, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT;
-TBAG_API Err box_clone(box_data * dest, btype type, box_data const * src) TBAG_NOEXCEPT;
-TBAG_API Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT;
 
 TBAG_API Err box_data_set      (box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT;
 TBAG_API Err box_data_set_args (box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 rank, ...) TBAG_NOEXCEPT;

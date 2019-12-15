@@ -16,6 +16,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <algorithm>
 #include <type_traits>
 
 // -------------------
@@ -662,15 +663,48 @@ void box_data_free(bdev device, void * data) TBAG_NOEXCEPT
 // box_data implementation
 // -----------------------
 
-box_data::box_data()
+box_data::box_data() TBAG_NOEXCEPT
 {
     clear();
     clear_opaque();
 }
 
+box_data::box_data(box_data && obj) TBAG_NOEXCEPT : box_data()
+{
+    swap(obj);
+}
+
 box_data::~box_data()
 {
     release();
+}
+
+box_data & box_data::operator =(box_data && obj) TBAG_NOEXCEPT
+{
+    swap(obj);
+    return *this;
+}
+
+void box_data::swap(box_data & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        std::swap(type, obj.type);
+        std::swap(device, obj.device);
+        std::swap(ext[0], obj.ext[0]);
+        std::swap(ext[1], obj.ext[1]);
+        std::swap(ext[2], obj.ext[2]);
+        std::swap(ext[3], obj.ext[3]);
+        std::swap(data, obj.data);
+        std::swap(total_data_byte, obj.total_data_byte);
+        std::swap(size, obj.size);
+        std::swap(dims, obj.dims);
+        std::swap(total_dims_byte, obj.total_dims_byte);
+        std::swap(rank, obj.rank);
+        std::swap(info, obj.info);
+        std::swap(total_info_byte, obj.total_info_byte);
+        std::swap(info_size, obj.info_size);
+        std::swap(opaque, obj.opaque);
+    }
 }
 
 void box_data::release()
@@ -684,6 +718,7 @@ void box_data::release()
     if (info) {
         box_info_free(info);
     }
+    clear();
 }
 
 void box_data::clear() TBAG_NOEXCEPT
@@ -1059,6 +1094,38 @@ Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext,
     return E_SUCCESS;
 }
 
+ErrPair<box_data> box_data::clone(btype change_type, btype change_device, ui64 const * change_ext) const
+{
+    ErrPair<box_data> result;
+    auto const code1 = result.value.alloc_dims_copy(change_type, change_device, change_ext,
+                                                    dims, total_dims_byte, rank);
+    if (isFailure(code1)) {
+        return code1;
+    }
+    auto const code2 = box_data_copy(&result.value, this);
+    if (isFailure(code2)) {
+        return code2;
+    }
+    // TODO
+    result.code = E_SUCCESS;
+    return result;
+}
+
+ErrPair<box_data> box_data::clone(btype change_device, ui64 const * change_ext) const
+{
+    return clone(type, change_device, change_ext);
+}
+
+ErrPair<box_data> box_data::clone(btype change_type) const
+{
+    return clone(change_type, device, ext);
+}
+
+ErrPair<box_data> box_data::clone() const
+{
+    return clone(type, device, ext);
+}
+
 // -------------------------
 // box_cursor implementation
 // -------------------------
@@ -1117,37 +1184,6 @@ bool box_cursor::next() TBAG_NOEXCEPT
     auto const integer_data_pointer = (std::intptr_t)begin;
     begin = (void*)(integer_data_pointer + stride_byte);
     return is_end();
-}
-
-Err box_clone(box_data * dest, btype type, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    assert(dest->data == nullptr);
-    auto const code = dest->alloc_dims_copy(type, device, ext, src->dims, src->total_dims_byte, src->rank);
-    if (isFailure(code)) {
-        return code;
-    }
-    return box_data_copy(dest, src);
-}
-
-Err box_clone(box_data * dest, btype device, ui64 const * ext, box_data const * src) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    return box_clone(dest, src->type, device, ext, src);
-}
-
-Err box_clone(box_data * dest, btype type, box_data const * src) TBAG_NOEXCEPT
-{
-    assert(dest != nullptr);
-    assert(src != nullptr);
-    return box_clone(dest, type, src->device, src->ext, src);
-}
-
-Err box_clone(box_data * dest, box_data const * src) TBAG_NOEXCEPT
-{
-    return box_clone(dest, src->type, src->device, src->ext, src);
 }
 
 Err box_data_set(box_data * box, void const * data, btype data_type, bdev data_device, ui64 const * ext, ui32 box_data_offset) TBAG_NOEXCEPT

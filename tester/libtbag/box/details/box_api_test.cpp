@@ -155,8 +155,9 @@ TEST(box_api_test, Clone)
         box_data_set(&box, &i, BT_INT32, BD_CPU, nullptr, i);
     }
 
-    box_data box2;
-    ASSERT_EQ(E_SUCCESS, box_clone(&box2, &box));
+    auto err_box2 = box.clone();
+    ASSERT_TRUE(err_box2);
+    box_data box2 = std::move(err_box2.value);
 
     ASSERT_EQ(box.type, box2.type);
     ASSERT_EQ(box.device, box2.device);
