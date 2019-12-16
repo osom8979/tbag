@@ -25,18 +25,18 @@ TEST(BoxTest, Default)
 
     Box b1_move;
     ASSERT_TRUE(b1_move);
-    auto const * b1_data = b1_move.get();
+    auto const * b1_data = b1_move.ptr();
     Box b2 = std::move(b1_move);
     ASSERT_TRUE(b2);
-    auto const * b2_data = b2.get();
+    auto const * b2_data = b2.ptr();
     ASSERT_EQ(b1_data, b2_data);
 
     Box b3;
     Box b4 = b3;
     ASSERT_TRUE(b3);
     ASSERT_TRUE(b4);
-    auto const * b3_data = b3.get();
-    auto const * b4_data = b4.get();
+    auto const * b3_data = b3.ptr();
+    auto const * b4_data = b4.ptr();
     ASSERT_EQ(b3_data, b4_data);
 
     Box b5;
@@ -44,8 +44,8 @@ TEST(BoxTest, Default)
     Box b6(nullptr);
     ASSERT_FALSE(b6);
     b6 = b5;
-    auto const * b5_data = b5.get();
-    auto const * b6_data = b6.get();
+    auto const * b5_data = b5.ptr();
+    auto const * b6_data = b6.ptr();
     ASSERT_EQ(b5_data, b6_data);
 }
 
@@ -76,8 +76,8 @@ TEST(BoxTest, StlContainerCompatibility)
         ASSERT_STREQ("1", container2[0].getInfoString().c_str());
         ASSERT_STREQ("2", container2[1].getInfoString().c_str());
 
-        ASSERT_EQ(container[0].get(), container2[0].get());
-        ASSERT_EQ(container[1].get(), container2[1].get());
+        ASSERT_EQ(container[0].ptr(), container2[0].ptr());
+        ASSERT_EQ(container[1].ptr(), container2[1].ptr());
     }
 
     TBAG_SCENARIO("std::set") {
@@ -115,10 +115,10 @@ TEST(BoxTest, StlContainerCompatibility)
         ASSERT_STREQ("1", container2.find(3)->second.getInfoString().c_str());
         ASSERT_STREQ("2", container2.find(4)->second.getInfoString().c_str());
 
-        ASSERT_EQ(container.find(1)->second.get(), container2.find(1)->second.get());
-        ASSERT_EQ(container.find(2)->second.get(), container2.find(2)->second.get());
-        ASSERT_EQ(container.find(3)->second.get(), container2.find(3)->second.get());
-        ASSERT_EQ(container.find(4)->second.get(), container2.find(4)->second.get());
+        ASSERT_EQ(container.find(1)->second.ptr(), container2.find(1)->second.ptr());
+        ASSERT_EQ(container.find(2)->second.ptr(), container2.find(2)->second.ptr());
+        ASSERT_EQ(container.find(3)->second.ptr(), container2.find(3)->second.ptr());
+        ASSERT_EQ(container.find(4)->second.ptr(), container2.find(4)->second.ptr());
     }
 
     TBAG_SCENARIO("std::unordered_set") {
@@ -156,10 +156,10 @@ TEST(BoxTest, StlContainerCompatibility)
         ASSERT_STREQ("1", container2.find(3)->second.getInfoString().c_str());
         ASSERT_STREQ("2", container2.find(4)->second.getInfoString().c_str());
 
-        ASSERT_EQ(container.find(1)->second.get(), container2.find(1)->second.get());
-        ASSERT_EQ(container.find(2)->second.get(), container2.find(2)->second.get());
-        ASSERT_EQ(container.find(3)->second.get(), container2.find(3)->second.get());
-        ASSERT_EQ(container.find(4)->second.get(), container2.find(4)->second.get());
+        ASSERT_EQ(container.find(1)->second.ptr(), container2.find(1)->second.ptr());
+        ASSERT_EQ(container.find(2)->second.ptr(), container2.find(2)->second.ptr());
+        ASSERT_EQ(container.find(3)->second.ptr(), container2.find(3)->second.ptr());
+        ASSERT_EQ(container.find(4)->second.ptr(), container2.find(4)->second.ptr());
     }
 }
 
@@ -306,10 +306,10 @@ TEST(BoxTest, Info)
 {
     std::string const INFO = "TEST";
     Box box = {{0}};
-    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    box.setInfo(INFO);
     ASSERT_EQ(INFO.size(), box.info_capacity());
     ASSERT_EQ(INFO.size(), box.info_size());
-    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    box.setInfo(INFO);
     ASSERT_EQ(INFO, box.getInfoString());
 }
 
@@ -317,7 +317,7 @@ TEST(BoxTest, EncodeDecode)
 {
     std::string const INFO = "{TEMP STRING}";
     Box box = {{11, 22}};
-    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    box.setInfo(INFO);
     ASSERT_TRUE(box.is_device_cpu());
     ASSERT_TRUE(box.is_si32());
     ASSERT_EQ(2, box.rank());
@@ -356,7 +356,7 @@ TEST(BoxTest, EncodeDecode_ONLYINFO)
 {
     std::string const INFO = "{TEMP STRING}";
     Box box;
-    ASSERT_EQ(E_SUCCESS, box.setInfo(INFO));
+    box.setInfo(INFO);
     ASSERT_EQ(0, box.rank());
     ASSERT_EQ(0, box.size());
     ASSERT_EQ(INFO.size(), box.info_capacity());

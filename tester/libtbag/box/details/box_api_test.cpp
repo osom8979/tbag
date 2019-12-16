@@ -190,7 +190,7 @@ TEST(box_api_test, box_info)
 
     char const test_info_data[] = "INFORMATION";
     auto const test_info_data_length = strlen(test_info_data)*sizeof(char);
-    ASSERT_TRUE(box.checked_assign_info_string(test_info_data));
+    box.checked_assign_info_string(test_info_data);
     ASSERT_NE(nullptr, box.info);
     ASSERT_EQ(test_info_data_length, box.total_info_byte);
     ASSERT_EQ(test_info_data_length, box.info_size);
@@ -198,7 +198,7 @@ TEST(box_api_test, box_info)
 
     char const test_info_data_long[] = "MORE_TEST_INFORMATION";
     auto const test_info_data_long_length = strlen(test_info_data_long)*sizeof(char);
-    ASSERT_TRUE(box.checked_assign_info_string(test_info_data_long));
+    box.checked_assign_info_string(test_info_data_long);
     ASSERT_NE(nullptr, box.info);
     ASSERT_EQ(test_info_data_long_length, box.total_info_byte);
     ASSERT_EQ(test_info_data_long_length, box.info_size);
@@ -207,7 +207,7 @@ TEST(box_api_test, box_info)
     auto const * prev_box_info = box.info;
     char const test_info_data_short[] = "INF";
     auto const test_info_data_short_length = strlen(test_info_data_short)*sizeof(char);
-    ASSERT_TRUE(box.checked_assign_info_string(test_info_data_short));
+    box.checked_assign_info_string(test_info_data_short);
     ASSERT_NE(nullptr, box.info);
     ASSERT_EQ(prev_box_info, box.info);
     ASSERT_EQ(test_info_data_long_length, box.total_info_byte);

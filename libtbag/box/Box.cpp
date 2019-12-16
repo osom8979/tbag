@@ -25,22 +25,22 @@ using namespace libtbag::box::details;
 
 Box::Box() : _data(std::make_shared<box_data>())
 {
-    // EMPTY.
+    assert(exists());
 }
 
 Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
 {
+    assert(!exists());
+}
+
+Box::Box(Box const & obj) TBAG_NOEXCEPT : _data(obj._data)
+{
     // EMPTY.
 }
 
-Box::Box(Box const & obj) TBAG_NOEXCEPT : Box(nullptr)
+Box::Box(Box && obj) TBAG_NOEXCEPT : _data(std::move(obj._data))
 {
-    (*this) = obj;
-}
-
-Box::Box(Box && obj) TBAG_NOEXCEPT : Box(nullptr)
-{
-    (*this) = std::move(obj);
+    // EMPTY.
 }
 
 Box::~Box()
@@ -68,31 +68,32 @@ Box & Box::operator =(std::nullptr_t) TBAG_NOEXCEPT
     return *this;
 }
 
-void Box::clear()
+void Box::createIfNotExists()
 {
-    _data->size = 0;
-    _data->rank = 0;
-    _data->info_size = 0;
+    if (!exists()) {
+        _data = std::make_shared<box_data>();
+    }
 }
 
-Err Box::setInfo(ui8 const * info, ui32 size)
+void Box::setInfo(ui8 const * info, ui32 size)
 {
-    return _data.get()->checked_assign_info_buffer(info, size) ? E_SUCCESS : E_COPY;
+    createIfNotExists();
+    _data->checked_assign_info_buffer(info, size);
 }
 
-Err Box::setInfo(std::string const & info)
+void Box::setInfo(std::string const & info)
 {
     return setInfo((ui8 const *)info.c_str(), static_cast<ui32>(info.size()));
 }
 
-Err Box::setInfo(Buffer const & info)
+void Box::setInfo(Buffer const & info)
 {
     return setInfo((ui8 const *)info.data(), static_cast<ui32>(info.size()));
 }
 
 std::string Box::getInfoString() const
 {
-    if (_data->info) {
+    if (_data && _data->info) {
         return std::string(_data->info, _data->info + _data->info_size);
     }
     return {};
@@ -100,7 +101,7 @@ std::string Box::getInfoString() const
 
 Box::Buffer Box::getInfoBuffer() const
 {
-    if (_data->info) {
+    if (_data && _data->info) {
         return Buffer(_data->info, _data->info + _data->info_size);
     }
     return {};
@@ -110,23 +111,24 @@ Err Box::reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
 {
     va_list ap;
     va_start(ap, rank);
-    auto const CODE = reshape_vargs(type, device, ext, rank, ap);
+    auto const code = reshape_vargs(type, device, ext, rank, ap);
     va_end(ap);
-    return CODE;
+    return code;
 }
 
 Err Box::reshape_args(btype type, ui32 rank, ...)
 {
     va_list ap;
     va_start(ap, rank);
-    auto const CODE = reshape_vargs(type, rank, ap);
+    auto const code = reshape_vargs(type, rank, ap);
     va_end(ap);
-    return CODE;
+    return code;
 }
 
 Err Box::reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
 {
-    return get()->resize_vargs(type, device, ext, rank, ap);
+    createIfNotExists();
+    return _data->resize_vargs(type, device, ext, rank, ap);
 }
 
 Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
@@ -135,16 +137,17 @@ Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
     ui64 const * reshape_ext = nullptr;
     if (exists()) {
         if (!is_device_none()) {
-            reshape_device = device();
+            reshape_device = getDevice();
         }
-        reshape_ext = ext();
+        reshape_ext = getExtensions();
     }
     return reshape_vargs(type, reshape_device, reshape_ext, rank, ap);
 }
 
 Err Box::reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
 {
-    return get()->resize_dims(type, device, ext, rank, dims);
+    createIfNotExists();
+    return _data->resize_dims(type, device, ext, rank, dims);
 }
 
 Err Box::reshape_dims(btype type, ui32 rank, ui32 const * dims)
@@ -153,26 +156,31 @@ Err Box::reshape_dims(btype type, ui32 rank, ui32 const * dims)
     ui64 const * reshape_ext = nullptr;
     if (exists()) {
         if (!is_device_none()) {
-            reshape_device = device();
+            reshape_device = getDevice();
         }
-        reshape_ext = ext();
+        reshape_ext = getExtensions();
     }
     return reshape_dims(type, reshape_device, reshape_ext, rank, dims);
 }
 
-Err Box::reshape_box(box_data const * reference_box_data)
+Err Box::reshape_ref_box(box_data const * reference_box)
 {
-    assert(reference_box_data != nullptr);
-    return reshape_dims(reference_box_data->type,
-                        reference_box_data->device,
-                        reference_box_data->ext,
-                        reference_box_data->rank,
-                        reference_box_data->dims);
+    if (reference_box == nullptr) {
+        return E_ILLARGS;
+    }
+    return reshape_dims(reference_box->type,
+                        reference_box->device,
+                        reference_box->ext,
+                        reference_box->rank,
+                        reference_box->dims);
 }
 
-Err Box::reshape_box(Box const & reference_box_data)
+Err Box::reshape_ref_box(Box const & reference_box)
 {
-    return reshape_box(reference_box_data.get());
+    if (!reference_box) {
+        return E_ILLARGS;
+    }
+    return reshape_ref_box(reference_box.getBoxData());
 }
 
 Box Box::shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
@@ -196,9 +204,9 @@ Box Box::shape_args(btype type, ui32 rank, ...)
 Box Box::shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
 {
     Box result;
-    assert(result);
-    auto const CODE = result.reshape_vargs(type, device, ext, rank, ap);
-    if (isFailure(CODE)) {
+    assert(result.exists());
+    auto const code = result.reshape_vargs(type, device, ext, rank, ap);
+    if (isFailure(code)) {
         return Box(nullptr);
     }
     return result;
@@ -207,9 +215,9 @@ Box Box::shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_li
 Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
 {
     Box result;
-    assert(result);
-    auto const CODE = result.reshape_vargs(type, rank, ap);
-    if (isFailure(CODE)) {
+    assert(result.exists());
+    auto const code = result.reshape_vargs(type, rank, ap);
+    if (isFailure(code)) {
         return Box(nullptr);
     }
     return result;
@@ -218,9 +226,9 @@ Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
 Box Box::shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
 {
     Box result;
-    assert(result);
-    auto const CODE = result.reshape_dims(type, device, ext, rank, dims);
-    if (isFailure(CODE)) {
+    assert(result.exists());
+    auto const code = result.reshape_dims(type, device, ext, rank, dims);
+    if (isFailure(code)) {
         return Box(nullptr);
     }
     return result;
@@ -229,66 +237,72 @@ Box Box::shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 c
 Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
 {
     Box result;
-    assert(result);
-    auto const CODE = result.reshape_dims(type, rank, dims);
-    if (isFailure(CODE)) {
+    assert(result.exists());
+    auto const code = result.reshape_dims(type, rank, dims);
+    if (isFailure(code)) {
         return Box(nullptr);
     }
     return result;
 }
 
-Err Box::copyFromData(Box const & box)
-{
-    auto const code = reshape_box(box);
-    if (isFailure(code)) {
-        return code;
-    }
-    return box->copy_to_data(get());
-}
-
 Err Box::copyToData(Box & box) const
 {
-    return box.copyFromData(*this);
+    if (exists()) {
+        auto const code = box.reshape_ref_box(*this);
+        if (isFailure(code)) {
+            return code;
+        }
+        return box->assign_data(getData(), getType(), getDevice(), getExtensions(), getSize());
+    } else {
+        if (box.exists()) {
+            box.clearData();
+        }
+        return E_SUCCESS;
+    }
 }
 
-Err Box::copyFromInfo(Box const & box)
+Err Box::copyFromData(Box const & box)
 {
-    return get()->checked_assign_info_box(box.get()) ? E_SUCCESS : E_COPY;
+    return box.copyToData(*this);
 }
 
 Err Box::copyToInfo(Box & box) const
 {
-    return box.copyFromInfo(*this);
+    if (exists()) {
+        box->checked_assign_info_buffer(getInfo(), getInfoSize());
+        return E_SUCCESS;
+    } else {
+        if (box.exists()) {
+            box.clearData();
+        }
+        return E_SUCCESS;
+    }
 }
 
-Err Box::copyFrom(Box const & box)
+Err Box::copyFromInfo(Box const & box)
 {
-    if (box.size() == 0 || box.rank() == 0) {
-        return E_ALREADY;
-    }
-
-    auto const code1 = reshape_box(box);
-    if (isFailure(code1)) {
-        return code1;
-    }
-
-    auto const code2 = copyFromData(box);
-    if (isFailure(code2)) {
-        return code2;
-    }
-    return copyFromInfo(box);
+    return box.copyToInfo(*this);
 }
 
 Err Box::copyTo(Box & box) const
 {
-    return box.copyFrom(*this);
+    auto const code = copyToData(box);
+    if (isFailure(code)) {
+        return code;
+    }
+    return copyToInfo(box);
+}
+
+Err Box::copyFrom(Box const & box)
+{
+    return box.copyTo(*this);
 }
 
 Box Box::clone() const
 {
     Box result;
-    auto const CODE = copyTo(result);
-    if (isFailure(CODE)) {
+    auto const code = copyTo(result);
+    if (isFailure(code)) {
         return Box(nullptr);
     }
     return result;
@@ -297,7 +311,8 @@ Box Box::clone() const
 Box Box::astype(btype type) const
 {
     Box result;
-    auto code = result->alloc_dims_copy(type, device(), ext(), dims(), dims_capacity(), rank());
+    auto code = result->alloc_dims_copy(type, getDevice(), getExtensions(),
+                                        getDimensions(), getDimensionsCapacity(), getRank());
     if (isFailure(code)) {
         return Box(nullptr);
     }
@@ -329,12 +344,12 @@ Err Box::setData(Buffer const & info)
 
 Err Box::getDataString(std::string & result) const
 {
-    if (empty()) {
+    if (isEmpty()) {
         return E_NREADY;
     }
     auto const * data = cast<char>();
     assert(data != nullptr);
-    auto const byte_size = size() * getTypeByte();
+    auto const byte_size = getSize() * getTypeByte();
     assert(byte_size >= 1);
     result.assign(data, data + byte_size);
     return E_SUCCESS;
@@ -356,9 +371,9 @@ Err Box::encode(Builder & builder) const
 
 Err Box::encode(Builder & builder, Buffer & buffer) const
 {
-    auto const CODE = encode(builder);
-    if (isFailure(CODE)) {
-        return CODE;
+    auto const code = encode(builder);
+    if (isFailure(code)) {
+        return code;
     }
     buffer.assign(builder.point(), builder.point() + builder.size());
     return E_SUCCESS;
@@ -388,9 +403,9 @@ Err Box::decode(Buffer const & buffer, std::size_t * computed_size)
 
 Err Box::encodeToJson(Builder & builder, std::string & json) const
 {
-    auto const CODE = encode(builder);
-    if (isFailure(CODE)) {
-        return CODE;
+    auto const code = encode(builder);
+    if (isFailure(code)) {
+        return code;
     }
     json = builder.toJsonString();
     return E_SUCCESS;

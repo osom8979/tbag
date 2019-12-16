@@ -137,6 +137,16 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
     // clang-format on
 }
 
+bool box_ext_is_equals(ui64 const * ext1, ui64 const * ext2) TBAG_NOEXCEPT
+{
+    for (int i = 0; i < TBAG_BOX_EXT_SIZE; ++i) {
+        if (ext1[i] != ext2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
 {
     if (rank == 0u) {
@@ -485,7 +495,7 @@ void box_cpu_memcpy(void * TBAG_RESTRICT dest, void const * TBAG_RESTRICT src, u
     assert(dest != nullptr);
     assert(src != nullptr);
     assert(dest != src);
-    assert(byte >= 1);
+    assert(byte >= 1u);
     memcpy(dest, src, byte);
 }
 
@@ -528,7 +538,7 @@ void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
     assert(dest != nullptr);
     assert(src != nullptr);
     assert(dest != src);
-    assert(size >= 1);
+    assert(size >= 1u);
 
     // clang-format off
     switch (src_type) {
@@ -1102,12 +1112,12 @@ ErrPair<box_data> box_data::clone(btype change_type, btype change_device, ui64 c
     if (isFailure(code1)) {
         return code1;
     }
-
-    auto const code2 = copy_to_data(&result.value);
+    auto const code2 = result.value.assign_data(data, type, device, ext, size);
     if (isFailure(code2)) {
         return code2;
     }
-    // TODO: info copy
+    result.value.checked_assign_info_buffer(info, info_size);
+    memcpy(&(result.value.opaque), &opaque, sizeof(opaque));
     result.code = E_SUCCESS;
     return result;
 }
@@ -1142,14 +1152,14 @@ bool box_data::check_data_address(void const * test_data_pointer) const TBAG_NOE
     return box_data_check_address_raw(data, size, type, test_data_pointer);
 }
 
-bool box_data::checked_assign_info_buffer(ui8 const * src, ui32 src_size)
+void box_data::checked_assign_info_buffer(ui8 const * src, ui32 src_size)
 {
     if (src == nullptr || src_size == 0) {
         if (info && total_info_byte >= 1) {
             info[0] = '\0';
         }
         info_size = 0u;
-        return true;
+        return;
     }
 
     if (info != nullptr && total_info_byte < src_size) {
@@ -1158,6 +1168,7 @@ bool box_data::checked_assign_info_buffer(ui8 const * src, ui32 src_size)
         total_info_byte = 0u;
         size = 0u;
     }
+
     if (info == nullptr) {
         info = box_info_malloc(src_size);
         assert(info != nullptr);
@@ -1170,19 +1181,12 @@ bool box_data::checked_assign_info_buffer(ui8 const * src, ui32 src_size)
     auto const result = box_info_assign_buffer(info, GET_TOTAL_INFO_BYTE_TO_SIZE(total_info_byte), src, src_size);
     assert(result);
     info_size = src_size;
-    return true;
 }
 
-bool box_data::checked_assign_info_string(char const * src)
+void box_data::checked_assign_info_string(char const * src)
 {
     assert(src != nullptr);
-    return checked_assign_info_buffer((ui8 const *)src, strlen(src)*sizeof(char));
-}
-
-bool box_data::checked_assign_info_box(box_data const * src)
-{
-    assert(src != nullptr);
-    return checked_assign_info_buffer(src->info, src->info_size);
+    checked_assign_info_buffer((ui8 const *)src, strlen(src)*sizeof(char));
 }
 
 Err box_data::set_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
@@ -1289,18 +1293,14 @@ Err box_data::get_data_dims(void * out_data, btype out_type, bdev out_device, ui
     return get_data(out_data, out_type, out_device, out_ext, box_data_offset);
 }
 
-Err box_data::copy_from_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_size)
+Err box_data::assign_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_size)
 {
     assert(src_data != nullptr);
     assert(data != src_data);
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
     assert(src_size >= 1u);
-
-    if (size < src_size) {
-        return E_ILLARGS;
-    }
-
+    assert(src_size <= size);
     if (device == BD_CPU && src_device == BD_CPU) {
         if (type == src_type) {
             box_cpu_memcpy(data, src_data, box_get_type_byte(src_type)*src_size);
@@ -1314,30 +1314,6 @@ Err box_data::copy_from_data(void const * src_data, btype src_type, bdev src_dev
         // TODO
     }
     return E_ENOSYS;
-}
-
-Err box_data::copy_to_data(box_data * dest, ui32 data_size) const
-{
-    assert(dest != nullptr);
-    if (data_size < 1u) {
-        return E_ILLARGS;
-    }
-    if (dest->size < data_size) {
-        return E_ILLARGS;
-    }
-    if (size < data_size) {
-        return E_ILLARGS;
-    }
-    if (this == dest) {
-        return E_SUCCESS;
-    }
-    return dest->copy_from_data(data, type, device, ext, data_size);
-}
-
-Err box_data::copy_to_data(box_data * dest) const
-{
-    assert(dest != nullptr);
-    return copy_to_data(dest, size);
 }
 
 // -------------------------

@@ -425,8 +425,7 @@ public:
             auto const info_size = info->size();
             if (info_size >= 1) {
                 assert(info_data != nullptr);
-                auto const result = box->checked_assign_info_buffer(info_data, info_size);
-                assert(result);
+                box->checked_assign_info_buffer(info_data, info_size);
             } else {
                 box->info_size = 0;
             }

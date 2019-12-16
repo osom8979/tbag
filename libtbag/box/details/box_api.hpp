@@ -153,6 +153,8 @@ TBAG_API char const * box_get_device_name(bdev dev) TBAG_NOEXCEPT;
 
 TBAG_API ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT;
 
+TBAG_API bool box_ext_is_equals(ui64 const * ext1, ui64 const * ext2) TBAG_NOEXCEPT;
+
 TBAG_API ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT;
 TBAG_API ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT;
 TBAG_API ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT;
@@ -398,9 +400,8 @@ struct TBAG_API box_data
     ui32 get_offset_dims(ui32 const * indexes) const TBAG_NOEXCEPT
     { return box_dim_get_offset_dims(dims, rank, indexes); }
 
-    bool checked_assign_info_buffer(ui8 const * src, ui32 src_size);
-    bool checked_assign_info_string(char const * src);
-    bool checked_assign_info_box(box_data const * src);
+    void checked_assign_info_buffer(ui8 const * src, ui32 src_size);
+    void checked_assign_info_string(char const * src);
 
     Err set_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
                  ui32 box_data_offset);
@@ -420,9 +421,10 @@ struct TBAG_API box_data
     Err get_data_dims(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
                       ui32 box_rank, ui32 const * box_indexes) const;
 
-    Err copy_from_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_size);
-    Err copy_to_data(box_data * dest, ui32 data_size) const;
-    Err copy_to_data(box_data * dest) const;
+    Err assign_data(void const * src_data, btype src_type, bdev src_device,
+                    ui64 const * src_ext, ui32 src_size);
+    Err checked_assign_data(void const * src_data, btype src_type, bdev src_device,
+                            ui64 const * src_ext, ui32 src_size);
 };
 
 /**
