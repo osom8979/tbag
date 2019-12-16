@@ -262,7 +262,6 @@ public:
     using size_type = ui32;
     using difference_type = std::ptrdiff_t;
 
-public:
     using SharedBoxData = std::shared_ptr<box_data>;
 
 public:
@@ -1170,6 +1169,90 @@ public:
 public:
     std::string toJsonText(Err * code = nullptr) const;
     bool fromJsonText(std::string const & json, Err * code = nullptr);
+
+    struct Cursor
+    {
+        box_cursor cursor;
+
+        Cursor() TBAG_NOEXCEPT
+        { /* EMPTY. */ }
+
+        Cursor(box_cursor const & c) TBAG_NOEXCEPT : cursor(c)
+        { /* EMPTY. */ }
+        Cursor(box_cursor && c) TBAG_NOEXCEPT : cursor(std::move(c))
+        { /* EMPTY. */ }
+
+        Cursor(Cursor const & obj) TBAG_NOEXCEPT : cursor(obj.cursor)
+        { /* EMPTY. */ }
+        Cursor(Cursor && obj) TBAG_NOEXCEPT : cursor(std::move(obj.cursor))
+        { /* EMPTY. */ }
+
+        ~Cursor()
+        { /* EMPTY. */ }
+
+        Cursor & operator =(Cursor const & obj) TBAG_NOEXCEPT
+        {
+            if (this != &obj) {
+                cursor = obj.cursor;
+            }
+            return *this;
+        }
+
+        Cursor & operator =(Cursor && obj) TBAG_NOEXCEPT
+        {
+            if (this != &obj) {
+                cursor = std::move(obj.cursor);
+            }
+            return *this;
+        }
+
+        ErrPair<Cursor> createSubCursor(ui32 dim_index, int begin_index, int end_index, int step_index)
+        {
+            auto const err_cursor = cursor.init_cursor(dim_index, begin_index, end_index, step_index);
+            return { err_cursor.code, err_cursor.value };
+        }
+
+        ErrPair<Cursor> createSubCursor(ui32 dim_index, int begin_index, int end_index)
+        {
+            auto const err_cursor = cursor.init_cursor(dim_index, begin_index, end_index);
+            return { err_cursor.code, err_cursor.value };
+        }
+
+        ErrPair<Cursor> createSubCursor(ui32 dim_index, int begin_index)
+        {
+            auto const err_cursor = cursor.init_cursor(dim_index, begin_index);
+            return { err_cursor.code, err_cursor.value };
+        }
+
+        ErrPair<Cursor> createSubCursor(ui32 dim_index)
+        {
+            auto const err_cursor = cursor.init_cursor(dim_index);
+            return { err_cursor.code, err_cursor.value };
+        }
+
+        ErrPair<Cursor> createSubCursor()
+        {
+            auto const err_cursor = cursor.init_cursor();
+            return { err_cursor.code, err_cursor.value };
+        }
+
+        bool isEnd() const
+        {
+            return cursor.is_end();
+        }
+
+        bool next()
+        {
+            return cursor.next();
+        }
+    };
+
+    ErrPair<Cursor> createCursor(void * data_begin, ui32 dim_index, int begin, int end, int step);
+    ErrPair<Cursor> createCursor(ui32 dim_index, int begin, int end, int step);
+    ErrPair<Cursor> createCursor(ui32 dim_index, int begin, int end);
+    ErrPair<Cursor> createCursor(ui32 dim_index, int begin);
+    ErrPair<Cursor> createCursor(ui32 dim_index);
+    ErrPair<Cursor> createCursor();
 };
 
 } // namespace box

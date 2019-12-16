@@ -452,6 +452,60 @@ bool Box::fromJsonText(std::string const & json, Err * code)
     return isSuccess(result);
 }
 
+ErrPair<Box::Cursor> Box::createCursor(void * data_begin, ui32 dim_index, int begin, int end, int step)
+{
+    if (exists()) {
+        return E_EXPIRED;
+    }
+    auto const err_cursor = _data->init_cursor(data_begin, dim_index, begin, end, step);
+    return { err_cursor.code, err_cursor.value };
+}
+
+ErrPair<Box::Cursor> Box::createCursor(ui32 dim_index, int begin, int end, int step)
+{
+    if (exists()) {
+        return E_EXPIRED;
+    }
+    auto const err_cursor = _data->init_cursor(dim_index, begin, end, step);
+    return { err_cursor.code, err_cursor.value };
+}
+
+ErrPair<Box::Cursor> Box::createCursor(ui32 dim_index, int begin, int end)
+{
+    if (exists()) {
+        return E_EXPIRED;
+    }
+    auto const err_cursor = _data->init_cursor(dim_index, begin, end);
+    return { err_cursor.code, err_cursor.value };
+}
+
+ErrPair<Box::Cursor> Box::createCursor(ui32 dim_index, int begin)
+{
+    if (exists()) {
+        return E_EXPIRED;
+    }
+    auto const err_cursor = _data->init_cursor(dim_index, begin);
+    return { err_cursor.code, err_cursor.value };
+}
+
+ErrPair<Box::Cursor> Box::createCursor(ui32 dim_index)
+{
+    if (exists()) {
+        return E_EXPIRED;
+    }
+    auto const err_cursor = _data->init_cursor(dim_index);
+    return { err_cursor.code, err_cursor.value };
+}
+
+ErrPair<Box::Cursor> Box::createCursor()
+{
+    if (exists()) {
+        return E_EXPIRED;
+    }
+    auto const err_cursor = _data->init_cursor();
+    return { err_cursor.code, err_cursor.value };
+}
+
 } // namespace box
 
 // --------------------

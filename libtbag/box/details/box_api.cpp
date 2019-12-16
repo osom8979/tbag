@@ -1336,6 +1336,7 @@ box_cursor::~box_cursor()
 
 ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, int begin_index, int end_index, int step_index) TBAG_NOEXCEPT
 {
+    assert(box != nullptr);
     return box->init_cursor(begin, dim_index, begin_index, end_index, step_index);
 }
 
