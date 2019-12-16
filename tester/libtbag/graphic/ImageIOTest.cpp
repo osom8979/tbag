@@ -27,14 +27,14 @@ TEST(ImageIOTest, ReadImage)
     ASSERT_EQ(512, image.dim(0));
 
     // First RGB pixel.
-    ASSERT_EQ(226, image.offset<uint8_t>(0)); // r
-    ASSERT_EQ(137, image.offset<uint8_t>(1)); // g
-    ASSERT_EQ(125, image.offset<uint8_t>(2)); // b
+    ASSERT_EQ(226, image.getElementByOffset<uint8_t>(0)); // r
+    ASSERT_EQ(137, image.getElementByOffset<uint8_t>(1)); // g
+    ASSERT_EQ(125, image.getElementByOffset<uint8_t>(2)); // b
 
     // Last RGB pixel.
-    ASSERT_EQ(185, image.offset<uint8_t>(image.size() - 3)); // r
-    ASSERT_EQ( 74, image.offset<uint8_t>(image.size() - 2)); // g
-    ASSERT_EQ( 81, image.offset<uint8_t>(image.size() - 1)); // b
+    ASSERT_EQ(185, image.getElementByOffset<uint8_t>(image.size() - 3)); // r
+    ASSERT_EQ( 74, image.getElementByOffset<uint8_t>(image.size() - 2)); // g
+    ASSERT_EQ( 81, image.getElementByOffset<uint8_t>(image.size() - 1)); // b
 
     libtbag::util::Buffer buffer;
     ASSERT_EQ(E_SUCCESS, writeImage(buffer, image, ImageFileFormat::IFF_PNG));
@@ -54,14 +54,14 @@ TEST(ImageIOTest, ReadImage)
     ASSERT_EQ(512, reload.dim(0));
 
     // First RGB pixel.
-    ASSERT_EQ(226, reload.offset<uint8_t>(0)); // r
-    ASSERT_EQ(137, reload.offset<uint8_t>(1)); // g
-    ASSERT_EQ(125, reload.offset<uint8_t>(2)); // b
+    ASSERT_EQ(226, reload.getElementByOffset<uint8_t>(0)); // r
+    ASSERT_EQ(137, reload.getElementByOffset<uint8_t>(1)); // g
+    ASSERT_EQ(125, reload.getElementByOffset<uint8_t>(2)); // b
 
     // Last RGB pixel.
-    ASSERT_EQ(185, reload.offset<uint8_t>(reload.size() - 3)); // r
-    ASSERT_EQ( 74, reload.offset<uint8_t>(reload.size() - 2)); // g
-    ASSERT_EQ( 81, reload.offset<uint8_t>(reload.size() - 1)); // b
+    ASSERT_EQ(185, reload.getElementByOffset<uint8_t>(reload.size() - 3)); // r
+    ASSERT_EQ( 74, reload.getElementByOffset<uint8_t>(reload.size() - 2)); // g
+    ASSERT_EQ( 81, reload.getElementByOffset<uint8_t>(reload.size() - 1)); // b
 }
 
 TEST(ImageIOTest, UseJpeg)

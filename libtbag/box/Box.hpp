@@ -394,6 +394,21 @@ public:
         return _data->type;
     }
 
+    inline bool isSupportType() const TBAG_NOEXCEPT
+    {
+        return libtbag::box::details::box_support_type(getType());
+    }
+
+    inline char const * getTypeName() const TBAG_NOEXCEPT
+    {
+        return libtbag::box::details::box_get_type_name(getType());
+    }
+
+    inline ui32 getTypeByte() const TBAG_NOEXCEPT
+    {
+        return libtbag::box::details::box_get_type_byte(getType());
+    }
+
     // clang-format off
     inline bool is_none() const TBAG_NOEXCEPT { return getType() == type_none(); }
     inline bool is_si8 () const TBAG_NOEXCEPT { return getType() == type_si8 (); }
@@ -436,6 +451,16 @@ public:
     {
         assert(exists());
         return _data->device;
+    }
+
+    inline bool isSupportDevice() const TBAG_NOEXCEPT
+    {
+        return libtbag::box::details::box_support_device(getDevice());
+    }
+
+    inline char const * getDeviceName(bdev dev) const TBAG_NOEXCEPT
+    {
+        return libtbag::box::details::box_get_device_name(getType());
     }
 
     // clang-format off
@@ -498,6 +523,20 @@ public:
     {
         assert(exists());
         return _data->data;
+    }
+
+    template <typename T>
+    inline T * cast() TBAG_NOEXCEPT
+    {
+        assert(exists());
+        return static_cast<T*>(_data->data);
+    }
+
+    template <typename T>
+    inline T const * cast() const TBAG_NOEXCEPT
+    {
+        assert(exists());
+        return static_cast<T const *>(_data->data);
     }
 
     inline ui32 getCapacity() const TBAG_NOEXCEPT
@@ -597,6 +636,16 @@ public:
     {
         assert(exists());
         return _data->rank;
+    }
+
+    inline ui32 getStride(ui32 i) const TBAG_NOEXCEPT
+    {
+        return libtbag::box::details::box_dim_get_stride(getDimensions(), getRank(), i);
+    }
+
+    inline ui32 getStrideByte(ui32 i) const TBAG_NOEXCEPT
+    {
+        return getStride(i) * getTypeByte();
     }
 
 public:
@@ -1033,7 +1082,6 @@ public:
         return E_SUCCESS;
     }
 
-public:
     // clang-format off
     template <typename T> Err assign(init1d_t<T> const & items) { return assign(device_cpu(), nullptr, items); }
     template <typename T> Err assign(init2d_t<T> const & items) { return assign(device_cpu(), nullptr, items); }
@@ -1042,84 +1090,48 @@ public:
     // clang-format on
 
 public:
-    inline bool isSupportType() const TBAG_NOEXCEPT
-    { return libtbag::box::details::box_support_type(getType()); }
-
-    inline bool isSupportDevice() const TBAG_NOEXCEPT
-    { return libtbag::box::details::box_support_device(getDevice()); }
-
-    inline char const * getTypeName() const TBAG_NOEXCEPT
-    { return libtbag::box::details::box_get_type_name(getType()); }
-
-    inline char const * getDeviceName(bdev dev) const TBAG_NOEXCEPT
-    { return libtbag::box::details::box_get_device_name(getType()); }
-
-    inline ui32 getTypeByte() const TBAG_NOEXCEPT
-    { return libtbag::box::details::box_get_type_byte(getType()); }
-
-    inline ui32 getStride(ui32 i) const TBAG_NOEXCEPT
-    { return libtbag::box::details::box_dim_get_stride(getDimensions(), getRank(), i); }
-
-    inline ui32 getStrideByte(ui32 i) const TBAG_NOEXCEPT
-    { return getStride(i) * getTypeByte(); }
-
-public:
     template <typename T>
-    inline T * cast() TBAG_NOEXCEPT
-    { return static_cast<T*>(data()); }
-
-    template <typename T>
-    inline T const * cast() const TBAG_NOEXCEPT
-    { return static_cast<T const *>(data()); }
-
-    template <typename T>
-    inline typename libtbag::remove_cr<T>::type & offset(ui32 i) TBAG_NOEXCEPT
+    inline typename libtbag::remove_cr<T>::type & getElementByOffset(ui32 i) TBAG_NOEXCEPT
     {
-        using ResultType = typename libtbag::remove_cr<T>::type;
+        using result_type = typename libtbag::remove_cr<T>::type;
         assert(exists());
-        assert(is_btype_equals<ResultType>(getType()));
-        assert(i < getSize());
-        return *((ResultType*)_data->get_data_ptr_by_offset(i));
+        assert(is_btype_equals<result_type>(type()));
+        assert(i < size());
+        return *((result_type*)_data->get_data_ptr_by_offset(i));
     }
 
     template <typename T>
-    inline typename libtbag::remove_cr<T>::type const & offset(ui32 i) const TBAG_NOEXCEPT
+    inline typename libtbag::remove_cr<T>::type const & getElementByOffset(ui32 i) const TBAG_NOEXCEPT
     {
-        using ResultType = typename libtbag::remove_cr<T>::type;
+        using result_type = typename libtbag::remove_cr<T>::type const;
         assert(exists());
-        assert(is_btype_equals<ResultType>(getType()));
-        assert(i < getSize());
-        return *((ResultType*)_data->get_data_ptr_by_offset(i));
+        assert(is_btype_equals<result_type>(type()));
+        assert(i < size());
+        return *((result_type*)_data->get_data_ptr_by_offset(i));
     }
-
-    template <typename T>
-    inline typename libtbag::remove_cr<T>::type & operator [](ui32 i) TBAG_NOEXCEPT
-    { return offset<typename libtbag::remove_cr<T>::type>(i); }
-
-    template <typename T>
-    inline typename libtbag::remove_cr<T>::type const & operator [](ui32 i) const TBAG_NOEXCEPT
-    { return offset<typename libtbag::remove_cr<T>::type>(i); }
 
     template <typename T, typename ... Args>
     inline typename libtbag::remove_cr<T>::type & at(Args && ... args) TBAG_NOEXCEPT
     {
-        using ResultType = typename libtbag::remove_cr<T>::type;
+        using result_type = typename libtbag::remove_cr<T>::type;
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         using namespace libtbag::box::details;
-        return offset<ResultType>(box_dim_get_offset_args(getDimensions(),
-                                                          static_cast<ui32>(sizeof...(Args)),
-                                                          std::forward<Args>(args) ...));
+        auto const offset = box_dim_get_offset_args(getDimensions(),
+                                                    static_cast<ui32>(sizeof...(Args)),
+                                                    std::forward<Args>(args) ...);
+        return getElementByOffset<result_type>(offset);
     }
 
     template <typename T, typename ... Args>
     inline typename libtbag::remove_cr<T>::type const & at(Args && ... args) const TBAG_NOEXCEPT
     {
-        using ResultType = typename libtbag::remove_cr<T>::type;
+        using result_type = typename libtbag::remove_cr<T>::type;
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         using namespace libtbag::box::details;
-        return offset<ResultType>(box_dim_get_offset_args(getDimensions(),
-                                                          static_cast<ui32>(sizeof...(Args)),
-                                                          std::forward<Args>(args) ...));
+        auto const offset = box_dim_get_offset_args(getDimensions(),
+                                                    static_cast<ui32>(sizeof...(Args)),
+                                                    std::forward<Args>(args) ...);
+        return getElementByOffset<result_type>(offset);
     }
 
 public:

@@ -324,8 +324,8 @@ TEST(BoxTest, EncodeDecode)
     ASSERT_EQ(2, box.size());
     ASSERT_EQ(1, box.dim(0));
     ASSERT_EQ(2, box.dim(1));
-    ASSERT_EQ(11, box.offset<si32>(0));
-    ASSERT_EQ(22, box.offset<si32>(1));
+    ASSERT_EQ(11, box.getElementByOffset<si32>(0));
+    ASSERT_EQ(22, box.getElementByOffset<si32>(1));
     ASSERT_EQ(INFO.size(), box.info_capacity());
     ASSERT_EQ(INFO.size(), box.info_size());
     ASSERT_EQ(INFO, box.getInfoString());
@@ -345,8 +345,8 @@ TEST(BoxTest, EncodeDecode)
     ASSERT_EQ(2, box2.size());
     ASSERT_EQ(1, box2.dim(0));
     ASSERT_EQ(2, box2.dim(1));
-    ASSERT_EQ(11, box2.offset<si32>(0));
-    ASSERT_EQ(22, box2.offset<si32>(1));
+    ASSERT_EQ(11, box2.getElementByOffset<si32>(0));
+    ASSERT_EQ(22, box2.getElementByOffset<si32>(1));
     ASSERT_EQ(INFO.size(), box2.info_capacity());
     ASSERT_EQ(INFO.size(), box2.info_size());
     ASSERT_EQ(INFO, box2.getInfoString());
