@@ -70,7 +70,11 @@ TEST(ErrPairTest, MakeErrMsg)
 
     ErrMsg err4 = TBAG_MAKE_ERR_MSG(E_ALREADY);
     std::cout << "err4 msg: " << err4.msg << std::endl;
-    ASSERT_FALSE(err4.msg.empty());
+    if (isReleaseMode()) {
+        ASSERT_TRUE(err4.msg.empty());
+    } else {
+        ASSERT_FALSE(err4.msg.empty());
+    }
     ASSERT_EQ(E_ALREADY, err4.code);
 }
 
