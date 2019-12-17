@@ -12,6 +12,7 @@
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
+#include <cstdlib>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
@@ -68,13 +69,34 @@ static void __write_to_buffer(void * context, void * data, int size)
     buffer->insert(buffer->end(), begin, end);
 }
 
-bool writeJpg(int width, int height, int channels, char const * data, int jpeg_quality,
-              libtbag::util::Buffer & buffer)
+bool writePng(int width, int height, int channels, char const * data, int stride_bytes, libtbag::util::Buffer & buffer)
+{
+    int len;
+    auto * png = stbi_write_png_to_mem((unsigned char *)data, stride_bytes, width, height, channels, &len);
+    if (png == nullptr) {
+        return false;
+    }
+    buffer.assign(png, png + len);
+    STBIW_FREE(png);
+    return true;
+}
+
+bool writePng(int width, int height, int channels, char const * data, libtbag::util::Buffer & buffer)
+{
+    return writePng(width, height, channels, data, width * channels, buffer);
+}
+
+bool writeJpg(int width, int height, int channels, char const * data, int jpeg_quality, libtbag::util::Buffer & buffer)
 {
     stbi__write_context s;
     s.func = &__write_to_buffer;
     s.context = (void*)&buffer;
     return stbi_write_jpg_core(&s, width, height, channels, data, jpeg_quality);
+}
+
+bool writeJpg(int width, int height, int channels, char const * data, libtbag::util::Buffer & buffer)
+{
+    return writeJpg(width, height, channels, data, DEFAULT_JPG_QUALITY, buffer);
 }
 
 Err readImage(std::string const & path, Box & image)

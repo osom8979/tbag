@@ -58,7 +58,13 @@ TBAG_API bool writeJpg(char const * path, int width, int height, int channels, c
 TBAG_API bool writeBmp(char const * path, int width, int height, int channels, char const * data);
 TBAG_API bool writeTga(char const * path, int width, int height, int channels, char const * data);
 
+TBAG_API bool writePng(int width, int height, int channels, char const * data, int stride_bytes,
+                       libtbag::util::Buffer & buffer);
+TBAG_API bool writePng(int width, int height, int channels, char const * data,
+                       libtbag::util::Buffer & buffer);
 TBAG_API bool writeJpg(int width, int height, int channels, char const * data, int jpeg_quality,
+                       libtbag::util::Buffer & buffer);
+TBAG_API bool writeJpg(int width, int height, int channels, char const * data,
                        libtbag::util::Buffer & buffer);
 
 /** Read image file. */
