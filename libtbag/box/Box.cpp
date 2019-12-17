@@ -58,7 +58,9 @@ Box & Box::operator =(Box const & obj) TBAG_NOEXCEPT
 
 Box & Box::operator =(Box && obj) TBAG_NOEXCEPT
 {
-    swap(obj);
+    if (this != &obj) {
+        _data = std::move(obj._data);
+    }
     return *this;
 }
 

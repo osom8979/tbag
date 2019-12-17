@@ -149,19 +149,19 @@ bool box_ext_is_equals(ui64 const * ext1, ui64 const * ext2) TBAG_NOEXCEPT
 
 ui32 * box_dim_malloc(ui32 rank) TBAG_NOEXCEPT
 {
-    if (rank == 0u) {
+    if (rank == 0) {
         return nullptr;
     }
-    assert(rank >= 1u);
+    assert(rank >= 1);
     return (ui32*)tbMalloc(GET_RANK_TO_TOTAL_DIMS_BYTE(rank));
 }
 
 ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT
 {
-    if (rank == 0u) {
+    if (rank == 0) {
         return nullptr;
     }
-    assert(rank >= 1u);
+    assert(rank >= 1);
     va_list ap;
     va_start(ap, rank);
     auto * result = box_dim_malloc_vargs(rank, ap);
@@ -172,10 +172,10 @@ ui32 * box_dim_malloc_args(ui32 rank, ...) TBAG_NOEXCEPT
 
 ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
-    if (rank == 0u) {
+    if (rank == 0) {
         return nullptr;
     }
-    assert(rank >= 1u);
+    assert(rank >= 1);
     auto * result = box_dim_malloc(rank);
     assert(result != nullptr);
     box_dim_set_vargs(result, rank, ap);
@@ -184,10 +184,10 @@ ui32 * box_dim_malloc_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
 
 ui32 * box_dim_malloc_dims(ui32 rank, ui32 const * dims) TBAG_NOEXCEPT
 {
-    if (rank == 0u) {
+    if (rank == 0) {
         return nullptr;
     }
-    assert(rank >= 1u);
+    assert(rank >= 1);
     auto * result = box_dim_malloc(rank);
     assert(dims != nullptr);
     box_dim_set_dims(result, rank, dims);
@@ -233,7 +233,7 @@ void box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
     assert(src != nullptr);
-    assert(rank >= 1u);
+    assert(rank >= 1);
     while (rank) {
         *dest = *src;
         ++dest;
@@ -245,15 +245,15 @@ void box_dim_copy(ui32 * dest, ui32 const * src, ui32 rank) TBAG_NOEXCEPT
 ui32 * box_dim_clone(ui32 const * src, ui32 rank) TBAG_NOEXCEPT
 {
     assert(src != nullptr);
-    assert(rank >= 1u);
+    assert(rank >= 1);
     return box_dim_clone_with_alloc_size(src, rank, rank);
 }
 
 ui32 * box_dim_clone_with_alloc_size(ui32 const * src, ui32 alloc_size, ui32 rank) TBAG_NOEXCEPT
 {
     assert(src != nullptr);
-    assert(alloc_size >= 1u);
-    assert(rank >= 1u);
+    assert(alloc_size >= 1);
+    assert(rank >= 1);
     assert(alloc_size >= rank);
     ui32 * result = box_dim_malloc(alloc_size);
     assert(result != nullptr);
@@ -273,7 +273,7 @@ bool box_dim_is_equals(ui32 const * dims1, ui32 rank1, ui32 const * dims2, ui32 
         return true;
     }
     assert(dims1 != dims2);
-    for (ui32 i = 0u; i < rank1; ++i) {
+    for (ui32 i = 0; i < rank1; ++i) {
         if (dims1[i] != dims2[i]) {
             return false;
         }
@@ -299,7 +299,7 @@ bool box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list
     assert(rank1 == rank2);
     va_list ap2;
     va_copy(ap2, ap);
-    for (ui32 i = 0u; i < rank1; ++i) {
+    for (ui32 i = 0; i < rank1; ++i) {
         if (dims1[i] != va_arg(ap2, ui32)) {
             return false;
         }
@@ -311,9 +311,9 @@ bool box_dim_is_equals_vargs(ui32 const * dims1, ui32 rank1, ui32 rank2, va_list
 ui32 box_dim_get_total_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
-    assert(rank >= 1u);
+    assert(rank >= 1);
     auto size = dims[0];
-    for (auto i = 1u; i < rank; ++i) {
+    for (auto i = 1; i < rank; ++i) {
         size *= dims[i];
     }
     return size;
@@ -321,7 +321,7 @@ ui32 box_dim_get_total_size(ui32 const * dims, ui32 rank) TBAG_NOEXCEPT
 
 ui32 box_dim_get_total_size_args(ui32 rank, ...) TBAG_NOEXCEPT
 {
-    assert(rank >= 1u);
+    assert(rank >= 1);
     va_list ap;
     va_start(ap, rank);
     auto const size = box_dim_get_total_size_vargs(rank, ap);
@@ -331,11 +331,11 @@ ui32 box_dim_get_total_size_args(ui32 rank, ...) TBAG_NOEXCEPT
 
 ui32 box_dim_get_total_size_vargs(ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
-    assert(rank >= 1u);
+    assert(rank >= 1);
     va_list ap2;
     va_copy(ap2, ap);
     auto size = va_arg(ap2, ui32);
-    for (ui32 i = 1u; i < rank; ++i) {
+    for (ui32 i = 1; i < rank; ++i) {
         size *= va_arg(ap2, ui32);
     }
     va_end(ap2);
@@ -358,7 +358,7 @@ ui32 box_dim_get_stride(ui32 const * dims, ui32 rank, ui32 dim_index) TBAG_NOEXC
 ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
-    assert(rank >= 1u);
+    assert(rank >= 1);
     va_list ap;
     va_start(ap, rank);
     auto const offset = box_dim_get_offset_vargs(dims, rank, ap);
@@ -369,16 +369,16 @@ ui32 box_dim_get_offset_args(ui32 const * dims, ui32 rank, ...) TBAG_NOEXCEPT
 ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
-    assert(rank >= 1u);
+    assert(rank >= 1);
     va_list ap2;
     va_copy(ap2, ap);
-    ui32 offset = 0u;
-    while (rank >= 2u) {
+    ui32 offset = 0;
+    while (rank >= 2) {
         ++dims;
         --rank;
         offset = (va_arg(ap2, ui32) + offset) * (*dims);
     }
-    assert(rank == 1u);
+    assert(rank == 1);
     offset += va_arg(ap2, ui32);
     va_end(ap2);
     return offset;
@@ -387,22 +387,22 @@ ui32 box_dim_get_offset_vargs(ui32 const * dims, ui32 rank, va_list ap) TBAG_NOE
 ui32 box_dim_get_offset_dims(ui32 const * dims, ui32 rank, ui32 const * indexes) TBAG_NOEXCEPT
 {
     assert(dims != nullptr);
-    assert(rank >= 1u);
-    ui32 offset = 0u;
-    while (rank >= 2u) {
+    assert(rank >= 1);
+    ui32 offset = 0;
+    while (rank >= 2) {
         ++dims;
         --rank;
         offset = (*indexes + offset) * (*dims);
         ++indexes;
     }
-    assert(rank == 1u);
+    assert(rank == 1);
     offset += *indexes;
     return offset;
 }
 
 ui8 * box_info_malloc(ui32 info_size) TBAG_NOEXCEPT
 {
-    assert(info_size >= 1u);
+    assert(info_size >= 1);
     return (ui8*)tbMalloc(GET_SIZE_TO_TOTAL_INFO_BYTE(info_size));
 }
 
@@ -415,9 +415,9 @@ void box_info_free(ui8 * info) TBAG_NOEXCEPT
 bool box_info_assign_buffer(ui8 * dest, ui32 dest_size, ui8 const * src, ui32 src_size) TBAG_NOEXCEPT
 {
     assert(dest != nullptr);
-    assert(dest_size >= 1u);
+    assert(dest_size >= 1);
     assert(src != nullptr);
-    assert(src_size >= 1u);
+    assert(src_size >= 1);
     if (dest_size < src_size) {
         return false;
     }
@@ -445,11 +445,11 @@ void const * box_data_ptr_offset_raw(void const * data, btype type, ui32 offset)
 bool box_data_check_address_raw(void const * data_begin, ui32 size, btype type, void const * check_data) TBAG_NOEXCEPT
 {
     assert(data_begin != nullptr);
-    assert(size >= 1u);
+    assert(size >= 1);
     assert(box_support_type(type));
     assert(check_data != nullptr);
     auto const min = (std::intptr_t)data_begin;
-    auto const max = ((std::intptr_t)data_begin) + ((size-1u) * box_get_type_byte(type));
+    auto const max = ((std::intptr_t)data_begin) + ((size-1) * box_get_type_byte(type));
     auto const pivot = (std::intptr_t)check_data;
     return (min <= COMPARE_AND(pivot) <= max);
 }
@@ -495,7 +495,7 @@ void box_cpu_memcpy(void * TBAG_RESTRICT dest, void const * TBAG_RESTRICT src, u
     assert(dest != nullptr);
     assert(src != nullptr);
     assert(dest != src);
-    assert(byte >= 1u);
+    assert(byte >= 1);
     memcpy(dest, src, byte);
 }
 
@@ -538,7 +538,7 @@ void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
     assert(dest != nullptr);
     assert(src != nullptr);
     assert(dest != src);
-    assert(size >= 1u);
+    assert(size >= 1);
 
     // clang-format off
     switch (src_type) {
@@ -621,7 +621,7 @@ void box_cpu_set(void * TBAG_RESTRICT dest, btype dest_type,
 void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT
 {
     assert(box_support_device(device));
-    assert(byte >= 1u);
+    assert(byte >= 1);
     switch (device) {
     case BD_CPU:
         return box_cpu_malloc(byte);
@@ -643,7 +643,7 @@ void * box_data_malloc(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT
 {
     assert(box_support_type(type));
     assert(box_support_device(device));
-    assert(element_size >= 1u);
+    assert(element_size >= 1);
     return box_data_malloc(device, box_get_type_byte(type) * element_size);
 }
 
@@ -735,19 +735,19 @@ void box_data::clear() TBAG_NOEXCEPT
 {
     type = BT_NONE;
     device = BD_NONE;
-    ext[0] = 0u;
-    ext[1] = 0u;
-    ext[2] = 0u;
-    ext[3] = 0u;
+    ext[0] = 0;
+    ext[1] = 0;
+    ext[2] = 0;
+    ext[3] = 0;
     data = nullptr;
-    total_data_byte = 0u;
-    size = 0u;
+    total_data_byte = 0;
+    size = 0;
     dims = nullptr;
-    total_dims_byte = 0u;
-    rank = 0u;
+    total_dims_byte = 0;
+    rank = 0;
     info = nullptr;
-    total_info_byte = 0u;
-    info_size = 0u;
+    total_info_byte = 0;
+    info_size = 0;
 }
 
 void box_data::clear_opaque() TBAG_NOEXCEPT
@@ -766,7 +766,7 @@ Err box_data::alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, 
 
 Err box_data::alloc_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap)
 {
-    assert(src_rank >= 1u);
+    assert(src_rank >= 1);
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
 
@@ -785,7 +785,7 @@ Err box_data::alloc_dims_copy(btype src_type, bdev src_device, ui64 const * src_
                               ui32 const * src_dims, ui32 src_dims_byte, ui32 src_rank)
 {
     assert(src_dims != nullptr);
-    assert(src_rank >= 1u);
+    assert(src_rank >= 1);
     assert(CHECK_TOTAL_DIMS_BYTE(src_dims_byte));
     assert(src_dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank));
     assert(box_support_type(src_type));
@@ -806,14 +806,14 @@ Err box_data::alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_
                               ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank)
 {
     assert(src_dims != nullptr);
-    assert(src_rank >= 1u);
+    assert(src_rank >= 1);
     assert(CHECK_TOTAL_DIMS_BYTE(src_dims_byte));
     assert(src_dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank));
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
 
     auto const total_elem_size = box_dim_get_total_size(src_dims, src_rank);
-    assert(total_elem_size >= 1u);
+    assert(total_elem_size >= 1);
 
     void * allocated_data = box_data_malloc(src_type, src_device, total_elem_size);
     if (allocated_data == nullptr) {
@@ -849,17 +849,17 @@ Err box_data::alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_
 
 bool box_data::exists_data() const TBAG_NOEXCEPT
 {
-    return data != nullptr && total_data_byte >= 1u && size >= 1u;
+    return data != nullptr && total_data_byte >= 1 && size >= 1;
 }
 
 bool box_data::exists_dims() const TBAG_NOEXCEPT
 {
-    return dims != nullptr && total_dims_byte >= 1u && rank >= 1u;
+    return dims != nullptr && total_dims_byte >= 1 && rank >= 1;
 }
 
 bool box_data::exists_info() const TBAG_NOEXCEPT
 {
-    return info != nullptr && total_info_byte >= 1u && info_size >= 1u;
+    return info != nullptr && total_info_byte >= 1 && info_size >= 1;
 }
 
 void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
@@ -900,10 +900,10 @@ fp64 box_data::get_opaque_fp64() const TBAG_NOEXCEPT { return opaque.data_fp64; 
 
 ui32 box_data::get_dims_total_size() const TBAG_NOEXCEPT
 {
-    if (rank == 0u) {
-        return 0u;
+    if (rank == 0) {
+        return 0;
     }
-    assert(rank >= 1u);
+    assert(rank >= 1);
     assert(dims != nullptr);
     return box_dim_get_total_size(dims, rank);
 }
@@ -911,7 +911,7 @@ ui32 box_data::get_dims_total_size() const TBAG_NOEXCEPT
 ErrPair<box_cursor> box_data::init_cursor(void * data_pointer, ui32 dim_index, int begin_index, int end_index, int step_index) TBAG_NOEXCEPT
 {
     assert(data_pointer != nullptr);
-    assert(rank >= 1u);
+    assert(rank >= 1);
 
     if (step_index == 0) {
         return E_ILLARGS;
@@ -960,7 +960,7 @@ ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index, int begin_index, int e
 
 ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index, int begin_index) TBAG_NOEXCEPT
 {
-    assert(rank >= 1u);
+    assert(rank >= 1);
     assert(dim_index < rank);
     return init_cursor(dim_index, begin_index, dims[dim_index]);
 }
@@ -1012,13 +1012,13 @@ Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext,
             ext[2] = src_ext[2];
             ext[3] = src_ext[3];
         } else {
-            ext[0] = 0u;
-            ext[1] = 0u;
-            ext[2] = 0u;
-            ext[3] = 0u;
+            ext[0] = 0;
+            ext[1] = 0;
+            ext[2] = 0;
+            ext[3] = 0;
         }
-        size = 0u;
-        rank = 0u;
+        size = 0;
+        rank = 0;
         return E_SUCCESS;
     }
 
@@ -1076,11 +1076,11 @@ Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext,
     assert(box_dim_is_equals(dims, rank, src_dims, src_rank));
 
     auto const dims_total_size = box_dim_get_total_size(src_dims, src_rank);
-    assert(dims_total_size >= 1u);
+    assert(dims_total_size >= 1);
     assert(dims_total_size == box_dim_get_total_size(dims, rank));
 
     auto const dims_total_byte = box_get_type_byte(src_type) * dims_total_size;
-    assert(dims_total_byte >= 1u);
+    assert(dims_total_byte >= 1);
 
     if (total_data_byte < dims_total_byte) {
         if (data) {
@@ -1088,8 +1088,8 @@ Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext,
         }
         data = box_data_malloc(src_type, src_device, dims_total_size);
         if (data == nullptr) {
-            total_data_byte = 0u;
-            size = 0u;
+            total_data_byte = 0;
+            size = 0;
             return E_BADALLOC;
         }
         total_data_byte = dims_total_byte;
@@ -1158,22 +1158,22 @@ void box_data::checked_assign_info_buffer(ui8 const * src, ui32 src_size)
         if (info && total_info_byte >= 1) {
             info[0] = '\0';
         }
-        info_size = 0u;
+        info_size = 0;
         return;
     }
 
     if (info != nullptr && total_info_byte < src_size) {
         box_info_free(info);
         info = nullptr;
-        total_info_byte = 0u;
-        size = 0u;
+        total_info_byte = 0;
+        size = 0;
     }
 
     if (info == nullptr) {
         info = box_info_malloc(src_size);
         assert(info != nullptr);
         total_info_byte = GET_SIZE_TO_TOTAL_INFO_BYTE(src_size);
-        assert(total_info_byte >= 1u);
+        assert(total_info_byte >= 1);
     }
 
     assert(info != nullptr);
@@ -1212,7 +1212,7 @@ Err box_data::set_data_args(void const * src_data, btype src_type, bdev src_devi
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
-    assert(box_rank >= 1u);
+    assert(box_rank >= 1);
     va_list box_ap;
     va_start(box_ap, box_rank);
     auto const code = set_data_vargs(src_data, src_type, src_device, src_ext, box_rank, box_ap);
@@ -1226,7 +1226,7 @@ Err box_data::set_data_vargs(void const * src_data, btype src_type, bdev src_dev
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
-    assert(box_rank >= 1u);
+    assert(box_rank >= 1);
     return set_data(src_data, src_type, src_device, src_ext, box_dim_get_offset_vargs(dims, box_rank, box_ap));
 }
 
@@ -1236,7 +1236,7 @@ Err box_data::set_data_dims(void const * src_data, btype src_type, bdev src_devi
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
-    assert(box_rank >= 1u);
+    assert(box_rank >= 1);
     return set_data(src_data, src_type, src_device, src_ext, box_dim_get_offset_dims(dims, box_rank, box_indexes));
 }
 
@@ -1263,7 +1263,7 @@ Err box_data::get_data_args(void * out_data, btype out_type, bdev out_device, ui
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
     assert(box_support_device(out_device));
-    assert(rank >= 1u);
+    assert(rank >= 1);
     va_list box_ap;
     va_start(box_ap, box_rank);
     auto const code = get_data_vargs(out_data, out_type, out_device, out_ext, box_rank, box_ap);
@@ -1277,7 +1277,7 @@ Err box_data::get_data_vargs(void * out_data, btype out_type, bdev out_device, u
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
     assert(box_support_device(out_device));
-    assert(rank >= 1u);
+    assert(rank >= 1);
     auto const box_data_offset = box_dim_get_offset_vargs(dims, box_rank, box_ap);
     return get_data(out_data, out_type, out_device, out_ext, box_data_offset);
 }
@@ -1288,7 +1288,7 @@ Err box_data::get_data_dims(void * out_data, btype out_type, bdev out_device, ui
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
     assert(box_support_device(out_device));
-    assert(rank >= 1u);
+    assert(rank >= 1);
     auto const box_data_offset = box_dim_get_offset_dims(dims, box_rank, box_indexes);
     return get_data(out_data, out_type, out_device, out_ext, box_data_offset);
 }
@@ -1299,7 +1299,7 @@ Err box_data::assign_data(void const * src_data, btype src_type, bdev src_device
     assert(data != src_data);
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
-    assert(src_size >= 1u);
+    assert(src_size >= 1);
     assert(src_size <= size);
     if (device == BD_CPU && src_device == BD_CPU) {
         if (type == src_type) {
@@ -1348,8 +1348,8 @@ ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, int begin_index, int
 ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, int begin_index) TBAG_NOEXCEPT
 {
     assert(box != nullptr);
-    assert(dim_index >= 0u);
-    assert(box->rank >= 1u);
+    assert(dim_index >= 0);
+    assert(box->rank >= 1);
     assert(dim_index < box->rank);
     assert(box->dims != nullptr);
     return init_cursor(dim_index, begin_index, box->dims[dim_index]);

@@ -485,10 +485,10 @@ public:
     }
 
     // clang-format off
-    inline ui64 getExtension0() const TBAG_NOEXCEPT { if (_data) { return _data->ext[0]; } return 0u; }
-    inline ui64 getExtension1() const TBAG_NOEXCEPT { if (_data) { return _data->ext[1]; } return 0u; }
-    inline ui64 getExtension2() const TBAG_NOEXCEPT { if (_data) { return _data->ext[2]; } return 0u; }
-    inline ui64 getExtension3() const TBAG_NOEXCEPT { if (_data) { return _data->ext[3]; } return 0u; }
+    inline ui64 getExtension0() const TBAG_NOEXCEPT { if (_data) { return _data->ext[0]; } return 0; }
+    inline ui64 getExtension1() const TBAG_NOEXCEPT { if (_data) { return _data->ext[1]; } return 0; }
+    inline ui64 getExtension2() const TBAG_NOEXCEPT { if (_data) { return _data->ext[2]; } return 0; }
+    inline ui64 getExtension3() const TBAG_NOEXCEPT { if (_data) { return _data->ext[3]; } return 0; }
     inline ui64 ext0() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[0]; }
     inline ui64 ext1() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[1]; }
     inline ui64 ext2() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[2]; }
@@ -543,7 +543,7 @@ public:
         if (_data) {
             return _data->total_data_byte;
         }
-        return 0u;
+        return 0;
     }
 
     inline ui32 capacity() const TBAG_NOEXCEPT
@@ -557,7 +557,7 @@ public:
         if (_data) {
             return _data->size;
         }
-        return 0u;
+        return 0;
     }
 
     inline ui32 size() const TBAG_NOEXCEPT
@@ -569,7 +569,7 @@ public:
     inline bool isEmpty() const TBAG_NOEXCEPT
     {
         if (_data) {
-            return _data->size == 0u;
+            return _data->size == 0;
         }
         return true;
     }
@@ -577,7 +577,7 @@ public:
     inline bool empty() const TBAG_NOEXCEPT
     {
         assert(exists());
-        return _data->size == 0u;
+        return _data->size == 0;
     }
 
 public:
@@ -600,7 +600,7 @@ public:
         if (_data && i < _data->rank) {
             return _data->dims[i];
         }
-        return 0u;
+        return 0;
     }
 
     inline ui32 dim(ui32 i) const TBAG_NOEXCEPT
@@ -614,7 +614,7 @@ public:
         if (_data) {
             return _data->total_dims_byte;
         }
-        return 0u;
+        return 0;
     }
 
     inline ui32 dims_capacity() const TBAG_NOEXCEPT
@@ -628,7 +628,7 @@ public:
         if (_data) {
             return _data->rank;
         }
-        return 0u;
+        return 0;
     }
 
     inline ui32 rank() const TBAG_NOEXCEPT
@@ -681,7 +681,7 @@ public:
         if (_data) {
             return _data->total_info_byte;
         }
-        return 0u;
+        return 0;
     }
 
     inline ui32 info_capacity() const TBAG_NOEXCEPT
@@ -695,7 +695,7 @@ public:
         if (_data) {
             return _data->info_size;
         }
-        return 0u;
+        return 0;
     }
 
     inline ui32 info_size() const TBAG_NOEXCEPT
@@ -737,15 +737,15 @@ public:
     inline void clearData() TBAG_NOEXCEPT
     {
         if (_data) {
-            _data->size = 0u;
-            _data->rank = 0u;
+            _data->size = 0;
+            _data->rank = 0;
         }
     }
 
     inline void clearInfo() TBAG_NOEXCEPT
     {
         if (_data) {
-            _data->info_size = 0u;
+            _data->info_size = 0;
         }
     }
 
