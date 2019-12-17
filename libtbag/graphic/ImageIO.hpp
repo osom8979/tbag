@@ -66,6 +66,10 @@ TBAG_API bool writeJpg(int width, int height, int channels, char const * data, i
                        libtbag::util::Buffer & buffer);
 TBAG_API bool writeJpg(int width, int height, int channels, char const * data,
                        libtbag::util::Buffer & buffer);
+TBAG_API bool writeBmp(int width, int height, int channels, char const * data,
+                       libtbag::util::Buffer & buffer);
+TBAG_API bool writeTga(int width, int height, int channels, char const * data,
+                       libtbag::util::Buffer & buffer);
 
 /** Read image file. */
 TBAG_API Err readImage(std::string const & path, Box & image);

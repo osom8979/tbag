@@ -99,6 +99,22 @@ bool writeJpg(int width, int height, int channels, char const * data, libtbag::u
     return writeJpg(width, height, channels, data, DEFAULT_JPG_QUALITY, buffer);
 }
 
+bool writeBmp(int width, int height, int channels, char const * data, libtbag::util::Buffer & buffer)
+{
+    stbi__write_context s;
+    s.func = &__write_to_buffer;
+    s.context = (void*)&buffer;
+    return stbi_write_bmp_core(&s, width, height, channels, data);
+}
+
+bool writeTga(int width, int height, int channels, char const * data, libtbag::util::Buffer & buffer)
+{
+    stbi__write_context s;
+    s.func = &__write_to_buffer;
+    s.context = (void*)&buffer;
+    return stbi_write_tga_core(&s, width, height, channels, (void*)data);
+}
+
 Err readImage(std::string const & path, Box & image)
 {
     if (!filesystem::Path(path).exists()) {
