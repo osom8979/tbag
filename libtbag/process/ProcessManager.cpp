@@ -45,21 +45,23 @@ void ProcessManager::Proc::onErrRead(char const * buffer, std::size_t size)
     _parent->onErrRead(getPid(), buffer, size);
 }
 
+void ProcessManager::Proc::onExit(int64_t exit_status, int term_signal)
+{
+    assert(_parent != nullptr);
+    _parent->onExit(getPid(), exit_status, term_signal);
+}
+
 void ProcessManager::Proc::runner()
 {
-    int const PID = getPid();
-    if (PID == 0) {
+    int const pid = getPid();
+    if (pid == 0) {
         tDLogE("ProcessManager::Proc::runner() Unknown process id");
         return;
     }
-
-    Err const CODE = _loop.run();
-    if (isFailure(CODE)) {
-        tDLogW("ProcessManager::Proc::runner() loop {} error (PID: {})", getErrName(CODE), PID);
+    auto const code = _loop.run();
+    if (isFailure(code)) {
+        tDLogW("ProcessManager::Proc::runner() loop {} error (PID: {})", code, pid);
     }
-
-    assert(_parent != nullptr);
-    _parent->onExit(PID, getExitStatus(), getTermSignal());
 }
 
 Err ProcessManager::Proc::exec(std::string const & file,

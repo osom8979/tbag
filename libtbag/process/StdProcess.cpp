@@ -133,6 +133,8 @@ Err StdProcess::spawn(Loop & loop,
     }
 
     _process->exit_cb = [&](int64_t exit_status, int term_signal){
+        _exit_status = exit_status;
+        _term_signal = term_signal;
         onExit(exit_status, term_signal);
         _process->close();
     };

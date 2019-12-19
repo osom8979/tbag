@@ -67,8 +67,9 @@ public:
         virtual ~Proc();
 
     protected:
-        virtual void onOutRead(char const * buffer, std::size_t size) override;
-        virtual void onErrRead(char const * buffer, std::size_t size) override;
+        void onOutRead(char const * buffer, std::size_t size) override;
+        void onErrRead(char const * buffer, std::size_t size) override;
+        void onExit(int64_t exit_status, int term_signal) override;
 
     private:
         void runner();
