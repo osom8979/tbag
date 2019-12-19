@@ -166,16 +166,28 @@ TEST(StringUtilsTest, ConvertStringWithThreadId)
     ASSERT_FALSE(result.empty());
 }
 
-TEST(StringUtilsTest, SplitMatch)
+TEST(StringUtilsTest, SplitMatch_01)
 {
-    std::string match = R"(TEST[^ ]*)";
-    std::string content = std::string("TEST1 TEST10 TEST");
+    auto const match = R"(TEST[^ ]*)";
+    auto const content = "TEST1 TEST10 TEST";
+    auto const result = splitMatch(content, match);
+    ASSERT_EQ(3u, result.size());
+    ASSERT_STREQ("TEST1", result[0].c_str());
+    ASSERT_STREQ("TEST10", result[1].c_str());
+    ASSERT_STREQ("TEST", result[2].c_str());
+}
 
-    std::vector<std::string> list = splitMatch(content, std::regex(match));
-    ASSERT_EQ(3U, list.size());
-    ASSERT_STREQ("TEST1", list[0].c_str());
-    ASSERT_STREQ("TEST10", list[1].c_str());
-    ASSERT_STREQ("TEST", list[2].c_str());
+TEST(StringUtilsTest, SplitMatch_02)
+{
+    auto const match = R"([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*)";
+    auto const content = R"(Test OK. The remaining time is 21 days
+c2core lua(Lua 5.1) storage init: Thu Dec 19 09:48:23 2019
+0.3.5
+Packet: 1.2
+Distribution code: 6)";
+    auto const result = splitMatch(content, match);
+    ASSERT_EQ(1u, result.size());
+    ASSERT_STREQ("0.3.5", result[0].c_str());
 }
 
 TEST(StringUtilsTest, ReplaceRegex)
