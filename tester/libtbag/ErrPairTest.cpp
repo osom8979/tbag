@@ -78,3 +78,19 @@ TEST(ErrPairTest, MakeErrMsg)
     ASSERT_EQ(E_ALREADY, err4.code);
 }
 
+TEST(ErrPairTest, CastErrMsg)
+{
+    ErrMsgPair<int> err1("test1", E_ILLARGS, 100);
+    ASSERT_STREQ("test1", err1.msg.c_str());
+    ASSERT_EQ(E_ILLARGS, err1.code);
+    ASSERT_EQ(100, err1.value);
+
+    ErrMsg err2 = err1;
+    ASSERT_STREQ("test1", err2.msg.c_str());
+    ASSERT_EQ(E_ILLARGS, err2.code);
+
+    ErrPair<int> err3 = err1;
+    ASSERT_EQ(E_ILLARGS, err3.code);
+    ASSERT_EQ(100, err3.value);
+}
+

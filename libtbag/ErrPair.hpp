@@ -241,6 +241,16 @@ struct ErrMsgPair : public ErrPair<T>
         }
         return *this;
     }
+
+    operator ErrMsgPair<std::nullptr_t>() const
+    {
+        return ErrMsgPair<std::nullptr_t>(this->msg, this->code);
+    }
+
+    operator ErrPair<ValueType>() const
+    {
+        return ErrPair<ValueType>(this->code, this->value);
+    }
 };
 
 using ErrMsg = ErrMsgPair<std::nullptr_t>;
