@@ -16,15 +16,22 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/ErrPair.hpp>
+#include <libtbag/lock/RwLock.hpp>
+#include <libtbag/thread/ThreadGroup.hpp>
+#include <libtbag/process/ProcessManager.hpp>
+#include <libtbag/Type.hpp>
+
+#include <string>
+#include <vector>
+#include <atomic>
+#include <unordered_map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace task {
-
-// Forward declaration.
 
 /**
  * TaskManager class prototype.
@@ -34,12 +41,147 @@ namespace task {
  */
 class TBAG_API TaskManager : private Noncopyable
 {
-private:
-    // Insert member variables.
+public:
+    using RwLock         = libtbag::lock::RwLock;
+    using ReadLockGuard  = libtbag::lock::ReadLockGuard;
+    using WriteLockGuard = libtbag::lock::WriteLockGuard;
+
+    using ThreadGroup = libtbag::thread::ThreadGroup;
+    using ProcessManager = libtbag::process::ProcessManager;
+
+    using uthread = libtbag::uvpp::uthread;
+    using TaskId = std::int32_t;
+    using ErrTaskId = libtbag::ErrPair<TaskId>;
+
+    /** ThreadID or ProcessID. */
+    union InternalTaskId
+    {
+        uthread thread;
+        int process;
+    };
+
+    static InternalTaskId createThreadTaskId(uthread id) TBAG_NOEXCEPT
+    {
+        InternalTaskId result = {};
+        result.thread = id;
+        return result;
+    }
+
+    static InternalTaskId createProcessTaskId(int id) TBAG_NOEXCEPT
+    {
+        InternalTaskId result = {};
+        result.process = id;
+        return result;
+    }
 
 public:
-    TaskManager();
+    TBAG_CONSTEXPR static TaskId const UNKNOWN_TASK_ID = 0;
+    TBAG_CONSTEXPR static TaskId const BEGIN_TASK_ID = 1;
+
+public:
+    enum class TaskType
+    {
+        TT_THREAD,
+        TT_PROCESS,
+    };
+
+    struct TaskInfo
+    {
+        /** thread or process? */
+        TaskType type;
+
+        /** Internal ID. */
+        InternalTaskId internal_id;
+
+        /** Task id done? */
+        bool done = false;
+
+        /** Exit status code. */
+        int64_t exit_status = 0;
+
+        /** Terminate signal number. */
+        int term_signal = 0;
+
+        /** User's data. */
+        void * opaque = nullptr;
+    };
+
+    using ErrTaskInfo = libtbag::ErrPair<TaskInfo>;
+    using TaskMap = std::unordered_map<TaskId, TaskInfo>;
+    using Pid2Task = std::unordered_map<int, TaskId>;
+
+    struct TaskCallback
+    {
+        virtual void onThreadExit(TaskId id) { /* EMPTY. */ }
+        virtual void onProcessOut(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
+        virtual void onProcessErr(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
+        virtual void onProcessExit(TaskId id, int64_t exit_status, int term_signal) { /* EMPTY. */ }
+    };
+
+    struct ThreadParams
+    {
+        using Callback = libtbag::thread::FunctionalThread::Callback;
+        Callback runner;
+    };
+
+    struct ProcessParams
+    {
+        std::string file;
+        std::vector<std::string> args;
+        std::vector<std::string> envs;
+        std::string cwd;
+        std::string input;
+    };
+
+private:
+    TaskCallback * const CALLBACK;
+
+private:
+    RwLock mutable _threads_lock;
+    ThreadGroup _threads;
+
+private:
+    RwLock mutable _processes_lock;
+    ProcessManager _processes;
+
+private:
+    RwLock mutable _tasks_lock;
+    TaskMap _tasks;
+    Pid2Task _pid2task;
+
+private:
+    std::atomic<TaskId> _task_number;
+
+public:
+    TaskManager(TaskCallback * cb = nullptr);
     virtual ~TaskManager();
+
+public:
+    std::size_t size() const;
+    bool empty() const;
+
+public:
+    std::vector<TaskId> list() const;
+    TaskMap map() const;
+
+public:
+    bool exists(TaskId id) const;
+    ErrTaskInfo getTaskInfo(TaskId id) const;
+
+private:
+    void onThreadExit(TaskId id);
+    void onProcessOut(int pid, char const * buffer, std::size_t size);
+    void onProcessErr(int pid, char const * buffer, std::size_t size);
+    void onProcessExit(int pid, int64_t exit_status, int term_signal);
+
+public:
+    ErrTaskId runThread(ThreadParams const & params, void * opaque = nullptr);
+    ErrTaskId runProcess(ProcessParams const & params, void * opaque = nullptr);
+
+public:
+    Err join(TaskId id);
+    Err erase(TaskId id);
+    Err kill(TaskId id);
 };
 
 } // namespace task
