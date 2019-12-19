@@ -33,12 +33,7 @@ void ThreadGroup::clear()
 
 bool ThreadGroup::exists(uthread const & tid) const
 {
-    for (auto & t : _threads) {
-        if (t && t->equal(tid)) {
-            return true;
-        }
-    }
-    return false;
+    return _threads.find(tid) != _threads.end();
 }
 
 bool ThreadGroup::exists(Thread const & thread) const
@@ -53,24 +48,12 @@ bool ThreadGroup::existsCurrentThread() const
 
 bool ThreadGroup::insert(SharedThread const & thread)
 {
-    return _threads.insert(thread).second;
+    return _threads.emplace(thread->tid(), thread).second;
 }
 
 bool ThreadGroup::erase(uthread const & tid)
 {
-    auto itr = _threads.begin();
-    auto const end = _threads.end();
-    for (; itr != end; ++itr) {
-        auto shared_thread = *itr;
-        if (shared_thread && shared_thread->tid() == tid) {
-            break;
-        }
-    }
-    if (itr == end) {
-        return false;
-    }
-    _threads.erase(itr);
-    return true;
+    return _threads.erase(tid) == 1u;
 }
 
 uthread ThreadGroup::createThread(FunctionalThread::Callback const & cb)
@@ -83,23 +66,34 @@ uthread ThreadGroup::createThread(FunctionalThread::Callback const & cb)
     return uthread();
 }
 
+Err ThreadGroup::join(uthread const & tid, bool rethrow)
+{
+    auto itr = _threads.find(tid);
+    if (itr == _threads.end()) {
+        return E_NFOUND;
+    }
+    if (!itr->second->joinable()) {
+        return E_ILLSTATE;
+    }
+    return itr->second->join(rethrow);
+}
+
 void ThreadGroup::joinAll(bool rethrow)
 {
     for (auto & t : _threads) {
-        if (t && t->joinable()) {
-            t->join(rethrow);
+        if (t.second && t.second->joinable()) {
+            t.second->join(rethrow);
         }
     }
 }
 
 Err ThreadGroup::kill(uthread const & tid)
 {
-    for (auto & t : _threads) {
-        if (t && t->equal(tid)) {
-            return t->kill();
-        }
+    auto itr = _threads.find(tid);
+    if (itr == _threads.end()) {
+        return E_NFOUND;
     }
-    return E_NFOUND;
+    return itr->second->kill();
 }
 
 } // namespace thread

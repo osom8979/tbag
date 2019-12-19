@@ -108,27 +108,22 @@ private:
     ProcMap _procs;
 
 public:
-    OnOutRead  out_read_cb;
-    OnErrRead  err_read_cb;
-    OnExit     exit_cb;
+    OnOutRead out_read_cb;
+    OnErrRead err_read_cb;
+    OnExit exit_cb;
 
 public:
     ProcessManager();
     virtual ~ProcessManager();
 
 public:
-    inline bool        empty() const TBAG_NOEXCEPT_SP_OP(_procs.empty()) { Guard g(_mutex); return _procs.empty(); }
-    inline std::size_t  size() const TBAG_NOEXCEPT_SP_OP(_procs.size())  { Guard g(_mutex); return _procs.size();  }
-
-private:
-    void clearUnsafe();
-    void joinUnsafe();
-    void killUnsafe();
+    bool empty() const;
+    std::size_t size() const;
 
 public:
     void clear();
-    void join();
-    void kill();
+    Err join(int pid);
+    void joinAll();
 
 public:
     bool exists(int pid) const;
@@ -146,6 +141,8 @@ public:
              std::string const & cwd = std::string(),
              std::string const & input = std::string());
     Err kill(int pid, int signum);
+    void killAll(int signum);
+    void killAll();
 
 public:
     virtual void onOutRead(int pid, char const * buffer, std::size_t size);

@@ -90,9 +90,9 @@ void ProcessManager::Proc::join()
     _thread.join();
 }
 
-// ------------------------------
-// ProcessManager implementation.
-// ------------------------------
+// -----------------------------
+// ProcessManager implementation
+// -----------------------------
 
 ProcessManager::ProcessManager()
 {
@@ -101,50 +101,52 @@ ProcessManager::ProcessManager()
 
 ProcessManager::~ProcessManager()
 {
+    // EMPTY.
+}
+
+bool ProcessManager::empty() const
+{
     Guard const G(_mutex);
-    killUnsafe();
-    clearUnsafe();
+    return _procs.empty();
 }
 
-void ProcessManager::clearUnsafe()
+std::size_t ProcessManager::size() const
 {
-    _procs.clear();
-}
-
-void ProcessManager::joinUnsafe()
-{
-    for (auto & proc : _procs) {
-        if (static_cast<bool>(proc.second) && proc.second->joinable()) {
-            proc.second->join();
-        }
-    }
-}
-
-void ProcessManager::killUnsafe()
-{
-    for (auto & proc : _procs) {
-        if (static_cast<bool>(proc.second) && proc.second->isRunning()) {
-            proc.second->kill(signal::TBAG_SIGNAL_TERMINATION);
-        }
-    }
+    Guard const G(_mutex);
+    return _procs.size();
 }
 
 void ProcessManager::clear()
 {
     Guard const G(_mutex);
-    clearUnsafe();
+    _procs.clear();
 }
 
-void ProcessManager::join()
+Err ProcessManager::join(int pid)
 {
     Guard const G(_mutex);
-    joinUnsafe();
+    auto itr = _procs.find(pid);
+    if (itr == _procs.end()) {
+        return E_NFOUND;
+    }
+    if (!itr->second) {
+        return E_EXPIRED;
+    }
+    if (!itr->second->joinable()) {
+        return E_ILLSTATE;
+    }
+    itr->second->join();
+    return E_SUCCESS;
 }
 
-void ProcessManager::kill()
+void ProcessManager::joinAll()
 {
     Guard const G(_mutex);
-    killUnsafe();
+    for (auto & proc : _procs) {
+        if (proc.second && proc.second->joinable()) {
+            proc.second->join();
+        }
+    }
 }
 
 bool ProcessManager::exists(int pid) const
@@ -157,7 +159,7 @@ bool ProcessManager::isActive(int pid) const
 {
     Guard g(_mutex);
     auto itr = _procs.find(pid);
-    if (itr != _procs.end() && static_cast<bool>(itr->second)) {
+    if (itr != _procs.end() && itr->second) {
         return itr->second->isRunning();
     }
     return false;
@@ -197,7 +199,7 @@ ProcessManager::WeakProc ProcessManager::get(int pid)
 bool ProcessManager::erase(int pid)
 {
     Guard g(_mutex);
-    return _procs.erase(pid) == 1U;
+    return _procs.erase(pid) == 1u;
 }
 
 int ProcessManager::exec(std::string const & file,
@@ -215,7 +217,7 @@ int ProcessManager::exec(std::string const & file,
     }
 
     int const PID = proc->getPid();
-    if (_procs.insert(ProcPair(PID, proc)).second == false) {
+    if (!_procs.insert(ProcPair(PID, proc)).second) {
         tDLogE("ProcessManager::spawn() Insert error.");
         return 0;
     }
@@ -224,10 +226,10 @@ int ProcessManager::exec(std::string const & file,
 
 Err ProcessManager::kill(int pid, int signum)
 {
-    Guard g(_mutex);
+    Guard const g(_mutex);
     auto itr = _procs.find(pid);
     if (itr != _procs.end()) {
-        if (static_cast<bool>(itr->second)) {
+        if (itr->second) {
             if (itr->second->isRunning()) {
                 return itr->second->kill(signum);
             } else {
@@ -238,6 +240,21 @@ Err ProcessManager::kill(int pid, int signum)
         }
     }
     return E_NFOUND;
+}
+
+void ProcessManager::killAll(int signum)
+{
+    Guard const G(_mutex);
+    for (auto & proc : _procs) {
+        if (proc.second && proc.second->isRunning()) {
+            proc.second->kill(signum);
+        }
+    }
+}
+
+void ProcessManager::killAll()
+{
+    return killAll(libtbag::signal::TBAG_SIGNAL_TERMINATION);
 }
 
 void ProcessManager::onOutRead(int pid, char const * buffer, std::size_t size)

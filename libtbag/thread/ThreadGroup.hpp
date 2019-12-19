@@ -18,7 +18,7 @@
 #include <libtbag/thread/Thread.hpp>
 #include <libtbag/thread/FunctionalThread.hpp>
 
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 // -------------------
@@ -38,13 +38,13 @@ class TBAG_API ThreadGroup : private Noncopyable
 public:
     using uthread = Thread::uthread;
     using SharedThread = std::shared_ptr<Thread>;
-    using ThreadSet = std::unordered_set<SharedThread>;
+    using ThreadMap = std::unordered_map<uthread, SharedThread>;
 
-    using iterator = ThreadSet::iterator;
-    using const_iterator = ThreadSet::const_iterator;
+    using iterator = ThreadMap::iterator;
+    using const_iterator = ThreadMap::const_iterator;
 
 private:
-    ThreadSet _threads;
+    ThreadMap _threads;
 
 public:
     ThreadGroup();
@@ -88,6 +88,7 @@ public:
     uthread createThread(FunctionalThread::Callback const & cb);
 
 public:
+    Err join(uthread const & tid, bool rethrow = false);
     void joinAll(bool rethrow = false);
 
 public:

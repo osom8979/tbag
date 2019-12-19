@@ -46,7 +46,7 @@ TEST(ProcessManagerTest, Default)
     for (int i = 0; i < TEST_COUNT; ++i) {
         ASSERT_NE(0, pm.exec(PATH.toString(), {"out"}, {}, std::string(), TEST_OUT));
     }
-    pm.join();
+    pm.joinAll();
 
     ASSERT_EQ(TEST_COUNT, pm.size());
     ASSERT_FALSE(pm.empty());
