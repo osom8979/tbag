@@ -92,7 +92,8 @@ public:
     void joinAll(bool rethrow = false);
 
 public:
-    Err kill(uthread const & tid);
+    Err kill(uthread const & tid, int signum);
+    Err cancel(uthread const & tid);
 };
 
 } // namespace thread

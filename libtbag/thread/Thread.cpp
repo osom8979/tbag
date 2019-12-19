@@ -183,9 +183,14 @@ Err Thread::waitForRunningOrDone(unsigned long timeout_ms, unsigned long tick_ms
     return waitForRunningOrDone(*this, std::chrono::milliseconds(timeout_ms), std::chrono::milliseconds(tick_ms));
 }
 
-Err Thread::kill() const
+Err Thread::kill(int signum) const
 {
-    return killThread(_thread);
+    return libtbag::thread::killThread(_thread, signum);
+}
+
+Err Thread::cancel() const
+{
+    return libtbag::thread::cancelThread(_thread);
 }
 
 } // namespace thread

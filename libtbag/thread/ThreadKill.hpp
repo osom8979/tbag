@@ -24,7 +24,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace thread {
 
-TBAG_API Err killThread(libtbag::uvpp::uthread id);
+TBAG_API Err killThread(libtbag::uvpp::uthread id, int signum);
+TBAG_API Err cancelThread(libtbag::uvpp::uthread id);
+
+// pthread only...
+
+TBAG_API Err setEnableCancelState();
+TBAG_API Err setDisableCancelState();
+
+TBAG_API Err setAsynchronousCancelType();
+TBAG_API Err setDeferredCancelType();
 
 } // namespace thread
 

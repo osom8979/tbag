@@ -7,9 +7,11 @@
 
 #include <libtbag/task/TaskManager.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/thread/ThreadKill.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -20,6 +22,15 @@ namespace task {
 using TaskId = TaskManager::TaskId;
 using ErrTaskId = TaskManager::ErrTaskId;
 using ErrTaskInfo = TaskManager::ErrTaskInfo;
+
+static void __init_task_thread(TaskId UNUSED_PARAM(id))
+{
+    libtbag::thread::setAsynchronousCancelType();
+}
+
+// --------------------------
+// TaskManager implementation
+// --------------------------
 
 TaskManager::TaskManager(TaskCallback * cb)
         : CALLBACK(cb), _task_number(BEGIN_TASK_ID)
@@ -155,6 +166,7 @@ ErrTaskId TaskManager::runThread(ThreadParams const & params, void * opaque)
 
     _threads_lock.writeLock();
     auto const thread_id = _threads.createThread([this, params, TASK_ID](){
+        __init_task_thread(TASK_ID);
         if (params.runner) {
             params.runner();
         }
@@ -284,8 +296,23 @@ Err TaskManager::kill(TaskId id)
         assert(task_info.type == TaskType::TT_THREAD);
         auto const thread_id = task_info.internal_id.thread;
         tDLogN("TaskManager::kill(task_id={}) Thread ID: {}", id, (void*)thread_id);
-        WriteLockGuard const G2(_threads_lock);
-        return _threads.kill(thread_id);
+
+        WriteLockGuard const G2(_tasks_lock);
+        auto const itr = _tasks.find(id);
+        if (itr == _tasks.end()) {
+            return E_NFOUND;
+        }
+        if (itr->second.done) {
+            return E_ALREADY;
+        }
+        WriteLockGuard const G3(_threads_lock);
+        auto const cancel_result = _threads.cancel(thread_id);
+        if (isSuccess(cancel_result)) {
+            itr->second.done = true;
+            itr->second.exit_status = 0;
+            itr->second.term_signal = libtbag::signal::TBAG_SIGNAL_KILL;
+        }
+        return cancel_result;
     }
 }
 

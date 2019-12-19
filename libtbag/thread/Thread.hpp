@@ -172,7 +172,8 @@ public:
     Err waitForRunningOrDone(unsigned long timeout_ms, unsigned long tick_ms = 1);
 
 public:
-    Err kill() const;
+    Err kill(int signum) const;
+    Err cancel() const;
 };
 
 } // namespace thread

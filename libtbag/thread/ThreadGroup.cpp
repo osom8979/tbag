@@ -87,13 +87,22 @@ void ThreadGroup::joinAll(bool rethrow)
     }
 }
 
-Err ThreadGroup::kill(uthread const & tid)
+Err ThreadGroup::kill(uthread const & tid, int signum)
 {
     auto itr = _threads.find(tid);
     if (itr == _threads.end()) {
         return E_NFOUND;
     }
-    return itr->second->kill();
+    return itr->second->kill(signum);
+}
+
+Err ThreadGroup::cancel(uthread const & tid)
+{
+    auto itr = _threads.find(tid);
+    if (itr == _threads.end()) {
+        return E_NFOUND;
+    }
+    return itr->second->cancel();
 }
 
 } // namespace thread

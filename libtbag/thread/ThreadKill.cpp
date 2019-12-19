@@ -8,6 +8,7 @@
 #include <libtbag/thread/ThreadKill.hpp>
 #include <libtbag/config-ex.h>
 #include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/Err.hpp>
 
 #if defined(TBAG_PLATFORM_WINDOWS)
 # include <Windows.h> // or <processthreadsapi.h>
@@ -26,30 +27,101 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace thread {
 
-Err __kill_thread_win32(libtbag::uvpp::uthread id)
+Err __kill_thread_win32(libtbag::uvpp::uthread id, int signum)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
-    return TerminateThread((HANDLE)id, EXIT_FAILURE) == TRUE ? E_SUCCESS : E_UNKNOWN;
+    return TerminateThread(id, signum) == TRUE ? E_SUCCESS : E_UNKNOWN;
 #else
     return E_ENOSYS;
 #endif
 }
 
-Err __kill_thread_pthread(libtbag::uvpp::uthread id)
+Err __kill_thread_pthread(libtbag::uvpp::uthread id, int signum)
 {
 #if defined(TBAG_USE_PTHREADS)
-    return ::pthread_kill((pthread_t)id, libtbag::signal::TBAG_SIGNAL_KILL) == 0 ? E_SUCCESS : E_UNKNOWN;
+    auto const result = ::pthread_kill(id, signum);
+    if (result == 0) {
+        return E_SUCCESS;
+    }
+    return libtbag::convertSystemErrorToErr(result);
 #else
     return E_ENOSYS;
 #endif
 }
 
-Err killThread(libtbag::uvpp::uthread id)
+Err killThread(libtbag::uvpp::uthread id, int signum)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
-    return __kill_thread_win32(id);
+    return __kill_thread_win32(id, signum);
 #elif defined(TBAG_USE_PTHREADS)
-    return __kill_thread_pthread(id);
+    return __kill_thread_pthread(id, signum);
+#else
+    return E_ENOSYS;
+#endif
+}
+
+Err cancelThread(libtbag::uvpp::uthread id)
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+    return TerminateThread(id, EXIT_FAILURE) == TRUE ? E_SUCCESS : E_UNKNOWN;
+#elif defined(TBAG_USE_PTHREADS)
+    auto const result = ::pthread_cancel(id);
+    if (result == 0) {
+        return E_SUCCESS;
+    }
+    return libtbag::convertSystemErrorToErr(result);
+#else
+    return E_ENOSYS;
+#endif
+}
+
+Err setEnableCancelState()
+{
+#if defined(TBAG_USE_PTHREADS)
+    auto const result = ::pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, nullptr);
+    if (result == 0) {
+        return E_SUCCESS;
+    }
+    return libtbag::convertSystemErrorToErr(result);
+#else
+    return E_ENOSYS;
+#endif
+}
+
+Err setDisableCancelState()
+{
+#if defined(TBAG_USE_PTHREADS)
+    auto const result = ::pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, nullptr);
+    if (result == 0) {
+        return E_SUCCESS;
+    }
+    return libtbag::convertSystemErrorToErr(result);
+#else
+    return E_ENOSYS;
+#endif
+}
+
+Err setAsynchronousCancelType()
+{
+#if defined(TBAG_USE_PTHREADS)
+    auto const result = ::pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, nullptr);
+    if (result == 0) {
+        return E_SUCCESS;
+    }
+    return libtbag::convertSystemErrorToErr(result);
+#else
+    return E_ENOSYS;
+#endif
+}
+
+Err setDeferredCancelType()
+{
+#if defined(TBAG_USE_PTHREADS)
+    auto const result = ::pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, nullptr);
+    if (result == 0) {
+        return E_SUCCESS;
+    }
+    return libtbag::convertSystemErrorToErr(result);
 #else
     return E_ENOSYS;
 #endif
