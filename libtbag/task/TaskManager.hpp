@@ -110,8 +110,11 @@ public:
     using TaskMap = std::unordered_map<TaskId, TaskInfo>;
     using Pid2Task = std::unordered_map<int, TaskId>;
 
-    struct TaskCallback
+    struct Callback
     {
+        Callback() { /* EMPTY. */ }
+        virtual ~Callback() { /* EMPTY. */ }
+
         virtual void onThreadExit(TaskId id) { /* EMPTY. */ }
         virtual void onProcessOut(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
         virtual void onProcessErr(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
@@ -134,7 +137,8 @@ public:
     };
 
 private:
-    TaskCallback * const CALLBACK;
+    // "CALLBACK" are being used as macros in MSVC.
+    Callback * const TASK_CALLBACK;
 
 private:
     RwLock mutable _threads_lock;
@@ -153,7 +157,7 @@ private:
     std::atomic<TaskId> _task_number;
 
 public:
-    TaskManager(TaskCallback * cb = nullptr);
+    TaskManager(Callback * cb = nullptr);
     virtual ~TaskManager();
 
 public:

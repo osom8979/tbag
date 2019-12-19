@@ -32,8 +32,8 @@ static void __init_task_thread(TaskId UNUSED_PARAM(id))
 // TaskManager implementation
 // --------------------------
 
-TaskManager::TaskManager(TaskCallback * cb)
-        : CALLBACK(cb), _task_number(BEGIN_TASK_ID)
+TaskManager::TaskManager(Callback * cb)
+        : TASK_CALLBACK(cb), _task_number(BEGIN_TASK_ID)
 {
     using namespace std::placeholders;
     _processes.out_read_cb = std::bind(&TaskManager::onProcessOut, this, _1, _2, _3);
@@ -99,8 +99,8 @@ void TaskManager::onThreadExit(TaskId id)
         assert(itr != _tasks.end());
         itr->second.done = true;
     }
-    if (CALLBACK) {
-        CALLBACK->onThreadExit(id);
+    if (TASK_CALLBACK) {
+        TASK_CALLBACK->onThreadExit(id);
     }
 }
 
@@ -115,8 +115,8 @@ void TaskManager::onProcessOut(int pid, char const * buffer, std::size_t size)
         auto itr = _tasks.find(task_id);
         assert(itr != _tasks.end());
     }
-    if (CALLBACK) {
-        CALLBACK->onProcessOut(task_id, buffer, size);
+    if (TASK_CALLBACK) {
+        TASK_CALLBACK->onProcessOut(task_id, buffer, size);
     }
 }
 
@@ -131,8 +131,8 @@ void TaskManager::onProcessErr(int pid, char const * buffer, std::size_t size)
         auto itr = _tasks.find(task_id);
         assert(itr != _tasks.end());
     }
-    if (CALLBACK) {
-        CALLBACK->onProcessErr(task_id, buffer, size);
+    if (TASK_CALLBACK) {
+        TASK_CALLBACK->onProcessErr(task_id, buffer, size);
     }
 }
 
@@ -152,8 +152,8 @@ void TaskManager::onProcessExit(int pid, int64_t exit_status, int term_signal)
     }
     tDLogN("TaskManager::onProcessExit(task_id={},pid={},exit={},signum={}) function was called.",
            task_id, pid, exit_status, term_signal);
-    if (CALLBACK) {
-        CALLBACK->onProcessExit(task_id, exit_status, term_signal);
+    if (TASK_CALLBACK) {
+        TASK_CALLBACK->onProcessExit(task_id, exit_status, term_signal);
     }
 }
 
