@@ -91,7 +91,17 @@ TaskManager::TaskManager(Callback * cb)
 
 TaskManager::~TaskManager()
 {
-    // EMPTY.
+    WriteLockGuard const G(_tasks_lock);
+    _tasks.clear();
+    _pid2task.clear();
+
+    _threads_lock.writeLock();
+    _threads.clear();
+    _threads_lock.writeUnlock();
+
+    _processes_lock.writeLock();
+    _processes.clear();
+    _processes_lock.writeUnlock();
 }
 
 TaskId TaskManager::nextTaskId()
