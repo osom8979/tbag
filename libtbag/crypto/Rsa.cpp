@@ -87,9 +87,29 @@ Rsa::Rsa()
     // EMPTY.
 }
 
+Rsa::Rsa(Rsa && obj) TBAG_NOEXCEPT : _rsa(std::move(obj._rsa))
+{
+    // EMPTY.
+}
+
 Rsa::~Rsa()
 {
     // EMPTY.
+}
+
+Rsa & Rsa::operator =(Rsa && obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _rsa = std::move(obj._rsa);
+    }
+    return *this;
+}
+
+void Rsa::swap(Rsa & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _rsa.swap(obj._rsa);
+    }
 }
 
 bool Rsa::gen()

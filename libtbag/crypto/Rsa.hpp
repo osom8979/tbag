@@ -98,7 +98,16 @@ private:
 
 public:
     Rsa();
+    Rsa(Rsa && obj) TBAG_NOEXCEPT;
     ~Rsa();
+
+public:
+    Rsa & operator =(Rsa && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(Rsa & obj) TBAG_NOEXCEPT;
+    inline friend void swap(Rsa & lh, Rsa & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
 
 public:
     bool gen();
