@@ -217,6 +217,68 @@ bool getInt(Json::Value const & v, std::string const & key, int * out)
     return getInt(v[key], out);
 }
 
+bool getErr(Json::Value const & v, Err * out)
+{
+    switch (v.type()) {
+    case Json::intValue:
+        if (existsErr(v.asInt())) {
+            if (out != nullptr) {
+                *out = toErr(v.asInt());
+            }
+            return true;
+        } else {
+            return false;
+        }
+
+    case Json::uintValue:
+        if (existsErr(static_cast<int>(v.asUInt()))) {
+            if (out != nullptr) {
+                *out = toErr(static_cast<int>(v.asUInt()));
+            }
+            return true;
+        } else {
+            return false;
+        }
+
+    case Json::stringValue:
+        {
+            using namespace libtbag::string;
+            auto const text = upper(trim(v.asString()));
+            if (text.empty()) {
+                return false;
+            }
+            if (text == "E_UNKNOWN") {
+                if (out != nullptr) {
+                    *out = E_UNKNOWN;
+                }
+                return true;
+            } else {
+                auto const code = libtbag::getErr(text.c_str());
+                if (code != E_UNKNOWN) {
+                    if (out != nullptr) {
+                        *out = code;
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
+
+    default:
+        return false;
+    }
+}
+
+Err optErr(Json::Value const & v, Err def)
+{
+    Err result;
+    if (getErr(v, &result)) {
+        return result;
+    } else {
+        return def;
+    }
+}
+
 } // namespace json
 } // namespace dom
 

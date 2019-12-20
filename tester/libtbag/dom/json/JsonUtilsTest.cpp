@@ -30,3 +30,11 @@ TEST(JsonUtilsTest, DoNotUseTheDropNull)
     ASSERT_STREQ(TEST_JSON_TEXT, JSON_TEXT.c_str());
 }
 
+TEST(JsonUtilsTest, OptErr)
+{
+    char const * const TEST_JSON_TEXT = R"({"key":"warning"})";
+    Json::Value value;
+    ASSERT_TRUE(parse(TEST_JSON_TEXT, value));
+    ASSERT_EQ(E_WARNING, optErr(value["key"]));
+}
+

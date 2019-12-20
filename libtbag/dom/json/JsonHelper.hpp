@@ -66,6 +66,9 @@ struct TBAG_API JsonHelper
     static bool getInt(Json::Value const & v, int * out);
     static bool getInt(Json::Value const & v, std::string const & key, int * out);
 
+    static bool getErr(Json::Value const & v, Err * out);
+    static Err optErr(Json::Value const & v, Err def = E_UNKNOWN);
+
     template <typename T>
     Json::Value toJsonArray(std::vector<T> const & val)
     {

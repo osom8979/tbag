@@ -144,6 +144,7 @@ static libtbag::Err convertSystemErrorToErr(int system_error)
 // ------------------
 
 #include <libtbag/log/Log.hpp>
+#include <cstring>
 #include <uv.h>
 
 // Symbol check.
@@ -155,13 +156,27 @@ UV_ERRNO_MAP(_XX)
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
+Err getErr(char const * upper_text) TBAG_NOEXCEPT
+{
+    assert(upper_text != nullptr);
+#define _TBAG_XX(name, num, message) if (::strcmp("E"#name, upper_text) == 0) { return Err::E##name; }
+    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
+#undef _TBAG_XX
+    // &(#name[1]) : Remove underscore.
+#define _TBAG_XX(name, num, message) if (::strcmp(&(#name[1]), upper_text) == 0) { return Err::E##name; }
+    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
+#undef _TBAG_XX
+    return E_UNKNOWN;
+}
+
 char const * getErrName(Err code) TBAG_NOEXCEPT
 {
     switch (code) {
 #define _TBAG_XX(name, num, message) case Err::E##name: return "E"#name;
     TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
-    default: return "E_UNKNOWN";
+    default:
+        return "E_UNKNOWN";
     }
 }
 
@@ -171,7 +186,19 @@ char const * getErrDetail(Err code) TBAG_NOEXCEPT
 #define _TBAG_XX(name, num, message) case Err::E##name: return message;
     TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
-    default: return "Unknown error.";
+    default:
+        return "E_UNKNOWN";
+    }
+}
+
+bool existsErr(int code) TBAG_NOEXCEPT
+{
+    switch (code) {
+#define _TBAG_XX(name, num, message) case static_cast<int>(Err::E##name): return true;
+    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
+#undef _TBAG_XX
+    default:
+        return false;
     }
 }
 
@@ -185,7 +212,8 @@ Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT
     TBAG_ERROR_INFO_MAP(_TBAG_ERASE_XX, _TBAG_XX)
 #undef _TBAG_ERASE_XX
 #undef _TBAG_XX
-    default: return Err::E_UNKNOWN;
+    default:
+        return E_UNKNOWN;
     }
     // clang-format on
 }

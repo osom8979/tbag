@@ -466,8 +466,10 @@ TBAG_CONSTEXPR Err const E_NNG_EINTERNAL    = E_INTERNAL     ;
 inline int toInt(Err code) TBAG_NOEXCEPT { return static_cast<int>(code); }
 inline Err toErr(int code) TBAG_NOEXCEPT { return static_cast<Err>(code); }
 
+TBAG_API Err getErr(char const * upper_text) TBAG_NOEXCEPT;
 TBAG_API char const * getErrName(Err code) TBAG_NOEXCEPT;
 TBAG_API char const * getErrDetail(Err code) TBAG_NOEXCEPT;
+TBAG_API bool existsErr(int code) TBAG_NOEXCEPT;
 
 TBAG_API Err convertUvErrorToErr(int uv_error_code) TBAG_NOEXCEPT;
 TBAG_API Err convertUvErrorToErrWithLogging(char const * prefix, int uv_error_code);

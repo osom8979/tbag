@@ -129,6 +129,16 @@ bool JsonHelper::getInt(Json::Value const & v, std::string const & key, int * ou
     return libtbag::dom::json::getInt(v, key, out);
 }
 
+bool JsonHelper::getErr(Json::Value const & v, Err * out)
+{
+    return libtbag::dom::json::getErr(v, out);
+}
+
+Err JsonHelper::optErr(Json::Value const & v, Err def)
+{
+    return libtbag::dom::json::optErr(v, def);
+}
+
 } // namespace json
 } // namespace dom
 

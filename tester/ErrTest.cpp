@@ -22,3 +22,14 @@ TEST(ErrTest, Default)
     std::cout << "Error code: " << code << std::endl;
 }
 
+TEST(ErrTest, GetErr)
+{
+    ASSERT_EQ(E_UNKNOWN, getErr("?"));
+
+    ASSERT_EQ(E_SUCCESS, getErr("E_SUCCESS"));
+    ASSERT_EQ(E_WARNING, getErr("E_WARNING"));
+
+    ASSERT_EQ(E_ILLARGS, getErr("ILLARGS"));
+    ASSERT_EQ(E_ALREADY, getErr("ALREADY"));
+}
+

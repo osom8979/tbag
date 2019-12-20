@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/dom/json/jsoncpp/json.h>
 
 #include <vector>
@@ -60,6 +61,9 @@ TBAG_API bool getString(Json::Value const & v, std::string const & key, std::str
 
 TBAG_API bool getInt(Json::Value const & v, int * out);
 TBAG_API bool getInt(Json::Value const & v, std::string const & key, int * out);
+
+TBAG_API bool getErr(Json::Value const & v, Err * out);
+TBAG_API Err optErr(Json::Value const & v, Err def = E_UNKNOWN);
 
 template <typename T>
 Json::Value toJsonArray(std::vector<T> const & val)
