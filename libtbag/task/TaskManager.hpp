@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <atomic>
+#include <functional>
 #include <unordered_map>
 
 // -------------------
@@ -115,7 +116,7 @@ public:
         Callback() { /* EMPTY. */ }
         virtual ~Callback() { /* EMPTY. */ }
 
-        virtual void onThreadExit(TaskId id) { /* EMPTY. */ }
+        virtual void onThreadExit(TaskId id, int64_t exit_status, int term_signal) { /* EMPTY. */ }
         virtual void onProcessOut(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
         virtual void onProcessErr(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
         virtual void onProcessExit(TaskId id, int64_t exit_status, int term_signal) { /* EMPTY. */ }
@@ -160,6 +161,12 @@ public:
     TaskManager(Callback * cb = nullptr);
     virtual ~TaskManager();
 
+private:
+    TBAG_API friend void __task_int_signal(int signum);
+
+public:
+    TaskId nextTaskId();
+
 public:
     std::size_t size() const;
     bool empty() const;
@@ -173,10 +180,10 @@ public:
     ErrTaskInfo getTaskInfo(TaskId id) const;
 
 private:
-    void onThreadExit(TaskId id);
-    void onProcessOut(int pid, char const * buffer, std::size_t size);
-    void onProcessErr(int pid, char const * buffer, std::size_t size);
-    void onProcessExit(int pid, int64_t exit_status, int term_signal);
+    void _on_thread_exit(TaskId id, int64_t exit_status, int term_signal);
+    void _on_process_out(int pid, char const * buffer, std::size_t size);
+    void _on_process_err(int pid, char const * buffer, std::size_t size);
+    void _on_process_exit(int pid, int64_t exit_status, int term_signal);
 
 public:
     ErrTaskId runThread(ThreadParams const & params, void * opaque = nullptr);

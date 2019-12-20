@@ -26,6 +26,7 @@ namespace thread {
 
 TBAG_API Err killThread(libtbag::uvpp::uthread id, int signum);
 TBAG_API Err cancelThread(libtbag::uvpp::uthread id);
+TBAG_API void exitThread(int exit_code);
 
 // pthread only...
 

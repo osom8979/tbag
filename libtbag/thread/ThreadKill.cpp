@@ -27,34 +27,16 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace thread {
 
-Err __kill_thread_win32(libtbag::uvpp::uthread id, int signum)
+Err killThread(libtbag::uvpp::uthread id, int signum)
 {
 #if defined(TBAG_PLATFORM_WINDOWS)
     return TerminateThread(id, signum) == TRUE ? E_SUCCESS : E_UNKNOWN;
-#else
-    return E_ENOSYS;
-#endif
-}
-
-Err __kill_thread_pthread(libtbag::uvpp::uthread id, int signum)
-{
-#if defined(TBAG_USE_PTHREADS)
+#elif defined(TBAG_USE_PTHREADS)
     auto const result = ::pthread_kill(id, signum);
     if (result == 0) {
         return E_SUCCESS;
     }
     return libtbag::convertSystemErrorToErr(result);
-#else
-    return E_ENOSYS;
-#endif
-}
-
-Err killThread(libtbag::uvpp::uthread id, int signum)
-{
-#if defined(TBAG_PLATFORM_WINDOWS)
-    return __kill_thread_win32(id, signum);
-#elif defined(TBAG_USE_PTHREADS)
-    return __kill_thread_pthread(id, signum);
 #else
     return E_ENOSYS;
 #endif
@@ -72,6 +54,15 @@ Err cancelThread(libtbag::uvpp::uthread id)
     return libtbag::convertSystemErrorToErr(result);
 #else
     return E_ENOSYS;
+#endif
+}
+
+void exitThread(int exit_code)
+{
+#if defined(TBAG_PLATFORM_WINDOWS)
+    ExitThread(exit_code);
+#elif defined(TBAG_USE_PTHREADS)
+    ::pthread_exit((void*)(std::intptr_t)exit_code);
 #endif
 }
 

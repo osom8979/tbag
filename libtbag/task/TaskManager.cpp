@@ -8,6 +8,10 @@
 #include <libtbag/task/TaskManager.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/thread/ThreadKill.hpp>
+#include <libtbag/thread/ThreadLocalStorage.hpp>
+#include <libtbag/container/Global.hpp>
+#include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <cassert>
@@ -23,9 +27,51 @@ using TaskId = TaskManager::TaskId;
 using ErrTaskId = TaskManager::ErrTaskId;
 using ErrTaskInfo = TaskManager::ErrTaskInfo;
 
-static void __init_task_thread(TaskId UNUSED_PARAM(id))
+TBAG_CONSTEXPR static char const * const GLOBAL_MANAGER_REGISTER_KEY =
+        "libtbag::task::_manager_register";
+TBAG_CONSTEXPR static int const THREAD_TASK_KILL_SIGNAL =
+        libtbag::signal::TBAG_SIGNAL_INTERRUPT;
+
+struct _manager_register TBAG_FINAL : private Noncopyable
 {
-    libtbag::thread::setAsynchronousCancelType();
+    using Tls = libtbag::thread::ThreadLocalStorage;
+
+    Tls mgr;
+    Tls id;
+
+    _manager_register() { /* EMPTY. */ }
+    ~_manager_register() { /* EMPTY. */ }
+};
+
+static std::shared_ptr<_manager_register> __get_global_manager_register()
+{
+    using namespace libtbag::container;
+    auto weak = findGlobalObject<_manager_register>(GLOBAL_MANAGER_REGISTER_KEY);
+    if (auto shared = weak.lock()) {
+        return shared;
+    } else {
+        return newGlobalObject<_manager_register>(GLOBAL_MANAGER_REGISTER_KEY);
+    }
+}
+
+void __task_int_signal(int signum)
+{
+    auto const shared = __get_global_manager_register();
+    TaskManager * mgr = shared->mgr.cast<TaskManager>();
+    TaskId id = (TaskId)(std::intptr_t)shared->id.get();
+    mgr->_on_thread_exit(id, EXIT_FAILURE, signum);
+    libtbag::thread::exitThread(EXIT_FAILURE);
+}
+
+static void __init_task_thread(TaskManager * mgr, TaskId id)
+{
+#if !defined(TBAG_PLATFORM_WINDOWS)
+    auto const shared = __get_global_manager_register();
+    assert(static_cast<bool>(shared));
+    shared->mgr.set(mgr);
+    shared->id.set((void*)(std::intptr_t)id);
+    std::signal(THREAD_TASK_KILL_SIGNAL, &__task_int_signal);
+#endif
 }
 
 // --------------------------
@@ -35,15 +81,27 @@ static void __init_task_thread(TaskId UNUSED_PARAM(id))
 TaskManager::TaskManager(Callback * cb)
         : TASK_CALLBACK(cb), _task_number(BEGIN_TASK_ID)
 {
+    auto const shared = __get_global_manager_register();
+    assert(static_cast<bool>(shared));
     using namespace std::placeholders;
-    _processes.out_read_cb = std::bind(&TaskManager::onProcessOut, this, _1, _2, _3);
-    _processes.err_read_cb = std::bind(&TaskManager::onProcessErr, this, _1, _2, _3);
-    _processes.exit_cb = std::bind(&TaskManager::onProcessExit, this, _1, _2, _3);
+    _processes.out_read_cb = std::bind(&TaskManager::_on_process_out, this, _1, _2, _3);
+    _processes.err_read_cb = std::bind(&TaskManager::_on_process_err, this, _1, _2, _3);
+    _processes.exit_cb = std::bind(&TaskManager::_on_process_exit, this, _1, _2, _3);
 }
 
 TaskManager::~TaskManager()
 {
     // EMPTY.
+}
+
+TaskId TaskManager::nextTaskId()
+{
+    while (true) {
+        auto const id = _task_number++;
+        if (!exists(id)) {
+            return id;
+        }
+    }
 }
 
 std::size_t TaskManager::size() const
@@ -90,21 +148,24 @@ ErrTaskInfo TaskManager::getTaskInfo(TaskId id) const
     return { E_SUCCESS, itr->second };
 }
 
-void TaskManager::onThreadExit(TaskId id)
+void TaskManager::_on_thread_exit(TaskId id, int64_t exit_status, int term_signal)
 {
-    tDLogN("TaskManager::onThreadExit(task_id={}) function was called.", id);
+    tDLogN("TaskManager::_on_thread_exit(task_id={},exit={},signum={}) function was called.",
+           id, exit_status, term_signal);
     COMMENT("Tasks lock") {
         WriteLockGuard const G(_tasks_lock);
         auto itr = _tasks.find(id);
         assert(itr != _tasks.end());
         itr->second.done = true;
+        itr->second.exit_status = exit_status;
+        itr->second.term_signal = term_signal;
     }
     if (TASK_CALLBACK) {
-        TASK_CALLBACK->onThreadExit(id);
+        TASK_CALLBACK->onThreadExit(id, exit_status, term_signal);
     }
 }
 
-void TaskManager::onProcessOut(int pid, char const * buffer, std::size_t size)
+void TaskManager::_on_process_out(int pid, char const * buffer, std::size_t size)
 {
     TaskId task_id;
     COMMENT("Tasks lock") {
@@ -120,7 +181,7 @@ void TaskManager::onProcessOut(int pid, char const * buffer, std::size_t size)
     }
 }
 
-void TaskManager::onProcessErr(int pid, char const * buffer, std::size_t size)
+void TaskManager::_on_process_err(int pid, char const * buffer, std::size_t size)
 {
     TaskId task_id;
     COMMENT("Tasks lock") {
@@ -136,7 +197,7 @@ void TaskManager::onProcessErr(int pid, char const * buffer, std::size_t size)
     }
 }
 
-void TaskManager::onProcessExit(int pid, int64_t exit_status, int term_signal)
+void TaskManager::_on_process_exit(int pid, int64_t exit_status, int term_signal)
 {
     TaskId task_id;
     COMMENT("Tasks lock") {
@@ -150,7 +211,7 @@ void TaskManager::onProcessExit(int pid, int64_t exit_status, int term_signal)
         itr->second.exit_status = exit_status;
         itr->second.term_signal = term_signal;
     }
-    tDLogN("TaskManager::onProcessExit(task_id={},pid={},exit={},signum={}) function was called.",
+    tDLogN("TaskManager::_on_process_exit(task_id={},pid={},exit={},signum={}) function was called.",
            task_id, pid, exit_status, term_signal);
     if (TASK_CALLBACK) {
         TASK_CALLBACK->onProcessExit(task_id, exit_status, term_signal);
@@ -159,18 +220,29 @@ void TaskManager::onProcessExit(int pid, int64_t exit_status, int term_signal)
 
 ErrTaskId TaskManager::runThread(ThreadParams const & params, void * opaque)
 {
-    auto const TASK_ID = _task_number++;
+    auto const task_id = nextTaskId();
+
+    libtbag::lock::UvLock lock;
+    libtbag::lock::UvCondition signal;
+    bool init_task_end = false;
 
     // [IMPORTANT] Before adding a task, to prevent access from a new thread.
     WriteLockGuard const G(_tasks_lock);
 
     _threads_lock.writeLock();
-    auto const thread_id = _threads.createThread([this, params, TASK_ID](){
-        __init_task_thread(TASK_ID);
+    auto const thread_id = _threads.createThread([this, params, opaque, task_id, &lock, &signal, &init_task_end](){
+        __init_task_thread(this, task_id);
+
+        lock.lock();
+        init_task_end = true;
+        signal.signal();
+        lock.unlock();
+
         if (params.runner) {
             params.runner();
         }
-        onThreadExit(TASK_ID);
+
+        _on_thread_exit(task_id, EXIT_SUCCESS, 0);
     });
     _threads_lock.writeUnlock();
 
@@ -185,15 +257,22 @@ ErrTaskId TaskManager::runThread(ThreadParams const & params, void * opaque)
     info.exit_status = 0;
     info.term_signal = 0;
     info.opaque = opaque;
-    if (!_tasks.emplace(TASK_ID, info).second) {
-        return E_INSERT;
+    auto const task_insert_result = _tasks.emplace(task_id, info).second;
+    assert(task_insert_result);
+
+    // Do not unlock until the signal is registered.
+    lock.lock();
+    while (!init_task_end) {
+        signal.wait(lock);
     }
-    return { E_SUCCESS, TASK_ID };
+    lock.unlock();
+
+    return { E_SUCCESS, task_id };
 }
 
 ErrTaskId TaskManager::runProcess(ProcessParams const & params, void * opaque)
 {
-    auto const TASK_ID = _task_number++;
+    auto const task_id = nextTaskId();
 
     // [IMPORTANT] Before adding a task, to prevent access from a new thread.
     WriteLockGuard const G(_tasks_lock);
@@ -213,13 +292,11 @@ ErrTaskId TaskManager::runProcess(ProcessParams const & params, void * opaque)
     info.exit_status = 0;
     info.term_signal = 0;
     info.opaque = opaque;
-    if (!_tasks.emplace(TASK_ID, info).second) {
-        return E_INSERT;
-    }
-    if (!_pid2task.emplace(pid, TASK_ID).second) {
-        return E_INSERT;
-    }
-    return { E_SUCCESS, TASK_ID };
+    auto const task_insert_result = _tasks.emplace(task_id, info).second;
+    assert(task_insert_result);
+    auto const pid_insert_result = _pid2task.emplace(pid, task_id).second;
+    assert(pid_insert_result);
+    return { E_SUCCESS, task_id };
 }
 
 Err TaskManager::join(TaskId id)
@@ -297,22 +374,35 @@ Err TaskManager::kill(TaskId id)
         auto const thread_id = task_info.internal_id.thread;
         tDLogN("TaskManager::kill(task_id={}) Thread ID: {}", id, (void*)thread_id);
 
-        WriteLockGuard const G2(_tasks_lock);
-        auto const itr = _tasks.find(id);
-        if (itr == _tasks.end()) {
-            return E_NFOUND;
+        if (isWindowsPlatform()) {
+            // [IMPORTANT]
+            // On Windows platforms, the thread terminates immediately.
+            // Therefore, you must manipulate the attribute yourself.
+            WriteLockGuard const G2(_tasks_lock);
+            auto const itr = _tasks.find(id);
+            if (itr == _tasks.end()) {
+                return E_NFOUND;
+            }
+            if (itr->second.done) {
+                return E_ALREADY;
+            }
+
+            WriteLockGuard const G3(_threads_lock);
+            auto const cancel_result = _threads.cancel(thread_id);
+
+            if (isSuccess(cancel_result)) {
+                itr->second.done = true;
+                itr->second.exit_status = EXIT_FAILURE;
+                itr->second.term_signal = THREAD_TASK_KILL_SIGNAL;
+            }
+            if (TASK_CALLBACK) {
+                TASK_CALLBACK->onThreadExit(id, EXIT_FAILURE, THREAD_TASK_KILL_SIGNAL);
+            }
+            return cancel_result;
+        } else {
+            WriteLockGuard const G3(_threads_lock);
+            return _threads.kill(thread_id, THREAD_TASK_KILL_SIGNAL);
         }
-        if (itr->second.done) {
-            return E_ALREADY;
-        }
-        WriteLockGuard const G3(_threads_lock);
-        auto const cancel_result = _threads.cancel(thread_id);
-        if (isSuccess(cancel_result)) {
-            itr->second.done = true;
-            itr->second.exit_status = 0;
-            itr->second.term_signal = libtbag::signal::TBAG_SIGNAL_KILL;
-        }
-        return cancel_result;
     }
 }
 

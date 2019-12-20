@@ -676,6 +676,16 @@ WIN32_DUMMY_INLINE BOOL TerminateThread(HANDLE hThread, DWORD dwExitCode)
 { return FALSE; }
 
 /**
+ * @see <https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-exitthread>
+ *
+ * @remarks
+ *  - processthreadsapi.h (include Windows.h)
+ *  - Library: Kernel32.lib
+ */
+WIN32_DUMMY_INLINE void ExitThread(DWORD dwExitCode)
+{ /* EMPTY. */ }
+
+/**
  * @see <https://msdn.microsoft.com/ko-kr/library/windows/desktop/ms724948(v=vs.85).aspx>
  *
  * @remarks

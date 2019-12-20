@@ -130,8 +130,8 @@ TEST(TaskManagerTest, KillThread)
     auto const & task_info = err_task_info.value;
     ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info.type);
     ASSERT_TRUE(task_info.done);
-    ASSERT_EQ(0, task_info.exit_status);
-    ASSERT_EQ(libtbag::signal::TBAG_SIGNAL_KILL, task_info.term_signal);
+    ASSERT_EQ(EXIT_FAILURE, task_info.exit_status);
+    ASSERT_EQ(libtbag::signal::TBAG_SIGNAL_INTERRUPT, task_info.term_signal);
 
     auto const erase_result = mgr.erase(task_id);
     ASSERT_EQ(E_SUCCESS, erase_result);
@@ -201,7 +201,11 @@ TEST(TaskManagerTest, KillProcess)
     auto const & task_info = err_task_info.value;
     ASSERT_EQ(TaskManager::TaskType::TT_PROCESS, task_info.type);
     ASSERT_TRUE(task_info.done);
-    ASSERT_EQ(0, task_info.exit_status);
+    if (isWindowsPlatform()) {
+        ASSERT_EQ(1, task_info.exit_status);
+    } else {
+        ASSERT_EQ(0, task_info.exit_status);
+    }
     ASSERT_EQ(libtbag::signal::TBAG_SIGNAL_KILL, task_info.term_signal);
 
     auto const erase_result = mgr.erase(task_id);
