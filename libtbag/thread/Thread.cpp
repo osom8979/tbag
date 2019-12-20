@@ -13,6 +13,10 @@
 
 #include <uv.h>
 
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <cxxabi.h>
+#endif
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -22,7 +26,7 @@ namespace thread {
 using uthread = Thread::uthread;
 using State = Thread::State;
 
-void __global_uv_thread_cb__(void * args) TBAG_NOEXCEPT
+void __global_uv_thread_cb__(void * args)
 {
     assert(args != nullptr);
     auto * thread = (Thread*)args;
@@ -33,6 +37,10 @@ void __global_uv_thread_cb__(void * args) TBAG_NOEXCEPT
 
     try {
         thread->onRunner();
+#if defined(_CXXABI_FORCED_H)
+    } catch (abi::__forced_unwind &) {
+        throw;
+#endif
     } catch (...) {
         thread->_exception = std::current_exception();
     }

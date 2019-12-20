@@ -152,7 +152,7 @@ public:
     Err join(bool rethrow = true);
 
 private:
-    friend TBAG_API void __global_uv_thread_cb__(void * args) TBAG_NOEXCEPT;
+    friend TBAG_API void __global_uv_thread_cb__(void * args);
 
 public:
     template <typename TimeoutDuration, typename TickDuration = TimeoutDuration>
