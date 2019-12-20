@@ -161,6 +161,9 @@ public:
     TaskManager(Callback * cb = nullptr);
     virtual ~TaskManager();
 
+public:
+    void clearWithoutChecking();
+
 private:
     TBAG_API friend void __task_int_signal(int signum);
 

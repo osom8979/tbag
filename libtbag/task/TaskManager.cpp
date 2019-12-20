@@ -91,6 +91,11 @@ TaskManager::TaskManager(Callback * cb)
 
 TaskManager::~TaskManager()
 {
+    clearWithoutChecking();
+}
+
+void TaskManager::clearWithoutChecking()
+{
     WriteLockGuard const G(_tasks_lock);
     _tasks.clear();
     _pid2task.clear();
