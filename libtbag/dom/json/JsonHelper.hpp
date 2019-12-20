@@ -69,6 +69,12 @@ struct TBAG_API JsonHelper
     static bool getErr(Json::Value const & v, Err * out);
     static Err optErr(Json::Value const & v, Err def = E_UNKNOWN);
 
+    template <typename Iterator>
+    Json::Value toJsonArray(Iterator begin, Iterator end)
+    {
+        return libtbag::dom::json::toJsonArray<Iterator>(begin, end);
+    }
+
     template <typename T>
     Json::Value toJsonArray(std::vector<T> const & val)
     {
