@@ -70,3 +70,38 @@ TEST(RsaTest, EncryptPrivate)
     ASSERT_EQ(TEST_DATA, DECRYPT_DATA);
 }
 
+TEST(RsaTest, PublicKey_PrivateKey)
+{
+    auto keys = generateKeys();
+    PublicKey public_key = std::move(keys.first);
+    PrivateKey private_key = std::move(keys.second);
+
+    ASSERT_TRUE(public_key.exists());
+    ASSERT_TRUE(private_key.exists());
+
+    ASSERT_FALSE(public_key.key().empty());
+    ASSERT_FALSE(private_key.key().empty());
+
+    std::string const test_data = "TEST_DATA";
+
+    COMMENT("Public -> Private") {
+        auto const encrypt_data = public_key.encrypt(test_data);
+        ASSERT_FALSE(encrypt_data.empty());
+        ASSERT_NE(test_data, encrypt_data);
+
+        auto const decrypt_data = private_key.decrypt(encrypt_data);
+        ASSERT_FALSE(decrypt_data.empty());
+        ASSERT_EQ(test_data, decrypt_data);
+    }
+
+    COMMENT("Private -> Public") {
+        auto const encrypt_data = private_key.encrypt(test_data);
+        ASSERT_FALSE(encrypt_data.empty());
+        ASSERT_NE(test_data, encrypt_data);
+
+        auto const decrypt_data = public_key.decrypt(encrypt_data);
+        ASSERT_FALSE(decrypt_data.empty());
+        ASSERT_EQ(test_data, decrypt_data);
+    }
+}
+

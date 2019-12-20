@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -141,6 +142,178 @@ public:
     static std::string generatePemPrivateKey(int key_length = DEFAULT_KEY_LENGTH);
     static std::string generatePemPrivateKey(CipherAlgorithm cipher, int key_length = DEFAULT_KEY_LENGTH);
 };
+
+/**
+ * PublicKey class prototype.
+ *
+ * @author zer0
+ * @date   2019-12-21
+ */
+class PublicKey : private Noncopyable
+{
+public:
+    using Padding = Rsa::Padding;
+
+private:
+    std::string _key;
+    Rsa _rsa;
+
+public:
+    PublicKey()
+    { /* EMPTY. */ }
+    PublicKey(PublicKey && obj) TBAG_NOEXCEPT
+            : _key(std::move(obj._key)), _rsa(std::move(obj._rsa))
+    { /* EMPTY. */ }
+    ~PublicKey()
+    { /* EMPTY. */ }
+
+public:
+    PublicKey & operator =(PublicKey && obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            _key = std::move(obj._key);
+            _rsa = std::move(obj._rsa);
+        }
+        return *this;
+    }
+
+public:
+    void swap(PublicKey & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            _key.swap(obj._key);
+            _rsa.swap(obj._rsa);
+        }
+    }
+
+    friend void swap(PublicKey & lh, PublicKey & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
+
+public:
+    std::string const & key() const TBAG_NOEXCEPT
+    {
+        return _key;
+    }
+
+    bool exists() const TBAG_NOEXCEPT_SP_OP(_key.empty())
+    {
+        return !_key.empty();
+    }
+
+    int getMaxDataSize(Padding p) const
+    {
+        return _rsa.getMaxDataSize(p);
+    }
+
+    bool readPem(std::string const & key)
+    {
+        if (!_rsa.readPemPublicKey(key)) {
+            return false;
+        }
+        _key = key;
+        return true;
+    }
+
+    std::string encrypt(std::string const & data, Padding p = Padding::P_PKCS1) const
+    {
+        return _rsa.encryptPublic(data, p);
+    }
+
+    std::string decrypt(std::string const & data, Padding p = Padding::P_PKCS1) const
+    {
+        return _rsa.decryptPublic(data, p);
+    }
+};
+
+/**
+ * PrivateKey class prototype.
+ *
+ * @author zer0
+ * @date   2019-12-21
+ */
+class PrivateKey : private Noncopyable
+{
+public:
+    using Padding = Rsa::Padding;
+
+private:
+    std::string _key;
+    Rsa _rsa;
+
+public:
+    PrivateKey()
+    { /* EMPTY. */ }
+    PrivateKey(PrivateKey && obj) TBAG_NOEXCEPT
+            : _key(std::move(obj._key)), _rsa(std::move(obj._rsa))
+    { /* EMPTY. */ }
+    ~PrivateKey()
+    { /* EMPTY. */ }
+
+public:
+    PrivateKey & operator =(PrivateKey && obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            _key = std::move(obj._key);
+            _rsa = std::move(obj._rsa);
+        }
+        return *this;
+    }
+
+public:
+    void swap(PrivateKey & obj) TBAG_NOEXCEPT
+    {
+        if (this != &obj) {
+            _key.swap(obj._key);
+            _rsa.swap(obj._rsa);
+        }
+    }
+
+    friend void swap(PrivateKey & lh, PrivateKey & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
+
+public:
+    std::string const & key() const TBAG_NOEXCEPT
+    {
+        return _key;
+    }
+
+    bool exists() const TBAG_NOEXCEPT_SP_OP(_key.empty())
+    {
+        return !_key.empty();
+    }
+
+    int getMaxDataSize(Padding p) const
+    {
+        return _rsa.getMaxDataSize(p);
+    }
+
+    bool readPem(std::string const & key)
+    {
+        if (!_rsa.readPemPrivateKey(key)) {
+            return false;
+        }
+        _key = key;
+        return true;
+    }
+
+    std::string encrypt(std::string const & data, Padding p = Padding::P_PKCS1) const
+    {
+        return _rsa.encryptPrivate(data, p);
+    }
+
+    std::string decrypt(std::string const & data, Padding p = Padding::P_PKCS1) const
+    {
+        return _rsa.decryptPrivate(data, p);
+    }
+};
+
+TBAG_API std::pair<PublicKey, PrivateKey> generateKeys(
+        Rsa::CipherAlgorithm cipher = Rsa::CipherAlgorithm::CA_NONE,
+        int key_length = Rsa::DEFAULT_KEY_LENGTH);
 
 } // namespace crypto
 

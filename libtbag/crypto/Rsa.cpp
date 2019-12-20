@@ -339,6 +339,19 @@ std::string Rsa::generatePemPrivateKey(CipherAlgorithm cipher, int key_length)
     return rsa.getPemPrivateKey(cipher);
 }
 
+std::pair<PublicKey, PrivateKey> generateKeys(Rsa::CipherAlgorithm cipher, int key_length)
+{
+    std::string public_key;
+    std::string private_key;
+    if (!Rsa::generatePem(public_key, private_key, cipher, key_length)) {
+        return {};
+    }
+    std::pair<PublicKey, PrivateKey> result;
+    result.first.readPem(public_key);
+    result.second.readPem(private_key);
+    return result;
+}
+
 } // namespace crypto
 
 // --------------------
