@@ -277,10 +277,10 @@ public:
     TBAG_CONSTEXPR static btype const type_fp32() TBAG_NOEXCEPT { return get_btype<fp32>(); }
     TBAG_CONSTEXPR static btype const type_fp64() TBAG_NOEXCEPT { return get_btype<fp64>(); }
 
-    TBAG_CONSTEXPR static btype const device_none() TBAG_NOEXCEPT { return libtbag::box::details::BD_NONE; }
-    TBAG_CONSTEXPR static btype const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }
-    TBAG_CONSTEXPR static btype const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
-    TBAG_CONSTEXPR static btype const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }
+    TBAG_CONSTEXPR static bdev const device_none() TBAG_NOEXCEPT { return libtbag::box::details::BD_NONE; }
+    TBAG_CONSTEXPR static bdev const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }
+    TBAG_CONSTEXPR static bdev const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
+    TBAG_CONSTEXPR static bdev const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }
 
 private:
     SharedBoxData _data;
