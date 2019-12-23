@@ -142,6 +142,8 @@ union box_any
     fp64 data_fp64;
 };
 
+using box_opaque_delete_cb = void(*)(void*);
+
 struct box_cursor;
 struct box_data;
 
@@ -239,7 +241,7 @@ TBAG_API void   box_data_free(bdev device, void * data) TBAG_NOEXCEPT;
  *  It is an alternative to the 1d vector container. @n
  *  Therefore, the entire memory must be connected in one dimension.
  */
-struct TBAG_API box_data
+struct TBAG_API box_data : private Noncopyable
 {
     /** Data type. */
     btype type;
@@ -291,12 +293,13 @@ struct TBAG_API box_data
     /** User's data. */
     box_any opaque;
 
+    /** If not null, Called when released. */
+    box_opaque_delete_cb opaque_deleter;
+
     box_data() TBAG_NOEXCEPT;
-    box_data(box_data const & obj) = delete;
     box_data(box_data && obj) TBAG_NOEXCEPT;
     ~box_data();
 
-    box_data & operator =(box_data const & obj) = delete;
     box_data & operator =(box_data && obj) TBAG_NOEXCEPT;
 
     void swap(box_data & obj) TBAG_NOEXCEPT;

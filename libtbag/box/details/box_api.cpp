@@ -714,6 +714,7 @@ void box_data::swap(box_data & obj) TBAG_NOEXCEPT
         std::swap(total_info_byte, obj.total_info_byte);
         std::swap(info_size, obj.info_size);
         std::swap(opaque, obj.opaque);
+        std::swap(opaque_deleter, obj.opaque_deleter);
     }
 }
 
@@ -727,6 +728,9 @@ void box_data::release()
     }
     if (info) {
         box_info_free(info);
+    }
+    if (opaque.pointer && opaque_deleter) {
+        opaque_deleter(opaque.pointer);
     }
     clear();
 }
@@ -753,6 +757,7 @@ void box_data::clear() TBAG_NOEXCEPT
 void box_data::clear_opaque() TBAG_NOEXCEPT
 {
     memset(&opaque, 0x00, sizeof(opaque));
+    opaque_deleter = nullptr;
 }
 
 Err box_data::alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...)
