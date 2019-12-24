@@ -28,6 +28,7 @@ namespace details {
 
 STATIC_ASSERT_CHECK_SIZEOF(btype, 2);
 STATIC_ASSERT_CHECK_SIZEOF(bdev , 2);
+STATIC_ASSERT_CHECK_SIZEOF(bool8, 1);
 STATIC_ASSERT_CHECK_SIZEOF(si8  , 1);
 STATIC_ASSERT_CHECK_SIZEOF(si16 , 2);
 STATIC_ASSERT_CHECK_SIZEOF(si32 , 4);
@@ -40,6 +41,7 @@ STATIC_ASSERT_CHECK_SIZEOF(fp32 , 4);
 STATIC_ASSERT_CHECK_SIZEOF(fp64 , 8);
 
 STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_NONE   , BT_NONE   );
+STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_BOOL8  , BT_BOOL8  );
 STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_INT8   , BT_INT8   );
 STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_INT16  , BT_INT16  );
 STATIC_ASSERT_CHECK_IS_EQUALS(TBAG_BOX_TYPE_INT32  , BT_INT32  );
@@ -56,6 +58,7 @@ bool box_support_type(btype type) TBAG_NOEXCEPT
     // clang-format off
     switch (type) {
     case BT_NONE:    return false;
+    case BT_BOOL8:   return true;
     case BT_INT8:    return true;
     case BT_INT16:   return true;
     case BT_INT32:   return true;
@@ -89,6 +92,7 @@ char const * box_get_type_name(btype type) TBAG_NOEXCEPT
     // clang-format off
     switch (type) {
     case BT_NONE:    return "NONE";
+    case BT_BOOL8:   return "BOOL8";
     case BT_INT8:    return "INT8";
     case BT_INT16:   return "INT16";
     case BT_INT32:   return "INT32";
@@ -122,6 +126,7 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
     // clang-format off
     switch (type) {
     case BT_NONE:    return 0;
+    case BT_BOOL8:   return sizeof(bool8);
     case BT_INT8:    return sizeof(si8);
     case BT_INT16:   return sizeof(si16);
     case BT_INT32:   return sizeof(si32);

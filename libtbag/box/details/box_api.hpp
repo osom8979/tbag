@@ -52,6 +52,7 @@ namespace details {
 #define TBAG_BOX_TYPE_SIZE_128BIT 128
 
 #define TBAG_BOX_TYPE_NONE        0x0000
+#define TBAG_BOX_TYPE_BOOL8       0x0108
 #define TBAG_BOX_TYPE_INT8        0x0308
 #define TBAG_BOX_TYPE_INT16       0x0310
 #define TBAG_BOX_TYPE_INT32       0x0320
@@ -81,10 +82,13 @@ namespace details {
     (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
 
 #define TBAG_MAKE_BOX_TYPE(prefix, size) (((prefix)<<(8))|(size))
+#define TBAG_GET_BOX_TYPE_PREFIX(type) (((type)&(TBAG_BOX_TYPE_PREFIX_BIT))>>(8))
+#define TBAG_GET_BOX_TYPE_SUFFIX(type) ((type)&(TBAG_BOX_TYPE_SUFFIX_BIT))
 
 enum BoxType
 {
     BT_NONE    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNKNOWN , TBAG_BOX_TYPE_SIZE_0BIT  ),
+    BT_BOOL8   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_BOOLEAN , TBAG_BOX_TYPE_SIZE_8BIT  ),
     BT_INT8    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_8BIT  ),
     BT_INT16   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_16BIT ),
     BT_INT32   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_32BIT ),
@@ -104,6 +108,8 @@ enum BoxDevice
     BD_CUDA = TBAG_BOX_DEVICE_CUDA,
     BD_CL   = TBAG_BOX_DEVICE_CL,
 };
+
+using bool8 = uint8_t;
 
 using si8  = int8_t;
 using si16 = int16_t;
@@ -130,22 +136,41 @@ using bdev  = ui16;
 union box_any
 {
     void * pointer;
-    si8  data_si8;
-    si16 data_si16;
-    si32 data_si32;
-    si64 data_si64;
-    ui8  data_ui8;
-    ui16 data_ui16;
-    ui32 data_ui32;
-    ui64 data_ui64;
-    fp32 data_fp32;
-    fp64 data_fp64;
+    si8    data_si8;
+    si16   data_si16;
+    si32   data_si32;
+    si64   data_si64;
+    ui8    data_ui8;
+    ui16   data_ui16;
+    ui32   data_ui32;
+    ui64   data_ui64;
+    fp32   data_fp32;
+    fp64   data_fp64;
 };
 
 using box_opaque_delete_cb = void(*)(void*);
 
 struct box_cursor;
 struct box_data;
+
+// clang-format off
+inline bool box_is_unknown_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_UNKNOWN ; }
+inline bool box_is_boolean_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_BOOLEAN ; }
+inline bool box_is_string_type  (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_STRING  ; }
+inline bool box_is_signed_type  (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_SIGNED  ; }
+inline bool box_is_unsigned_type(btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_UNSIGNED; }
+inline bool box_is_floating_type(btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_FLOATING; }
+inline bool box_is_complex_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_COMPLEX ; }
+// clang-format on
+
+// clang-format off
+inline bool box_is_0bit_type  (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_0BIT  ; }
+inline bool box_is_8bit_type  (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_8BIT  ; }
+inline bool box_is_16bit_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_16BIT ; }
+inline bool box_is_32bit_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_32BIT ; }
+inline bool box_is_64bit_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_64BIT ; }
+inline bool box_is_128bit_type(btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_128BIT; }
+// clang-format on
 
 TBAG_API bool box_support_type(btype type) TBAG_NOEXCEPT;
 TBAG_API bool box_support_device(bdev dev) TBAG_NOEXCEPT;

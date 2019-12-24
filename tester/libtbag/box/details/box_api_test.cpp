@@ -13,6 +13,27 @@ using namespace libtbag;
 using namespace libtbag::box;
 using namespace libtbag::box::details;
 
+TEST(box_api_test, is_prefix_int8)
+{
+    ASSERT_FALSE(box_is_unknown_type(BT_INT8));
+    ASSERT_FALSE(box_is_boolean_type(BT_INT8));
+    ASSERT_FALSE(box_is_string_type(BT_INT8));
+    ASSERT_TRUE(box_is_signed_type(BT_INT8));
+    ASSERT_FALSE(box_is_unsigned_type(BT_INT8));
+    ASSERT_FALSE(box_is_floating_type(BT_INT8));
+    ASSERT_FALSE(box_is_complex_type(BT_INT8));
+}
+
+TEST(box_api_test, is_suffix_int8)
+{
+    ASSERT_FALSE(box_is_0bit_type(BT_INT8));
+    ASSERT_TRUE(box_is_8bit_type(BT_INT8));
+    ASSERT_FALSE(box_is_16bit_type(BT_INT8));
+    ASSERT_FALSE(box_is_32bit_type(BT_INT8));
+    ASSERT_FALSE(box_is_64bit_type(BT_INT8));
+    ASSERT_FALSE(box_is_128bit_type(BT_INT8));
+}
+
 TEST(box_api_test, Default)
 {
     box_data box;
