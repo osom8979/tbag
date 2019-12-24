@@ -49,6 +49,21 @@ TEST(Box_Info_Test, NullAssign)
     ASSERT_EQ(INFO, box.getInfoString());
 }
 
+TEST(Box_Info_Test, Resize)
+{
+    Box box = {{0}};
+    box.setInfo("TEST");
+    auto const * info_ptr1 = box.info();
+    ASSERT_NE(nullptr, info_ptr1);
+    ASSERT_EQ(4, box.info_size());
+
+    box.setInfo("T");
+    auto const * info_ptr2 = box.info();
+    ASSERT_NE(nullptr, info_ptr2);
+    ASSERT_EQ(1, box.info_size());
+    ASSERT_EQ(info_ptr1, info_ptr2);
+}
+
 TEST(Box_Info_Test, EmptyString)
 {
     Box box;
