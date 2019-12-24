@@ -181,6 +181,19 @@ std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::s
     return result;
 }
 
+std::vector<std::string> splitSize(std::string const & source, std::size_t size)
+{
+    assert(size >= 1u);
+    if (source.empty()) {
+        return {};
+    }
+    std::vector<std::string> result;
+    for (std::size_t i = 0; i < source.size(); i += size) {
+        result.emplace_back(source.substr(i, i + size));
+    }
+    return result;
+}
+
 std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter)
 {
     return mergeTokens(tokens.begin(), tokens.end(), delimiter);

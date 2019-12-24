@@ -128,6 +128,7 @@ TBAG_API bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size
  */
 TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter, bool remove_empty = true);
 TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter, bool remove_empty = true);
+TBAG_API std::vector<std::string> splitSize(std::string const & source, std::size_t size);
 
 template <typename Iterator>
 std::string mergeTokens(Iterator begin, Iterator end, std::string const & delimiter)

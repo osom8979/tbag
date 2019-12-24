@@ -154,6 +154,26 @@ TEST(StringUtilsTest, SplitUtf8Tokens_NotRemoveEmpty)
     ASSERT_EQ(std::string(), tokens3[1]);
 }
 
+TEST(StringUtilsTest, SplitSize)
+{
+    auto const tokens0 = splitSize("", 1);
+    ASSERT_TRUE(tokens0.empty());
+
+    auto const tokens1 = splitSize("12", 1);
+    ASSERT_EQ(2, tokens1.size());
+    ASSERT_STREQ("1", tokens1[0].c_str());
+    ASSERT_STREQ("2", tokens1[1].c_str());
+
+    auto const tokens2 = splitSize("12345", 3);
+    ASSERT_EQ(2, tokens2.size());
+    ASSERT_STREQ("123", tokens2[0].c_str());
+    ASSERT_STREQ("45", tokens2[1].c_str());
+
+    auto const tokens3 = splitSize("1234567890", 100);
+    ASSERT_EQ(1, tokens3.size());
+    ASSERT_STREQ("1234567890", tokens3[0].c_str());
+}
+
 TEST(StringUtilsTest, ConvertStringWithFloatingPoint)
 {
     std::string result = convertStringWithFloatingPoint(10.5542, 2);
