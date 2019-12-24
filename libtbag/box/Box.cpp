@@ -249,18 +249,32 @@ Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
 
 Err Box::copyToData(Box & box) const
 {
-    if (exists()) {
-        auto const code = box.reshape_ref_box(*this);
-        if (isFailure(code)) {
-            return code;
-        }
-        return box->assign_data(getData(), getType(), getDevice(), getExtensions(), getSize());
-    } else {
-        if (box.exists()) {
-            box.clearData();
-        }
+    if (!box.exists()) {
+        box.reset();
+    }
+
+    assert(box.exists());
+    if (!exists()) {
+        box.clearData();
         return E_SUCCESS;
     }
+    if (empty()) {
+        box.clearData();
+        return E_SUCCESS;
+    }
+
+    assert(type() != type_none());
+    assert(rank() >= 1);
+    assert(size() >= 1);
+
+    auto const code = box.reshape_ref_box(*this);
+    if (isFailure(code)) {
+        return code;
+    }
+
+    assert(rank() == box.rank());
+    assert(size() == box.size());
+    return box->assign_data(data(), type(), device(), ext(), size());
 }
 
 Err Box::copyFromData(Box const & box)
