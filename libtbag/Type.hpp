@@ -20,6 +20,7 @@
 
 #include <utility>
 #include <memory>
+#include <string>
 #include <type_traits>
 
 #define STATIC_ASSERT_CHECK_TRAIT1(traits, type) \
@@ -121,6 +122,29 @@ struct is_string_literal
     typedef typename std::add_lvalue_reference<const char [std::extent<__base_t>::value]>::type __test_t;
 
     TBAG_CONSTEXPR static bool value = std::is_same<T, __test_t>::value;
+};
+
+/**
+ * Test that the first template argument is a string type.
+ *
+ * @author zer0
+ * @date   2019-12-24
+ */
+template <typename ... T>
+struct is_first_string;
+
+template <typename Head, typename ... Tail>
+struct is_first_string<Head, Tail...>
+{
+    TBAG_CONSTEXPR static bool const value = is_first_string<Head>::value;
+};
+
+template <typename T>
+struct is_first_string<T>
+{
+    TBAG_CONSTEXPR static bool const value =
+            std::is_same<typename remove_cr<T>::type, std::string>::value ||
+            is_string_literal<T>::value;
 };
 
 // Test assertion.

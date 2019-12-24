@@ -418,23 +418,6 @@ private:
         >::value;
     };
 
-    template <typename ... T>
-    struct is_first_string;
-
-    template <typename Head, typename ... Tail>
-    struct is_first_string<Head, Tail...>
-    {
-        TBAG_CONSTEXPR static bool const value = is_first_string<Head>::value;
-    };
-
-    template <typename T>
-    struct is_first_string<T>
-    {
-        TBAG_CONSTEXPR static bool const value =
-                std::is_same<typename remove_cr<T>::type, std::string>::value ||
-                is_string_literal<T>::value;
-    };
-
 public:
     template <typename ... ArgsT>
     Err add(ArgsT && ... args)
