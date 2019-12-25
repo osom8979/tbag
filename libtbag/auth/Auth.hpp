@@ -74,7 +74,19 @@ private:
 
 public:
     AuthClient();
+    AuthClient(AuthClient && obj) TBAG_NOEXCEPT;
     ~AuthClient();
+
+public:
+    AuthClient & operator =(AuthClient && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(AuthClient & obj) TBAG_NOEXCEPT;
+
+    inline friend void swap(AuthClient & lh, AuthClient & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
 
 public:
     bool init(std::string const & ca_pem_public_key, std::string const & client_data);
@@ -128,7 +140,19 @@ private:
 
 public:
     AuthServer();
+    AuthServer(AuthServer && obj) TBAG_NOEXCEPT;
     ~AuthServer();
+
+public:
+    AuthServer & operator =(AuthServer && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(AuthServer & obj) TBAG_NOEXCEPT;
+
+    inline friend void swap(AuthServer & lh, AuthServer & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
 
 public:
     bool init(std::string const & ca_pem_private_key, std::string const & server_data);

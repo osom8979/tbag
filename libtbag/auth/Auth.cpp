@@ -13,6 +13,8 @@
 #include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
+
+#include <algorithm>
 #include <sstream>
 
 // -------------------
@@ -137,13 +139,53 @@ AuthClient::AuthClient()
     // EMPTY.
 }
 
+AuthClient::AuthClient(AuthClient && obj) TBAG_NOEXCEPT
+        : _ca_public_key(std::move(obj._ca_public_key)),
+          _client_public_key(std::move(obj._client_public_key)),
+          _client_private_key(std::move(obj._client_private_key)),
+          _client_data(std::move(obj._client_data)),
+          _server_public_key(std::move(obj._server_public_key)),
+          _server_data(std::move(obj._server_data)),
+          _validation(obj._validation)
+{
+    // EMPTY.
+}
+
 AuthClient::~AuthClient()
 {
     // EMPTY.
 }
 
+AuthClient & AuthClient::operator =(AuthClient && obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _ca_public_key = std::move(obj._ca_public_key);
+        _client_public_key = std::move(obj._client_public_key);
+        _client_private_key = std::move(obj._client_private_key);
+        _client_data = std::move(obj._client_data);
+        _server_public_key = std::move(obj._server_public_key);
+        _server_data = std::move(obj._server_data);
+        _validation = obj._validation;
+    }
+    return *this;
+}
+
+void AuthClient::swap(AuthClient & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _ca_public_key.swap(obj._ca_public_key);
+        _client_public_key.swap(obj._client_public_key);
+        _client_private_key.swap(obj._client_private_key);
+        _client_data.swap(obj._client_data);
+        _server_public_key.swap(obj._server_public_key);
+        _server_data.swap(obj._server_data);
+        std::swap(_validation, obj._validation);
+    }
+}
+
 bool AuthClient::init(std::string const & ca_pem_public_key, std::string const & client_data)
 {
+    _ca_public_key = PublicKey();
     if (!_ca_public_key.readPem(ca_pem_public_key)) {
         return false;
     }
@@ -151,6 +193,9 @@ bool AuthClient::init(std::string const & ca_pem_public_key, std::string const &
     _client_public_key = std::move(keys.first);
     _client_private_key = std::move(keys.second);
     _client_data = client_data;
+    _server_public_key = PublicKey();
+    _server_data.clear();
+    _validation = false;
     return true;
 }
 
@@ -225,13 +270,53 @@ AuthServer::AuthServer()
     // EMPTY.
 }
 
+AuthServer::AuthServer(AuthServer && obj) TBAG_NOEXCEPT
+        : _ca_private_key(std::move(obj._ca_private_key)),
+          _server_public_key(std::move(obj._server_public_key)),
+          _server_private_key(std::move(obj._server_private_key)),
+          _server_data(std::move(obj._server_data)),
+          _client_public_key(std::move(obj._client_public_key)),
+          _client_data(std::move(obj._client_data)),
+          _validation(obj._validation)
+{
+    // EMPTY.
+}
+
 AuthServer::~AuthServer()
 {
     // EMPTY.
 }
 
+AuthServer & AuthServer::operator =(AuthServer && obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _ca_private_key = std::move(obj._ca_private_key);
+        _server_public_key = std::move(obj._server_public_key);
+        _server_private_key = std::move(obj._server_private_key);
+        _server_data = std::move(obj._server_data);
+        _client_public_key = std::move(obj._client_public_key);
+        _client_data = std::move(obj._client_data);
+        _validation =  obj._validation;
+    }
+    return *this;
+}
+
+void AuthServer::swap(AuthServer & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _ca_private_key.swap(obj._ca_private_key);
+        _server_public_key.swap(obj._server_public_key);
+        _server_private_key.swap(obj._server_private_key);
+        _server_data.swap(obj._server_data);
+        _client_public_key.swap(obj._client_public_key);
+        _client_data.swap(obj._client_data);
+        std::swap(_validation, obj._validation);
+    }
+}
+
 bool AuthServer::init(std::string const & ca_pem_private_key, std::string const & server_data)
 {
+    _ca_private_key = PrivateKey();
     if (!_ca_private_key.readPem(ca_pem_private_key)) {
         return false;
     }
@@ -239,6 +324,9 @@ bool AuthServer::init(std::string const & ca_pem_private_key, std::string const 
     _server_public_key = std::move(keys.first);
     _server_private_key = std::move(keys.second);
     _server_data = server_data;
+    _client_public_key = PublicKey();
+    _client_data.clear();
+    _validation = false;
     return true;
 }
 
