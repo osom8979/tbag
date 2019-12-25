@@ -17,13 +17,67 @@ TEST(HandshakeTest, Default)
     auto const ca_public_key = std::move(ca_keys.first);
     auto const ca_private_key = std::move(ca_keys.second);
 
-    auto const SERVER_DATA = "SERVER";
-    auto const CLIENT_DATA = "CLIENT";
+    std::string const CLIENT_DATA = "CLIENT";
+    std::string const SERVER_DATA = "SERVER";
 
     HandshakeClient client;
     HandshakeServer server;
 
     ASSERT_TRUE(client.init(ca_public_key.key(), CLIENT_DATA));
     ASSERT_TRUE(server.init(ca_private_key.key(), SERVER_DATA));
+
+    ASSERT_EQ(CLIENT_DATA, client.getClientData());
+    ASSERT_EQ(SERVER_DATA, server.getServerData());
+
+    ASSERT_TRUE(client.getServerData().empty());
+    ASSERT_TRUE(server.getClientData().empty());
+
+    auto const encoded_auth0 = client.encodeAuth0();
+    std::cout << "Encoded auth0: " << encoded_auth0 << std::endl;
+    ASSERT_FALSE(encoded_auth0.empty());
+    ASSERT_TRUE(server.decodeAuth0(encoded_auth0));
+
+    auto const encoded_auth1 = server.encodeAuth1();
+    std::cout << "Encoded auth1: " << encoded_auth1 << std::endl;
+    ASSERT_FALSE(encoded_auth1.empty());
+    ASSERT_TRUE(client.decodeAuth1(encoded_auth1));
+
+    auto const encoded_auth2 = client.encodeAuth2();
+    std::cout << "Encoded auth2: " << encoded_auth2 << std::endl;
+    ASSERT_FALSE(encoded_auth2.empty());
+    ASSERT_TRUE(server.decodeAuth2(encoded_auth2));
+
+    auto const encoded_auth3 = server.encodeAuth3();
+    std::cout << "Encoded auth3: " << encoded_auth3 << std::endl;
+    ASSERT_FALSE(encoded_auth3.empty());
+    ASSERT_TRUE(client.decodeAuth3(encoded_auth3));
+
+    ASSERT_FALSE(client.validation());
+    ASSERT_FALSE(server.validation());
+
+    ASSERT_EQ(CLIENT_DATA, client.getClientData());
+    ASSERT_EQ(SERVER_DATA, client.getServerData());
+
+    ASSERT_EQ(CLIENT_DATA, server.getClientData());
+    ASSERT_EQ(SERVER_DATA, server.getServerData());
+
+    std::string const TEST_DATA1 = "TEST_DATA1";
+    std::string const TEST_DATA2 = "TEST_DATA2";
+    ASSERT_TRUE(client.encode(TEST_DATA1).empty());
+    ASSERT_TRUE(client.decode(TEST_DATA1).empty());
+
+    client.ok();
+    server.ok();
+
+    ASSERT_TRUE(client.validation());
+    ASSERT_TRUE(server.validation());
+
+    auto const encode_data1 = client.encode(TEST_DATA1);
+    ASSERT_FALSE(encode_data1.empty());
+    ASSERT_EQ(TEST_DATA1, server.decode(encode_data1));
+
+    auto const encode_data2 = server.encode(TEST_DATA2);
+    ASSERT_FALSE(encode_data2.empty());
+    ASSERT_EQ(TEST_DATA2, client.decode(encode_data2));
 }
 

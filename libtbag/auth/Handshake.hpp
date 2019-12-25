@@ -39,31 +39,6 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace auth {
 
-struct AuthData
-{
-    AuthData() { /* EMPTY. */ }
-    virtual ~AuthData() { /* EMPTY. */ }
-
-    virtual std::string toString() const = 0;
-    virtual bool fromString(std::string const & data) = 0;
-};
-
-struct StringAuthData : public AuthData
-{
-    std::string auth_data;
-
-    StringAuthData() { /* EMPTY. */ }
-    StringAuthData(std::string const & data) : auth_data(data) { /* EMPTY. */ }
-    virtual ~StringAuthData() { /* EMPTY. */ }
-
-    std::string toString() const override
-    { return auth_data; }
-
-    bool fromString(std::string const & data) override
-    { auth_data = data; return true; }
-};
-
-using SharedAuthData = std::shared_ptr<AuthData>;
 using PublicKey = libtbag::crypto::PublicKey;
 using PrivateKey = libtbag::crypto::PrivateKey;
 using Padding = libtbag::crypto::Rsa::Padding;
@@ -87,53 +62,43 @@ private:
 private:
     PublicKey _client_public_key;
     PrivateKey _client_private_key;
-    SharedAuthData _client_data;
+    std::string _client_data;
 
 private:
     PublicKey _server_public_key;
-    SharedAuthData _server_data;
+    std::string _server_data;
+
+private:
+    bool _validation = false;
 
 public:
     HandshakeClient();
     ~HandshakeClient();
 
 public:
-    bool init(std::string const & ca_pem_public_key, SharedAuthData const & client_data);
     bool init(std::string const & ca_pem_public_key, std::string const & client_data);
 
 public:
-    /**
-     * Handshake #1 request. (Client->Server)
-     *
-     * - Algorithm: ca_public_key/encode
-     * - Send data: client_public_key
-     */
-    std::string getHandshake1RequestData() const;
-
-    /**
-     * Handshake #1 response. (Server->Client)
-     *
-     * - Algorithm: ca_public_key/decode
-     * - Recv data: server_public_key
-     */
-    bool setHandshake1ResponseData(std::string const & data);
+    std::string getServerData() const;
+    std::string getClientData() const;
 
 public:
-    /**
-     * Handshake #2 request. (Client->Server)
-     *
-     * - Algorithm: server_public_key/encode
-     * - Send data: client_data
-     */
-    std::string getHandshake2RequestData() const;
+    std::string encodeAuth0() const;
+    bool decodeAuth1(std::string const & encoded_data);
 
-    /**
-     * Handshake #2 response. (Server->Client)
-     *
-     * - Algorithm: client_private_key/decode
-     * - Recv data: server_data
-     */
-    bool setHandshake2ResponseData(std::string const & data);
+    std::string encodeAuth2() const;
+    bool decodeAuth3(std::string const & encoded_data);
+
+public:
+    void ok() TBAG_NOEXCEPT;
+    void no() TBAG_NOEXCEPT;
+
+public:
+    bool validation() const TBAG_NOEXCEPT;
+
+public:
+    std::string encode(std::string const & data) const;
+    std::string decode(std::string const & data) const;
 };
 
 /**
@@ -150,53 +115,43 @@ private:
 private:
     PublicKey _server_public_key;
     PrivateKey _server_private_key;
-    SharedAuthData _server_data;
+    std::string _server_data;
 
 private:
     PublicKey _client_public_key;
-    SharedAuthData _client_data;
+    std::string _client_data;
+
+private:
+    bool _validation = false;
 
 public:
     HandshakeServer();
     ~HandshakeServer();
 
 public:
-    bool init(std::string const & ca_pem_private_key, SharedAuthData const & server_data);
     bool init(std::string const & ca_pem_private_key, std::string const & server_data);
 
 public:
-    /**
-     * Handshake #1 response. (Client->Server)
-     *
-     * - Algorithm: ca_private_key/decode
-     * - Recv data: client_public_key
-     */
-    bool setHandshake1ResponseData(std::string const & data);
-
-    /**
-     * Handshake #1 replay. (Server->Client)
-     *
-     * - Algorithm: ca_private_key/encode
-     * - Send data: server_public_key
-     */
-    std::string getHandshake1ReplayData() const;
+    std::string getServerData() const;
+    std::string getClientData() const;
 
 public:
-    /**
-     * Handshake #2 response. (Client->Server)
-     *
-     * - Algorithm: server_private_key/decode
-     * - Recv data: client_data
-     */
-    bool setHandshake2ResponseData(std::string const & data);
+    bool decodeAuth0(std::string const & encoded_data);
+    std::string encodeAuth1() const;
 
-    /**
-     * Handshake #2 replay. (Server->Client)
-     *
-     * - Algorithm: client_public_key/encode
-     * - Send data: server_data
-     */
-    std::string getHandshake2ReplayData() const;
+    bool decodeAuth2(std::string const & encoded_data);
+    std::string encodeAuth3() const;
+
+public:
+    void ok() TBAG_NOEXCEPT;
+    void no() TBAG_NOEXCEPT;
+
+public:
+    bool validation() const TBAG_NOEXCEPT;
+
+public:
+    std::string encode(std::string const & data) const;
+    std::string decode(std::string const & data) const;
 };
 
 } // namespace auth
