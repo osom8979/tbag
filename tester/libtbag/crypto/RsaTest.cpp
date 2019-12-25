@@ -24,6 +24,15 @@ TEST(RsaTest, Default)
     std::cout << private_key << std::endl;
 }
 
+TEST(RsaTest, MaxSize)
+{
+    auto keys = generateKeys();
+    auto const max_size = keys.first.getMaxDataSize(Rsa::Padding::P_PKCS1);
+    auto const test_data = std::string(max_size, 'a');
+    auto const encrypted_test_data = keys.first.encrypt(test_data);
+    ASSERT_FALSE(encrypted_test_data.empty());
+}
+
 TEST(RsaTest, EncryptPublic)
 {
     std::string public_key;

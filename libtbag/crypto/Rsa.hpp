@@ -60,12 +60,17 @@ public:
         /**
          * PKCS #1 v1.5 padding.
          * This currently is the most widely used mode.
+         *
+         * The message must be no longer than the length of the public modulus minus 11 bytes.
          */
         P_PKCS1,
 
         /**
          * EME-OAEP as defined in PKCS #1 v2.0 with SHA-1, MGF1 and an empty encoding parameter.
          * This mode is recommended for all new applications.
+         *
+         * The message must be no longer than the length of the public modulus minus twice the hash length,
+         * minus a further 2.
          */
         P_PKCS1_OAEP,
 
@@ -124,6 +129,10 @@ public:
     std::string getPemPrivateKey(CipherAlgorithm cipher = CipherAlgorithm::CA_NONE) const;
 
 public:
+    /**
+     * @see <https://www.openssl.org/docs/manmaster/man3/RSA_public_encrypt.html>
+     *
+     */
     int getMaxDataSize(Padding p) const;
 
 public:

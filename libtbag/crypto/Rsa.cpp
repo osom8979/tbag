@@ -227,49 +227,48 @@ std::string Rsa::getPemPrivateKey(CipherAlgorithm cipher) const
 
 int Rsa::getMaxDataSize(Padding p) const
 {
-    auto const RSA_SIZE = RSA_size((RSA*)_rsa.get());
+    // flen must not be more than RSA_size(rsa) - 11 for the PKCS #1 v1.5 based padding modes,
+    // not more than RSA_size(rsa) - 42 for RSA_PKCS1_OAEP_PADDING
+    // and exactly RSA_size(rsa) for RSA_NO_PADDING.
+    auto const rsa_size = RSA_size((RSA*)_rsa.get());
     switch (p) {
-    case Padding::P_PKCS1:      return RSA_SIZE - 11;
-    case Padding::P_PKCS1_OAEP: return RSA_SIZE - 41;
-    case Padding::P_SSLV23:     return 0;
-    case Padding::P_NO:         return RSA_SIZE;
-    default:                    return 0;
+    case Padding::P_PKCS1:
+        return rsa_size - 11;
+    case Padding::P_PKCS1_OAEP:
+        return rsa_size - 42;
+    case Padding::P_SSLV23:
+        return 0;
+    case Padding::P_NO:
+        return rsa_size;
+    default:
+        return 0;
     }
 }
 
 std::string Rsa::encryptPublic(std::string const & data, Padding p) const
 {
-    if (data.size() >= getMaxDataSize(p)) {
-        return std::string();
-    }
-
-    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
-    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
-
-    auto const RESULT = RSA_public_encrypt((int)data.size(), (unsigned char const *)data.data(),
+    auto const encrypt_size = RSA_size((RSA*)_rsa.get());
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(encrypt_size), 0);
+    auto const result = RSA_public_encrypt((int)data.size(), (unsigned char const *)data.data(),
                                            &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
-    if (RESULT == -1) {
+    if (result == -1) {
         return std::string();
     }
-    assert(RESULT <= ENCRYPT_SIZE);
-    return std::string(buffer.data(), buffer.data() + RESULT);
+    assert(result <= encrypt_size);
+    return std::string(buffer.data(), buffer.data() + result);
 }
 
 std::string Rsa::decryptPublic(std::string const & data, Padding p) const
 {
-    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
-    if (data.size() > ENCRYPT_SIZE) {
-        return std::string();
-    }
-
-    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
-    auto const RESULT = RSA_public_decrypt((int)data.size(), (unsigned char const *)data.data(),
+    auto const encrypt_size = RSA_size((RSA*)_rsa.get());
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(encrypt_size), 0);
+    auto const result = RSA_public_decrypt((int)data.size(), (unsigned char const *)data.data(),
                                            &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
-    if (RESULT == -1) {
+    if (result == -1) {
         return std::string();
     }
-    assert(RESULT <= ENCRYPT_SIZE);
-    return std::string(buffer.data(), buffer.data() + RESULT);
+    assert(result <= encrypt_size);
+    return std::string(buffer.data(), buffer.data() + result);
 }
 
 std::string Rsa::encryptPrivate(std::string const & data, Padding p) const
@@ -277,37 +276,30 @@ std::string Rsa::encryptPrivate(std::string const & data, Padding p) const
     if (!isPrivateKeyEncryptionSupports(p)) {
         return std::string();
     }
-    if (data.size() >= getMaxDataSize(p)) {
-        return std::string();
-    }
 
-    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
-    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
+    auto const encrypt_size = RSA_size((RSA*)_rsa.get());
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(encrypt_size), 0);
 
-    auto const RESULT = RSA_private_encrypt((int)data.size(), (unsigned char const *)data.data(),
+    auto const result = RSA_private_encrypt((int)data.size(), (unsigned char const *)data.data(),
                                             &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
-    if (RESULT == -1) {
+    if (result == -1) {
         return std::string();
     }
-    assert(RESULT <= ENCRYPT_SIZE);
-    return std::string(buffer.data(), buffer.data() + RESULT);
+    assert(result <= encrypt_size);
+    return std::string(buffer.data(), buffer.data() + result);
 }
 
 std::string Rsa::decryptPrivate(std::string const & data, Padding p) const
 {
-    auto const ENCRYPT_SIZE = RSA_size((RSA*)_rsa.get());
-    if (data.size() > ENCRYPT_SIZE) {
-        return std::string();
-    }
-
-    std::vector<unsigned char> buffer(static_cast<std::size_t>(ENCRYPT_SIZE), 0);
-    auto const RESULT = RSA_private_decrypt((int)data.size(), (unsigned char const *)data.data(),
+    auto const encrypt_size = RSA_size((RSA*)_rsa.get());
+    std::vector<unsigned char> buffer(static_cast<std::size_t>(encrypt_size), 0);
+    auto const result = RSA_private_decrypt((int)data.size(), (unsigned char const *)data.data(),
                                           &buffer[0], (RSA*)_rsa.get(), __get_rsa_padding(p));
-    if (RESULT == -1) {
+    if (result == -1) {
         return std::string();
     }
-    assert(RESULT <= ENCRYPT_SIZE);
-    return std::string(buffer.data(), buffer.data() + RESULT);
+    assert(result <= encrypt_size);
+    return std::string(buffer.data(), buffer.data() + result);
 }
 
 bool Rsa::generatePem(std::string & public_key, std::string & private_key, CipherAlgorithm cipher, int key_length)
