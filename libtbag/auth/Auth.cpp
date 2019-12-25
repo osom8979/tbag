@@ -1,11 +1,12 @@
 /**
- * @file   Handshake.cpp
- * @brief  Handshake class implementation.
+ * @file   Auth.cpp
+ * @brief  Auth package implementation.
  * @author zer0
  * @date   2019-12-24
+ * @date   2019-12-25 (Rename: Handshake -> Auth)
  */
 
-#include <libtbag/auth/Handshake.hpp>
+#include <libtbag/auth/Auth.hpp>
 
 #include <libtbag/dom/json/JsonUtils.hpp>
 #include <libtbag/archive/ex/ZipBase64.hpp>
@@ -128,20 +129,20 @@ std::string __decodeAuth3(PrivateKey const & client_private_key, std::string con
 // clang-format on
 
 // ---------------
-// HandshakeClient
+// AuthClient
 // ---------------
 
-HandshakeClient::HandshakeClient()
+AuthClient::AuthClient()
 {
     // EMPTY.
 }
 
-HandshakeClient::~HandshakeClient()
+AuthClient::~AuthClient()
 {
     // EMPTY.
 }
 
-bool HandshakeClient::init(std::string const & ca_pem_public_key, std::string const & client_data)
+bool AuthClient::init(std::string const & ca_pem_public_key, std::string const & client_data)
 {
     if (!_ca_public_key.readPem(ca_pem_public_key)) {
         return false;
@@ -153,53 +154,53 @@ bool HandshakeClient::init(std::string const & ca_pem_public_key, std::string co
     return true;
 }
 
-std::string HandshakeClient::getServerData() const
+std::string AuthClient::getServerData() const
 {
     return _server_data;
 }
 
-std::string HandshakeClient::getClientData() const
+std::string AuthClient::getClientData() const
 {
     return _client_data;
 }
 
-std::string HandshakeClient::encodeAuth0() const
+std::string AuthClient::encodeAuth0() const
 {
     return __encodeAuth0(_ca_public_key, _client_public_key.key());
 }
 
-bool HandshakeClient::decodeAuth1(std::string const & encoded_data)
+bool AuthClient::decodeAuth1(std::string const & encoded_data)
 {
     return _server_public_key.readPem(__decodeAuth1(_ca_public_key, encoded_data));
 }
 
-std::string HandshakeClient::encodeAuth2() const
+std::string AuthClient::encodeAuth2() const
 {
     return __encodeAuth2(_server_public_key, _client_data);
 }
 
-bool HandshakeClient::decodeAuth3(std::string const & encoded_data)
+bool AuthClient::decodeAuth3(std::string const & encoded_data)
 {
     _server_data = __decodeAuth3(_client_private_key, encoded_data);
     return !_server_data.empty();
 }
 
-void HandshakeClient::ok() TBAG_NOEXCEPT
+void AuthClient::ok() TBAG_NOEXCEPT
 {
     _validation = true;
 }
 
-void HandshakeClient::no() TBAG_NOEXCEPT
+void AuthClient::no() TBAG_NOEXCEPT
 {
     _validation = false;
 }
 
-bool HandshakeClient::validation() const TBAG_NOEXCEPT
+bool AuthClient::validation() const TBAG_NOEXCEPT
 {
     return _validation;
 }
 
-std::string HandshakeClient::encode(std::string const & data) const
+std::string AuthClient::encode(std::string const & data) const
 {
     if (!_validation) {
         return {};
@@ -207,7 +208,7 @@ std::string HandshakeClient::encode(std::string const & data) const
     return __encrypt(_server_public_key, data);
 }
 
-std::string HandshakeClient::decode(std::string const & data) const
+std::string AuthClient::decode(std::string const & data) const
 {
     if (!_validation) {
         return {};
@@ -216,20 +217,20 @@ std::string HandshakeClient::decode(std::string const & data) const
 }
 
 // ---------------
-// HandshakeServer
+// AuthServer
 // ---------------
 
-HandshakeServer::HandshakeServer()
+AuthServer::AuthServer()
 {
     // EMPTY.
 }
 
-HandshakeServer::~HandshakeServer()
+AuthServer::~AuthServer()
 {
     // EMPTY.
 }
 
-bool HandshakeServer::init(std::string const & ca_pem_private_key, std::string const & server_data)
+bool AuthServer::init(std::string const & ca_pem_private_key, std::string const & server_data)
 {
     if (!_ca_private_key.readPem(ca_pem_private_key)) {
         return false;
@@ -241,53 +242,53 @@ bool HandshakeServer::init(std::string const & ca_pem_private_key, std::string c
     return true;
 }
 
-std::string HandshakeServer::getServerData() const
+std::string AuthServer::getServerData() const
 {
     return _server_data;
 }
 
-std::string HandshakeServer::getClientData() const
+std::string AuthServer::getClientData() const
 {
     return _client_data;
 }
 
-bool HandshakeServer::decodeAuth0(std::string const & encoded_data)
+bool AuthServer::decodeAuth0(std::string const & encoded_data)
 {
     return _client_public_key.readPem(__decodeAuth0(_ca_private_key, encoded_data));
 }
 
-std::string HandshakeServer::encodeAuth1() const
+std::string AuthServer::encodeAuth1() const
 {
     return __encodeAuth1(_ca_private_key, _server_public_key.key());
 }
 
-bool HandshakeServer::decodeAuth2(std::string const & encoded_data)
+bool AuthServer::decodeAuth2(std::string const & encoded_data)
 {
     _client_data = __decodeAuth2(_server_private_key, encoded_data);
     return !_client_data.empty();
 }
 
-std::string HandshakeServer::encodeAuth3() const
+std::string AuthServer::encodeAuth3() const
 {
     return __encodeAuth3(_client_public_key, _server_data);
 }
 
-void HandshakeServer::ok() TBAG_NOEXCEPT
+void AuthServer::ok() TBAG_NOEXCEPT
 {
     _validation = true;
 }
 
-void HandshakeServer::no() TBAG_NOEXCEPT
+void AuthServer::no() TBAG_NOEXCEPT
 {
     _validation = false;
 }
 
-bool HandshakeServer::validation() const TBAG_NOEXCEPT
+bool AuthServer::validation() const TBAG_NOEXCEPT
 {
     return _validation;
 }
 
-std::string HandshakeServer::encode(std::string const & data) const
+std::string AuthServer::encode(std::string const & data) const
 {
     if (!_validation) {
         return {};
@@ -295,7 +296,7 @@ std::string HandshakeServer::encode(std::string const & data) const
     return __encrypt(_client_public_key, data);
 }
 
-std::string HandshakeServer::decode(std::string const & data) const
+std::string AuthServer::decode(std::string const & data) const
 {
     if (!_validation) {
         return {};

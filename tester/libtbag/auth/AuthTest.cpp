@@ -1,17 +1,18 @@
 /**
- * @file   HandshakeTest.cpp
- * @brief  Handshake class tester.
+ * @file   AuthTest.cpp
+ * @brief  Auth class tester.
  * @author zer0
  * @date   2019-12-24
+ * @date   2019-12-25 (Rename: HandshakeTest -> AuthTest)
  */
 
 #include <gtest/gtest.h>
-#include <libtbag/auth/Handshake.hpp>
+#include <libtbag/auth/Auth.hpp>
 
 using namespace libtbag;
 using namespace libtbag::auth;
 
-TEST(HandshakeTest, Default)
+TEST(AuthTest, Default)
 {
     auto ca_keys = libtbag::crypto::generateKeys();
     auto const ca_public_key = std::move(ca_keys.first);
@@ -20,8 +21,8 @@ TEST(HandshakeTest, Default)
     std::string const CLIENT_DATA = "CLIENT";
     std::string const SERVER_DATA = "SERVER";
 
-    HandshakeClient client;
-    HandshakeServer server;
+    AuthClient client;
+    AuthServer server;
 
     ASSERT_TRUE(client.init(ca_public_key.key(), CLIENT_DATA));
     ASSERT_TRUE(server.init(ca_private_key.key(), SERVER_DATA));
@@ -33,22 +34,18 @@ TEST(HandshakeTest, Default)
     ASSERT_TRUE(server.getClientData().empty());
 
     auto const encoded_auth0 = client.encodeAuth0();
-    std::cout << "Encoded auth0: " << encoded_auth0 << std::endl;
     ASSERT_FALSE(encoded_auth0.empty());
     ASSERT_TRUE(server.decodeAuth0(encoded_auth0));
 
     auto const encoded_auth1 = server.encodeAuth1();
-    std::cout << "Encoded auth1: " << encoded_auth1 << std::endl;
     ASSERT_FALSE(encoded_auth1.empty());
     ASSERT_TRUE(client.decodeAuth1(encoded_auth1));
 
     auto const encoded_auth2 = client.encodeAuth2();
-    std::cout << "Encoded auth2: " << encoded_auth2 << std::endl;
     ASSERT_FALSE(encoded_auth2.empty());
     ASSERT_TRUE(server.decodeAuth2(encoded_auth2));
 
     auto const encoded_auth3 = server.encodeAuth3();
-    std::cout << "Encoded auth3: " << encoded_auth3 << std::endl;
     ASSERT_FALSE(encoded_auth3.empty());
     ASSERT_TRUE(client.decodeAuth3(encoded_auth3));
 

@@ -1,8 +1,9 @@
 /**
- * @file   Handshake.hpp
- * @brief  Handshake class prototype.
+ * @file   Auth.hpp
+ * @brief  Auth class prototype.
  * @author zer0
  * @date   2019-12-24
+ * @date   2019-12-25 (Rename: Handshake -> Auth)
  *
  * Handshake sequence:
  * @msc
@@ -17,8 +18,8 @@
  * @endmsc
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_AUTH_HANDSHAKE_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_AUTH_HANDSHAKE_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_AUTH_AUTH_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_AUTH_AUTH_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -31,7 +32,6 @@
 #include <libtbag/crypto/Rsa.hpp>
 
 #include <string>
-#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -49,12 +49,13 @@ TBAG_CONSTEXPR CipherAlgorithm const DEFAULT_CIPHER = CipherAlgorithm::CA_NONE;
 TBAG_CONSTEXPR int const DEFAULT_KEY_LENGTH = 2048;
 
 /**
- * HandshakeClient class prototype.
+ * AuthClient class prototype.
  *
  * @author zer0
  * @date   2019-12-24
+ * @date   2019-12-25 (Rename: HandshakeClient -> AuthClient)
  */
-class TBAG_API HandshakeClient : private Noncopyable
+class TBAG_API AuthClient : private Noncopyable
 {
 private:
     PublicKey _ca_public_key;
@@ -72,8 +73,8 @@ private:
     bool _validation = false;
 
 public:
-    HandshakeClient();
-    ~HandshakeClient();
+    AuthClient();
+    ~AuthClient();
 
 public:
     bool init(std::string const & ca_pem_public_key, std::string const & client_data);
@@ -102,12 +103,13 @@ public:
 };
 
 /**
- * HandshakeServer class prototype.
+ * AuthServer class prototype.
  *
  * @author zer0
  * @date   2019-12-24
+ * @date   2019-12-25 (Rename: HandshakeServer -> AuthServer)
  */
-class TBAG_API HandshakeServer : private Noncopyable
+class TBAG_API AuthServer : private Noncopyable
 {
 private:
     PrivateKey _ca_private_key;
@@ -125,8 +127,8 @@ private:
     bool _validation = false;
 
 public:
-    HandshakeServer();
-    ~HandshakeServer();
+    AuthServer();
+    ~AuthServer();
 
 public:
     bool init(std::string const & ca_pem_private_key, std::string const & server_data);
@@ -160,5 +162,5 @@ public:
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_AUTH_HANDSHAKE_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_AUTH_AUTH_HPP__
 
