@@ -63,7 +63,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_INTERNAL                             , 10026, "Internal error detected"                                 )\
     _TBAG_XX(_SHUTDOWN                             , 10027, "Shutdown error"                                          )\
     _TBAG_XX(_NFOUND                               , 10028, "Not found error"                                         )\
-    _TBAG_XX(_TIMEOUT                              , 10029, "Timeout error"                                           )\
+  /*_TBAG_XX(                                      , 10029, ""                                                      )*/\
     _TBAG_XX(_PARSING                              , 10030, "Parsing error"                                           )\
     _TBAG_XX(_DECODE                               , 10031, "Decode error"                                            )\
     _TBAG_XX(_ENCODE                               , 10032, "Encode error"                                            )\
@@ -415,6 +415,7 @@ static_assert(static_cast<int>(Err::E_SUCCESS) == 0, "The success code must be 0
 TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
 
+TBAG_CONSTEXPR Err const E_TIMEOUT                = E_ETIMEDOUT;
 TBAG_CONSTEXPR Err const E_ASYNC_REQUEST          = E_ASYNCREQ;
 TBAG_CONSTEXPR Err const E_ENQUEUE_AND_ASYNC      = E_ENQASYNC;
 TBAG_CONSTEXPR Err const E_ILLEGAL_ARGUMENTS      = E_ILLARGS ;
