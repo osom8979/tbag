@@ -288,6 +288,7 @@ private:
 public:
     Box();
     explicit Box(std::nullptr_t) TBAG_NOEXCEPT;
+    explicit Box(box_data && data) TBAG_NOEXCEPT;
     Box(Box const & obj) TBAG_NOEXCEPT;
     Box(Box && obj) TBAG_NOEXCEPT;
     ~Box();
@@ -899,15 +900,6 @@ public:
 
 public:
     Box clone() const;
-
-public:
-    Box astype(btype type) const;
-
-    template <typename T>
-    Box astype() const
-    {
-        return astype(get_btype<T>());
-    }
 
 public:
     template <typename T>

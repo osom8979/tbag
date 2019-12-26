@@ -337,13 +337,6 @@ struct TBAG_API box_data : private Noncopyable
     void clear() TBAG_NOEXCEPT;
     void clear_opaque() TBAG_NOEXCEPT;
 
-    Err alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...);
-    Err alloc_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap);
-    Err alloc_dims_copy(btype src_type, bdev src_device, ui64 const * src_ext,
-                        ui32 const * src_dims, ui32 src_dims_byte, ui32 src_rank);
-    Err alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_ext,
-                        ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank);
-
     bool exists_data() const TBAG_NOEXCEPT;
     bool exists_dims() const TBAG_NOEXCEPT;
     bool exists_info() const TBAG_NOEXCEPT;
@@ -397,6 +390,13 @@ struct TBAG_API box_data : private Noncopyable
     fp32 get_opaque_fp32() const TBAG_NOEXCEPT;
     fp64 get_opaque_fp64() const TBAG_NOEXCEPT;
 
+    Err alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...);
+    Err alloc_vargs(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, va_list ap);
+    Err alloc_dims_copy(btype src_type, bdev src_device, ui64 const * src_ext,
+                        ui32 const * src_dims, ui32 src_dims_byte, ui32 src_rank);
+    Err alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_ext,
+                        ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank);
+
     ui32 get_dims_total_size() const TBAG_NOEXCEPT;
 
     ErrPair<box_cursor> init_cursor(void * data, ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
@@ -449,10 +449,10 @@ struct TBAG_API box_data : private Noncopyable
     Err get_data_dims(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
                       ui32 box_rank, ui32 const * box_indexes) const;
 
-    Err assign_data(void const * src_data, btype src_type, bdev src_device,
-                    ui64 const * src_ext, ui32 src_size);
-    Err checked_assign_data(void const * src_data, btype src_type, bdev src_device,
-                            ui64 const * src_ext, ui32 src_size);
+    Err assign_data(btype src_type, bdev src_device, ui64 const * src_ext,
+                    ui32 src_size, void const * src_data);
+    Err checked_assign_data(btype src_type, bdev src_device, ui64 const * src_ext,
+                            ui32 src_rank, ui32 const * src_dims, void const * src_data);
 };
 
 /**

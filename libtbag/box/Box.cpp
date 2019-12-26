@@ -33,6 +33,11 @@ Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
     assert(!exists());
 }
 
+Box::Box(box_data && data) TBAG_NOEXCEPT : _data(std::make_shared<box_data>(std::move(data)))
+{
+    // EMPTY.
+}
+
 Box::Box(Box const & obj) TBAG_NOEXCEPT : _data(obj._data)
 {
     // EMPTY.
@@ -249,32 +254,15 @@ Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
 
 Err Box::copyToData(Box & box) const
 {
-    if (!box.exists()) {
-        box.reset();
-    }
-
-    assert(box.exists());
-    if (!exists()) {
-        box.clearData();
+    if (exists()) {
+        box->checked_assign_data(type(), device(), ext(), rank(), dims(), data());
+        return E_SUCCESS;
+    } else {
+        if (box.exists()) {
+            box.clearData();
+        }
         return E_SUCCESS;
     }
-    if (empty()) {
-        box.clearData();
-        return E_SUCCESS;
-    }
-
-    assert(type() != type_none());
-    assert(rank() >= 1);
-    assert(size() >= 1);
-
-    auto const code = box.reshape_ref_box(*this);
-    if (isFailure(code)) {
-        return code;
-    }
-
-    assert(rank() == box.rank());
-    assert(size() == box.size());
-    return box->assign_data(data(), type(), device(), ext(), size());
 }
 
 Err Box::copyFromData(Box const & box)
@@ -289,7 +277,7 @@ Err Box::copyToInfo(Box & box) const
         return E_SUCCESS;
     } else {
         if (box.exists()) {
-            box.clearData();
+            box.clearInfo();
         }
         return E_SUCCESS;
     }
@@ -316,31 +304,14 @@ Err Box::copyFrom(Box const & box)
 
 Box Box::clone() const
 {
-    Box result;
-    auto const code = copyTo(result);
-    if (isFailure(code)) {
+    if (!exists()) {
         return Box(nullptr);
     }
-    return result;
-}
-
-Box Box::astype(btype type) const
-{
-    Box result;
-    auto code = result->alloc_dims_copy(type, getDevice(), getExtensions(),
-                                        getDimensions(), getDimensionsCapacity(), getRank());
-    if (isFailure(code)) {
-        return Box(nullptr);
+    auto result = _data->clone();
+    if (result) {
+        return Box(std::move(result.value));
     }
-    code = result.copyFromData(*this);
-    if (isFailure(code)) {
-        return Box(nullptr);
-    }
-    code = result.copyFromInfo(*this);
-    if (isFailure(code)) {
-        return Box(nullptr);
-    }
-    return result;
+    return Box(nullptr);
 }
 
 Err Box::setData(ui8 const * info, ui32 size)

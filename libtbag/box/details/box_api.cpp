@@ -725,6 +725,13 @@ void box_data::swap(box_data & obj) TBAG_NOEXCEPT
 
 void box_data::release()
 {
+    // [WARNING] Do not change the calling order.
+    // User data can refer to box data. So you need to release Opaque data first.
+    if (opaque.pointer && opaque_deleter) {
+        opaque_deleter(opaque.pointer);
+    }
+    clear_opaque();
+
     if (data) {
         box_data_free(device, data);
     }
@@ -733,9 +740,6 @@ void box_data::release()
     }
     if (info) {
         box_info_free(info);
-    }
-    if (opaque.pointer && opaque_deleter) {
-        opaque_deleter(opaque.pointer);
     }
     clear();
 }
@@ -764,6 +768,57 @@ void box_data::clear_opaque() TBAG_NOEXCEPT
     memset(&opaque, 0x00, sizeof(opaque));
     opaque_deleter = nullptr;
 }
+
+bool box_data::exists_data() const TBAG_NOEXCEPT
+{
+    return data != nullptr && total_data_byte >= 1 && size >= 1;
+}
+
+bool box_data::exists_dims() const TBAG_NOEXCEPT
+{
+    return dims != nullptr && total_dims_byte >= 1 && rank >= 1;
+}
+
+bool box_data::exists_info() const TBAG_NOEXCEPT
+{
+    return info != nullptr && total_info_byte >= 1 && info_size >= 1;
+}
+
+void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
+void box_data::set_opaque(si8  v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
+void box_data::set_opaque(si16 v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
+void box_data::set_opaque(si32 v) TBAG_NOEXCEPT { opaque.data_si32 = v; }
+void box_data::set_opaque(si64 v) TBAG_NOEXCEPT { opaque.data_si64 = v; }
+void box_data::set_opaque(ui8  v) TBAG_NOEXCEPT { opaque.data_ui8  = v; }
+void box_data::set_opaque(ui16 v) TBAG_NOEXCEPT { opaque.data_ui16 = v; }
+void box_data::set_opaque(ui32 v) TBAG_NOEXCEPT { opaque.data_ui32 = v; }
+void box_data::set_opaque(ui64 v) TBAG_NOEXCEPT { opaque.data_ui64 = v; }
+void box_data::set_opaque(fp32 v) TBAG_NOEXCEPT { opaque.data_fp32 = v; }
+void box_data::set_opaque(fp64 v) TBAG_NOEXCEPT { opaque.data_fp64 = v; }
+
+void box_data::get_opaque(void ** v) const TBAG_NOEXCEPT { *v = opaque.pointer; }
+void box_data::get_opaque(si8  * v) const TBAG_NOEXCEPT { *v = opaque.data_si8 ; }
+void box_data::get_opaque(si16 * v) const TBAG_NOEXCEPT { *v = opaque.data_si16; }
+void box_data::get_opaque(si32 * v) const TBAG_NOEXCEPT { *v = opaque.data_si32; }
+void box_data::get_opaque(si64 * v) const TBAG_NOEXCEPT { *v = opaque.data_si64; }
+void box_data::get_opaque(ui8  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui8 ; }
+void box_data::get_opaque(ui16 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui16; }
+void box_data::get_opaque(ui32 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui32; }
+void box_data::get_opaque(ui64 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui64; }
+void box_data::get_opaque(fp32 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp32; }
+void box_data::get_opaque(fp64 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp64; }
+
+void * box_data::get_opaque_pointer() const TBAG_NOEXCEPT { return opaque.pointer; }
+si8  box_data::get_opaque_si8 () const TBAG_NOEXCEPT { return opaque.data_si8 ; }
+si16 box_data::get_opaque_si16() const TBAG_NOEXCEPT { return opaque.data_si16; }
+si32 box_data::get_opaque_si32() const TBAG_NOEXCEPT { return opaque.data_si32; }
+si64 box_data::get_opaque_si64() const TBAG_NOEXCEPT { return opaque.data_si64; }
+ui8  box_data::get_opaque_ui8 () const TBAG_NOEXCEPT { return opaque.data_ui8 ; }
+ui16 box_data::get_opaque_ui16() const TBAG_NOEXCEPT { return opaque.data_ui16; }
+ui32 box_data::get_opaque_ui32() const TBAG_NOEXCEPT { return opaque.data_ui32; }
+ui64 box_data::get_opaque_ui64() const TBAG_NOEXCEPT { return opaque.data_ui64; }
+fp32 box_data::get_opaque_fp32() const TBAG_NOEXCEPT { return opaque.data_fp32; }
+fp64 box_data::get_opaque_fp64() const TBAG_NOEXCEPT { return opaque.data_fp64; }
 
 Err box_data::alloc_args(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ...)
 {
@@ -856,57 +911,6 @@ Err box_data::alloc_dims_move(btype src_type, bdev src_device, ui64 const * src_
 
     return E_SUCCESS;
 }
-
-bool box_data::exists_data() const TBAG_NOEXCEPT
-{
-    return data != nullptr && total_data_byte >= 1 && size >= 1;
-}
-
-bool box_data::exists_dims() const TBAG_NOEXCEPT
-{
-    return dims != nullptr && total_dims_byte >= 1 && rank >= 1;
-}
-
-bool box_data::exists_info() const TBAG_NOEXCEPT
-{
-    return info != nullptr && total_info_byte >= 1 && info_size >= 1;
-}
-
-void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
-void box_data::set_opaque(si8  v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
-void box_data::set_opaque(si16 v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
-void box_data::set_opaque(si32 v) TBAG_NOEXCEPT { opaque.data_si32 = v; }
-void box_data::set_opaque(si64 v) TBAG_NOEXCEPT { opaque.data_si64 = v; }
-void box_data::set_opaque(ui8  v) TBAG_NOEXCEPT { opaque.data_ui8  = v; }
-void box_data::set_opaque(ui16 v) TBAG_NOEXCEPT { opaque.data_ui16 = v; }
-void box_data::set_opaque(ui32 v) TBAG_NOEXCEPT { opaque.data_ui32 = v; }
-void box_data::set_opaque(ui64 v) TBAG_NOEXCEPT { opaque.data_ui64 = v; }
-void box_data::set_opaque(fp32 v) TBAG_NOEXCEPT { opaque.data_fp32 = v; }
-void box_data::set_opaque(fp64 v) TBAG_NOEXCEPT { opaque.data_fp64 = v; }
-
-void box_data::get_opaque(void ** v) const TBAG_NOEXCEPT { *v = opaque.pointer; }
-void box_data::get_opaque(si8  * v) const TBAG_NOEXCEPT { *v = opaque.data_si8 ; }
-void box_data::get_opaque(si16 * v) const TBAG_NOEXCEPT { *v = opaque.data_si16; }
-void box_data::get_opaque(si32 * v) const TBAG_NOEXCEPT { *v = opaque.data_si32; }
-void box_data::get_opaque(si64 * v) const TBAG_NOEXCEPT { *v = opaque.data_si64; }
-void box_data::get_opaque(ui8  * v) const TBAG_NOEXCEPT { *v = opaque.data_ui8 ; }
-void box_data::get_opaque(ui16 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui16; }
-void box_data::get_opaque(ui32 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui32; }
-void box_data::get_opaque(ui64 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui64; }
-void box_data::get_opaque(fp32 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp32; }
-void box_data::get_opaque(fp64 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp64; }
-
-void * box_data::get_opaque_pointer() const TBAG_NOEXCEPT { return opaque.pointer; }
-si8  box_data::get_opaque_si8 () const TBAG_NOEXCEPT { return opaque.data_si8 ; }
-si16 box_data::get_opaque_si16() const TBAG_NOEXCEPT { return opaque.data_si16; }
-si32 box_data::get_opaque_si32() const TBAG_NOEXCEPT { return opaque.data_si32; }
-si64 box_data::get_opaque_si64() const TBAG_NOEXCEPT { return opaque.data_si64; }
-ui8  box_data::get_opaque_ui8 () const TBAG_NOEXCEPT { return opaque.data_ui8 ; }
-ui16 box_data::get_opaque_ui16() const TBAG_NOEXCEPT { return opaque.data_ui16; }
-ui32 box_data::get_opaque_ui32() const TBAG_NOEXCEPT { return opaque.data_ui32; }
-ui64 box_data::get_opaque_ui64() const TBAG_NOEXCEPT { return opaque.data_ui64; }
-fp32 box_data::get_opaque_fp32() const TBAG_NOEXCEPT { return opaque.data_fp32; }
-fp64 box_data::get_opaque_fp64() const TBAG_NOEXCEPT { return opaque.data_fp64; }
 
 ui32 box_data::get_dims_total_size() const TBAG_NOEXCEPT
 {
@@ -1013,7 +1017,7 @@ Err box_data::resize_vargs(btype src_type, bdev src_device, ui64 const * src_ext
 
 Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_rank, ui32 const * src_dims)
 {
-    if (src_rank == 0) {
+    if (src_rank == 0 || src_dims == nullptr || box_dim_get_total_size(src_dims, src_rank) == 0) {
         type = src_type;
         device = src_device;
         if (src_ext != nullptr) {
@@ -1031,23 +1035,13 @@ Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext,
         rank = 0;
         return E_SUCCESS;
     }
+    assert(src_rank >= 1);
+    assert(src_dims != nullptr);
+    assert(box_dim_get_total_size(src_dims, src_rank) >= 1);
 
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
-    if (data == nullptr && dims == nullptr) {
-        auto const src_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank);
-        return alloc_dims_copy(src_type, src_device, src_ext, src_dims, src_dims_byte, src_rank);
-    }
-
-    ui64 resize_ext[TBAG_BOX_EXT_SIZE] = {0,};
-    if (src_ext) {
-        memcpy(resize_ext, src_ext, sizeof(ui64)*TBAG_BOX_EXT_SIZE);
-    }
-    if (device != src_device ||
-        ext[0] != resize_ext[0] ||
-        ext[1] != resize_ext[1] ||
-        ext[2] != resize_ext[2] ||
-        ext[3] != resize_ext[3]) {
+    if (data == nullptr || dims == nullptr) {
         if (data) {
             box_data_free(device, data);
         }
@@ -1058,76 +1052,110 @@ Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext,
         return alloc_dims_copy(src_type, src_device, src_ext, src_dims, src_dims_byte, src_rank);
     }
 
-    assert(device == src_device);
-    assert(ext[0] == resize_ext[0]);
-    assert(ext[1] == resize_ext[1]);
-    assert(ext[2] == resize_ext[2]);
-    assert(ext[3] == resize_ext[3]);
-
-    if (box_dim_is_equals(dims, rank, src_dims, src_rank)) {
-        return E_SUCCESS;
-    }
-
-    if (total_dims_byte < GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank)) {
-        if (dims) {
-            box_dim_free(dims);
-        }
-        dims = box_dim_clone(src_dims, src_rank);
-        assert(dims != nullptr);
-        total_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank);
-        rank = src_rank;
-    } else {
-        box_dim_copy(dims, src_dims, src_rank);
-        rank = src_rank;
-    }
-    assert(total_dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank));
-    assert(dims != nullptr);
-    assert(rank == src_rank);
-    assert(box_dim_is_equals(dims, rank, src_dims, src_rank));
-
-    auto const dims_total_size = box_dim_get_total_size(src_dims, src_rank);
-    assert(dims_total_size >= 1);
-    assert(dims_total_size == box_dim_get_total_size(dims, rank));
-
-    auto const dims_total_byte = box_get_type_byte(src_type) * dims_total_size;
-    assert(dims_total_byte >= 1);
-
-    if (total_data_byte < dims_total_byte) {
-        if (data) {
-            box_data_free(src_device, data);
-        }
-        data = box_data_malloc(src_type, src_device, dims_total_size);
-        if (data == nullptr) {
-            total_data_byte = 0;
-            size = 0;
-            return E_BADALLOC;
-        }
-        total_data_byte = dims_total_byte;
-        size = dims_total_size;
-    } else {
-        size = dims_total_size;
-    }
-    type = src_type;
-    assert(total_data_byte >= dims_total_byte);
+    // If 'data' is allocated, 'dims' is also allocated.
     assert(data != nullptr);
-    assert(size == dims_total_size);
+    assert(total_data_byte >= 1);
+    assert(dims != nullptr);
+    assert(total_dims_byte >= 1);
+
+    // Comparison value for when the 'src_ext' value is nullptr.
+    ui64 realized_ext[TBAG_BOX_EXT_SIZE] = {0,};
+    if (src_ext) {
+        memcpy(realized_ext, src_ext, sizeof(ui64)*TBAG_BOX_EXT_SIZE);
+    }
+
+    if (device != src_device ||
+        ext[0] != realized_ext[0] ||
+        ext[1] != realized_ext[1] ||
+        ext[2] != realized_ext[2] ||
+        ext[3] != realized_ext[3]) {
+        box_data_free(device, data);
+        box_dim_free(dims);
+        auto const src_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank);
+        return alloc_dims_copy(src_type, src_device, src_ext /* Do not use the 'realized_ext' variable. */,
+                               src_dims, src_dims_byte, src_rank);
+    }
+
+    assert(device == src_device);
+    assert(ext[0] == realized_ext[0]);
+    assert(ext[1] == realized_ext[1]);
+    assert(ext[2] == realized_ext[2]);
+    assert(ext[3] == realized_ext[3]);
+
+    COMMENT("Update dims properties.") {
+        if (box_dim_is_equals(dims, rank, src_dims, src_rank)) {
+            assert(size == box_dim_get_total_size(src_dims, src_rank));
+            if (type == src_type) {
+                return E_SUCCESS;
+            }
+            auto const type_byte = get_type_byte();
+            auto const src_type_byte = box_get_type_byte(src_type);
+            assert(src_type_byte >= 1);
+            if (type_byte >= src_type_byte) {
+                type = src_type;
+                return E_SUCCESS;
+            }
+            // If the 'current type byte' is smaller than the 'source type byte',
+            // The total byte size that should be allocated to the data may be small.
+        } else {
+            if (total_dims_byte < GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank)) {
+                box_dim_free(dims);
+                dims = box_dim_clone(src_dims, src_rank);
+                assert(dims != nullptr);
+                total_dims_byte = GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank);
+                rank = src_rank;
+            } else {
+                box_dim_copy(dims, src_dims, src_rank);
+                rank = src_rank;
+            }
+        }
+        assert(total_dims_byte >= GET_RANK_TO_TOTAL_DIMS_BYTE(src_rank));
+        assert(dims != nullptr);
+        assert(rank == src_rank);
+        assert(box_dim_is_equals(dims, rank, src_dims, src_rank));
+    }
+
+    COMMENT("Update data properties.") {
+        auto const dims_total_size = box_dim_get_total_size(src_dims, src_rank);
+        assert(dims_total_size >= 1);
+        assert(dims_total_size == box_dim_get_total_size(dims, rank));
+
+        auto const dims_total_byte = box_get_type_byte(src_type) * dims_total_size;
+        assert(dims_total_byte >= 1);
+
+        if (total_data_byte < dims_total_byte) {
+            box_data_free(src_device, data);
+            data = box_data_malloc(src_type, src_device, dims_total_size);
+            if (data == nullptr) {
+                total_data_byte = 0;
+                size = 0;
+                return E_BADALLOC;
+            }
+            total_data_byte = dims_total_byte;
+            size = dims_total_size;
+        } else {
+            size = dims_total_size;
+        }
+        type = src_type;
+        assert(total_data_byte >= dims_total_byte);
+        assert(data != nullptr);
+        assert(size == dims_total_size);
+    }
+
     return E_SUCCESS;
 }
 
 ErrPair<box_data> box_data::clone(btype change_type, btype change_device, ui64 const * change_ext) const
 {
     ErrPair<box_data> result;
-    auto const code1 = result.value.alloc_dims_copy(change_type, change_device, change_ext,
-                                                    dims, total_dims_byte, rank);
-    if (isFailure(code1)) {
-        return code1;
-    }
-    auto const code2 = result.value.assign_data(data, type, device, ext, size);
-    if (isFailure(code2)) {
-        return code2;
+    auto const code = result.value.checked_assign_data(change_type, change_device, change_ext,
+                                                        rank, dims, data);
+    if (isFailure(code)) {
+        return code;
     }
     result.value.checked_assign_info_buffer(info, info_size);
     memcpy(&(result.value.opaque), &opaque, sizeof(opaque));
+    result.value.opaque_deleter = opaque_deleter;
     result.code = E_SUCCESS;
     return result;
 }
@@ -1303,7 +1331,7 @@ Err box_data::get_data_dims(void * out_data, btype out_type, bdev out_device, ui
     return get_data(out_data, out_type, out_device, out_ext, box_data_offset);
 }
 
-Err box_data::assign_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_size)
+Err box_data::assign_data(btype src_type, bdev src_device, ui64 const * src_ext, ui32 src_size, void const * src_data)
 {
     assert(src_data != nullptr);
     assert(data != src_data);
@@ -1324,6 +1352,20 @@ Err box_data::assign_data(void const * src_data, btype src_type, bdev src_device
         // TODO
     }
     return E_ENOSYS;
+}
+
+Err box_data::checked_assign_data(btype src_type, bdev src_device, ui64 const * src_ext,
+                                  ui32 src_rank, ui32 const * src_dims, void const * src_data)
+{
+    auto const resize_code = resize_dims(src_type, src_device, src_ext, src_rank, src_dims);
+    if (isFailure(resize_code)) {
+        return resize_code;
+    }
+    if (size >= 1 && src_data != nullptr) {
+        return assign_data(src_type, src_device, src_ext, size, src_data);
+    } else {
+        return E_SUCCESS;
+    }
 }
 
 // -------------------------
