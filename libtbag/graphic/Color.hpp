@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/Err.hpp>
 
 #include <cstdint>
@@ -125,10 +126,6 @@ TBAG_API Err convertHexStringToRgb24(std::string const & text, Rgb24 & color);
  */
 struct Rgb24
 {
-    struct constexpr_init_t { /* EMPTY. */ };
-
-    TBAG_CONSTEXPR static constexpr_init_t const constexpr_init = {};
-
     Channel r;
     Channel g;
     Channel b;
@@ -144,6 +141,12 @@ struct Rgb24
 
     Rgb24(std::string const & text) : r(), g(), b()
     { fromString(text); }
+
+    TBAG_CONSTEXPR Rgb24(constexpr_init_t, Rgb32 const & obj) TBAG_NOEXCEPT : r(), g(), b()
+    { *this = obj; }
+
+    TBAG_CONSTEXPR Rgb24(constexpr_init_t, Rgb24 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b)
+    { /* EMPTY. */ }
 
     Rgb24(Rgb32 const & obj) TBAG_NOEXCEPT : r(), g(), b()
     { *this = obj; }
@@ -234,10 +237,6 @@ struct Rgb24
  */
 struct Rgb32
 {
-    struct constexpr_init_t { /* EMPTY. */ };
-
-    TBAG_CONSTEXPR static constexpr_init_t const constexpr_init = {};
-
     Channel r;
     Channel g;
     Channel b;
@@ -255,6 +254,12 @@ struct Rgb32
 
     Rgb32(std::string const & text) : r(), g(), b(), a()
     { fromString(text); }
+
+    TBAG_CONSTEXPR Rgb32(constexpr_init_t, Rgb24 const & obj) TBAG_NOEXCEPT : r(), g(), b(), a()
+    { *this = obj; }
+
+    TBAG_CONSTEXPR Rgb32(constexpr_init_t, Rgb32 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b), a(obj.a)
+    { /* EMPTY. */ }
 
     Rgb32(Rgb24 const & obj) TBAG_NOEXCEPT : r(), g(), b(), a()
     { *this = obj; }
@@ -403,53 +408,53 @@ using Color = Rgb32;
  * @{
  */
 
-TBAG_CONSTEXPR Color const BLACK_COLOR = { Color::constexpr_init, channel_min(), channel_min(), channel_min() };
-TBAG_CONSTEXPR Color const WHITE_COLOR = { Color::constexpr_init, channel_max(), channel_max(), channel_max() };
+TBAG_CONSTEXPR Color const BLACK_COLOR = { constexpr_init, channel_min(), channel_min(), channel_min() };
+TBAG_CONSTEXPR Color const WHITE_COLOR = { constexpr_init, channel_max(), channel_max(), channel_max() };
 
-TBAG_CONSTEXPR Color const RED_COLOR     = { Color::constexpr_init, 0xFF, 0x00, 0x00 };
-TBAG_CONSTEXPR Color const LIME_COLOR    = { Color::constexpr_init, 0x00, 0xFF, 0x00 };
-TBAG_CONSTEXPR Color const BLUE_COLOR    = { Color::constexpr_init, 0x00, 0x00, 0xFF };
+TBAG_CONSTEXPR Color const RED_COLOR     = { constexpr_init, 0xFF, 0x00, 0x00 };
+TBAG_CONSTEXPR Color const LIME_COLOR    = { constexpr_init, 0x00, 0xFF, 0x00 };
+TBAG_CONSTEXPR Color const BLUE_COLOR    = { constexpr_init, 0x00, 0x00, 0xFF };
 
-TBAG_CONSTEXPR Color const YELLOW_COLOR  = { Color::constexpr_init, 0xFF, 0xFF, 0x00 };
-TBAG_CONSTEXPR Color const AQUA_COLOR    = { Color::constexpr_init, 0x00, 0xFF, 0xFF };
-TBAG_CONSTEXPR Color const FUCHSIA_COLOR = { Color::constexpr_init, 0xFF, 0x00, 0xFF };
+TBAG_CONSTEXPR Color const YELLOW_COLOR  = { constexpr_init, 0xFF, 0xFF, 0x00 };
+TBAG_CONSTEXPR Color const AQUA_COLOR    = { constexpr_init, 0x00, 0xFF, 0xFF };
+TBAG_CONSTEXPR Color const FUCHSIA_COLOR = { constexpr_init, 0xFF, 0x00, 0xFF };
 
-TBAG_CONSTEXPR Color const SILVER_COLOR  = { Color::constexpr_init, 0xC0, 0xC0, 0xC0 };
-TBAG_CONSTEXPR Color const GRAY_COLOR    = { Color::constexpr_init, 0x80, 0x80, 0x80 };
-TBAG_CONSTEXPR Color const MAROON_COLOR  = { Color::constexpr_init, 0x80, 0x00, 0x00 };
-TBAG_CONSTEXPR Color const OLIVE_COLOR   = { Color::constexpr_init, 0x80, 0x80, 0x00 };
-TBAG_CONSTEXPR Color const GREEN_COLOR   = { Color::constexpr_init, 0x00, 0x80, 0x00 };
-TBAG_CONSTEXPR Color const TEAL_COLOR    = { Color::constexpr_init, 0x00, 0x80, 0x80 };
-TBAG_CONSTEXPR Color const NAVY_COLOR    = { Color::constexpr_init, 0x00, 0x00, 0x80 };
-TBAG_CONSTEXPR Color const PURPLE_COLOR  = { Color::constexpr_init, 0x80, 0x00, 0x80 };
+TBAG_CONSTEXPR Color const SILVER_COLOR  = { constexpr_init, 0xC0, 0xC0, 0xC0 };
+TBAG_CONSTEXPR Color const GRAY_COLOR    = { constexpr_init, 0x80, 0x80, 0x80 };
+TBAG_CONSTEXPR Color const MAROON_COLOR  = { constexpr_init, 0x80, 0x00, 0x00 };
+TBAG_CONSTEXPR Color const OLIVE_COLOR   = { constexpr_init, 0x80, 0x80, 0x00 };
+TBAG_CONSTEXPR Color const GREEN_COLOR   = { constexpr_init, 0x00, 0x80, 0x00 };
+TBAG_CONSTEXPR Color const TEAL_COLOR    = { constexpr_init, 0x00, 0x80, 0x80 };
+TBAG_CONSTEXPR Color const NAVY_COLOR    = { constexpr_init, 0x00, 0x00, 0x80 };
+TBAG_CONSTEXPR Color const PURPLE_COLOR  = { constexpr_init, 0x80, 0x00, 0x80 };
 
 // -----------
 // Flat colors
 // -----------
 
-TBAG_CONSTEXPR Color const TURQUOISE_FLAT_COLOR     = { Color::constexpr_init,  26, 188, 156 };
-TBAG_CONSTEXPR Color const EMERALD_FLAT_COLOR       = { Color::constexpr_init,  46, 204, 113 };
-TBAG_CONSTEXPR Color const PETER_RIVER_FLAT_COLOR   = { Color::constexpr_init,  52, 152, 219 };
-TBAG_CONSTEXPR Color const AMETHYST_FLAT_COLOR      = { Color::constexpr_init, 155,  89, 182 };
-TBAG_CONSTEXPR Color const WET_ASPHALT_FLAT_COLOR   = { Color::constexpr_init,  52,  73,  94 };
+TBAG_CONSTEXPR Color const TURQUOISE_FLAT_COLOR     = { constexpr_init,  26, 188, 156 };
+TBAG_CONSTEXPR Color const EMERALD_FLAT_COLOR       = { constexpr_init,  46, 204, 113 };
+TBAG_CONSTEXPR Color const PETER_RIVER_FLAT_COLOR   = { constexpr_init,  52, 152, 219 };
+TBAG_CONSTEXPR Color const AMETHYST_FLAT_COLOR      = { constexpr_init, 155,  89, 182 };
+TBAG_CONSTEXPR Color const WET_ASPHALT_FLAT_COLOR   = { constexpr_init,  52,  73,  94 };
 
-TBAG_CONSTEXPR Color const GREEN_SEA_FLAT_COLOR     = { Color::constexpr_init,  22, 160, 133 };
-TBAG_CONSTEXPR Color const NEPHRITIS_FLAT_COLOR     = { Color::constexpr_init,  39, 174,  96 };
-TBAG_CONSTEXPR Color const BELIZE_HOLE_FLAT_COLOR   = { Color::constexpr_init,  41, 128, 185 };
-TBAG_CONSTEXPR Color const WISTERIA_FLAT_COLOR      = { Color::constexpr_init, 142,  68, 173 };
-TBAG_CONSTEXPR Color const MIDNIGHT_BLUE_FLAT_COLOR = { Color::constexpr_init,  44,  62,  80 };
+TBAG_CONSTEXPR Color const GREEN_SEA_FLAT_COLOR     = { constexpr_init,  22, 160, 133 };
+TBAG_CONSTEXPR Color const NEPHRITIS_FLAT_COLOR     = { constexpr_init,  39, 174,  96 };
+TBAG_CONSTEXPR Color const BELIZE_HOLE_FLAT_COLOR   = { constexpr_init,  41, 128, 185 };
+TBAG_CONSTEXPR Color const WISTERIA_FLAT_COLOR      = { constexpr_init, 142,  68, 173 };
+TBAG_CONSTEXPR Color const MIDNIGHT_BLUE_FLAT_COLOR = { constexpr_init,  44,  62,  80 };
 
-TBAG_CONSTEXPR Color const SUN_FLOWER_FLAT_COLOR    = { Color::constexpr_init, 241, 196,  15 };
-TBAG_CONSTEXPR Color const CARROT_FLAT_COLOR        = { Color::constexpr_init, 230, 126,  34 };
-TBAG_CONSTEXPR Color const ALIZARIN_FLAT_COLOR      = { Color::constexpr_init, 231,  76,  60 };
-TBAG_CONSTEXPR Color const CLOUDS_FLAT_COLOR        = { Color::constexpr_init, 236, 240, 241 };
-TBAG_CONSTEXPR Color const CONCRETE_FLAT_COLOR      = { Color::constexpr_init, 149, 165, 166 };
+TBAG_CONSTEXPR Color const SUN_FLOWER_FLAT_COLOR    = { constexpr_init, 241, 196,  15 };
+TBAG_CONSTEXPR Color const CARROT_FLAT_COLOR        = { constexpr_init, 230, 126,  34 };
+TBAG_CONSTEXPR Color const ALIZARIN_FLAT_COLOR      = { constexpr_init, 231,  76,  60 };
+TBAG_CONSTEXPR Color const CLOUDS_FLAT_COLOR        = { constexpr_init, 236, 240, 241 };
+TBAG_CONSTEXPR Color const CONCRETE_FLAT_COLOR      = { constexpr_init, 149, 165, 166 };
 
-TBAG_CONSTEXPR Color const ORANGE_FLAT_COLOR        = { Color::constexpr_init, 243, 156,  18 };
-TBAG_CONSTEXPR Color const PUMPKIN_FLAT_COLOR       = { Color::constexpr_init, 211,  84,   0 };
-TBAG_CONSTEXPR Color const POMEGRANATE_FLAT_COLOR   = { Color::constexpr_init, 192,  57,  43 };
-TBAG_CONSTEXPR Color const SILVER_FLAT_COLOR        = { Color::constexpr_init, 189, 195, 199 };
-TBAG_CONSTEXPR Color const ASBESTOS_FLAT_COLOR      = { Color::constexpr_init, 127, 140, 141 };
+TBAG_CONSTEXPR Color const ORANGE_FLAT_COLOR        = { constexpr_init, 243, 156,  18 };
+TBAG_CONSTEXPR Color const PUMPKIN_FLAT_COLOR       = { constexpr_init, 211,  84,   0 };
+TBAG_CONSTEXPR Color const POMEGRANATE_FLAT_COLOR   = { constexpr_init, 192,  57,  43 };
+TBAG_CONSTEXPR Color const SILVER_FLAT_COLOR        = { constexpr_init, 189, 195, 199 };
+TBAG_CONSTEXPR Color const ASBESTOS_FLAT_COLOR      = { constexpr_init, 127, 140, 141 };
 
 /**
  * @}

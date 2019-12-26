@@ -147,6 +147,10 @@ struct is_first_string<T>
             is_string_literal<T>::value;
 };
 
+struct constexpr_init_t { /* EMPTY. */ };
+
+TBAG_CONSTEXPR static constexpr_init_t const constexpr_init = {};
+
 // Test assertion.
 static_assert(!std::is_const<typename remove_cr<int const &>::type>::value
         , "It isn't non-const type.");
