@@ -154,8 +154,8 @@ struct Rgb24
     Rgb24(Rgb24 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b)
     { /* EMPTY. */ }
 
-    Rgb24(Rgb24 && obj) TBAG_NOEXCEPT : r(), g(), b()
-    { *this = std::move(obj); }
+    Rgb24(Rgb24 && obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b)
+    { /* EMPTY. */ }
 
     Rgb24 & operator =(Rgb24 const & obj) TBAG_NOEXCEPT
     {
@@ -169,7 +169,11 @@ struct Rgb24
 
     Rgb24 & operator =(Rgb24 && obj) TBAG_NOEXCEPT
     {
-        swap(obj);
+        if (this != &obj) {
+            r = obj.r;
+            g = obj.g;
+            b = obj.b;
+        }
         return *this;
     }
 
@@ -267,8 +271,8 @@ struct Rgb32
     Rgb32(Rgb32 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b), a(obj.a)
     { /* EMPTY. */ }
 
-    Rgb32(Rgb32 && obj) TBAG_NOEXCEPT : r(), g(), b(), a()
-    { *this = std::move(obj); }
+    Rgb32(Rgb32 && obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b), a(obj.a)
+    { /* EMPTY. */ }
 
     Rgb32 & operator =(Rgb32 const & obj) TBAG_NOEXCEPT
     {
@@ -283,7 +287,12 @@ struct Rgb32
 
     Rgb32 & operator =(Rgb32 && obj) TBAG_NOEXCEPT
     {
-        swap(obj);
+        if (this != &obj) {
+            r = obj.r;
+            g = obj.g;
+            b = obj.b;
+            a = obj.a;
+        }
         return *this;
     }
 
