@@ -142,12 +142,6 @@ struct Rgb24
     Rgb24(std::string const & text) : r(), g(), b()
     { fromString(text); }
 
-    TBAG_CONSTEXPR Rgb24(constexpr_init_t, Rgb32 const & obj) TBAG_NOEXCEPT : r(), g(), b()
-    { *this = obj; }
-
-    TBAG_CONSTEXPR Rgb24(constexpr_init_t, Rgb24 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b)
-    { /* EMPTY. */ }
-
     Rgb24(Rgb32 const & obj) TBAG_NOEXCEPT : r(), g(), b()
     { *this = obj; }
 
@@ -258,12 +252,6 @@ struct Rgb32
 
     Rgb32(std::string const & text) : r(), g(), b(), a()
     { fromString(text); }
-
-    TBAG_CONSTEXPR Rgb32(constexpr_init_t, Rgb24 const & obj) TBAG_NOEXCEPT : r(), g(), b(), a()
-    { *this = obj; }
-
-    TBAG_CONSTEXPR Rgb32(constexpr_init_t, Rgb32 const & obj) TBAG_NOEXCEPT : r(obj.r), g(obj.g), b(obj.b), a(obj.a)
-    { /* EMPTY. */ }
 
     Rgb32(Rgb24 const & obj) TBAG_NOEXCEPT : r(), g(), b(), a()
     { *this = obj; }
