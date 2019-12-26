@@ -1176,7 +1176,7 @@ void box_data::checked_assign_info_buffer(ui8 const * src, ui32 src_size)
         box_info_free(info);
         info = nullptr;
         total_info_byte = 0;
-        size = 0;
+        info_size = 0;
     }
 
     if (info == nullptr) {
