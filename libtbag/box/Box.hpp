@@ -1152,10 +1152,9 @@ public:
     template <typename T>
     inline T & offset(ui32 i)
     {
-        using result_type = typename libtbag::remove_cr<T>::type;
         assert(exists());
         assert(i < size());
-        assert(is_btype_equals<result_type>(type()));
+        assert(is_btype_equals<T>(type()));
         return *((T*)_data->get_data_ptr_by_offset(i));
     }
 
@@ -1230,12 +1229,12 @@ public:
 
         Cursor(box_cursor const & c) TBAG_NOEXCEPT : cursor(c)
         { /* EMPTY. */ }
-        Cursor(box_cursor && c) TBAG_NOEXCEPT : cursor(std::move(c))
+        Cursor(box_cursor && c) TBAG_NOEXCEPT : cursor(c)
         { /* EMPTY. */ }
 
         Cursor(Cursor const & obj) TBAG_NOEXCEPT : cursor(obj.cursor)
         { /* EMPTY. */ }
-        Cursor(Cursor && obj) TBAG_NOEXCEPT : cursor(std::move(obj.cursor))
+        Cursor(Cursor && obj) TBAG_NOEXCEPT : cursor(obj.cursor)
         { /* EMPTY. */ }
 
         ~Cursor()
@@ -1252,38 +1251,48 @@ public:
         Cursor & operator =(Cursor && obj) TBAG_NOEXCEPT
         {
             if (this != &obj) {
-                cursor = std::move(obj.cursor);
+                cursor = obj.cursor;
             }
             return *this;
         }
 
-        ErrPair<Cursor> createSubCursor(ui32 dim_index, int begin_index, int end_index, int step_index)
+        ErrPair<Cursor> sub(int begin_index, int end_index, int step_index) const
         {
-            auto const err_cursor = cursor.init_cursor(dim_index, begin_index, end_index, step_index);
+            assert(cursor.box != nullptr);
+            if ((cursor.dim_index+1) >= cursor.box->rank) {
+                return E_OORANGE;
+            }
+            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1, begin_index, end_index, step_index);
             return { err_cursor.code, err_cursor.value };
         }
 
-        ErrPair<Cursor> createSubCursor(ui32 dim_index, int begin_index, int end_index)
+        ErrPair<Cursor> sub(int begin_index, int end_index) const
         {
-            auto const err_cursor = cursor.init_cursor(dim_index, begin_index, end_index);
+            assert(cursor.box != nullptr);
+            if ((cursor.dim_index+1) >= cursor.box->rank) {
+                return E_OORANGE;
+            }
+            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1, begin_index, end_index);
             return { err_cursor.code, err_cursor.value };
         }
 
-        ErrPair<Cursor> createSubCursor(ui32 dim_index, int begin_index)
+        ErrPair<Cursor> sub(int begin_index) const
         {
-            auto const err_cursor = cursor.init_cursor(dim_index, begin_index);
+            assert(cursor.box != nullptr);
+            if ((cursor.dim_index+1) >= cursor.box->rank) {
+                return E_OORANGE;
+            }
+            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1, begin_index);
             return { err_cursor.code, err_cursor.value };
         }
 
-        ErrPair<Cursor> createSubCursor(ui32 dim_index)
+        ErrPair<Cursor> sub() const
         {
-            auto const err_cursor = cursor.init_cursor(dim_index);
-            return { err_cursor.code, err_cursor.value };
-        }
-
-        ErrPair<Cursor> createSubCursor()
-        {
-            auto const err_cursor = cursor.init_cursor();
+            assert(cursor.box != nullptr);
+            if ((cursor.dim_index+1) >= cursor.box->rank) {
+                return E_OORANGE;
+            }
+            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1);
             return { err_cursor.code, err_cursor.value };
         }
 
@@ -1296,14 +1305,51 @@ public:
         {
             return cursor.next();
         }
+
+        template <typename T>
+        inline T * data() TBAG_NOEXCEPT
+        {
+            return static_cast<T*>(cursor.begin);
+        }
+
+        template <typename T>
+        inline T const * data() const TBAG_NOEXCEPT
+        {
+            return static_cast<T const *>(cursor.begin);
+        }
+
+        inline void * data() TBAG_NOEXCEPT
+        {
+            return cursor.begin;
+        }
+
+        inline void const * data() const TBAG_NOEXCEPT
+        {
+            return cursor.begin;
+        }
+
+        template <typename T>
+        inline T & at()
+        {
+            assert(cursor.box != nullptr);
+            assert(is_btype_equals<T>(cursor.box->type));
+            return *((T*)cursor.begin);
+        }
+
+        template <typename T>
+        inline T const & at() const
+        {
+            assert(cursor.box != nullptr);
+            assert(is_btype_equals<T>(cursor.box->type));
+            return *((T*)cursor.begin);
+        }
     };
 
-    ErrPair<Cursor> createCursor(void * data_begin, ui32 dim_index, int begin, int end, int step);
-    ErrPair<Cursor> createCursor(ui32 dim_index, int begin, int end, int step);
-    ErrPair<Cursor> createCursor(ui32 dim_index, int begin, int end);
-    ErrPair<Cursor> createCursor(ui32 dim_index, int begin);
-    ErrPair<Cursor> createCursor(ui32 dim_index);
-    ErrPair<Cursor> createCursor();
+public:
+    ErrPair<Cursor> cursor(int begin, int end, int step) const;
+    ErrPair<Cursor> cursor(int begin, int end) const;
+    ErrPair<Cursor> cursor(int begin) const;
+    ErrPair<Cursor> cursor() const;
 };
 
 } // namespace box
