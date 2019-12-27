@@ -6,9 +6,9 @@
  */
 
 #define luajit_c
+#include <libtbag/script/LuaMain.hpp>
 #include <libtbag/script/LuaBypass.hpp>
 #include <libtbag/script/LuaMachine.hpp>
-#include <libtbag/script/LuaMain.hpp>
 #include <libtbag/Noncopyable.hpp>
 
 #include <cstdio>
@@ -35,10 +35,7 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
-namespace tpot {
-namespace apps {
-
-using namespace libtbag::script;
+namespace script {
 
 TBAG_CONSTEXPR static unsigned const FLAG_INTERACTIVE =  1;
 TBAG_CONSTEXPR static unsigned const FLAG_VERSION =  2;
@@ -212,6 +209,7 @@ static void print_jit_status(lua_State * L)
     for (n++; (s = lua_tostring(L, n)); n++) {
         fprintf(stdout, " %s", s);
     }
+    fputs("\n", stdout);
     fflush(stdout);
 }
 
@@ -684,8 +682,7 @@ int runLuaJit(int argc, char ** argv)
     return LuaMain(argc, argv).run();
 }
 
-} // namespace apps
-} // namespace tpot
+} // namespace script
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE

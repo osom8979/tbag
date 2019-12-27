@@ -229,7 +229,7 @@ set (CONFIG_EX_INPUT  "${PROJECT_SOURCE_DIR}/template/config-ex.h.in")
 set (CONFIG_EX_OUTPUT "${PROJECT_SOURCE_DIR}/${MAIN_NAME}/config-ex.h")
 configure_file ("${CONFIG_EX_INPUT}" "${CONFIG_EX_OUTPUT}")
 
-set (TBAG_BUILD_PROJECTS libtbag)
+set (TBAG_BUILD_PROJECTS libtbag tlua)
 if (NOT DISABLE_TESTER)
     set (TBAG_BUILD_PROJECTS ${TBAG_BUILD_PROJECTS} tools/libtbshare tools/tbproc tester)
 endif ()

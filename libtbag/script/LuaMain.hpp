@@ -3,6 +3,7 @@
  * @brief  LuaMain class prototype.
  * @author zer0
  * @date   2019-01-30
+ * @date   2019-12-17 (Rename: LuaPot -> LuaMain)
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_SCRIPT_LUAMAIN_HPP__
