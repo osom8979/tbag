@@ -20,6 +20,7 @@
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/ErrPair.hpp>
+#include <libtbag/type/TypeTable.hpp>
 
 #include <cstdint>
 #include <cstdarg>
@@ -153,6 +154,8 @@ using box_opaque_delete_cb = void(*)(void*);
 struct box_cursor;
 struct box_data;
 
+TBAG_CONSTEXPR int const box_nop = libtbag::type::TypeInfo<int>::maximum();
+
 // clang-format off
 inline bool box_is_unknown_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_UNKNOWN ; }
 inline bool box_is_boolean_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_BOOLEAN ; }
@@ -238,7 +241,7 @@ TBAG_API void const * box_data_ptr_offset_raw(void const * data, btype type, ui3
 TBAG_API bool box_data_check_address_raw(void const * data_begin, ui32 size, btype type,
                                          void const * check_data) TBAG_NOEXCEPT;
 
-TBAG_API int  box_index_abs(int dim_size, int dim_index) TBAG_NOEXCEPT;
+TBAG_API int box_index_abs(ui32 const * dims, ui32 dim_index, int data_index) TBAG_NOEXCEPT;
 TBAG_API bool box_step_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
 TBAG_API void * box_cpu_malloc(ui32 byte_size) TBAG_NOEXCEPT;
@@ -398,9 +401,6 @@ struct TBAG_API box_data : private Noncopyable
                         ui32 * src_dims, ui32 src_dims_byte, ui32 src_rank);
 
     ui32 get_dims_total_size() const TBAG_NOEXCEPT;
-
-    struct nop_t { /* EMPTY */ };
-    TBAG_CONSTEXPR static nop_t const nop = { /* EMPTY */ };
 
     ErrPair<box_cursor> init_cursor(void * data, ui32 dim_index,
                                     int begin, int end, int step) TBAG_NOEXCEPT;
