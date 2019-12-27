@@ -26,50 +26,50 @@ TEST(Box_Info_Test, ImmutabilityOfOtherProperties)
 {
     Box box = {{0, 1}, {2, 3}};
 
-    auto const type = box->type;
-    auto const device = box->device;
-    auto const ext0 = box->ext[0];
-    auto const ext1 = box->ext[1];
-    auto const ext2 = box->ext[2];
-    auto const ext3 = box->ext[3];
-    auto const data = box->data;
-    auto const total_data_byte = box->total_data_byte;
-    auto const size = box->size;
-    auto const dims = box->dims;
-    auto const total_dims_byte = box->total_dims_byte;
-    auto const rank = box->rank;
+    auto const type = box.type();
+    auto const device = box.device();
+    auto const ext0 = box.ext0();
+    auto const ext1 = box.ext1();
+    auto const ext2 = box.ext2();
+    auto const ext3 = box.ext3();
+    auto const data = box.data();
+    auto const total_data_byte = box.total_data_byte();
+    auto const size = box.size();
+    auto const dims = box.dims();
+    auto const total_dims_byte = box.total_dims_byte();
+    auto const rank = box.rank();
 
     ASSERT_EQ(Box::type_si32(), type);
     ASSERT_EQ(4, size);
     ASSERT_EQ(2, rank);
 
     box.setInfo("TEST");
-    ASSERT_EQ(type, box->type);
-    ASSERT_EQ(device, box->device);
-    ASSERT_EQ(ext0, box->ext[0]);
-    ASSERT_EQ(ext1, box->ext[1]);
-    ASSERT_EQ(ext2, box->ext[2]);
-    ASSERT_EQ(ext3, box->ext[3]);
-    ASSERT_EQ(data, box->data);
-    ASSERT_EQ(total_data_byte, box->total_data_byte);
-    ASSERT_EQ(size, box->size);
-    ASSERT_EQ(dims, box->dims);
-    ASSERT_EQ(total_dims_byte, box->total_dims_byte);
-    ASSERT_EQ(rank, box->rank);
+    ASSERT_EQ(type, box.type());
+    ASSERT_EQ(device, box.device());
+    ASSERT_EQ(ext0, box.ext0());
+    ASSERT_EQ(ext1, box.ext1());
+    ASSERT_EQ(ext2, box.ext2());
+    ASSERT_EQ(ext3, box.ext3());
+    ASSERT_EQ(data, box.data());
+    ASSERT_EQ(total_data_byte, box.total_data_byte());
+    ASSERT_EQ(size, box.size());
+    ASSERT_EQ(dims, box.dims());
+    ASSERT_EQ(total_dims_byte, box.total_dims_byte());
+    ASSERT_EQ(rank, box.rank());
 
     box.setInfo("TEST_1234");
-    ASSERT_EQ(type, box->type);
-    ASSERT_EQ(device, box->device);
-    ASSERT_EQ(ext0, box->ext[0]);
-    ASSERT_EQ(ext1, box->ext[1]);
-    ASSERT_EQ(ext2, box->ext[2]);
-    ASSERT_EQ(ext3, box->ext[3]);
-    ASSERT_EQ(data, box->data);
-    ASSERT_EQ(total_data_byte, box->total_data_byte);
-    ASSERT_EQ(size, box->size);
-    ASSERT_EQ(dims, box->dims);
-    ASSERT_EQ(total_dims_byte, box->total_dims_byte);
-    ASSERT_EQ(rank, box->rank);
+    ASSERT_EQ(type, box.type());
+    ASSERT_EQ(device, box.device());
+    ASSERT_EQ(ext0, box.ext0());
+    ASSERT_EQ(ext1, box.ext1());
+    ASSERT_EQ(ext2, box.ext2());
+    ASSERT_EQ(ext3, box.ext3());
+    ASSERT_EQ(data, box.data());
+    ASSERT_EQ(total_data_byte, box.total_data_byte());
+    ASSERT_EQ(size, box.size());
+    ASSERT_EQ(dims, box.dims());
+    ASSERT_EQ(total_dims_byte, box.total_dims_byte());
+    ASSERT_EQ(rank, box.rank());
 }
 
 TEST(Box_Info_Test, Buffer)

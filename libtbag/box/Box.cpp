@@ -187,7 +187,7 @@ Err Box::reshape_ref_box(Box const & reference_box)
     if (!reference_box) {
         return E_ILLARGS;
     }
-    return reshape_ref_box(reference_box.getBoxData());
+    return reshape_ref_box(reference_box.base());
 }
 
 Box Box::shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)

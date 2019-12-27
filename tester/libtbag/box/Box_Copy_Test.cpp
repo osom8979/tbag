@@ -39,9 +39,9 @@ TEST(Box_Copy_Test, CopyToNull)
     ASSERT_FALSE(dest.exists());
     ASSERT_EQ(E_SUCCESS, src.copyTo(dest));
 
-    auto const * src_box_data = src.getBoxData();
+    auto const * src_box_data = src.base();
     ASSERT_NE(nullptr, src_box_data);
-    auto const * dest_box_data = dest.getBoxData();
+    auto const * dest_box_data = dest.base();
     ASSERT_NE(nullptr, dest_box_data);
     ASSERT_NE(src_box_data, dest_box_data);
 
@@ -73,9 +73,9 @@ TEST(Box_Copy_Test, CopyFromNull)
     dest.setInfo("1234");
     ASSERT_EQ(E_SUCCESS, src.copyTo(dest));
 
-    auto const * src_box_data = src.getBoxData();
+    auto const * src_box_data = src.base();
     ASSERT_EQ(nullptr, src_box_data);
-    auto const * dest_box_data = dest.getBoxData();
+    auto const * dest_box_data = dest.base();
     ASSERT_NE(nullptr, dest_box_data);
 
     ASSERT_TRUE(src.isEmpty());
@@ -103,9 +103,9 @@ TEST(Box_Copy_Test, DowngradeDataSize)
     Box const src = {1.0f};
     Box dest = {{2, 3}};
     ASSERT_EQ(E_SUCCESS, src.copyTo(dest));
-    auto const * src_box_data = src.getBoxData();
+    auto const * src_box_data = src.base();
     ASSERT_NE(nullptr, src_box_data);
-    auto const * dest_box_data = dest.getBoxData();
+    auto const * dest_box_data = dest.base();
     ASSERT_NE(nullptr, dest_box_data);
     ASSERT_NE(src_box_data, dest_box_data);
 
@@ -126,9 +126,9 @@ TEST(Box_Copy_Test, UpgradeDataSize)
     Box const src = {{2, 3}};
     Box dest = {1.0f};
     ASSERT_EQ(E_SUCCESS, src.copyTo(dest));
-    auto const * src_box_data = src.getBoxData();
+    auto const * src_box_data = src.base();
     ASSERT_NE(nullptr, src_box_data);
-    auto const * dest_box_data = dest.getBoxData();
+    auto const * dest_box_data = dest.base();
     ASSERT_NE(nullptr, dest_box_data);
     ASSERT_NE(src_box_data, dest_box_data);
 

@@ -60,8 +60,8 @@ TEST_F(Box_Stl_Test_Fixture, Vector)
     ASSERT_STREQ("1", container2[0].getInfoString().c_str());
     ASSERT_STREQ("2", container2[1].getInfoString().c_str());
 
-    ASSERT_EQ(container[0].ptr(), container2[0].ptr());
-    ASSERT_EQ(container[1].ptr(), container2[1].ptr());
+    ASSERT_EQ(container[0].base(), container2[0].base());
+    ASSERT_EQ(container[1].base(), container2[1].base());
 }
 
 TEST_F(Box_Stl_Test_Fixture, Deque)
@@ -78,8 +78,8 @@ TEST_F(Box_Stl_Test_Fixture, Deque)
     ASSERT_STREQ("1", container2[0].getInfoString().c_str());
     ASSERT_STREQ("2", container2[1].getInfoString().c_str());
 
-    ASSERT_EQ(container[0].ptr(), container2[0].ptr());
-    ASSERT_EQ(container[1].ptr(), container2[1].ptr());
+    ASSERT_EQ(container[0].base(), container2[0].base());
+    ASSERT_EQ(container[1].base(), container2[1].base());
 }
 
 TEST_F(Box_Stl_Test_Fixture, Set)
@@ -119,10 +119,10 @@ TEST_F(Box_Stl_Test_Fixture, Map)
     ASSERT_STREQ("1", container2.find(3)->second.getInfoString().c_str());
     ASSERT_STREQ("2", container2.find(4)->second.getInfoString().c_str());
 
-    ASSERT_EQ(container.find(1)->second.ptr(), container2.find(1)->second.ptr());
-    ASSERT_EQ(container.find(2)->second.ptr(), container2.find(2)->second.ptr());
-    ASSERT_EQ(container.find(3)->second.ptr(), container2.find(3)->second.ptr());
-    ASSERT_EQ(container.find(4)->second.ptr(), container2.find(4)->second.ptr());
+    ASSERT_EQ(container.find(1)->second.base(), container2.find(1)->second.base());
+    ASSERT_EQ(container.find(2)->second.base(), container2.find(2)->second.base());
+    ASSERT_EQ(container.find(3)->second.base(), container2.find(3)->second.base());
+    ASSERT_EQ(container.find(4)->second.base(), container2.find(4)->second.base());
 }
 
 TEST_F(Box_Stl_Test_Fixture, UnorderedSet)
@@ -162,9 +162,9 @@ TEST_F(Box_Stl_Test_Fixture, UnorderedMap)
     ASSERT_STREQ("1", container2.find(3)->second.getInfoString().c_str());
     ASSERT_STREQ("2", container2.find(4)->second.getInfoString().c_str());
 
-    ASSERT_EQ(container.find(1)->second.ptr(), container2.find(1)->second.ptr());
-    ASSERT_EQ(container.find(2)->second.ptr(), container2.find(2)->second.ptr());
-    ASSERT_EQ(container.find(3)->second.ptr(), container2.find(3)->second.ptr());
-    ASSERT_EQ(container.find(4)->second.ptr(), container2.find(4)->second.ptr());
+    ASSERT_EQ(container.find(1)->second.base(), container2.find(1)->second.base());
+    ASSERT_EQ(container.find(2)->second.base(), container2.find(2)->second.base());
+    ASSERT_EQ(container.find(3)->second.base(), container2.find(3)->second.base());
+    ASSERT_EQ(container.find(4)->second.base(), container2.find(4)->second.base());
 }
 

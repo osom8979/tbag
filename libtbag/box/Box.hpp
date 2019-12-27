@@ -367,20 +367,8 @@ public:
     }
 
 public:
-    inline box_data       * getBoxData()       TBAG_NOEXCEPT { return _data.get(); }
-    inline box_data const * getBoxData() const TBAG_NOEXCEPT { return _data.get(); }
-
-    inline box_data       * ptr()       TBAG_NOEXCEPT { return getBoxData(); }
-    inline box_data const * ptr() const TBAG_NOEXCEPT { return getBoxData(); }
-
-    inline box_data       * operator ->()       TBAG_NOEXCEPT { return ptr(); }
-    inline box_data const * operator ->() const TBAG_NOEXCEPT { return ptr(); }
-
-    inline box_data       & ref()       TBAG_NOEXCEPT { return *ptr(); }
-    inline box_data const & ref() const TBAG_NOEXCEPT { return *ptr(); }
-
-    inline box_data       & operator *()       TBAG_NOEXCEPT { return ref(); }
-    inline box_data const & operator *() const TBAG_NOEXCEPT { return ref(); }
+    inline box_data       * base()       TBAG_NOEXCEPT { return _data.get(); }
+    inline box_data const * base() const TBAG_NOEXCEPT { return _data.get(); }
 
 public:
     inline btype getType() const TBAG_NOEXCEPT
@@ -1336,7 +1324,7 @@ struct hash<libtbag::box::Box>
 {
     inline std::size_t operator()(libtbag::box::Box const & v) const
     {
-        return reinterpret_cast<std::size_t>(v.ptr());
+        return reinterpret_cast<std::size_t>(v.base());
     }
 };
 
@@ -1345,7 +1333,7 @@ struct equal_to<libtbag::box::Box>
 {
     inline bool operator()(libtbag::box::Box const & x, libtbag::box::Box const & y) const
     {
-        return x.ptr() == y.ptr();
+        return x.base() == y.base();
     }
 };
 
@@ -1354,7 +1342,7 @@ struct less<libtbag::box::Box>
 {
     inline bool operator()(libtbag::box::Box const & x, libtbag::box::Box const & y) const
     {
-        return x.ptr() < y.ptr();
+        return x.base() < y.base();
     }
 };
 
