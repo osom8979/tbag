@@ -453,38 +453,17 @@ ErrPair<Box::Cursor> Box::cursor(int begin, int end, int step) const
 
 ErrPair<Box::Cursor> Box::cursor(int begin, int end) const
 {
-    if (!exists()) {
-        return E_EXPIRED;
-    }
-    if (rank() == 0) {
-        return E_EINVAL;
-    }
-    auto const result = _data->init_cursor(0u, begin, end);
-    return { result.code, result.value };
+    return cursor(begin, end, 1);
 }
 
 ErrPair<Box::Cursor> Box::cursor(int begin) const
 {
-    if (!exists()) {
-        return E_EXPIRED;
-    }
-    if (rank() == 0) {
-        return E_EINVAL;
-    }
-    auto const result = _data->init_cursor(0u, begin);
-    return { result.code, result.value };
+    return cursor(begin, nop);
 }
 
 ErrPair<Box::Cursor> Box::cursor() const
 {
-    if (!exists()) {
-        return E_EXPIRED;
-    }
-    if (rank() == 0) {
-        return E_EINVAL;
-    }
-    auto const result = _data->init_cursor(0u);
-    return { result.code, result.value };
+    return cursor(nop);
 }
 
 } // namespace box

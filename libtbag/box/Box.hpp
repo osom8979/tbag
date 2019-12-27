@@ -268,6 +268,8 @@ public:
     using SharedBoxData = std::shared_ptr<box_data>;
 
 public:
+    TBAG_CONSTEXPR static int const nop = libtbag::box::details::box_nop;
+
     TBAG_CONSTEXPR static btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
     TBAG_CONSTEXPR static btype const type_si8 () TBAG_NOEXCEPT { return get_btype<si8 >(); }
     TBAG_CONSTEXPR static btype const type_si16() TBAG_NOEXCEPT { return get_btype<si16>(); }
@@ -1220,6 +1222,7 @@ public:
     std::string toJsonText(Err * code = nullptr) const;
     bool fromJsonText(std::string const & json, Err * code = nullptr);
 
+public:
     struct Cursor
     {
         box_cursor cursor;
@@ -1268,32 +1271,17 @@ public:
 
         ErrPair<Cursor> sub(int begin_index, int end_index) const
         {
-            assert(cursor.box != nullptr);
-            if ((cursor.dim_index+1) >= cursor.box->rank) {
-                return E_OORANGE;
-            }
-            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1, begin_index, end_index);
-            return { err_cursor.code, err_cursor.value };
+            return sub(begin_index, end_index, 1);
         }
 
         ErrPair<Cursor> sub(int begin_index) const
         {
-            assert(cursor.box != nullptr);
-            if ((cursor.dim_index+1) >= cursor.box->rank) {
-                return E_OORANGE;
-            }
-            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1, begin_index);
-            return { err_cursor.code, err_cursor.value };
+            return sub(begin_index, nop);
         }
 
         ErrPair<Cursor> sub() const
         {
-            assert(cursor.box != nullptr);
-            if ((cursor.dim_index+1) >= cursor.box->rank) {
-                return E_OORANGE;
-            }
-            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1);
-            return { err_cursor.code, err_cursor.value };
+            return sub(nop);
         }
 
         bool isEnd() const
