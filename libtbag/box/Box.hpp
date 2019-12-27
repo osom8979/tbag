@@ -1144,47 +1144,38 @@ public:
 
 public:
     template <typename T>
-    inline typename libtbag::remove_cr<T>::type & getElementByOffset(ui32 i) TBAG_NOEXCEPT
+    inline T & offset(ui32 i)
     {
         using result_type = typename libtbag::remove_cr<T>::type;
         assert(exists());
-        assert(is_btype_equals<result_type>(type()));
         assert(i < size());
-        return *((result_type*)_data->get_data_ptr_by_offset(i));
+        assert(is_btype_equals<result_type>(type()));
+        return *((T*)_data->get_data_ptr_by_offset(i));
     }
 
     template <typename T>
-    inline typename libtbag::remove_cr<T>::type const & getElementByOffset(ui32 i) const TBAG_NOEXCEPT
+    inline T const & offset(ui32 i) const
     {
-        using result_type = typename libtbag::remove_cr<T>::type const;
         assert(exists());
-        assert(is_btype_equals<result_type>(type()));
         assert(i < size());
-        return *((result_type*)_data->get_data_ptr_by_offset(i));
+        assert(is_btype_equals<T>(type()));
+        return *((T*)_data->get_data_ptr_by_offset(i));
     }
 
     template <typename T, typename ... Args>
-    inline typename libtbag::remove_cr<T>::type & at(Args && ... args) TBAG_NOEXCEPT
+    inline T & at(Args && ... args)
     {
-        using result_type = typename libtbag::remove_cr<T>::type;
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        using namespace libtbag::box::details;
-        auto const offset = box_dim_get_offset_args(getDimensions(),
-                                                    static_cast<ui32>(sizeof...(Args)),
-                                                    std::forward<Args>(args) ...);
-        return getElementByOffset<result_type>(offset);
+        return offset<T>(libtbag::box::details::box_dim_get_offset_args(
+                dims(), static_cast<ui32>(sizeof...(Args)), std::forward<Args>(args) ...));
     }
 
     template <typename T, typename ... Args>
-    inline typename libtbag::remove_cr<T>::type const & at(Args && ... args) const TBAG_NOEXCEPT
+    inline T const & at(Args && ... args) const
     {
-        using result_type = typename libtbag::remove_cr<T>::type;
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        using namespace libtbag::box::details;
-        auto const offset = box_dim_get_offset_args(getDimensions(),
-                                                    static_cast<ui32>(sizeof...(Args)),
-                                                    std::forward<Args>(args) ...);
-        return getElementByOffset<result_type>(offset);
+        return offset<T>(libtbag::box::details::box_dim_get_offset_args(
+                dims(), static_cast<ui32>(sizeof...(Args)), std::forward<Args>(args) ...));
     }
 
 public:
