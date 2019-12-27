@@ -256,6 +256,9 @@ public:
 
     using box_data   = libtbag::box::details::box_data;
     using box_cursor = libtbag::box::details::box_cursor;
+    using box_any    = libtbag::box::details::box_any;
+
+    using box_opaque_delete_cb = libtbag::box::details::box_opaque_delete_cb;
 
     using Buffer = std::vector<ui8>;
 
@@ -496,6 +499,17 @@ public:
     inline ui64 ext3() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[3]; }
     // clang-format on
 
+    inline bool testExtensions(ui64 e0, ui64 e1, ui64 e2, ui64 e3) const TBAG_NOEXCEPT
+    {
+        if (_data) {
+            return _data->ext[0] == e0 &&
+                   _data->ext[1] == e1 &&
+                   _data->ext[2] == e2 &&
+                   _data->ext[3] == e3;
+        }
+        return false;
+    }
+
 public:
     inline void * getData() TBAG_NOEXCEPT
     {
@@ -539,7 +553,7 @@ public:
         return static_cast<T const *>(_data->data);
     }
 
-    inline ui32 getCapacity() const TBAG_NOEXCEPT
+    inline ui32 getTotalDataByte() const TBAG_NOEXCEPT
     {
         if (_data) {
             return _data->total_data_byte;
@@ -547,10 +561,20 @@ public:
         return 0;
     }
 
-    inline ui32 capacity() const TBAG_NOEXCEPT
+    inline ui32 total_data_byte() const TBAG_NOEXCEPT
     {
         assert(exists());
         return _data->total_data_byte;
+    }
+
+    inline ui32 getCapacity() const TBAG_NOEXCEPT
+    {
+        return getTotalDataByte();
+    }
+
+    inline ui32 capacity() const TBAG_NOEXCEPT
+    {
+        return total_data_byte();
     }
 
     inline ui32 getSize() const TBAG_NOEXCEPT
@@ -610,7 +634,7 @@ public:
         return _data->dims[i];
     }
 
-    inline ui32 getDimensionsCapacity() const TBAG_NOEXCEPT
+    inline ui32 getTotalDimsByte() const TBAG_NOEXCEPT
     {
         if (_data) {
             return _data->total_dims_byte;
@@ -618,10 +642,20 @@ public:
         return 0;
     }
 
-    inline ui32 dims_capacity() const TBAG_NOEXCEPT
+    inline ui32 total_dims_byte() const TBAG_NOEXCEPT
     {
         assert(exists());
         return _data->total_dims_byte;
+    }
+
+    inline ui32 getDimensionsCapacity() const TBAG_NOEXCEPT
+    {
+        return getTotalDimsByte();
+    }
+
+    inline ui32 dims_capacity() const TBAG_NOEXCEPT
+    {
+        return total_dims_byte();
     }
 
     inline ui32 getRank() const TBAG_NOEXCEPT
@@ -677,7 +711,7 @@ public:
         return _data->info;
     }
 
-    inline ui32 getInfoCapacity() const TBAG_NOEXCEPT
+    inline ui32 getTotalInfoByte() const TBAG_NOEXCEPT
     {
         if (_data) {
             return _data->total_info_byte;
@@ -685,10 +719,20 @@ public:
         return 0;
     }
 
-    inline ui32 info_capacity() const TBAG_NOEXCEPT
+    inline ui32 total_info_byte() const TBAG_NOEXCEPT
     {
         assert(exists());
         return _data->total_info_byte;
+    }
+
+    inline ui32 getInfoCapacity() const TBAG_NOEXCEPT
+    {
+        return getTotalInfoByte();
+    }
+
+    inline ui32 info_capacity() const TBAG_NOEXCEPT
+    {
+        return total_info_byte();
     }
 
     inline ui32 getInfoSize() const TBAG_NOEXCEPT
@@ -708,30 +752,48 @@ public:
 public:
     inline void setOpaque(void * v) const TBAG_NOEXCEPT
     {
-        assert(exists());
-        _data->set_opaque(v);
+        if (_data) {
+            _data->set_opaque(v);
+        }
     }
 
     template <typename T>
     void setOpaque(T v) TBAG_NOEXCEPT
     {
-        assert(exists());
-        assert(is_btype_equals<T>(getType()));
-        _data->set_opaque(v);
-    }
-
-    inline void * getOpaquePointer() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->get_opaque_pointer();
+        if (_data) {
+            _data->set_opaque(v);
+        }
     }
 
     template <typename T>
     void getOpaque(T * v) const TBAG_NOEXCEPT
     {
-        assert(exists());
-        assert(is_btype_equals<T>(getType()));
-        _data->get_opaque(v);
+        if (_data && v != nullptr) {
+            _data->get_opaque(v);
+        }
+    }
+
+    inline void * getOpaquePointer() const TBAG_NOEXCEPT
+    {
+        if (_data) {
+            return _data->get_opaque_pointer();
+        }
+        return nullptr;
+    }
+
+    inline box_opaque_delete_cb getOpaqueDeleter() const TBAG_NOEXCEPT
+    {
+        if (_data) {
+            return _data->opaque_deleter;
+        }
+        return nullptr;
+    }
+
+    inline void setOpaqueDeleter(box_opaque_delete_cb cb) TBAG_NOEXCEPT
+    {
+        if (_data) {
+            _data->opaque_deleter = cb;
+        }
     }
 
 public:
@@ -887,16 +949,16 @@ public:
     }
 
 public:
-    Err copyToData(Box & box) const;
     Err copyFromData(Box const & box);
+    Err copyToData(Box & box) const;
 
 public:
-    Err copyToInfo(Box & box) const;
     Err copyFromInfo(Box const & box);
+    Err copyToInfo(Box & box) const;
 
 public:
-    Err copyTo(Box & box) const;
     Err copyFrom(Box const & box);
+    Err copyTo(Box & box) const;
 
 public:
     Box clone() const;

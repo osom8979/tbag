@@ -252,54 +252,54 @@ Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
     return result;
 }
 
-Err Box::copyToData(Box & box) const
-{
-    if (exists()) {
-        box->checked_assign_data(type(), device(), ext(), rank(), dims(), data());
-        return E_SUCCESS;
-    } else {
-        if (box.exists()) {
-            box.clearData();
-        }
-        return E_SUCCESS;
-    }
-}
-
 Err Box::copyFromData(Box const & box)
 {
-    return box.copyToData(*this);
-}
-
-Err Box::copyToInfo(Box & box) const
-{
-    if (exists()) {
-        box->checked_assign_info_buffer(getInfo(), getInfoSize());
-        return E_SUCCESS;
+    if (box.exists()) {
+        createIfNotExists();
+        return _data->checked_assign_data(box.type(), box.device(), box.ext(), box.rank(), box.dims(), box.data());
     } else {
-        if (box.exists()) {
-            box.clearInfo();
+        if (exists()) {
+            clearData();
         }
         return E_SUCCESS;
     }
+}
+
+Err Box::copyToData(Box & box) const
+{
+    return box.copyFromData(*this);
 }
 
 Err Box::copyFromInfo(Box const & box)
 {
-    return box.copyToInfo(*this);
+    if (box.exists()) {
+        createIfNotExists();
+        _data->checked_assign_info_buffer(box.info(), box.info_size());
+    } else {
+        if (exists()) {
+            clearInfo();
+        }
+    }
+    return E_SUCCESS;
 }
 
-Err Box::copyTo(Box & box) const
+Err Box::copyToInfo(Box & box) const
 {
-    auto const code = copyToData(box);
-    if (isFailure(code)) {
-        return code;
-    }
-    return copyToInfo(box);
+    return box.copyFromInfo(*this);
 }
 
 Err Box::copyFrom(Box const & box)
 {
-    return box.copyTo(*this);
+    auto const code = copyFromData(box);
+    if (isFailure(code)) {
+        return code;
+    }
+    return copyFromInfo(box);
+}
+
+Err Box::copyTo(Box & box) const
+{
+    return box.copyFrom(*this);
 }
 
 Box Box::clone() const
