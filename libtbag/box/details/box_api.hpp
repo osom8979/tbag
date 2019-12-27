@@ -431,23 +431,23 @@ struct TBAG_API box_data : private Noncopyable
     void checked_assign_info_buffer(ui8 const * src, ui32 src_size);
     void checked_assign_info_string(char const * src);
 
-    Err set_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                 ui32 box_data_offset);
-    Err set_data_args(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                      ui32 box_rank, ...);
-    Err set_data_vargs(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                       ui32 box_rank, va_list box_ap);
-    Err set_data_dims(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                      ui32 box_rank, ui32 const * box_indexes);
+    Err set_data(void const * src_data, btype src_type, bdev src_device,
+                 ui64 const * src_ext, ui32 box_data_offset);
+    Err set_data_args(void const * src_data, btype src_type, bdev src_device,
+                      ui64 const * src_ext, ui32 box_rank, ...);
+    Err set_data_vargs(void const * src_data, btype src_type, bdev src_device,
+                       ui64 const * src_ext, ui32 box_rank, va_list box_ap);
+    Err set_data_dims(void const * src_data, btype src_type, bdev src_device,
+                      ui64 const * src_ext, ui32 box_rank, ui32 const * box_indexes);
 
-    Err get_data(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                 ui32 box_data_offset) const;
-    Err get_data_args(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                      ui32 box_rank, ...) const;
-    Err get_data_vargs(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                       ui32 box_rank, va_list box_ap) const;
-    Err get_data_dims(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                      ui32 box_rank, ui32 const * box_indexes) const;
+    Err get_data(void * out_data, btype out_type, bdev out_device,
+                 ui64 const * out_ext, ui32 box_data_offset) const;
+    Err get_data_args(void * out_data, btype out_type, bdev out_device,
+                      ui64 const * out_ext, ui32 box_rank, ...) const;
+    Err get_data_vargs(void * out_data, btype out_type, bdev out_device,
+                       ui64 const * out_ext, ui32 box_rank, va_list box_ap) const;
+    Err get_data_dims(void * out_data, btype out_type, bdev out_device,
+                      ui64 const * out_ext, ui32 box_rank, ui32 const * box_indexes) const;
 
     Err assign_data(btype src_type, bdev src_device, ui64 const * src_ext,
                     ui32 src_size, void const * src_data);

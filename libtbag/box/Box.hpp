@@ -511,6 +511,24 @@ public:
     }
 
 public:
+    template <typename T>
+    inline void * getData() TBAG_NOEXCEPT
+    {
+        if (_data) {
+            return static_cast<T*>(_data->data);
+        }
+        return nullptr;
+    }
+
+    template <typename T>
+    inline void const * getData() const TBAG_NOEXCEPT
+    {
+        if (_data) {
+            return static_cast<T*>(_data->data);
+        }
+        return nullptr;
+    }
+
     inline void * getData() TBAG_NOEXCEPT
     {
         if (_data) {
@@ -527,6 +545,20 @@ public:
         return nullptr;
     }
 
+    template <typename T>
+    inline T * data() TBAG_NOEXCEPT
+    {
+        assert(exists());
+        return static_cast<T*>(_data->data);
+    }
+
+    template <typename T>
+    inline T const * data() const TBAG_NOEXCEPT
+    {
+        assert(exists());
+        return static_cast<T const *>(_data->data);
+    }
+
     inline void * data() TBAG_NOEXCEPT
     {
         assert(exists());
@@ -537,20 +569,6 @@ public:
     {
         assert(exists());
         return _data->data;
-    }
-
-    template <typename T>
-    inline T * cast() TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return static_cast<T*>(_data->data);
-    }
-
-    template <typename T>
-    inline T const * cast() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return static_cast<T const *>(_data->data);
     }
 
     inline ui32 getTotalDataByte() const TBAG_NOEXCEPT
@@ -985,7 +1003,7 @@ public:
         }
 
         if (is_device_cpu() && type == device_cpu()) {
-            auto * d = cast<DataType>();
+            auto * d = data<DataType>();
             for (; begin != end; ++begin) {
                 *d = static_cast<DataType>(*begin);
                 ++d;
@@ -1025,7 +1043,7 @@ public:
         }
 
         if (is_device_cpu() && type == device_cpu()) {
-            auto * d = cast<DataType>();
+            auto * d = data<DataType>();
             for (auto & i1 : items) {
                 assert(i1.size() == dim_2d);
                 for (auto & i2 : i1) {
@@ -1060,7 +1078,7 @@ public:
         }
 
         if (is_device_cpu() && type == device_cpu()) {
-            auto * d = cast<DataType>();
+            auto * d = data<DataType>();
             for (auto & i1 : items) {
                 assert(i1.size() == dim_2d);
                 for (auto & i2 : i1) {
@@ -1102,7 +1120,7 @@ public:
         }
 
         if (is_device_cpu() && type == device_cpu()) {
-            auto * d = cast<DataType>();
+            auto * d = data<DataType>();
             for (auto & i1 : items) {
                 assert(i1.size() == dim_2d);
                 for (auto & i2 : i1) {

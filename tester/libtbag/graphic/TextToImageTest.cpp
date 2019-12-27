@@ -62,7 +62,7 @@ TEST(TextToImageTest, EmptyImage)
     ASSERT_EQ(100, image.dim(1));
     ASSERT_EQ(1, image.dim(2));
 
-    auto const * pixels = image.cast<std::uint8_t>();
+    auto const * pixels = image.data<std::uint8_t>();
     for (auto i = 0u; i < image.size(); ++i) {
         ASSERT_EQ(0, *pixels);
     }

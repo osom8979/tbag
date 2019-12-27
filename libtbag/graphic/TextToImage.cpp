@@ -99,7 +99,7 @@ Err renderCenteredText(std::string const & text,
     if (channels == 1) {
         output.reshape<std::uint8_t>(height, width, 1);
         auto const * source = static_cast<std::uint8_t const *>(data.pixelData);
-        auto * destination = output.cast<std::uint8_t>();
+        auto * destination = output.data<std::uint8_t>();
         auto const loop_size = height*width;
         for (auto i = 0; i < loop_size; ++i) {
             *destination = static_cast<std::uint8_t>((source[0] + source[1] + source[2]) / 3);
@@ -109,7 +109,7 @@ Err renderCenteredText(std::string const & text,
     } else if (channels == 3) {
         output.reshape<std::uint8_t>(height, width, 3);
         auto const * source = static_cast<std::uint8_t const *>(data.pixelData);
-        auto * destination = output.cast<std::uint8_t>();
+        auto * destination = output.data<std::uint8_t>();
         auto const loop_size = height*width;
         for (auto i = 0; i < loop_size; ++i) {
             destination[0] = source[0];

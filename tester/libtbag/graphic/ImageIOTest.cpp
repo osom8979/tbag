@@ -90,7 +90,7 @@ TEST(ImageIOTest, UseJpeg)
 
     // Write To memory:
     libtbag::util::Buffer buffer;
-    ASSERT_NE(0, writeJpg(width, height, channels, reload.cast<char>(), DEFAULT_JPG_QUALITY, buffer));
+    ASSERT_NE(0, writeJpg(width, height, channels, reload.data<char>(), DEFAULT_JPG_QUALITY, buffer));
     ASSERT_FALSE(buffer.empty());
     auto const JPEG_PATH_02 = tttDir_Get() / "save_02.jpg";
     ASSERT_EQ(E_SUCCESS, libtbag::filesystem::writeFile(JPEG_PATH_02, buffer));

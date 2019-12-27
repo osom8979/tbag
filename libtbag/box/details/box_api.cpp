@@ -1227,8 +1227,8 @@ void box_data::checked_assign_info_string(char const * src)
     checked_assign_info_buffer((ui8 const *)src, strlen(src)*sizeof(char));
 }
 
-Err box_data::set_data(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                       ui32 box_data_offset)
+Err box_data::set_data(void const * src_data, btype src_type, bdev src_device,
+                       ui64 const * src_ext, ui32 box_data_offset)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1244,8 +1244,8 @@ Err box_data::set_data(void const * src_data, btype src_type, bdev src_device, u
     return E_ENOSYS;
 }
 
-Err box_data::set_data_args(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                            ui32 box_rank, ...)
+Err box_data::set_data_args(void const * src_data, btype src_type, bdev src_device,
+                            ui64 const * src_ext, ui32 box_rank, ...)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1258,8 +1258,8 @@ Err box_data::set_data_args(void const * src_data, btype src_type, bdev src_devi
     return code;
 }
 
-Err box_data::set_data_vargs(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                             ui32 box_rank, va_list box_ap)
+Err box_data::set_data_vargs(void const * src_data, btype src_type, bdev src_device,
+                             ui64 const * src_ext, ui32 box_rank, va_list box_ap)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1268,8 +1268,8 @@ Err box_data::set_data_vargs(void const * src_data, btype src_type, bdev src_dev
     return set_data(src_data, src_type, src_device, src_ext, box_dim_get_offset_vargs(dims, box_rank, box_ap));
 }
 
-Err box_data::set_data_dims(void const * src_data, btype src_type, bdev src_device, ui64 const * src_ext,
-                            ui32 box_rank, ui32 const * box_indexes)
+Err box_data::set_data_dims(void const * src_data, btype src_type, bdev src_device,
+                            ui64 const * src_ext, ui32 box_rank, ui32 const * box_indexes)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
@@ -1278,8 +1278,8 @@ Err box_data::set_data_dims(void const * src_data, btype src_type, bdev src_devi
     return set_data(src_data, src_type, src_device, src_ext, box_dim_get_offset_dims(dims, box_rank, box_indexes));
 }
 
-Err box_data::get_data(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                       ui32 box_data_offset) const
+Err box_data::get_data(void * out_data, btype out_type, bdev out_device,
+                       ui64 const * out_ext, ui32 box_data_offset) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
@@ -1295,8 +1295,8 @@ Err box_data::get_data(void * out_data, btype out_type, bdev out_device, ui64 co
     return E_ENOSYS;
 }
 
-Err box_data::get_data_args(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                            ui32 box_rank, ...) const
+Err box_data::get_data_args(void * out_data, btype out_type, bdev out_device,
+                            ui64 const * out_ext, ui32 box_rank, ...) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
@@ -1309,8 +1309,8 @@ Err box_data::get_data_args(void * out_data, btype out_type, bdev out_device, ui
     return code;
 }
 
-Err box_data::get_data_vargs(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                             ui32 box_rank, va_list box_ap) const
+Err box_data::get_data_vargs(void * out_data, btype out_type, bdev out_device,
+                             ui64 const * out_ext, ui32 box_rank, va_list box_ap) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
@@ -1320,8 +1320,8 @@ Err box_data::get_data_vargs(void * out_data, btype out_type, bdev out_device, u
     return get_data(out_data, out_type, out_device, out_ext, box_data_offset);
 }
 
-Err box_data::get_data_dims(void * out_data, btype out_type, bdev out_device, ui64 const * out_ext,
-                            ui32 box_rank, ui32 const * box_indexes) const
+Err box_data::get_data_dims(void * out_data, btype out_type, bdev out_device,
+                            ui64 const * out_ext, ui32 box_rank, ui32 const * box_indexes) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));

@@ -334,11 +334,11 @@ Err Box::getDataString(std::string & result) const
     if (isEmpty()) {
         return E_NREADY;
     }
-    auto const * data = cast<char>();
-    assert(data != nullptr);
+    auto const * begin = data<char>();
+    assert(begin != nullptr);
     auto const byte_size = getSize() * getTypeByte();
     assert(byte_size >= 1);
-    result.assign(data, data + byte_size);
+    result.assign(begin, begin + byte_size);
     return E_SUCCESS;
 }
 
