@@ -6,7 +6,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <libtbag/util/TestUtils.hpp>
 #include <libtbag/type/TypeTable.hpp>
+#include <sstream>
 
 using namespace libtbag;
 using namespace libtbag::type;
@@ -14,59 +16,84 @@ using namespace libtbag::type;
 struct CustomTestType { /* EMPTY. */ };
 
 template <typename T>
-TypeTable coverageOnly()
+static std::string __get_printable_information()
 {
-    TypeInfo<T>::name();
-    TypeInfo<T>::isArithmetic();
-    TypeInfo<T>::isSpecialized();
-    TypeInfo<T>::isPointer();
-    TypeInfo<T>::size();
-    TypeInfo<T>::index();
-    TypeInfo<T>::maximum();
-    TypeInfo<T>::minimum();
-    TypeInfo<T>::lowest();
-    TypeInfo<T>::epsilon();
-    TypeInfo<T>::round_error();
-    TypeInfo<T>::infinity();
-    TypeInfo<T>::quiet_NaN();
-    TypeInfo<T>::signaling_NaN();
-    TypeInfo<T>::denorm_min();
-    return TypeInfo<T>::table();
+    std::stringstream ss;
+    ss << "NAME: "             << TypeInfo<T>::name()          << std::endl
+       << " - isArithmetic: "  << TypeInfo<T>::isArithmetic()  << std::endl
+       << " - isSpecialized: " << TypeInfo<T>::isSpecialized() << std::endl
+       << " - isPointer: "     << TypeInfo<T>::isPointer()     << std::endl
+       << " - size: "          << TypeInfo<T>::size()          << std::endl
+       << " - index: "         << TypeInfo<T>::index()         << std::endl
+       << " - maximum: "       << TypeInfo<T>::maximum()       << std::endl
+       << " - minimum: "       << TypeInfo<T>::minimum()       << std::endl
+       << " - lowest: "        << TypeInfo<T>::lowest()        << std::endl
+       << " - epsilon: "       << TypeInfo<T>::epsilon()       << std::endl
+       << " - round_error: "   << TypeInfo<T>::round_error()   << std::endl
+       << " - infinity: "      << TypeInfo<T>::infinity()      << std::endl
+       << " - quiet_NaN: "     << TypeInfo<T>::quiet_NaN()     << std::endl
+       << " - signaling_NaN: " << TypeInfo<T>::signaling_NaN() << std::endl
+       << " - denorm_min: "    << TypeInfo<T>::denorm_min()    << std::endl;
+    return ss.str();
+}
+
+TEST(TypeTableTest, PrintInformation)
+{
+    std::stringstream ss;
+    ss << __get_printable_information<              bool>() << std::endl;
+    ss << __get_printable_information<              char>() << std::endl;
+    ss << __get_printable_information<       signed char>() << std::endl;
+    ss << __get_printable_information<     unsigned char>() << std::endl;
+    ss << __get_printable_information<           wchar_t>() << std::endl;
+    ss << __get_printable_information<          char16_t>() << std::endl;
+    ss << __get_printable_information<          char32_t>() << std::endl;
+    ss << __get_printable_information<             short>() << std::endl;
+    ss << __get_printable_information<    unsigned short>() << std::endl;
+    ss << __get_printable_information<               int>() << std::endl;
+    ss << __get_printable_information<      unsigned int>() << std::endl;
+    ss << __get_printable_information<              long>() << std::endl;
+    ss << __get_printable_information<     unsigned long>() << std::endl;
+    ss << __get_printable_information<         long long>() << std::endl;
+    ss << __get_printable_information<unsigned long long>() << std::endl;
+    ss << __get_printable_information<             float>() << std::endl;
+    ss << __get_printable_information<            double>() << std::endl;
+    ss << __get_printable_information<       long double>() << std::endl;
+    TBAG_WRITE_INFORMATION(ss.str());
 }
 
 TEST(TypeTableTest, Default)
 {
-    ASSERT_EQ(TypeTable::TT_UNKNOWN, coverageOnly<    CustomTestType>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<              bool>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<              char>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<       signed char>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<     unsigned char>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<           wchar_t>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<          char16_t>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<          char32_t>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<             short>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<    unsigned short>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<               int>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<      unsigned int>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<              long>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<     unsigned long>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<         long long>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<unsigned long long>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<             float>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<            double>());
-    ASSERT_NE(TypeTable::TT_UNKNOWN, coverageOnly<       long double>());
+    ASSERT_EQ(TypeTable::TT_UNKNOWN, TypeInfo<    CustomTestType>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<              bool>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<              char>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<       signed char>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<     unsigned char>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<           wchar_t>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<          char16_t>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<          char32_t>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<             short>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<    unsigned short>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<               int>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<      unsigned int>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<              long>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<     unsigned long>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<         long long>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<unsigned long long>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<             float>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<            double>::table());
+    ASSERT_NE(TypeTable::TT_UNKNOWN, TypeInfo<       long double>::table());
 }
 
 TEST(TypeTableTest, IntegerTypes)
 {
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<  int8_t>());
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< uint8_t>());
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< int16_t>());
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<uint16_t>());
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< int32_t>());
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<uint32_t>());
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly< int64_t>());
-    EXPECT_NE(TypeTable::TT_UNKNOWN, coverageOnly<uint64_t>());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo<  int8_t>::table());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo< uint8_t>::table());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo< int16_t>::table());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo<uint16_t>::table());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo< int32_t>::table());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo<uint32_t>::table());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo< int64_t>::table());
+    EXPECT_NE(TypeTable::TT_UNKNOWN, TypeInfo<uint64_t>::table());
 }
 
 TEST(TypeTableTest, GetTypeName)
