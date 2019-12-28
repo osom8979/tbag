@@ -60,97 +60,97 @@ TEST(BoxTest, CreateIfNotExists)
 
 TEST(BoxTest, is_first_box_data)
 {
-    ASSERT_FALSE(is_first_box_data<Box const &>::value);
-    ASSERT_FALSE(is_first_box_data<Box const *>::value);
-    ASSERT_FALSE(is_first_box_data<Box const>::value);
-    ASSERT_FALSE(is_first_box_data<Box &>::value);
-    ASSERT_FALSE(is_first_box_data<Box *>::value);
-    ASSERT_FALSE(is_first_box_data<Box>::value);
+    EXPECT_FALSE(is_first_box_data<Box const &>::value);
+    EXPECT_FALSE(is_first_box_data<Box const *>::value);
+    EXPECT_FALSE(is_first_box_data<Box const>::value);
+    EXPECT_FALSE(is_first_box_data<Box &>::value);
+    EXPECT_FALSE(is_first_box_data<Box *>::value);
+    EXPECT_FALSE(is_first_box_data<Box>::value);
 
     using namespace libtbag::box::details;
-    ASSERT_TRUE(is_first_box_data<box_data const &>::value);
-    ASSERT_TRUE(is_first_box_data<box_data const *>::value);
-    ASSERT_TRUE(is_first_box_data<box_data const>::value);
-    ASSERT_TRUE(is_first_box_data<box_data &>::value);
-    ASSERT_TRUE(is_first_box_data<box_data *>::value);
-    ASSERT_TRUE(is_first_box_data<box_data>::value);
+    EXPECT_TRUE(is_first_box_data<box_data const &>::value);
+    EXPECT_TRUE(is_first_box_data<box_data const *>::value);
+    EXPECT_TRUE(is_first_box_data<box_data const>::value);
+    EXPECT_TRUE(is_first_box_data<box_data &>::value);
+    EXPECT_TRUE(is_first_box_data<box_data *>::value);
+    EXPECT_TRUE(is_first_box_data<box_data>::value);
 
-    ASSERT_TRUE((is_first_box_data<box_data,int>::value));
-    ASSERT_TRUE((is_first_box_data<box_data,int,double>::value));
+    EXPECT_TRUE((is_first_box_data<box_data,int>::value));
+    EXPECT_TRUE((is_first_box_data<box_data,int,double>::value));
 
-    ASSERT_FALSE((is_first_box_data<int,box_data>::value));
-    ASSERT_FALSE((is_first_box_data<double,int,box_data>::value));
+    EXPECT_FALSE((is_first_box_data<int,box_data>::value));
+    EXPECT_FALSE((is_first_box_data<double,int,box_data>::value));
 }
 
 TEST(BoxTest, is_first_Box)
 {
-    ASSERT_TRUE(is_first_Box<Box const &>::value);
-    ASSERT_TRUE(is_first_Box<Box const *>::value);
-    ASSERT_TRUE(is_first_Box<Box const>::value);
-    ASSERT_TRUE(is_first_Box<Box &>::value);
-    ASSERT_TRUE(is_first_Box<Box *>::value);
-    ASSERT_TRUE(is_first_Box<Box>::value);
+    EXPECT_TRUE(is_first_Box<Box const &>::value);
+    EXPECT_TRUE(is_first_Box<Box const *>::value);
+    EXPECT_TRUE(is_first_Box<Box const>::value);
+    EXPECT_TRUE(is_first_Box<Box &>::value);
+    EXPECT_TRUE(is_first_Box<Box *>::value);
+    EXPECT_TRUE(is_first_Box<Box>::value);
 
     using namespace libtbag::box::details;
-    ASSERT_FALSE(is_first_Box<box_data const &>::value);
-    ASSERT_FALSE(is_first_Box<box_data const *>::value);
-    ASSERT_FALSE(is_first_Box<box_data const>::value);
-    ASSERT_FALSE(is_first_Box<box_data &>::value);
-    ASSERT_FALSE(is_first_Box<box_data *>::value);
-    ASSERT_FALSE(is_first_Box<box_data>::value);
+    EXPECT_FALSE(is_first_Box<box_data const &>::value);
+    EXPECT_FALSE(is_first_Box<box_data const *>::value);
+    EXPECT_FALSE(is_first_Box<box_data const>::value);
+    EXPECT_FALSE(is_first_Box<box_data &>::value);
+    EXPECT_FALSE(is_first_Box<box_data *>::value);
+    EXPECT_FALSE(is_first_Box<box_data>::value);
 
-    ASSERT_TRUE((is_first_Box<Box,int>::value));
-    ASSERT_TRUE((is_first_Box<Box,int,double>::value));
+    EXPECT_TRUE((is_first_Box<Box,int>::value));
+    EXPECT_TRUE((is_first_Box<Box,int,double>::value));
 
-    ASSERT_FALSE((is_first_Box<int,Box>::value));
-    ASSERT_FALSE((is_first_Box<double,int,Box>::value));
+    EXPECT_FALSE((is_first_Box<int,Box>::value));
+    EXPECT_FALSE((is_first_Box<double,int,Box>::value));
 }
 
 TEST(BoxTest, is_last_va_list)
 {
-    ASSERT_TRUE(is_last_va_list<va_list const &>::value);
-    ASSERT_TRUE(is_last_va_list<va_list const *>::value);
-    ASSERT_TRUE(is_last_va_list<va_list const>::value);
-    ASSERT_TRUE(is_last_va_list<va_list &>::value);
-    ASSERT_TRUE(is_last_va_list<va_list *>::value);
-    ASSERT_TRUE(is_last_va_list<va_list>::value);
+    EXPECT_TRUE(is_last_va_list<va_list const &>::value);
+    EXPECT_TRUE(is_last_va_list<va_list const *>::value);
+    EXPECT_TRUE(is_last_va_list<va_list const>::value);
+    EXPECT_TRUE(is_last_va_list<va_list &>::value);
+    EXPECT_TRUE(is_last_va_list<va_list *>::value);
+    EXPECT_TRUE(is_last_va_list<va_list>::value);
 
-    ASSERT_FALSE(is_last_va_list<int const &>::value);
-    ASSERT_FALSE(is_last_va_list<int const *>::value);
-    ASSERT_FALSE(is_last_va_list<int const>::value);
-    ASSERT_FALSE(is_last_va_list<int &>::value);
-    ASSERT_FALSE(is_last_va_list<int *>::value);
-    ASSERT_FALSE(is_last_va_list<int>::value);
+    EXPECT_FALSE(is_last_va_list<int const &>::value);
+    EXPECT_FALSE(is_last_va_list<int const *>::value);
+    EXPECT_FALSE(is_last_va_list<int const>::value);
+    EXPECT_FALSE(is_last_va_list<int &>::value);
+    EXPECT_FALSE(is_last_va_list<int *>::value);
+    EXPECT_FALSE(is_last_va_list<int>::value);
 
-    ASSERT_TRUE((is_last_va_list<int,va_list>::value));
-    ASSERT_TRUE((is_last_va_list<double,int,va_list>::value));
+    EXPECT_TRUE((is_last_va_list<int,va_list>::value));
+    EXPECT_TRUE((is_last_va_list<double,int,va_list>::value));
 
-    ASSERT_FALSE((is_last_va_list<va_list,int>::value));
-    ASSERT_FALSE((is_last_va_list<va_list,int,double>::value));
+    EXPECT_FALSE((is_last_va_list<va_list,int>::value));
+    EXPECT_FALSE((is_last_va_list<va_list,int,double>::value));
 }
 
 TEST(BoxTest, is_last_ui32_ptr)
 {
     using namespace libtbag::box::details;
-    ASSERT_FALSE(is_last_ui32_ptr<ui32 const &>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<ui32 const>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<ui32 &>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<ui32>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<ui32 const &>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<ui32 const>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<ui32 &>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<ui32>::value);
 
-    ASSERT_TRUE(is_last_ui32_ptr<ui32 const *>::value);
-    ASSERT_TRUE(is_last_ui32_ptr<ui32 *>::value);
+    EXPECT_TRUE(is_last_ui32_ptr<ui32 const *>::value);
+    EXPECT_TRUE(is_last_ui32_ptr<ui32 *>::value);
 
-    ASSERT_FALSE(is_last_ui32_ptr<int const &>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<int const *>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<int const>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<int &>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<int *>::value);
-    ASSERT_FALSE(is_last_ui32_ptr<int>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<int const &>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<int const *>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<int const>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<int &>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<int *>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<int>::value);
 
-    ASSERT_TRUE((is_last_ui32_ptr<int,ui32*>::value));
-    ASSERT_TRUE((is_last_ui32_ptr<double,int,ui32*>::value));
+    EXPECT_TRUE((is_last_ui32_ptr<int,ui32*>::value));
+    EXPECT_TRUE((is_last_ui32_ptr<double,int,ui32*>::value));
 
-    ASSERT_FALSE((is_last_ui32_ptr<ui32*,int>::value));
-    ASSERT_FALSE((is_last_ui32_ptr<ui32*,int,double>::value));
+    EXPECT_FALSE((is_last_ui32_ptr<ui32*,int>::value));
+    EXPECT_FALSE((is_last_ui32_ptr<ui32*,int,double>::value));
 }
 

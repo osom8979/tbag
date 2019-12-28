@@ -1096,88 +1096,14 @@ public:
         return _reshape<T>(reshape_selector<Args...>::value, std::forward<Args>(args) ...);
     }
 
-private:
-    static Box _shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-    static Box _shape_args(btype type, ui32 rank, ...);
-
-    static Box _shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
-    static Box _shape_vargs(btype type, ui32 rank, va_list ap);
-
-    static Box _shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
-    static Box _shape_dims(btype type, ui32 rank, ui32 const * dims);
-
-    static Box _shape_ref_box(btype type, box_data const * reference_box);
-    static Box _shape_ref_box(btype type, Box const & reference_box);
-
-private:
-    template <typename T, typename ... Args>
-    static Box _shape(reshape_unknown_t, Args && ... args)
-    {
-        return Box(nullptr);
-    }
-
-    template <typename T, typename ... Args>
-    static Box _shape(reshape_args1_t, bdev device, ui64 const * ext, Args && ... args)
-    {
-        return _shape_args(get_btype<T>(), device, ext,
-                           static_cast<ui32>(sizeof...(Args)),
-                           std::forward<Args>(args) ...);
-    }
-
-    template <typename T, typename ... Args>
-    static Box _shape(reshape_args2_t, Args && ... args)
-    {
-        return _shape_args(get_btype<T>(),
-                           static_cast<ui32>(sizeof...(Args)),
-                           std::forward<Args>(args) ...);
-    }
-
-    template <typename T>
-    static Box _shape(reshape_vargs1_t, bdev device, ui64 const * ext, ui32 rank, va_list ap)
-    {
-        return _shape_vargs(get_btype<T>(), device, ext, rank, ap);
-    }
-
-    template <typename T>
-    static Box _shape(reshape_vargs2_t, ui32 rank, va_list ap)
-    {
-        return _shape_vargs(get_btype<T>(), rank, ap);
-    }
-
-    template <typename T>
-    static Box _shape(reshape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
-    {
-        return _shape_dims(get_btype<T>(), device, ext, rank, dims);
-    }
-
-    template <typename T>
-    static Box _shape(reshape_dims2_t, ui32 rank, ui32 const * dims)
-    {
-        return _shape_dims(get_btype<T>(), rank, dims);
-    }
-
-    template <typename T>
-    static Box _shape(reshape_ref_box1_t, box_data const * reference_box)
-    {
-        return _shape_ref_box(get_btype<T>(), reference_box);
-    }
-
-    template <typename T>
-    static Box _shape(reshape_ref_box2_t, Box const & reference_box)
-    {
-        return _shape_ref_box(get_btype<T>(), reference_box);
-    }
-
-public:
-    /**
-     * Coordinate the {Header}, {Dims}, and {DataSize} sections.
-     *
-     * @see libtbag::box::details::box_data::resize_dims
-     */
     template <typename T, typename ... Args>
     static Box shape(Args && ... args)
     {
-        return _shape<T>(reshape_selector<Args...>::value, std::forward<Args>(args) ...);
+        Box result;
+        if (isFailure(result.reshape<T>(std::forward<Args>(args) ...))) {
+            return Box(nullptr);
+        }
+        return result;
     }
 
 public:
