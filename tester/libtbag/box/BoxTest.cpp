@@ -58,3 +58,24 @@ TEST(BoxTest, CreateIfNotExists)
     ASSERT_TRUE(box);
 }
 
+TEST(BoxTest, TypeTraits)
+{
+    ASSERT_FALSE(is_first_box_data<Box const &>::value);
+    ASSERT_FALSE(is_first_box_data<Box const *>::value);
+    ASSERT_FALSE(is_first_box_data<Box &>::value);
+    ASSERT_FALSE(is_first_box_data<Box *>::value);
+    ASSERT_FALSE(is_first_box_data<Box const>::value);
+    ASSERT_FALSE(is_first_box_data<Box>::value);
+
+    using namespace libtbag::box::details;
+    ASSERT_TRUE(is_first_box_data<box_data const &>::value);
+    ASSERT_TRUE(is_first_box_data<box_data const *>::value);
+    ASSERT_TRUE(is_first_box_data<box_data &>::value);
+    ASSERT_TRUE(is_first_box_data<box_data *>::value);
+    ASSERT_TRUE(is_first_box_data<box_data const>::value);
+    ASSERT_TRUE(is_first_box_data<box_data>::value);
+
+    ASSERT_FALSE((is_first_box_data<int,box_data>::value));
+    ASSERT_FALSE((is_first_box_data<Box,int,box_data>::value));
+}
+

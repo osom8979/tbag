@@ -37,6 +37,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace box {
 
+// Forward declarations.
+class Box;
+
 /**
  * Type table of Box class.
  *
@@ -208,6 +211,24 @@ inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
 {
     return type == get_btype<typename btype_regularization<T>::type>();
 }
+
+template <typename ... T>
+struct is_first_box_data;
+
+template <typename Head, typename ... Tail>
+struct is_first_box_data<Head, Tail...>
+{
+    TBAG_CONSTEXPR static bool const value = is_first_box_data<Head>::value;
+};
+
+template <typename T>
+struct is_first_box_data<T>
+{
+    using __t1 = typename std::remove_reference<T>::type;
+    using __t2 = typename std::remove_pointer<__t1>::type;
+    using __t3 = typename std::remove_const<__t2>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__t3, libtbag::box::details::box_data>::value;
+};
 
 /**
  * Box class prototype.
