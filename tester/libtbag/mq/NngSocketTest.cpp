@@ -7,14 +7,13 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/mq/NngSocket.hpp>
+#include <libtbag/lock/UvCondition.hpp>
+#include <libtbag/lock/UvLock.hpp>
 
 #include <string>
 #include <vector>
 #include <future>
-#include <thread>
-#include <chrono>
 #include <iostream>
-#include <mutex>
 
 using namespace libtbag;
 using namespace libtbag::mq;
@@ -48,11 +47,16 @@ TEST(NngSocketTest, ClientRecvTimeout_After)
     int server_step = 0;
     int client_step = 0;
 
-    std::mutex lock;
+    using namespace libtbag::lock;
+    UvLock output_lock;
     auto printer = [&](int step, char const * prefix){
-        std::lock_guard<std::mutex> const g(lock);
+        UvLockGuard<UvLock> const g(output_lock);
         std::cout << prefix << " (step=" << step << ")" << std::endl;
     };
+
+    UvLock signal_lock;
+    UvCondition signal;
+    bool server_wait_end = false;
 
     auto server_thread = std::async(std::launch::async, [&]() -> Err {
         printer(server_step++, "Server recv");
@@ -63,7 +67,11 @@ TEST(NngSocketTest, ClientRecvTimeout_After)
         }
 
         printer(server_step++, "Server wait");
-        std::this_thread::sleep_for(std::chrono::milliseconds(server_wait_ms));
+        signal_lock.lock();
+        while (!server_wait_end) {
+            signal.wait(signal_lock);
+        }
+        signal_lock.unlock();
 
         printer(server_step++, "Server send");
         auto const send_code = sock_server.send((void*)send_data.data(), send_data.size());
@@ -94,6 +102,11 @@ TEST(NngSocketTest, ClientRecvTimeout_After)
         if (isFailure(opt_code)) {
             return opt_code;
         }
+
+        signal_lock.lock();
+        server_wait_end = true;
+        signal.signal();
+        signal_lock.unlock();
 
         printer(client_step++, "Client recv2");
         auto const recv_code2 = sock_client.recv(client_buffer.data(), &recv_size);
