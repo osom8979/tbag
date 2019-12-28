@@ -1553,30 +1553,195 @@ public:
     bool fromJsonText(std::string const & json, Err * code = nullptr);
 
 public:
-    struct Cursor
-    {
-        box_cursor cursor;
+    class Cursor;
 
+    struct begin_tag_t { /* EMPTY. */ };
+    struct end_tag_t { /* EMPTY. */ };
+
+    TBAG_CONSTEXPR static begin_tag_t const begin_tag = { /* EMPTY. */ };
+    TBAG_CONSTEXPR static end_tag_t const end_tag = { /* EMPTY. */ };
+
+    /**
+     * Iterator class.
+     *
+     * @author zer0
+     * @date   2019-12-16
+     */
+    template <typename CursorT, typename T>
+    class Iterator
+    {
+    public:
+        using CursorType = CursorT;
+        using DataType = T;
+
+    public:
+        using difference_type = ui32;
+        using value_type = DataType;
+        using pointer = DataType*;
+        using reference = DataType&;
+        using iterator_category = std::forward_iterator_tag;
+
+    private:
+        /** Base cursor. */
+        CursorType & _cursor;
+
+        /** Base pointer. */
+        DataType * _data;
+
+    public:
+        Iterator(begin_tag_t, CursorType & cursor) TBAG_NOEXCEPT : _cursor(cursor), _data((DataType*)cursor.getBegin())
+        { /* EMPTY. */ }
+        Iterator(end_tag_t, CursorType & cursor) TBAG_NOEXCEPT : _cursor(cursor), _data((DataType*)cursor.getEnd())
+        { /* EMPTY. */ }
+
+        Iterator(Iterator const & obj) TBAG_NOEXCEPT : _cursor(obj._cursor), _data(obj._data)
+        { /* EMPTY. */ }
+        Iterator(Iterator && obj) TBAG_NOEXCEPT : _cursor(obj._cursor), _data(obj._data)
+        { /* EMPTY. */ }
+
+        Iterator & operator =(Iterator const & obj) TBAG_NOEXCEPT
+        {
+            if (this != &obj) {
+                _cursor = obj._cursor;
+                _data = obj._data;
+            }
+            return *this;
+        }
+
+        Iterator & operator =(Iterator && obj) TBAG_NOEXCEPT
+        {
+            if (this != &obj) {
+                _cursor = obj._cursor;
+                _data = obj._data;
+            }
+            return *this;
+        }
+
+        inline Cursor       & cursor()       TBAG_NOEXCEPT { return _cursor; }
+        inline Cursor const & cursor() const TBAG_NOEXCEPT { return _cursor; }
+
+        inline DataType       * operator ->()       TBAG_NOEXCEPT { return _data; }
+        inline DataType const * operator ->() const TBAG_NOEXCEPT { return _data; }
+
+        inline DataType       & operator *()       TBAG_NOEXCEPT { return *_data; }
+        inline DataType const & operator *() const TBAG_NOEXCEPT { return *_data; }
+
+        inline bool operator ==(Iterator const & obj) const TBAG_NOEXCEPT
+        {
+            return _data == obj._data;
+        }
+
+        inline bool operator !=(Iterator const & obj) const TBAG_NOEXCEPT
+        {
+            return _data != obj._data;
+        }
+
+        inline void step(int i) TBAG_NOEXCEPT
+        {
+            _data = (DataType*)(((std::intptr_t)_data) + (_cursor.getStrideByte() * i));
+        }
+
+        inline void next() TBAG_NOEXCEPT
+        {
+            step(1);
+        }
+
+        inline void prev() TBAG_NOEXCEPT
+        {
+            step(-1);
+        }
+
+        Iterator & operator ++() TBAG_NOEXCEPT
+        {
+            next();
+            return *this;
+        }
+
+        Iterator & operator --() TBAG_NOEXCEPT
+        {
+            prev();
+            return *this;
+        }
+
+        Iterator operator ++(int) TBAG_NOEXCEPT
+        {
+            Iterator temp = *this;
+            next();
+            return temp;
+        }
+
+        Iterator operator --(int) TBAG_NOEXCEPT
+        {
+            Iterator temp = *this;
+            prev();
+            return temp;
+        }
+    };
+
+    template <typename CursorT, typename T>
+    struct IteratorGenerator
+    {
+        using iterator = Iterator<CursorT, T>;
+        using const_iterator = Iterator<
+                typename std::add_const<CursorT>::type,
+                typename std::add_const<T>::type>;
+
+        CursorT & cursor;
+
+        IteratorGenerator(CursorT & c) : cursor(c)
+        { /* EMPTY. */ }
+        ~IteratorGenerator()
+        { /* EMPTY. */ }
+
+        iterator begin()
+        { return iterator(begin_tag, cursor); }
+        iterator end()
+        { return iterator(end_tag, cursor); }
+
+        const_iterator begin() const
+        { return const_iterator(begin_tag, cursor); }
+        const_iterator end() const
+        { return const_iterator(end_tag, cursor); }
+
+        const_iterator cbegin() const
+        { return const_iterator(begin_tag, cursor); }
+        const_iterator cend() const
+        { return const_iterator(end_tag, cursor); }
+    };
+
+    /**
+     * Cursor class.
+     *
+     * @author zer0
+     * @date   2019-12-16
+     */
+    class Cursor
+    {
+    private:
+        box_cursor _cursor;
+
+    public:
         Cursor() TBAG_NOEXCEPT
         { /* EMPTY. */ }
 
-        Cursor(box_cursor const & c) TBAG_NOEXCEPT : cursor(c)
+        Cursor(box_cursor const & c) TBAG_NOEXCEPT : _cursor(c)
         { /* EMPTY. */ }
-        Cursor(box_cursor && c) TBAG_NOEXCEPT : cursor(c)
+        Cursor(box_cursor && c) TBAG_NOEXCEPT : _cursor(c)
         { /* EMPTY. */ }
 
-        Cursor(Cursor const & obj) TBAG_NOEXCEPT : cursor(obj.cursor)
+        Cursor(Cursor const & obj) TBAG_NOEXCEPT : _cursor(obj._cursor)
         { /* EMPTY. */ }
-        Cursor(Cursor && obj) TBAG_NOEXCEPT : cursor(obj.cursor)
+        Cursor(Cursor && obj) TBAG_NOEXCEPT : _cursor(obj._cursor)
         { /* EMPTY. */ }
 
         ~Cursor()
         { /* EMPTY. */ }
 
+    public:
         Cursor & operator =(Cursor const & obj) TBAG_NOEXCEPT
         {
             if (this != &obj) {
-                cursor = obj.cursor;
+                _cursor = obj._cursor;
             }
             return *this;
         }
@@ -1584,18 +1749,19 @@ public:
         Cursor & operator =(Cursor && obj) TBAG_NOEXCEPT
         {
             if (this != &obj) {
-                cursor = obj.cursor;
+                _cursor = obj._cursor;
             }
             return *this;
         }
 
+    public:
         ErrPair<Cursor> sub(int begin_index, int end_index, int step_index) const
         {
-            assert(cursor.box != nullptr);
-            if ((cursor.dim_index+1) >= cursor.box->rank) {
+            assert(_cursor.box != nullptr);
+            if ((_cursor.dim_index+1) >= _cursor.box->rank) {
                 return E_OORANGE;
             }
-            auto const err_cursor = cursor.init_cursor(cursor.dim_index+1, begin_index, end_index, step_index);
+            auto const err_cursor = _cursor.init_cursor(_cursor.dim_index+1, begin_index, end_index, step_index);
             return { err_cursor.code, err_cursor.value };
         }
 
@@ -1614,70 +1780,104 @@ public:
             return sub(nop);
         }
 
-        bool isEnd() const
+    public:
+        void * getBegin() TBAG_NOEXCEPT
         {
-            return cursor.is_end();
+            return _cursor.begin;
         }
 
-        bool next()
+        void const * getBegin() const TBAG_NOEXCEPT
         {
-            return cursor.next();
+            return _cursor.begin;
         }
 
+        void * getEnd() TBAG_NOEXCEPT
+        {
+            return _cursor.end;
+        }
+
+        void const * getEnd() const TBAG_NOEXCEPT
+        {
+            return _cursor.end;
+        }
+
+        int getStrideByte() const TBAG_NOEXCEPT
+        {
+            return _cursor.stride_byte;
+        }
+
+        bool isContinue() const TBAG_NOEXCEPT
+        {
+            return _cursor.is_continue();
+        }
+
+        bool isEnd() const TBAG_NOEXCEPT
+        {
+            return _cursor.is_end();
+        }
+
+        bool next() TBAG_NOEXCEPT
+        {
+            return _cursor.next();
+        }
+
+    public:
         template <typename T>
         inline T * data() TBAG_NOEXCEPT
         {
-            return static_cast<T*>(cursor.begin);
+            return static_cast<T*>(_cursor.begin);
         }
 
         template <typename T>
         inline T const * data() const TBAG_NOEXCEPT
         {
-            return static_cast<T const *>(cursor.begin);
+            return static_cast<T const *>(_cursor.begin);
         }
 
         inline void * data() TBAG_NOEXCEPT
         {
-            return cursor.begin;
+            return _cursor.begin;
         }
 
         inline void const * data() const TBAG_NOEXCEPT
         {
-            return cursor.begin;
+            return _cursor.begin;
         }
 
+    public:
         template <typename T>
         inline T & at()
         {
-            assert(cursor.box != nullptr);
-            assert(is_btype_equals<T>(cursor.box->type));
-            return *((T*)cursor.begin);
+            assert(_cursor.box != nullptr);
+            assert(is_btype_equals<T>(_cursor.box->type));
+            return *((T*)_cursor.begin);
         }
 
         template <typename T>
         inline T const & at() const
         {
-            assert(cursor.box != nullptr);
-            assert(is_btype_equals<T>(cursor.box->type));
-            return *((T*)cursor.begin);
+            assert(_cursor.box != nullptr);
+            assert(is_btype_equals<T>(_cursor.box->type));
+            return *((T*)_cursor.begin);
         }
 
+    public:
         template <typename T>
         Err get(T * out, bdev out_device, ui64 const * out_ext) const
         {
-            assert(cursor.box != nullptr);
-            return cursor.box->get_data(out, get_btype<T>(), out_device, out_ext, cursor.begin);
+            assert(_cursor.box != nullptr);
+            return _cursor.box->get_data(out, get_btype<T>(), out_device, out_ext, _cursor.begin);
         }
 
         template <typename T>
         Err get(T * out) const
         {
             using namespace libtbag::box::details;
-            assert(cursor.box != nullptr);
-            auto const out_device = cursor.box->device == BD_NONE ? BD_CPU : cursor.box->device;
-            ui64 const out_ext[TBAG_BOX_EXT_SIZE] = { cursor.box->ext[0], cursor.box->ext[1],
-                                                      cursor.box->ext[2], cursor.box->ext[3] };
-            return cursor.box->get_data(out, get_btype<T>(), out_device, out_ext, cursor.begin);
+            assert(_cursor.box != nullptr);
+            auto const out_device = _cursor.box->device == BD_NONE ? BD_CPU : _cursor.box->device;
+            ui64 const out_ext[TBAG_BOX_EXT_SIZE] = { _cursor.box->ext[0], _cursor.box->ext[1],
+                                                      _cursor.box->ext[2], _cursor.box->ext[3] };
+            return _cursor.box->get_data(out, get_btype<T>(), out_device, out_ext, _cursor.begin);
         }
 
         template <typename T>
@@ -1696,11 +1896,12 @@ public:
             return out;
         }
 
+    public:
         template <typename T>
         Err set(T const * src, bdev src_device, ui64 const * src_ext)
         {
-            assert(cursor.box != nullptr);
-            return cursor.box->set_data(src, get_btype<T>(), src_device, src_ext, cursor.begin);
+            assert(_cursor.box != nullptr);
+            return _cursor.box->set_data(src, get_btype<T>(), src_device, src_ext, _cursor.begin);
         }
 
         template <typename T>
@@ -1713,17 +1914,30 @@ public:
         Err set(T const * src)
         {
             using namespace libtbag::box::details;
-            assert(cursor.box != nullptr);
-            auto const src_device = cursor.box->device == BD_NONE ? BD_CPU : cursor.box->device;
-            ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { cursor.box->ext[0], cursor.box->ext[1],
-                                                      cursor.box->ext[2], cursor.box->ext[3] };
-            return cursor.box->set_data(src, get_btype<T>(), src_device, src_ext, cursor.begin);
+            assert(_cursor.box != nullptr);
+            auto const src_device = _cursor.box->device == BD_NONE ? BD_CPU : _cursor.box->device;
+            ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { _cursor.box->ext[0], _cursor.box->ext[1],
+                                                      _cursor.box->ext[2], _cursor.box->ext[3] };
+            return _cursor.box->set_data(src, get_btype<T>(), src_device, src_ext, _cursor.begin);
         }
 
         template <typename T>
         Err set(T const & src)
         {
             return set((T const *)&src);
+        }
+
+    public:
+        template <typename T>
+        IteratorGenerator<Cursor, T> itr()
+        {
+            return IteratorGenerator<Cursor, T>(*this);
+        }
+
+        template <typename T>
+        IteratorGenerator<typename std::add_const<Cursor>::type, T> itr() const
+        {
+            return IteratorGenerator<typename std::add_const<Cursor>::type, T>(*this);
         }
     };
 

@@ -1452,16 +1452,21 @@ ErrPair<box_cursor> box_cursor::init_cursor() const TBAG_NOEXCEPT
     return init_cursor(0);
 }
 
-bool box_cursor::is_end() const TBAG_NOEXCEPT
+bool box_cursor::is_continue() const TBAG_NOEXCEPT
 {
     return begin != end;
+}
+
+bool box_cursor::is_end() const TBAG_NOEXCEPT
+{
+    return !is_continue();
 }
 
 bool box_cursor::next() TBAG_NOEXCEPT
 {
     auto const integer_data_pointer = (std::intptr_t)begin;
     begin = (void*)(integer_data_pointer + stride_byte);
-    return is_end();
+    return is_continue();
 }
 
 } // namespace details

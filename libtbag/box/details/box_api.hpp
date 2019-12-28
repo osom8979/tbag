@@ -497,6 +497,7 @@ struct TBAG_API box_cursor
     ErrPair<box_cursor> init_cursor(ui32 dim_index) const TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor() const TBAG_NOEXCEPT;
 
+    bool is_continue() const TBAG_NOEXCEPT;
     bool is_end() const TBAG_NOEXCEPT;
     bool next() TBAG_NOEXCEPT;
 };
