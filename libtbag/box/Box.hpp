@@ -952,8 +952,6 @@ public:
     struct reshape_unknown_t  { /* EMPTY. */ };
     struct reshape_args1_t    { /* EMPTY. */ };
     struct reshape_args2_t    { /* EMPTY. */ };
-    struct reshape_vargs1_t   { /* EMPTY. */ };
-    struct reshape_vargs2_t   { /* EMPTY. */ };
     struct reshape_dims1_t    { /* EMPTY. */ };
     struct reshape_dims2_t    { /* EMPTY. */ };
     struct reshape_ref_box1_t { /* EMPTY. */ };
@@ -977,14 +975,6 @@ public:
                 sizeof...(Args) == 2 &&
                 is_last_ui32_ptr<Args...>::value;
 
-        TBAG_CONSTEXPR static bool const is_reshape_vargs1 =
-                sizeof...(Args) == 4 &&
-                is_first_bdev_and_second_ui64_ptr<Args...>::value &&
-                is_last_va_list<Args...>::value;
-        TBAG_CONSTEXPR static bool const is_reshape_vargs2 =
-                sizeof...(Args) == 2 &&
-                is_last_va_list<Args...>::value;
-
         TBAG_CONSTEXPR static bool const is_reshape_args1 =
                 sizeof...(Args) >= 3 &&
                 is_first_bdev_and_second_ui64_ptr<Args...>::value;
@@ -998,15 +988,11 @@ public:
                 typename std::conditional<is_reshape_ref_box2, reshape_ref_box2_t,
                 typename std::conditional<is_reshape_dims1, reshape_dims1_t,
                 typename std::conditional<is_reshape_dims2, reshape_dims2_t,
-                typename std::conditional<is_reshape_vargs1, reshape_vargs1_t,
-                typename std::conditional<is_reshape_vargs2, reshape_vargs2_t,
                 typename std::conditional<is_reshape_args1, reshape_args1_t,
                 typename std::conditional<is_reshape_args2, reshape_args2_t,
                 reshape_unknown_t
                 >::type // reshape_args2_t
                 >::type // reshape_args1_t
-                >::type // reshape_vargs2_t
-                >::type // reshape_vargs1_t
                 >::type // reshape_dims2_t
                 >::type // reshape_dims1_t
                 >::type // reshape_ref_box2_t
@@ -1053,18 +1039,6 @@ private:
     }
 
     template <typename T>
-    Err _reshape(reshape_vargs1_t, bdev device, ui64 const * ext, ui32 rank, va_list ap)
-    {
-        return _reshape_vargs(get_btype<T>(), device, ext, rank, ap);
-    }
-
-    template <typename T>
-    Err _reshape(reshape_vargs2_t, ui32 rank, va_list ap)
-    {
-        return _reshape_vargs(get_btype<T>(), rank, ap);
-    }
-
-    template <typename T>
     Err _reshape(reshape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
     {
         return _reshape_dims(get_btype<T>(), device, ext, rank, dims);
@@ -1095,13 +1069,13 @@ public:
      * @see libtbag::box::details::box_data::resize_dims
      */
     template <typename T, typename ... Args>
-    Err reshape(Args && ... args)
+    Err reshape(Args ... args)
     {
         return _reshape<T>(reshape_selector<Args...>::value, std::forward<Args>(args) ...);
     }
 
     template <typename T, typename ... Args>
-    static Box shape(Args && ... args)
+    static Box shape(Args ... args)
     {
         Box result;
         if (isFailure(result.reshape<T>(std::forward<Args>(args) ...))) {

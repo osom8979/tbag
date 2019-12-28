@@ -160,12 +160,15 @@ Err Box::_reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui3
 Err Box::_reshape_dims(btype type, ui32 rank, ui32 const * dims)
 {
     btype reshape_device = device_cpu();
-    ui64 const * reshape_ext = nullptr;
+    ui64 reshape_ext[TBAG_BOX_EXT_SIZE] = {0, 0, 0, 0};
     if (exists()) {
         if (!is_device_none()) {
-            reshape_device = getDevice();
+            reshape_device = device();
         }
-        reshape_ext = getExtensions();
+        reshape_ext[0] = ext0();
+        reshape_ext[1] = ext1();
+        reshape_ext[2] = ext2();
+        reshape_ext[3] = ext3();
     }
     return _reshape_dims(type, reshape_device, reshape_ext, rank, dims);
 }

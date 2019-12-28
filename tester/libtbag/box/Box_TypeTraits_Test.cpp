@@ -169,9 +169,6 @@ TEST(Box_TypeTraits_Test, reshape_selector)
     EXPECT_TRUE((std::is_same<typename Box::reshape_selector<bdev&&,ui64*,ui32&&,int&&>::type, Box::reshape_args1_t>::value));
     EXPECT_TRUE((std::is_same<typename Box::reshape_selector<int&&,int&&>::type, Box::reshape_args2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<bdev,ui64*,ui32,va_list>::type, Box::reshape_vargs1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<ui32,va_list>::type, Box::reshape_vargs2_t>::value));
-
     EXPECT_TRUE((std::is_same<typename Box::reshape_selector<bdev,ui64*,ui32,ui32*>::type, Box::reshape_dims1_t>::value));
     EXPECT_TRUE((std::is_same<typename Box::reshape_selector<ui32,ui32*>::type, Box::reshape_dims2_t>::value));
 
