@@ -261,6 +261,11 @@ template <typename T>
 struct is_last_va_list<T>
 {
     using __t1 = typename std::remove_reference<T>::type;
+
+    // [WARNING]
+    // Do not use 'std::remove_pointer' type traits.
+    // In MSVC, va_list is declared as a pointer.
+
     using __t2 = typename std::remove_const<__t1>::type;
     TBAG_CONSTEXPR static bool const value = std::is_same<__t2, va_list>::value;
 };

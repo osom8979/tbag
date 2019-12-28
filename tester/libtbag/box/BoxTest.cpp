@@ -60,17 +60,21 @@ TEST(BoxTest, CreateIfNotExists)
 
 TEST(BoxTest, is_first_box_data)
 {
+    EXPECT_FALSE(is_first_box_data<Box const &&>::value);
     EXPECT_FALSE(is_first_box_data<Box const &>::value);
     EXPECT_FALSE(is_first_box_data<Box const *>::value);
     EXPECT_FALSE(is_first_box_data<Box const>::value);
+    EXPECT_FALSE(is_first_box_data<Box &&>::value);
     EXPECT_FALSE(is_first_box_data<Box &>::value);
     EXPECT_FALSE(is_first_box_data<Box *>::value);
     EXPECT_FALSE(is_first_box_data<Box>::value);
 
     using namespace libtbag::box::details;
+    EXPECT_TRUE(is_first_box_data<box_data const &&>::value);
     EXPECT_TRUE(is_first_box_data<box_data const &>::value);
     EXPECT_TRUE(is_first_box_data<box_data const *>::value);
     EXPECT_TRUE(is_first_box_data<box_data const>::value);
+    EXPECT_TRUE(is_first_box_data<box_data &&>::value);
     EXPECT_TRUE(is_first_box_data<box_data &>::value);
     EXPECT_TRUE(is_first_box_data<box_data *>::value);
     EXPECT_TRUE(is_first_box_data<box_data>::value);
@@ -84,6 +88,7 @@ TEST(BoxTest, is_first_box_data)
 
 TEST(BoxTest, is_first_Box)
 {
+    EXPECT_TRUE(is_first_Box<Box const &&>::value);
     EXPECT_TRUE(is_first_Box<Box const &>::value);
     EXPECT_TRUE(is_first_Box<Box const *>::value);
     EXPECT_TRUE(is_first_Box<Box const>::value);
@@ -92,6 +97,7 @@ TEST(BoxTest, is_first_Box)
     EXPECT_TRUE(is_first_Box<Box>::value);
 
     using namespace libtbag::box::details;
+    EXPECT_FALSE(is_first_Box<box_data const &&>::value);
     EXPECT_FALSE(is_first_Box<box_data const &>::value);
     EXPECT_FALSE(is_first_Box<box_data const *>::value);
     EXPECT_FALSE(is_first_Box<box_data const>::value);
@@ -108,17 +114,21 @@ TEST(BoxTest, is_first_Box)
 
 TEST(BoxTest, is_last_va_list)
 {
+    EXPECT_TRUE(is_last_va_list<va_list const &&>::value);
     EXPECT_TRUE(is_last_va_list<va_list const &>::value);
     EXPECT_TRUE(is_last_va_list<va_list const>::value);
+    EXPECT_TRUE(is_last_va_list<va_list &&>::value);
     EXPECT_TRUE(is_last_va_list<va_list &>::value);
     EXPECT_TRUE(is_last_va_list<va_list>::value);
 
     EXPECT_FALSE(is_last_va_list<va_list const *>::value);
     EXPECT_FALSE(is_last_va_list<va_list *>::value);
 
+    EXPECT_FALSE(is_last_va_list<int const &&>::value);
     EXPECT_FALSE(is_last_va_list<int const &>::value);
     EXPECT_FALSE(is_last_va_list<int const *>::value);
     EXPECT_FALSE(is_last_va_list<int const>::value);
+    EXPECT_FALSE(is_last_va_list<int &&>::value);
     EXPECT_FALSE(is_last_va_list<int &>::value);
     EXPECT_FALSE(is_last_va_list<int *>::value);
     EXPECT_FALSE(is_last_va_list<int>::value);
@@ -133,17 +143,21 @@ TEST(BoxTest, is_last_va_list)
 TEST(BoxTest, is_last_ui32_ptr)
 {
     using namespace libtbag::box::details;
+    EXPECT_FALSE(is_last_ui32_ptr<ui32 const &&>::value);
     EXPECT_FALSE(is_last_ui32_ptr<ui32 const &>::value);
     EXPECT_FALSE(is_last_ui32_ptr<ui32 const>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<ui32 &&>::value);
     EXPECT_FALSE(is_last_ui32_ptr<ui32 &>::value);
     EXPECT_FALSE(is_last_ui32_ptr<ui32>::value);
 
     EXPECT_TRUE(is_last_ui32_ptr<ui32 const *>::value);
     EXPECT_TRUE(is_last_ui32_ptr<ui32 *>::value);
 
+    EXPECT_FALSE(is_last_ui32_ptr<int const &&>::value);
     EXPECT_FALSE(is_last_ui32_ptr<int const &>::value);
     EXPECT_FALSE(is_last_ui32_ptr<int const *>::value);
     EXPECT_FALSE(is_last_ui32_ptr<int const>::value);
+    EXPECT_FALSE(is_last_ui32_ptr<int &&>::value);
     EXPECT_FALSE(is_last_ui32_ptr<int &>::value);
     EXPECT_FALSE(is_last_ui32_ptr<int *>::value);
     EXPECT_FALSE(is_last_ui32_ptr<int>::value);
@@ -158,22 +172,28 @@ TEST(BoxTest, is_last_ui32_ptr)
 TEST(BoxTest, is_first_bdev_and_second_ui64_ptr)
 {
     using namespace libtbag::box::details;
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 const &&>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 const &>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 const *>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 const>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 &&>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 &>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 *>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64>::value);
 
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev const &&>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev const &>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev const *>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev const>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev &&>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev &>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev *>::value);
     EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev>::value);
 
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 const &&>::value));
     EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 const &>::value));
     EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 const>::value));
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 &&>::value));
     EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 &>::value));
     EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64>::value));
 
