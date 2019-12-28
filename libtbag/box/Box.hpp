@@ -1422,6 +1422,74 @@ public:
         return out;
     }
 
+private:
+    template <typename T, typename ... Args>
+    Err _set(shape_unknown_t, T const * src, Args && ... args)
+    {
+        return E_INACCESSIBLE_BLOCK;
+    }
+
+    template <typename T, typename ... Args>
+    Err _set(shape_args1_t, T const * src, bdev src_device, ui64 const * src_ext, Args ... args)
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        return _data->set_data_args((void const *)src, get_btype<T>(), src_device, src_ext,
+                                    static_cast<ui32>(sizeof...(Args)),
+                                    std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    Err _set(shape_args2_t, T const * src, Args ... args)
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        auto const shape_device = is_device_none() ? device_cpu() : device();
+        ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return _data->set_data_args((void const *)src, get_btype<T>(), shape_device, shape_ext,
+                                    static_cast<ui32>(sizeof...(Args)),
+                                    std::forward<Args>(args) ...);
+    }
+
+    template <typename T>
+    Err _set(shape_dims1_t, T const * src, bdev src_device, ui64 const * src_ext,
+             ui32 index_rank, ui32 const * index_dims)
+    {
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        return _data->set_data_dims((void const *)src, get_btype<T>(), src_device, src_ext, index_rank, index_dims);
+    }
+
+    template <typename T>
+    Err _set(shape_dims2_t, T const * src, ui32 index_rank, ui32 const * index_dims)
+    {
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        auto const shape_device = is_device_none() ? device_cpu() : device();
+        ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return _data->set_data_dims((void const *)src, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
+    }
+
+public:
+    template <typename T, typename ... Args>
+    Err set(T const * src, Args ... args)
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        return _set<T>(index_selector<Args...>::value, src, std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    Err set(T const & src, Args ... args)
+    {
+        return set(&src, std::forward<Args>(args) ...);
+    }
+
 public:
     Err setData(ui8 const * info, ui32 size);
     Err setData(std::string const & info);

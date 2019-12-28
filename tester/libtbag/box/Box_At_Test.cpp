@@ -107,3 +107,48 @@ TEST(Box_At_Test, Get_ArgumentOutput)
     ASSERT_EQ(4, elem3);
 }
 
+TEST(Box_At_Test, Set_Get)
+{
+    Box box = {{0, 0}, {0, 0}};
+    ASSERT_EQ(E_SUCCESS, box.set(10.0, 0, 0));
+    ASSERT_EQ(E_SUCCESS, box.set(20.0, 0, 1));
+    ASSERT_EQ(E_SUCCESS, box.set(30.0, 1, 0));
+    ASSERT_EQ(E_SUCCESS, box.set(40.0, 1, 1));
+    ASSERT_EQ(10, box.get<int>(0, 0));
+    ASSERT_EQ(20, box.get<int>(0, 1));
+    ASSERT_EQ(30, box.get<int>(1, 0));
+    ASSERT_EQ(40, box.get<int>(1, 1));
+
+    ui64 ext[] = {0, 0, 0, 0};
+    ASSERT_EQ(E_SUCCESS, box.set(1.0, Box::device_cpu(), ext, 0, 0));
+    ASSERT_EQ(E_SUCCESS, box.set(2.0, Box::device_cpu(), ext, 0, 1));
+    ASSERT_EQ(E_SUCCESS, box.set(3.0, Box::device_cpu(), ext, 1, 0));
+    ASSERT_EQ(E_SUCCESS, box.set(4.0, Box::device_cpu(), ext, 1, 1));
+    ASSERT_EQ(1, box.get<int>(0, 0));
+    ASSERT_EQ(2, box.get<int>(0, 1));
+    ASSERT_EQ(3, box.get<int>(1, 0));
+    ASSERT_EQ(4, box.get<int>(1, 1));
+
+    ui32 dims0[] = {0, 0};
+    ui32 dims1[] = {0, 1};
+    ui32 dims2[] = {1, 0};
+    ui32 dims3[] = {1, 1};
+    ASSERT_EQ(E_SUCCESS, box.set(100u, 2, dims0));
+    ASSERT_EQ(E_SUCCESS, box.set(200u, 2, dims1));
+    ASSERT_EQ(E_SUCCESS, box.set(300u, 2, dims2));
+    ASSERT_EQ(E_SUCCESS, box.set(400u, 2, dims3));
+    ASSERT_EQ(100, box.get<int>(0, 0));
+    ASSERT_EQ(200, box.get<int>(0, 1));
+    ASSERT_EQ(300, box.get<int>(1, 0));
+    ASSERT_EQ(400, box.get<int>(1, 1));
+
+    ASSERT_EQ(E_SUCCESS, box.set(11.0f, Box::device_cpu(), ext, 2, dims0));
+    ASSERT_EQ(E_SUCCESS, box.set(12.0f, Box::device_cpu(), ext, 2, dims1));
+    ASSERT_EQ(E_SUCCESS, box.set(13.0f, Box::device_cpu(), ext, 2, dims2));
+    ASSERT_EQ(E_SUCCESS, box.set(14.0f, Box::device_cpu(), ext, 2, dims3));
+    ASSERT_EQ(11, box.get<int>(0, 0));
+    ASSERT_EQ(12, box.get<int>(0, 1));
+    ASSERT_EQ(13, box.get<int>(1, 0));
+    ASSERT_EQ(14, box.get<int>(1, 1));
+}
+
