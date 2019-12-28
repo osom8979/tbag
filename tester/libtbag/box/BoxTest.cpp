@@ -154,3 +154,34 @@ TEST(BoxTest, is_last_ui32_ptr)
     EXPECT_FALSE((is_last_ui32_ptr<ui32*,int,double>::value));
 }
 
+TEST(BoxTest, is_first_bdev_and_second_ui64_ptr)
+{
+    using namespace libtbag::box::details;
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 const &>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 const *>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 const>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 &>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64 *>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<ui64>::value);
+
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev const &>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev const *>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev const>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev &>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev *>::value);
+    EXPECT_FALSE(is_first_bdev_and_second_ui64_ptr<bdev>::value);
+
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 const &>::value));
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 const>::value));
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 &>::value));
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<bdev,ui64>::value));
+
+    EXPECT_TRUE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 const *>::value));
+    EXPECT_TRUE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 *>::value));
+    EXPECT_TRUE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 const *,int>::value));
+    EXPECT_TRUE((is_first_bdev_and_second_ui64_ptr<bdev,ui64 *,int>::value));
+
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<int,bdev,ui64 const *>::value));
+    EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<int,bdev,ui64 *>::value));
+}
+
