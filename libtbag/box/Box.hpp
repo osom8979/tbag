@@ -230,6 +230,24 @@ struct is_first_box_data<T>
     TBAG_CONSTEXPR static bool const value = std::is_same<__t3, libtbag::box::details::box_data>::value;
 };
 
+template <typename ... T>
+struct is_first_Box;
+
+template <typename Head, typename ... Tail>
+struct is_first_Box<Head, Tail...>
+{
+    TBAG_CONSTEXPR static bool const value = is_first_Box<Head>::value;
+};
+
+template <typename T>
+struct is_first_Box<T>
+{
+    using __t1 = typename std::remove_reference<T>::type;
+    using __t2 = typename std::remove_pointer<__t1>::type;
+    using __t3 = typename std::remove_const<__t2>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__t3, libtbag::box::Box>::value;
+};
+
 /**
  * Box class prototype.
  *
