@@ -1027,6 +1027,63 @@ private:
     }
 
 public:
+    template <typename ... Args>
+    struct reshape_selector
+    {
+        TBAG_CONSTEXPR static bool const is_reshape_ref_box1 =
+                sizeof...(Args) == 1 &&
+                is_first_box_data<Args...>::value;
+        TBAG_CONSTEXPR static bool const is_reshape_ref_box2 =
+                sizeof...(Args) == 1 &&
+                is_first_Box<Args...>::value;
+
+        TBAG_CONSTEXPR static bool const is_reshape_dims1 =
+                sizeof...(Args) == 4 &&
+                is_first_bdev_and_second_ui64_ptr<Args...>::value &&
+                is_last_ui32_ptr<Args...>::value;
+        TBAG_CONSTEXPR static bool const is_reshape_dims2 =
+                sizeof...(Args) == 2 &&
+                is_last_ui32_ptr<Args...>::value;
+
+        TBAG_CONSTEXPR static bool const is_reshape_vargs1 =
+                sizeof...(Args) == 4 &&
+                is_first_bdev_and_second_ui64_ptr<Args...>::value &&
+                is_last_va_list<Args...>::value;
+        TBAG_CONSTEXPR static bool const is_reshape_vargs2 =
+                sizeof...(Args) == 2 &&
+                is_last_va_list<Args...>::value;
+
+        TBAG_CONSTEXPR static bool const is_reshape_args1 =
+                sizeof...(Args) >= 3 &&
+                is_first_bdev_and_second_ui64_ptr<Args...>::value;
+        TBAG_CONSTEXPR static bool const is_reshape_args2 =
+                sizeof...(Args) >= 1 &&
+                is_all_integral<Args...>::value;
+
+        // clang-format off
+        using type =
+                typename std::conditional<is_reshape_ref_box1, reshape_ref_box1_t,
+                typename std::conditional<is_reshape_ref_box2, reshape_ref_box2_t,
+                typename std::conditional<is_reshape_dims1, reshape_dims1_t,
+                typename std::conditional<is_reshape_dims2, reshape_dims2_t,
+                typename std::conditional<is_reshape_vargs1, reshape_vargs1_t,
+                typename std::conditional<is_reshape_vargs2, reshape_vargs2_t,
+                typename std::conditional<is_reshape_args1, reshape_args1_t,
+                typename std::conditional<is_reshape_args2, reshape_args2_t,
+                reshape_unknown_t
+                >::type // reshape_args2_t
+                >::type // reshape_args1_t
+                >::type // reshape_vargs2_t
+                >::type // reshape_vargs1_t
+                >::type // reshape_dims2_t
+                >::type // reshape_dims1_t
+                >::type // reshape_ref_box2_t
+                >::type;// reshape_ref_box1_t
+        // clang-format on
+
+        TBAG_CONSTEXPR static type const value = { /* EMPTY. */ };
+    };
+
     /**
      * Coordinate the {Header}, {Dims}, and {DataSize} sections.
      *
@@ -1035,39 +1092,7 @@ public:
     template <typename T, typename ... Args>
     Err reshape(Args && ... args)
     {
-        // clang-format off
-        using __select_t = typename std::conditional<
-                sizeof...(Args) == 1 && is_first_box_data<Args...>::value,
-                reshape_ref_box1_t,
-                typename std::conditional<sizeof...(Args) == 1 && is_first_Box<Args...>::value,
-                reshape_ref_box2_t,
-
-                typename std::conditional<sizeof...(Args) == 4 && is_last_ui32_ptr<Args...>::value,
-                reshape_dims1_t,
-                typename std::conditional<sizeof...(Args) == 2 && is_last_ui32_ptr<Args...>::value,
-                reshape_dims2_t,
-
-                typename std::conditional<sizeof...(Args) == 4 && is_last_va_list<Args...>::value,
-                reshape_vargs1_t,
-                typename std::conditional<sizeof...(Args) == 2 && is_last_va_list<Args...>::value,
-                reshape_vargs2_t,
-
-                typename std::conditional<sizeof...(Args) >= 3 && is_first_bdev_and_second_ui64_ptr<Args...>::value,
-                reshape_args1_t,
-                typename std::conditional<sizeof...(Args) >= 1 && is_all_integral<Args...>::value,
-                reshape_args2_t,
-
-                reshape_unknown_t
-        >::type // reshape_args2_t
-        >::type // reshape_args1_t
-        >::type // reshape_vargs2_t
-        >::type // reshape_vargs1_t
-        >::type // reshape_dims2_t
-        >::type // reshape_dims1_t
-        >::type // reshape_ref_box2_t
-        >::type;// reshape_ref_box1_t
-        // clang-format on
-        return _reshape<T>(__select_t{}, std::forward<Args>(args) ...);
+        return _reshape<T>(reshape_selector<Args...>::value, std::forward<Args>(args) ...);
     }
 
 public:
