@@ -1931,12 +1931,14 @@ public:
         template <typename T>
         IteratorGenerator<Cursor, T> itr()
         {
+            assert(is_btype_equals<T>(_cursor.box->type));
             return IteratorGenerator<Cursor, T>(*this);
         }
 
         template <typename T>
         IteratorGenerator<typename std::add_const<Cursor>::type, T> itr() const
         {
+            assert(is_btype_equals<T>(_cursor.box->type));
             return IteratorGenerator<typename std::add_const<Cursor>::type, T>(*this);
         }
     };

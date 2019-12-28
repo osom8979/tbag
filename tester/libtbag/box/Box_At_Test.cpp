@@ -152,3 +152,10 @@ TEST(Box_At_Test, Set_Get)
     ASSERT_EQ(14, box.get<int>(1, 1));
 }
 
+TEST(Box_At_Test, Set_Get_Cast)
+{
+    Box box = {0.0};
+    ASSERT_EQ(E_SUCCESS, box.set(100.0, 0));
+    ASSERT_EQ(100, box.get<ui16>(0));
+}
+
