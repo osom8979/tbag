@@ -1568,6 +1568,40 @@ public:
             assert(is_btype_equals<T>(cursor.box->type));
             return *((T*)cursor.begin);
         }
+
+        template <typename T>
+        Err get(T * out, bdev out_device, ui64 const * out_ext) const
+        {
+            assert(cursor.box != nullptr);
+            return cursor.box->get_data(out, get_btype<T>(), out_device, out_ext, cursor.begin);
+        }
+
+        template <typename T>
+        Err get(T * out) const
+        {
+            using namespace libtbag::box::details;
+            assert(cursor.box != nullptr);
+            auto const out_device = cursor.box->device == BD_NONE ? BD_CPU : cursor.box->device;
+            ui64 const out_ext[TBAG_BOX_EXT_SIZE] = { cursor.box->ext[0], cursor.box->ext[1],
+                                                      cursor.box->ext[2], cursor.box->ext[3] };
+            return cursor.box->get_data(out, get_btype<T>(), out_device, out_ext, cursor.begin);
+        }
+
+        template <typename T>
+        T get(bdev out_device, ui64 const * out_ext) const
+        {
+            T out = T();
+            get(&out, out_device, out_ext);
+            return out;
+        }
+
+        template <typename T>
+        T get() const
+        {
+            T out = T();
+            get(&out);
+            return out;
+        }
     };
 
 public:

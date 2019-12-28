@@ -81,3 +81,26 @@ TEST(Box_Cursor_Test, Reverse)
     ASSERT_EQ(0, result[8]);
 }
 
+TEST(Box_Cursor_Test, Get)
+{
+    Box box = {1.0, 2.0, 3.0, 4.0};
+    auto c0 = box.cursor();
+    ASSERT_EQ(E_SUCCESS, c0.code);
+    ASSERT_EQ(1, c0.value.get<int>());
+    ASSERT_TRUE(c0.value.next());
+
+    ui64 ext[] = {0, 0, 0, 0};
+    ASSERT_EQ(2, c0.value.get<int>(Box::device_cpu(), ext));
+    ASSERT_TRUE(c0.value.next());
+
+    int elem;
+    ASSERT_EQ(E_SUCCESS, c0.value.get<int>(&elem));
+    ASSERT_EQ(3, elem);
+    ASSERT_TRUE(c0.value.next());
+    elem = 0;
+
+    ASSERT_EQ(E_SUCCESS, c0.value.get<int>(&elem, Box::device_cpu(), ext));
+    ASSERT_EQ(4, elem);
+    ASSERT_FALSE(c0.value.next());
+}
+

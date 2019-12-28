@@ -1300,13 +1300,13 @@ Err box_data::set_data_dims(void const * src_data, btype src_type, bdev src_devi
 }
 
 Err box_data::get_data(void * out_data, btype out_type, bdev out_device,
-                       ui64 const * out_ext, ui32 box_data_offset) const
+                       ui64 const * out_ext, void const * src_data) const
 {
     assert(out_data != nullptr);
     assert(box_support_type(out_type));
     assert(box_support_device(out_device));
     if (device == BD_CPU && out_device == BD_CPU) {
-        box_cpu_set(out_data, out_type, get_data_ptr_by_offset(box_data_offset), type);
+        box_cpu_set(out_data, out_type, src_data, type);
         return E_SUCCESS;
     } else if (device == BD_CUDA && out_device == BD_CUDA) {
         // TODO
@@ -1314,6 +1314,13 @@ Err box_data::get_data(void * out_data, btype out_type, bdev out_device,
         // TODO
     }
     return E_ENOSYS;
+}
+
+Err box_data::get_data(void * out_data, btype out_type, bdev out_device,
+                       ui64 const * out_ext, ui32 box_data_offset) const
+{
+    return get_data(out_data, out_type, out_device,
+                    out_ext, get_data_ptr_by_offset(box_data_offset));
 }
 
 Err box_data::get_data_args(void * out_data, btype out_type, bdev out_device,

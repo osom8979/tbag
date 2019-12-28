@@ -446,6 +446,8 @@ struct TBAG_API box_data : private Noncopyable
                       ui64 const * src_ext, ui32 box_rank, ui32 const * box_indexes);
 
     Err get_data(void * out_data, btype out_type, bdev out_device,
+                 ui64 const * out_ext, void const * src_data) const;
+    Err get_data(void * out_data, btype out_type, bdev out_device,
                  ui64 const * out_ext, ui32 box_data_offset) const;
     Err get_data_args(void * out_data, btype out_type, bdev out_device,
                       ui64 const * out_ext, ui32 box_rank, ...) const;
