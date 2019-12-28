@@ -266,6 +266,24 @@ struct is_last_va_list<T>
     TBAG_CONSTEXPR static bool const value = std::is_same<__t3, va_list>::value;
 };
 
+template <typename ... T>
+struct is_last_ui32_ptr;
+
+template <typename Head, typename ... Tail>
+struct is_last_ui32_ptr<Head, Tail...>
+{
+    TBAG_CONSTEXPR static bool const value = is_last_ui32_ptr<Tail...>::value;
+};
+
+template <typename T>
+struct is_last_ui32_ptr<T>
+{
+    using __t1 = typename std::remove_reference<T>::type;
+    using __t2 = typename std::remove_pointer<__t1>::type;
+    using __t3 = typename std::remove_const<__t2>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__t3, ui32>::value && std::is_pointer<T>::value;
+};
+
 /**
  * Box class prototype.
  *
