@@ -294,6 +294,9 @@ std::string Box::getDataString() const
 
 Err Box::encode(Builder & builder) const
 {
+    if (!exists()) {
+        return E_EXPIRED;
+    }
     return builder.build(_data.get());
 }
 
@@ -315,6 +318,9 @@ Err Box::encode(Buffer & buffer) const
 
 Err Box::decode(void const * buffer, std::size_t size, Parser const & parser, std::size_t * computed_size)
 {
+    if (!exists()) {
+        return E_EXPIRED;
+    }
     return parser.parse(buffer, size, _data.get(), computed_size);
 }
 
@@ -347,6 +353,9 @@ Err Box::encodeToJson(std::string & json) const
 
 Err Box::decodeFromJson(char const * json, std::size_t size, Parser const & parser)
 {
+    if (!exists()) {
+        return E_EXPIRED;
+    }
     return parser.parseJson(std::string(json, json + size), _data.get());
 }
 
