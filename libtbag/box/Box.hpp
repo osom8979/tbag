@@ -949,54 +949,88 @@ public:
     Buffer getInfoBuffer() const;
 
 public:
-    struct reshape_unknown_t  { /* EMPTY. */ };
-    struct reshape_args1_t    { /* EMPTY. */ };
-    struct reshape_args2_t    { /* EMPTY. */ };
-    struct reshape_dims1_t    { /* EMPTY. */ };
-    struct reshape_dims2_t    { /* EMPTY. */ };
-    struct reshape_ref_box1_t { /* EMPTY. */ };
-    struct reshape_ref_box2_t { /* EMPTY. */ };
+    struct shape_unknown_t  { /* EMPTY. */ };
+    struct shape_args1_t    { /* EMPTY. */ };
+    struct shape_args2_t    { /* EMPTY. */ };
+    struct shape_dims1_t    { /* EMPTY. */ };
+    struct shape_dims2_t    { /* EMPTY. */ };
+    struct shape_ref_box1_t { /* EMPTY. */ };
+    struct shape_ref_box2_t { /* EMPTY. */ };
 
     template <typename ... Args>
-    struct reshape_selector
+    struct shape_selector
     {
-        TBAG_CONSTEXPR static bool const is_reshape_ref_box1 =
+        TBAG_CONSTEXPR static bool const is_shape_ref_box1 =
                 sizeof...(Args) == 1 &&
                 is_first_box_data<Args...>::value;
-        TBAG_CONSTEXPR static bool const is_reshape_ref_box2 =
+        TBAG_CONSTEXPR static bool const is_shape_ref_box2 =
                 sizeof...(Args) == 1 &&
                 is_first_Box<Args...>::value;
 
-        TBAG_CONSTEXPR static bool const is_reshape_dims1 =
+        TBAG_CONSTEXPR static bool const is_shape_dims1 =
                 sizeof...(Args) == 4 &&
                 is_first_bdev_and_second_ui64_ptr<Args...>::value &&
                 is_last_ui32_ptr<Args...>::value;
-        TBAG_CONSTEXPR static bool const is_reshape_dims2 =
+        TBAG_CONSTEXPR static bool const is_shape_dims2 =
                 sizeof...(Args) == 2 &&
                 is_last_ui32_ptr<Args...>::value;
 
-        TBAG_CONSTEXPR static bool const is_reshape_args1 =
+        TBAG_CONSTEXPR static bool const is_shape_args1 =
                 sizeof...(Args) >= 3 &&
                 is_first_bdev_and_second_ui64_ptr<Args...>::value;
-        TBAG_CONSTEXPR static bool const is_reshape_args2 =
+        TBAG_CONSTEXPR static bool const is_shape_args2 =
                 sizeof...(Args) >= 1 &&
                 is_all_integral<Args...>::value;
 
         // clang-format off
         using type =
-                typename std::conditional<is_reshape_ref_box1, reshape_ref_box1_t,
-                typename std::conditional<is_reshape_ref_box2, reshape_ref_box2_t,
-                typename std::conditional<is_reshape_dims1, reshape_dims1_t,
-                typename std::conditional<is_reshape_dims2, reshape_dims2_t,
-                typename std::conditional<is_reshape_args1, reshape_args1_t,
-                typename std::conditional<is_reshape_args2, reshape_args2_t,
-                reshape_unknown_t
-                >::type // reshape_args2_t
-                >::type // reshape_args1_t
-                >::type // reshape_dims2_t
-                >::type // reshape_dims1_t
-                >::type // reshape_ref_box2_t
-                >::type;// reshape_ref_box1_t
+                typename std::conditional<is_shape_ref_box1, shape_ref_box1_t,
+                typename std::conditional<is_shape_ref_box2, shape_ref_box2_t,
+                typename std::conditional<is_shape_dims1, shape_dims1_t,
+                typename std::conditional<is_shape_dims2, shape_dims2_t,
+                typename std::conditional<is_shape_args1, shape_args1_t,
+                typename std::conditional<is_shape_args2, shape_args2_t,
+                shape_unknown_t
+                >::type // shape_args2_t
+                >::type // shape_args1_t
+                >::type // shape_dims2_t
+                >::type // shape_dims1_t
+                >::type // shape_ref_box2_t
+                >::type;// shape_ref_box1_t
+        // clang-format on
+
+        TBAG_CONSTEXPR static type const value = { /* EMPTY. */ };
+    };
+
+    template <typename ... Args>
+    struct index_selector
+    {
+        TBAG_CONSTEXPR static bool const is_shape_dims1 =
+                sizeof...(Args) == 4 &&
+                is_first_bdev_and_second_ui64_ptr<Args...>::value &&
+                is_last_ui32_ptr<Args...>::value;
+        TBAG_CONSTEXPR static bool const is_shape_dims2 =
+                sizeof...(Args) == 2 &&
+                is_last_ui32_ptr<Args...>::value;
+
+        TBAG_CONSTEXPR static bool const is_shape_args1 =
+                sizeof...(Args) >= 3 &&
+                is_first_bdev_and_second_ui64_ptr<Args...>::value;
+        TBAG_CONSTEXPR static bool const is_shape_args2 =
+                sizeof...(Args) >= 1 &&
+                is_all_integral<Args...>::value;
+
+        // clang-format off
+        using type =
+                typename std::conditional<is_shape_dims1, shape_dims1_t,
+                typename std::conditional<is_shape_dims2, shape_dims2_t,
+                typename std::conditional<is_shape_args1, shape_args1_t,
+                typename std::conditional<is_shape_args2, shape_args2_t,
+                shape_unknown_t
+                >::type // shape_args2_t
+                >::type // shape_args1_t
+                >::type // shape_dims2_t
+                >::type;// shape_dims1_t
         // clang-format on
 
         TBAG_CONSTEXPR static type const value = { /* EMPTY. */ };
@@ -1017,47 +1051,49 @@ private:
 
 private:
     template <typename T, typename ... Args>
-    Err _reshape(reshape_unknown_t, Args && ... args)
+    Err _reshape(shape_unknown_t, Args && ... args)
     {
         return E_INACCESSIBLE_BLOCK;
     }
 
     template <typename T, typename ... Args>
-    Err _reshape(reshape_args1_t, bdev device, ui64 const * ext, Args && ... args)
+    Err _reshape(shape_args1_t, bdev device, ui64 const * ext, Args ... args)
     {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         return _reshape_args(get_btype<T>(), device, ext,
                              static_cast<ui32>(sizeof...(Args)),
                              std::forward<Args>(args) ...);
     }
 
     template <typename T, typename ... Args>
-    Err _reshape(reshape_args2_t, Args && ... args)
+    Err _reshape(shape_args2_t, Args ... args)
     {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         return _reshape_args(get_btype<T>(),
                              static_cast<ui32>(sizeof...(Args)),
                              std::forward<Args>(args) ...);
     }
 
     template <typename T>
-    Err _reshape(reshape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+    Err _reshape(shape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
     {
         return _reshape_dims(get_btype<T>(), device, ext, rank, dims);
     }
 
     template <typename T>
-    Err _reshape(reshape_dims2_t, ui32 rank, ui32 const * dims)
+    Err _reshape(shape_dims2_t, ui32 rank, ui32 const * dims)
     {
         return _reshape_dims(get_btype<T>(), rank, dims);
     }
 
     template <typename T>
-    Err _reshape(reshape_ref_box1_t, box_data const * reference_box)
+    Err _reshape(shape_ref_box1_t, box_data const * reference_box)
     {
         return _reshape_ref_box(get_btype<T>(), reference_box);
     }
 
     template <typename T>
-    Err _reshape(reshape_ref_box2_t, Box const & reference_box)
+    Err _reshape(shape_ref_box2_t, Box const & reference_box)
     {
         return _reshape_ref_box(get_btype<T>(), reference_box);
     }
@@ -1071,12 +1107,14 @@ public:
     template <typename T, typename ... Args>
     Err reshape(Args ... args)
     {
-        return _reshape<T>(reshape_selector<Args...>::value, std::forward<Args>(args) ...);
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        return _reshape<T>(shape_selector<Args...>::value, std::forward<Args>(args) ...);
     }
 
     template <typename T, typename ... Args>
     static Box shape(Args ... args)
     {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         Box result;
         if (isFailure(result.reshape<T>(std::forward<Args>(args) ...))) {
             return Box(nullptr);
@@ -1311,6 +1349,77 @@ public:
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         return offset<T>(libtbag::box::details::box_dim_get_offset_args(
                 dims(), static_cast<ui32>(sizeof...(Args)), std::forward<Args>(args) ...));
+    }
+
+private:
+    template <typename T, typename ... Args>
+    Err _get(shape_unknown_t, T * result, Args && ... args)
+    {
+        return E_INACCESSIBLE_BLOCK;
+    }
+
+    template <typename T, typename ... Args>
+    Err _get(shape_args1_t, T * out, bdev out_device, ui64 const * out_ext, Args ... args) const
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        return _data->get_data_args((void*)out, get_btype<T>(), out_device, out_ext,
+                                    static_cast<ui32>(sizeof...(Args)),
+                                    std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    Err _get(shape_args2_t, T * out, Args ... args) const
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        auto const shape_device = is_device_none() ? device_cpu() : device();
+        ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return _data->get_data_args((void*)out, get_btype<T>(), shape_device, shape_ext,
+                                    static_cast<ui32>(sizeof...(Args)),
+                                    std::forward<Args>(args) ...);
+    }
+
+    template <typename T>
+    Err _get(shape_dims1_t, T * out, bdev out_device, ui64 const * out_ext,
+             ui32 index_rank, ui32 const * index_dims) const
+    {
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        return _data->get_data_dims((void*)out, get_btype<T>(), out_device, out_ext, index_rank, index_dims);
+    }
+
+    template <typename T>
+    Err _get(shape_dims2_t, T * out, ui32 index_rank, ui32 const * index_dims) const
+    {
+        if (!exists()) {
+            return E_EXPIRED;
+        }
+        auto const shape_device = is_device_none() ? device_cpu() : device();
+        ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return _data->get_data_dims((void*)out, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
+    }
+
+public:
+    template <typename T, typename ... Args>
+    Err get(T * out, Args ... args) const
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        return _get<T>(index_selector<Args...>::value, out, std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    T get(Args ... args) const
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        T out = T();
+        _get<T>(index_selector<Args...>::value, &out, std::forward<Args>(args) ...);
+        return out;
     }
 
 public:

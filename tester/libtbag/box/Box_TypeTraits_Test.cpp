@@ -159,22 +159,22 @@ TEST(Box_TypeTraits_Test, is_first_bdev_and_second_ui64_ptr)
     EXPECT_FALSE((is_first_bdev_and_second_ui64_ptr<int,bdev,ui64 *>::value));
 }
 
-TEST(Box_TypeTraits_Test, reshape_selector)
+TEST(Box_TypeTraits_Test, shape_selector)
 {
     using namespace libtbag::box::details;
 
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<bdev,ui64*,int>::type, Box::reshape_args1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<int>::type, Box::reshape_args2_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<bdev,ui64*,int>::type, Box::shape_args1_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<int>::type, Box::shape_args2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<bdev&&,ui64*,ui32&&,int&&>::type, Box::reshape_args1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<int&&,int&&>::type, Box::reshape_args2_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<bdev&&,ui64*,ui32&&,int&&>::type, Box::shape_args1_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<int&&,int&&>::type, Box::shape_args2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<bdev,ui64*,ui32,ui32*>::type, Box::reshape_dims1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<ui32,ui32*>::type, Box::reshape_dims2_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<bdev,ui64*,ui32,ui32*>::type, Box::shape_dims1_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<ui32,ui32*>::type, Box::shape_dims2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<box_data&&>::type, Box::reshape_ref_box1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<Box&&>::type, Box::reshape_ref_box2_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<box_data&&>::type, Box::shape_ref_box1_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<Box&&>::type, Box::shape_ref_box2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::reshape_selector<Box,Box>::type, Box::reshape_unknown_t>::value));
+    EXPECT_TRUE((std::is_same<typename Box::shape_selector<Box,Box>::type, Box::shape_unknown_t>::value));
 }
 
