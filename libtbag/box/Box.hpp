@@ -284,6 +284,38 @@ struct is_last_ui32_ptr<T>
     TBAG_CONSTEXPR static bool const value = std::is_same<__t3, ui32>::value && std::is_pointer<T>::value;
 };
 
+template <typename ... T>
+struct is_first_bdev_and_second_ui64_ptr;
+
+template <typename First, typename Second, typename ... Tail>
+struct is_first_bdev_and_second_ui64_ptr<First, Second, Tail...>
+{
+    TBAG_CONSTEXPR static bool const value = is_first_bdev_and_second_ui64_ptr<First, Second>::value;
+};
+
+template <typename First, typename Second>
+struct is_first_bdev_and_second_ui64_ptr<First, Second>
+{
+    using __f1 = typename std::remove_reference<First>::type;
+    using __f2 = typename std::remove_pointer<__f1>::type;
+    using __f3 = typename std::remove_const<__f2>::type;
+
+    using __s1 = typename std::remove_reference<Second>::type;
+    using __s2 = typename std::remove_pointer<__s1>::type;
+    using __s3 = typename std::remove_const<__s2>::type;
+
+    TBAG_CONSTEXPR static bool const value =
+            std::is_same<__f3, libtbag::box::details::bdev>::value &&
+            std::is_same<__s3, ui64>::value &&
+            std::is_pointer<Second>::value;
+};
+
+template <typename T>
+struct is_first_bdev_and_second_ui64_ptr<T>
+{
+    TBAG_CONSTEXPR static bool const value = false;
+};
+
 /**
  * Box class prototype.
  *
@@ -912,65 +944,130 @@ public:
     std::string getInfoString() const;
     Buffer getInfoBuffer() const;
 
+private:
+    Err _reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
+    Err _reshape_args(btype type, ui32 rank, ...);
+
+    Err _reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
+    Err _reshape_vargs(btype type, ui32 rank, va_list ap);
+
+    Err _reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
+    Err _reshape_dims(btype type, ui32 rank, ui32 const * dims);
+
+    Err _reshape_ref_box(btype type, box_data const * reference_box);
+    Err _reshape_ref_box(btype type, Box const & reference_box);
+
+private:
+    struct reshape_unknown_t {};
+    struct reshape_args1_t {};
+    struct reshape_args2_t {};
+    struct reshape_vargs1_t {};
+    struct reshape_vargs2_t {};
+    struct reshape_dims1_t {};
+    struct reshape_dims2_t {};
+    struct reshape_ref_box1_t {};
+    struct reshape_ref_box2_t {};
+
+    template <typename T, typename ... Args>
+    Err _reshape(reshape_unknown_t, Args && ... args)
+    {
+        return E_INACCESSIBLE_BLOCK;
+    }
+
+    template <typename T, typename ... Args>
+    Err _reshape(reshape_args1_t, bdev device, ui64 const * ext, Args && ... args)
+    {
+        return _reshape_args(get_btype<T>(), device, ext,
+                            static_cast<ui32>(sizeof...(Args)),
+                            std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    Err _reshape(reshape_args2_t, Args && ... args)
+    {
+        return _reshape_args(get_btype<T>(),
+                            static_cast<ui32>(sizeof...(Args)),
+                            std::forward<Args>(args) ...);
+    }
+
+    template <typename T>
+    Err _reshape(reshape_vargs1_t, bdev device, ui64 const * ext, ui32 rank, va_list ap)
+    {
+        return _reshape_vargs(get_btype<T>(), device, ext, rank, ap);
+    }
+
+    template <typename T>
+    Err _reshape(reshape_vargs2_t, ui32 rank, va_list ap)
+    {
+        return _reshape_vargs(get_btype<T>(), rank, ap);
+    }
+
+    template <typename T>
+    Err _reshape(reshape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+    {
+        return _reshape_dims(get_btype<T>(), device, ext, rank, dims);
+    }
+
+    template <typename T>
+    Err _reshape(reshape_dims2_t, ui32 rank, ui32 const * dims)
+    {
+        return _reshape_dims(get_btype<T>(), rank, dims);
+    }
+
+    template <typename T>
+    Err _reshape(reshape_ref_box1_t, box_data const * reference_box)
+    {
+        return _reshape_ref_box(get_btype<T>(), reference_box);
+    }
+
+    template <typename T>
+    Err _reshape(reshape_ref_box2_t, Box const & reference_box)
+    {
+        return _reshape_ref_box(get_btype<T>(), reference_box);
+    }
+
 public:
-    Err reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-    Err reshape_args(btype type, ui32 rank, ...);
-
-    template <typename T, typename ... Args>
-    Err reshape_args_type(bdev device, ui64 const * ext, Args && ... args)
-    {
-        return reshape_args(get_btype<T>(), device, ext,
-                            static_cast<ui32>(sizeof...(Args)),
-                            std::forward<Args>(args) ...);
-    }
-
-    template <typename T, typename ... Args>
-    Err reshape_args_type(Args && ... args)
-    {
-        return reshape_args(get_btype<T>(),
-                            static_cast<ui32>(sizeof...(Args)),
-                            std::forward<Args>(args) ...);
-    }
-
-    Err reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
-    Err reshape_vargs(btype type, ui32 rank, va_list ap);
-
-    template <typename T>
-    Err reshape_vargs_type(bdev device, ui64 const * ext, ui32 rank, va_list ap)
-    {
-        return reshape_vargs(get_btype<T>(), device, ext, rank, ap);
-    }
-
-    template <typename T>
-    Err reshape_vargs_type(ui32 rank, va_list ap)
-    {
-        return reshape_vargs(get_btype<T>(), rank, ap);
-    }
-
-    Err reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
-    Err reshape_dims(btype type, ui32 rank, ui32 const * dims);
-
-    template <typename T>
-    Err reshape_dims_type(bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
-    {
-        return reshape_dims(get_btype<T>(), device, ext, rank, dims);
-    }
-
-    template <typename T>
-    Err reshape_dims_type(ui32 rank, ui32 const * dims)
-    {
-        return reshape_dims(get_btype<T>(), rank, dims);
-    }
-
-    Err reshape_ref_box(box_data const * reference_box);
-    Err reshape_ref_box(Box const & reference_box);
-
+    /**
+     * Coordinate the {Header}, {Dims}, and {DataSize} sections.
+     *
+     * @see libtbag::box::details::box_data::resize_dims
+     */
     template <typename T, typename ... Args>
     Err reshape(Args && ... args)
     {
-        return reshape_args(get_btype<T>(),
-                            static_cast<ui32>(sizeof...(Args)),
-                            std::forward<Args>(args) ...);
+        // clang-format off
+        using __select_t = typename std::conditional<
+                sizeof...(Args) == 1 && is_first_box_data<Args...>::value,
+                reshape_ref_box1_t,
+                typename std::conditional<sizeof...(Args) == 1 && is_first_Box<Args...>::value,
+                reshape_ref_box2_t,
+
+                typename std::conditional<sizeof...(Args) == 4 && is_last_ui32_ptr<Args...>::value,
+                reshape_dims1_t,
+                typename std::conditional<sizeof...(Args) == 2 && is_last_ui32_ptr<Args...>::value,
+                reshape_dims2_t,
+
+                typename std::conditional<sizeof...(Args) == 4 && is_last_va_list<Args...>::value,
+                reshape_vargs1_t,
+                typename std::conditional<sizeof...(Args) == 2 && is_last_va_list<Args...>::value,
+                reshape_vargs2_t,
+
+                typename std::conditional<sizeof...(Args) >= 3 && is_first_bdev_and_second_ui64_ptr<Args...>::value,
+                reshape_args1_t,
+                typename std::conditional<sizeof...(Args) >= 1 && is_all_integral<Args...>::value,
+                reshape_args2_t,
+
+                reshape_unknown_t
+        >::type // reshape_args2_t
+        >::type // reshape_args1_t
+        >::type // reshape_vargs2_t
+        >::type // reshape_vargs1_t
+        >::type // reshape_dims2_t
+        >::type // reshape_dims1_t
+        >::type // reshape_ref_box2_t
+        >::type;// reshape_ref_box1_t
+        // clang-format on
+        return _reshape<T>(__select_t{}, std::forward<Args>(args) ...);
     }
 
 public:
@@ -1062,7 +1159,7 @@ public:
         using DataType = typename libtbag::remove_cr<T>::type;
         auto const dim_1d = static_cast<ui32>(std::distance(begin, end));
         auto const type = get_btype<DataType>();
-        auto const code = reshape_args(type, device, ext, 1, dim_1d);
+        auto const code = _reshape_args(type, device, ext, 1, dim_1d);
         if (isFailure(code)) {
             return code;
         }
@@ -1102,7 +1199,7 @@ public:
         auto const dim_1d = static_cast<ui32>(items.size());
         auto const dim_2d = static_cast<ui32>(items.begin()->size());
         auto const type = get_btype<DataType>();
-        auto const code = reshape_args(type, device, ext, 2, dim_1d, dim_2d);
+        auto const code = _reshape_args(type, device, ext, 2, dim_1d, dim_2d);
         if (isFailure(code)) {
             return code;
         }
@@ -1137,7 +1234,7 @@ public:
         auto const dim_2d = static_cast<ui32>(items.begin()->size());
         auto const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
         auto const type = get_btype<DataType>();
-        auto const code = reshape_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
+        auto const code = _reshape_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
         if (isFailure(code)) {
             return code;
         }
@@ -1179,7 +1276,7 @@ public:
         auto const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
         auto const dim_4d = static_cast<ui32>(items.begin()->begin()->begin()->size());
         auto const type = get_btype<DataType>();
-        auto const code = reshape_args(type, device, ext, 4, dim_1d, dim_2d, dim_3d, dim_4d);
+        auto const code = _reshape_args(type, device, ext, 4, dim_1d, dim_2d, dim_3d, dim_4d);
         if (isFailure(code)) {
             return code;
         }

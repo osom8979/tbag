@@ -114,31 +114,31 @@ Box::Buffer Box::getInfoBuffer() const
     return {};
 }
 
-Err Box::reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
+Err Box::_reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
 {
     va_list ap;
     va_start(ap, rank);
-    auto const code = reshape_vargs(type, device, ext, rank, ap);
+    auto const code = _reshape_vargs(type, device, ext, rank, ap);
     va_end(ap);
     return code;
 }
 
-Err Box::reshape_args(btype type, ui32 rank, ...)
+Err Box::_reshape_args(btype type, ui32 rank, ...)
 {
     va_list ap;
     va_start(ap, rank);
-    auto const code = reshape_vargs(type, rank, ap);
+    auto const code = _reshape_vargs(type, rank, ap);
     va_end(ap);
     return code;
 }
 
-Err Box::reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
+Err Box::_reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
 {
     createIfNotExists();
     return _data->resize_vargs(type, device, ext, rank, ap);
 }
 
-Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
+Err Box::_reshape_vargs(btype type, ui32 rank, va_list ap)
 {
     btype reshape_device = device_cpu();
     ui64 const * reshape_ext = nullptr;
@@ -148,16 +148,16 @@ Err Box::reshape_vargs(btype type, ui32 rank, va_list ap)
         }
         reshape_ext = getExtensions();
     }
-    return reshape_vargs(type, reshape_device, reshape_ext, rank, ap);
+    return _reshape_vargs(type, reshape_device, reshape_ext, rank, ap);
 }
 
-Err Box::reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+Err Box::_reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
 {
     createIfNotExists();
     return _data->resize_dims(type, device, ext, rank, dims);
 }
 
-Err Box::reshape_dims(btype type, ui32 rank, ui32 const * dims)
+Err Box::_reshape_dims(btype type, ui32 rank, ui32 const * dims)
 {
     btype reshape_device = device_cpu();
     ui64 const * reshape_ext = nullptr;
@@ -167,27 +167,27 @@ Err Box::reshape_dims(btype type, ui32 rank, ui32 const * dims)
         }
         reshape_ext = getExtensions();
     }
-    return reshape_dims(type, reshape_device, reshape_ext, rank, dims);
+    return _reshape_dims(type, reshape_device, reshape_ext, rank, dims);
 }
 
-Err Box::reshape_ref_box(box_data const * reference_box)
+Err Box::_reshape_ref_box(btype type, box_data const * reference_box)
 {
     if (reference_box == nullptr) {
         return E_ILLARGS;
     }
-    return reshape_dims(reference_box->type,
-                        reference_box->device,
-                        reference_box->ext,
-                        reference_box->rank,
-                        reference_box->dims);
+    return _reshape_dims(type,
+                         reference_box->device,
+                         reference_box->ext,
+                         reference_box->rank,
+                         reference_box->dims);
 }
 
-Err Box::reshape_ref_box(Box const & reference_box)
+Err Box::_reshape_ref_box(btype type, Box const & reference_box)
 {
     if (!reference_box) {
         return E_ILLARGS;
     }
-    return reshape_ref_box(reference_box.base());
+    return _reshape_ref_box(type, reference_box.base());
 }
 
 Box Box::shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
@@ -212,7 +212,7 @@ Box Box::shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_li
 {
     Box result;
     assert(result.exists());
-    auto const code = result.reshape_vargs(type, device, ext, rank, ap);
+    auto const code = result._reshape_vargs(type, device, ext, rank, ap);
     if (isFailure(code)) {
         return Box(nullptr);
     }
@@ -223,7 +223,7 @@ Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
 {
     Box result;
     assert(result.exists());
-    auto const code = result.reshape_vargs(type, rank, ap);
+    auto const code = result._reshape_vargs(type, rank, ap);
     if (isFailure(code)) {
         return Box(nullptr);
     }
@@ -234,7 +234,7 @@ Box Box::shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 c
 {
     Box result;
     assert(result.exists());
-    auto const code = result.reshape_dims(type, device, ext, rank, dims);
+    auto const code = result._reshape_dims(type, device, ext, rank, dims);
     if (isFailure(code)) {
         return Box(nullptr);
     }
@@ -245,7 +245,7 @@ Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
 {
     Box result;
     assert(result.exists());
-    auto const code = result.reshape_dims(type, rank, dims);
+    auto const code = result._reshape_dims(type, rank, dims);
     if (isFailure(code)) {
         return Box(nullptr);
     }

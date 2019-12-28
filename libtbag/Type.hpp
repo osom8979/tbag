@@ -147,6 +147,27 @@ struct is_first_string<T>
             is_string_literal<T>::value;
 };
 
+/**
+ * Test that all template arguments are of type integer.
+ *
+ * @author zer0
+ * @date   2019-12-28
+ */
+template <typename ... T>
+struct is_all_integral;
+
+template <typename Head, typename ... Tail>
+struct is_all_integral<Head, Tail...>
+{
+    TBAG_CONSTEXPR static bool const value = is_all_integral<Head>::value && is_all_integral<Tail ...>::value;
+};
+
+template <typename T>
+struct is_all_integral<T>
+{
+    TBAG_CONSTEXPR static bool const value = std::is_integral<typename remove_cr<T>::type>::value;
+};
+
 struct constexpr_init_t { /* EMPTY. */ };
 
 TBAG_CONSTEXPR static constexpr_init_t const constexpr_init = {};
