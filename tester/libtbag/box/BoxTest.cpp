@@ -109,11 +109,12 @@ TEST(BoxTest, is_first_Box)
 TEST(BoxTest, is_last_va_list)
 {
     EXPECT_TRUE(is_last_va_list<va_list const &>::value);
-    EXPECT_TRUE(is_last_va_list<va_list const *>::value);
     EXPECT_TRUE(is_last_va_list<va_list const>::value);
     EXPECT_TRUE(is_last_va_list<va_list &>::value);
-    EXPECT_TRUE(is_last_va_list<va_list *>::value);
     EXPECT_TRUE(is_last_va_list<va_list>::value);
+
+    EXPECT_FALSE(is_last_va_list<va_list const *>::value);
+    EXPECT_FALSE(is_last_va_list<va_list *>::value);
 
     EXPECT_FALSE(is_last_va_list<int const &>::value);
     EXPECT_FALSE(is_last_va_list<int const *>::value);

@@ -261,9 +261,8 @@ template <typename T>
 struct is_last_va_list<T>
 {
     using __t1 = typename std::remove_reference<T>::type;
-    using __t2 = typename std::remove_pointer<__t1>::type;
-    using __t3 = typename std::remove_const<__t2>::type;
-    TBAG_CONSTEXPR static bool const value = std::is_same<__t3, va_list>::value;
+    using __t2 = typename std::remove_const<__t1>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__t2, va_list>::value;
 };
 
 template <typename ... T>
