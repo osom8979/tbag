@@ -1442,6 +1442,12 @@ private:
     }
 
     template <typename T, typename ... Args>
+    Err _set(shape_args1_t, T const & src, bdev src_device, ui64 const * src_ext, Args ... args)
+    {
+        return _set(shape_args1_t{}, (T const *)&src, src_device, src_ext, std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
     Err _set(shape_args2_t, T const * src, Args ... args)
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
@@ -1455,6 +1461,12 @@ private:
                                     std::forward<Args>(args) ...);
     }
 
+    template <typename T, typename ... Args>
+    Err _set(shape_args2_t, T const & src, Args ... args)
+    {
+        return _set(shape_args2_t{}, (T const *)&src, std::forward<Args>(args) ...);
+    }
+
     template <typename T>
     Err _set(shape_dims1_t, T const * src, bdev src_device, ui64 const * src_ext,
              ui32 index_rank, ui32 const * index_dims)
@@ -1463,6 +1475,13 @@ private:
             return E_EXPIRED;
         }
         return _data->set_data_dims((void const *)src, get_btype<T>(), src_device, src_ext, index_rank, index_dims);
+    }
+
+    template <typename T>
+    Err _set(shape_dims1_t, T const & src, bdev src_device, ui64 const * src_ext,
+             ui32 index_rank, ui32 const * index_dims)
+    {
+        return _set(shape_dims1_t{}, (T const *)&src, src_device, src_ext, index_rank, index_dims);
     }
 
     template <typename T>
@@ -1476,6 +1495,12 @@ private:
         return _data->set_data_dims((void const *)src, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
     }
 
+    template <typename T>
+    Err _set(shape_dims2_t, T const & src, ui32 index_rank, ui32 const * index_dims)
+    {
+        return _set(shape_dims2_t{}, (T const *)&src, index_rank, index_dims);
+    }
+
 public:
     template <typename T, typename ... Args>
     Err set(T const * src, Args ... args)
@@ -1487,7 +1512,7 @@ public:
     template <typename T, typename ... Args>
     Err set(T const & src, Args ... args)
     {
-        return set(&src, std::forward<Args>(args) ...);
+        return set((T const *)&src, std::forward<Args>(args) ...);
     }
 
 public:
@@ -1669,6 +1694,36 @@ public:
             T out = T();
             get(&out);
             return out;
+        }
+
+        template <typename T>
+        Err set(T const * src, bdev src_device, ui64 const * src_ext)
+        {
+            assert(cursor.box != nullptr);
+            return cursor.box->set_data(src, get_btype<T>(), src_device, src_ext, cursor.begin);
+        }
+
+        template <typename T>
+        Err set(T const & src, bdev src_device, ui64 const * src_ext)
+        {
+            return set((T const *)&src, src_device, src_ext);
+        }
+
+        template <typename T>
+        Err set(T const * src)
+        {
+            using namespace libtbag::box::details;
+            assert(cursor.box != nullptr);
+            auto const src_device = cursor.box->device == BD_NONE ? BD_CPU : cursor.box->device;
+            ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { cursor.box->ext[0], cursor.box->ext[1],
+                                                      cursor.box->ext[2], cursor.box->ext[3] };
+            return cursor.box->set_data(src, get_btype<T>(), src_device, src_ext, cursor.begin);
+        }
+
+        template <typename T>
+        Err set(T const & src)
+        {
+            return set((T const *)&src);
         }
     };
 

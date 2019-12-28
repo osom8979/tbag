@@ -104,3 +104,29 @@ TEST(Box_Cursor_Test, Get)
     ASSERT_FALSE(c0.value.next());
 }
 
+TEST(Box_Cursor_Test, Set)
+{
+    Box box = {0, 0, 0, 0};
+    auto c0 = box.cursor();
+    ASSERT_EQ(E_SUCCESS, c0.code);
+    ASSERT_EQ(E_SUCCESS, c0.value.set(10.0f));
+    ASSERT_TRUE(c0.value.next());
+
+    ui64 ext[] = {0, 0, 0, 0};
+    ASSERT_EQ(E_SUCCESS, c0.value.set(200.0, Box::device_cpu(), ext));
+    ASSERT_TRUE(c0.value.next());
+
+    int const elem2 = 30;
+    ASSERT_EQ(E_SUCCESS, c0.value.set(&elem2));
+    ASSERT_TRUE(c0.value.next());
+
+    unsigned const elem3 = 4u;
+    ASSERT_EQ(E_SUCCESS, c0.value.set(&elem3, Box::device_cpu(), ext));
+    ASSERT_FALSE(c0.value.next());
+
+    ASSERT_EQ(10, box.at<int>(0));
+    ASSERT_EQ(200, box.at<int>(1));
+    ASSERT_EQ(30, box.at<int>(2));
+    ASSERT_EQ(4, box.at<int>(3));
+}
+

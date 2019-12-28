@@ -437,6 +437,8 @@ struct TBAG_API box_data : private Noncopyable
     void checked_assign_info_string(char const * src);
 
     Err set_data(void const * src_data, btype src_type, bdev src_device,
+                 ui64 const * src_ext, void * dest_data);
+    Err set_data(void const * src_data, btype src_type, bdev src_device,
                  ui64 const * src_ext, ui32 box_data_offset);
     Err set_data_args(void const * src_data, btype src_type, bdev src_device,
                       ui64 const * src_ext, ui32 box_rank, ...);

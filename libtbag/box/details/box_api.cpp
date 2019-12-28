@@ -1249,13 +1249,13 @@ void box_data::checked_assign_info_string(char const * src)
 }
 
 Err box_data::set_data(void const * src_data, btype src_type, bdev src_device,
-                       ui64 const * src_ext, ui32 box_data_offset)
+                       ui64 const * src_ext, void * dest_data)
 {
     assert(src_data != nullptr);
     assert(box_support_type(src_type));
     assert(box_support_device(src_device));
     if (device == BD_CPU && src_device == BD_CPU) {
-        box_cpu_set(get_data_ptr_by_offset(box_data_offset), type, src_data, src_type);
+        box_cpu_set(dest_data, type, src_data, src_type);
         return E_SUCCESS;
     } else if (device == BD_CUDA && src_device == BD_CUDA) {
         // TODO
@@ -1263,6 +1263,12 @@ Err box_data::set_data(void const * src_data, btype src_type, bdev src_device,
         // TODO
     }
     return E_ENOSYS;
+}
+
+Err box_data::set_data(void const * src_data, btype src_type, bdev src_device,
+                       ui64 const * src_ext, ui32 box_data_offset)
+{
+    return set_data(src_data, src_type, src_device, src_ext, get_data_ptr_by_offset(box_data_offset));
 }
 
 Err box_data::set_data_args(void const * src_data, btype src_type, bdev src_device,
