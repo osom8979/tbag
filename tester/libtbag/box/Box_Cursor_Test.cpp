@@ -94,12 +94,12 @@ TEST(Box_Cursor_Test, Get)
     ASSERT_TRUE(c0.value.next());
 
     int elem;
-    ASSERT_EQ(E_SUCCESS, c0.value.get<int>(&elem));
+    ASSERT_EQ(E_SUCCESS, c0.value.get(&elem));
     ASSERT_EQ(3, elem);
     ASSERT_TRUE(c0.value.next());
     elem = 0;
 
-    ASSERT_EQ(E_SUCCESS, c0.value.get<int>(&elem, Box::device_cpu(), ext));
+    ASSERT_EQ(E_SUCCESS, c0.value.get(&elem, Box::device_cpu(), ext));
     ASSERT_EQ(4, elem);
     ASSERT_FALSE(c0.value.next());
 }
