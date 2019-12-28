@@ -58,7 +58,7 @@ TEST(BoxTest, CreateIfNotExists)
     ASSERT_TRUE(box);
 }
 
-TEST(BoxTest, TypeTraits_box_data)
+TEST(BoxTest, is_first_box_data)
 {
     ASSERT_FALSE(is_first_box_data<Box const &>::value);
     ASSERT_FALSE(is_first_box_data<Box const *>::value);
@@ -79,7 +79,7 @@ TEST(BoxTest, TypeTraits_box_data)
     ASSERT_FALSE((is_first_box_data<Box,int,box_data>::value));
 }
 
-TEST(BoxTest, TypeTraits_Box)
+TEST(BoxTest, is_first_Box)
 {
     ASSERT_TRUE(is_first_Box<Box const &>::value);
     ASSERT_TRUE(is_first_Box<Box const *>::value);
@@ -98,5 +98,25 @@ TEST(BoxTest, TypeTraits_Box)
 
     ASSERT_FALSE((is_first_Box<int,Box>::value));
     ASSERT_FALSE((is_first_Box<box_data,int,Box>::value));
+}
+
+TEST(BoxTest, is_last_va_list)
+{
+    ASSERT_TRUE(is_last_va_list<va_list const &>::value);
+    ASSERT_TRUE(is_last_va_list<va_list const *>::value);
+    ASSERT_TRUE(is_last_va_list<va_list const>::value);
+    ASSERT_TRUE(is_last_va_list<va_list &>::value);
+    ASSERT_TRUE(is_last_va_list<va_list *>::value);
+    ASSERT_TRUE(is_last_va_list<va_list>::value);
+
+    ASSERT_FALSE(is_last_va_list<int const &>::value);
+    ASSERT_FALSE(is_last_va_list<int const *>::value);
+    ASSERT_FALSE(is_last_va_list<int const>::value);
+    ASSERT_FALSE(is_last_va_list<int &>::value);
+    ASSERT_FALSE(is_last_va_list<int *>::value);
+    ASSERT_FALSE(is_last_va_list<int>::value);
+
+    ASSERT_FALSE((is_first_Box<va_list,int>::value));
+    ASSERT_FALSE((is_first_Box<va_list,int,double>::value));
 }
 
