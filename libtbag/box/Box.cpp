@@ -190,25 +190,25 @@ Err Box::_reshape_ref_box(btype type, Box const & reference_box)
     return _reshape_ref_box(type, reference_box.base());
 }
 
-Box Box::shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
+Box Box::_shape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...)
 {
     va_list ap;
     va_start(ap, rank);
-    auto result = shape_vargs(type, device, ext, rank, ap);
+    auto result = _shape_vargs(type, device, ext, rank, ap);
     va_end(ap);
     return result;
 }
 
-Box Box::shape_args(btype type, ui32 rank, ...)
+Box Box::_shape_args(btype type, ui32 rank, ...)
 {
     va_list ap;
     va_start(ap, rank);
-    auto result = shape_vargs(type, rank, ap);
+    auto result = _shape_vargs(type, rank, ap);
     va_end(ap);
     return result;
 }
 
-Box Box::shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
+Box Box::_shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
 {
     Box result;
     assert(result.exists());
@@ -219,7 +219,7 @@ Box Box::shape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_li
     return result;
 }
 
-Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
+Box Box::_shape_vargs(btype type, ui32 rank, va_list ap)
 {
     Box result;
     assert(result.exists());
@@ -230,7 +230,7 @@ Box Box::shape_vargs(btype type, ui32 rank, va_list ap)
     return result;
 }
 
-Box Box::shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+Box Box::_shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
 {
     Box result;
     assert(result.exists());
@@ -241,11 +241,33 @@ Box Box::shape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 c
     return result;
 }
 
-Box Box::shape_dims(btype type, ui32 rank, ui32 const * dims)
+Box Box::_shape_dims(btype type, ui32 rank, ui32 const * dims)
 {
     Box result;
     assert(result.exists());
     auto const code = result._reshape_dims(type, rank, dims);
+    if (isFailure(code)) {
+        return Box(nullptr);
+    }
+    return result;
+}
+
+Box Box::_shape_ref_box(btype type, box_data const * reference_box)
+{
+    Box result;
+    assert(result.exists());
+    auto const code = result._reshape_ref_box(type, reference_box);
+    if (isFailure(code)) {
+        return Box(nullptr);
+    }
+    return result;
+}
+
+Box Box::_shape_ref_box(btype type, Box const & reference_box)
+{
+    Box result;
+    assert(result.exists());
+    auto const code = result._reshape_ref_box(type, reference_box);
     if (isFailure(code)) {
         return Box(nullptr);
     }
