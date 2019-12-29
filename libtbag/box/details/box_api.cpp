@@ -1452,6 +1452,11 @@ ErrPair<box_cursor> box_cursor::init_cursor() const TBAG_NOEXCEPT
     return init_cursor(0);
 }
 
+bool box_cursor::is_last_dim() const TBAG_NOEXCEPT
+{
+    return ((dim_index+1) >= (box->rank));
+}
+
 bool box_cursor::is_continue() const TBAG_NOEXCEPT
 {
     return begin != end;
