@@ -21,6 +21,8 @@
 #include <utility>
 #include <memory>
 #include <string>
+#include <tuple>
+#include <functional>
 #include <type_traits>
 
 #define STATIC_ASSERT_CHECK_TRAIT1(traits, type) \
@@ -148,6 +150,27 @@ struct is_first_string<T>
 };
 
 /**
+ * Obtain the first template argument type.
+ *
+ * @author zer0
+ * @date   2019-12-29
+ */
+template <typename ... T>
+struct first_argument;
+
+template <typename Head, typename ... Tail>
+struct first_argument<Head, Tail...>
+{
+    using type = Head;
+};
+
+template <typename T>
+struct first_argument<T>
+{
+    using type = T;
+};
+
+/**
  * Test that all template arguments are of type integer.
  *
  * @author zer0
@@ -167,6 +190,94 @@ struct is_all_integral<T>
 {
     TBAG_CONSTEXPR static bool const value = std::is_integral<typename remove_cr<T>::type>::value;
 };
+
+template <typename T>
+struct function_traits;
+
+template <typename RetT, typename ... ArgsT>
+struct function_traits<RetT(ArgsT...)>
+{
+    TBAG_CONSTEXPR static std::size_t const argument_size = sizeof...(ArgsT);
+
+    using return_type = RetT;
+    using function_type = RetT(ArgsT...);
+
+    template <std::size_t i>
+    struct arguments
+    {
+        using type = typename std::tuple_element<i, std::tuple<ArgsT ...> >::type;
+    };
+};
+
+template <typename RetT, typename ... ArgsT>
+struct function_traits<RetT(*)(ArgsT...)> : public function_traits<RetT(ArgsT...)>
+{ /* EMPTY. */ };
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<RetT(ClassT::*)(ArgsT...)> : public function_traits<RetT(ArgsT...)>
+{
+    using class_type = ClassT;
+};
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<RetT(ClassT::*)(ArgsT...) const> : public function_traits<RetT(ArgsT...)>
+{
+    using class_type = ClassT;
+};
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<RetT(ClassT::*)(ArgsT...) volatile> : public function_traits<RetT(ArgsT...)>
+{
+    using class_type = ClassT;
+};
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<RetT(ClassT::*)(ArgsT...) volatile const> : public function_traits<RetT(ArgsT...)>
+{
+    using class_type = ClassT;
+};
+
+template <typename T>
+struct function_traits : public function_traits<decltype(&T::operator())>
+{ /* EMPTY. */ };
+
+template <typename T>
+struct function_traits< std::function<T> > : public function_traits<T>
+{ /* EMPTY. */ };
+
+#if defined(_GLIBCXX_FUNCTIONAL)
+# define _TBAG_MEM_FUNCTIONAL_TYPE std::_Mem_fn
+#elif defined(_LIBCPP_FUNCTIONAL)
+# define _TBAG_MEM_FUNCTIONAL_TYPE std::__mem_fn
+#endif
+
+#if defined(_TBAG_MEM_FUNCTIONAL_TYPE)
+template <typename RetT, typename ClassT>
+struct function_traits<_TBAG_MEM_FUNCTIONAL_TYPE<RetT(ClassT::*)> >
+        : public function_traits<RetT(ClassT*)>
+{ /* EMPTY. */ };
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<_TBAG_MEM_FUNCTIONAL_TYPE<RetT(ClassT::*)(ArgsT...)> >
+        : public function_traits<RetT(ClassT*, ArgsT...)>
+{ /* EMPTY. */ };
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<_TBAG_MEM_FUNCTIONAL_TYPE<RetT(ClassT::*)(ArgsT...) const> >
+        : public function_traits<RetT(const ClassT*, ArgsT...)>
+{ /* EMPTY. */ };
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<_TBAG_MEM_FUNCTIONAL_TYPE<RetT(ClassT::*)(ArgsT...) volatile> >
+        : public function_traits<RetT(volatile ClassT*, ArgsT...)>
+{ /* EMPTY. */ };
+
+template <typename RetT, typename ClassT, typename ... ArgsT>
+struct function_traits<_TBAG_MEM_FUNCTIONAL_TYPE<RetT(ClassT::*)(ArgsT...) volatile const> >
+        : public function_traits<RetT(volatile const ClassT*, ArgsT...)>
+{ /* EMPTY. */ };
+
+#endif // _TBAG_MEM_FUNCTIONAL_TYPE
 
 struct constexpr_init_t { /* EMPTY. */ };
 
