@@ -141,7 +141,7 @@ Err readImage(std::string const & path, Box & image)
     assert(1 <= COMPARE_AND(channels) <= 4);
     assert(width >= 1);
     assert(height >= 1);
-    image.reshape<uint8_t>(height, width, channels);
+    image.resize<uint8_t>(height, width, channels);
     memcpy(image.data(), data, image.size());
 
     stbi_image_free(data);

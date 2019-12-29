@@ -335,8 +335,8 @@ struct is_first_bdev_and_second_ui64_ptr<T>
  *     <td><code>Box b = {{1, 2}, {3, 4}, {5, 6}};</code></td>
  *   </tr>
  *   <tr>
- *     <td><code>a.reshape([2, 3])</code></td>
- *     <td><code>a.reshape(2, 3)</code></td>
+ *     <td><code>a.resize([2, 3])</code></td>
+ *     <td><code>a.resize(2, 3)</code></td>
  *   </tr>
  *   <tr>
  *     <td><code>a.astype(np.double)</code></td>
@@ -1046,65 +1046,65 @@ public:
     };
 
 private:
-    Err _reshape_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
-    Err _reshape_args(btype type, ui32 rank, ...);
+    Err _resize_args(btype type, bdev device, ui64 const * ext, ui32 rank, ...);
+    Err _resize_args(btype type, ui32 rank, ...);
 
-    Err _reshape_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
-    Err _reshape_vargs(btype type, ui32 rank, va_list ap);
+    Err _resize_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap);
+    Err _resize_vargs(btype type, ui32 rank, va_list ap);
 
-    Err _reshape_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
-    Err _reshape_dims(btype type, ui32 rank, ui32 const * dims);
+    Err _resize_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
+    Err _resize_dims(btype type, ui32 rank, ui32 const * dims);
 
-    Err _reshape_ref_box(btype type, box_data const * reference_box);
-    Err _reshape_ref_box(btype type, Box const & reference_box);
+    Err _resize_ref_box(btype type, box_data const * reference_box);
+    Err _resize_ref_box(btype type, Box const & reference_box);
 
 private:
     template <typename T, typename ... Args>
-    Err _reshape(shape_unknown_t, Args && ... args)
+    Err _resize(shape_unknown_t, Args && ... args)
     {
         return libtbag::E_INACCESSIBLE_BLOCK;
     }
 
     template <typename T, typename ... Args>
-    Err _reshape(shape_args1_t, bdev device, ui64 const * ext, Args ... args)
+    Err _resize(shape_args1_t, bdev device, ui64 const * ext, Args ... args)
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        return _reshape_args(get_btype<T>(), device, ext,
+        return _resize_args(get_btype<T>(), device, ext,
                              static_cast<ui32>(sizeof...(Args)),
                              std::forward<Args>(args) ...);
     }
 
     template <typename T, typename ... Args>
-    Err _reshape(shape_args2_t, Args ... args)
+    Err _resize(shape_args2_t, Args ... args)
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        return _reshape_args(get_btype<T>(),
+        return _resize_args(get_btype<T>(),
                              static_cast<ui32>(sizeof...(Args)),
                              std::forward<Args>(args) ...);
     }
 
     template <typename T>
-    Err _reshape(shape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+    Err _resize(shape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
     {
-        return _reshape_dims(get_btype<T>(), device, ext, rank, dims);
+        return _resize_dims(get_btype<T>(), device, ext, rank, dims);
     }
 
     template <typename T>
-    Err _reshape(shape_dims2_t, ui32 rank, ui32 const * dims)
+    Err _resize(shape_dims2_t, ui32 rank, ui32 const * dims)
     {
-        return _reshape_dims(get_btype<T>(), rank, dims);
+        return _resize_dims(get_btype<T>(), rank, dims);
     }
 
     template <typename T>
-    Err _reshape(shape_ref_box1_t, box_data const * reference_box)
+    Err _resize(shape_ref_box1_t, box_data const * reference_box)
     {
-        return _reshape_ref_box(get_btype<T>(), reference_box);
+        return _resize_ref_box(get_btype<T>(), reference_box);
     }
 
     template <typename T>
-    Err _reshape(shape_ref_box2_t, Box const & reference_box)
+    Err _resize(shape_ref_box2_t, Box const & reference_box)
     {
-        return _reshape_ref_box(get_btype<T>(), reference_box);
+        return _resize_ref_box(get_btype<T>(), reference_box);
     }
 
 public:
@@ -1114,10 +1114,10 @@ public:
      * @see libtbag::box::details::box_data::resize_dims
      */
     template <typename T, typename ... Args>
-    Err reshape(Args ... args)
+    Err resize(Args ... args)
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        return _reshape<T>(shape_selector<Args...>::value, std::forward<Args>(args) ...);
+        return _resize<T>(shape_selector<Args...>::value, std::forward<Args>(args) ...);
     }
 
     template <typename T, typename ... Args>
@@ -1125,7 +1125,7 @@ public:
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         Box result;
-        if (isFailure(result.reshape<T>(std::forward<Args>(args) ...))) {
+        if (isFailure(result.resize<T>(std::forward<Args>(args) ...))) {
             return Box(nullptr);
         }
         return result;
@@ -1171,7 +1171,7 @@ public:
         using DataType = typename libtbag::remove_cr<T>::type;
         auto const dim_1d = static_cast<ui32>(std::distance(begin, end));
         auto const type = get_btype<DataType>();
-        auto const code = _reshape_args(type, device, ext, 1, dim_1d);
+        auto const code = _resize_args(type, device, ext, 1, dim_1d);
         if (isFailure(code)) {
             return code;
         }
@@ -1211,7 +1211,7 @@ public:
         auto const dim_1d = static_cast<ui32>(items.size());
         auto const dim_2d = static_cast<ui32>(items.begin()->size());
         auto const type = get_btype<DataType>();
-        auto const code = _reshape_args(type, device, ext, 2, dim_1d, dim_2d);
+        auto const code = _resize_args(type, device, ext, 2, dim_1d, dim_2d);
         if (isFailure(code)) {
             return code;
         }
@@ -1246,7 +1246,7 @@ public:
         auto const dim_2d = static_cast<ui32>(items.begin()->size());
         auto const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
         auto const type = get_btype<DataType>();
-        auto const code = _reshape_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
+        auto const code = _resize_args(type, device, ext, 3, dim_1d, dim_2d, dim_3d);
         if (isFailure(code)) {
             return code;
         }
@@ -1288,7 +1288,7 @@ public:
         auto const dim_3d = static_cast<ui32>(items.begin()->begin()->size());
         auto const dim_4d = static_cast<ui32>(items.begin()->begin()->begin()->size());
         auto const type = get_btype<DataType>();
-        auto const code = _reshape_args(type, device, ext, 4, dim_1d, dim_2d, dim_3d, dim_4d);
+        auto const code = _resize_args(type, device, ext, 4, dim_1d, dim_2d, dim_3d, dim_4d);
         if (isFailure(code)) {
             return code;
         }

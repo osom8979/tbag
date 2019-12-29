@@ -97,7 +97,7 @@ Err renderCenteredText(std::string const & text,
     assert(obtain_result == 0);
 
     if (channels == 1) {
-        output.reshape<std::uint8_t>(height, width, 1);
+        output.resize<std::uint8_t>(height, width, 1);
         auto const * source = static_cast<std::uint8_t const *>(data.pixelData);
         auto * destination = output.data<std::uint8_t>();
         auto const loop_size = height*width;
@@ -107,7 +107,7 @@ Err renderCenteredText(std::string const & text,
             source += 4;
         }
     } else if (channels == 3) {
-        output.reshape<std::uint8_t>(height, width, 3);
+        output.resize<std::uint8_t>(height, width, 3);
         auto const * source = static_cast<std::uint8_t const *>(data.pixelData);
         auto * destination = output.data<std::uint8_t>();
         auto const loop_size = height*width;
@@ -121,7 +121,7 @@ Err renderCenteredText(std::string const & text,
         }
     } else {
         assert(channels == 4);
-        output.reshape<std::uint8_t>(height, width, 4);
+        output.resize<std::uint8_t>(height, width, 4);
         memcpy(output.data(), data.pixelData, (height*width*4));
     }
     return E_SUCCESS;
