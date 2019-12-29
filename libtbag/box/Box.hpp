@@ -1590,13 +1590,7 @@ public:
     {
     public:
         using CursorType = CursorT;
-        using DataType = T;
-
-    public:
-        using difference_type = ui32;
-        using value_type = DataType;
-        using pointer = DataType*;
-        using reference = DataType&;
+        using DataType = typename std::remove_pointer<typename std::remove_reference<T>::type>::type;
         using iterator_category = std::forward_iterator_tag;
 
     private:
@@ -2003,18 +1997,25 @@ public:
             return IteratorGenerator<typename std::add_const<Cursor>::type, T>(*this);
         }
 
-        template <typename T, typename Predicated>
-        Err forEach(Predicated predicated)
+        template <typename Predicated>
+        Err forEach(Slice const * slice_begin, Slice const * slice_end, Predicated predicated)
         {
             if (isLastDimension()) {
-                return itr<T>().forEach(predicated);
+                using __arg0 = typename libtbag::function_traits<Predicated>::template arguments<0>::type;
+                return itr<__arg0>().forEach(predicated);
             } else {
                 do {
-                    auto err_cursor = sub();
-                    if (isFailure(err_cursor)) {
+                    ErrPair<Cursor> err_cursor;
+                    if (slice_begin == slice_end) {
+                        err_cursor = sub();
+                    } else {
+                        err_cursor = sub(*slice_begin);
+                        ++slice_begin;
+                    }
+                    if (!err_cursor) {
                         return err_cursor.code;
                     }
-                    auto const code = err_cursor.value.forEach<T>(predicated);
+                    auto const code = err_cursor.value.forEach(slice_begin, slice_end, predicated);
                     if (isFailure(code)) {
                         return code;
                     }
@@ -2026,15 +2027,24 @@ public:
         template <typename T, typename Predicated>
         Err forEach(Slice const * slice, std::size_t size, Predicated predicated)
         {
-            if (slice == nullptr || size == 0 || isLastDimension()) {
-                return itr<T>().forEach(predicated);
+            return forEach(slice, slice + size, predicated);
+        }
+
+        template <typename Predicated>
+        Err forEachGet(Slice const * slice_begin, Slice const * slice_end, Predicated predicated)
+        {
+            if (slice_begin == slice_end || isLastDimension()) {
+                do {
+                    using __arg0 = typename libtbag::function_traits<Predicated>::template arguments<0>::type;
+                    predicated(get<__arg0>());
+                } while (next());
             } else {
                 do {
-                    auto err_cursor = sub(*slice);
+                    auto err_cursor = sub(*slice_begin);
                     if (isFailure(err_cursor)) {
                         return err_cursor.code;
                     }
-                    auto const code = err_cursor.value.forEach<T>(slice+1, size-1, predicated);
+                    auto const code = err_cursor.value.forEachGet(slice_begin+1, slice_end, predicated);
                     if (isFailure(code)) {
                         return code;
                     }
@@ -2051,27 +2061,32 @@ public:
     ErrPair<Cursor> cursor(int begin) const;
     ErrPair<Cursor> cursor() const;
 
-    template <typename T, typename Predicated>
-    Err forEach(Predicated predicated) const
+    template <typename Predicated>
+    Err forEach(Slice const * slice_begin, Slice const * slice_end, Predicated predicated) const
     {
-        auto err_cursor = cursor();
-        if (isFailure(err_cursor)) {
+        ErrPair<Cursor> err_cursor;
+        if (slice_begin == slice_end) {
+            err_cursor = cursor();
+        } else {
+            err_cursor = cursor(*slice_begin);
+            ++slice_begin;
+        }
+        if (!err_cursor) {
             return err_cursor.code;
         }
-        return err_cursor.value.forEach<T>(predicated);
+        return err_cursor.value.forEach(slice_begin, slice_end, predicated);
     }
 
-    template <typename T, typename Predicated>
+    template <typename Predicated>
     Err forEach(Slice const * slices, std::size_t size, Predicated predicated) const
     {
-        if (slices == nullptr || size == 0) {
-            return E_ILLARGS;
-        }
-        auto err_cursor = cursor(*slices);
-        if (isFailure(err_cursor)) {
-            return err_cursor.code;
-        }
-        return err_cursor.value.forEach<T>(slices+1, size-1, predicated);
+        return forEach(slices, slices + size, predicated);
+    }
+
+    template <typename Predicated>
+    Err forEach(Predicated predicated) const
+    {
+        return forEach(static_cast<Slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
     }
 
     std::vector<ui32> diffs(Slice const * slice_begin, Slice const * slice_end) const;
@@ -2079,7 +2094,37 @@ public:
     std::vector<ui32> diffs(std::vector<Slice> const & slices) const;
     std::vector<ui32> diffs() const;
 
-    Box slice(std::vector<Slice> const & slices);
+    template <typename Predicated>
+    Err forEachGet(Slice const * slice_begin, Slice const * slice_end, Predicated predicated) const
+    {
+        ErrPair<Cursor> err_cursor;
+        if (slice_begin == slice_end) {
+            err_cursor = cursor();
+        } else {
+            err_cursor = cursor(*slice_begin);
+            ++slice_begin;
+        }
+        if (!err_cursor) {
+            return err_cursor.code;
+        }
+        return err_cursor.value.forEachGet(slice_begin, slice_end, predicated);
+    }
+
+    template <typename Predicated>
+    Err forEachGet(Slice const * slices, std::size_t size, Predicated predicated) const
+    {
+        return forEachGet(slices, slices + size, predicated);
+    }
+
+    template <typename Predicated>
+    Err forEachGet(Predicated predicated) const
+    {
+        return forEachGet(static_cast<Slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
+    }
+
+    Box slice(Slice const * slice_begin, Slice const * slice_end) const;
+    Box slice(Slice const * slices, std::size_t size) const;
+    Box slice(std::vector<Slice> const & slices) const;
 };
 
 } // namespace box

@@ -499,15 +499,61 @@ std::vector<ui32> Box::diffs() const
     return diffs(static_cast<Slice const *>(nullptr), static_cast<std::size_t>(0u));
 }
 
-Box Box::slice(std::vector<Slice> const & slices)
+Box Box::slice(Slice const * slice_begin, Slice const * slice_end) const
 {
-    if (slices.empty()) {
+    auto const dims = diffs(slice_begin, slice_end);
+    Box result;
+    auto const resize_code = result._resize_dims(type(), device(), ext(), dims.size(), dims.data());
+    if (isFailure(resize_code)) {
         return Box(nullptr);
     }
-    auto const * slices_data = slices.data();
-    auto const slices_size = slices.size();
-    assert(slices_data != nullptr);
-    assert(slices_size >= 0);
+    assert(result.exists());
+    if (info_size() >= 1) {
+        result.setInfo(info(), info_size());
+    }
+    result.setOpaque(getOpaque<box_any>());
+    result.setOpaqueDeleter(getOpaqueDeleter());
+
+//    ErrPair<Cursor> err_cursor;
+//    if (slice_begin == slice_end) {
+//        err_cursor = cursor();
+//    } else {
+//        err_cursor = cursor(*slice_begin);
+//        ++slice_begin;
+//    }
+//    if (!err_cursor) {
+//        return Box(nullptr);
+//    }
+//
+//    err_cursor.value.forEach<T>(slice_begin+1, slice_end, predicated);
+//
+//    if (slice_begin == slice_end || err_cursor.value.isLastDimension()) {
+//        return itr<T>().forEach(predicated);
+//    } else {
+//        do {
+//            auto err_cursor = sub(*slice_begin);
+//            if (isFailure(err_cursor)) {
+//                return err_cursor.code;
+//            }
+//            auto const code = err_cursor.value.forEach<T>(slice_begin, slice_end, predicated);
+//            if (isFailure(code)) {
+//                return code;
+//            }
+//        } while (next());
+//        return libtbag::E_SUCCESS;
+//    }
+
+    return result;
+}
+
+Box Box::slice(Slice const * slices, std::size_t size) const
+{
+    return slice(slices, slices + size);
+}
+
+Box Box::slice(std::vector<Slice> const & slices) const
+{
+    return slice(slices.data(), slices.size());
 }
 
 } // namespace box

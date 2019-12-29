@@ -15,7 +15,7 @@ TEST(Box_ForEach_Test, Default)
 {
     Box box = {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
     std::vector<int> result;
-    auto const code = box.forEach<int>([&](int const & val){
+    auto const code = box.forEach([&](int const & val){
         result.emplace_back(val);
     });
     ASSERT_EQ(E_SUCCESS, code);
@@ -34,7 +34,7 @@ TEST(Box_ForEach_Test, Default_Mutable)
 {
     Box box = {{{0, 0}, {0, 0}}, {{0, 0}, {0, 0}}};
     int i = 0;
-    auto const code = box.forEach<int>([&](int & val){
+    auto const code = box.forEach([&](int & val){
         val = i;
         ++i;
     });
