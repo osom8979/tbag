@@ -15,6 +15,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
+#include <cmath>
 
 #include <algorithm>
 #include <type_traits>
@@ -469,6 +470,32 @@ int box_index_abs(ui32 const * dims, ui32 dim_index, int data_index) TBAG_NOEXCE
     } else {
         assert(data_index < 0);
         return max_size + data_index;
+    }
+}
+
+int box_index_begin_abs(ui32 const * dims, ui32 dim_index, int data_index, int data_step) TBAG_NOEXCEPT
+{
+    if (data_index == box_nop) {
+        if (data_step >= 0) {
+            return 0;
+        } else {
+            return static_cast<int>(dims[dim_index]-1);
+        }
+    } else {
+        return box_index_abs(dims, dim_index, data_index);
+    }
+}
+
+int box_index_end_abs(ui32 const * dims, ui32 dim_index, int data_index, int data_step) TBAG_NOEXCEPT
+{
+    if (data_index == box_nop) {
+        if (data_step >= 0) {
+            return dims[dim_index];
+        } else {
+            return -1;
+        }
+    } else {
+        return box_index_abs(dims, dim_index, data_index);
     }
 }
 
@@ -951,34 +978,14 @@ ErrPair<box_cursor> box_data::init_cursor(void * data_pointer, ui32 dim_index,
         return E_ILLARGS;
     }
 
-    int begin_abs;
-    if (begin_index == box_nop) {
-        if (step_index >= 0) {
-            begin_abs = 0;
-        } else {
-            begin_abs = static_cast<int>(dims[dim_index]-1);
-        }
-    } else {
-        begin_abs = box_index_abs(dims, dim_index, begin_index);
-    }
+    int const begin_abs = box_index_begin_abs(dims, dim_index, begin_index, step_index);
     if (begin_abs < 0) {
         return E_INDEX;
     }
-
-    int end_abs;
-    if (end_index == box_nop) {
-        if (step_index >= 0) {
-            end_abs = dims[dim_index];
-        } else {
-            end_abs = -1;
-        }
-    } else {
-        end_abs = box_index_abs(dims, dim_index, end_index);
-    }
+    int const end_abs = box_index_end_abs(dims, dim_index, end_index, step_index);
     if (end_abs < -1) {
         return E_INDEX;
     }
-
     if (!box_step_check(begin_abs, end_abs, step_index)) {
         return E_INDEX;
     }
@@ -1465,6 +1472,11 @@ ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index) const TBAG_NOEXCEPT
 ErrPair<box_cursor> box_cursor::init_cursor() const TBAG_NOEXCEPT
 {
     return init_cursor(0);
+}
+
+int box_cursor::diff() const TBAG_NOEXCEPT
+{
+    return (int)std::abs((((std::intptr_t)end)-((std::intptr_t)begin)) / stride_byte);
 }
 
 bool box_cursor::is_last_dim() const TBAG_NOEXCEPT

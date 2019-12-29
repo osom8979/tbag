@@ -58,3 +58,74 @@ TEST(BoxTest, CreateIfNotExists)
     ASSERT_TRUE(box);
 }
 
+TEST(BoxTest, Diffs0)
+{
+    Box box;
+    ASSERT_TRUE(box);
+
+    auto const diffs = box.diffs();
+    ASSERT_EQ(0, diffs.size());
+}
+
+TEST(BoxTest, Diffs1)
+{
+    auto box = Box::array<int>(3, 3);
+    ASSERT_TRUE(box);
+
+    auto const diffs = box.diffs({{Box::nop, Box::nop, -1}, {0, -1, 1}});
+    ASSERT_EQ(2, diffs.size());
+    ASSERT_EQ(3, diffs[0]);
+    ASSERT_EQ(2, diffs[1]);
+}
+
+TEST(BoxTest, Diffs2)
+{
+    auto box = Box::array<int>(5, 5);
+    ASSERT_TRUE(box);
+
+    auto const diffs = box.diffs({{1, 4, 1}, {2, 4, 1}});
+    ASSERT_EQ(2, diffs.size());
+    ASSERT_EQ(3, diffs[0]);
+    ASSERT_EQ(2, diffs[1]);
+}
+
+TEST(BoxTest, Diffs3)
+{
+    auto box = Box::array<int>(5, 5, 3);
+    ASSERT_TRUE(box);
+
+    auto const diffs = box.diffs({{1, 4, 1}, {1, 3, 2}});
+    ASSERT_EQ(3, diffs.size());
+    ASSERT_EQ(3, diffs[0]);
+    ASSERT_EQ(1, diffs[1]);
+    ASSERT_EQ(3, diffs[2]);
+}
+
+TEST(BoxTest, Diffs4)
+{
+    auto box = Box::array<int>(5, 5, 3, 1);
+    ASSERT_TRUE(box);
+
+    auto const diffs = box.diffs();
+    ASSERT_EQ(4, diffs.size());
+    ASSERT_EQ(5, diffs[0]);
+    ASSERT_EQ(5, diffs[1]);
+    ASSERT_EQ(3, diffs[2]);
+    ASSERT_EQ(1, diffs[3]);
+}
+
+//TEST(BoxTest, GetDiffs_02)
+//{
+//    Box box = { {  1,  2,  3,  4,  5 },
+//                {  6,  7,  8,  9, 10 },
+//                { 11, 12, 13, 14, 15 },
+//                { 16, 17, 18, 19, 20 },
+//                { 21, 22, 23, 24, 25 } };
+//    ASSERT_TRUE(box);
+//
+//    auto const diffs = box.getDiffs({{1, 4, 1}, {1, 4, 1}});
+//    ASSERT_EQ(2, diffs.size());
+//    ASSERT_EQ(3, diffs[0]);
+//    ASSERT_EQ(3, diffs[1]);
+//}
+

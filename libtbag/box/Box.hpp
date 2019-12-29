@@ -1857,6 +1857,11 @@ public:
             return _cursor.stride_byte;
         }
 
+        int getDiff() const TBAG_NOEXCEPT
+        {
+            return _cursor.diff();
+        }
+
         bool isLastDimension() const TBAG_NOEXCEPT
         {
             return _cursor.is_last_dim();
@@ -2068,6 +2073,11 @@ public:
         }
         return err_cursor.value.forEach<T>(slices+1, size-1, predicated);
     }
+
+    std::vector<ui32> diffs(Slice const * slice_begin, Slice const * slice_end) const;
+    std::vector<ui32> diffs(Slice const * slices, std::size_t size) const;
+    std::vector<ui32> diffs(std::vector<Slice> const & slices) const;
+    std::vector<ui32> diffs() const;
 
     Box slice(std::vector<Slice> const & slices);
 };

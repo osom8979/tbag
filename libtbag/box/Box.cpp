@@ -447,6 +447,58 @@ ErrPair<Box::Cursor> Box::cursor() const
     return cursor(nop);
 }
 
+std::vector<ui32> Box::diffs(Slice const * slice_begin, Slice const * slice_end) const
+{
+    if (!exists()) {
+        return {};
+    }
+
+    ErrPair<Cursor> err_cursor;
+    if (slice_begin == slice_end) {
+        err_cursor = cursor();
+    } else {
+        err_cursor = cursor(*slice_begin);
+        ++slice_begin;
+    }
+
+    std::vector<ui32> result;
+    if (err_cursor) {
+        result.emplace_back(err_cursor.value.getDiff());
+    } else {
+        return {};
+    }
+
+    while (true) {
+        if (slice_begin == slice_end) {
+            err_cursor = err_cursor.value.sub();
+        } else {
+            err_cursor = err_cursor.value.sub(*slice_begin);
+            ++slice_begin;
+        }
+        if (err_cursor) {
+            result.emplace_back(err_cursor.value.getDiff());
+        } else {
+            break;
+        }
+    }
+    return result;
+}
+
+std::vector<ui32> Box::diffs(Slice const * slices, std::size_t size) const
+{
+    return diffs(slices, slices + size);
+}
+
+std::vector<ui32> Box::diffs(std::vector<Slice> const & slices) const
+{
+    return diffs(slices.data(), slices.size());
+}
+
+std::vector<ui32> Box::diffs() const
+{
+    return diffs(static_cast<Slice const *>(nullptr), static_cast<std::size_t>(0u));
+}
+
 Box Box::slice(std::vector<Slice> const & slices)
 {
     if (slices.empty()) {

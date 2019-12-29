@@ -242,6 +242,8 @@ TBAG_API bool box_data_check_address_raw(void const * data_begin, ui32 size, bty
                                          void const * check_data) TBAG_NOEXCEPT;
 
 TBAG_API int box_index_abs(ui32 const * dims, ui32 dim_index, int data_index) TBAG_NOEXCEPT;
+TBAG_API int box_index_begin_abs(ui32 const * dims, ui32 dim_index, int data_index, int data_step) TBAG_NOEXCEPT;
+TBAG_API int box_index_end_abs(ui32 const * dims, ui32 dim_index, int data_index, int data_step) TBAG_NOEXCEPT;
 TBAG_API bool box_step_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
 TBAG_API void * box_cpu_malloc(ui32 byte_size) TBAG_NOEXCEPT;
@@ -499,6 +501,8 @@ struct TBAG_API box_cursor
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin_index) const TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index) const TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor() const TBAG_NOEXCEPT;
+
+    int diff() const TBAG_NOEXCEPT;
 
     bool is_last_dim() const TBAG_NOEXCEPT;
     bool is_continue() const TBAG_NOEXCEPT;
