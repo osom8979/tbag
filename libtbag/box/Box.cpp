@@ -415,6 +415,11 @@ bool Box::fromJsonText(std::string const & json, Err * code)
     return isSuccess(result);
 }
 
+ErrPair<Box::Cursor> Box::cursor(Slice const & slice) const
+{
+    return cursor(slice.begin, slice.end, slice.step);
+}
+
 ErrPair<Box::Cursor> Box::cursor(int begin, int end, int step) const
 {
     if (!exists()) {
@@ -440,6 +445,17 @@ ErrPair<Box::Cursor> Box::cursor(int begin) const
 ErrPair<Box::Cursor> Box::cursor() const
 {
     return cursor(nop);
+}
+
+Box Box::slice(std::vector<Slice> const & slices)
+{
+    if (slices.empty()) {
+        return Box(nullptr);
+    }
+    auto const * slices_data = slices.data();
+    auto const slices_size = slices.size();
+    assert(slices_data != nullptr);
+    assert(slices_size >= 0);
 }
 
 } // namespace box

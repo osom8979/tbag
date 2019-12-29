@@ -1121,7 +1121,7 @@ public:
     }
 
     template <typename T, typename ... Args>
-    static Box shape(Args ... args)
+    static Box array(Args ... args)
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         Box result;
@@ -1743,6 +1743,19 @@ public:
     };
 
     /**
+     * Slice structure.
+     *
+     * @author zer0
+     * @date   2019-12-29
+     */
+    struct Slice
+    {
+        int begin = nop;
+        int end = nop;
+        int step = 1;
+    };
+
+    /**
      * Cursor class.
      *
      * @author zer0
@@ -1788,6 +1801,11 @@ public:
         }
 
     public:
+        ErrPair<Cursor> sub(Slice const & slice) const
+        {
+            return sub(slice.begin, slice.end, slice.step);
+        }
+
         ErrPair<Cursor> sub(int begin_index, int end_index, int step_index) const
         {
             assert(_cursor.box != nullptr);
@@ -1999,15 +2017,35 @@ public:
                 return libtbag::E_SUCCESS;
             }
         }
+
+        template <typename T, typename Predicated>
+        Err forEach(Slice const * slice, std::size_t size, Predicated predicated)
+        {
+            if (slice == nullptr || size == 0 || isLastDimension()) {
+                return itr<T>().forEach(predicated);
+            } else {
+                do {
+                    auto err_cursor = sub(*slice);
+                    if (isFailure(err_cursor)) {
+                        return err_cursor.code;
+                    }
+                    auto const code = err_cursor.value.forEach<T>(slice+1, size-1, predicated);
+                    if (isFailure(code)) {
+                        return code;
+                    }
+                } while (next());
+                return libtbag::E_SUCCESS;
+            }
+        }
     };
 
 public:
+    ErrPair<Cursor> cursor(Slice const & slice) const;
     ErrPair<Cursor> cursor(int begin, int end, int step) const;
     ErrPair<Cursor> cursor(int begin, int end) const;
     ErrPair<Cursor> cursor(int begin) const;
     ErrPair<Cursor> cursor() const;
 
-public:
     template <typename T, typename Predicated>
     Err forEach(Predicated predicated) const
     {
@@ -2017,6 +2055,21 @@ public:
         }
         return err_cursor.value.forEach<T>(predicated);
     }
+
+    template <typename T, typename Predicated>
+    Err forEach(Slice const * slices, std::size_t size, Predicated predicated) const
+    {
+        if (slices == nullptr || size == 0) {
+            return E_ILLARGS;
+        }
+        auto err_cursor = cursor(*slices);
+        if (isFailure(err_cursor)) {
+            return err_cursor.code;
+        }
+        return err_cursor.value.forEach<T>(slices+1, size-1, predicated);
+    }
+
+    Box slice(std::vector<Slice> const & slices);
 };
 
 } // namespace box

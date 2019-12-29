@@ -28,7 +28,7 @@ TEST(Box_Shape_Test, ResizeArgs1)
 
 TEST(Box_Shape_Test, ResizeArgs2)
 {
-    auto box = Box::shape<int>(2, 3);
+    auto box = Box::array<int>(2, 3);
     ASSERT_TRUE(box.is_device_cpu());
     ASSERT_TRUE(box.is_si32());
     ASSERT_EQ(2, box.rank());
@@ -139,15 +139,15 @@ TEST(Box_Shape_Test, ResizeBox2)
 
 TEST(Box_Shape_Test, Stride)
 {
-    auto b0 = Box::shape<int>(2, 3);
+    auto b0 = Box::array<int>(2, 3);
     ASSERT_EQ(3, b0.getStride(0));
     ASSERT_EQ(1, b0.getStride(1));
 
-    auto b1 = Box::shape<double>(2, 3);
+    auto b1 = Box::array<double>(2, 3);
     ASSERT_EQ(3, b1.getStride(0));
     ASSERT_EQ(1, b1.getStride(1));
 
-    auto b2 = Box::shape<double>(3, 4, 5);
+    auto b2 = Box::array<double>(3, 4, 5);
     ASSERT_EQ(4*5, b2.getStride(0));
     ASSERT_EQ(5, b2.getStride(1));
     ASSERT_EQ(1, b2.getStride(2));
