@@ -196,6 +196,29 @@ Err Box::_reshape_ref_box(btype type, Box const & reference_box)
     return _reshape_ref_box(type, reference_box.base());
 }
 
+Box Box::astype(btype change_type) const
+{
+    if (!exists()) {
+        return Box(nullptr);
+    }
+    Box result;
+    auto const code = result._reshape_ref_box(change_type, *this);
+    if (isFailure(code)) {
+        return Box(nullptr);
+    }
+    auto const assign_data_code = result.base()->assign_data(type(), device(), ext(), size(), data());
+    if (isFailure(assign_data_code)) {
+        return Box(nullptr);
+    }
+    assert(result.exists());
+    if (info_size() >= 1) {
+        result.setInfo(info(), info_size());
+    }
+    result.setOpaque(getOpaque<box_any>());
+    result.setOpaqueDeleter(getOpaqueDeleter());
+    return result;
+}
+
 Err Box::copyFromData(Box const & box)
 {
     if (box.exists()) {

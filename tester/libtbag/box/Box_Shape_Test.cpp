@@ -155,25 +155,44 @@ TEST(Box_Shape_Test, Stride)
 
 TEST(Box_Shape_Test, Astype)
 {
-//    Box b0 = {10, 20, 30, 40};
-//    Box b1 = b0.astype<double>();
-//
-//    ASSERT_TRUE(b0.is_device_cpu());
-//    ASSERT_TRUE(b0.is_si32());
-//    ASSERT_EQ(1, b0.rank());
-//    ASSERT_EQ(4, b0.size());
-//    ASSERT_EQ(4, b0.dim(0));
-//    ASSERT_EQ(10, b0.at<si32>(0));
-//    ASSERT_EQ(20, b0.at<si32>(1));
-//
-//    ASSERT_TRUE(b1.is_device_cpu());
-//    ASSERT_TRUE(b1.is_fp64());
-//    ASSERT_EQ(1, b1.rank());
-//    ASSERT_EQ(4, b1.size());
-//    ASSERT_EQ(4, b1.dim(0));
-//    ASSERT_EQ(10.0, b1.at<fp64>(0));
-//    ASSERT_EQ(20.0, b1.at<fp64>(1));
-//    ASSERT_EQ(30.0, b1.at<fp64>(2));
-//    ASSERT_EQ(40.0, b1.at<fp64>(3));
+    auto const INFO_TEXT = "TEST";
+    Box b0 = {{10, 20, 30, 40}};
+    b0.setInfo(INFO_TEXT);
+    b0.setOpaque(9999);
+    Box const b1 = b0.astype<double>();
+
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_si32());
+    ASSERT_EQ(0, b0.ext0());
+    ASSERT_EQ(0, b0.ext1());
+    ASSERT_EQ(0, b0.ext2());
+    ASSERT_EQ(0, b0.ext3());
+    ASSERT_EQ(2, b0.rank());
+    ASSERT_EQ(4, b0.size());
+    ASSERT_EQ(1, b0.dim(0));
+    ASSERT_EQ(4, b0.dim(1));
+    ASSERT_EQ(10, b0.at<si32>(0, 0));
+    ASSERT_EQ(20, b0.at<si32>(0, 1));
+    ASSERT_EQ(30, b0.at<si32>(0, 2));
+    ASSERT_EQ(40, b0.at<si32>(0, 3));
+    ASSERT_STREQ(INFO_TEXT, b0.getInfoString().c_str());
+    ASSERT_EQ(9999, b0.getOpaque<int>());
+
+    ASSERT_TRUE(b1.is_device_cpu());
+    ASSERT_TRUE(b1.is_fp64());
+    ASSERT_EQ(0, b1.ext0());
+    ASSERT_EQ(0, b1.ext1());
+    ASSERT_EQ(0, b1.ext2());
+    ASSERT_EQ(0, b1.ext3());
+    ASSERT_EQ(2, b1.rank());
+    ASSERT_EQ(4, b1.size());
+    ASSERT_EQ(1, b1.dim(0));
+    ASSERT_EQ(4, b1.dim(1));
+    ASSERT_EQ(10.0, b1.at<fp64>(0, 0));
+    ASSERT_EQ(20.0, b1.at<fp64>(0, 1));
+    ASSERT_EQ(30.0, b1.at<fp64>(0, 2));
+    ASSERT_EQ(40.0, b1.at<fp64>(0, 3));
+    ASSERT_STREQ(INFO_TEXT, b1.getInfoString().c_str());
+    ASSERT_EQ(9999, b1.getOpaque<int>());
 }
 

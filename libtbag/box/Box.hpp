@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstdarg>
+#include <cstring>
 #include <cassert>
 
 #include <type_traits>
@@ -877,7 +878,7 @@ public:
     }
 
     template <typename T>
-    void setOpaque(T v) TBAG_NOEXCEPT
+    inline void setOpaque(T v) TBAG_NOEXCEPT
     {
         if (_data) {
             _data->set_opaque(v);
@@ -885,11 +886,19 @@ public:
     }
 
     template <typename T>
-    void getOpaque(T * v) const TBAG_NOEXCEPT
+    inline void getOpaque(T * v) const TBAG_NOEXCEPT
     {
         if (_data && v != nullptr) {
             _data->get_opaque(v);
         }
+    }
+
+    template <typename T>
+    inline T getOpaque() const TBAG_NOEXCEPT
+    {
+        T result = T();
+        getOpaque(&result);
+        return result;
     }
 
     inline void * getOpaquePointer() const TBAG_NOEXCEPT
@@ -1120,6 +1129,15 @@ public:
             return Box(nullptr);
         }
         return result;
+    }
+
+public:
+    Box astype(btype type) const;
+
+    template <typename T>
+    Box astype() const
+    {
+        return astype(get_btype<T>());
     }
 
 public:

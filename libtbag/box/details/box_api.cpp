@@ -788,6 +788,11 @@ bool box_data::exists_info() const TBAG_NOEXCEPT
     return info != nullptr && total_info_byte >= 1 && info_size >= 1;
 }
 
+void box_data::set_opaque(box_any const & v) TBAG_NOEXCEPT
+{
+    memcpy(&opaque, &v, sizeof(box_any));
+}
+
 void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
 void box_data::set_opaque(si8  v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
 void box_data::set_opaque(si16 v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
@@ -800,6 +805,11 @@ void box_data::set_opaque(ui64 v) TBAG_NOEXCEPT { opaque.data_ui64 = v; }
 void box_data::set_opaque(fp32 v) TBAG_NOEXCEPT { opaque.data_fp32 = v; }
 void box_data::set_opaque(fp64 v) TBAG_NOEXCEPT { opaque.data_fp64 = v; }
 
+void box_data::get_opaque(box_any * v) TBAG_NOEXCEPT
+{
+    memcpy(v, &opaque, sizeof(box_any));
+}
+
 void box_data::get_opaque(void ** v) const TBAG_NOEXCEPT { *v = opaque.pointer; }
 void box_data::get_opaque(si8  * v) const TBAG_NOEXCEPT { *v = opaque.data_si8 ; }
 void box_data::get_opaque(si16 * v) const TBAG_NOEXCEPT { *v = opaque.data_si16; }
@@ -811,6 +821,11 @@ void box_data::get_opaque(ui32 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui32;
 void box_data::get_opaque(ui64 * v) const TBAG_NOEXCEPT { *v = opaque.data_ui64; }
 void box_data::get_opaque(fp32 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp32; }
 void box_data::get_opaque(fp64 * v) const TBAG_NOEXCEPT { *v = opaque.data_fp64; }
+
+box_any box_data::get_opaque_any() const TBAG_NOEXCEPT
+{
+    return opaque;
+}
 
 void * box_data::get_opaque_pointer() const TBAG_NOEXCEPT { return opaque.pointer; }
 si8  box_data::get_opaque_si8 () const TBAG_NOEXCEPT { return opaque.data_si8 ; }
