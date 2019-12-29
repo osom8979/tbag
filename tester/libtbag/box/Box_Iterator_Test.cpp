@@ -12,15 +12,16 @@
 using namespace libtbag;
 using namespace libtbag::box;
 
-TEST(Box_Iterator_Test, Rank1)
+TEST(Box_Iterator_Test, Rank1_Const)
 {
-    Box box = {1, 2, 3};
+    Box const box = {1, 2, 3};
 
     auto cursor_code = box.cursor();
     ASSERT_EQ(E_SUCCESS, cursor_code.code);
+    auto const & cursor = cursor_code.value;
 
     std::vector<int> result;
-    for (auto & data : cursor_code.value.itr<int>()) {
+    for (auto const & data : cursor.itr<int>()) {
         result.emplace_back(data);
     }
 
@@ -28,6 +29,25 @@ TEST(Box_Iterator_Test, Rank1)
     ASSERT_EQ(1, result[0]);
     ASSERT_EQ(2, result[1]);
     ASSERT_EQ(3, result[2]);
+}
+
+TEST(Box_Iterator_Test, Rank1_Mutable)
+{
+    Box box = {0, 0, 0};
+
+    auto cursor_code = box.cursor();
+    ASSERT_EQ(E_SUCCESS, cursor_code.code);
+    auto & cursor = cursor_code.value;
+
+    int i = 0;
+    for (auto & data : cursor.itr<int>()) {
+        data = i;
+        ++i;
+    }
+
+    ASSERT_EQ(0, box.at<int>(0));
+    ASSERT_EQ(1, box.at<int>(1));
+    ASSERT_EQ(2, box.at<int>(2));
 }
 
 TEST(Box_Iterator_Test, Rank2)

@@ -1948,6 +1948,32 @@ public:
     ErrPair<Cursor> cursor(int begin, int end) const;
     ErrPair<Cursor> cursor(int begin) const;
     ErrPair<Cursor> cursor() const;
+
+public:
+    template <typename Predicated>
+    static Err forEach(Predicated predicated)
+    {
+    }
+
+    template <typename Predicated>
+    static Err forEach(Box & box, Predicated predicated)
+    {
+    }
+
+    template <typename Predicated>
+    static Err forEach(Cursor & cursor, Predicated predicated)
+    {
+    }
+
+    template <typename Predicated>
+    static Err forEach(ErrPair<Cursor> & cursor, Predicated predicated)
+    {
+    }
+
+    template <typename CursorT, typename T, typename Predicated>
+    static Err forEach(IteratorGenerator<CursorT, T> & cursor, Predicated predicated)
+    {
+    }
 };
 
 } // namespace box
