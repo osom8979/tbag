@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/debug/Assert.hpp>
 #include <libtbag/box/BoxTraits.hpp>
 #include <libtbag/box/BoxIterator.hpp>
 #include <libtbag/box/BoxIteratorGenerator.hpp>
@@ -198,13 +199,60 @@ public:
         return BoxIteratorGenerator<T const>((T const *)getBegin(), (T const *)getEnd(), getStrideByte());
     }
 
+private:
+    template <typename T>
+    void * _access(access_unknown_t)
+    {
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return data();
+    }
+
+    template <typename T>
+    void const * _access(access_void_const_ptr_t) const
+    {
+        return data();
+    }
+
+    template <typename T>
+    void * _access(access_void_ptr_t)
+    {
+        return data();
+    }
+
+    template <typename T>
+    T const * _access(access_const_ptr_t) const
+    {
+        return data<T>();
+    }
+
+    template <typename T>
+    T _access(access_const_ref_t) const
+    {
+        return get<T>();
+    }
+
+    template <typename T>
+    T * _access(access_ptr_t)
+    {
+        return data<T>();
+    }
+
+    template <typename T>
+    T & _access(access_ref_t)
+    {
+        return at<T>();
+    }
+
+public:
     template <typename Predicated>
     Err forEach(box_slice const * slice_begin, box_slice const * slice_end, Predicated predicated)
     {
         if (isLastDimension()) {
             using __arg0 = typename libtbag::function_traits<Predicated>::template arguments<0>::type;
             using __type = typename libtbag::remove_cpr<__arg0>::type;
-            return itr<__type>().forEach(predicated);
+            do {
+                predicated(_access<__type>(access_selector<__arg0>::value));
+            } while (next());
         } else {
             do {
                 ErrPair<BoxCursor> err_cursor;
@@ -222,8 +270,8 @@ public:
                     return code;
                 }
             } while (next());
-            return libtbag::E_SUCCESS;
         }
+        return libtbag::E_SUCCESS;
     }
 
     template <typename T, typename Predicated>
