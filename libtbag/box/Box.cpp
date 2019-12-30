@@ -415,7 +415,7 @@ bool Box::fromJsonText(std::string const & json, Err * code)
     return isSuccess(result);
 }
 
-ErrPair<Box::Cursor> Box::cursor(Slice const & slice) const
+ErrPair<Box::Cursor> Box::cursor(box_slice const & slice) const
 {
     return cursor(slice.begin, slice.end, slice.step);
 }
@@ -447,7 +447,7 @@ ErrPair<Box::Cursor> Box::cursor() const
     return cursor(nop);
 }
 
-std::vector<ui32> Box::diffs(Slice const * slice_begin, Slice const * slice_end) const
+std::vector<ui32> Box::diffs(box_slice const * slice_begin, box_slice const * slice_end) const
 {
     if (!exists()) {
         return {};
@@ -484,22 +484,22 @@ std::vector<ui32> Box::diffs(Slice const * slice_begin, Slice const * slice_end)
     return result;
 }
 
-std::vector<ui32> Box::diffs(Slice const * slices, std::size_t size) const
+std::vector<ui32> Box::diffs(box_slice const * slices, std::size_t size) const
 {
     return diffs(slices, slices + size);
 }
 
-std::vector<ui32> Box::diffs(std::vector<Slice> const & slices) const
+std::vector<ui32> Box::diffs(std::vector<box_slice> const & slices) const
 {
     return diffs(slices.data(), slices.size());
 }
 
 std::vector<ui32> Box::diffs() const
 {
-    return diffs(static_cast<Slice const *>(nullptr), static_cast<std::size_t>(0u));
+    return diffs(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u));
 }
 
-Box Box::slice(Slice const * slice_begin, Slice const * slice_end) const
+Box Box::slice(box_slice const * slice_begin, box_slice const * slice_end) const
 {
     auto const dims = diffs(slice_begin, slice_end);
     Box result;
@@ -546,12 +546,12 @@ Box Box::slice(Slice const * slice_begin, Slice const * slice_end) const
     return result;
 }
 
-Box Box::slice(Slice const * slices, std::size_t size) const
+Box Box::slice(box_slice const * slices, std::size_t size) const
 {
     return slice(slices, slices + size);
 }
 
-Box Box::slice(std::vector<Slice> const & slices) const
+Box Box::slice(std::vector<box_slice> const & slices) const
 {
     return slice(slices.data(), slices.size());
 }

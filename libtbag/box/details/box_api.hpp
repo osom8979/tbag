@@ -262,6 +262,20 @@ TBAG_API void * box_data_malloc(btype type, bdev device, ui32 element_size) TBAG
 TBAG_API void   box_data_free(bdev device, void * data) TBAG_NOEXCEPT;
 
 /**
+ * box_slice structure.
+ *
+ * @author zer0
+ * @date   2019-12-29
+ * @date   2019-12-30 (Rename: Slice -> box_slice)
+ */
+struct box_slice
+{
+    int begin = box_nop;
+    int end = box_nop;
+    int step = 1;
+};
+
+/**
  * Box container information structure.
  *
  * @author zer0
@@ -409,7 +423,10 @@ struct TBAG_API box_data : private Noncopyable
 
     ErrPair<box_cursor> init_cursor(void * data, ui32 dim_index,
                                     int begin, int end, int step) TBAG_NOEXCEPT;
+    ErrPair<box_cursor> init_cursor(void * data, ui32 dim_index,
+                                    box_slice const & slice) TBAG_NOEXCEPT;
 
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, box_slice const & slice) TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end, int step) TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin, int end) TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin) TBAG_NOEXCEPT;
@@ -496,6 +513,7 @@ struct TBAG_API box_cursor
     box_cursor() TBAG_NOEXCEPT;
     ~box_cursor();
 
+    ErrPair<box_cursor> init_cursor(ui32 dim_index, box_slice const & slice) const TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin_index, int end_index, int step_index) const TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin_index, int end_index) const TBAG_NOEXCEPT;
     ErrPair<box_cursor> init_cursor(ui32 dim_index, int begin_index) const TBAG_NOEXCEPT;

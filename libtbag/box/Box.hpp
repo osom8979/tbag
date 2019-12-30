@@ -88,6 +88,7 @@ public:
     using bdev  = libtbag::box::details::bdev;
 
     using box_data   = libtbag::box::details::box_data;
+    using box_slice  = libtbag::box::details::box_slice;
     using box_cursor = libtbag::box::details::box_cursor;
     using box_any    = libtbag::box::details::box_any;
 
@@ -1376,19 +1377,6 @@ public:
     };
 
     /**
-     * Slice structure.
-     *
-     * @author zer0
-     * @date   2019-12-29
-     */
-    struct Slice
-    {
-        int begin = nop;
-        int end = nop;
-        int step = 1;
-    };
-
-    /**
      * Cursor class.
      *
      * @author zer0
@@ -1434,7 +1422,7 @@ public:
         }
 
     public:
-        ErrPair<Cursor> sub(Slice const & slice) const
+        ErrPair<Cursor> sub(box_slice const & slice) const
         {
             return sub(slice.begin, slice.end, slice.step);
         }
@@ -1637,7 +1625,7 @@ public:
         }
 
         template <typename Predicated>
-        Err forEach(Slice const * slice_begin, Slice const * slice_end, Predicated predicated)
+        Err forEach(box_slice const * slice_begin, box_slice const * slice_end, Predicated predicated)
         {
             if (isLastDimension()) {
                 using __arg0 = typename libtbag::function_traits<Predicated>::template arguments<0>::type;
@@ -1665,13 +1653,13 @@ public:
         }
 
         template <typename T, typename Predicated>
-        Err forEach(Slice const * slice, std::size_t size, Predicated predicated)
+        Err forEach(box_slice const * slice, std::size_t size, Predicated predicated)
         {
             return forEach(slice, slice + size, predicated);
         }
 
         template <typename Predicated>
-        Err forEachGet(Slice const * slice_begin, Slice const * slice_end, Predicated predicated)
+        Err forEachGet(box_slice const * slice_begin, box_slice const * slice_end, Predicated predicated)
         {
             if (slice_begin == slice_end || isLastDimension()) {
                 do {
@@ -1696,14 +1684,14 @@ public:
     };
 
 public:
-    ErrPair<Cursor> cursor(Slice const & slice) const;
+    ErrPair<Cursor> cursor(box_slice const & slice) const;
     ErrPair<Cursor> cursor(int begin, int end, int step) const;
     ErrPair<Cursor> cursor(int begin, int end) const;
     ErrPair<Cursor> cursor(int begin) const;
     ErrPair<Cursor> cursor() const;
 
     template <typename Predicated>
-    Err forEach(Slice const * slice_begin, Slice const * slice_end, Predicated predicated) const
+    Err forEach(box_slice const * slice_begin, box_slice const * slice_end, Predicated predicated) const
     {
         ErrPair<Cursor> err_cursor;
         if (slice_begin == slice_end) {
@@ -1719,7 +1707,7 @@ public:
     }
 
     template <typename Predicated>
-    Err forEach(Slice const * slices, std::size_t size, Predicated predicated) const
+    Err forEach(box_slice const * slices, std::size_t size, Predicated predicated) const
     {
         return forEach(slices, slices + size, predicated);
     }
@@ -1727,16 +1715,16 @@ public:
     template <typename Predicated>
     Err forEach(Predicated predicated) const
     {
-        return forEach(static_cast<Slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
+        return forEach(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
     }
 
-    std::vector<ui32> diffs(Slice const * slice_begin, Slice const * slice_end) const;
-    std::vector<ui32> diffs(Slice const * slices, std::size_t size) const;
-    std::vector<ui32> diffs(std::vector<Slice> const & slices) const;
+    std::vector<ui32> diffs(box_slice const * slice_begin, box_slice const * slice_end) const;
+    std::vector<ui32> diffs(box_slice const * slices, std::size_t size) const;
+    std::vector<ui32> diffs(std::vector<box_slice> const & slices) const;
     std::vector<ui32> diffs() const;
 
     template <typename Predicated>
-    Err forEachGet(Slice const * slice_begin, Slice const * slice_end, Predicated predicated) const
+    Err forEachGet(box_slice const * slice_begin, box_slice const * slice_end, Predicated predicated) const
     {
         ErrPair<Cursor> err_cursor;
         if (slice_begin == slice_end) {
@@ -1752,7 +1740,7 @@ public:
     }
 
     template <typename Predicated>
-    Err forEachGet(Slice const * slices, std::size_t size, Predicated predicated) const
+    Err forEachGet(box_slice const * slices, std::size_t size, Predicated predicated) const
     {
         return forEachGet(slices, slices + size, predicated);
     }
@@ -1760,12 +1748,12 @@ public:
     template <typename Predicated>
     Err forEachGet(Predicated predicated) const
     {
-        return forEachGet(static_cast<Slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
+        return forEachGet(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
     }
 
-    Box slice(Slice const * slice_begin, Slice const * slice_end) const;
-    Box slice(Slice const * slices, std::size_t size) const;
-    Box slice(std::vector<Slice> const & slices) const;
+    Box slice(box_slice const * slice_begin, box_slice const * slice_end) const;
+    Box slice(box_slice const * slices, std::size_t size) const;
+    Box slice(std::vector<box_slice> const & slices) const;
 };
 
 } // namespace box

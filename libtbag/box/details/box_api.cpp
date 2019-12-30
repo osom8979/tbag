@@ -1007,6 +1007,16 @@ ErrPair<box_cursor> box_data::init_cursor(void * data_pointer, ui32 dim_index,
     return result;
 }
 
+ErrPair<box_cursor> box_data::init_cursor(void * data_pointer, ui32 dim_index, box_slice const & slice) TBAG_NOEXCEPT
+{
+    return init_cursor(data_pointer, dim_index, slice.begin, slice.end, slice.step);
+}
+
+ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index, box_slice const & slice) TBAG_NOEXCEPT
+{
+    return init_cursor(dim_index, slice.begin, slice.end, slice.step);
+}
+
 ErrPair<box_cursor> box_data::init_cursor(ui32 dim_index, int begin_index, int end_index, int step_index) TBAG_NOEXCEPT
 {
     return init_cursor(data, dim_index, begin_index, end_index, step_index);
@@ -1441,6 +1451,11 @@ box_cursor::box_cursor() TBAG_NOEXCEPT
 box_cursor::~box_cursor()
 {
     // EMPTY.
+}
+
+ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, box_slice const & slice) const TBAG_NOEXCEPT
+{
+    return init_cursor(dim_index, slice.begin, slice.end, slice.step);
 }
 
 ErrPair<box_cursor> box_cursor::init_cursor(ui32 dim_index, int begin_index, int end_index, int step_index) const TBAG_NOEXCEPT
