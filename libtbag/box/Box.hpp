@@ -17,7 +17,11 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
 #include <libtbag/box/details/box_api.hpp>
+#include <libtbag/box/BoxCursor.hpp>
+#include <libtbag/box/BoxIterator.hpp>
+#include <libtbag/box/BoxIteratorGenerator.hpp>
 #include <libtbag/box/BoxPacket.hpp>
+#include <libtbag/box/BoxTraits.hpp>
 
 #include <cstddef>
 #include <cstdlib>
