@@ -163,18 +163,18 @@ TEST(Box_TypeTraits_Test, shape_selector)
 {
     using namespace libtbag::box::details;
 
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<bdev,ui64*,int>::type, Box::shape_args1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<int>::type, Box::shape_args2_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<bdev,ui64*,int>::type, shape_args1_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<int>::type, shape_args2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<bdev&&,ui64*,ui32&&,int&&>::type, Box::shape_args1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<int&&,int&&>::type, Box::shape_args2_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<bdev&&,ui64*,ui32&&,int&&>::type, shape_args1_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<int&&,int&&>::type, shape_args2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<bdev,ui64*,ui32,ui32*>::type, Box::shape_dims1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<ui32,ui32*>::type, Box::shape_dims2_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<bdev,ui64*,ui32,ui32*>::type, shape_dims1_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<ui32,ui32*>::type, shape_dims2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<box_data&&>::type, Box::shape_ref_box1_t>::value));
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<Box&&>::type, Box::shape_ref_box2_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<box_data&&>::type, shape_ref_box1_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<Box&&>::type, shape_ref_box2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename Box::shape_selector<Box,Box>::type, Box::shape_unknown_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<Box,Box>::type, shape_unknown_t>::value));
 }
 
