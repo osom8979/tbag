@@ -23,3 +23,18 @@ TEST(TypeTest, Default)
     ASSERT_EQ(2, p.y);
 }
 
+TEST(TypeTest, RemoveCpr)
+{
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int const * &&>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int const * &>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int const *>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int const &&>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int const &>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int * &&>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int * &>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int *>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int &&>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int &>::type>::value));
+    ASSERT_TRUE((std::is_same<int, typename remove_cpr<int>::type>::value));
+}
+

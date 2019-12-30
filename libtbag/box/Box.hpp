@@ -225,10 +225,8 @@ struct is_first_box_data<Head, Tail...>
 template <typename T>
 struct is_first_box_data<T>
 {
-    using __t1 = typename std::remove_reference<T>::type;
-    using __t2 = typename std::remove_pointer<__t1>::type;
-    using __t3 = typename std::remove_const<__t2>::type;
-    TBAG_CONSTEXPR static bool const value = std::is_same<__t3, libtbag::box::details::box_data>::value;
+    using __type = typename libtbag::remove_cpr<T>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__type, libtbag::box::details::box_data>::value;
 };
 
 template <typename ... T>
@@ -243,10 +241,8 @@ struct is_first_Box<Head, Tail...>
 template <typename T>
 struct is_first_Box<T>
 {
-    using __t1 = typename std::remove_reference<T>::type;
-    using __t2 = typename std::remove_pointer<__t1>::type;
-    using __t3 = typename std::remove_const<__t2>::type;
-    TBAG_CONSTEXPR static bool const value = std::is_same<__t3, libtbag::box::Box>::value;
+    using __type = typename libtbag::remove_cpr<T>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__type, libtbag::box::Box>::value;
 };
 
 template <typename ... T>
@@ -261,14 +257,11 @@ struct is_last_va_list<Head, Tail...>
 template <typename T>
 struct is_last_va_list<T>
 {
-    using __t1 = typename std::remove_reference<T>::type;
-
     // [WARNING]
     // Do not use 'std::remove_pointer' type traits.
     // In MSVC, va_list is declared as a pointer.
-
-    using __t2 = typename std::remove_const<__t1>::type;
-    TBAG_CONSTEXPR static bool const value = std::is_same<__t2, va_list>::value;
+    using __type = typename libtbag::remove_cr<T>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__type, va_list>::value;
 };
 
 template <typename ... T>
@@ -283,10 +276,8 @@ struct is_last_ui32_ptr<Head, Tail...>
 template <typename T>
 struct is_last_ui32_ptr<T>
 {
-    using __t1 = typename std::remove_reference<T>::type;
-    using __t2 = typename std::remove_pointer<__t1>::type;
-    using __t3 = typename std::remove_const<__t2>::type;
-    TBAG_CONSTEXPR static bool const value = std::is_same<__t3, ui32>::value && std::is_pointer<T>::value;
+    using __type = typename libtbag::remove_cpr<T>::type;
+    TBAG_CONSTEXPR static bool const value = std::is_same<__type, ui32>::value && std::is_pointer<T>::value;
 };
 
 template <typename ... T>
@@ -301,17 +292,12 @@ struct is_first_bdev_and_second_ui64_ptr<First, Second, Tail...>
 template <typename First, typename Second>
 struct is_first_bdev_and_second_ui64_ptr<First, Second>
 {
-    using __f1 = typename std::remove_reference<First>::type;
-    using __f2 = typename std::remove_pointer<__f1>::type;
-    using __f3 = typename std::remove_const<__f2>::type;
-
-    using __s1 = typename std::remove_reference<Second>::type;
-    using __s2 = typename std::remove_pointer<__s1>::type;
-    using __s3 = typename std::remove_const<__s2>::type;
+    using __first = typename libtbag::remove_cpr<First>::type;
+    using __second = typename libtbag::remove_cpr<Second>::type;
 
     TBAG_CONSTEXPR static bool const value =
-            std::is_same<__f3, libtbag::box::details::bdev>::value &&
-            std::is_same<__s3, ui64>::value &&
+            std::is_same<__first, libtbag::box::details::bdev>::value &&
+            std::is_same<__second, ui64>::value &&
             std::is_pointer<Second>::value;
 };
 
@@ -1593,9 +1579,11 @@ public:
     class Iterator
     {
     public:
-        using CursorType = CursorT;
-        using DataType = typename std::remove_pointer<typename std::remove_reference<T>::type>::type;
         using iterator_category = std::forward_iterator_tag;
+
+    public:
+        using CursorType = CursorT;
+        using DataType = T;
 
     private:
         /** Base cursor. */
@@ -2006,7 +1994,8 @@ public:
         {
             if (isLastDimension()) {
                 using __arg0 = typename libtbag::function_traits<Predicated>::template arguments<0>::type;
-                return itr<__arg0>().forEach(predicated);
+                using __type = typename libtbag::remove_cpr<__arg0>::type;
+                return itr<__type>().forEach(predicated);
             } else {
                 do {
                     ErrPair<Cursor> err_cursor;
@@ -2040,7 +2029,8 @@ public:
             if (slice_begin == slice_end || isLastDimension()) {
                 do {
                     using __arg0 = typename libtbag::function_traits<Predicated>::template arguments<0>::type;
-                    predicated(get<__arg0>());
+                    using __type = typename libtbag::remove_cpr<__arg0>::type;
+                    predicated(get<__type>());
                 } while (next());
             } else {
                 do {

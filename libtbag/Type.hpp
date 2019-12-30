@@ -102,10 +102,31 @@ static_assert(is_shared_ptr<std::shared_ptr<int> >::value, "T is std::shared_ptr
 template <typename T>
 struct remove_cr
 {
-    typedef typename std::remove_reference<T>::type remove_reference;
-    typedef typename std::remove_const<remove_reference>::type remove_reference_const;
+    using __t0 = T;
+    using __t1 = typename std::remove_reference<__t0>::type;
+    using __t2 = typename std::remove_const<__t1>::type;
+    using type = __t2;
+};
 
-    typedef remove_reference_const type;
+/**
+ * Remove const & reference & pointer.
+ *
+ * @remarks
+ *  - First, remove reference,
+ *  - Second, remove pointer,
+ *  - Third, remove const.
+ *
+ * @author zer0
+ * @date   2019-12-30
+ */
+template <typename T>
+struct remove_cpr
+{
+    using __t0 = T;
+    using __t1 = typename std::remove_reference<__t0>::type;
+    using __t2 = typename std::remove_pointer<__t1>::type;
+    using __t3 = typename std::remove_const<__t2>::type;
+    using type = __t3;
 };
 
 /**
