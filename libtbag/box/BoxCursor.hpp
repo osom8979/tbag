@@ -208,25 +208,13 @@ private:
     }
 
     template <typename T>
-    void const * _access(access_void_const_ptr_t) const
-    {
-        return data();
-    }
-
-    template <typename T>
-    void * _access(access_void_ptr_t)
-    {
-        return data();
-    }
-
-    template <typename T>
     T const * _access(access_const_ptr_t) const
     {
         return data<T>();
     }
 
     template <typename T>
-    T _access(access_const_ref_t) const
+    T /* const & // Obtain only */ _access(access_const_ref_t) const
     {
         return get<T>();
     }

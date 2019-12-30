@@ -424,36 +424,31 @@ struct index_selector
     TBAG_CONSTEXPR static type const value = { /* EMPTY. */ };
 };
 
-struct access_unknown_t        { /* EMPTY. */ };
-struct access_void_const_ptr_t { /* EMPTY. */ };
-struct access_void_ptr_t       { /* EMPTY. */ };
-struct access_const_ptr_t      { /* EMPTY. */ };
-struct access_const_ref_t      { /* EMPTY. */ };
-struct access_ptr_t            { /* EMPTY. */ };
-struct access_ref_t            { /* EMPTY. */ };
+struct access_unknown_t   { /* EMPTY. */ };
+struct access_const_ptr_t { /* EMPTY. */ };
+struct access_const_ref_t { /* EMPTY. */ };
+struct access_ptr_t       { /* EMPTY. */ };
+struct access_ref_t       { /* EMPTY. */ };
 
 template <typename T>
 struct access_selector
 {
-    TBAG_CONSTEXPR static bool const is_void = std::is_void<T>::value;
-    TBAG_CONSTEXPR static bool const is_const = std::is_const<T>::value;
-    TBAG_CONSTEXPR static bool const is_pointer = std::is_pointer<T>::value;
     TBAG_CONSTEXPR static bool const is_reference = std::is_reference<T>::value;
+    using __t1 = typename std::remove_reference<T>::type;
+    TBAG_CONSTEXPR static bool const is_pointer = std::is_pointer<__t1>::value;
+    using __t2 = typename std::remove_pointer<__t1>::type;
+    TBAG_CONSTEXPR static bool const is_const = std::is_const<__t2>::value;
 
     // clang-format off
-    using type = typename std::conditional< is_void &&  is_const &&  is_pointer && !is_reference, access_void_const_ptr_t,
-                 typename std::conditional< is_void && !is_const &&  is_pointer && !is_reference, access_void_ptr_t,
-                 typename std::conditional<!is_void &&  is_const &&  is_pointer && !is_reference, access_const_ptr_t,
-                 typename std::conditional<!is_void &&  is_const && !is_pointer &&  is_reference, access_const_ref_t,
-                 typename std::conditional<!is_void && !is_const &&  is_pointer && !is_reference, access_ptr_t,
-                 typename std::conditional<!is_void && !is_const && !is_pointer &&  is_reference, access_ref_t,
+    using type = typename std::conditional< is_const &&  is_pointer && !is_reference, access_const_ptr_t,
+                 typename std::conditional< is_const && !is_pointer &&  is_reference, access_const_ref_t,
+                 typename std::conditional<!is_const &&  is_pointer && !is_reference, access_ptr_t,
+                 typename std::conditional<!is_const && !is_pointer &&  is_reference, access_ref_t,
                  access_unknown_t
                  >::type // access_ref_t
                  >::type // access_ptr_t
                  >::type // access_const_ref_t
-                 >::type // access_const_ptr_t
-                 >::type // access_void_ptr_t
-                 >::type;// access_void_const_ptr_t
+                 >::type;// access_const_ptr_t
     // clang-format on
 
     TBAG_CONSTEXPR static type const value = { /* EMPTY. */ };
