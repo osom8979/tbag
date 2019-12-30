@@ -1059,52 +1059,44 @@ private:
     Err _resize_ref_box(btype type, Box const & reference_box);
 
 private:
-    template <typename T, typename ... Args>
+    template <typename ... Args>
     Err _resize(shape_unknown_t, Args && ... args)
     {
         return libtbag::E_INACCESSIBLE_BLOCK;
     }
 
-    template <typename T, typename ... Args>
-    Err _resize(shape_args1_t, bdev device, ui64 const * ext, Args ... args)
+    template <typename ... Args>
+    Err _resize(shape_args1_t, btype type, bdev device, ui64 const * ext, Args ... args)
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        return _resize_args(get_btype<T>(), device, ext,
-                             static_cast<ui32>(sizeof...(Args)),
-                             std::forward<Args>(args) ...);
+        return _resize_args(type, device, ext, static_cast<ui32>(sizeof...(Args)), std::forward<Args>(args) ...);
     }
 
-    template <typename T, typename ... Args>
-    Err _resize(shape_args2_t, Args ... args)
+    template <typename ... Args>
+    Err _resize(shape_args2_t, btype type, Args ... args)
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        return _resize_args(get_btype<T>(),
-                             static_cast<ui32>(sizeof...(Args)),
-                             std::forward<Args>(args) ...);
+        return _resize_args(type, static_cast<ui32>(sizeof...(Args)), std::forward<Args>(args) ...);
     }
 
-    template <typename T>
-    Err _resize(shape_dims1_t, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
+    Err _resize(shape_dims1_t, btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
     {
-        return _resize_dims(get_btype<T>(), device, ext, rank, dims);
+        return _resize_dims(type, device, ext, rank, dims);
     }
 
-    template <typename T>
-    Err _resize(shape_dims2_t, ui32 rank, ui32 const * dims)
+    Err _resize(shape_dims2_t, btype type, ui32 rank, ui32 const * dims)
     {
-        return _resize_dims(get_btype<T>(), rank, dims);
+        return _resize_dims(type, rank, dims);
     }
 
-    template <typename T>
-    Err _resize(shape_ref_box1_t, box_data const * reference_box)
+    Err _resize(shape_ref_box1_t, btype type, box_data const * reference_box)
     {
-        return _resize_ref_box(get_btype<T>(), reference_box);
+        return _resize_ref_box(type, reference_box);
     }
 
-    template <typename T>
-    Err _resize(shape_ref_box2_t, Box const & reference_box)
+    Err _resize(shape_ref_box2_t, btype type, Box const & reference_box)
     {
-        return _resize_ref_box(get_btype<T>(), reference_box);
+        return _resize_ref_box(type, reference_box);
     }
 
 public:
@@ -1113,22 +1105,34 @@ public:
      *
      * @see libtbag::box::details::box_data::resize_dims
      */
+    template <typename ... Args>
+    Err resize(btype type, Args ... args)
+    {
+        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
+        return _resize(shape_selector<Args...>::value, type, std::forward<Args>(args) ...);
+    }
+
     template <typename T, typename ... Args>
     Err resize(Args ... args)
     {
+        return resize(get_btype<T>(), std::forward<Args>(args) ...);
+    }
+
+    template <typename ... Args>
+    static Box array(btype type, Args ... args)
+    {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        return _resize<T>(shape_selector<Args...>::value, std::forward<Args>(args) ...);
+        Box result;
+        if (isFailure(result.resize(type, std::forward<Args>(args) ...))) {
+            return Box(nullptr);
+        }
+        return result;
     }
 
     template <typename T, typename ... Args>
     static Box array(Args ... args)
     {
-        static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
-        Box result;
-        if (isFailure(result.resize<T>(std::forward<Args>(args) ...))) {
-            return Box(nullptr);
-        }
-        return result;
+        return array(get_btype<T>(), std::forward<Args>(args) ...);
     }
 
 public:
