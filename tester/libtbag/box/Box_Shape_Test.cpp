@@ -15,7 +15,7 @@ TEST(Box_Shape_Test, ResizeArgs1)
 {
     Box box;
     ui64 ext[] = {0, 1, 2, 3};
-    ASSERT_EQ(E_SUCCESS, box.resize<int>(Box::device_cpu(), ext, 2, 3));
+    ASSERT_EQ(E_SUCCESS, box.resize<int>(device_cpu(), ext, 2, 3));
     ASSERT_TRUE(box.is_device_cpu());
     ASSERT_TRUE(box.is_si32());
     ASSERT_EQ(0, box.ext0());
@@ -58,7 +58,7 @@ TEST(Box_Shape_Test, ResizeDims1)
     Box box;
     ui64 ext[] = {0, 1, 2, 3};
     ui32 dims[] = {2, 3};
-    ASSERT_EQ(E_SUCCESS, box.resize<int>(Box::device_cpu(), ext, 2, dims));
+    ASSERT_EQ(E_SUCCESS, box.resize<int>(device_cpu(), ext, 2, dims));
     ASSERT_TRUE(box.is_device_cpu());
     ASSERT_TRUE(box.is_si32());
     ASSERT_EQ(0, box.ext0());

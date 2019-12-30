@@ -415,12 +415,12 @@ bool Box::fromJsonText(std::string const & json, Err * code)
     return isSuccess(result);
 }
 
-ErrPair<Box::Cursor> Box::cursor(box_slice const & slice) const
+ErrPair<BoxCursor> Box::cursor(box_slice const & slice) const
 {
     return cursor(slice.begin, slice.end, slice.step);
 }
 
-ErrPair<Box::Cursor> Box::cursor(int begin, int end, int step) const
+ErrPair<BoxCursor> Box::cursor(int begin, int end, int step) const
 {
     if (!exists()) {
         return E_EXPIRED;
@@ -432,17 +432,17 @@ ErrPair<Box::Cursor> Box::cursor(int begin, int end, int step) const
     return { result.code, result.value };
 }
 
-ErrPair<Box::Cursor> Box::cursor(int begin, int end) const
+ErrPair<BoxCursor> Box::cursor(int begin, int end) const
 {
     return cursor(begin, end, 1);
 }
 
-ErrPair<Box::Cursor> Box::cursor(int begin) const
+ErrPair<BoxCursor> Box::cursor(int begin) const
 {
     return cursor(begin, nop);
 }
 
-ErrPair<Box::Cursor> Box::cursor() const
+ErrPair<BoxCursor> Box::cursor() const
 {
     return cursor(nop);
 }
@@ -453,7 +453,7 @@ std::vector<ui32> Box::diffs(box_slice const * slice_begin, box_slice const * sl
         return {};
     }
 
-    ErrPair<Cursor> err_cursor;
+    ErrPair<BoxCursor> err_cursor;
     if (slice_begin == slice_end) {
         err_cursor = cursor();
     } else {
@@ -514,34 +514,7 @@ Box Box::slice(box_slice const * slice_begin, box_slice const * slice_end) const
     result.setOpaque(getOpaque<box_any>());
     result.setOpaqueDeleter(getOpaqueDeleter());
 
-//    ErrPair<Cursor> err_cursor;
-//    if (slice_begin == slice_end) {
-//        err_cursor = cursor();
-//    } else {
-//        err_cursor = cursor(*slice_begin);
-//        ++slice_begin;
-//    }
-//    if (!err_cursor) {
-//        return Box(nullptr);
-//    }
-//
-//    err_cursor.value.forEach<T>(slice_begin+1, slice_end, predicated);
-//
-//    if (slice_begin == slice_end || err_cursor.value.isLastDimension()) {
-//        return itr<T>().forEach(predicated);
-//    } else {
-//        do {
-//            auto err_cursor = sub(*slice_begin);
-//            if (isFailure(err_cursor)) {
-//                return err_cursor.code;
-//            }
-//            auto const code = err_cursor.value.forEach<T>(slice_begin, slice_end, predicated);
-//            if (isFailure(code)) {
-//                return code;
-//            }
-//        } while (next());
-//        return libtbag::E_SUCCESS;
-//    }
+    // TODO
 
     return result;
 }

@@ -56,13 +56,13 @@ TEST(Box_Cursor_Test, Reverse)
                 {3, 4, 5},
                 {6, 7, 8} };
 
-    auto c0 = box.cursor(Box::nop, Box::nop, -1);
+    auto c0 = box.cursor(nop, nop, -1);
     ASSERT_EQ(E_SUCCESS, c0.code);
 
     std::vector<int> result;
 
     do {
-        auto c1 = c0.value.sub(Box::nop, Box::nop, -1);
+        auto c1 = c0.value.sub(nop, nop, -1);
         ASSERT_EQ(E_SUCCESS, c1.code);
         do {
             result.emplace_back(c1.value.at<si32>());
@@ -90,7 +90,7 @@ TEST(Box_Cursor_Test, Get)
     ASSERT_TRUE(c0.value.next());
 
     ui64 ext[] = {0, 0, 0, 0};
-    ASSERT_EQ(2, c0.value.get<int>(Box::device_cpu(), ext));
+    ASSERT_EQ(2, c0.value.get<int>(device_cpu(), ext));
     ASSERT_TRUE(c0.value.next());
 
     int elem;
@@ -99,7 +99,7 @@ TEST(Box_Cursor_Test, Get)
     ASSERT_TRUE(c0.value.next());
     elem = 0;
 
-    ASSERT_EQ(E_SUCCESS, c0.value.get(&elem, Box::device_cpu(), ext));
+    ASSERT_EQ(E_SUCCESS, c0.value.get(&elem, device_cpu(), ext));
     ASSERT_EQ(4, elem);
     ASSERT_FALSE(c0.value.next());
 }
@@ -113,7 +113,7 @@ TEST(Box_Cursor_Test, Set)
     ASSERT_TRUE(c0.value.next());
 
     ui64 ext[] = {0, 0, 0, 0};
-    ASSERT_EQ(E_SUCCESS, c0.value.set(200.0, Box::device_cpu(), ext));
+    ASSERT_EQ(E_SUCCESS, c0.value.set(200.0, device_cpu(), ext));
     ASSERT_TRUE(c0.value.next());
 
     int const elem2 = 30;
@@ -121,7 +121,7 @@ TEST(Box_Cursor_Test, Set)
     ASSERT_TRUE(c0.value.next());
 
     unsigned const elem3 = 4u;
-    ASSERT_EQ(E_SUCCESS, c0.value.set(&elem3, Box::device_cpu(), ext));
+    ASSERT_EQ(E_SUCCESS, c0.value.set(&elem3, device_cpu(), ext));
     ASSERT_FALSE(c0.value.next());
 
     ASSERT_EQ(10, box.at<int>(0));

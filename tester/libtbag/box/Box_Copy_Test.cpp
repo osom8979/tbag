@@ -21,13 +21,13 @@ TEST(Box_Copy_Test, CopyToNull)
     ASSERT_TRUE(src.is_device_cpu());
     ASSERT_TRUE(src.testExtensions(0, 0, 0, 0));
     ASSERT_NE(nullptr, src.data());
-    ASSERT_LE(sizeof(Box::si32)*2, src.total_data_byte());
+    ASSERT_LE(sizeof(si32)*2, src.total_data_byte());
     ASSERT_EQ(2, src.size());
     ASSERT_NE(nullptr, src.dims());
-    ASSERT_LE(sizeof(Box::ui32)*2, src.total_dims_byte());
+    ASSERT_LE(sizeof(ui32)*2, src.total_dims_byte());
     ASSERT_EQ(2, src.rank());
-    ASSERT_EQ(1, src.at<Box::si32>(0, 0));
-    ASSERT_EQ(2, src.at<Box::si32>(0, 1));
+    ASSERT_EQ(1, src.at<si32>(0, 0));
+    ASSERT_EQ(2, src.at<si32>(0, 1));
     ASSERT_NE(nullptr, src.info());
     ASSERT_LE(4, src.total_info_byte());
     ASSERT_EQ(4, src.info_size());
@@ -49,13 +49,13 @@ TEST(Box_Copy_Test, CopyToNull)
     ASSERT_TRUE(dest.is_device_cpu());
     ASSERT_TRUE(dest.testExtensions(0, 0, 0, 0));
     ASSERT_NE(nullptr, dest.data());
-    ASSERT_LE(sizeof(Box::si32)*2, dest.total_data_byte());
+    ASSERT_LE(sizeof(si32)*2, dest.total_data_byte());
     ASSERT_EQ(2, dest.size());
     ASSERT_NE(nullptr, dest.dims());
-    ASSERT_LE(sizeof(Box::ui32)*2, dest.total_dims_byte());
+    ASSERT_LE(sizeof(ui32)*2, dest.total_dims_byte());
     ASSERT_EQ(2, dest.rank());
-    ASSERT_EQ(1, dest.at<Box::si32>(0, 0));
-    ASSERT_EQ(2, dest.at<Box::si32>(0, 1));
+    ASSERT_EQ(1, dest.at<si32>(0, 0));
+    ASSERT_EQ(2, dest.at<si32>(0, 1));
     ASSERT_NE(nullptr, dest.info());
     ASSERT_LE(4, dest.total_info_byte());
     ASSERT_EQ(4, dest.info_size());
@@ -113,12 +113,12 @@ TEST(Box_Copy_Test, DowngradeDataSize)
     ASSERT_TRUE(dest.is_device_cpu());
     ASSERT_TRUE(dest.testExtensions(0, 0, 0, 0));
     ASSERT_NE(nullptr, dest.data());
-    ASSERT_LE(sizeof(Box::fp32)*1, dest.total_data_byte());
+    ASSERT_LE(sizeof(fp32)*1, dest.total_data_byte());
     ASSERT_EQ(1, dest.size());
     ASSERT_NE(nullptr, dest.dims());
-    ASSERT_LE(sizeof(Box::fp32)*1, dest.total_dims_byte());
+    ASSERT_LE(sizeof(fp32)*1, dest.total_dims_byte());
     ASSERT_EQ(1, dest.rank());
-    ASSERT_EQ(1.0f, dest.at<Box::fp32>(0));
+    ASSERT_EQ(1.0f, dest.at<fp32>(0));
 }
 
 TEST(Box_Copy_Test, UpgradeDataSize)
@@ -136,12 +136,12 @@ TEST(Box_Copy_Test, UpgradeDataSize)
     ASSERT_TRUE(dest.is_device_cpu());
     ASSERT_TRUE(dest.testExtensions(0, 0, 0, 0));
     ASSERT_NE(nullptr, dest.data());
-    ASSERT_LE(sizeof(Box::si32)*2, dest.total_data_byte());
+    ASSERT_LE(sizeof(si32)*2, dest.total_data_byte());
     ASSERT_EQ(2, dest.size());
     ASSERT_NE(nullptr, dest.dims());
-    ASSERT_LE(sizeof(Box::ui32)*2, dest.total_dims_byte());
+    ASSERT_LE(sizeof(ui32)*2, dest.total_dims_byte());
     ASSERT_EQ(2, dest.rank());
-    ASSERT_EQ(2, dest.at<Box::si32>(0, 0));
-    ASSERT_EQ(3, dest.at<Box::si32>(0, 1));
+    ASSERT_EQ(2, dest.at<si32>(0, 0));
+    ASSERT_EQ(3, dest.at<si32>(0, 1));
 }
 

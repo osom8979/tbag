@@ -14,10 +14,10 @@ using namespace libtbag::box;
 TEST(Box_At_Test, At)
 {
     Box box = {{1, 2}, {3, 4}};
-    ASSERT_EQ(1, box.at<Box::si32>(0, 0));
-    ASSERT_EQ(2, box.at<Box::si32>(0, 1));
-    ASSERT_EQ(3, box.at<Box::si32>(1, 0));
-    ASSERT_EQ(4, box.at<Box::si32>(1, 1));
+    ASSERT_EQ(1, box.at<si32>(0, 0));
+    ASSERT_EQ(2, box.at<si32>(0, 1));
+    ASSERT_EQ(3, box.at<si32>(1, 0));
+    ASSERT_EQ(4, box.at<si32>(1, 1));
 }
 
 TEST(Box_At_Test, Get_ReturnOutput)
@@ -29,10 +29,10 @@ TEST(Box_At_Test, Get_ReturnOutput)
     ASSERT_EQ(4, box.get<int>(1, 1));
 
     ui64 ext[] = {0, 0, 0, 0};
-    ASSERT_EQ(1, box.get<int>(Box::device_cpu(), ext, 0, 0));
-    ASSERT_EQ(2, box.get<int>(Box::device_cpu(), ext, 0, 1));
-    ASSERT_EQ(3, box.get<int>(Box::device_cpu(), ext, 1, 0));
-    ASSERT_EQ(4, box.get<int>(Box::device_cpu(), ext, 1, 1));
+    ASSERT_EQ(1, box.get<int>(device_cpu(), ext, 0, 0));
+    ASSERT_EQ(2, box.get<int>(device_cpu(), ext, 0, 1));
+    ASSERT_EQ(3, box.get<int>(device_cpu(), ext, 1, 0));
+    ASSERT_EQ(4, box.get<int>(device_cpu(), ext, 1, 1));
 
     ui32 dims0[] = {0, 0};
     ui32 dims1[] = {0, 1};
@@ -43,10 +43,10 @@ TEST(Box_At_Test, Get_ReturnOutput)
     ASSERT_EQ(3, box.get<int>(2, dims2));
     ASSERT_EQ(4, box.get<int>(2, dims3));
 
-    ASSERT_EQ(1, box.get<int>(Box::device_cpu(), ext, 2, dims0));
-    ASSERT_EQ(2, box.get<int>(Box::device_cpu(), ext, 2, dims1));
-    ASSERT_EQ(3, box.get<int>(Box::device_cpu(), ext, 2, dims2));
-    ASSERT_EQ(4, box.get<int>(Box::device_cpu(), ext, 2, dims3));
+    ASSERT_EQ(1, box.get<int>(device_cpu(), ext, 2, dims0));
+    ASSERT_EQ(2, box.get<int>(device_cpu(), ext, 2, dims1));
+    ASSERT_EQ(3, box.get<int>(device_cpu(), ext, 2, dims2));
+    ASSERT_EQ(4, box.get<int>(device_cpu(), ext, 2, dims3));
 }
 
 TEST(Box_At_Test, Get_ArgumentOutput)
@@ -67,10 +67,10 @@ TEST(Box_At_Test, Get_ArgumentOutput)
     elem3 = 0;
 
     ui64 ext[] = {0, 0, 0, 0};
-    ASSERT_EQ(E_SUCCESS, box.get(&elem0, Box::device_cpu(), ext, 0, 0));
-    ASSERT_EQ(E_SUCCESS, box.get(&elem1, Box::device_cpu(), ext, 0, 1));
-    ASSERT_EQ(E_SUCCESS, box.get(&elem2, Box::device_cpu(), ext, 1, 0));
-    ASSERT_EQ(E_SUCCESS, box.get(&elem3, Box::device_cpu(), ext, 1, 1));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem0, device_cpu(), ext, 0, 0));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem1, device_cpu(), ext, 0, 1));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem2, device_cpu(), ext, 1, 0));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem3, device_cpu(), ext, 1, 1));
     ASSERT_EQ(1, elem0);
     ASSERT_EQ(2, elem1);
     ASSERT_EQ(3, elem2);
@@ -97,10 +97,10 @@ TEST(Box_At_Test, Get_ArgumentOutput)
     elem2 = 0;
     elem3 = 0;
 
-    ASSERT_EQ(E_SUCCESS, box.get(&elem0, Box::device_cpu(), ext, 2, dims0));
-    ASSERT_EQ(E_SUCCESS, box.get(&elem1, Box::device_cpu(), ext, 2, dims1));
-    ASSERT_EQ(E_SUCCESS, box.get(&elem2, Box::device_cpu(), ext, 2, dims2));
-    ASSERT_EQ(E_SUCCESS, box.get(&elem3, Box::device_cpu(), ext, 2, dims3));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem0, device_cpu(), ext, 2, dims0));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem1, device_cpu(), ext, 2, dims1));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem2, device_cpu(), ext, 2, dims2));
+    ASSERT_EQ(E_SUCCESS, box.get(&elem3, device_cpu(), ext, 2, dims3));
     ASSERT_EQ(1, elem0);
     ASSERT_EQ(2, elem1);
     ASSERT_EQ(3, elem2);
@@ -120,10 +120,10 @@ TEST(Box_At_Test, Set_Get)
     ASSERT_EQ(40, box.get<int>(1, 1));
 
     ui64 ext[] = {0, 0, 0, 0};
-    ASSERT_EQ(E_SUCCESS, box.set(1.0, Box::device_cpu(), ext, 0, 0));
-    ASSERT_EQ(E_SUCCESS, box.set(2.0, Box::device_cpu(), ext, 0, 1));
-    ASSERT_EQ(E_SUCCESS, box.set(3.0, Box::device_cpu(), ext, 1, 0));
-    ASSERT_EQ(E_SUCCESS, box.set(4.0, Box::device_cpu(), ext, 1, 1));
+    ASSERT_EQ(E_SUCCESS, box.set(1.0, device_cpu(), ext, 0, 0));
+    ASSERT_EQ(E_SUCCESS, box.set(2.0, device_cpu(), ext, 0, 1));
+    ASSERT_EQ(E_SUCCESS, box.set(3.0, device_cpu(), ext, 1, 0));
+    ASSERT_EQ(E_SUCCESS, box.set(4.0, device_cpu(), ext, 1, 1));
     ASSERT_EQ(1, box.get<int>(0, 0));
     ASSERT_EQ(2, box.get<int>(0, 1));
     ASSERT_EQ(3, box.get<int>(1, 0));
@@ -142,10 +142,10 @@ TEST(Box_At_Test, Set_Get)
     ASSERT_EQ(300, box.get<int>(1, 0));
     ASSERT_EQ(400, box.get<int>(1, 1));
 
-    ASSERT_EQ(E_SUCCESS, box.set(11.0f, Box::device_cpu(), ext, 2, dims0));
-    ASSERT_EQ(E_SUCCESS, box.set(12.0f, Box::device_cpu(), ext, 2, dims1));
-    ASSERT_EQ(E_SUCCESS, box.set(13.0f, Box::device_cpu(), ext, 2, dims2));
-    ASSERT_EQ(E_SUCCESS, box.set(14.0f, Box::device_cpu(), ext, 2, dims3));
+    ASSERT_EQ(E_SUCCESS, box.set(11.0f, device_cpu(), ext, 2, dims0));
+    ASSERT_EQ(E_SUCCESS, box.set(12.0f, device_cpu(), ext, 2, dims1));
+    ASSERT_EQ(E_SUCCESS, box.set(13.0f, device_cpu(), ext, 2, dims2));
+    ASSERT_EQ(E_SUCCESS, box.set(14.0f, device_cpu(), ext, 2, dims3));
     ASSERT_EQ(11, box.get<int>(0, 0));
     ASSERT_EQ(12, box.get<int>(0, 1));
     ASSERT_EQ(13, box.get<int>(1, 0));

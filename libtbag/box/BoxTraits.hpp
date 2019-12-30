@@ -29,6 +29,29 @@ namespace box {
 // Forward declarations.
 class Box;
 
+using si8   = libtbag::box::details::si8;
+using si16  = libtbag::box::details::si16;
+using si32  = libtbag::box::details::si32;
+using si64  = libtbag::box::details::si64;
+
+using ui8   = libtbag::box::details::ui8;
+using ui16  = libtbag::box::details::ui16;
+using ui32  = libtbag::box::details::ui32;
+using ui64  = libtbag::box::details::ui64;
+
+using fp32  = libtbag::box::details::fp32;
+using fp64  = libtbag::box::details::fp64;
+
+using btype = libtbag::box::details::btype;
+using bdev  = libtbag::box::details::bdev;
+
+using box_data   = libtbag::box::details::box_data;
+using box_slice  = libtbag::box::details::box_slice;
+using box_cursor = libtbag::box::details::box_cursor;
+using box_any    = libtbag::box::details::box_any;
+
+using box_opaque_delete_cb = libtbag::box::details::box_opaque_delete_cb;
+
 /**
  * Type table of Box class.
  *
@@ -202,6 +225,26 @@ inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
 {
     return type == get_btype<typename btype_regularization<T>::type>();
 }
+
+TBAG_CONSTEXPR int const nop = libtbag::box::details::box_nop;
+
+TBAG_CONSTEXPR btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
+TBAG_CONSTEXPR btype const type_si8 () TBAG_NOEXCEPT { return get_btype<si8 >(); }
+TBAG_CONSTEXPR btype const type_si16() TBAG_NOEXCEPT { return get_btype<si16>(); }
+TBAG_CONSTEXPR btype const type_si32() TBAG_NOEXCEPT { return get_btype<si32>(); }
+TBAG_CONSTEXPR btype const type_si64() TBAG_NOEXCEPT { return get_btype<si64>(); }
+TBAG_CONSTEXPR btype const type_ui8 () TBAG_NOEXCEPT { return get_btype<ui8 >(); }
+TBAG_CONSTEXPR btype const type_ui16() TBAG_NOEXCEPT { return get_btype<ui16>(); }
+TBAG_CONSTEXPR btype const type_ui32() TBAG_NOEXCEPT { return get_btype<ui32>(); }
+TBAG_CONSTEXPR btype const type_ui64() TBAG_NOEXCEPT { return get_btype<ui64>(); }
+TBAG_CONSTEXPR btype const type_fp32() TBAG_NOEXCEPT { return get_btype<fp32>(); }
+TBAG_CONSTEXPR btype const type_fp64() TBAG_NOEXCEPT { return get_btype<fp64>(); }
+
+TBAG_CONSTEXPR bdev const device_none() TBAG_NOEXCEPT { return libtbag::box::details::BD_NONE; }
+TBAG_CONSTEXPR bdev const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }
+TBAG_CONSTEXPR bdev const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
+TBAG_CONSTEXPR bdev const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }
+
 
 template <typename ... T>
 struct is_first_box_data;

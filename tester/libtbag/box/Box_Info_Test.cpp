@@ -39,7 +39,7 @@ TEST(Box_Info_Test, ImmutabilityOfOtherProperties)
     auto const total_dims_byte = box.total_dims_byte();
     auto const rank = box.rank();
 
-    ASSERT_EQ(Box::type_si32(), type);
+    ASSERT_EQ(type_si32(), type);
     ASSERT_EQ(4, size);
     ASSERT_EQ(2, rank);
 

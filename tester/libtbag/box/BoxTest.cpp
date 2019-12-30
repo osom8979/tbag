@@ -72,7 +72,7 @@ TEST(BoxTest, Diffs1)
     auto box = Box::array<int>(3, 3);
     ASSERT_TRUE(box);
 
-    auto const diffs = box.diffs({{Box::nop, Box::nop, -1}, {0, -1, 1}});
+    auto const diffs = box.diffs({{nop, nop, -1}, {0, -1, 1}});
     ASSERT_EQ(2, diffs.size());
     ASSERT_EQ(3, diffs[0]);
     ASSERT_EQ(2, diffs[1]);
