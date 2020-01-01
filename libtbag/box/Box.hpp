@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Type.hpp>
 #include <libtbag/box/details/box_api.hpp>
+#include <libtbag/box/BoxBase.hpp>
 #include <libtbag/box/BoxCursor.hpp>
 #include <libtbag/box/BoxIterator.hpp>
 #include <libtbag/box/BoxIteratorGenerator.hpp>
@@ -68,19 +69,8 @@ namespace box {
  * @author zer0
  * @date   2019-05-16
  */
-class TBAG_API Box
+class TBAG_API Box : public BoxBase
 {
-public:
-    using Buffer = std::vector<ui8>;
-
-    using size_type = ui32;
-    using difference_type = std::ptrdiff_t;
-
-    using SharedBoxData = std::shared_ptr<box_data>;
-
-private:
-    SharedBoxData _data;
-
 public:
     Box();
     explicit Box(std::nullptr_t) TBAG_NOEXCEPT;
@@ -134,7 +124,7 @@ public:
     inline void swap(Box & obj) TBAG_NOEXCEPT
     {
         if (this != &obj) {
-            _data.swap(obj._data);
+            _base.swap(obj._base);
         }
     }
 
@@ -143,490 +133,8 @@ public:
         lh.swap(rh);
     }
 
-public:
-    inline bool exists() const TBAG_NOEXCEPT
-    {
-        return static_cast<bool>(_data);
-    }
-
-    inline operator bool() const TBAG_NOEXCEPT
-    {
-        return exists();
-    }
-
-    void reset() TBAG_NOEXCEPT_SP_OP(_data.reset())
-    {
-        _data.reset();
-    }
-
-public:
-    inline box_data       * base()       TBAG_NOEXCEPT { return _data.get(); }
-    inline box_data const * base() const TBAG_NOEXCEPT { return _data.get(); }
-
-public:
-    inline btype getType() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->type;
-        }
-        return type_none();
-    }
-
-    inline btype type() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->type;
-    }
-
-    inline bool isSupportType() const TBAG_NOEXCEPT
-    {
-        return libtbag::box::details::box_support_type(getType());
-    }
-
-    inline char const * getTypeName() const TBAG_NOEXCEPT
-    {
-        return libtbag::box::details::box_get_type_name(getType());
-    }
-
-    inline ui32 getTypeByte() const TBAG_NOEXCEPT
-    {
-        return libtbag::box::details::box_get_type_byte(getType());
-    }
-
-    // clang-format off
-    inline bool is_none() const TBAG_NOEXCEPT { return getType() == type_none(); }
-    inline bool is_si8 () const TBAG_NOEXCEPT { return getType() == type_si8 (); }
-    inline bool is_si16() const TBAG_NOEXCEPT { return getType() == type_si16(); }
-    inline bool is_si32() const TBAG_NOEXCEPT { return getType() == type_si32(); }
-    inline bool is_si64() const TBAG_NOEXCEPT { return getType() == type_si64(); }
-    inline bool is_ui8 () const TBAG_NOEXCEPT { return getType() == type_ui8 (); }
-    inline bool is_ui16() const TBAG_NOEXCEPT { return getType() == type_ui16(); }
-    inline bool is_ui32() const TBAG_NOEXCEPT { return getType() == type_ui32(); }
-    inline bool is_ui64() const TBAG_NOEXCEPT { return getType() == type_ui64(); }
-    inline bool is_fp32() const TBAG_NOEXCEPT { return getType() == type_fp32(); }
-    inline bool is_fp64() const TBAG_NOEXCEPT { return getType() == type_fp64(); }
-    // clang-format on
-
-    inline bool is_signed() const TBAG_NOEXCEPT
-    {
-        return is_si8() || is_si16() || is_si32() || is_si64();
-    }
-
-    inline bool is_unsigned() const TBAG_NOEXCEPT
-    {
-        return is_ui8() || is_ui16() || is_ui32() || is_ui64();
-    }
-
-    inline bool is_floating() const TBAG_NOEXCEPT
-    {
-        return is_fp32() || is_fp64();
-    }
-
-public:
-    inline btype getDevice() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->device;
-        }
-        return device_none();
-    }
-
-    inline btype device() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->device;
-    }
-
-    inline bool isSupportDevice() const TBAG_NOEXCEPT
-    {
-        return libtbag::box::details::box_support_device(getDevice());
-    }
-
-    inline char const * getDeviceName(bdev dev) const TBAG_NOEXCEPT
-    {
-        return libtbag::box::details::box_get_device_name(getType());
-    }
-
-    // clang-format off
-    inline bool is_device_none() const TBAG_NOEXCEPT { return getDevice() == device_none(); }
-    inline bool is_device_cpu () const TBAG_NOEXCEPT { return getDevice() == device_cpu (); }
-    inline bool is_device_cuda() const TBAG_NOEXCEPT { return getDevice() == device_cuda(); }
-    inline bool is_device_cl  () const TBAG_NOEXCEPT { return getDevice() == device_cl  (); }
-    // clang-format on
-
-public:
-    inline ui64 const * getExtensions() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->ext;
-        }
-        return nullptr;
-    }
-
-    inline ui64 const * ext() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->ext;
-    }
-
-    // clang-format off
-    inline ui64 getExtension0() const TBAG_NOEXCEPT { if (_data) { return _data->ext[0]; } return 0; }
-    inline ui64 getExtension1() const TBAG_NOEXCEPT { if (_data) { return _data->ext[1]; } return 0; }
-    inline ui64 getExtension2() const TBAG_NOEXCEPT { if (_data) { return _data->ext[2]; } return 0; }
-    inline ui64 getExtension3() const TBAG_NOEXCEPT { if (_data) { return _data->ext[3]; } return 0; }
-    inline ui64 ext0() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[0]; }
-    inline ui64 ext1() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[1]; }
-    inline ui64 ext2() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[2]; }
-    inline ui64 ext3() const TBAG_NOEXCEPT { assert(exists()); return _data->ext[3]; }
-    // clang-format on
-
-    inline bool testExtensions(ui64 e0, ui64 e1, ui64 e2, ui64 e3) const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->ext[0] == e0 &&
-                   _data->ext[1] == e1 &&
-                   _data->ext[2] == e2 &&
-                   _data->ext[3] == e3;
-        }
-        return false;
-    }
-
-public:
-    template <typename T>
-    inline void * getData() TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return static_cast<T*>(_data->data);
-        }
-        return nullptr;
-    }
-
-    template <typename T>
-    inline void const * getData() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return static_cast<T*>(_data->data);
-        }
-        return nullptr;
-    }
-
-    inline void * getData() TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->data;
-        }
-        return nullptr;
-    }
-
-    inline void const * getData() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->data;
-        }
-        return nullptr;
-    }
-
-    template <typename T>
-    inline T * data() TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return static_cast<T*>(_data->data);
-    }
-
-    template <typename T>
-    inline T const * data() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return static_cast<T const *>(_data->data);
-    }
-
-    inline void * data() TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->data;
-    }
-
-    inline void const * data() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->data;
-    }
-
-    inline ui32 getTotalDataByte() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->total_data_byte;
-        }
-        return 0;
-    }
-
-    inline ui32 total_data_byte() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->total_data_byte;
-    }
-
-    inline ui32 getCapacity() const TBAG_NOEXCEPT
-    {
-        return getTotalDataByte();
-    }
-
-    inline ui32 capacity() const TBAG_NOEXCEPT
-    {
-        return total_data_byte();
-    }
-
-    inline ui32 getSize() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->size;
-        }
-        return 0;
-    }
-
-    inline ui32 size() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->size;
-    }
-
-    inline bool isEmpty() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->size == 0;
-        }
-        return true;
-    }
-
-    inline bool empty() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->size == 0;
-    }
-
-public:
-    inline ui32 const * getDimensions() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->dims;
-        }
-        return nullptr;
-    }
-
-    inline ui32 const * dims() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->dims;
-    }
-
-    inline ui32 getDimension(ui32 i) const TBAG_NOEXCEPT
-    {
-        if (_data && i < _data->rank) {
-            return _data->dims[i];
-        }
-        return 0;
-    }
-
-    inline ui32 dim(ui32 i) const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->dims[i];
-    }
-
-    inline ui32 getTotalDimsByte() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->total_dims_byte;
-        }
-        return 0;
-    }
-
-    inline ui32 total_dims_byte() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->total_dims_byte;
-    }
-
-    inline ui32 getDimensionsCapacity() const TBAG_NOEXCEPT
-    {
-        return getTotalDimsByte();
-    }
-
-    inline ui32 dims_capacity() const TBAG_NOEXCEPT
-    {
-        return total_dims_byte();
-    }
-
-    inline ui32 getRank() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->rank;
-        }
-        return 0;
-    }
-
-    inline ui32 rank() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->rank;
-    }
-
-    inline ui32 getStride(ui32 i) const TBAG_NOEXCEPT
-    {
-        return libtbag::box::details::box_dim_get_stride(getDimensions(), getRank(), i);
-    }
-
-    inline ui32 getStrideByte(ui32 i) const TBAG_NOEXCEPT
-    {
-        return getStride(i) * getTypeByte();
-    }
-
-public:
-    inline ui8 * getInfo() TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->info;
-        }
-        return nullptr;
-    }
-
-    inline ui8 const * getInfo() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->info;
-        }
-        return nullptr;
-    }
-
-    inline ui8 * info() TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->info;
-    }
-
-    inline ui8 const * info() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->info;
-    }
-
-    inline ui32 getTotalInfoByte() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->total_info_byte;
-        }
-        return 0;
-    }
-
-    inline ui32 total_info_byte() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->total_info_byte;
-    }
-
-    inline ui32 getInfoCapacity() const TBAG_NOEXCEPT
-    {
-        return getTotalInfoByte();
-    }
-
-    inline ui32 info_capacity() const TBAG_NOEXCEPT
-    {
-        return total_info_byte();
-    }
-
-    inline ui32 getInfoSize() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->info_size;
-        }
-        return 0;
-    }
-
-    inline ui32 info_size() const TBAG_NOEXCEPT
-    {
-        assert(exists());
-        return _data->info_size;
-    }
-
-public:
-    inline void setOpaque(void * v) const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            _data->set_opaque(v);
-        }
-    }
-
-    template <typename T>
-    inline void setOpaque(T v) TBAG_NOEXCEPT
-    {
-        if (_data) {
-            _data->set_opaque(v);
-        }
-    }
-
-    template <typename T>
-    inline void getOpaque(T * v) const TBAG_NOEXCEPT
-    {
-        if (_data && v != nullptr) {
-            _data->get_opaque(v);
-        }
-    }
-
-    template <typename T>
-    inline T getOpaque() const TBAG_NOEXCEPT
-    {
-        T result = T();
-        getOpaque(&result);
-        return result;
-    }
-
-    inline void * getOpaquePointer() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->get_opaque_pointer();
-        }
-        return nullptr;
-    }
-
-    inline box_opaque_delete_cb getOpaqueDeleter() const TBAG_NOEXCEPT
-    {
-        if (_data) {
-            return _data->opaque_deleter;
-        }
-        return nullptr;
-    }
-
-    inline void setOpaqueDeleter(box_opaque_delete_cb cb) TBAG_NOEXCEPT
-    {
-        if (_data) {
-            _data->opaque_deleter = cb;
-        }
-    }
-
-public:
-    inline void clearData() TBAG_NOEXCEPT
-    {
-        if (_data) {
-            _data->size = 0;
-            _data->rank = 0;
-        }
-    }
-
-    inline void clearInfo() TBAG_NOEXCEPT
-    {
-        if (_data) {
-            _data->info_size = 0;
-        }
-    }
-
-    inline void clear() TBAG_NOEXCEPT
-    {
-        clearData();
-        clearInfo();
-    }
-
-public:
-    void createIfNotExists();
+private:
+    void __create_if_not_exists();
 
 public:
     void setInfo(ui8 const * info, ui32 size);
@@ -780,7 +288,7 @@ public:
         } else {
             ui32 offset = 0;
             for (; begin != end; ++begin) {
-                _data->set_data(begin, type, device, ext, offset);
+                _base->set_data(begin, type, device, ext, offset);
                 ++offset;
             }
         }
@@ -825,7 +333,7 @@ public:
             for (auto & i1 : items) {
                 assert(i1.size() == dim_2d);
                 for (auto & i2 : i1) {
-                    _data->set_data(&i2, type, device, ext, offset);
+                    _base->set_data(&i2, type, device, ext, offset);
                     ++offset;
                 }
             }
@@ -865,7 +373,7 @@ public:
                 for (auto & i2 : i1) {
                     assert(i2.size() == dim_3d);
                     for (auto & i3 : i2) {
-                        _data->set_data(&i3, type, device, ext, offset);
+                        _base->set_data(&i3, type, device, ext, offset);
                         ++offset;
                     }
                 }
@@ -912,7 +420,7 @@ public:
                     for (auto & i3 : i2) {
                         assert(i3.size() == dim_4d);
                         for (auto & i4 : i3) {
-                            _data->set_data(&i4, type, device, ext, offset);
+                            _base->set_data(&i4, type, device, ext, offset);
                             ++offset;
                         }
                     }
@@ -936,7 +444,7 @@ public:
         assert(exists());
         assert(i < size());
         assert(is_btype_equals<T>(type()));
-        return *((T*)_data->get_data_ptr_by_offset(i));
+        return *((T*)_base->get_data_ptr_by_offset(i));
     }
 
     template <typename T>
@@ -945,7 +453,7 @@ public:
         assert(exists());
         assert(i < size());
         assert(is_btype_equals<T>(type()));
-        return *((T*)_data->get_data_ptr_by_offset(i));
+        return *((T*)_base->get_data_ptr_by_offset(i));
     }
 
     template <typename T, typename ... Args>
@@ -978,7 +486,7 @@ private:
         if (!exists()) {
             return libtbag::E_EXPIRED;
         }
-        return _data->get_data_args((void*)out, get_btype<T>(), out_device, out_ext,
+        return _base->get_data_args((void*)out, get_btype<T>(), out_device, out_ext,
                                     static_cast<ui32>(sizeof...(Args)),
                                     std::forward<Args>(args) ...);
     }
@@ -992,7 +500,7 @@ private:
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
-        return _data->get_data_args((void*)out, get_btype<T>(), shape_device, shape_ext,
+        return _base->get_data_args((void*)out, get_btype<T>(), shape_device, shape_ext,
                                     static_cast<ui32>(sizeof...(Args)),
                                     std::forward<Args>(args) ...);
     }
@@ -1004,7 +512,7 @@ private:
         if (!exists()) {
             return libtbag::E_EXPIRED;
         }
-        return _data->get_data_dims((void*)out, get_btype<T>(), out_device, out_ext, index_rank, index_dims);
+        return _base->get_data_dims((void*)out, get_btype<T>(), out_device, out_ext, index_rank, index_dims);
     }
 
     template <typename T>
@@ -1015,7 +523,7 @@ private:
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
-        return _data->get_data_dims((void*)out, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
+        return _base->get_data_dims((void*)out, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
     }
 
 public:
@@ -1049,7 +557,7 @@ private:
         if (!exists()) {
             return libtbag::E_EXPIRED;
         }
-        return _data->set_data_args((void const *)src, get_btype<T>(), src_device, src_ext,
+        return _base->set_data_args((void const *)src, get_btype<T>(), src_device, src_ext,
                                     static_cast<ui32>(sizeof...(Args)),
                                     std::forward<Args>(args) ...);
     }
@@ -1069,7 +577,7 @@ private:
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
-        return _data->set_data_args((void const *)src, get_btype<T>(), shape_device, shape_ext,
+        return _base->set_data_args((void const *)src, get_btype<T>(), shape_device, shape_ext,
                                     static_cast<ui32>(sizeof...(Args)),
                                     std::forward<Args>(args) ...);
     }
@@ -1087,7 +595,7 @@ private:
         if (!exists()) {
             return libtbag::E_EXPIRED;
         }
-        return _data->set_data_dims((void const *)src, get_btype<T>(), src_device, src_ext, index_rank, index_dims);
+        return _base->set_data_dims((void const *)src, get_btype<T>(), src_device, src_ext, index_rank, index_dims);
     }
 
     template <typename T>
@@ -1105,7 +613,7 @@ private:
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
-        return _data->set_data_dims((void const *)src, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
+        return _base->set_data_dims((void const *)src, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
     }
 
     template <typename T>

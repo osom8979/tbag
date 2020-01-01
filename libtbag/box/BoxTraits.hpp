@@ -228,17 +228,17 @@ inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
 
 TBAG_CONSTEXPR int const nop = libtbag::box::details::box_nop;
 
-TBAG_CONSTEXPR btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
-TBAG_CONSTEXPR btype const type_si8 () TBAG_NOEXCEPT { return get_btype<si8 >(); }
-TBAG_CONSTEXPR btype const type_si16() TBAG_NOEXCEPT { return get_btype<si16>(); }
-TBAG_CONSTEXPR btype const type_si32() TBAG_NOEXCEPT { return get_btype<si32>(); }
-TBAG_CONSTEXPR btype const type_si64() TBAG_NOEXCEPT { return get_btype<si64>(); }
-TBAG_CONSTEXPR btype const type_ui8 () TBAG_NOEXCEPT { return get_btype<ui8 >(); }
-TBAG_CONSTEXPR btype const type_ui16() TBAG_NOEXCEPT { return get_btype<ui16>(); }
-TBAG_CONSTEXPR btype const type_ui32() TBAG_NOEXCEPT { return get_btype<ui32>(); }
-TBAG_CONSTEXPR btype const type_ui64() TBAG_NOEXCEPT { return get_btype<ui64>(); }
-TBAG_CONSTEXPR btype const type_fp32() TBAG_NOEXCEPT { return get_btype<fp32>(); }
-TBAG_CONSTEXPR btype const type_fp64() TBAG_NOEXCEPT { return get_btype<fp64>(); }
+TBAG_CONSTEXPR btype const type_none () TBAG_NOEXCEPT { return get_btype<void >(); }
+TBAG_CONSTEXPR btype const type_si8  () TBAG_NOEXCEPT { return get_btype<si8  >(); }
+TBAG_CONSTEXPR btype const type_si16 () TBAG_NOEXCEPT { return get_btype<si16 >(); }
+TBAG_CONSTEXPR btype const type_si32 () TBAG_NOEXCEPT { return get_btype<si32 >(); }
+TBAG_CONSTEXPR btype const type_si64 () TBAG_NOEXCEPT { return get_btype<si64 >(); }
+TBAG_CONSTEXPR btype const type_ui8  () TBAG_NOEXCEPT { return get_btype<ui8  >(); }
+TBAG_CONSTEXPR btype const type_ui16 () TBAG_NOEXCEPT { return get_btype<ui16 >(); }
+TBAG_CONSTEXPR btype const type_ui32 () TBAG_NOEXCEPT { return get_btype<ui32 >(); }
+TBAG_CONSTEXPR btype const type_ui64 () TBAG_NOEXCEPT { return get_btype<ui64 >(); }
+TBAG_CONSTEXPR btype const type_fp32 () TBAG_NOEXCEPT { return get_btype<fp32 >(); }
+TBAG_CONSTEXPR btype const type_fp64 () TBAG_NOEXCEPT { return get_btype<fp64 >(); }
 
 TBAG_CONSTEXPR bdev const device_none() TBAG_NOEXCEPT { return libtbag::box::details::BD_NONE; }
 TBAG_CONSTEXPR bdev const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }

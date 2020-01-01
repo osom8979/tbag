@@ -50,14 +50,6 @@ TEST(BoxTest, GetBtype)
     ASSERT_EQ(char_btype, si8_btype);
 }
 
-TEST(BoxTest, CreateIfNotExists)
-{
-    Box box(nullptr);
-    ASSERT_FALSE(box);
-    box.createIfNotExists();
-    ASSERT_TRUE(box);
-}
-
 TEST(BoxTest, Diffs0)
 {
     Box box;

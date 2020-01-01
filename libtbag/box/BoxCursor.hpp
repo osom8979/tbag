@@ -262,13 +262,13 @@ public:
         return libtbag::E_SUCCESS;
     }
 
-    template <typename T, typename Predicated>
+    template <typename Predicated>
     Err forEach(box_slice const * slice, std::size_t size, Predicated predicated)
     {
         return forEach(slice, slice + size, predicated);
     }
 
-    template <typename T, typename Predicated>
+    template <typename Predicated>
     Err forEach(Predicated predicated)
     {
         return forEach(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);

@@ -23,27 +23,27 @@ namespace box {
 
 using namespace libtbag::box::details;
 
-Box::Box() : _data(std::make_shared<box_data>())
+Box::Box() : BoxBase()
 {
     assert(exists());
 }
 
-Box::Box(std::nullptr_t) TBAG_NOEXCEPT : _data(nullptr)
+Box::Box(std::nullptr_t) TBAG_NOEXCEPT : BoxBase(nullptr)
 {
     assert(!exists());
 }
 
-Box::Box(box_data && data) TBAG_NOEXCEPT : _data(std::make_shared<box_data>(std::move(data)))
+Box::Box(box_data && data) TBAG_NOEXCEPT : BoxBase(std::move(data))
 {
     // EMPTY.
 }
 
-Box::Box(Box const & obj) TBAG_NOEXCEPT : _data(obj._data)
+Box::Box(Box const & obj) TBAG_NOEXCEPT : BoxBase(obj._base)
 {
     // EMPTY.
 }
 
-Box::Box(Box && obj) TBAG_NOEXCEPT : _data(std::move(obj._data))
+Box::Box(Box && obj) TBAG_NOEXCEPT : BoxBase(std::move(obj._base))
 {
     // EMPTY.
 }
@@ -56,7 +56,7 @@ Box::~Box()
 Box & Box::operator =(Box const & obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _data = obj._data;
+        _base = obj._base;
     }
     return *this;
 }
@@ -64,28 +64,28 @@ Box & Box::operator =(Box const & obj) TBAG_NOEXCEPT
 Box & Box::operator =(Box && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _data = std::move(obj._data);
+        _base = std::move(obj._base);
     }
     return *this;
 }
 
 Box & Box::operator =(std::nullptr_t) TBAG_NOEXCEPT
 {
-    _data = nullptr;
+    _base = nullptr;
     return *this;
 }
 
-void Box::createIfNotExists()
+void Box::__create_if_not_exists()
 {
     if (!exists()) {
-        _data = std::make_shared<box_data>();
+        _base = std::make_shared<box_data>();
     }
 }
 
 void Box::setInfo(ui8 const * info, ui32 size)
 {
-    createIfNotExists();
-    _data->checked_assign_info_buffer(info, size);
+    __create_if_not_exists();
+    _base->checked_assign_info_buffer(info, size);
 }
 
 void Box::setInfo(std::string const & info)
@@ -100,16 +100,16 @@ void Box::setInfo(Buffer const & info)
 
 std::string Box::getInfoString() const
 {
-    if (_data && _data->info) {
-        return std::string(_data->info, _data->info + _data->info_size);
+    if (_base && _base->info) {
+        return std::string(_base->info, _base->info + _base->info_size);
     }
     return {};
 }
 
 Box::Buffer Box::getInfoBuffer() const
 {
-    if (_data && _data->info) {
-        return Buffer(_data->info, _data->info + _data->info_size);
+    if (_base && _base->info) {
+        return Buffer(_base->info, _base->info + _base->info_size);
     }
     return {};
 }
@@ -134,8 +134,8 @@ Err Box::_resize_args(btype type, ui32 rank, ...)
 
 Err Box::_resize_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_list ap)
 {
-    createIfNotExists();
-    return _data->resize_vargs(type, device, ext, rank, ap);
+    __create_if_not_exists();
+    return _base->resize_vargs(type, device, ext, rank, ap);
 }
 
 Err Box::_resize_vargs(btype type, ui32 rank, va_list ap)
@@ -156,8 +156,8 @@ Err Box::_resize_vargs(btype type, ui32 rank, va_list ap)
 
 Err Box::_resize_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims)
 {
-    createIfNotExists();
-    return _data->resize_dims(type, device, ext, rank, dims);
+    __create_if_not_exists();
+    return _base->resize_dims(type, device, ext, rank, dims);
 }
 
 Err Box::_resize_dims(btype type, ui32 rank, ui32 const * dims)
@@ -222,8 +222,8 @@ Box Box::astype(btype change_type) const
 Err Box::copyFromData(Box const & box)
 {
     if (box.exists()) {
-        createIfNotExists();
-        return _data->checked_assign_data(box.type(), box.device(), box.ext(), box.rank(), box.dims(), box.data());
+        __create_if_not_exists();
+        return _base->checked_assign_data(box.type(), box.device(), box.ext(), box.rank(), box.dims(), box.data());
     } else {
         if (exists()) {
             clearData();
@@ -240,8 +240,8 @@ Err Box::copyToData(Box & box) const
 Err Box::copyFromInfo(Box const & box)
 {
     if (box.exists()) {
-        createIfNotExists();
-        _data->checked_assign_info_buffer(box.info(), box.info_size());
+        __create_if_not_exists();
+        _base->checked_assign_info_buffer(box.info(), box.info_size());
     } else {
         if (exists()) {
             clearInfo();
@@ -274,7 +274,7 @@ Box Box::clone() const
     if (!exists()) {
         return Box(nullptr);
     }
-    auto result = _data->clone();
+    auto result = _base->clone();
     if (result) {
         return Box(std::move(result.value));
     }
@@ -323,7 +323,7 @@ Err Box::encode(Builder & builder) const
     if (!exists()) {
         return E_EXPIRED;
     }
-    return builder.build(_data.get());
+    return builder.build(_base.get());
 }
 
 Err Box::encode(Builder & builder, Buffer & buffer) const
@@ -347,7 +347,7 @@ Err Box::decode(void const * buffer, std::size_t size, Parser const & parser, st
     if (!exists()) {
         return E_EXPIRED;
     }
-    return parser.parse(buffer, size, _data.get(), computed_size);
+    return parser.parse(buffer, size, _base.get(), computed_size);
 }
 
 Err Box::decode(void const * buffer, std::size_t size, std::size_t * computed_size)
@@ -382,7 +382,7 @@ Err Box::decodeFromJson(char const * json, std::size_t size, Parser const & pars
     if (!exists()) {
         return E_EXPIRED;
     }
-    return parser.parseJson(std::string(json, json + size), _data.get());
+    return parser.parseJson(std::string(json, json + size), _base.get());
 }
 
 Err Box::decodeFromJson(char const * json, std::size_t size)
@@ -428,7 +428,7 @@ ErrPair<BoxCursor> Box::cursor(int begin, int end, int step) const
     if (rank() == 0) {
         return E_EINVAL;
     }
-    auto const result = _data->init_cursor(0u, begin, end, step);
+    auto const result = _base->init_cursor(0u, begin, end, step);
     return { result.code, result.value };
 }
 
@@ -507,15 +507,20 @@ Box Box::slice(box_slice const * slice_begin, box_slice const * slice_end) const
     if (isFailure(resize_code)) {
         return Box(nullptr);
     }
+    ui32 offset = 0;
+    auto const copy_code = forEach(slice_begin, slice_end, [&](void const * elem){
+        result.base()->set_data(elem, type(), device(), ext(), offset);
+        ++offset;
+    });
+    if (isFailure(copy_code)) {
+        return Box(nullptr);
+    }
     assert(result.exists());
     if (info_size() >= 1) {
         result.setInfo(info(), info_size());
     }
     result.setOpaque(getOpaque<box_any>());
     result.setOpaqueDeleter(getOpaqueDeleter());
-
-    // TODO
-
     return result;
 }
 
