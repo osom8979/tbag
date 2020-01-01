@@ -159,7 +159,7 @@ private:
 
 private:
     template <typename ... Args>
-    Err _resize(shape_unknown_t, Args && ... args)
+    Err _resize(shape_unknown_t, Args && ... UNUSED_PARAM(args))
     {
         return libtbag::E_INACCESSIBLE_BLOCK;
     }
@@ -474,7 +474,7 @@ public:
 
 private:
     template <typename T, typename ... Args>
-    Err _get(shape_unknown_t, T * result, Args && ... args)
+    Err _get(shape_unknown_t, T * UNUSED_PARAM(result), Args && ... UNUSED_PARAM(args))
     {
         return libtbag::E_INACCESSIBLE_BLOCK;
     }
@@ -545,7 +545,7 @@ public:
 
 private:
     template <typename T, typename ... Args>
-    Err _set(shape_unknown_t, T const * src, Args && ... args)
+    Err _set(shape_unknown_t, T const * UNUSED_PARAM(src), Args && ... UNUSED_PARAM(args))
     {
         return libtbag::E_INACCESSIBLE_BLOCK;
     }

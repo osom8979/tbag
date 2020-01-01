@@ -145,3 +145,34 @@ TEST(Box_ForEach_Test, MutablePtr)
     ASSERT_EQ(11, box.at<int>(0, 1));
 }
 
+TEST(Box_ForEach_Test, Slice_Dim1)
+{
+    Box box = {0, 1, 2, 3};
+    std::vector<box_slice> slices = { {1, 3, 1} };
+    std::vector<int> result;
+    auto const code = box.forEach(slices.data(), slices.size(), [&](int const & val){
+        result.emplace_back(val);
+    });
+    ASSERT_EQ(E_SUCCESS, code);
+    ASSERT_EQ(2, result.size());
+    ASSERT_EQ(1, result[0]);
+    ASSERT_EQ(2, result[1]);
+}
+
+TEST(Box_ForEach_Test, Slice_Dim2)
+{
+    using namespace libtbag::box::details;
+    Box box = {{0, 1, 2, 3}, {4, 5, 6, 7}};
+    std::vector<box_slice> slices = {{box_nop, box_nop, -1}, {1, 3, 1}};
+    std::vector<int> result;
+    auto const code = box.forEach(slices.data(), slices.size(), [&](int const & val){
+        result.emplace_back(val);
+    });
+    ASSERT_EQ(E_SUCCESS, code);
+    ASSERT_EQ(4, result.size());
+    ASSERT_EQ(5, result[0]);
+    ASSERT_EQ(6, result[1]);
+    ASSERT_EQ(1, result[2]);
+    ASSERT_EQ(2, result[3]);
+}
+

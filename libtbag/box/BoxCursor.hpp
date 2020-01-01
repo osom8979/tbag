@@ -242,18 +242,18 @@ public:
                 predicated(_access<__type>(access_selector<__arg0>::value));
             } while (next());
         } else {
+            auto const * next_slice_begin = (slice_begin == slice_end ? slice_begin : slice_begin + 1);
             do {
                 ErrPair<BoxCursor> err_cursor;
                 if (slice_begin == slice_end) {
                     err_cursor = sub();
                 } else {
                     err_cursor = sub(*slice_begin);
-                    ++slice_begin;
                 }
                 if (!err_cursor) {
                     return err_cursor.code;
                 }
-                auto const code = err_cursor.value.forEach(slice_begin, slice_end, predicated);
+                auto const code = err_cursor.value.forEach(next_slice_begin, slice_end, predicated);
                 if (isFailure(code)) {
                     return code;
                 }
