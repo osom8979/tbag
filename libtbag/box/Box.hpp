@@ -716,6 +716,39 @@ public:
     Box slice(box_slice const * slice_begin, box_slice const * slice_end) const;
     Box slice(box_slice const * slices, std::size_t size) const;
     Box slice(std::vector<box_slice> const & slices) const;
+
+public:
+    template <typename T>
+    Err fill(T const * value, bdev src_device, ui64 const * src_ext)
+    {
+        return forEach([&](void * data){
+            _base->set_data(value, get_btype<T>(), src_device, src_ext, data);
+        });
+    }
+
+    template <typename T>
+    Err fill(T const & value, bdev src_device, ui64 const * src_ext)
+    {
+        return fill(&value, src_device, src_ext);
+    }
+
+    template <typename T>
+    Err fill(T const * value)
+    {
+        auto const src_device = is_device_none() ? device_cpu() : device();
+        ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return fill(value, src_device, src_ext);
+    }
+
+    template <typename T>
+    Err fill(T const & value)
+    {
+        return fill(&value);
+    }
+
+public:
+    Err zeros();
+    Err ones();
 };
 
 } // namespace box

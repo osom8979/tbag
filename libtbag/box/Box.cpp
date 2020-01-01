@@ -534,6 +534,16 @@ Box Box::slice(std::vector<box_slice> const & slices) const
     return slice(slices.data(), slices.size());
 }
 
+Err Box::zeros()
+{
+    return fill(0);
+}
+
+Err Box::ones()
+{
+    return fill(1);
+}
+
 } // namespace box
 
 // --------------------
