@@ -721,6 +721,9 @@ public:
     template <typename T>
     Err fill(T const * value, bdev src_device, ui64 const * src_ext)
     {
+        if (!exists()) {
+            return libtbag::E_EXPIRED;
+        }
         return forEach([&](void * data){
             _base->set_data(value, get_btype<T>(), src_device, src_ext, data);
         });
@@ -749,6 +752,8 @@ public:
 public:
     Err zeros();
     Err ones();
+
+public:
 };
 
 } // namespace box

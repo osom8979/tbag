@@ -11,6 +11,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 
 #include <algorithm>
 #include <utility>
@@ -501,6 +502,9 @@ std::vector<ui32> Box::diffs() const
 
 Box Box::slice(box_slice const * slice_begin, box_slice const * slice_end) const
 {
+    if (!exists()) {
+        return Box(nullptr);
+    }
     auto const dims = diffs(slice_begin, slice_end);
     Box result;
     auto const resize_code = result._resize_dims(type(), device(), ext(), dims.size(), dims.data());
@@ -536,7 +540,15 @@ Box Box::slice(std::vector<box_slice> const & slices) const
 
 Err Box::zeros()
 {
-    return fill(0);
+    if (!exists()) {
+        return libtbag::E_EXPIRED;
+    }
+    if (type() == device_cpu()) {
+        ::memset(data(), 0x00, size());
+        return E_SUCCESS;
+    } else {
+        return fill(0);
+    }
 }
 
 Err Box::ones()
