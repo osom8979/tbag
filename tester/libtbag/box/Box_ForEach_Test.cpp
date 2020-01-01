@@ -176,3 +176,32 @@ TEST(Box_ForEach_Test, Slice_Dim2)
     ASSERT_EQ(2, result[3]);
 }
 
+TEST(Box_ForEach_Test, Slice_Dim3)
+{
+    using namespace libtbag::box::details;
+    Box box = {
+        {{ 0,  1,  2,  3}, { 4,  5,  6,  7}},
+        {{ 8,  9, 10, 11}, {12, 13, 14, 15}},
+        {{16, 17, 18, 19}, {20, 21, 22, 23}},
+    };
+    std::vector<box_slice> slices = {
+        {0, box_nop, 2},
+        {box_nop, box_nop, -1},
+        {1, 3, 1}
+    };
+    std::vector<int> result;
+    auto const code = box.forEach(slices.data(), slices.size(), [&](int const & val){
+        result.emplace_back(val);
+    });
+    ASSERT_EQ(E_SUCCESS, code);
+    ASSERT_EQ(8, result.size());
+    ASSERT_EQ(5, result[0]);
+    ASSERT_EQ(6, result[1]);
+    ASSERT_EQ(1, result[2]);
+    ASSERT_EQ(2, result[3]);
+    ASSERT_EQ(21, result[4]);
+    ASSERT_EQ(22, result[5]);
+    ASSERT_EQ(17, result[6]);
+    ASSERT_EQ(18, result[7]);
+}
+
