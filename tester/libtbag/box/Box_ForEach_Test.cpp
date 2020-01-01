@@ -227,3 +227,71 @@ TEST(Box_ForEach_Test, Slice_Dim1)
     ASSERT_EQ(1, result.at<int>(3));
 }
 
+TEST(Box_ForEach_Test, Slice_Dim2)
+{
+    using namespace libtbag::box::details;
+    Box box = {
+            { 0,  1,  2,  3,  4},
+            { 5,  6,  7,  8,  9},
+            {10, 11, 12, 13, 14},
+            {15, 16, 17, 18, 19},
+            {20, 21, 22, 23, 24},
+    };
+    std::vector<box_slice> slices = {
+            {1, 4, 1},
+            {1, 4, 1},
+    };
+    auto const result = box.slice(slices);
+
+    ASSERT_TRUE(result.is_device_cpu());
+    ASSERT_TRUE(result.is_si32());
+    ASSERT_EQ(0, result.ext0());
+    ASSERT_EQ(0, result.ext1());
+    ASSERT_EQ(0, result.ext2());
+    ASSERT_EQ(0, result.ext3());
+    ASSERT_EQ(2, result.rank());
+    ASSERT_EQ(3, result.dim(0));
+    ASSERT_EQ(3, result.dim(1));
+    ASSERT_EQ(9, result.size());
+    ASSERT_EQ(6, result.at<int>(0));
+    ASSERT_EQ(7, result.at<int>(1));
+    ASSERT_EQ(8, result.at<int>(2));
+    ASSERT_EQ(11, result.at<int>(3));
+    ASSERT_EQ(12, result.at<int>(4));
+    ASSERT_EQ(13, result.at<int>(5));
+    ASSERT_EQ(16, result.at<int>(6));
+    ASSERT_EQ(17, result.at<int>(7));
+    ASSERT_EQ(18, result.at<int>(8));
+}
+
+TEST(Box_ForEach_Test, Slice_Dim3)
+{
+    using namespace libtbag::box::details;
+    Box box = {
+            {{0, 1}, {2, 3}},
+            {{4, 5}, {6, 7}},
+    };
+    std::vector<box_slice> slices = {
+            {box_nop, box_nop, 1},
+            {box_nop, box_nop, -1},
+            {-1, box_nop, 1},
+    };
+    auto const result = box.slice(slices);
+
+    ASSERT_TRUE(result.is_device_cpu());
+    ASSERT_TRUE(result.is_si32());
+    ASSERT_EQ(0, result.ext0());
+    ASSERT_EQ(0, result.ext1());
+    ASSERT_EQ(0, result.ext2());
+    ASSERT_EQ(0, result.ext3());
+    ASSERT_EQ(3, result.rank());
+    ASSERT_EQ(2, result.dim(0));
+    ASSERT_EQ(2, result.dim(1));
+    ASSERT_EQ(1, result.dim(2));
+    ASSERT_EQ(4, result.size());
+    ASSERT_EQ(3, result.at<int>(0));
+    ASSERT_EQ(1, result.at<int>(1));
+    ASSERT_EQ(7, result.at<int>(2));
+    ASSERT_EQ(5, result.at<int>(3));
+}
+
