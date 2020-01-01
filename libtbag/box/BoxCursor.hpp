@@ -232,8 +232,8 @@ private:
     }
 
 public:
-    template <typename Predicated>
-    Err forEach(box_slice const * slice_begin, box_slice const * slice_end, Predicated predicated)
+    template <typename SliceIterator, typename Predicated>
+    Err forEach(SliceIterator slice_begin, SliceIterator slice_end, Predicated predicated)
     {
         if (isLastDimension()) {
             using __arg0 = typename libtbag::function_traits<Predicated>::template arguments<0>::type;
@@ -242,7 +242,7 @@ public:
                 predicated(_access<__type>(access_selector<__arg0>::value));
             } while (next());
         } else {
-            auto const * next_slice_begin = (slice_begin == slice_end ? slice_begin : slice_begin + 1);
+            auto next_slice_begin = (slice_begin == slice_end ? slice_begin : slice_begin + 1);
             do {
                 ErrPair<BoxCursor> err_cursor;
                 if (slice_begin == slice_end) {
@@ -262,16 +262,16 @@ public:
         return libtbag::E_SUCCESS;
     }
 
-    template <typename Predicated>
-    Err forEach(box_slice const * slice, std::size_t size, Predicated predicated)
+    template <typename ContainerT, typename Predicated>
+    Err forEach(ContainerT const & slices, Predicated predicated)
     {
-        return forEach(slice, slice + size, predicated);
+        return forEach(slices.begin(), slices.end(), predicated);
     }
 
     template <typename Predicated>
     Err forEach(Predicated predicated)
     {
-        return forEach(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
+        return forEach<box_slice const *, Predicated>(nullptr, nullptr, predicated);
     }
 };
 

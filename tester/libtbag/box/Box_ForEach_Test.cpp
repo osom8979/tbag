@@ -145,12 +145,12 @@ TEST(Box_ForEach_Test, MutablePtr)
     ASSERT_EQ(11, box.at<int>(0, 1));
 }
 
-TEST(Box_ForEach_Test, Slice_Dim1)
+TEST(Box_ForEach_Test, ForEach_Slice_Dim1)
 {
     Box box = {0, 1, 2, 3};
     std::vector<box_slice> slices = { {1, 3, 1} };
     std::vector<int> result;
-    auto const code = box.forEach(slices.data(), slices.size(), [&](int const & val){
+    auto const code = box.forEach(slices, [&](int const & val){
         result.emplace_back(val);
     });
     ASSERT_EQ(E_SUCCESS, code);
@@ -159,13 +159,13 @@ TEST(Box_ForEach_Test, Slice_Dim1)
     ASSERT_EQ(2, result[1]);
 }
 
-TEST(Box_ForEach_Test, Slice_Dim2)
+TEST(Box_ForEach_Test, ForEach_Slice_Dim2)
 {
     using namespace libtbag::box::details;
     Box box = {{0, 1, 2, 3}, {4, 5, 6, 7}};
     std::vector<box_slice> slices = {{box_nop, box_nop, -1}, {1, 3, 1}};
     std::vector<int> result;
-    auto const code = box.forEach(slices.data(), slices.size(), [&](int const & val){
+    auto const code = box.forEach(slices, [&](int const & val){
         result.emplace_back(val);
     });
     ASSERT_EQ(E_SUCCESS, code);
@@ -176,7 +176,7 @@ TEST(Box_ForEach_Test, Slice_Dim2)
     ASSERT_EQ(2, result[3]);
 }
 
-TEST(Box_ForEach_Test, Slice_Dim3)
+TEST(Box_ForEach_Test, ForEach_Slice_Dim3)
 {
     using namespace libtbag::box::details;
     Box box = {
@@ -190,7 +190,7 @@ TEST(Box_ForEach_Test, Slice_Dim3)
         {1, 3, 1}
     };
     std::vector<int> result;
-    auto const code = box.forEach(slices.data(), slices.size(), [&](int const & val){
+    auto const code = box.forEach(slices, [&](int const & val){
         result.emplace_back(val);
     });
     ASSERT_EQ(E_SUCCESS, code);
@@ -203,5 +203,27 @@ TEST(Box_ForEach_Test, Slice_Dim3)
     ASSERT_EQ(22, result[5]);
     ASSERT_EQ(17, result[6]);
     ASSERT_EQ(18, result[7]);
+}
+
+TEST(Box_ForEach_Test, Slice_Dim1)
+{
+    using namespace libtbag::box::details;
+    Box box = {0, 1, 2, 3, 4, 5, 6, 7};
+    std::vector<box_slice> slices = { {box_nop, box_nop, -2} };
+    auto const result = box.slice(slices);
+
+    ASSERT_TRUE(result.is_device_cpu());
+    ASSERT_TRUE(result.is_si32());
+    ASSERT_EQ(0, result.ext0());
+    ASSERT_EQ(0, result.ext1());
+    ASSERT_EQ(0, result.ext2());
+    ASSERT_EQ(0, result.ext3());
+    ASSERT_EQ(1, result.rank());
+    ASSERT_EQ(4, result.dim(0));
+    ASSERT_EQ(4, result.size());
+    ASSERT_EQ(7, result.at<int>(0));
+    ASSERT_EQ(5, result.at<int>(1));
+    ASSERT_EQ(3, result.at<int>(2));
+    ASSERT_EQ(1, result.at<int>(3));
 }
 

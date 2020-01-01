@@ -680,8 +680,8 @@ public:
     ErrPair<BoxCursor> cursor(int begin) const;
     ErrPair<BoxCursor> cursor() const;
 
-    template <typename Predicated>
-    Err forEach(box_slice const * slice_begin, box_slice const * slice_end, Predicated predicated) const
+    template <typename SliceIterator, typename Predicated>
+    Err forEach(SliceIterator slice_begin, SliceIterator slice_end, Predicated predicated) const
     {
         ErrPair<BoxCursor> err_cursor;
         if (slice_begin == slice_end) {
@@ -696,16 +696,16 @@ public:
         return err_cursor.value.forEach(slice_begin, slice_end, predicated);
     }
 
-    template <typename Predicated>
-    Err forEach(box_slice const * slices, std::size_t size, Predicated predicated) const
+    template <typename ContainerT, typename Predicated>
+    Err forEach(ContainerT const & slices, Predicated predicated) const
     {
-        return forEach(slices, slices + size, predicated);
+        return forEach(slices.begin(), slices.end(), predicated);
     }
 
     template <typename Predicated>
     Err forEach(Predicated predicated) const
     {
-        return forEach(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u), predicated);
+        return forEach<box_slice const *, Predicated>(nullptr, nullptr, predicated);
     }
 
     std::vector<ui32> diffs(box_slice const * slice_begin, box_slice const * slice_end) const;
