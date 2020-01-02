@@ -62,7 +62,7 @@ enum class BoxTypeTable : libtbag::box::details::btype
 {
     // clang-format off
     BTT_NONE    = libtbag::box::details::BT_NONE   ,
-    BTT_BOOL8   = libtbag::box::details::BT_BOOL8   ,
+    BTT_BOOL    = libtbag::box::details::BT_BOOL   ,
     BTT_INT8    = libtbag::box::details::BT_INT8   ,
     BTT_INT16   = libtbag::box::details::BT_INT16  ,
     BTT_INT32   = libtbag::box::details::BT_INT32  ,
@@ -77,7 +77,6 @@ enum class BoxTypeTable : libtbag::box::details::btype
 };
 
 // clang-format off
-using bool8 = libtbag::box::details::bool8;
 using si8   = libtbag::box::details::si8;
 using si16  = libtbag::box::details::si16;
 using si32  = libtbag::box::details::si32;
@@ -118,21 +117,23 @@ struct BoxInfo<void, BoxTypeTable::BTT_NONE>
 };
 
 // clang-format off
-template <typename T> struct BoxTypeInfo : public BoxInfo<T, BoxTypeTable::BTT_NONE   > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si8 > : public BoxInfo<si8  , BoxTypeTable::BTT_INT8   > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si16> : public BoxInfo<si16 , BoxTypeTable::BTT_INT16  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si32> : public BoxInfo<si32 , BoxTypeTable::BTT_INT32  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si64> : public BoxInfo<si64 , BoxTypeTable::BTT_INT64  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui8 > : public BoxInfo<ui8  , BoxTypeTable::BTT_UINT8  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui16> : public BoxInfo<ui16 , BoxTypeTable::BTT_UINT16 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui32> : public BoxInfo<ui32 , BoxTypeTable::BTT_UINT32 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui64> : public BoxInfo<ui64 , BoxTypeTable::BTT_UINT64 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<fp32> : public BoxInfo<fp32 , BoxTypeTable::BTT_FLOAT32> { /* EMPTY. */ };
-template <> struct BoxTypeInfo<fp64> : public BoxInfo<fp64 , BoxTypeTable::BTT_FLOAT64> { /* EMPTY. */ };
+template <typename T> struct BoxTypeInfo : public BoxInfo<T, BoxTypeTable::BTT_NONE  > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<bool> : public BoxInfo<bool, BoxTypeTable::BTT_BOOL   > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si8 > : public BoxInfo<si8 , BoxTypeTable::BTT_INT8   > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si16> : public BoxInfo<si16, BoxTypeTable::BTT_INT16  > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si32> : public BoxInfo<si32, BoxTypeTable::BTT_INT32  > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si64> : public BoxInfo<si64, BoxTypeTable::BTT_INT64  > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui8 > : public BoxInfo<ui8 , BoxTypeTable::BTT_UINT8  > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui16> : public BoxInfo<ui16, BoxTypeTable::BTT_UINT16 > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui32> : public BoxInfo<ui32, BoxTypeTable::BTT_UINT32 > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui64> : public BoxInfo<ui64, BoxTypeTable::BTT_UINT64 > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<fp32> : public BoxInfo<fp32, BoxTypeTable::BTT_FLOAT32> { /* EMPTY. */ };
+template <> struct BoxTypeInfo<fp64> : public BoxInfo<fp64, BoxTypeTable::BTT_FLOAT64> { /* EMPTY. */ };
 // clang-format on
 
 // clang-format off
 template <BoxTypeTable egg_type> struct BoxEnumInfo       : public BoxInfo<void, BoxTypeTable::BTT_NONE   > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_BOOL   > : public BoxInfo<bool, BoxTypeTable::BTT_BOOL   > { /* EMPTY. */ };
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT8   > : public BoxInfo<si8 , BoxTypeTable::BTT_INT8   > { /* EMPTY. */ };
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT16  > : public BoxInfo<si16, BoxTypeTable::BTT_INT16  > { /* EMPTY. */ };
 template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT32  > : public BoxInfo<si32, BoxTypeTable::BTT_INT32  > { /* EMPTY. */ };
@@ -228,17 +229,18 @@ inline bool is_btype_equals(libtbag::box::details::btype type) TBAG_NOEXCEPT
 
 TBAG_CONSTEXPR int const nop = libtbag::box::details::box_nop;
 
-TBAG_CONSTEXPR btype const type_none () TBAG_NOEXCEPT { return get_btype<void >(); }
-TBAG_CONSTEXPR btype const type_si8  () TBAG_NOEXCEPT { return get_btype<si8  >(); }
-TBAG_CONSTEXPR btype const type_si16 () TBAG_NOEXCEPT { return get_btype<si16 >(); }
-TBAG_CONSTEXPR btype const type_si32 () TBAG_NOEXCEPT { return get_btype<si32 >(); }
-TBAG_CONSTEXPR btype const type_si64 () TBAG_NOEXCEPT { return get_btype<si64 >(); }
-TBAG_CONSTEXPR btype const type_ui8  () TBAG_NOEXCEPT { return get_btype<ui8  >(); }
-TBAG_CONSTEXPR btype const type_ui16 () TBAG_NOEXCEPT { return get_btype<ui16 >(); }
-TBAG_CONSTEXPR btype const type_ui32 () TBAG_NOEXCEPT { return get_btype<ui32 >(); }
-TBAG_CONSTEXPR btype const type_ui64 () TBAG_NOEXCEPT { return get_btype<ui64 >(); }
-TBAG_CONSTEXPR btype const type_fp32 () TBAG_NOEXCEPT { return get_btype<fp32 >(); }
-TBAG_CONSTEXPR btype const type_fp64 () TBAG_NOEXCEPT { return get_btype<fp64 >(); }
+TBAG_CONSTEXPR btype const type_none() TBAG_NOEXCEPT { return get_btype<void>(); }
+TBAG_CONSTEXPR btype const type_bool() TBAG_NOEXCEPT { return get_btype<bool>(); }
+TBAG_CONSTEXPR btype const type_si8 () TBAG_NOEXCEPT { return get_btype<si8 >(); }
+TBAG_CONSTEXPR btype const type_si16() TBAG_NOEXCEPT { return get_btype<si16>(); }
+TBAG_CONSTEXPR btype const type_si32() TBAG_NOEXCEPT { return get_btype<si32>(); }
+TBAG_CONSTEXPR btype const type_si64() TBAG_NOEXCEPT { return get_btype<si64>(); }
+TBAG_CONSTEXPR btype const type_ui8 () TBAG_NOEXCEPT { return get_btype<ui8 >(); }
+TBAG_CONSTEXPR btype const type_ui16() TBAG_NOEXCEPT { return get_btype<ui16>(); }
+TBAG_CONSTEXPR btype const type_ui32() TBAG_NOEXCEPT { return get_btype<ui32>(); }
+TBAG_CONSTEXPR btype const type_ui64() TBAG_NOEXCEPT { return get_btype<ui64>(); }
+TBAG_CONSTEXPR btype const type_fp32() TBAG_NOEXCEPT { return get_btype<fp32>(); }
+TBAG_CONSTEXPR btype const type_fp64() TBAG_NOEXCEPT { return get_btype<fp64>(); }
 
 TBAG_CONSTEXPR bdev const device_none() TBAG_NOEXCEPT { return libtbag::box::details::BD_NONE; }
 TBAG_CONSTEXPR bdev const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }

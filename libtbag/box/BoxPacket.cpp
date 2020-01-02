@@ -76,6 +76,7 @@ inline static AnyArr convertBtypeToAnyArr(btype type) TBAG_NOEXCEPT
     // clang-format off
     switch (type) {
     case BT_NONE   : return AnyArr_NONE;
+    case BT_BOOL   : return AnyArr_BoolArr;
     case BT_INT8   : return AnyArr_ByteArr;
     case BT_INT16  : return AnyArr_ShortArr;
     case BT_INT32  : return AnyArr_IntArr;
@@ -108,6 +109,9 @@ struct BoxPacketBuilder::Impl
 public:
     FlatBufferBuilder builder;
     FlatBufferParser parser;
+
+public:
+    std::vector<std::uint8_t> boolean_buffer;
 
 public:
     Impl(std::size_t capacity) : Impl(Options(), capacity)
@@ -171,13 +175,21 @@ public:
 
     Err build(box_data const * box)
     {
+        if (box == nullptr) {
+            return E_EXPIRED;
+        }
+
         auto const ANY_TYPE = convertBtypeToAnyArr(box->type);
         clear();
 
         using namespace flatbuffers;
         Offset<void> box_data = 0;
-        if (ANY_TYPE != AnyArr_NONE && box->data != nullptr && box->size >= 1) {
-            box_data = createAnyArr(ANY_TYPE, box->data, box->size);
+        if (box->data != nullptr && box->size >= 1) {
+            if (ANY_TYPE == AnyArr_BoolArr) {
+                box_data = createBoolArr(box->data, box->size);
+            } else if (ANY_TYPE != AnyArr_NONE) {
+                box_data = createAnyArr(ANY_TYPE, box->data, box->size);
+            }
         }
 
         Offset< Vector<uint32_t> > box_dims = 0;
@@ -196,8 +208,37 @@ public:
         return E_SUCCESS;
     }
 
+    struct use_boolean_buffer_t { /* EMPTY. */ };
+    struct direct_static_cast_t { /* EMPTY. */ };
+
+    flatbuffers::Offset<void> createBoolArr(use_boolean_buffer_t, bool const * data, ui32 size)
+    {
+        boolean_buffer.resize(size);
+        for (auto i = 0; i < size; ++i) {
+            boolean_buffer[i] = static_cast<std::uint8_t>(data[i]);
+        }
+        return createBoolArr(direct_static_cast_t{}, boolean_buffer.data(), boolean_buffer.size());
+    }
+
+    flatbuffers::Offset<void> createBoolArr(direct_static_cast_t, void const * data, ui32 size)
+    {
+        return CreateBoolArr(builder, builder.CreateVector((uint8_t const *)data, size)).Union();
+    }
+
+    flatbuffers::Offset<void> createBoolArr(void const * data, ui32 size)
+    {
+        using select_t = typename std::conditional<
+                sizeof(bool) == 1,
+                direct_static_cast_t,
+                use_boolean_buffer_t
+        >::type;
+        return createBoolArr(select_t{}, data, size);
+    }
+
     flatbuffers::Offset<void> createAnyArr(AnyArr any_type, void const * data, ui32 size)
     {
+        assert(any_type != AnyArr_BoolArr);
+
         // clang-format off
         switch (any_type) {
         case AnyArr_ByteArr  : return CreateByteArr  (builder, builder.CreateVector(( si8 const *)data, size)).Union();
@@ -216,7 +257,8 @@ public:
             break;
         }
         // clang-format on
-        return flatbuffers::Offset<void>();
+
+        return {};
     }
 };
 
@@ -328,24 +370,24 @@ public:
         auto const VERIFY_RESULT = VerifyBoxFbsBuffer(verifier);
 
 #if defined(FLATBUFFERS_TRACK_VERIFIER_BUFFER_SIZE)
-        std::size_t const COMPUTED_SIZE = verifier.GetComputedSize();
+        std::size_t const computed_size = verifier.GetComputedSize();
 #else
-        std::size_t const COMPUTED_SIZE = 0U;
+        std::size_t const computed_size = 0U;
 #endif
 
         if (!VERIFY_RESULT) {
-            return std::make_pair(E_VERIFIER, COMPUTED_SIZE);
+            return std::make_pair(E_VERIFIER, computed_size);
         }
 
         auto const * packet = GetBoxFbs(buffer);
         auto const data_type = packet->data_type();
         if (!(AnyArr_MIN <= COMPARE_AND(data_type) <= AnyArr_MAX)) {
-            return std::make_pair(E_ENOMSG, COMPUTED_SIZE);
+            return std::make_pair(E_ENOMSG, computed_size);
         }
 
         if (!VerifyAnyArr(verifier, packet->data(), data_type)) {
             // Use 'Parsing error' to distinguish it from 'Verifier error' at the top.
-            return std::make_pair(E_PARSING, COMPUTED_SIZE);
+            return std::make_pair(E_PARSING, computed_size);
         }
 
         auto const type = packet->type();
@@ -372,13 +414,14 @@ public:
             if (total_dims >= 1) {
                 auto code = box->resize_dims(type, device, ext, dims_size, dims_data);
                 if (isFailure(code)) {
-                    return std::make_pair(code, COMPUTED_SIZE);
+                    return std::make_pair(code, computed_size);
                 }
 
                 auto const * fbs_table = packet->data();
                 if (fbs_table != nullptr) {
                     // clang-format off
                     switch (data_type) {
+                    case AnyArr_BoolArr  : update_data((BoolArr   const *)fbs_table, (bool*)box->data); break;
                     case AnyArr_ByteArr  : update_data((ByteArr   const *)fbs_table, (si8 *)box->data); break;
                     case AnyArr_ShortArr : update_data((ShortArr  const *)fbs_table, (si16*)box->data); break;
                     case AnyArr_IntArr   : update_data((IntArr    const *)fbs_table, (si32*)box->data); break;
@@ -433,7 +476,7 @@ public:
             box->info_size = 0;
         }
 
-        return std::make_pair(E_SUCCESS, COMPUTED_SIZE);
+        return std::make_pair(E_SUCCESS, computed_size);
     }
 
     template <typename FlatT, typename DataT>
@@ -442,8 +485,8 @@ public:
         assert(table != nullptr);
         auto * arr = table->arr();
         assert(arr != nullptr);
-        auto const SIZE = arr->size();
-        for (std::size_t i = 0; i < SIZE; ++i) {
+        auto const size = arr->size();
+        for (std::size_t i = 0; i < size; ++i) {
             data[i] = arr->Get(i);
         }
     }

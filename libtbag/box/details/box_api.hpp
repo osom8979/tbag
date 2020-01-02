@@ -45,6 +45,7 @@ namespace details {
 #define TBAG_BOX_TYPE_PREFIX_FLOATING  5
 #define TBAG_BOX_TYPE_PREFIX_COMPLEX   6
 
+#define TBAG_BOX_TYPE_SIZE_SYSTEM   0
 #define TBAG_BOX_TYPE_SIZE_0BIT     0
 #define TBAG_BOX_TYPE_SIZE_8BIT     8
 #define TBAG_BOX_TYPE_SIZE_16BIT   16
@@ -53,7 +54,7 @@ namespace details {
 #define TBAG_BOX_TYPE_SIZE_128BIT 128
 
 #define TBAG_BOX_TYPE_NONE        0x0000
-#define TBAG_BOX_TYPE_BOOL8       0x0108
+#define TBAG_BOX_TYPE_BOOL        0x0100
 #define TBAG_BOX_TYPE_INT8        0x0308
 #define TBAG_BOX_TYPE_INT16       0x0310
 #define TBAG_BOX_TYPE_INT32       0x0320
@@ -89,7 +90,7 @@ namespace details {
 enum BoxType
 {
     BT_NONE    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNKNOWN , TBAG_BOX_TYPE_SIZE_0BIT  ),
-    BT_BOOL8   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_BOOLEAN , TBAG_BOX_TYPE_SIZE_8BIT  ),
+    BT_BOOL    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_BOOLEAN , TBAG_BOX_TYPE_SIZE_SYSTEM),
     BT_INT8    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_8BIT  ),
     BT_INT16   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_16BIT ),
     BT_INT32   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_32BIT ),
@@ -109,8 +110,6 @@ enum BoxDevice
     BD_CUDA = TBAG_BOX_DEVICE_CUDA,
     BD_CL   = TBAG_BOX_DEVICE_CL,
 };
-
-using bool8 = uint8_t;
 
 using si8  = int8_t;
 using si16 = int16_t;
@@ -137,6 +136,7 @@ using bdev  = ui16;
 union box_any
 {
     void * pointer;
+    bool   data_bool;
     si8    data_si8;
     si16   data_si16;
     si32   data_si32;
@@ -167,6 +167,7 @@ inline bool box_is_complex_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX
 // clang-format on
 
 // clang-format off
+inline bool box_is_system_type(btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_SYSTEM; }
 inline bool box_is_0bit_type  (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_0BIT  ; }
 inline bool box_is_8bit_type  (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_8BIT  ; }
 inline bool box_is_16bit_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_SUFFIX(type) == TBAG_BOX_TYPE_SIZE_16BIT ; }

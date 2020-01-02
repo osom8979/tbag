@@ -108,6 +108,7 @@ public:
 
     // clang-format off
     inline bool is_none() const TBAG_NOEXCEPT { return getType() == type_none(); }
+    inline bool is_bool() const TBAG_NOEXCEPT { return getType() == type_bool(); }
     inline bool is_si8 () const TBAG_NOEXCEPT { return getType() == type_si8 (); }
     inline bool is_si16() const TBAG_NOEXCEPT { return getType() == type_si16(); }
     inline bool is_si32() const TBAG_NOEXCEPT { return getType() == type_si32(); }
