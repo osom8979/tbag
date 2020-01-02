@@ -36,6 +36,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <random>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -754,6 +755,156 @@ public:
     Err ones();
 
 public:
+    template <typename ... Args>
+    static Box zeros(btype type, Args ... args)
+    {
+        auto box = array(type, std::forward<Args>(args) ...);
+        if (!box) {
+            return Box(nullptr);
+        }
+        if (isFailure(box.zeros())) {
+            return Box(nullptr);
+        }
+        return box;
+    }
+
+    template <typename T, typename ... Args>
+    static Box zeros(Args ... args)
+    {
+        return zeros(get_btype<T>(), std::forward<Args>(args) ...);
+    }
+
+    template <typename ... Args>
+    static Box ones(btype type, Args ... args)
+    {
+        auto box = array(type, std::forward<Args>(args) ...);
+        if (!box) {
+            return Box(nullptr);
+        }
+        if (isFailure(box.ones())) {
+            return Box(nullptr);
+        }
+        return box;
+    }
+
+    template <typename T, typename ... Args>
+    static Box ones(Args ... args)
+    {
+        return ones(get_btype<T>(), std::forward<Args>(args) ...);
+    }
+
+    template <typename ValT, typename ... Args>
+    static Box full(ValT const * value, btype type, Args ... args)
+    {
+        auto box = array(type, std::forward<Args>(args) ...);
+        if (!box) {
+            return Box(nullptr);
+        }
+        if (isFailure(box.fill(value))) {
+            return Box(nullptr);
+        }
+        return box;
+    }
+
+    template <typename ValT, typename ... Args>
+    static Box full(ValT const & value, btype type, Args ... args)
+    {
+        auto box = array(type, std::forward<Args>(args) ...);
+        if (!box) {
+            return Box(nullptr);
+        }
+        if (isFailure(box.fill(value))) {
+            return Box(nullptr);
+        }
+        return box;
+    }
+
+    template <typename BaseT, typename ValT, typename ... Args>
+    static Box full(ValT const * value, Args ... args)
+    {
+        return full(value, get_btype<BaseT>(), std::forward<Args>(args) ...);
+    }
+
+    template <typename BaseT, typename ValT, typename ... Args>
+    static Box full(ValT const & value, Args ... args)
+    {
+        return full(value, get_btype<BaseT>(), std::forward<Args>(args) ...);
+    }
+
+public:
+    template <typename RangeT, typename EngineT = std::mt19937>
+    Err rand(RangeT range, EngineT engine, bdev src_device, ui64 const * src_ext)
+    {
+        if (!exists()) {
+            return libtbag::E_EXPIRED;
+        }
+        return forEach([&](void * data){
+            auto src = range(engine);
+            _base->set_data(&src, get_btype<decltype(src)>(), src_device, src_ext, data);
+        });
+    }
+
+    template <typename RangeT, typename EngineT = std::mt19937>
+    Err rand(RangeT range, EngineT engine)
+    {
+        auto const src_device = is_device_none() ? device_cpu() : device();
+        ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return rand(range, engine, src_device, src_ext);
+    }
+
+    template <typename T,
+              typename RangeT = typename std::conditional<
+                      std::is_floating_point<T>::value,
+                      typename std::uniform_real_distribution<T>,
+                      typename std::uniform_int_distribution<T>
+              >::type,
+              typename DeviceT = std::random_device,
+              typename EngineT = std::mt19937>
+    Err rand(T start, T end, bdev src_device, ui64 const * src_ext)
+    {
+        return rand(RangeT(start, end), EngineT(DeviceT()()), src_device, src_ext);
+    }
+
+    template <typename T>
+    Err rand(T start, T end)
+    {
+        auto const src_device = is_device_none() ? device_cpu() : device();
+        ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return rand(start, end, src_device, src_ext);
+    }
+
+public:
+    template <typename T, typename ... Args>
+    static Box rand(T start, T end, btype type, bdev src_device, ui64 const * src_ext, Args ... args)
+    {
+        auto box = array(type, std::forward<Args>(args) ...);
+        if (!box) {
+            return Box(nullptr);
+        }
+        if (isFailure(box.rand(start, end))) {
+            return Box(nullptr);
+        }
+        return box;
+    }
+
+    template <typename T, typename ... Args>
+    static Box rand(T start, T end, bdev src_device, ui64 const * src_ext, Args ... args)
+    {
+        return rand(start, end, get_btype<T>(), src_device, src_ext, std::forward<Args>(args) ...);
+    }
+
+    template <typename T, typename ... Args>
+    static Box rand(T start, T end, Args ... args)
+    {
+        auto box = array<T>(std::forward<Args>(args) ...);
+        if (!box) {
+            return Box(nullptr);
+        }
+        if (isFailure(box.rand(start, end))) {
+            return Box(nullptr);
+        }
+        return box;
+    }
 };
 
 } // namespace box
