@@ -24,6 +24,9 @@ namespace box {
 
 using namespace libtbag::box::details;
 
+using ErrBox = Box::ErrBox;
+using ErrMsgBox = Box::ErrMsgBox;
+
 Box::Box() : BoxBase()
 {
     assert(exists());
@@ -177,7 +180,7 @@ Err Box::_resize_dims(btype type, ui32 rank, ui32 const * dims)
     return _resize_dims(type, reshape_device, reshape_ext, rank, dims);
 }
 
-Err Box::_resize_ref_box(btype type, box_data const * reference_box)
+Err Box::_resize_like(btype type, box_data const * reference_box)
 {
     if (reference_box == nullptr) {
         return E_ILLARGS;
@@ -189,12 +192,12 @@ Err Box::_resize_ref_box(btype type, box_data const * reference_box)
                          reference_box->dims);
 }
 
-Err Box::_resize_ref_box(btype type, Box const & reference_box)
+Err Box::_resize_like(btype type, Box const & reference_box)
 {
     if (!reference_box) {
         return E_ILLARGS;
     }
-    return _resize_ref_box(type, reference_box.base());
+    return _resize_like(type, reference_box.base());
 }
 
 Box Box::astype(btype change_type) const
@@ -203,7 +206,7 @@ Box Box::astype(btype change_type) const
         return Box(nullptr);
     }
     Box result;
-    auto const code = result._resize_ref_box(change_type, *this);
+    auto const code = result._resize_like(change_type, *this);
     if (isFailure(code)) {
         return Box(nullptr);
     }
@@ -541,7 +544,7 @@ Box Box::slice(std::vector<box_slice> const & slices) const
 Err Box::zeros()
 {
     if (!exists()) {
-        return libtbag::E_EXPIRED;
+        return E_EXPIRED;
     }
     if (type() == device_cpu()) {
         ::memset(data(), 0x00, size());
@@ -554,6 +557,36 @@ Err Box::zeros()
 Err Box::ones()
 {
     return fill(1);
+}
+
+ErrBox Box::lt(Box const & box) const
+{
+    if (!exists() || !box.exists()) {
+        return { E_EXPIRED, Box(nullptr) };
+    }
+    if (!box_dim_is_equals(dims(), rank(), box.dims(), box.rank())) {
+        return { E_SHAPE, Box(nullptr) };
+    }
+}
+
+ErrBox Box::le(Box const & box) const
+{
+}
+
+ErrBox Box::gt(Box const & box) const
+{
+}
+
+ErrBox Box::ge(Box const & box) const
+{
+}
+
+ErrBox Box::eq(Box const & box) const
+{
+}
+
+ErrBox Box::ne(Box const & box) const
+{
 }
 
 } // namespace box

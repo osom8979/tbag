@@ -73,6 +73,10 @@ namespace box {
 class TBAG_API Box : public BoxBase
 {
 public:
+    using ErrBox = libtbag::ErrPair<Box>;
+    using ErrMsgBox = libtbag::ErrMsgPair<Box>;
+
+public:
     Box();
     explicit Box(std::nullptr_t) TBAG_NOEXCEPT;
     explicit Box(box_data && data) TBAG_NOEXCEPT;
@@ -155,14 +159,14 @@ private:
     Err _resize_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32 const * dims);
     Err _resize_dims(btype type, ui32 rank, ui32 const * dims);
 
-    Err _resize_ref_box(btype type, box_data const * reference_box);
-    Err _resize_ref_box(btype type, Box const & reference_box);
+    Err _resize_like(btype type, box_data const * reference_box);
+    Err _resize_like(btype type, Box const & reference_box);
 
 private:
     template <typename ... Args>
-    Err _resize(shape_unknown_t, Args && ... UNUSED_PARAM(args))
+    Err _resize(shape_error_t, Args && ... UNUSED_PARAM(args))
     {
-        return libtbag::E_INACCESSIBLE_BLOCK;
+        return E_INACCESSIBLE_BLOCK;
     }
 
     template <typename ... Args>
@@ -189,14 +193,14 @@ private:
         return _resize_dims(type, rank, dims);
     }
 
-    Err _resize(shape_ref_box1_t, btype type, box_data const * reference_box)
+    Err _resize(shape_like1_t, btype type, box_data const * reference_box)
     {
-        return _resize_ref_box(type, reference_box);
+        return _resize_like(type, reference_box);
     }
 
-    Err _resize(shape_ref_box2_t, btype type, Box const & reference_box)
+    Err _resize(shape_like2_t, btype type, Box const & reference_box)
     {
-        return _resize_ref_box(type, reference_box);
+        return _resize_like(type, reference_box);
     }
 
 public:
@@ -293,7 +297,7 @@ public:
                 ++offset;
             }
         }
-        return libtbag::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     template <typename T>
@@ -339,7 +343,7 @@ public:
                 }
             }
         }
-        return libtbag::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     template <typename T>
@@ -380,7 +384,7 @@ public:
                 }
             }
         }
-        return libtbag::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     template <typename T>
@@ -428,7 +432,7 @@ public:
                 }
             }
         }
-        return libtbag::E_SUCCESS;
+        return E_SUCCESS;
     }
 
     // clang-format off
@@ -475,9 +479,9 @@ public:
 
 private:
     template <typename T, typename ... Args>
-    Err _get(shape_unknown_t, T * UNUSED_PARAM(result), Args && ... UNUSED_PARAM(args))
+    Err _get(shape_error_t, T * UNUSED_PARAM(result), Args && ... UNUSED_PARAM(args))
     {
-        return libtbag::E_INACCESSIBLE_BLOCK;
+        return E_INACCESSIBLE_BLOCK;
     }
 
     template <typename T, typename ... Args>
@@ -485,7 +489,7 @@ private:
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         return _base->get_data_args((void*)out, get_btype<T>(), out_device, out_ext,
                                     static_cast<ui32>(sizeof...(Args)),
@@ -497,7 +501,7 @@ private:
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
@@ -511,7 +515,7 @@ private:
              ui32 index_rank, ui32 const * index_dims) const
     {
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         return _base->get_data_dims((void*)out, get_btype<T>(), out_device, out_ext, index_rank, index_dims);
     }
@@ -520,7 +524,7 @@ private:
     Err _get(shape_dims2_t, T * out, ui32 index_rank, ui32 const * index_dims) const
     {
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
@@ -546,9 +550,9 @@ public:
 
 private:
     template <typename T, typename ... Args>
-    Err _set(shape_unknown_t, T const * UNUSED_PARAM(src), Args && ... UNUSED_PARAM(args))
+    Err _set(shape_error_t, T const * UNUSED_PARAM(src), Args && ... UNUSED_PARAM(args))
     {
-        return libtbag::E_INACCESSIBLE_BLOCK;
+        return E_INACCESSIBLE_BLOCK;
     }
 
     template <typename T, typename ... Args>
@@ -556,7 +560,7 @@ private:
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         return _base->set_data_args((void const *)src, get_btype<T>(), src_device, src_ext,
                                     static_cast<ui32>(sizeof...(Args)),
@@ -574,7 +578,7 @@ private:
     {
         static_assert(static_cast<ui32>(sizeof...(Args)) >= 1u, "At least one Args is required.");
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
@@ -594,7 +598,7 @@ private:
              ui32 index_rank, ui32 const * index_dims)
     {
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         return _base->set_data_dims((void const *)src, get_btype<T>(), src_device, src_ext, index_rank, index_dims);
     }
@@ -610,7 +614,7 @@ private:
     Err _set(shape_dims2_t, T const * src, ui32 index_rank, ui32 const * index_dims)
     {
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         auto const shape_device = is_device_none() ? device_cpu() : device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
@@ -723,7 +727,7 @@ public:
     Err fill(T const * value, bdev src_device, ui64 const * src_ext)
     {
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         return forEach([&](void * data){
             _base->set_data(value, get_btype<T>(), src_device, src_ext, data);
@@ -836,7 +840,7 @@ public:
     Err rand(RangeT range, EngineT engine, bdev src_device, ui64 const * src_ext)
     {
         if (!exists()) {
-            return libtbag::E_EXPIRED;
+            return E_EXPIRED;
         }
         return forEach([&](void * data){
             auto src = range(engine);
@@ -905,6 +909,21 @@ public:
         }
         return box;
     }
+
+public:
+    ErrBox lt(Box const & box) const;
+    ErrBox le(Box const & box) const;
+    ErrBox gt(Box const & box) const;
+    ErrBox ge(Box const & box) const;
+    ErrBox eq(Box const & box) const;
+    ErrBox ne(Box const & box) const;
+
+    Box operator < (Box const & box) const { return lt(box).value; }
+    Box operator <=(Box const & box) const { return le(box).value; }
+    Box operator > (Box const & box) const { return gt(box).value; }
+    Box operator >=(Box const & box) const { return ge(box).value; }
+    Box operator ==(Box const & box) const { return eq(box).value; }
+    Box operator !=(Box const & box) const { return ne(box).value; }
 };
 
 } // namespace box

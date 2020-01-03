@@ -47,8 +47,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_BADALLOC                             , 10010, "Bad allocation"                                          )\
     _TBAG_XX(_OORANGE                              , 10011, "Out of range"                                            )\
     _TBAG_XX(_NULLPTR                              , 10012, "Null pointer exception"                                  )\
-    _TBAG_XX(_BUFFER                               , 10013, "Unknown buffer error"                                    )\
-    _TBAG_XX(_QUEUE                                , 10014, "Unknown queue error"                                     )\
+    _TBAG_XX(_BUFFER                               , 10013, "Buffer error"                                            )\
+    _TBAG_XX(_QUEUE                                , 10014, "Queue error"                                             )\
     _TBAG_XX(_NREADY                               , 10015, "Not ready"                                               )\
     _TBAG_XX(_EMPTY                                , 10016, "Empty error"                                             )\
     _TBAG_XX(_INIT                                 , 10017, "Initialize error"                                        )\
@@ -71,8 +71,8 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EXPIRED                              , 10034, "Expired object error"                                    )\
     _TBAG_XX(_INSERT                               , 10035, "Insert error"                                            )\
     _TBAG_XX(_ERASE                                , 10036, "Erase error"                                             )\
-    _TBAG_XX(_CLOSING                              , 10037, "Closing object"                                          )\
-    _TBAG_XX(_CLOSED                               , 10038, "Closed object"                                           )\
+    _TBAG_XX(_CLOSING                              , 10037, "Closing error"                                           )\
+    _TBAG_XX(_CLOSED                               , 10038, "Closed error"                                            )\
     _TBAG_XX(_QUERY                                , 10039, "Query error"                                             )\
     _TBAG_XX(_SMALLBUF                             , 10040, "Buffer size is small"                                    )\
     _TBAG_XX(_KEYGEN                               , 10041, "Key generator error"                                     )\
@@ -104,6 +104,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_SCRIPT                               , 10067, "Unknown script error"                                    )\
     _TBAG_XX(_MISMATCH                             , 10068, "The data does not match"                                 )\
     _TBAG_XX(_SKIP                                 , 10069, "Skip error"                                              )\
+    _TBAG_XX(_SHAPE                                , 10070, "Shape error"                                             )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\

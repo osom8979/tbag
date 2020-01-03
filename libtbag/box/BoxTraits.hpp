@@ -341,13 +341,13 @@ struct is_first_bdev_and_second_ui64_ptr<T>
     TBAG_CONSTEXPR static bool const value = false;
 };
 
-struct shape_unknown_t  { /* EMPTY. */ };
-struct shape_args1_t    { /* EMPTY. */ };
-struct shape_args2_t    { /* EMPTY. */ };
-struct shape_dims1_t    { /* EMPTY. */ };
-struct shape_dims2_t    { /* EMPTY. */ };
-struct shape_ref_box1_t { /* EMPTY. */ };
-struct shape_ref_box2_t { /* EMPTY. */ };
+struct shape_error_t { /* EMPTY. */ };
+struct shape_args1_t { /* EMPTY. */ };
+struct shape_args2_t { /* EMPTY. */ };
+struct shape_dims1_t { /* EMPTY. */ };
+struct shape_dims2_t { /* EMPTY. */ };
+struct shape_like1_t { /* EMPTY. */ };
+struct shape_like2_t { /* EMPTY. */ };
 
 template <typename ... Args>
 struct shape_selector
@@ -375,13 +375,13 @@ struct shape_selector
             is_all_integral<Args...>::value;
 
     // clang-format off
-    using type = typename std::conditional<is_shape_ref_box1, shape_ref_box1_t,
-                 typename std::conditional<is_shape_ref_box2, shape_ref_box2_t,
+    using type = typename std::conditional<is_shape_ref_box1, shape_like1_t,
+                 typename std::conditional<is_shape_ref_box2, shape_like2_t,
                  typename std::conditional<is_shape_dims1, shape_dims1_t,
                  typename std::conditional<is_shape_dims2, shape_dims2_t,
                  typename std::conditional<is_shape_args1, shape_args1_t,
                  typename std::conditional<is_shape_args2, shape_args2_t,
-                 shape_unknown_t
+                 shape_error_t
                  >::type // shape_args2_t
                  >::type // shape_args1_t
                  >::type // shape_dims2_t
@@ -416,7 +416,7 @@ struct index_selector
                  typename std::conditional<is_shape_dims2, shape_dims2_t,
                  typename std::conditional<is_shape_args1, shape_args1_t,
                  typename std::conditional<is_shape_args2, shape_args2_t,
-                 shape_unknown_t
+                 shape_error_t
                  >::type // shape_args2_t
                  >::type // shape_args1_t
                  >::type // shape_dims2_t

@@ -172,9 +172,9 @@ TEST(Box_TypeTraits_Test, shape_selector)
     EXPECT_TRUE((std::is_same<typename shape_selector<bdev,ui64*,ui32,ui32*>::type, shape_dims1_t>::value));
     EXPECT_TRUE((std::is_same<typename shape_selector<ui32,ui32*>::type, shape_dims2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename shape_selector<box_data&&>::type, shape_ref_box1_t>::value));
-    EXPECT_TRUE((std::is_same<typename shape_selector<Box&&>::type, shape_ref_box2_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<box_data&&>::type, shape_like1_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<Box&&>::type, shape_like2_t>::value));
 
-    EXPECT_TRUE((std::is_same<typename shape_selector<Box,Box>::type, shape_unknown_t>::value));
+    EXPECT_TRUE((std::is_same<typename shape_selector<Box,Box>::type, shape_error_t>::value));
 }
 
