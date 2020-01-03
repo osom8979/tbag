@@ -547,6 +547,7 @@ static void _box_cpu_element_copy_impl(itype src, ui32 size, void * dest, btype 
 {
     // clang-format off
     switch (dest_type) {
+    case BT_BOOL:    _box_cpu_element_copy_impl(src, src + size, (bool *)dest); break;
     case BT_INT8:    _box_cpu_element_copy_impl(src, src + size, (si8  *)dest); break;
     case BT_INT16:   _box_cpu_element_copy_impl(src, src + size, (si16 *)dest); break;
     case BT_INT32:   _box_cpu_element_copy_impl(src, src + size, (si32 *)dest); break;
@@ -577,6 +578,7 @@ void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
 
     // clang-format off
     switch (src_type) {
+    case BT_BOOL:    _box_cpu_element_copy_impl((bool *)src, size, dest, dest_type); break;
     case BT_INT8:    _box_cpu_element_copy_impl((si8  *)src, size, dest, dest_type); break;
     case BT_INT16:   _box_cpu_element_copy_impl((si16 *)src, size, dest, dest_type); break;
     case BT_INT32:   _box_cpu_element_copy_impl((si32 *)src, size, dest, dest_type); break;
@@ -607,6 +609,7 @@ inline static void _box_cpu_set_impl(itype const * in, void * out, btype out_typ
 {
     // clang-format off
     switch (out_type) {
+    case BT_BOOL:    _box_cpu_set_impl(in, (bool *)out); break;
     case BT_INT8:    _box_cpu_set_impl(in, (si8  *)out); break;
     case BT_INT16:   _box_cpu_set_impl(in, (si16 *)out); break;
     case BT_INT32:   _box_cpu_set_impl(in, (si32 *)out); break;
@@ -634,6 +637,7 @@ void box_cpu_set(void * TBAG_RESTRICT dest, btype dest_type,
 
     // clang-format off
     switch (src_type) {
+    case BT_BOOL:    _box_cpu_set_impl((bool *)src, dest, dest_type); break;
     case BT_INT8:    _box_cpu_set_impl((si8  *)src, dest, dest_type); break;
     case BT_INT16:   _box_cpu_set_impl((si16 *)src, dest, dest_type); break;
     case BT_INT32:   _box_cpu_set_impl((si32 *)src, dest, dest_type); break;
@@ -820,6 +824,7 @@ void box_data::set_opaque(box_any const & v) TBAG_NOEXCEPT
 }
 
 void box_data::set_opaque(void * v) TBAG_NOEXCEPT { opaque.pointer = v; }
+void box_data::set_opaque(bool v) TBAG_NOEXCEPT { opaque.data_bool = v; }
 void box_data::set_opaque(si8  v) TBAG_NOEXCEPT { opaque.data_si8  = v; }
 void box_data::set_opaque(si16 v) TBAG_NOEXCEPT { opaque.data_si16 = v; }
 void box_data::set_opaque(si32 v) TBAG_NOEXCEPT { opaque.data_si32 = v; }
@@ -837,6 +842,7 @@ void box_data::get_opaque(box_any * v) TBAG_NOEXCEPT
 }
 
 void box_data::get_opaque(void ** v) const TBAG_NOEXCEPT { *v = opaque.pointer; }
+void box_data::get_opaque(bool * v) const TBAG_NOEXCEPT { *v = opaque.data_bool; }
 void box_data::get_opaque(si8  * v) const TBAG_NOEXCEPT { *v = opaque.data_si8 ; }
 void box_data::get_opaque(si16 * v) const TBAG_NOEXCEPT { *v = opaque.data_si16; }
 void box_data::get_opaque(si32 * v) const TBAG_NOEXCEPT { *v = opaque.data_si32; }
@@ -854,6 +860,7 @@ box_any box_data::get_opaque_any() const TBAG_NOEXCEPT
 }
 
 void * box_data::get_opaque_pointer() const TBAG_NOEXCEPT { return opaque.pointer; }
+bool box_data::get_opaque_bool() const TBAG_NOEXCEPT { return opaque.data_bool; }
 si8  box_data::get_opaque_si8 () const TBAG_NOEXCEPT { return opaque.data_si8 ; }
 si16 box_data::get_opaque_si16() const TBAG_NOEXCEPT { return opaque.data_si16; }
 si32 box_data::get_opaque_si32() const TBAG_NOEXCEPT { return opaque.data_si32; }

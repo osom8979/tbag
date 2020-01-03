@@ -376,6 +376,7 @@ struct TBAG_API box_data : private Noncopyable
 
     void set_opaque(box_any const & v) TBAG_NOEXCEPT;
     void set_opaque(void * v) TBAG_NOEXCEPT;
+    void set_opaque(bool v) TBAG_NOEXCEPT;
     void set_opaque(si8  v) TBAG_NOEXCEPT;
     void set_opaque(si16 v) TBAG_NOEXCEPT;
     void set_opaque(si32 v) TBAG_NOEXCEPT;
@@ -389,6 +390,7 @@ struct TBAG_API box_data : private Noncopyable
 
     void get_opaque(box_any * v) TBAG_NOEXCEPT;
     void get_opaque(void ** v) const TBAG_NOEXCEPT;
+    void get_opaque(bool * v) const TBAG_NOEXCEPT;
     void get_opaque(si8  * v) const TBAG_NOEXCEPT;
     void get_opaque(si16 * v) const TBAG_NOEXCEPT;
     void get_opaque(si32 * v) const TBAG_NOEXCEPT;
@@ -402,6 +404,7 @@ struct TBAG_API box_data : private Noncopyable
 
     box_any get_opaque_any() const TBAG_NOEXCEPT;
     void * get_opaque_pointer() const TBAG_NOEXCEPT;
+    bool get_opaque_bool() const TBAG_NOEXCEPT;
     si8  get_opaque_si8 () const TBAG_NOEXCEPT;
     si16 get_opaque_si16() const TBAG_NOEXCEPT;
     si32 get_opaque_si32() const TBAG_NOEXCEPT;
