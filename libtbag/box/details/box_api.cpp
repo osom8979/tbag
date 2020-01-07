@@ -601,6 +601,39 @@ Err box_comp_test(box_data const * lh, box_data const * rh, box_data const * out
     return E_SUCCESS;
 }
 
+Err box_comp_test(box_data const * lh, btype val_type, bdev val_device, ui64 const * val_ext, box_data const * out)
+{
+    assert(lh != nullptr);
+    assert(val_ext != nullptr);
+    assert(out != nullptr);
+
+    if (lh->type != val_type) {
+        return E_INVALID_TYPE;
+    }
+    if (lh->device != val_device) {
+        return E_EXDEV;
+    }
+    if (!box_ext_is_equals(lh->ext, val_ext)) {
+        return E_EXDEV;
+    }
+
+    if (out->type != BT_BOOL) {
+        return E_INVALID_TYPE;
+    }
+    if (lh->device != out->device) {
+        return E_EXDEV;
+    }
+    if (!box_ext_is_equals(lh->ext, out->ext)) {
+        return E_EXDEV;
+    }
+    if (!box_dim_is_equals(lh->dims, lh->rank, out->dims, out->rank)) {
+        return E_SHAPE;
+    }
+    assert(lh->size == out->size);
+
+    return E_SUCCESS;
+}
+
 // -----------------------
 // box_data implementation
 // -----------------------
@@ -1358,6 +1391,33 @@ Err box_data::lt(box_data const * comp, box_data * out) const { return _comp<les
 Err box_data::le(box_data const * comp, box_data * out) const { return _comp<less_equal   >(this, comp, out); }
 Err box_data::gt(box_data const * comp, box_data * out) const { return _comp<greater_than >(this, comp, out); }
 Err box_data::ge(box_data const * comp, box_data * out) const { return _comp<greater_equal>(this, comp, out); }
+// clang-format on
+
+template <template <typename LeftT, typename RightT> class CompT>
+static Err _comp(box_data const * lh, btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * out)
+{
+    auto const test_code = box_comp_test(lh, val_type, val_device, val_ext, out);
+    if (isFailure(test_code)) {
+        return test_code;
+    }
+    if (lh->device == BD_CPU) {
+        box_cpu_value_comp<CompT>(lh->data, lh->type, val, val_type, (bool*)out->data, lh->size);
+        return E_SUCCESS;
+    } else if (lh->device == BD_CUDA) {
+        // TODO
+    } else if (lh->device == BD_CL) {
+        // TODO
+    }
+    return E_ENOSYS;
+}
+
+// clang-format off
+Err box_data::eq(btype t, bdev d, ui64 const * e, void const * val, box_data * out) const { return _comp<equal_to     >(this, t, d, e, val, out); }
+Err box_data::ne(btype t, bdev d, ui64 const * e, void const * val, box_data * out) const { return _comp<not_equal    >(this, t, d, e, val, out); }
+Err box_data::lt(btype t, bdev d, ui64 const * e, void const * val, box_data * out) const { return _comp<less_than    >(this, t, d, e, val, out); }
+Err box_data::le(btype t, bdev d, ui64 const * e, void const * val, box_data * out) const { return _comp<less_equal   >(this, t, d, e, val, out); }
+Err box_data::gt(btype t, bdev d, ui64 const * e, void const * val, box_data * out) const { return _comp<greater_than >(this, t, d, e, val, out); }
+Err box_data::ge(btype t, bdev d, ui64 const * e, void const * val, box_data * out) const { return _comp<greater_equal>(this, t, d, e, val, out); }
 // clang-format on
 
 // -------------------------

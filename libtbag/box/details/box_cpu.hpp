@@ -177,6 +177,72 @@ void box_cpu_comp(void const * lh, btype lh_type,
     // clang-format on
 }
 
+template <template <typename LeftT, typename RightT> class CompT, typename ltype, typename rtype>
+void box_cpu_comp_value_impl(ltype const * lh, rtype const * rh,
+                             bool * out, std::size_t size) TBAG_NOEXCEPT
+{
+    CompT<ltype, rtype> const compare;
+    for (auto i = 0u; i < size; ++i) {
+        out[i] = compare(lh[i], *rh);
+    }
+}
+
+template <template <typename LeftT, typename RightT> class CompT, typename ltype>
+void box_cpu_comp_value_impl(ltype const * lh, void const * rh, btype rh_type,
+                             bool * out, std::size_t size) TBAG_NOEXCEPT
+{
+    // clang-format off
+    switch (rh_type) {
+    case BT_BOOL:    box_cpu_comp_value_impl<CompT>(lh, (bool const *)rh, out, size); break;
+    case BT_INT8:    box_cpu_comp_value_impl<CompT>(lh, (si8  const *)rh, out, size); break;
+    case BT_INT16:   box_cpu_comp_value_impl<CompT>(lh, (si16 const *)rh, out, size); break;
+    case BT_INT32:   box_cpu_comp_value_impl<CompT>(lh, (si32 const *)rh, out, size); break;
+    case BT_INT64:   box_cpu_comp_value_impl<CompT>(lh, (si64 const *)rh, out, size); break;
+    case BT_UINT8:   box_cpu_comp_value_impl<CompT>(lh, (ui8  const *)rh, out, size); break;
+    case BT_UINT16:  box_cpu_comp_value_impl<CompT>(lh, (ui16 const *)rh, out, size); break;
+    case BT_UINT32:  box_cpu_comp_value_impl<CompT>(lh, (ui32 const *)rh, out, size); break;
+    case BT_UINT64:  box_cpu_comp_value_impl<CompT>(lh, (ui64 const *)rh, out, size); break;
+    case BT_FLOAT32: box_cpu_comp_value_impl<CompT>(lh, (fp32 const *)rh, out, size); break;
+    case BT_FLOAT64: box_cpu_comp_value_impl<CompT>(lh, (fp64 const *)rh, out, size); break;
+    case BT_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+    }
+    // clang-format on
+}
+
+template <template <typename LeftT, typename RightT> class CompT>
+void box_cpu_value_comp(void const * lh, btype lh_type,
+                        void const * rh, btype rh_type,
+                        bool * out, std::size_t size) TBAG_NOEXCEPT
+{
+    assert(rh != nullptr);
+    assert(lh != nullptr);
+
+    // clang-format off
+    switch (lh_type) {
+    case BT_BOOL:    box_cpu_comp_value_impl<CompT>((bool const *)lh, rh, rh_type, out, size); break;
+    case BT_INT8:    box_cpu_comp_value_impl<CompT>((si8  const *)lh, rh, rh_type, out, size); break;
+    case BT_INT16:   box_cpu_comp_value_impl<CompT>((si16 const *)lh, rh, rh_type, out, size); break;
+    case BT_INT32:   box_cpu_comp_value_impl<CompT>((si32 const *)lh, rh, rh_type, out, size); break;
+    case BT_INT64:   box_cpu_comp_value_impl<CompT>((si64 const *)lh, rh, rh_type, out, size); break;
+    case BT_UINT8:   box_cpu_comp_value_impl<CompT>((ui8  const *)lh, rh, rh_type, out, size); break;
+    case BT_UINT16:  box_cpu_comp_value_impl<CompT>((ui16 const *)lh, rh, rh_type, out, size); break;
+    case BT_UINT32:  box_cpu_comp_value_impl<CompT>((ui32 const *)lh, rh, rh_type, out, size); break;
+    case BT_UINT64:  box_cpu_comp_value_impl<CompT>((ui64 const *)lh, rh, rh_type, out, size); break;
+    case BT_FLOAT32: box_cpu_comp_value_impl<CompT>((fp32 const *)lh, rh, rh_type, out, size); break;
+    case BT_FLOAT64: box_cpu_comp_value_impl<CompT>((fp64 const *)lh, rh, rh_type, out, size); break;
+    case BT_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        break;
+    }
+    // clang-format on
+}
+
 } // namespace details
 } // namespace box
 

@@ -928,6 +928,87 @@ public:
     Box operator >=(Box const & box) const { return ge(box).value; }
     Box operator ==(Box const & box) const { return eq(box).value; }
     Box operator !=(Box const & box) const { return ne(box).value; }
+
+private:
+    using ValCompareMethod = Err (box_data::*)(btype, bdev, ui64 const *, void const *, box_data *) const;
+    ErrBox comp(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, ValCompareMethod m) const;
+
+public:
+    ErrBox lt(btype val_type, bdev val_device, ui64 const * val_ext, void const * val) const;
+    ErrBox le(btype val_type, bdev val_device, ui64 const * val_ext, void const * val) const;
+    ErrBox gt(btype val_type, bdev val_device, ui64 const * val_ext, void const * val) const;
+    ErrBox ge(btype val_type, bdev val_device, ui64 const * val_ext, void const * val) const;
+    ErrBox eq(btype val_type, bdev val_device, ui64 const * val_ext, void const * val) const;
+    ErrBox ne(btype val_type, bdev val_device, ui64 const * val_ext, void const * val) const;
+
+    template <typename T> ErrBox lt(bdev d, ui64 const * e, T const * v) const { return lt(get_btype<T>(), d, e, v); }
+    template <typename T> ErrBox le(bdev d, ui64 const * e, T const * v) const { return le(get_btype<T>(), d, e, v); }
+    template <typename T> ErrBox gt(bdev d, ui64 const * e, T const * v) const { return gt(get_btype<T>(), d, e, v); }
+    template <typename T> ErrBox ge(bdev d, ui64 const * e, T const * v) const { return ge(get_btype<T>(), d, e, v); }
+    template <typename T> ErrBox eq(bdev d, ui64 const * e, T const * v) const { return eq(get_btype<T>(), d, e, v); }
+    template <typename T> ErrBox ne(bdev d, ui64 const * e, T const * v) const { return ne(get_btype<T>(), d, e, v); }
+
+    template <typename T>
+    ErrBox lt(T const * v) const
+    {
+        auto const val_device = is_device_none() ? device_cpu() : device();
+        ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return lt(val_device, val_ext, v);
+    }
+
+    template <typename T>
+    ErrBox le(T const * v) const
+    {
+        auto const val_device = is_device_none() ? device_cpu() : device();
+        ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return le(val_device, val_ext, v);
+    }
+
+    template <typename T>
+    ErrBox gt(T const * v) const
+    {
+        auto const val_device = is_device_none() ? device_cpu() : device();
+        ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return gt(val_device, val_ext, v);
+    }
+
+    template <typename T>
+    ErrBox ge(T const * v) const
+    {
+        auto const val_device = is_device_none() ? device_cpu() : device();
+        ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return ge(val_device, val_ext, v);
+    }
+
+    template <typename T>
+    ErrBox eq(T const * v) const
+    {
+        auto const val_device = is_device_none() ? device_cpu() : device();
+        ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return eq(val_device, val_ext, v);
+    }
+
+    template <typename T>
+    ErrBox ne(T const * v) const
+    {
+        auto const val_device = is_device_none() ? device_cpu() : device();
+        ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
+        return ne(val_device, val_ext, v);
+    }
+
+    template <typename T> ErrBox lt(T const & v) const { return lt(&v); }
+    template <typename T> ErrBox le(T const & v) const { return le(&v); }
+    template <typename T> ErrBox gt(T const & v) const { return gt(&v); }
+    template <typename T> ErrBox ge(T const & v) const { return ge(&v); }
+    template <typename T> ErrBox eq(T const & v) const { return eq(&v); }
+    template <typename T> ErrBox ne(T const & v) const { return ne(&v); }
+
+    template <typename T> Box operator < (T const & v) const { return lt(v).value; }
+    template <typename T> Box operator <=(T const & v) const { return le(v).value; }
+    template <typename T> Box operator > (T const & v) const { return gt(v).value; }
+    template <typename T> Box operator >=(T const & v) const { return ge(v).value; }
+    template <typename T> Box operator ==(T const & v) const { return eq(v).value; }
+    template <typename T> Box operator !=(T const & v) const { return ne(v).value; }
 };
 
 } // namespace box

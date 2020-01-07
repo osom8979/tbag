@@ -134,6 +134,7 @@ TBAG_API void * box_data_malloc(btype type, bdev device, ui32 element_size) TBAG
 TBAG_API void   box_data_free(bdev device, void * data) TBAG_NOEXCEPT;
 
 TBAG_API Err box_comp_test(box_data const * lh, box_data const * rh, box_data const * out);
+TBAG_API Err box_comp_test(box_data const * lh, btype val_type, bdev val_device, ui64 const * val_ext, box_data const * out);
 
 /**
  * box_slice structure.
@@ -368,6 +369,13 @@ struct TBAG_API box_data : private Noncopyable
     Err le(box_data const * comp, box_data * result) const;
     Err gt(box_data const * comp, box_data * result) const;
     Err ge(box_data const * comp, box_data * result) const;
+
+    Err eq(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
+    Err ne(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
+    Err lt(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
+    Err le(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
+    Err gt(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
+    Err ge(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
 };
 
 /**

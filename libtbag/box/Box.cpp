@@ -568,6 +568,9 @@ ErrBox Box::comp(Box const & box, BoxCompareMethod m) const
     if (type() != box.type()) {
         return { E_INVALID_TYPE, Box(nullptr) };
     }
+    if (device() != box.device()) {
+        return { E_EXDEV, Box(nullptr) };
+    }
     if (!box_ext_is_equals(ext(), box.ext())) {
         return { E_EXDEV, Box(nullptr) };
     }
@@ -575,7 +578,7 @@ ErrBox Box::comp(Box const & box, BoxCompareMethod m) const
         return { E_SHAPE, Box(nullptr) };
     }
     Box result;
-    auto const resize_code = result.resize<bool>(box);
+    auto const resize_code = result.resize<bool>(*this);
     if (isFailure(resize_code)) {
         return { resize_code, Box(nullptr) };
     }
@@ -594,6 +597,42 @@ ErrBox Box::gt(Box const & box) const { return comp(box, &box_data::gt); }
 ErrBox Box::ge(Box const & box) const { return comp(box, &box_data::ge); }
 ErrBox Box::eq(Box const & box) const { return comp(box, &box_data::eq); }
 ErrBox Box::ne(Box const & box) const { return comp(box, &box_data::ne); }
+// clang-format on
+
+ErrBox Box::comp(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, ValCompareMethod m) const
+{
+    if (!exists()) {
+        return { E_EXPIRED, Box(nullptr) };
+    }
+    if (type() != val_type) {
+        return { E_INVALID_TYPE, Box(nullptr) };
+    }
+    if (device() != val_device) {
+        return { E_EXDEV, Box(nullptr) };
+    }
+    if (!box_ext_is_equals(ext(), val_ext)) {
+        return { E_EXDEV, Box(nullptr) };
+    }
+    Box result;
+    auto const resize_code = result.resize<bool>(*this);
+    if (isFailure(resize_code)) {
+        return { resize_code, Box(nullptr) };
+    }
+    auto const * base = _base.get();
+    auto const comp_code = (base->*m)(val_type, val_device, val_ext, val, result.base());
+    if (isFailure(comp_code)) {
+        return { comp_code, Box(nullptr) };
+    }
+    return { E_SUCCESS, result };
+}
+
+// clang-format off
+ErrBox Box::lt(btype t, bdev d, ui64 const * e, void const * v) const { return comp(t, d, e, v, &box_data::lt); }
+ErrBox Box::le(btype t, bdev d, ui64 const * e, void const * v) const { return comp(t, d, e, v, &box_data::le); }
+ErrBox Box::gt(btype t, bdev d, ui64 const * e, void const * v) const { return comp(t, d, e, v, &box_data::gt); }
+ErrBox Box::ge(btype t, bdev d, ui64 const * e, void const * v) const { return comp(t, d, e, v, &box_data::ge); }
+ErrBox Box::eq(btype t, bdev d, ui64 const * e, void const * v) const { return comp(t, d, e, v, &box_data::eq); }
+ErrBox Box::ne(btype t, bdev d, ui64 const * e, void const * v) const { return comp(t, d, e, v, &box_data::ne); }
 // clang-format on
 
 } // namespace box
