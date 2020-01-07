@@ -243,6 +243,64 @@ void box_cpu_value_comp(void const * lh, btype lh_type,
     // clang-format on
 }
 
+template <typename T>
+bool box_cpu_all_impl(T const * begin, T const * end) TBAG_NOEXCEPT
+{
+    for (; begin != end; ++begin) {
+        if (!static_cast<typename std::remove_pointer<T>::type>(*begin)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+template <typename T>
+bool box_cpu_all_impl(T const * begin, ui32 size) TBAG_NOEXCEPT
+{
+    return box_cpu_all_impl(begin, begin + size);
+}
+
+TBAG_API bool box_cpu_all(void const * data, btype type, ui32 size);
+
+template <typename T>
+bool box_cpu_any_impl(T const * begin, T const * end) TBAG_NOEXCEPT
+{
+    for (; begin != end; ++begin) {
+        if (static_cast<typename std::remove_pointer<T>::type>(*begin)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+template <typename T>
+bool box_cpu_any_impl(T const * begin, ui32 size) TBAG_NOEXCEPT
+{
+    return box_cpu_any_impl(begin, begin + size);
+}
+
+TBAG_API bool box_cpu_any(void const * data, btype type, ui32 size);
+
+template <typename T>
+std::size_t box_cpu_count_impl(T const * begin, T const * end) TBAG_NOEXCEPT
+{
+    std::size_t count = 0;
+    for (; begin != end; ++begin) {
+        if (static_cast<typename std::remove_pointer<T>::type>(*begin)) {
+            ++count;
+        }
+    }
+    return count;
+}
+
+template <typename T>
+std::size_t box_cpu_count_impl(T const * begin, ui32 size) TBAG_NOEXCEPT
+{
+    return box_cpu_count_impl(begin, begin + size);
+}
+
+TBAG_API std::size_t box_cpu_count(void const * data, btype type, ui32 size);
+
 } // namespace details
 } // namespace box
 

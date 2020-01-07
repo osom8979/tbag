@@ -376,6 +376,10 @@ struct TBAG_API box_data : private Noncopyable
     Err le(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
     Err gt(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
     Err ge(btype val_type, bdev val_device, ui64 const * val_ext, void const * val, box_data * result) const;
+
+    bool all() const;
+    bool any() const;
+    std::size_t count() const;
 };
 
 /**

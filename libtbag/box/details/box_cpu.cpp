@@ -99,6 +99,78 @@ void box_cpu_set(void * TBAG_RESTRICT dest, btype dest_type,
     // clang-format on
 }
 
+bool box_cpu_all(void const * data, btype type, ui32 size)
+{
+    // clang-format off
+    switch (type) {
+    case BT_BOOL:    return box_cpu_all_impl((bool const *)data, size);
+    case BT_INT8:    return box_cpu_all_impl((si8  const *)data, size);
+    case BT_INT16:   return box_cpu_all_impl((si16 const *)data, size);
+    case BT_INT32:   return box_cpu_all_impl((si32 const *)data, size);
+    case BT_INT64:   return box_cpu_all_impl((si64 const *)data, size);
+    case BT_UINT8:   return box_cpu_all_impl((ui8  const *)data, size);
+    case BT_UINT16:  return box_cpu_all_impl((ui16 const *)data, size);
+    case BT_UINT32:  return box_cpu_all_impl((ui32 const *)data, size);
+    case BT_UINT64:  return box_cpu_all_impl((ui64 const *)data, size);
+    case BT_FLOAT32: return box_cpu_all_impl((fp32 const *)data, size);
+    case BT_FLOAT64: return box_cpu_all_impl((fp64 const *)data, size);
+    case BT_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return false;
+    }
+    // clang-format on
+}
+
+bool box_cpu_any(void const * data, btype type, ui32 size)
+{
+    // clang-format off
+    switch (type) {
+    case BT_BOOL:    return box_cpu_any_impl((bool const *)data, size);
+    case BT_INT8:    return box_cpu_any_impl((si8  const *)data, size);
+    case BT_INT16:   return box_cpu_any_impl((si16 const *)data, size);
+    case BT_INT32:   return box_cpu_any_impl((si32 const *)data, size);
+    case BT_INT64:   return box_cpu_any_impl((si64 const *)data, size);
+    case BT_UINT8:   return box_cpu_any_impl((ui8  const *)data, size);
+    case BT_UINT16:  return box_cpu_any_impl((ui16 const *)data, size);
+    case BT_UINT32:  return box_cpu_any_impl((ui32 const *)data, size);
+    case BT_UINT64:  return box_cpu_any_impl((ui64 const *)data, size);
+    case BT_FLOAT32: return box_cpu_any_impl((fp32 const *)data, size);
+    case BT_FLOAT64: return box_cpu_any_impl((fp64 const *)data, size);
+    case BT_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return false;
+    }
+    // clang-format on
+}
+
+std::size_t box_cpu_count(void const * data, btype type, ui32 size)
+{
+    // clang-format off
+    switch (type) {
+    case BT_BOOL:    return box_cpu_count_impl((bool const *)data, size);
+    case BT_INT8:    return box_cpu_count_impl((si8  const *)data, size);
+    case BT_INT16:   return box_cpu_count_impl((si16 const *)data, size);
+    case BT_INT32:   return box_cpu_count_impl((si32 const *)data, size);
+    case BT_INT64:   return box_cpu_count_impl((si64 const *)data, size);
+    case BT_UINT8:   return box_cpu_count_impl((ui8  const *)data, size);
+    case BT_UINT16:  return box_cpu_count_impl((ui16 const *)data, size);
+    case BT_UINT32:  return box_cpu_count_impl((ui32 const *)data, size);
+    case BT_UINT64:  return box_cpu_count_impl((ui64 const *)data, size);
+    case BT_FLOAT32: return box_cpu_count_impl((fp32 const *)data, size);
+    case BT_FLOAT64: return box_cpu_count_impl((fp64 const *)data, size);
+    case BT_NONE:
+        TBAG_FALLTHROUGH
+    default:
+        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+        return 0;
+    }
+    // clang-format on
+}
+
 } // namespace details
 } // namespace box
 

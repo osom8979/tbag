@@ -635,6 +635,30 @@ ErrBox Box::eq(btype t, bdev d, ui64 const * e, void const * v) const { return c
 ErrBox Box::ne(btype t, bdev d, ui64 const * e, void const * v) const { return comp(t, d, e, v, &box_data::ne); }
 // clang-format on
 
+bool Box::all() const
+{
+    if (!exists()) {
+        return false;
+    }
+    return _base->all();
+}
+
+bool Box::any() const
+{
+    if (!exists()) {
+        return false;
+    }
+    return _base->any();
+}
+
+std::size_t Box::count() const
+{
+    if (!exists()) {
+        return 0;
+    }
+    return _base->count();
+}
+
 } // namespace box
 
 // --------------------

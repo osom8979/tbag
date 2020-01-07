@@ -1420,6 +1420,54 @@ Err box_data::gt(btype t, bdev d, ui64 const * e, void const * val, box_data * o
 Err box_data::ge(btype t, bdev d, ui64 const * e, void const * val, box_data * out) const { return _comp<greater_equal>(this, t, d, e, val, out); }
 // clang-format on
 
+bool box_data::all() const
+{
+    assert(data != nullptr);
+    if (size == 0) {
+        return false;
+    }
+    if (device == BD_CPU) {
+        return box_cpu_all(data, type, size);
+    } else if (device == BD_CUDA) {
+        // TODO
+    } else if (device == BD_CL) {
+        // TODO
+    }
+    return false;
+}
+
+bool box_data::any() const
+{
+    assert(data != nullptr);
+    if (size == 0) {
+        return false;
+    }
+    if (device == BD_CPU) {
+        return box_cpu_any(data, type, size);
+    } else if (device == BD_CUDA) {
+        // TODO
+    } else if (device == BD_CL) {
+        // TODO
+    }
+    return false;
+}
+
+std::size_t box_data::count() const
+{
+    assert(data != nullptr);
+    if (size == 0) {
+        return 0;
+    }
+    if (device == BD_CPU) {
+        return box_cpu_count(data, type, size);
+    } else if (device == BD_CUDA) {
+        // TODO
+    } else if (device == BD_CL) {
+        // TODO
+    }
+    return 0;
+}
+
 // -------------------------
 // box_cursor implementation
 // -------------------------

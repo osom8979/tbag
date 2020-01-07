@@ -1009,6 +1009,18 @@ public:
     template <typename T> Box operator >=(T const & v) const { return ge(v).value; }
     template <typename T> Box operator ==(T const & v) const { return eq(v).value; }
     template <typename T> Box operator !=(T const & v) const { return ne(v).value; }
+
+public:
+    bool all() const;
+    bool any() const;
+    std::size_t count() const;
+
+    static bool all(Box const & box)
+    { return box.all(); }
+    static bool any(Box const & box)
+    { return box.any(); }
+    static std::size_t count(Box const & box)
+    { return box.count(); }
 };
 
 } // namespace box
