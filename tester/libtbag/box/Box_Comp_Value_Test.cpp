@@ -14,28 +14,23 @@ using namespace libtbag::box;
 struct Box_Comp_Value_Test_Fixture : public testing::Test
 {
     Box src;
-    Box cmp;
 
     void SetUp() override
     {
         src = { { 1, 2, 3 },
                 { 4, 5, 6 },
                 { 7, 8, 9 } };
-        cmp = { { 9, 8, 7 },
-                { 6, 5, 4 },
-                { 3, 2, 1 } };
     }
 
     void TearDown() override
     {
         src = nullptr;
-        cmp = nullptr;
     }
 };
 
 TEST_F(Box_Comp_Value_Test_Fixture, EqualTo)
 {
-    auto const err_result = src.eq(cmp);
+    auto const err_result = src.eq(5);
     ASSERT_EQ(E_SUCCESS, err_result.code);
 
     auto const & result = err_result.value;
@@ -63,7 +58,7 @@ TEST_F(Box_Comp_Value_Test_Fixture, EqualTo)
 
 TEST_F(Box_Comp_Value_Test_Fixture, NotEqual)
 {
-    auto const err_result = src.ne(cmp);
+    auto const err_result = src.ne(5);
     ASSERT_EQ(E_SUCCESS, err_result.code);
 
     auto const & result = err_result.value;
@@ -91,7 +86,7 @@ TEST_F(Box_Comp_Value_Test_Fixture, NotEqual)
 
 TEST_F(Box_Comp_Value_Test_Fixture, LessThan)
 {
-    auto const err_result = src.lt(cmp);
+    auto const err_result = src.lt(5);
     ASSERT_EQ(E_SUCCESS, err_result.code);
 
     auto const & result = err_result.value;
@@ -119,7 +114,7 @@ TEST_F(Box_Comp_Value_Test_Fixture, LessThan)
 
 TEST_F(Box_Comp_Value_Test_Fixture, LessEqual)
 {
-    auto const err_result = src.le(cmp);
+    auto const err_result = src.le(5);
     ASSERT_EQ(E_SUCCESS, err_result.code);
 
     auto const & result = err_result.value;
@@ -147,7 +142,7 @@ TEST_F(Box_Comp_Value_Test_Fixture, LessEqual)
 
 TEST_F(Box_Comp_Value_Test_Fixture, GreaterThan)
 {
-    auto const err_result = src.gt(cmp);
+    auto const err_result = src.gt(5);
     ASSERT_EQ(E_SUCCESS, err_result.code);
 
     auto const & result = err_result.value;
@@ -175,7 +170,7 @@ TEST_F(Box_Comp_Value_Test_Fixture, GreaterThan)
 
 TEST_F(Box_Comp_Value_Test_Fixture, GreaterEqual)
 {
-    auto const err_result = src.ge(cmp);
+    auto const err_result = src.ge(5);
     ASSERT_EQ(E_SUCCESS, err_result.code);
 
     auto const & result = err_result.value;
