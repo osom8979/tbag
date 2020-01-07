@@ -3,6 +3,8 @@
  * @brief  TmxMap class prototype.
  * @author zer0
  * @date   2019-08-15
+ *
+ * @see <https://doc.mapeditor.org/en/stable/reference/tmx-map-format/>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_TILED_DETAILS_TMXMAP_HPP__
