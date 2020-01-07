@@ -910,6 +910,10 @@ public:
         return box;
     }
 
+private:
+    using BoxCompareMethod = Err (box_data::*)(box_data const *, box_data *) const;
+    ErrBox comp(Box const & box, BoxCompareMethod m) const;
+
 public:
     ErrBox lt(Box const & box) const;
     ErrBox le(Box const & box) const;

@@ -21,6 +21,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/ErrPair.hpp>
 #include <libtbag/type/TypeTable.hpp>
+#include <libtbag/box/details/box_common.hpp>
 
 #include <cstdint>
 #include <cstdarg>
@@ -34,127 +35,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box     {
 namespace details {
 
-#define TBAG_BOX_TYPE_PREFIX_BIT  0xFF00
-#define TBAG_BOX_TYPE_SUFFIX_BIT  0x00FF
-
-#define TBAG_BOX_TYPE_PREFIX_UNKNOWN   0
-#define TBAG_BOX_TYPE_PREFIX_BOOLEAN   1
-#define TBAG_BOX_TYPE_PREFIX_STRING    2
-#define TBAG_BOX_TYPE_PREFIX_SIGNED    3
-#define TBAG_BOX_TYPE_PREFIX_UNSIGNED  4
-#define TBAG_BOX_TYPE_PREFIX_FLOATING  5
-#define TBAG_BOX_TYPE_PREFIX_COMPLEX   6
-
-#define TBAG_BOX_TYPE_SIZE_SYSTEM   0
-#define TBAG_BOX_TYPE_SIZE_0BIT     0
-#define TBAG_BOX_TYPE_SIZE_8BIT     8
-#define TBAG_BOX_TYPE_SIZE_16BIT   16
-#define TBAG_BOX_TYPE_SIZE_32BIT   32
-#define TBAG_BOX_TYPE_SIZE_64BIT   64
-#define TBAG_BOX_TYPE_SIZE_128BIT 128
-
-#define TBAG_BOX_TYPE_NONE        0x0000
-#define TBAG_BOX_TYPE_BOOL        0x0100
-#define TBAG_BOX_TYPE_INT8        0x0308
-#define TBAG_BOX_TYPE_INT16       0x0310
-#define TBAG_BOX_TYPE_INT32       0x0320
-#define TBAG_BOX_TYPE_INT64       0x0340
-#define TBAG_BOX_TYPE_UINT8       0x0408
-#define TBAG_BOX_TYPE_UINT16      0x0410
-#define TBAG_BOX_TYPE_UINT32      0x0420
-#define TBAG_BOX_TYPE_UINT64      0x0440
-#define TBAG_BOX_TYPE_FLOAT32     0x0520
-#define TBAG_BOX_TYPE_FLOAT64     0x0540
-#define TBAG_BOX_TYPE_COMPLEX64   0x0640
-#define TBAG_BOX_TYPE_COMPLEX128  0x0680
-
-#define TBAG_BOX_DEVICE_NONE  0
-#define TBAG_BOX_DEVICE_CPU   1
-#define TBAG_BOX_DEVICE_CUDA  2
-#define TBAG_BOX_DEVICE_CL    3
-
-#define TBAG_BOX_EXT_SIZE 4
-#define TBAG_BOX_TEMP_DIM_STACK_SIZE 16
-
-#define GET_SIZE_TO_TOTAL_INFO_BYTE(size) (size*sizeof(ui8))
-#define GET_TOTAL_INFO_BYTE_TO_SIZE(byte) (byte/sizeof(ui8))
-#define GET_RANK_TO_TOTAL_DIMS_BYTE(rank) (rank*sizeof(ui32))
-#define GET_TOTAL_DIMS_BYTE_TO_RANK(byte) (byte/sizeof(ui32))
-#define CHECK_TOTAL_DIMS_BYTE(total_dims_byte) \
-    (total_dims_byte >= sizeof(ui32) && total_dims_byte % sizeof(ui32) == 0)
-
-#define TBAG_MAKE_BOX_TYPE(prefix, size) (((prefix)<<(8))|(size))
-#define TBAG_GET_BOX_TYPE_PREFIX(type) (((type)&(TBAG_BOX_TYPE_PREFIX_BIT))>>(8))
-#define TBAG_GET_BOX_TYPE_SUFFIX(type) ((type)&(TBAG_BOX_TYPE_SUFFIX_BIT))
-
-enum BoxType
-{
-    BT_NONE    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNKNOWN , TBAG_BOX_TYPE_SIZE_0BIT  ),
-    BT_BOOL    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_BOOLEAN , TBAG_BOX_TYPE_SIZE_SYSTEM),
-    BT_INT8    = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_8BIT  ),
-    BT_INT16   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_16BIT ),
-    BT_INT32   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_32BIT ),
-    BT_INT64   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_SIGNED  , TBAG_BOX_TYPE_SIZE_64BIT ),
-    BT_UINT8   = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_8BIT  ),
-    BT_UINT16  = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_16BIT ),
-    BT_UINT32  = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_32BIT ),
-    BT_UINT64  = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_UNSIGNED, TBAG_BOX_TYPE_SIZE_64BIT ),
-    BT_FLOAT32 = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_FLOATING, TBAG_BOX_TYPE_SIZE_32BIT ),
-    BT_FLOAT64 = TBAG_MAKE_BOX_TYPE(TBAG_BOX_TYPE_PREFIX_FLOATING, TBAG_BOX_TYPE_SIZE_64BIT ),
-};
-
-enum BoxDevice
-{
-    BD_NONE = TBAG_BOX_DEVICE_NONE,
-    BD_CPU  = TBAG_BOX_DEVICE_CPU,
-    BD_CUDA = TBAG_BOX_DEVICE_CUDA,
-    BD_CL   = TBAG_BOX_DEVICE_CL,
-};
-
-using si8  = int8_t;
-using si16 = int16_t;
-using si32 = int32_t;
-using si64 = int64_t;
-
-using ui8  = uint8_t;
-using ui16 = uint16_t;
-using ui32 = uint32_t;
-using ui64 = uint64_t;
-
-using fp32 = float;
-using fp64 = double;
-
-using btype = ui16;
-using bdev  = ui16;
-
-/**
- * Box any container.
- *
- * @author zer0
- * @date   2019-12-14
- */
-union box_any
-{
-    void * pointer;
-    bool   data_bool;
-    si8    data_si8;
-    si16   data_si16;
-    si32   data_si32;
-    si64   data_si64;
-    ui8    data_ui8;
-    ui16   data_ui16;
-    ui32   data_ui32;
-    ui64   data_ui64;
-    fp32   data_fp32;
-    fp64   data_fp64;
-};
-
-using box_opaque_delete_cb = void(*)(void*);
-
 struct box_cursor;
 struct box_data;
-
-TBAG_CONSTEXPR int const box_nop = libtbag::type::TypeInfo<int>::maximum();
 
 // clang-format off
 inline bool box_is_unknown_type (btype type) TBAG_NOEXCEPT { return TBAG_GET_BOX_TYPE_PREFIX(type) == TBAG_BOX_TYPE_PREFIX_UNKNOWN ; }
@@ -247,20 +129,11 @@ TBAG_API int box_index_begin_abs(ui32 const * dims, ui32 dim_index, int data_ind
 TBAG_API int box_index_end_abs(ui32 const * dims, ui32 dim_index, int data_index, int data_step) TBAG_NOEXCEPT;
 TBAG_API bool box_step_check(int begin, int end, int step) TBAG_NOEXCEPT;
 
-TBAG_API void * box_cpu_malloc(ui32 byte_size) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_free(void * ptr) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_memcpy(void * TBAG_RESTRICT dest,
-                             void const * TBAG_RESTRICT src,
-                             ui32 byte) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_element_copy(void * TBAG_RESTRICT dest, btype dest_type,
-                                   void const * TBAG_RESTRICT src, btype src_type,
-                                   ui32 size) TBAG_NOEXCEPT;
-TBAG_API void box_cpu_set(void * TBAG_RESTRICT dest, btype dest_type,
-                          void const * TBAG_RESTRICT src, btype src_type) TBAG_NOEXCEPT;
-
 TBAG_API void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT;
 TBAG_API void * box_data_malloc(btype type, bdev device, ui32 element_size) TBAG_NOEXCEPT;
 TBAG_API void   box_data_free(bdev device, void * data) TBAG_NOEXCEPT;
+
+TBAG_API Err box_comp_test(box_data const * lh, box_data const * rh, box_data const * out);
 
 /**
  * box_slice structure.
@@ -488,6 +361,13 @@ struct TBAG_API box_data : private Noncopyable
                     ui32 src_size, void const * src_data);
     Err checked_assign_data(btype src_type, bdev src_device, ui64 const * src_ext,
                             ui32 src_rank, ui32 const * src_dims, void const * src_data);
+
+    Err eq(box_data const * comp, box_data * result) const;
+    Err ne(box_data const * comp, box_data * result) const;
+    Err lt(box_data const * comp, box_data * result) const;
+    Err le(box_data const * comp, box_data * result) const;
+    Err gt(box_data const * comp, box_data * result) const;
+    Err ge(box_data const * comp, box_data * result) const;
 };
 
 /**

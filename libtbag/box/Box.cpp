@@ -560,35 +560,41 @@ Err Box::ones()
     return fill(1);
 }
 
-ErrBox Box::lt(Box const & box) const
+ErrBox Box::comp(Box const & box, BoxCompareMethod m) const
 {
     if (!exists() || !box.exists()) {
         return { E_EXPIRED, Box(nullptr) };
     }
+    if (type() == box.type()) {
+        return { E_INVALID_TYPE, Box(nullptr) };
+    }
+    if (!box_ext_is_equals(ext(), box.ext())) {
+        return { E_EXDEV, Box(nullptr) };
+    }
     if (!box_dim_is_equals(dims(), rank(), box.dims(), box.rank())) {
         return { E_SHAPE, Box(nullptr) };
     }
+    Box result;
+    auto const resize_code = result.resize<bool>(box);
+    if (isFailure(resize_code)) {
+        return { resize_code, Box(nullptr) };
+    }
+    auto const * base = _base.get();
+    auto const comp_code = (base->*m)(box.base(), result.base());
+    if (isFailure(comp_code)) {
+        return { comp_code, Box(nullptr) };
+    }
+    return { E_SUCCESS, result };
 }
 
-ErrBox Box::le(Box const & box) const
-{
-}
-
-ErrBox Box::gt(Box const & box) const
-{
-}
-
-ErrBox Box::ge(Box const & box) const
-{
-}
-
-ErrBox Box::eq(Box const & box) const
-{
-}
-
-ErrBox Box::ne(Box const & box) const
-{
-}
+// clang-format off
+ErrBox Box::lt(Box const & box) const { return comp(box, &box_data::lt); }
+ErrBox Box::le(Box const & box) const { return comp(box, &box_data::le); }
+ErrBox Box::gt(Box const & box) const { return comp(box, &box_data::gt); }
+ErrBox Box::ge(Box const & box) const { return comp(box, &box_data::ge); }
+ErrBox Box::eq(Box const & box) const { return comp(box, &box_data::eq); }
+ErrBox Box::ne(Box const & box) const { return comp(box, &box_data::ne); }
+// clang-format on
 
 } // namespace box
 
