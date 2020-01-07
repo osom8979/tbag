@@ -106,18 +106,3 @@ TEST(BoxTest, Diffs4)
     ASSERT_EQ(1, diffs[3]);
 }
 
-//TEST(BoxTest, GetDiffs_02)
-//{
-//    Box box = { {  1,  2,  3,  4,  5 },
-//                {  6,  7,  8,  9, 10 },
-//                { 11, 12, 13, 14, 15 },
-//                { 16, 17, 18, 19, 20 },
-//                { 21, 22, 23, 24, 25 } };
-//    ASSERT_TRUE(box);
-//
-//    auto const diffs = box.getDiffs({{1, 4, 1}, {1, 4, 1}});
-//    ASSERT_EQ(2, diffs.size());
-//    ASSERT_EQ(3, diffs[0]);
-//    ASSERT_EQ(3, diffs[1]);
-//}
-

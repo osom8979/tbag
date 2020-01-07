@@ -565,7 +565,7 @@ ErrBox Box::comp(Box const & box, BoxCompareMethod m) const
     if (!exists() || !box.exists()) {
         return { E_EXPIRED, Box(nullptr) };
     }
-    if (type() == box.type()) {
+    if (type() != box.type()) {
         return { E_INVALID_TYPE, Box(nullptr) };
     }
     if (!box_ext_is_equals(ext(), box.ext())) {
