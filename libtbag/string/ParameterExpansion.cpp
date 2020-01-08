@@ -7,6 +7,8 @@
 
 #include <libtbag/string/ParameterExpansion.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/filesystem/Path.hpp>
+#include <libtbag/filesystem/File.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -45,6 +47,7 @@ Err parameterExpansion(std::string const & variable, Flags const & flags, std::s
     std::stringstream sub_ss; // substitution
     std::stringstream offset_ss;
     std::stringstream length_ss;
+    std::stringstream path_ss;
 
     char c = 0;
 
@@ -232,9 +235,16 @@ Err parameterExpansion(std::string const & variable, Flags const & flags, std::s
             case 'P': format = _ef_parameter_at_operator_P; break;
             case 'A': format = _ef_parameter_at_operator_A; break;
             case 'a': format = _ef_parameter_at_operator_a; break;
+            case '/':
+                state = expansion_state_enable_at_slash;
+                format = _ef_parameter_at_operator_a_slash; break;
             default:
                 return E_PARSING;
             }
+            break;
+
+        case expansion_state_enable_at_slash:
+            path_ss << c;
             break;
         }
 
@@ -316,6 +326,9 @@ Err parameterExpansion(std::string const & variable, Flags const & flags, std::s
 
         case expansion_state_enable_at:
             return E_ILLSTATE;
+        case expansion_state_enable_at_slash:
+            format = _ef_parameter_at_operator_a_slash;
+            break;
         default:
             return E_INACCESSIBLE_BLOCK;
         }
@@ -334,6 +347,7 @@ Err parameterExpansion(std::string const & variable, Flags const & flags, std::s
     auto const sub = sub_ss.str();
     auto const offset = offset_ss.str();
     auto const length = length_ss.str();
+    auto const path = path_ss.str();
 
     switch (format) {
     case _ef_normal:
@@ -393,6 +407,26 @@ Err parameterExpansion(std::string const & variable, Flags const & flags, std::s
         return E_ENOSYS;
     case _ef_parameter_at_operator_a:
         return E_ENOSYS;
+    case _ef_parameter_at_operator_a_slash:
+        if (flags.existsByKey(name)) {
+            auto const value = flags.opt(name);
+            auto const file_path = libtbag::filesystem::Path(value) / path;
+            if (!file_path.isRegularFile()) {
+                return E_ENOENT;
+            }
+            if (!file_path.isReadable()) {
+                return E_EPERM;
+            }
+            std::string content;
+            auto const read_code = libtbag::filesystem::readFile(file_path, content);
+            if (isFailure(read_code)) {
+                return read_code;
+            }
+            result = content;
+            return E_SUCCESS;
+        } else {
+            return E_NFOUND;
+        }
     default:
         return E_INACCESSIBLE_BLOCK;
     }

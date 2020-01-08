@@ -50,38 +50,42 @@ enum expansion_state_t
     expansion_state_enable_comma_done,
     expansion_state_enable_comma_comma,
     expansion_state_enable_at,
+    // tea-bag only, extra state:
+    expansion_state_enable_at_slash,
 };
 
 // clang-format off
 enum expansion_format_t
 {
     _ef_unknown,
-    _ef_normal,                               ///< @code{.cpp} ${parameter @endcode
-    _ef_sharp_parameter,                      ///< @code{.cpp} ${#parameter @endcode
-    _ef_bang_prefix_asterisk,                 ///< @code{.cpp} ${!prefix* @endcode
-    _ef_bang_prefix_at,                       ///< @code{.cpp} ${!prefix@ @endcode
-    _ef_bang_name_at,                         ///< @code{.cpp} ${!name[@] @endcode
-    _ef_bang_name_asterisk,                   ///< @code{.cpp} ${!name[*] @endcode
-    _ef_parameter_colon_minus_word,           ///< @code{.cpp} ${parameter:-word @endcode
-    _ef_parameter_colon_equals_word,          ///< @code{.cpp} ${parameter:=word @endcode
-    _ef_parameter_colon_question_word,        ///< @code{.cpp} ${parameter:?word @endcode
-    _ef_parameter_colon_plus_word,            ///< @code{.cpp} ${parameter:+word @endcode
-    _ef_parameter_colon_offset,               ///< @code{.cpp} ${parameter:offset @endcode
-    _ef_parameter_colon_offset_colon_length,  ///< @code{.cpp} ${parameter:offset:length @endcode
-    _ef_parameter_sharp_word,                 ///< @code{.cpp} ${parameter#word @endcode
-    _ef_parameter_sharp_sharp_word,           ///< @code{.cpp} ${parameter##word @endcode
-    _ef_parameter_percent_word,               ///< @code{.cpp} ${parameter%word @endcode
-    _ef_parameter_percent_percent_word,       ///< @code{.cpp} ${parameter%%word @endcode
-    _ef_parameter_slash_pattern_slash_string, ///< @code{.cpp} ${parameter/pattern/string @endcode
-    _ef_parameter_carat_pattern,              ///< @code{.cpp} ${parameter^pattern @endcode
-    _ef_parameter_carat_carat_pattern,        ///< @code{.cpp} ${parameter^^pattern @endcode
-    _ef_parameter_comma_pattern,              ///< @code{.cpp} ${parameter,pattern @endcode
-    _ef_parameter_comma_comma_pattern,        ///< @code{.cpp} ${parameter,,pattern @endcode
-    _ef_parameter_at_operator_Q,              ///< @code{.cpp} ${parameter@Q @endcode
-    _ef_parameter_at_operator_E,              ///< @code{.cpp} ${parameter@E @endcode
-    _ef_parameter_at_operator_P,              ///< @code{.cpp} ${parameter@P @endcode
-    _ef_parameter_at_operator_A,              ///< @code{.cpp} ${parameter@A @endcode
-    _ef_parameter_at_operator_a,              ///< @code{.cpp} ${parameter@a @endcode
+    _ef_normal,                               ///< @code{.cpp} ${parameter} @endcode
+    _ef_sharp_parameter,                      ///< @code{.cpp} ${#parameter} @endcode
+    _ef_bang_prefix_asterisk,                 ///< @code{.cpp} ${!prefix*} @endcode
+    _ef_bang_prefix_at,                       ///< @code{.cpp} ${!prefix@} @endcode
+    _ef_bang_name_at,                         ///< @code{.cpp} ${!name[@]} @endcode
+    _ef_bang_name_asterisk,                   ///< @code{.cpp} ${!name[*]} @endcode
+    _ef_parameter_colon_minus_word,           ///< @code{.cpp} ${parameter:-word} @endcode
+    _ef_parameter_colon_equals_word,          ///< @code{.cpp} ${parameter:=word} @endcode
+    _ef_parameter_colon_question_word,        ///< @code{.cpp} ${parameter:?word} @endcode
+    _ef_parameter_colon_plus_word,            ///< @code{.cpp} ${parameter:+word} @endcode
+    _ef_parameter_colon_offset,               ///< @code{.cpp} ${parameter:offset} @endcode
+    _ef_parameter_colon_offset_colon_length,  ///< @code{.cpp} ${parameter:offset:length} @endcode
+    _ef_parameter_sharp_word,                 ///< @code{.cpp} ${parameter#word} @endcode
+    _ef_parameter_sharp_sharp_word,           ///< @code{.cpp} ${parameter##word} @endcode
+    _ef_parameter_percent_word,               ///< @code{.cpp} ${parameter%word} @endcode
+    _ef_parameter_percent_percent_word,       ///< @code{.cpp} ${parameter%%word} @endcode
+    _ef_parameter_slash_pattern_slash_string, ///< @code{.cpp} ${parameter/pattern/string} @endcode
+    _ef_parameter_carat_pattern,              ///< @code{.cpp} ${parameter^pattern} @endcode
+    _ef_parameter_carat_carat_pattern,        ///< @code{.cpp} ${parameter^^pattern} @endcode
+    _ef_parameter_comma_pattern,              ///< @code{.cpp} ${parameter,pattern} @endcode
+    _ef_parameter_comma_comma_pattern,        ///< @code{.cpp} ${parameter,,pattern} @endcode
+    _ef_parameter_at_operator_Q,              ///< @code{.cpp} ${parameter@Q} @endcode
+    _ef_parameter_at_operator_E,              ///< @code{.cpp} ${parameter@E} @endcode
+    _ef_parameter_at_operator_P,              ///< @code{.cpp} ${parameter@P} @endcode
+    _ef_parameter_at_operator_A,              ///< @code{.cpp} ${parameter@A} @endcode
+    _ef_parameter_at_operator_a,              ///< @code{.cpp} ${parameter@a} @endcode
+    // tea-bag only, extra state:
+    _ef_parameter_at_operator_a_slash,        ///< @code{.cpp} ${parameter@/path} @endcode
 };
 // clang-format on
 
