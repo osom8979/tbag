@@ -504,31 +504,43 @@ std::vector<ui32> Box::diffs() const
     return diffs(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u));
 }
 
+Err Box::sliceTo(Box & result, box_slice const * slice_begin, box_slice const * slice_end) const
+{
+    if (!exists()) {
+        return E_EXPIRED;
+    }
+    auto const sliced_dims = diffs(slice_begin, slice_end);
+    auto const resize_code = result._resize_dims(type(), device(), ext(), sliced_dims.size(), sliced_dims.data());
+    if (isFailure(resize_code)) {
+        return resize_code;
+    }
+    ui32 offset = 0;
+    return forEach(slice_begin, slice_end, [&](void const * elem){
+        result.base()->set_data(elem, type(), device(), ext(), offset);
+        ++offset;
+    });
+}
+
+Err Box::sliceTo(Box & result, box_slice const * slices, std::size_t size) const
+{
+    return sliceTo(result, slices, slices + size);
+}
+
+Err Box::sliceTo(Box & result, std::vector<box_slice> const & slices) const
+{
+    return sliceTo(result, slices.data(), slices.size());
+}
+
 Box Box::slice(box_slice const * slice_begin, box_slice const * slice_end) const
 {
     if (!exists()) {
         return Box(nullptr);
     }
-    auto const dims = diffs(slice_begin, slice_end);
     Box result;
-    auto const resize_code = result._resize_dims(type(), device(), ext(), dims.size(), dims.data());
-    if (isFailure(resize_code)) {
+    auto const code = sliceTo(result, slice_begin, slice_end);
+    if (isFailure(code)) {
         return Box(nullptr);
     }
-    ui32 offset = 0;
-    auto const copy_code = forEach(slice_begin, slice_end, [&](void const * elem){
-        result.base()->set_data(elem, type(), device(), ext(), offset);
-        ++offset;
-    });
-    if (isFailure(copy_code)) {
-        return Box(nullptr);
-    }
-    assert(result.exists());
-    if (info_size() >= 1) {
-        result.setInfo(info(), info_size());
-    }
-    result.setOpaque(getOpaque<box_any>());
-    result.setOpaqueDeleter(getOpaqueDeleter());
     return result;
 }
 

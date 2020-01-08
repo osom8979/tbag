@@ -77,6 +77,42 @@ public:
     using ErrMsgBox = libtbag::ErrMsgPair<Box>;
 
 public:
+    using si8   = libtbag::box::si8;
+    using si16  = libtbag::box::si16;
+    using si32  = libtbag::box::si32;
+    using si64  = libtbag::box::si64;
+
+    using ui8   = libtbag::box::ui8;
+    using ui16  = libtbag::box::ui16;
+    using ui32  = libtbag::box::ui32;
+    using ui64  = libtbag::box::ui64;
+
+    using fp32  = libtbag::box::fp32;
+    using fp64  = libtbag::box::fp64;
+
+public:
+    TBAG_CONSTEXPR static int const nop = libtbag::box::nop;
+
+public:
+    TBAG_CONSTEXPR static btype const type_none() TBAG_NOEXCEPT { return libtbag::box::type_none(); }
+    TBAG_CONSTEXPR static btype const type_bool() TBAG_NOEXCEPT { return libtbag::box::type_bool(); }
+    TBAG_CONSTEXPR static btype const type_si8 () TBAG_NOEXCEPT { return libtbag::box::type_si8 (); }
+    TBAG_CONSTEXPR static btype const type_si16() TBAG_NOEXCEPT { return libtbag::box::type_si16(); }
+    TBAG_CONSTEXPR static btype const type_si32() TBAG_NOEXCEPT { return libtbag::box::type_si32(); }
+    TBAG_CONSTEXPR static btype const type_si64() TBAG_NOEXCEPT { return libtbag::box::type_si64(); }
+    TBAG_CONSTEXPR static btype const type_ui8 () TBAG_NOEXCEPT { return libtbag::box::type_ui8 (); }
+    TBAG_CONSTEXPR static btype const type_ui16() TBAG_NOEXCEPT { return libtbag::box::type_ui16(); }
+    TBAG_CONSTEXPR static btype const type_ui32() TBAG_NOEXCEPT { return libtbag::box::type_ui32(); }
+    TBAG_CONSTEXPR static btype const type_ui64() TBAG_NOEXCEPT { return libtbag::box::type_ui64(); }
+    TBAG_CONSTEXPR static btype const type_fp32() TBAG_NOEXCEPT { return libtbag::box::type_fp32(); }
+    TBAG_CONSTEXPR static btype const type_fp64() TBAG_NOEXCEPT { return libtbag::box::type_fp64(); }
+
+    TBAG_CONSTEXPR static bdev const device_none() TBAG_NOEXCEPT { return libtbag::box::device_none(); }
+    TBAG_CONSTEXPR static bdev const device_cpu () TBAG_NOEXCEPT { return libtbag::box::device_cpu (); }
+    TBAG_CONSTEXPR static bdev const device_cuda() TBAG_NOEXCEPT { return libtbag::box::device_cuda(); }
+    TBAG_CONSTEXPR static bdev const device_cl  () TBAG_NOEXCEPT { return libtbag::box::device_cl  (); }
+
+public:
     Box();
     explicit Box(std::nullptr_t) TBAG_NOEXCEPT;
     explicit Box(box_data && data) TBAG_NOEXCEPT;
@@ -717,6 +753,10 @@ public:
     std::vector<ui32> diffs(box_slice const * slices, std::size_t size) const;
     std::vector<ui32> diffs(std::vector<box_slice> const & slices) const;
     std::vector<ui32> diffs() const;
+
+    Err sliceTo(Box & result, box_slice const * slice_begin, box_slice const * slice_end) const;
+    Err sliceTo(Box & result, box_slice const * slices, std::size_t size) const;
+    Err sliceTo(Box & result, std::vector<box_slice> const & slices) const;
 
     Box slice(box_slice const * slice_begin, box_slice const * slice_end) const;
     Box slice(box_slice const * slices, std::size_t size) const;
