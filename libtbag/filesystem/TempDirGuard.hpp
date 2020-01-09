@@ -50,6 +50,7 @@ private:
     Path _temp_dir;
 
 public:
+    TempDirGuard();
     TempDirGuard(std::string const & case_name,
                  std::string const & name,
                  std::string const & prefix,
@@ -60,6 +61,18 @@ public:
                  bool auto_create = true,
                  bool auto_remove = true);
     ~TempDirGuard();
+
+public:
+    void init(std::string const & case_name,
+              std::string const & name,
+              std::string const & prefix,
+              bool auto_create = true,
+              bool auto_remove = true);
+    void init(std::string const & case_name,
+              std::string const & name,
+              bool auto_create = true,
+              bool auto_remove = true);
+    void release();
 
 public:
     inline Path getDir() const { return _temp_dir; }

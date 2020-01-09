@@ -237,7 +237,7 @@ Err parameterExpansion(std::string const & variable, Flags const & flags, std::s
             case 'a': format = _ef_parameter_at_operator_a; break;
             case '/':
                 state = expansion_state_enable_at_slash;
-                format = _ef_parameter_at_operator_a_slash; break;
+                break;
             default:
                 return E_PARSING;
             }
