@@ -542,25 +542,5 @@ inline bool isFailure(libtbag::Err err) TBAG_NOEXCEPT
     return !isSuccess(err);
 }
 
-inline bool isSuccessAnyway(libtbag::Err err) TBAG_NOEXCEPT
-{
-    // clang-format off
-    switch (err) {
-    case libtbag::E_SUCCESS:  return true;
-    case libtbag::E_WARNING:  return true;
-    case libtbag::E_RETRY:    return true;
-    case libtbag::E_CONTINUE: return true;
-    case libtbag::E_ASYNCREQ: return true;
-    case libtbag::E_ENQASYNC: return true;
-    default:                  return false;
-    }
-    // clang-format on
-}
-
-inline bool isFailureAnyway(libtbag::Err err) TBAG_NOEXCEPT
-{
-    return !isSuccessAnyway(err);
-}
-
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_ERR_HPP__
 
