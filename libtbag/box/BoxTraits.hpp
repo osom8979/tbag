@@ -42,6 +42,9 @@ using ui64  = libtbag::box::details::ui64;
 using fp32  = libtbag::box::details::fp32;
 using fp64  = libtbag::box::details::fp64;
 
+using c64  = libtbag::box::details::c64;
+using c128 = libtbag::box::details::c128;
+
 using btype = libtbag::box::details::btype;
 using bdev  = libtbag::box::details::bdev;
 
@@ -61,33 +64,22 @@ using box_opaque_delete_cb = libtbag::box::details::box_opaque_delete_cb;
 enum class BoxTypeTable : libtbag::box::details::btype
 {
     // clang-format off
-    BTT_NONE    = libtbag::box::details::BT_NONE   ,
-    BTT_BOOL    = libtbag::box::details::BT_BOOL   ,
-    BTT_INT8    = libtbag::box::details::BT_INT8   ,
-    BTT_INT16   = libtbag::box::details::BT_INT16  ,
-    BTT_INT32   = libtbag::box::details::BT_INT32  ,
-    BTT_INT64   = libtbag::box::details::BT_INT64  ,
-    BTT_UINT8   = libtbag::box::details::BT_UINT8  ,
-    BTT_UINT16  = libtbag::box::details::BT_UINT16 ,
-    BTT_UINT32  = libtbag::box::details::BT_UINT32 ,
-    BTT_UINT64  = libtbag::box::details::BT_UINT64 ,
-    BTT_FLOAT32 = libtbag::box::details::BT_FLOAT32,
-    BTT_FLOAT64 = libtbag::box::details::BT_FLOAT64,
+    BTT_NONE       = libtbag::box::details::BT_NONE      ,
+    BTT_BOOL       = libtbag::box::details::BT_BOOL      ,
+    BTT_INT8       = libtbag::box::details::BT_INT8      ,
+    BTT_INT16      = libtbag::box::details::BT_INT16     ,
+    BTT_INT32      = libtbag::box::details::BT_INT32     ,
+    BTT_INT64      = libtbag::box::details::BT_INT64     ,
+    BTT_UINT8      = libtbag::box::details::BT_UINT8     ,
+    BTT_UINT16     = libtbag::box::details::BT_UINT16    ,
+    BTT_UINT32     = libtbag::box::details::BT_UINT32    ,
+    BTT_UINT64     = libtbag::box::details::BT_UINT64    ,
+    BTT_FLOAT32    = libtbag::box::details::BT_FLOAT32   ,
+    BTT_FLOAT64    = libtbag::box::details::BT_FLOAT64   ,
+    BTT_COMPLEX64  = libtbag::box::details::BT_COMPLEX64 ,
+    BTT_COMPLEX128 = libtbag::box::details::BT_COMPLEX128,
     // clang-format on
 };
-
-// clang-format off
-using si8   = libtbag::box::details::si8;
-using si16  = libtbag::box::details::si16;
-using si32  = libtbag::box::details::si32;
-using si64  = libtbag::box::details::si64;
-using ui8   = libtbag::box::details::ui8;
-using ui16  = libtbag::box::details::ui16;
-using ui32  = libtbag::box::details::ui32;
-using ui64  = libtbag::box::details::ui64;
-using fp32  = libtbag::box::details::fp32;
-using fp64  = libtbag::box::details::fp64;
-// clang-format on
 
 template <typename T, BoxTypeTable box_type>
 struct BoxInfo
@@ -117,75 +109,91 @@ struct BoxInfo<void, BoxTypeTable::BTT_NONE>
 };
 
 // clang-format off
-template <typename T> struct BoxTypeInfo : public BoxInfo<T, BoxTypeTable::BTT_NONE  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<bool> : public BoxInfo<bool, BoxTypeTable::BTT_BOOL   > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si8 > : public BoxInfo<si8 , BoxTypeTable::BTT_INT8   > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si16> : public BoxInfo<si16, BoxTypeTable::BTT_INT16  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si32> : public BoxInfo<si32, BoxTypeTable::BTT_INT32  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si64> : public BoxInfo<si64, BoxTypeTable::BTT_INT64  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui8 > : public BoxInfo<ui8 , BoxTypeTable::BTT_UINT8  > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui16> : public BoxInfo<ui16, BoxTypeTable::BTT_UINT16 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui32> : public BoxInfo<ui32, BoxTypeTable::BTT_UINT32 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui64> : public BoxInfo<ui64, BoxTypeTable::BTT_UINT64 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<fp32> : public BoxInfo<fp32, BoxTypeTable::BTT_FLOAT32> { /* EMPTY. */ };
-template <> struct BoxTypeInfo<fp64> : public BoxInfo<fp64, BoxTypeTable::BTT_FLOAT64> { /* EMPTY. */ };
+template <typename T> struct BoxTypeInfo : public BoxInfo<T, BoxTypeTable::BTT_NONE     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<bool> : public BoxInfo<bool, BoxTypeTable::BTT_BOOL      > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si8 > : public BoxInfo<si8 , BoxTypeTable::BTT_INT8      > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si16> : public BoxInfo<si16, BoxTypeTable::BTT_INT16     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si32> : public BoxInfo<si32, BoxTypeTable::BTT_INT32     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si64> : public BoxInfo<si64, BoxTypeTable::BTT_INT64     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui8 > : public BoxInfo<ui8 , BoxTypeTable::BTT_UINT8     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui16> : public BoxInfo<ui16, BoxTypeTable::BTT_UINT16    > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui32> : public BoxInfo<ui32, BoxTypeTable::BTT_UINT32    > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui64> : public BoxInfo<ui64, BoxTypeTable::BTT_UINT64    > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<fp32> : public BoxInfo<fp32, BoxTypeTable::BTT_FLOAT32   > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<fp64> : public BoxInfo<fp64, BoxTypeTable::BTT_FLOAT64   > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<c64 > : public BoxInfo<c64 , BoxTypeTable::BTT_COMPLEX64 > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<c128> : public BoxInfo<c128, BoxTypeTable::BTT_COMPLEX128> { /* EMPTY. */ };
 // clang-format on
 
 // clang-format off
-template <BoxTypeTable egg_type> struct BoxEnumInfo       : public BoxInfo<void, BoxTypeTable::BTT_NONE   > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_BOOL   > : public BoxInfo<bool, BoxTypeTable::BTT_BOOL   > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT8   > : public BoxInfo<si8 , BoxTypeTable::BTT_INT8   > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT16  > : public BoxInfo<si16, BoxTypeTable::BTT_INT16  > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT32  > : public BoxInfo<si32, BoxTypeTable::BTT_INT32  > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT64  > : public BoxInfo<si64, BoxTypeTable::BTT_INT64  > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT8  > : public BoxInfo<ui8 , BoxTypeTable::BTT_UINT8  > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT16 > : public BoxInfo<ui16, BoxTypeTable::BTT_UINT16 > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT32 > : public BoxInfo<ui32, BoxTypeTable::BTT_UINT32 > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT64 > : public BoxInfo<ui64, BoxTypeTable::BTT_UINT64 > { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_FLOAT32> : public BoxInfo<fp32, BoxTypeTable::BTT_FLOAT32> { /* EMPTY. */ };
-template <> struct BoxEnumInfo<BoxTypeTable::BTT_FLOAT64> : public BoxInfo<fp64, BoxTypeTable::BTT_FLOAT64> { /* EMPTY. */ };
+template <BoxTypeTable egg_type> struct BoxEnumInfo          : public BoxInfo<void, BoxTypeTable::BTT_NONE      > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_BOOL      > : public BoxInfo<bool, BoxTypeTable::BTT_BOOL      > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT8      > : public BoxInfo<si8 , BoxTypeTable::BTT_INT8      > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT16     > : public BoxInfo<si16, BoxTypeTable::BTT_INT16     > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT32     > : public BoxInfo<si32, BoxTypeTable::BTT_INT32     > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_INT64     > : public BoxInfo<si64, BoxTypeTable::BTT_INT64     > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT8     > : public BoxInfo<ui8 , BoxTypeTable::BTT_UINT8     > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT16    > : public BoxInfo<ui16, BoxTypeTable::BTT_UINT16    > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT32    > : public BoxInfo<ui32, BoxTypeTable::BTT_UINT32    > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_UINT64    > : public BoxInfo<ui64, BoxTypeTable::BTT_UINT64    > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_FLOAT32   > : public BoxInfo<fp32, BoxTypeTable::BTT_FLOAT32   > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_FLOAT64   > : public BoxInfo<fp64, BoxTypeTable::BTT_FLOAT64   > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_COMPLEX64 > : public BoxInfo<c64 , BoxTypeTable::BTT_COMPLEX64 > { /* EMPTY. */ };
+template <> struct BoxEnumInfo<BoxTypeTable::BTT_COMPLEX128> : public BoxInfo<c128, BoxTypeTable::BTT_COMPLEX128> { /* EMPTY. */ };
 // clang-format on
 
 // clang-format off
-static_assert(BoxTypeInfo<void>::size == 0, "void size is not correct.");
-static_assert(BoxTypeInfo<si8 >::size == 1,  "si8 size is not correct.");
-static_assert(BoxTypeInfo<si16>::size == 2, "si16 size is not correct.");
-static_assert(BoxTypeInfo<si32>::size == 4, "si32 size is not correct.");
-static_assert(BoxTypeInfo<si64>::size == 8, "si64 size is not correct.");
-static_assert(BoxTypeInfo<ui8 >::size == 1,  "ui8 size is not correct.");
-static_assert(BoxTypeInfo<ui16>::size == 2, "ui16 size is not correct.");
-static_assert(BoxTypeInfo<ui32>::size == 4, "ui32 size is not correct.");
-static_assert(BoxTypeInfo<ui64>::size == 8, "ui64 size is not correct.");
-static_assert(BoxTypeInfo<fp32>::size == 4, "fp32 size is not correct.");
-static_assert(BoxTypeInfo<fp64>::size == 8, "fp64 size is not correct.");
+static_assert(BoxTypeInfo<void>::size ==  0, "void size is not correct.");
+static_assert(BoxTypeInfo<si8 >::size ==  1,  "si8 size is not correct.");
+static_assert(BoxTypeInfo<si16>::size ==  2, "si16 size is not correct.");
+static_assert(BoxTypeInfo<si32>::size ==  4, "si32 size is not correct.");
+static_assert(BoxTypeInfo<si64>::size ==  8, "si64 size is not correct.");
+static_assert(BoxTypeInfo<ui8 >::size ==  1,  "ui8 size is not correct.");
+static_assert(BoxTypeInfo<ui16>::size ==  2, "ui16 size is not correct.");
+static_assert(BoxTypeInfo<ui32>::size ==  4, "ui32 size is not correct.");
+static_assert(BoxTypeInfo<ui64>::size ==  8, "ui64 size is not correct.");
+static_assert(BoxTypeInfo<fp32>::size ==  4, "fp32 size is not correct.");
+static_assert(BoxTypeInfo<fp64>::size ==  8, "fp64 size is not correct.");
+static_assert(BoxTypeInfo<c64 >::size ==  8,  "c64 size is not correct.");
+static_assert(BoxTypeInfo<c128>::size == 16, "c128 size is not correct.");
 // clang-format on
 
 template <typename T>
 struct is_supported_egg : public BoxTypeInfo<T>
 { /* EMPTY. */ };
 
-template <typename T, bool is_unsigned, std::size_t size, bool is_floating>
+template <typename T, bool is_unsigned, std::size_t size, bool is_floating, bool is_complex>
 struct __make_egg_type : public BoxTypeInfo<void>
 { /* EMPTY. */ };
 
 // clang-format off
-template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 4, true> : public BoxTypeInfo<float>  { /* EMPTY. */ };
-template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 8, true> : public BoxTypeInfo<double> { /* EMPTY. */ };
+template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 4, true, false> : public BoxTypeInfo<float>  { /* EMPTY. */ };
+template <typename T, bool is_unsigned> struct __make_egg_type<T, is_unsigned, 8, true, false> : public BoxTypeInfo<double> { /* EMPTY. */ };
 // clang-format on
 
 // clang-format off
-template <typename T> struct __make_egg_type<T, false, 1, false> : public BoxTypeInfo<  int8_t> { /* EMPTY. */ };
-template <typename T> struct __make_egg_type<T,  true, 1, false> : public BoxTypeInfo< uint8_t> { /* EMPTY. */ };
-template <typename T> struct __make_egg_type<T, false, 2, false> : public BoxTypeInfo< int16_t> { /* EMPTY. */ };
-template <typename T> struct __make_egg_type<T,  true, 2, false> : public BoxTypeInfo<uint16_t> { /* EMPTY. */ };
-template <typename T> struct __make_egg_type<T, false, 4, false> : public BoxTypeInfo< int32_t> { /* EMPTY. */ };
-template <typename T> struct __make_egg_type<T,  true, 4, false> : public BoxTypeInfo<uint32_t> { /* EMPTY. */ };
-template <typename T> struct __make_egg_type<T, false, 8, false> : public BoxTypeInfo< int64_t> { /* EMPTY. */ };
-template <typename T> struct __make_egg_type<T,  true, 8, false> : public BoxTypeInfo<uint64_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 1, false, false> : public BoxTypeInfo<  int8_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 1, false, false> : public BoxTypeInfo< uint8_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 2, false, false> : public BoxTypeInfo< int16_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 2, false, false> : public BoxTypeInfo<uint16_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 4, false, false> : public BoxTypeInfo< int32_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 4, false, false> : public BoxTypeInfo<uint32_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 8, false, false> : public BoxTypeInfo< int64_t> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T,  true, 8, false, false> : public BoxTypeInfo<uint64_t> { /* EMPTY. */ };
+// clang-format on
+
+// clang-format off
+template <typename T> struct __make_egg_type<T, false, 8, false, true> : public BoxTypeInfo<c64> { /* EMPTY. */ };
+template <typename T> struct __make_egg_type<T, false, 16, false, true> : public BoxTypeInfo<c128> { /* EMPTY. */ };
 // clang-format on
 
 template <typename T>
-struct make_egg_type : public __make_egg_type<T, std::is_unsigned<T>::value, sizeof(T), std::is_floating_point<T>::value>
+struct make_egg_type : public __make_egg_type<
+        T,
+        std::is_unsigned<T>::value,
+        sizeof(T),
+        std::is_floating_point<T>::value,
+        is_complex<T>::value>
 {
     using original_type = T;
 };
@@ -241,8 +249,9 @@ TBAG_CONSTEXPR btype const type_ui32() TBAG_NOEXCEPT { return get_btype<ui32>();
 TBAG_CONSTEXPR btype const type_ui64() TBAG_NOEXCEPT { return get_btype<ui64>(); }
 TBAG_CONSTEXPR btype const type_fp32() TBAG_NOEXCEPT { return get_btype<fp32>(); }
 TBAG_CONSTEXPR btype const type_fp64() TBAG_NOEXCEPT { return get_btype<fp64>(); }
+TBAG_CONSTEXPR btype const type_c64 () TBAG_NOEXCEPT { return get_btype<c64 >(); }
+TBAG_CONSTEXPR btype const type_c128() TBAG_NOEXCEPT { return get_btype<c128>(); }
 
-TBAG_CONSTEXPR bdev const device_none() TBAG_NOEXCEPT { return libtbag::box::details::BD_NONE; }
 TBAG_CONSTEXPR bdev const device_cpu () TBAG_NOEXCEPT { return libtbag::box::details::BD_CPU ; }
 TBAG_CONSTEXPR bdev const device_cuda() TBAG_NOEXCEPT { return libtbag::box::details::BD_CUDA; }
 TBAG_CONSTEXPR bdev const device_cl  () TBAG_NOEXCEPT { return libtbag::box::details::BD_CL  ; }

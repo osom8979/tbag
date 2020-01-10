@@ -105,6 +105,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_MISMATCH                             , 10068, "The data does not match"                                 )\
     _TBAG_XX(_SKIP                                 , 10069, "Skip error"                                              )\
     _TBAG_XX(_SHAPE                                , 10070, "Shape error"                                             )\
+    _TBAG_XX(_DEVICE                               , 10071, "Device error"                                             )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\

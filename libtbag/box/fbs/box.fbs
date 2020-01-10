@@ -2,44 +2,58 @@
 
 namespace libtbag.box.fbs;
 
-table   BoolArr { arr : [bool]  ; }
-table   ByteArr { arr : [byte]  ; }
-table  ShortArr { arr : [short] ; }
-table    IntArr { arr : [int]   ; }
-table   LongArr { arr : [long]  ; }
-table  UbyteArr { arr : [ubyte] ; }
-table UshortArr { arr : [ushort]; }
-table   UintArr { arr : [uint]  ; }
-table  UlongArr { arr : [ulong] ; }
-table  FloatArr { arr : [float] ; }
-table DoubleArr { arr : [double]; }
+struct Complex64
+{
+    real: float;
+    imag: float;
+}
+
+struct Complex128
+{
+    real: double;
+    imag: double;
+}
+
+table BoolArr       { arr: [bool];       }
+table ByteArr       { arr: [byte];       }
+table ShortArr      { arr: [short];      }
+table IntArr        { arr: [int];        }
+table LongArr       { arr: [long];       }
+table UbyteArr      { arr: [ubyte];      }
+table UshortArr     { arr: [ushort];     }
+table UintArr       { arr: [uint];       }
+table UlongArr      { arr: [ulong];      }
+table FloatArr      { arr: [float];      }
+table DoubleArr     { arr: [double];     }
+table Complex64Arr  { arr: [Complex64];  }
+table Complex128Arr { arr: [Complex128]; }
 
 union AnyArr
 {
-      BoolArr,
-      ByteArr,
-     ShortArr,
-       IntArr,
-      LongArr,
-     UbyteArr,
+    BoolArr,
+    ByteArr,
+    ShortArr,
+    IntArr,
+    LongArr,
+    UbyteArr,
     UshortArr,
-      UintArr,
-     UlongArr,
-     FloatArr,
+    UintArr,
+    UlongArr,
+    FloatArr,
     DoubleArr,
+    Complex64Arr,
+    Complex128Arr,
 }
 
 table BoxFbs
 {
-    type   : short;
-    device : short;
-    ext0   : long;
-    ext1   : long;
-    ext2   : long;
-    ext3   : long;
-    data   : AnyArr;
-    dims   : [uint];
-    info   : [ubyte];
+    ext0: long;
+    ext1: long;
+    ext2: long;
+    ext3: long;
+    data: AnyArr;
+    dims: [uint];
+    info: [ubyte];
 }
 
 root_type BoxFbs;

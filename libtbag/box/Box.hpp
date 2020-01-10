@@ -90,6 +90,9 @@ public:
     using fp32  = libtbag::box::fp32;
     using fp64  = libtbag::box::fp64;
 
+    using c64  = libtbag::box::c64;
+    using c128 = libtbag::box::c128;
+
 public:
     TBAG_CONSTEXPR static int const nop = libtbag::box::nop;
 
@@ -106,8 +109,9 @@ public:
     TBAG_CONSTEXPR static btype const type_ui64() TBAG_NOEXCEPT { return libtbag::box::type_ui64(); }
     TBAG_CONSTEXPR static btype const type_fp32() TBAG_NOEXCEPT { return libtbag::box::type_fp32(); }
     TBAG_CONSTEXPR static btype const type_fp64() TBAG_NOEXCEPT { return libtbag::box::type_fp64(); }
+    TBAG_CONSTEXPR static btype const type_c64 () TBAG_NOEXCEPT { return libtbag::box::type_c64 (); }
+    TBAG_CONSTEXPR static btype const type_c128() TBAG_NOEXCEPT { return libtbag::box::type_c128(); }
 
-    TBAG_CONSTEXPR static bdev const device_none() TBAG_NOEXCEPT { return libtbag::box::device_none(); }
     TBAG_CONSTEXPR static bdev const device_cpu () TBAG_NOEXCEPT { return libtbag::box::device_cpu (); }
     TBAG_CONSTEXPR static bdev const device_cuda() TBAG_NOEXCEPT { return libtbag::box::device_cuda(); }
     TBAG_CONSTEXPR static bdev const device_cl  () TBAG_NOEXCEPT { return libtbag::box::device_cl  (); }
@@ -539,7 +543,7 @@ private:
         if (!exists()) {
             return E_EXPIRED;
         }
-        auto const shape_device = is_device_none() ? device_cpu() : device();
+        auto const shape_device = device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return _base->get_data_args((void*)out, get_btype<T>(), shape_device, shape_ext,
                                     static_cast<ui32>(sizeof...(Args)),
@@ -562,7 +566,7 @@ private:
         if (!exists()) {
             return E_EXPIRED;
         }
-        auto const shape_device = is_device_none() ? device_cpu() : device();
+        auto const shape_device = device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return _base->get_data_dims((void*)out, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
     }
@@ -616,7 +620,7 @@ private:
         if (!exists()) {
             return E_EXPIRED;
         }
-        auto const shape_device = is_device_none() ? device_cpu() : device();
+        auto const shape_device = device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return _base->set_data_args((void const *)src, get_btype<T>(), shape_device, shape_ext,
                                     static_cast<ui32>(sizeof...(Args)),
@@ -652,7 +656,7 @@ private:
         if (!exists()) {
             return E_EXPIRED;
         }
-        auto const shape_device = is_device_none() ? device_cpu() : device();
+        auto const shape_device = device();
         ui64 const shape_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return _base->set_data_dims((void const *)src, get_btype<T>(), shape_device, shape_ext, index_rank, index_dims);
     }
@@ -783,7 +787,7 @@ public:
     template <typename T>
     Err fill(T const * value)
     {
-        auto const src_device = is_device_none() ? device_cpu() : device();
+        auto const src_device = device();
         ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return fill(value, src_device, src_ext);
     }
@@ -891,7 +895,7 @@ public:
     template <typename RangeT, typename EngineT = std::mt19937>
     Err rand(RangeT range, EngineT engine)
     {
-        auto const src_device = is_device_none() ? device_cpu() : device();
+        auto const src_device = device();
         ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return rand(range, engine, src_device, src_ext);
     }
@@ -912,7 +916,7 @@ public:
     template <typename T>
     Err rand(T start, T end)
     {
-        auto const src_device = is_device_none() ? device_cpu() : device();
+        auto const src_device = device();
         ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return rand(start, end, src_device, src_ext);
     }
@@ -991,7 +995,7 @@ public:
     template <typename T>
     ErrBox lt(T const * v) const
     {
-        auto const val_device = is_device_none() ? device_cpu() : device();
+        auto const val_device = device();
         ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return lt(val_device, val_ext, v);
     }
@@ -999,7 +1003,7 @@ public:
     template <typename T>
     ErrBox le(T const * v) const
     {
-        auto const val_device = is_device_none() ? device_cpu() : device();
+        auto const val_device = device();
         ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return le(val_device, val_ext, v);
     }
@@ -1007,7 +1011,7 @@ public:
     template <typename T>
     ErrBox gt(T const * v) const
     {
-        auto const val_device = is_device_none() ? device_cpu() : device();
+        auto const val_device = device();
         ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return gt(val_device, val_ext, v);
     }
@@ -1015,7 +1019,7 @@ public:
     template <typename T>
     ErrBox ge(T const * v) const
     {
-        auto const val_device = is_device_none() ? device_cpu() : device();
+        auto const val_device = device();
         ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return ge(val_device, val_ext, v);
     }
@@ -1023,7 +1027,7 @@ public:
     template <typename T>
     ErrBox eq(T const * v) const
     {
-        auto const val_device = is_device_none() ? device_cpu() : device();
+        auto const val_device = device();
         ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return eq(val_device, val_ext, v);
     }
@@ -1031,7 +1035,7 @@ public:
     template <typename T>
     ErrBox ne(T const * v) const
     {
-        auto const val_device = is_device_none() ? device_cpu() : device();
+        auto const val_device = device();
         ui64 const val_ext[TBAG_BOX_EXT_SIZE] = { ext0(), ext1(), ext2(), ext3() };
         return ne(val_device, val_ext, v);
     }

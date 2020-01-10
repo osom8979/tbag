@@ -119,6 +119,8 @@ public:
     inline bool is_ui64() const TBAG_NOEXCEPT { return getType() == type_ui64(); }
     inline bool is_fp32() const TBAG_NOEXCEPT { return getType() == type_fp32(); }
     inline bool is_fp64() const TBAG_NOEXCEPT { return getType() == type_fp64(); }
+    inline bool is_c64 () const TBAG_NOEXCEPT { return getType() == type_c64 (); }
+    inline bool is_c128() const TBAG_NOEXCEPT { return getType() == type_c128(); }
     // clang-format on
 
     inline bool is_signed() const TBAG_NOEXCEPT
@@ -136,13 +138,18 @@ public:
         return is_fp32() || is_fp64();
     }
 
+    inline bool is_complex() const TBAG_NOEXCEPT
+    {
+        return is_c64() || is_c128();
+    }
+
 public:
     inline btype getDevice() const TBAG_NOEXCEPT
     {
         if (_base) {
             return _base->device;
         }
-        return device_none();
+        return device_cpu();
     }
 
     inline btype device() const TBAG_NOEXCEPT
@@ -162,7 +169,6 @@ public:
     }
 
     // clang-format off
-    inline bool is_device_none() const TBAG_NOEXCEPT { return getDevice() == device_none(); }
     inline bool is_device_cpu () const TBAG_NOEXCEPT { return getDevice() == device_cpu (); }
     inline bool is_device_cuda() const TBAG_NOEXCEPT { return getDevice() == device_cuda(); }
     inline bool is_device_cl  () const TBAG_NOEXCEPT { return getDevice() == device_cl  (); }

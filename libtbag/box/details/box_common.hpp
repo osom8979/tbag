@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Type.hpp>
 #include <libtbag/type/TypeTable.hpp>
 
 #include <cstdint>
@@ -61,10 +62,9 @@ namespace details {
 #define TBAG_BOX_TYPE_COMPLEX64   0x0640
 #define TBAG_BOX_TYPE_COMPLEX128  0x0680
 
-#define TBAG_BOX_DEVICE_NONE  0
-#define TBAG_BOX_DEVICE_CPU   1
-#define TBAG_BOX_DEVICE_CUDA  2
-#define TBAG_BOX_DEVICE_CL    3
+#define TBAG_BOX_DEVICE_CPU   0
+#define TBAG_BOX_DEVICE_CUDA  1
+#define TBAG_BOX_DEVICE_CL    2
 
 #define TBAG_BOX_EXT_SIZE 4
 #define TBAG_BOX_TEMP_DIM_STACK_SIZE 16
@@ -100,7 +100,6 @@ enum BoxType
 
 enum BoxDevice
 {
-    BD_NONE = TBAG_BOX_DEVICE_NONE,
     BD_CPU  = TBAG_BOX_DEVICE_CPU,
     BD_CUDA = TBAG_BOX_DEVICE_CUDA,
     BD_CL   = TBAG_BOX_DEVICE_CL,

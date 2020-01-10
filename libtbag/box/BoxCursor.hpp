@@ -131,7 +131,7 @@ public:
     {
         using namespace libtbag::box::details;
         assert(_cursor.box != nullptr);
-        auto const out_device = _cursor.box->device == BD_NONE ? BD_CPU : _cursor.box->device;
+        auto const out_device = _cursor.box->device;
         ui64 const out_ext[TBAG_BOX_EXT_SIZE] = { _cursor.box->ext[0], _cursor.box->ext[1],
                                                   _cursor.box->ext[2], _cursor.box->ext[3] };
         return _cursor.box->get_data(out, get_btype<T>(), out_device, out_ext, _cursor.begin);
@@ -172,7 +172,7 @@ public:
     {
         using namespace libtbag::box::details;
         assert(_cursor.box != nullptr);
-        auto const src_device = _cursor.box->device == BD_NONE ? BD_CPU : _cursor.box->device;
+        auto const src_device = _cursor.box->device;
         ui64 const src_ext[TBAG_BOX_EXT_SIZE] = { _cursor.box->ext[0], _cursor.box->ext[1],
                                                   _cursor.box->ext[2], _cursor.box->ext[3] };
         return _cursor.box->set_data(src, get_btype<T>(), src_device, src_ext, _cursor.begin);

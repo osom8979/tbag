@@ -75,19 +75,44 @@ inline static AnyArr convertBtypeToAnyArr(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BT_NONE   : return AnyArr_NONE;
-    case BT_BOOL   : return AnyArr_BoolArr;
-    case BT_INT8   : return AnyArr_ByteArr;
-    case BT_INT16  : return AnyArr_ShortArr;
-    case BT_INT32  : return AnyArr_IntArr;
-    case BT_INT64  : return AnyArr_LongArr;
-    case BT_UINT8  : return AnyArr_UbyteArr;
-    case BT_UINT16 : return AnyArr_UshortArr;
-    case BT_UINT32 : return AnyArr_UintArr;
-    case BT_UINT64 : return AnyArr_UlongArr;
-    case BT_FLOAT32: return AnyArr_FloatArr;
-    case BT_FLOAT64: return AnyArr_DoubleArr;
-    default:         return AnyArr_NONE;
+    case BT_NONE      : return AnyArr_NONE;
+    case BT_BOOL      : return AnyArr_BoolArr;
+    case BT_INT8      : return AnyArr_ByteArr;
+    case BT_INT16     : return AnyArr_ShortArr;
+    case BT_INT32     : return AnyArr_IntArr;
+    case BT_INT64     : return AnyArr_LongArr;
+    case BT_UINT8     : return AnyArr_UbyteArr;
+    case BT_UINT16    : return AnyArr_UshortArr;
+    case BT_UINT32    : return AnyArr_UintArr;
+    case BT_UINT64    : return AnyArr_UlongArr;
+    case BT_FLOAT32   : return AnyArr_FloatArr;
+    case BT_FLOAT64   : return AnyArr_DoubleArr;
+    case BT_COMPLEX64 : return AnyArr_Complex64Arr;
+    case BT_COMPLEX128: return AnyArr_Complex128Arr;
+    default           : return AnyArr_NONE;
+    }
+    // clang-format on
+}
+
+inline static btype convertAnyArrToBtype(AnyArr type) TBAG_NOEXCEPT
+{
+    // clang-format off
+    switch (type) {
+    case AnyArr_NONE         : return BT_NONE;
+    case AnyArr_BoolArr      : return BT_BOOL;
+    case AnyArr_ByteArr      : return BT_INT8;
+    case AnyArr_ShortArr     : return BT_INT16;
+    case AnyArr_IntArr       : return BT_INT32;
+    case AnyArr_LongArr      : return BT_INT64;
+    case AnyArr_UbyteArr     : return BT_UINT8;
+    case AnyArr_UshortArr    : return BT_UINT16;
+    case AnyArr_UintArr      : return BT_UINT32;
+    case AnyArr_UlongArr     : return BT_UINT64;
+    case AnyArr_FloatArr     : return BT_FLOAT32;
+    case AnyArr_DoubleArr    : return BT_FLOAT64;
+    case AnyArr_Complex64Arr : return BT_COMPLEX64;
+    case AnyArr_Complex128Arr: return BT_COMPLEX128;
+    default                  : return BT_NONE;
     }
     // clang-format on
 }
@@ -112,6 +137,8 @@ public:
 
 public:
     std::vector<std::uint8_t> boolean_buffer;
+    std::vector<Complex64> complex64_buffer;
+    std::vector<Complex128> complex128_buffer;
 
 public:
     Impl(std::size_t capacity) : Impl(Options(), capacity)
@@ -125,7 +152,6 @@ public:
             tDLogA("BoxPacketBuilder::Impl() Parse fail.");
             throw std::bad_alloc();
         }
-
         parser.opts.strict_json = options.strict_json;
         parser.opts.indent_step = options.indent_step;
     }
@@ -178,6 +204,9 @@ public:
         if (box == nullptr) {
             return E_EXPIRED;
         }
+        if (box->device != BD_CPU) {
+            return E_DEVICE;
+        }
 
         auto const ANY_TYPE = convertBtypeToAnyArr(box->type);
         clear();
@@ -185,10 +214,21 @@ public:
         using namespace flatbuffers;
         Offset<void> box_data = 0;
         if (box->data != nullptr && box->size >= 1) {
-            if (ANY_TYPE == AnyArr_BoolArr) {
+            switch (ANY_TYPE) {
+            case AnyArr_NONE:
+                break;
+            case AnyArr_BoolArr:
                 box_data = createBoolArr(box->data, box->size);
-            } else if (ANY_TYPE != AnyArr_NONE) {
+                break;
+            case AnyArr_Complex64Arr:
+                box_data = createComplex64Arr((c64 const *)box->data, box->size);
+                break;
+            case AnyArr_Complex128Arr:
+                box_data = createComplex128Arr((c128 const *)box->data, box->size);
+                break;
+            default:
                 box_data = createAnyArr(ANY_TYPE, box->data, box->size);
+                break;
             }
         }
 
@@ -202,8 +242,7 @@ public:
             box_info = builder.CreateVector<uint8_t>(box->info, box->info_size);
         }
 
-        finish(CreateBoxFbs(builder, box->type, box->device,
-                            box->ext[0], box->ext[1], box->ext[2], box->ext[3],
+        finish(CreateBoxFbs(builder, box->ext[0], box->ext[1], box->ext[2], box->ext[3],
                             ANY_TYPE, box_data, box_dims, box_info));
         return E_SUCCESS;
     }
@@ -235,9 +274,30 @@ public:
         return createBoolArr(select_t{}, data, size);
     }
 
+    flatbuffers::Offset<void> createComplex64Arr(c64 const * data, ui32 size)
+    {
+        complex64_buffer.resize(size);
+        for (auto i = 0; i < size; ++i) {
+            complex64_buffer[i] = Complex64(data[i].real(), data[i].imag());
+        }
+        return CreateComplex64ArrDirect(builder, &complex64_buffer).Union();
+    }
+
+    flatbuffers::Offset<void> createComplex128Arr(c128 const * data, ui32 size)
+    {
+        complex128_buffer.resize(size);
+        for (auto i = 0; i < size; ++i) {
+            complex128_buffer[i] = Complex128(data[i].real(), data[i].imag());
+        }
+        return CreateComplex128ArrDirect(builder, &complex128_buffer).Union();
+    }
+
     flatbuffers::Offset<void> createAnyArr(AnyArr any_type, void const * data, ui32 size)
     {
+        assert(any_type != AnyArr_NONE);
         assert(any_type != AnyArr_BoolArr);
+        assert(any_type != AnyArr_Complex64Arr);
+        assert(any_type != AnyArr_Complex128Arr);
 
         // clang-format off
         switch (any_type) {
@@ -390,8 +450,6 @@ public:
             return std::make_pair(E_PARSING, computed_size);
         }
 
-        auto const type = packet->type();
-        auto const device = packet->device();
         auto const * dims = packet->dims();
 
         ui64 ext[TBAG_BOX_EXT_SIZE];
@@ -412,7 +470,7 @@ public:
             }
 
             if (total_dims >= 1) {
-                auto code = box->resize_dims(type, device, ext, dims_size, dims_data);
+                auto code = box->resize_dims(convertAnyArrToBtype(data_type), BD_CPU, ext, dims_size, dims_data);
                 if (isFailure(code)) {
                     return std::make_pair(code, computed_size);
                 }
@@ -421,17 +479,19 @@ public:
                 if (fbs_table != nullptr) {
                     // clang-format off
                     switch (data_type) {
-                    case AnyArr_BoolArr  : update_data((BoolArr   const *)fbs_table, (bool*)box->data); break;
-                    case AnyArr_ByteArr  : update_data((ByteArr   const *)fbs_table, (si8 *)box->data); break;
-                    case AnyArr_ShortArr : update_data((ShortArr  const *)fbs_table, (si16*)box->data); break;
-                    case AnyArr_IntArr   : update_data((IntArr    const *)fbs_table, (si32*)box->data); break;
-                    case AnyArr_LongArr  : update_data((LongArr   const *)fbs_table, (si64*)box->data); break;
-                    case AnyArr_UbyteArr : update_data((UbyteArr  const *)fbs_table, (ui8 *)box->data); break;
-                    case AnyArr_UshortArr: update_data((UshortArr const *)fbs_table, (ui16*)box->data); break;
-                    case AnyArr_UintArr  : update_data((UintArr   const *)fbs_table, (ui32*)box->data); break;
-                    case AnyArr_UlongArr : update_data((UlongArr  const *)fbs_table, (ui64*)box->data); break;
-                    case AnyArr_FloatArr : update_data((FloatArr  const *)fbs_table, (fp32*)box->data); break;
-                    case AnyArr_DoubleArr: update_data((DoubleArr const *)fbs_table, (fp64*)box->data); break;
+                    case AnyArr_BoolArr      : update_data((BoolArr       const *)fbs_table, (bool*)box->data); break;
+                    case AnyArr_ByteArr      : update_data((ByteArr       const *)fbs_table, (si8 *)box->data); break;
+                    case AnyArr_ShortArr     : update_data((ShortArr      const *)fbs_table, (si16*)box->data); break;
+                    case AnyArr_IntArr       : update_data((IntArr        const *)fbs_table, (si32*)box->data); break;
+                    case AnyArr_LongArr      : update_data((LongArr       const *)fbs_table, (si64*)box->data); break;
+                    case AnyArr_UbyteArr     : update_data((UbyteArr      const *)fbs_table, (ui8 *)box->data); break;
+                    case AnyArr_UshortArr    : update_data((UshortArr     const *)fbs_table, (ui16*)box->data); break;
+                    case AnyArr_UintArr      : update_data((UintArr       const *)fbs_table, (ui32*)box->data); break;
+                    case AnyArr_UlongArr     : update_data((UlongArr      const *)fbs_table, (ui64*)box->data); break;
+                    case AnyArr_FloatArr     : update_data((FloatArr      const *)fbs_table, (fp32*)box->data); break;
+                    case AnyArr_DoubleArr    : update_data((DoubleArr     const *)fbs_table, (fp64*)box->data); break;
+                    case AnyArr_Complex64Arr : update_data((Complex64Arr  const *)fbs_table, (c64 *)box->data); break;
+                    case AnyArr_Complex128Arr: update_data((Complex128Arr const *)fbs_table, (c128*)box->data); break;
                     case AnyArr_NONE:
                         break;
                     default:
@@ -442,8 +502,8 @@ public:
                     box->size = 0;
                 }
             } else {
-                box->type = type;
-                box->device = device;
+                box->type = BT_NONE;
+                box->device = BD_CPU;
                 box->ext[0] = ext[0];
                 box->ext[1] = ext[1];
                 box->ext[2] = ext[2];
@@ -452,8 +512,8 @@ public:
                 box->size = 0;
             }
         } else {
-            box->type = type;
-            box->device = device;
+            box->type = BT_NONE;
+            box->device = BD_CPU;
             box->ext[0] = ext[0];
             box->ext[1] = ext[1];
             box->ext[2] = ext[2];
@@ -488,6 +548,30 @@ public:
         auto const size = arr->size();
         for (std::size_t i = 0; i < size; ++i) {
             data[i] = arr->Get(i);
+        }
+    }
+
+    void update_data(Complex64Arr const * table, c64 * data) const
+    {
+        assert(table != nullptr);
+        auto * arr = table->arr();
+        assert(arr != nullptr);
+        auto const size = arr->size();
+        for (std::size_t i = 0; i < size; ++i) {
+            data[i].real(arr->Get(i)->real());
+            data[i].imag(arr->Get(i)->imag());
+        }
+    }
+
+    void update_data(Complex128Arr const * table, c128 * data) const
+    {
+        assert(table != nullptr);
+        auto * arr = table->arr();
+        assert(arr != nullptr);
+        auto const size = arr->size();
+        for (std::size_t i = 0; i < size; ++i) {
+            data[i].real(arr->Get(i)->real());
+            data[i].imag(arr->Get(i)->imag());
         }
     }
 };

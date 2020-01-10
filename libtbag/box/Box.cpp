@@ -146,11 +146,8 @@ Err Box::_resize_vargs(btype type, bdev device, ui64 const * ext, ui32 rank, va_
 Err Box::_resize_vargs(btype type, ui32 rank, va_list ap)
 {
     btype reshape_device = device_cpu();
-    ui64 reshape_ext[TBAG_BOX_EXT_SIZE] = {0, 0, 0, 0};
+    ui64 reshape_ext[TBAG_BOX_EXT_SIZE] = {0};
     if (exists()) {
-        if (!is_device_none()) {
-            reshape_device = device();
-        }
         reshape_ext[0] = ext0();
         reshape_ext[1] = ext1();
         reshape_ext[2] = ext2();
@@ -168,11 +165,8 @@ Err Box::_resize_dims(btype type, bdev device, ui64 const * ext, ui32 rank, ui32
 Err Box::_resize_dims(btype type, ui32 rank, ui32 const * dims)
 {
     btype reshape_device = device_cpu();
-    ui64 reshape_ext[TBAG_BOX_EXT_SIZE] = {0, 0, 0, 0};
+    ui64 reshape_ext[TBAG_BOX_EXT_SIZE] = {0};
     if (exists()) {
-        if (!is_device_none()) {
-            reshape_device = device();
-        }
         reshape_ext[0] = ext0();
         reshape_ext[1] = ext1();
         reshape_ext[2] = ext2();

@@ -62,19 +62,21 @@ bool box_support_type(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BT_NONE:    return false;
-    case BT_BOOL:    return true;
-    case BT_INT8:    return true;
-    case BT_INT16:   return true;
-    case BT_INT32:   return true;
-    case BT_INT64:   return true;
-    case BT_UINT8:   return true;
-    case BT_UINT16:  return true;
-    case BT_UINT32:  return true;
-    case BT_UINT64:  return true;
-    case BT_FLOAT32: return true;
-    case BT_FLOAT64: return true;
-    default:         return false;
+    case BT_NONE:       return false;
+    case BT_BOOL:       return true;
+    case BT_INT8:       return true;
+    case BT_INT16:      return true;
+    case BT_INT32:      return true;
+    case BT_INT64:      return true;
+    case BT_UINT8:      return true;
+    case BT_UINT16:     return true;
+    case BT_UINT32:     return true;
+    case BT_UINT64:     return true;
+    case BT_FLOAT32:    return true;
+    case BT_FLOAT64:    return true;
+    case BT_COMPLEX64:  return true;
+    case BT_COMPLEX128: return true;
+    default:            return false;
     }
     // clang-format on
 }
@@ -83,7 +85,6 @@ bool box_support_device(bdev dev) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (dev) {
-    case BD_NONE: return false;
     case BD_CPU:  return true;
     case BD_CUDA: return false;
     case BD_CL:   return false;
@@ -96,19 +97,21 @@ char const * box_get_type_name(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BT_NONE:    return "none";
-    case BT_BOOL:    return "bool";
-    case BT_INT8:    return "int8";
-    case BT_INT16:   return "int16";
-    case BT_INT32:   return "int32";
-    case BT_INT64:   return "int64";
-    case BT_UINT8:   return "uint8";
-    case BT_UINT16:  return "uint16";
-    case BT_UINT32:  return "uint32";
-    case BT_UINT64:  return "uint64";
-    case BT_FLOAT32: return "float32";
-    case BT_FLOAT64: return "float64";
-    default:         return "unknown";
+    case BT_NONE:       return "none";
+    case BT_BOOL:       return "bool";
+    case BT_INT8:       return "int8";
+    case BT_INT16:      return "int16";
+    case BT_INT32:      return "int32";
+    case BT_INT64:      return "int64";
+    case BT_UINT8:      return "uint8";
+    case BT_UINT16:     return "uint16";
+    case BT_UINT32:     return "uint32";
+    case BT_UINT64:     return "uint64";
+    case BT_FLOAT32:    return "float32";
+    case BT_FLOAT64:    return "float64";
+    case BT_COMPLEX64:  return "complex64";
+    case BT_COMPLEX128: return "complex128";
+    default:            return "unknown";
     }
     // clang-format on
 }
@@ -117,11 +120,10 @@ char const * box_get_device_name(bdev dev) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (dev) {
-    case BD_CPU:  return "CPU";
-    case BD_CUDA: return "CUDA";
-    case BD_CL:   return "CL";
-    case BD_NONE: return "NONE";
-    default:      return "UNKNOWN";
+    case BD_CPU:  return "cpu";
+    case BD_CUDA: return "cuda";
+    case BD_CL:   return "cl";
+    default:      return "unknown";
     }
     // clang-format on
 }
@@ -130,19 +132,21 @@ ui32 box_get_type_byte(btype type) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (type) {
-    case BT_NONE:    return 0;
-    case BT_BOOL:    return sizeof(bool);
-    case BT_INT8:    return sizeof(si8);
-    case BT_INT16:   return sizeof(si16);
-    case BT_INT32:   return sizeof(si32);
-    case BT_INT64:   return sizeof(si64);
-    case BT_UINT8:   return sizeof(ui8);
-    case BT_UINT16:  return sizeof(ui16);
-    case BT_UINT32:  return sizeof(ui32);
-    case BT_UINT64:  return sizeof(ui64);
-    case BT_FLOAT32: return sizeof(fp32);
-    case BT_FLOAT64: return sizeof(fp64);
-    default:         return 0;
+    case BT_NONE:       return 0;
+    case BT_BOOL:       return sizeof(bool);
+    case BT_INT8:       return sizeof(si8);
+    case BT_INT16:      return sizeof(si16);
+    case BT_INT32:      return sizeof(si32);
+    case BT_INT64:      return sizeof(si64);
+    case BT_UINT8:      return sizeof(ui8);
+    case BT_UINT16:     return sizeof(ui16);
+    case BT_UINT32:     return sizeof(ui32);
+    case BT_UINT64:     return sizeof(ui64);
+    case BT_FLOAT32:    return sizeof(fp32);
+    case BT_FLOAT64:    return sizeof(fp64);
+    case BT_COMPLEX64:  return sizeof(c64);
+    case BT_COMPLEX128: return sizeof(c128);
+    default:            return 0;
     }
     // clang-format on
 }
@@ -530,8 +534,6 @@ void * box_data_malloc(bdev device, ui32 byte) TBAG_NOEXCEPT
     case BD_CL:
         // TODO
         return nullptr;
-    case BD_NONE:
-        TBAG_FALLTHROUGH
     default:
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         return nullptr;
@@ -560,8 +562,6 @@ void box_data_free(bdev device, void * data) TBAG_NOEXCEPT
     case BD_CL:
         // TODO
         break;
-    case BD_NONE:
-        TBAG_FALLTHROUGH
     default:
         TBAG_INACCESSIBLE_BLOCK_ASSERT();
         break;
@@ -711,7 +711,7 @@ void box_data::release()
 void box_data::clear() TBAG_NOEXCEPT
 {
     type = BT_NONE;
-    device = BD_NONE;
+    device = BD_CPU;
     ext[0] = 0;
     ext[1] = 0;
     ext[2] = 0;
