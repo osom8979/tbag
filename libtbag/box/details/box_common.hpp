@@ -19,6 +19,8 @@
 #include <libtbag/type/TypeTable.hpp>
 
 #include <cstdint>
+#include <ccomplex>
+
 #include <complex>
 
 // -------------------
@@ -120,6 +122,9 @@ using fp64 = double;
 
 using c64  = std::complex<float>;
 using c128 = std::complex<double>;
+
+using nc64  = decltype(0.0f+0.0fi);
+using nc128 = decltype(0.0+0.0i);
 
 using btype = ui16;
 using bdev  = ui16;

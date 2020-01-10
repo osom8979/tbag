@@ -61,7 +61,7 @@ TEST(Box_Assign_Test, Dim3)
 TEST(Box_Assign_Test, Dim4)
 {
     Box box = {{{{10},{20}},{{30},{40}},{{50},{60}}},
-              {{{11},{21}},{{31},{41}},{{51},{61}}}};
+               {{{11},{21}},{{31},{41}},{{51},{61}}}};
     ASSERT_TRUE(box.is_device_cpu());
     ASSERT_TRUE(box.is_si32());
     ASSERT_EQ(4, box.rank());
