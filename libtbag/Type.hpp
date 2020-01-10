@@ -19,6 +19,7 @@
 #include <cstddef>
 
 #include <utility>
+#include <complex>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -77,16 +78,31 @@
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
+// Test std::shared_ptr
+
 template <typename T, typename SharedType = T>
 struct is_shared_ptr : public std::false_type
 { /* EMPTY. */ };
 
 template <typename T>
-struct is_shared_ptr<std::shared_ptr<T> > : public std::true_type
+struct is_shared_ptr< std::shared_ptr<T> > : public std::true_type
 { /* EMPTY. */ };
 
-static_assert(is_shared_ptr<int>::value == false, "T is not std::shared_ptr type.");
-static_assert(is_shared_ptr<std::shared_ptr<int> >::value, "T is std::shared_ptr type.");
+static_assert(!is_shared_ptr<int>::value, "T is not std::shared_ptr type.");
+static_assert(is_shared_ptr< std::shared_ptr<int> >::value, "T is std::shared_ptr type.");
+
+// Test std::complex
+
+template <typename T, typename SharedType = T>
+struct is_complex : public std::false_type
+{ /* EMPTY. */ };
+
+template <typename T>
+struct is_complex< std::complex<T> > : public std::true_type
+{ /* EMPTY. */ };
+
+static_assert(!is_complex<float>::value, "T is not std::complex type.");
+static_assert(is_complex< std::complex<float> >::value, "T is std::complex type.");
 
 /**
  * Remove const & reference.
