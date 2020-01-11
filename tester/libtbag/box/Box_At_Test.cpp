@@ -20,14 +20,14 @@ TEST(Box_At_Test, At)
     ASSERT_EQ(4, box.at<si32>(1, 1));
 }
 
-TEST(Box_At_Test, At_Complex128)
-{
-    Box box = {1.0+1.0i, 2.0+2.0i};
-    ASSERT_EQ(1, box.at<c128>(0).real());
-    ASSERT_EQ(1, box.at<c128>(0).imag());
-    ASSERT_EQ(2, box.at<c128>(1).real());
-    ASSERT_EQ(2, box.at<c128>(1).imag());
-}
+//TEST(Box_At_Test, At_Complex128)
+//{
+//    Box box = {1.0+1.0i, 2.0+2.0i};
+//    ASSERT_EQ(1, box.at<c128>(0).real());
+//    ASSERT_EQ(1, box.at<c128>(0).imag());
+//    ASSERT_EQ(2, box.at<c128>(1).real());
+//    ASSERT_EQ(2, box.at<c128>(1).imag());
+//}
 
 TEST(Box_At_Test, Get_ReturnOutput)
 {

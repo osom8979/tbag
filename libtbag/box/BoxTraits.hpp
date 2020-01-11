@@ -45,9 +45,6 @@ using fp64  = libtbag::box::details::fp64;
 using c64  = libtbag::box::details::c64;
 using c128 = libtbag::box::details::c128;
 
-using nc64  = libtbag::box::details::nc64;
-using nc128 = libtbag::box::details::nc128;
-
 using btype = libtbag::box::details::btype;
 using bdev  = libtbag::box::details::bdev;
 
@@ -113,21 +110,19 @@ struct BoxInfo<void, BoxTypeTable::BTT_NONE>
 
 // clang-format off
 template <typename T> struct BoxTypeInfo : public BoxInfo<T, BoxTypeTable::BTT_NONE     > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<bool>  : public BoxInfo<bool, BoxTypeTable::BTT_BOOL      > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si8 >  : public BoxInfo<si8 , BoxTypeTable::BTT_INT8      > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si16>  : public BoxInfo<si16, BoxTypeTable::BTT_INT16     > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si32>  : public BoxInfo<si32, BoxTypeTable::BTT_INT32     > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<si64>  : public BoxInfo<si64, BoxTypeTable::BTT_INT64     > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui8 >  : public BoxInfo<ui8 , BoxTypeTable::BTT_UINT8     > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui16>  : public BoxInfo<ui16, BoxTypeTable::BTT_UINT16    > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui32>  : public BoxInfo<ui32, BoxTypeTable::BTT_UINT32    > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<ui64>  : public BoxInfo<ui64, BoxTypeTable::BTT_UINT64    > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<fp32>  : public BoxInfo<fp32, BoxTypeTable::BTT_FLOAT32   > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<fp64>  : public BoxInfo<fp64, BoxTypeTable::BTT_FLOAT64   > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<c64 >  : public BoxInfo<c64 , BoxTypeTable::BTT_COMPLEX64 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<c128>  : public BoxInfo<c128, BoxTypeTable::BTT_COMPLEX128> { /* EMPTY. */ };
-template <> struct BoxTypeInfo<nc64 > : public BoxInfo<c64 , BoxTypeTable::BTT_COMPLEX64 > { /* EMPTY. */ };
-template <> struct BoxTypeInfo<nc128> : public BoxInfo<c128, BoxTypeTable::BTT_COMPLEX128> { /* EMPTY. */ };
+template <> struct BoxTypeInfo<bool> : public BoxInfo<bool, BoxTypeTable::BTT_BOOL      > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si8 > : public BoxInfo<si8 , BoxTypeTable::BTT_INT8      > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si16> : public BoxInfo<si16, BoxTypeTable::BTT_INT16     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si32> : public BoxInfo<si32, BoxTypeTable::BTT_INT32     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<si64> : public BoxInfo<si64, BoxTypeTable::BTT_INT64     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui8 > : public BoxInfo<ui8 , BoxTypeTable::BTT_UINT8     > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui16> : public BoxInfo<ui16, BoxTypeTable::BTT_UINT16    > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui32> : public BoxInfo<ui32, BoxTypeTable::BTT_UINT32    > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<ui64> : public BoxInfo<ui64, BoxTypeTable::BTT_UINT64    > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<fp32> : public BoxInfo<fp32, BoxTypeTable::BTT_FLOAT32   > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<fp64> : public BoxInfo<fp64, BoxTypeTable::BTT_FLOAT64   > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<c64 > : public BoxInfo<c64 , BoxTypeTable::BTT_COMPLEX64 > { /* EMPTY. */ };
+template <> struct BoxTypeInfo<c128> : public BoxInfo<c128, BoxTypeTable::BTT_COMPLEX128> { /* EMPTY. */ };
 // clang-format on
 
 // clang-format off
