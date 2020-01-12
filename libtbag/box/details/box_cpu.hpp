@@ -228,12 +228,14 @@ struct equal_to
 
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_EQ(l.real(), l.imag(), (typename L::value_type)r, typename L::value_type());
+        using left_value_type = typename L::value_type;
+        return TBAG_COMPLEX_EQ(l.real(), l.imag(), (left_value_type)r, 0);
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_EQ((typename R::value_type)l, typename R::value_type(), r.real(), r.imag());
+        using right_value_type = typename R::value_type;
+        return TBAG_COMPLEX_EQ((right_value_type)l, 0, r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -257,12 +259,14 @@ struct not_equal
 
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_NE(l.real(), l.imag(), (typename L::value_type)r, typename L::value_type());
+        using left_value_type = typename L::value_type;
+        return TBAG_COMPLEX_NE(l.real(), l.imag(), (left_value_type)r, 0);
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_NE((typename R::value_type)l, typename R::value_type(), r.real(), r.imag());
+        using right_value_type = typename R::value_type;
+        return TBAG_COMPLEX_NE((right_value_type)l, 0, r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -286,12 +290,14 @@ struct less_than
 
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_LT(l.real(), l.imag(), (typename L::value_type)r, typename L::value_type());
+        using left_value_type = typename L::value_type;
+        return TBAG_COMPLEX_LT(l.real(), l.imag(), (left_value_type)r, 0);
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_LT((typename R::value_type)l, typename R::value_type(), r.real(), r.imag());
+        using right_value_type = typename R::value_type;
+        return TBAG_COMPLEX_LT((right_value_type)l, 0, r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -315,12 +321,14 @@ struct less_equal
 
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_LE(l.real(), l.imag(), (typename L::value_type)r, typename L::value_type());
+        using left_value_type = typename L::value_type;
+        return TBAG_COMPLEX_LE(l.real(), l.imag(), (left_value_type)r, 0);
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_LE((typename R::value_type)l, typename R::value_type(), r.real(), r.imag());
+        using right_value_type = typename R::value_type;
+        return TBAG_COMPLEX_LE((right_value_type)l, 0, r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -344,12 +352,14 @@ struct greater_than
 
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_GT(l.real(), l.imag(), (typename L::value_type)r, typename L::value_type());
+        using left_value_type = typename L::value_type;
+        return TBAG_COMPLEX_GT(l.real(), l.imag(), (left_value_type)r, 0);
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_GT((typename R::value_type)l, typename R::value_type(), r.real(), r.imag());
+        using right_value_type = typename R::value_type;
+        return TBAG_COMPLEX_GT((right_value_type)l, 0, r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -373,12 +383,14 @@ struct greater_equal
 
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_GE(l.real(), l.imag(), (typename L::value_type)r, typename L::value_type());
+        using left_value_type = typename L::value_type;
+        return TBAG_COMPLEX_GE(l.real(), l.imag(), (left_value_type)r, 0);
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
-        return TBAG_COMPLEX_GE((typename R::value_type)l, typename R::value_type(), r.real(), r.imag());
+        using right_value_type = typename R::value_type;
+        return TBAG_COMPLEX_GE((right_value_type)l, 0, r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -392,18 +404,18 @@ struct greater_equal
     }
 };
 
-template <template <typename LeftT, typename RightT> class CompT, typename ltype, typename rtype>
-void box_cpu_comp_impl(ltype const * lh, rtype const * rh,
+template <template <typename LeftT, typename RightT> class CompT, typename LeftT, typename RightT>
+void box_cpu_comp_impl(LeftT const * lh, RightT const * rh,
                        bool * out, std::size_t size) TBAG_NOEXCEPT
 {
-    CompT<ltype, rtype> const compare;
+    CompT<LeftT, RightT> const compare;
     for (auto i = 0u; i < size; ++i) {
         out[i] = compare(lh[i], rh[i]);
     }
 }
 
-template <template <typename LeftT, typename RightT> class CompT, typename ltype>
-void box_cpu_comp_impl(ltype const * lh, void const * rh, btype rh_type,
+template <template <typename LeftT, typename RightT> class CompT, typename LeftT>
+void box_cpu_comp_impl(LeftT const * lh, void const * rh, btype rh_type,
                        bool * out, std::size_t size) TBAG_NOEXCEPT
 {
     // clang-format off
@@ -462,18 +474,18 @@ void box_cpu_comp(void const * lh, btype lh_type,
     // clang-format on
 }
 
-template <template <typename LeftT, typename RightT> class CompT, typename ltype, typename rtype>
-void box_cpu_comp_value_impl(ltype const * lh, rtype const * rh,
+template <template <typename LeftT, typename RightT> class CompT, typename LeftT, typename RightT>
+void box_cpu_comp_value_impl(LeftT const * lh, RightT const * rh,
                              bool * out, std::size_t size) TBAG_NOEXCEPT
 {
-    CompT<ltype, rtype> const compare;
+    CompT<LeftT, RightT> const compare;
     for (auto i = 0u; i < size; ++i) {
         out[i] = compare(lh[i], *rh);
     }
 }
 
-template <template <typename LeftT, typename RightT> class CompT, typename ltype>
-void box_cpu_comp_value_impl(ltype const * lh, void const * rh, btype rh_type,
+template <template <typename LeftT, typename RightT> class CompT, typename LeftT>
+void box_cpu_comp_value_impl(LeftT const * lh, void const * rh, btype rh_type,
                              bool * out, std::size_t size) TBAG_NOEXCEPT
 {
     // clang-format off
