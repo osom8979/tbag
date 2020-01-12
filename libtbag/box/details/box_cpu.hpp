@@ -211,12 +211,46 @@ void box_cpu_set_impl(InputT const * in, void * out, btype out_type) TBAG_NOEXCE
 // *****************************************************************************
 // **                           COMPLEX LOOPS                                 **
 // *****************************************************************************
-#define TBAG_COMPLEX_GE(xr,xi,yr,yi) ((xr > yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi >= yi))
-#define TBAG_COMPLEX_LE(xr,xi,yr,yi) ((xr < yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi <= yi))
-#define TBAG_COMPLEX_GT(xr,xi,yr,yi) ((xr > yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi > yi))
-#define TBAG_COMPLEX_LT(xr,xi,yr,yi) ((xr < yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi < yi))
-#define TBAG_COMPLEX_EQ(xr,xi,yr,yi) (xr == yr && xi == yi)
-#define TBAG_COMPLEX_NE(xr,xi,yr,yi) (xr != yr || xi != yi)
+
+template <typename R1, typename I1, typename R2, typename I2>
+bool TBAG_COMPLEX_GE(R1 xr, I1 xi, R2 yr, I2 yi) TBAG_NOEXCEPT
+{
+    using namespace std;
+    return (xr > yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi >= yi);
+}
+
+template <typename R1, typename I1, typename R2, typename I2>
+bool TBAG_COMPLEX_LE(R1 xr, I1 xi, R2 yr, I2 yi) TBAG_NOEXCEPT
+{
+    using namespace std;
+    return (xr < yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi <= yi);
+}
+
+template <typename R1, typename I1, typename R2, typename I2>
+bool TBAG_COMPLEX_GT(R1 xr, I1 xi, R2 yr, I2 yi) TBAG_NOEXCEPT
+{
+    using namespace std;
+    return (xr > yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi > yi);
+}
+
+template <typename R1, typename I1, typename R2, typename I2>
+bool TBAG_COMPLEX_LT(R1 xr, I1 xi, R2 yr, I2 yi) TBAG_NOEXCEPT
+{
+    using namespace std;
+    return (xr < yr && !isnan(xi) && !isnan(yi)) || (xr == yr && xi < yi);
+}
+
+template <typename R1, typename I1, typename R2, typename I2>
+bool TBAG_COMPLEX_EQ(R1 xr, I1 xi, R2 yr, I2 yi) TBAG_NOEXCEPT
+{
+    return xr == yr && xi == yi;
+}
+
+template <typename R1, typename I1, typename R2, typename I2>
+bool TBAG_COMPLEX_NE(R1 xr, I1 xi, R2 yr, I2 yi) TBAG_NOEXCEPT
+{
+    return xr != yr || xi != yi;
+}
 
 template <typename L, typename R>
 struct equal_to
@@ -229,13 +263,13 @@ struct equal_to
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using left_value_type = typename L::value_type;
-        return TBAG_COMPLEX_EQ(l.real(), l.imag(), (left_value_type)r, 0);
+        return TBAG_COMPLEX_EQ(l.real(), l.imag(), (left_value_type)r, left_value_type());
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using right_value_type = typename R::value_type;
-        return TBAG_COMPLEX_EQ((right_value_type)l, 0, r.real(), r.imag());
+        return TBAG_COMPLEX_EQ((right_value_type)l, right_value_type(), r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -260,13 +294,13 @@ struct not_equal
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using left_value_type = typename L::value_type;
-        return TBAG_COMPLEX_NE(l.real(), l.imag(), (left_value_type)r, 0);
+        return TBAG_COMPLEX_NE(l.real(), l.imag(), (left_value_type)r, left_value_type());
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using right_value_type = typename R::value_type;
-        return TBAG_COMPLEX_NE((right_value_type)l, 0, r.real(), r.imag());
+        return TBAG_COMPLEX_NE((right_value_type)l, right_value_type(), r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -291,13 +325,13 @@ struct less_than
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using left_value_type = typename L::value_type;
-        return TBAG_COMPLEX_LT(l.real(), l.imag(), (left_value_type)r, 0);
+        return TBAG_COMPLEX_LT(l.real(), l.imag(), (left_value_type)r, left_value_type());
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using right_value_type = typename R::value_type;
-        return TBAG_COMPLEX_LT((right_value_type)l, 0, r.real(), r.imag());
+        return TBAG_COMPLEX_LT((right_value_type)l, right_value_type(), r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -322,13 +356,13 @@ struct less_equal
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using left_value_type = typename L::value_type;
-        return TBAG_COMPLEX_LE(l.real(), l.imag(), (left_value_type)r, 0);
+        return TBAG_COMPLEX_LE(l.real(), l.imag(), (left_value_type)r, left_value_type());
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using right_value_type = typename R::value_type;
-        return TBAG_COMPLEX_LE((right_value_type)l, 0, r.real(), r.imag());
+        return TBAG_COMPLEX_LE((right_value_type)l, right_value_type(), r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -353,13 +387,13 @@ struct greater_than
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using left_value_type = typename L::value_type;
-        return TBAG_COMPLEX_GT(l.real(), l.imag(), (left_value_type)r, 0);
+        return TBAG_COMPLEX_GT(l.real(), l.imag(), (left_value_type)r, left_value_type());
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using right_value_type = typename R::value_type;
-        return TBAG_COMPLEX_GT((right_value_type)l, 0, r.real(), r.imag());
+        return TBAG_COMPLEX_GT((right_value_type)l, right_value_type(), r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -384,13 +418,13 @@ struct greater_equal
     inline bool __compare(left_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using left_value_type = typename L::value_type;
-        return TBAG_COMPLEX_GE(l.real(), l.imag(), (left_value_type)r, 0);
+        return TBAG_COMPLEX_GE(l.real(), l.imag(), (left_value_type)r, left_value_type());
     }
 
     inline bool __compare(right_complex_t, L l, R r) const TBAG_NOEXCEPT
     {
         using right_value_type = typename R::value_type;
-        return TBAG_COMPLEX_GE((right_value_type)l, 0, r.real(), r.imag());
+        return TBAG_COMPLEX_GE((right_value_type)l, right_value_type(), r.real(), r.imag());
     }
 
     inline bool __compare(all_complex_t, L l, R r) const TBAG_NOEXCEPT
@@ -409,7 +443,7 @@ void box_cpu_comp_impl(LeftT const * lh, RightT const * rh,
                        bool * out, std::size_t size) TBAG_NOEXCEPT
 {
     CompT<LeftT, RightT> const compare;
-    for (auto i = 0u; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         out[i] = compare(lh[i], rh[i]);
     }
 }
@@ -479,7 +513,7 @@ void box_cpu_comp_value_impl(LeftT const * lh, RightT const * rh,
                              bool * out, std::size_t size) TBAG_NOEXCEPT
 {
     CompT<LeftT, RightT> const compare;
-    for (auto i = 0u; i < size; ++i) {
+    for (auto i = 0; i < size; ++i) {
         out[i] = compare(lh[i], *rh);
     }
 }
