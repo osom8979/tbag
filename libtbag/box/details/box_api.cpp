@@ -611,9 +611,9 @@ Err box_comp_test(box_data const * lh, btype val_type, bdev val_device, ui64 con
     assert(val_ext != nullptr);
     assert(out != nullptr);
 
-    if (lh->type != val_type) {
-        return E_INVALID_TYPE;
-    }
+    // if (lh->type != val_type) {
+    //     return E_INVALID_TYPE;
+    // }
     if (lh->device != val_device) {
         return E_EXDEV;
     }

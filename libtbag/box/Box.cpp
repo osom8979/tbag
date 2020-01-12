@@ -610,9 +610,9 @@ ErrBox Box::comp(btype val_type, bdev val_device, ui64 const * val_ext, void con
     if (!exists()) {
         return { E_EXPIRED, Box(nullptr) };
     }
-    if (type() != val_type) {
-        return { E_INVALID_TYPE, Box(nullptr) };
-    }
+    // if (type() != val_type) {
+    //     return { E_INVALID_TYPE, Box(nullptr) };
+    // }
     if (device() != val_device) {
         return { E_EXDEV, Box(nullptr) };
     }

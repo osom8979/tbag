@@ -105,7 +105,50 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_MISMATCH                             , 10068, "The data does not match"                                 )\
     _TBAG_XX(_SKIP                                 , 10069, "Skip error"                                              )\
     _TBAG_XX(_SHAPE                                , 10070, "Shape error"                                             )\
-    _TBAG_XX(_DEVICE                               , 10071, "Device error"                                             )\
+    _TBAG_XX(_DEVICE                               , 10071, "Device error"                                            )\
+    _TBAG_XX(_UNKSTDEXCP                           , 10072, "Unknown std exception"                                   )\
+    _TBAG_XX(_UNKSTDSIG                            , 10073, "Unknown std signela"                                     )\
+    _TBAG_XX(_MEDIA_CHANGED                        , 10074, "Media changed"                                           )\
+    _TBAG_XX(_NO_MEDIA                             , 10075, "No media in drive/device"                                )\
+    _TBAG_XX(_NO_MORE_FILES                        , 10076, "No more files"                                           )\
+    _TBAG_XX(_NOT_BLOCK_DEVICE                     , 10077, "Not a block device"                                      )\
+    _TBAG_XX(_INVALID_FILE_NAME                    , 10078, "File/path name is invalid"                               )\
+    _TBAG_XX(_FILE_EMPTY                           , 10079, "File is empty"                                           )\
+    _TBAG_XX(_OPEN_FAILED                          , 10080, "File open failed"                                        )\
+    _TBAG_XX(_NOT_ROOT_DEVICE                      , 10081, "Not a root device/directory"                             )\
+    _TBAG_XX(_UNKNOWN_SYSTEM_ERROR                 , 10082, "Unknown system error"                                    )\
+    _TBAG_XX(_INVALID_SIGNATURE                    , 10083, "Invalid data signature or header"                        )\
+    _TBAG_XX(_INVALID_DATA                         , 10084, "Invalid or corrupted data"                               )\
+    _TBAG_XX(_INVALID_STRING                       , 10085, "Invalid string"                                          )\
+    _TBAG_XX(_DATA_TRUNCATED                       , 10086, "Truncated data"                                          )\
+    _TBAG_XX(_DATA_TOO_LARGE                       , 10087, "Input data too large to be processed"                    )\
+    _TBAG_XX(_DECOMPRESSION_FAILED                 , 10088, "Decompression failed due to invalid data"                )\
+    _TBAG_XX(_INVALID_GEOMETRY                     , 10089, "Invalid geometry (invalid path data or shape)"           )\
+    _TBAG_XX(_NO_MATCHING_VERTEX                   , 10090, "Returned when there is no matching vertex in path data"  )\
+    _TBAG_XX(_NO_MATCHING_COOKIE                   , 10091, "No matching cookie (BLContext)"                          )\
+    _TBAG_XX(_NO_STATES_TO_RESTORE                 , 10092, "No states to restore (BLContext)"                        )\
+    _TBAG_XX(_IMAGE_TOO_LARGE                      , 10093, "The size of the image is too large"                      )\
+    _TBAG_XX(_IMAGE_NO_MATCHING_CODEC              , 10094, "Image codec for a required format doesn't exist"         )\
+    _TBAG_XX(_IMAGE_UNKNOWN_FILE_FORMAT            , 10095, "Unknown or invalid file format that cannot be read"      )\
+    _TBAG_XX(_IMAGE_DECODER_NOT_PROVIDED           , 10096, "Image codec doesn't support reading the file format"     )\
+    _TBAG_XX(_IMAGE_ENCODER_NOT_PROVIDED           , 10097, "Image codec doesn't support writing the file format"     )\
+    _TBAG_XX(_PNG_MULTIPLE_IHDR                    , 10098, "Multiple IHDR chunks are not allowed (PNG)"              )\
+    _TBAG_XX(_PNG_INVALID_IDAT                     , 10099, "Invalid IDAT chunk (PNG)"                                )\
+    _TBAG_XX(_PNG_INVALID_IEND                     , 10100, "Invalid IEND chunk (PNG)"                                )\
+    _TBAG_XX(_PNG_INVALID_PLTE                     , 10101, "Invalid PLTE chunk (PNG)"                                )\
+    _TBAG_XX(_PNG_INVALID_TRNS                     , 10102, "Invalid tRNS chunk (PNG)"                                )\
+    _TBAG_XX(_PNG_INVALID_FILTER                   , 10103, "Invalid filter type (PNG)"                               )\
+    _TBAG_XX(_JPEG_UNSUPPORTED_FEATURE             , 10104, "Unsupported feature (JPEG)"                              )\
+    _TBAG_XX(_JPEG_INVALID_SOS                     , 10105, "Invalid SOS marker or header (JPEG)"                     )\
+    _TBAG_XX(_JPEG_INVALID_SOF                     , 10106, "Invalid SOF marker (JPEG)"                               )\
+    _TBAG_XX(_JPEG_MULTIPLE_SOF                    , 10107, "Multiple SOF markers (JPEG)"                             )\
+    _TBAG_XX(_JPEG_UNSUPPORTED_SOF                 , 10108, "Unsupported SOF marker (JPEG)"                           )\
+    _TBAG_XX(_FONT_NO_CHARACTER_MAPPING            , 10109, "Font has no character to glyph mapping data"             )\
+    _TBAG_XX(_FONT_MISSING_IMPORTANT_TABLE         , 10110, "Font has missing an important table"                     )\
+    _TBAG_XX(_FONT_FEATURE_NOT_AVAILABLE           , 10111, "Font feature is not available"                           )\
+    _TBAG_XX(_FONT_CFF_INVALID_DATA                , 10112, "Font has an invalid CFF data"                            )\
+    _TBAG_XX(_FONT_PROGRAM_TERMINATED              , 10113, "Font program terminated"                                 )\
+    _TBAG_XX(_INVALID_GLYPH                        , 10114, "Invalid glyph identifier"                                )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\
@@ -417,21 +460,22 @@ static_assert(static_cast<int>(Err::E_SUCCESS) == 0, "The success code must be 0
 TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
 #undef _TBAG_XX
 
+TBAG_CONSTEXPR Err const E_INVALID_ALIGNMENT      = E_ILLARGS  ;
 TBAG_CONSTEXPR Err const E_TIMEOUT                = E_ETIMEDOUT;
-TBAG_CONSTEXPR Err const E_ASYNC_REQUEST          = E_ASYNCREQ;
-TBAG_CONSTEXPR Err const E_ENQUEUE_AND_ASYNC      = E_ENQASYNC;
-TBAG_CONSTEXPR Err const E_ILLEGAL_ARGUMENTS      = E_ILLARGS ;
-TBAG_CONSTEXPR Err const E_ILLEGAL_STATE          = E_ILLSTATE;
-TBAG_CONSTEXPR Err const E_OUT_OF_RANGE           = E_OORANGE ;
-TBAG_CONSTEXPR Err const E_NOT_READY              = E_NREADY  ;
-TBAG_CONSTEXPR Err const E_UNSUPPORTED_OPERATION  = E_ENOSYS  ;
-TBAG_CONSTEXPR Err const E_READ_ERROR             = E_RDERR   ;
-TBAG_CONSTEXPR Err const E_WRITE_ERROR            = E_WRERR   ;
-TBAG_CONSTEXPR Err const E_SMALL_BUFFER           = E_SMALLBUF;
-TBAG_CONSTEXPR Err const E_UNKNOWN_EXCEPTION      = E_UNKEXCP ;
-TBAG_CONSTEXPR Err const E_UNKNOWN_SIGNAL         = E_UNKSIG  ;
-TBAG_CONSTEXPR Err const E_UNKNOWN_PROCESS_ID     = E_EBADF   ;
-TBAG_CONSTEXPR Err const E_LOCALE_CONVERTER_ERROR = E_ICU_CONV;
+TBAG_CONSTEXPR Err const E_ASYNC_REQUEST          = E_ASYNCREQ ;
+TBAG_CONSTEXPR Err const E_ENQUEUE_AND_ASYNC      = E_ENQASYNC ;
+TBAG_CONSTEXPR Err const E_ILLEGAL_ARGUMENTS      = E_ILLARGS  ;
+TBAG_CONSTEXPR Err const E_ILLEGAL_STATE          = E_ILLSTATE ;
+TBAG_CONSTEXPR Err const E_OUT_OF_RANGE           = E_OORANGE  ;
+TBAG_CONSTEXPR Err const E_NOT_READY              = E_NREADY   ;
+TBAG_CONSTEXPR Err const E_UNSUPPORTED_OPERATION  = E_ENOSYS   ;
+TBAG_CONSTEXPR Err const E_READ_ERROR             = E_RDERR    ;
+TBAG_CONSTEXPR Err const E_WRITE_ERROR            = E_WRERR    ;
+TBAG_CONSTEXPR Err const E_SMALL_BUFFER           = E_SMALLBUF ;
+TBAG_CONSTEXPR Err const E_UNKNOWN_EXCEPTION      = E_UNKEXCP  ;
+TBAG_CONSTEXPR Err const E_UNKNOWN_SIGNAL         = E_UNKSIG   ;
+TBAG_CONSTEXPR Err const E_UNKNOWN_PROCESS_ID     = E_EBADF    ;
+TBAG_CONSTEXPR Err const E_LOCALE_CONVERTER_ERROR = E_ICU_CONV ;
 
 // NNG (nng_errno_enum)
 TBAG_CONSTEXPR Err const E_NNG_EINTR        = E_EINTR        ;
