@@ -7,6 +7,7 @@
 
 #include <libtbag/graphic/Canvas.hpp>
 #include <libtbag/debug/Assert.hpp>
+#include <libtbag/util/OffsetOf.hpp>
 
 #include <cassert>
 #include <algorithm>
@@ -19,6 +20,38 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace graphic {
+
+using Point2d = Canvas::Point2d;
+using Point2i = Canvas::Point2i;
+
+static_assert(sizeof(BLPoint) == sizeof(Point2d) &&
+              alignof(BLPoint) == alignof(Point2d) &&
+              TBAG_OFFSET_OF(BLPoint, x) == TBAG_OFFSET_OF(Point2d, x) &&
+              TBAG_OFFSET_OF(BLPoint, y) == TBAG_OFFSET_OF(Point2d, y),
+              "BLPoint and Point2d must have the same structure.");
+static_assert(sizeof(BLPointI) == sizeof(Point2i) &&
+              alignof(BLPointI) == alignof(Point2i) &&
+              TBAG_OFFSET_OF(BLPointI, x) == TBAG_OFFSET_OF(Point2i, x) &&
+              TBAG_OFFSET_OF(BLPointI, y) == TBAG_OFFSET_OF(Point2i, y),
+              "BLPointI and Point2i must have the same structure.");
+
+using Rect2d = Canvas::Rect2d;
+using Rect2i = Canvas::Rect2i;
+
+static_assert(sizeof(BLRect) == sizeof(Rect2d) &&
+              alignof(BLRect) == alignof(Rect2d) &&
+              TBAG_OFFSET_OF(BLRect, x) == TBAG_OFFSET_OF(Rect2d, x) &&
+              TBAG_OFFSET_OF(BLRect, y) == TBAG_OFFSET_OF(Rect2d, y) &&
+              TBAG_OFFSET_OF(BLRect, w) == TBAG_OFFSET_OF(Rect2d, width) &&
+              TBAG_OFFSET_OF(BLRect, h) == TBAG_OFFSET_OF(Rect2d, height),
+              "BLRect and Rect2d must have the same structure.");
+static_assert(sizeof(BLRectI) == sizeof(Rect2i) &&
+              alignof(BLRectI) == alignof(Rect2i) &&
+              TBAG_OFFSET_OF(BLRectI, x) == TBAG_OFFSET_OF(Rect2i, x) &&
+              TBAG_OFFSET_OF(BLRectI, y) == TBAG_OFFSET_OF(Rect2i, y) &&
+              TBAG_OFFSET_OF(BLRectI, w) == TBAG_OFFSET_OF(Rect2i, width) &&
+              TBAG_OFFSET_OF(BLRectI, h) == TBAG_OFFSET_OF(Rect2i, height),
+              "BLRectI and Rect2i must have the same structure.");
 
 static uint32_t __get_channels_to_bl_format(int channels) TBAG_NOEXCEPT
 {
@@ -221,28 +254,24 @@ Err Canvas::init(int width, int height, int channels)
     }
 }
 
+#ifndef _call_blend2d_method
+#define _call_blend2d_method(func, ...) \
+    ((_impl) ? (convertBLResultToErr(_impl->context.func(__VA_ARGS__))) : (E_NREADY))
+#endif
+
 Err Canvas::end() TBAG_NOEXCEPT
 {
-    if (!_impl) {
-        return E_NREADY;
-    }
-    return convertBLResultToErr(_impl->context.end());
+    return _call_blend2d_method(end);
 }
 
 Err Canvas::setCompositionOperator(BlendMode mode) TBAG_NOEXCEPT
 {
-    if (!_impl) {
-        return E_NREADY;
-    }
-    return convertBLResultToErr(_impl->context.setCompOp(__get_blend_mode_to_bl_comp_op(mode)));
+    return _call_blend2d_method(setCompOp, __get_blend_mode_to_bl_comp_op(mode));
 }
 
 Err Canvas::setFillStyle(Channel r, Channel g, Channel b, Channel a) TBAG_NOEXCEPT
 {
-    if (!_impl) {
-        return E_NREADY;
-    }
-    return convertBLResultToErr(_impl->context.setFillStyle(BLRgba32(r, g, b, a)));
+    return _call_blend2d_method(setFillStyle, (BLRgba32(r, g, b, a)));
 }
 
 Err Canvas::setFillStyle(Rgb32 const & color) TBAG_NOEXCEPT
@@ -252,10 +281,82 @@ Err Canvas::setFillStyle(Rgb32 const & color) TBAG_NOEXCEPT
 
 Err Canvas::fillAll() TBAG_NOEXCEPT
 {
-    if (!_impl) {
-        return E_NREADY;
-    }
-    return convertBLResultToErr(_impl->context.fillAll());
+    return _call_blend2d_method(fillAll);
+}
+
+Err Canvas::fillBox(double x0, double y0, double x1, double y1) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillBox, x0, y0, x1, y1);
+}
+
+Err Canvas::fillRect(double x, double y, double w, double h) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillRect, x, y, w, h);
+}
+
+Err Canvas::fillCircle(double cx, double cy, double r) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillCircle, cx, cy, r);
+}
+
+Err Canvas::fillEllipse(double cx, double cy, double rx, double ry) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillEllipse, cx, cy, rx, ry);
+}
+
+Err Canvas::fillRoundRect(double x, double y, double w, double h, double r) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillRoundRect, x, y, w, h, r);
+}
+
+Err Canvas::fillRoundRect(double x, double y, double w, double h, double rx, double ry) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillRoundRect, x, y, w, h, rx, ry);
+}
+
+Err Canvas::fillChord(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillChord, cx, cy, r, start, sweep);
+}
+
+Err Canvas::fillChord(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillChord, cx, cy, rx, ry, start, sweep);
+}
+
+Err Canvas::fillPie(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillPie, cx, cy, r, start, sweep);
+}
+
+Err Canvas::fillPie(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillPie, cx, cy, rx, ry, start, sweep);
+}
+
+Err Canvas::fillTriangle(double x0, double y0, double x1, double y1, double x2, double y2) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillTriangle, x0, y0, x1, y1, x2, y2);
+}
+
+Err Canvas::fillPolygon(Point2d const * poly, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillPolygon, (BLPoint const *)poly, n);
+}
+
+Err Canvas::fillPolygon(Point2i const * poly, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillPolygon, (BLPointI const *)poly, n);
+}
+
+Err Canvas::fillRectArray(Rect2d const * data, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillRectArray, (BLRect const *)data, n);
+}
+
+Err Canvas::fillRectArray(Rect2i const * data, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(fillRectArray, (BLRectI const *)data, n);
 }
 
 Err Canvas::toBox(libtbag::box::Box & output) const

@@ -19,6 +19,8 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/box/Box.hpp>
 #include <libtbag/graphic/Color.hpp>
+#include <libtbag/geometry/Point2.hpp>
+#include <libtbag/geometry/Rect2.hpp>
 
 #include <memory>
 
@@ -38,6 +40,10 @@ class TBAG_API Canvas : private Noncopyable
 {
 public:
     using Box = libtbag::box::Box;
+    using Point2d = libtbag::geometry::Point2d;
+    using Point2i = libtbag::geometry::Point2i;
+    using Rect2d = libtbag::geometry::Rect2d;
+    using Rect2i = libtbag::geometry::Rect2i;
 
 public:
     struct Impl;
@@ -111,6 +117,21 @@ public:
 
 public:
     Err fillAll() TBAG_NOEXCEPT;
+    Err fillBox(double x0, double y0, double x1, double y1) TBAG_NOEXCEPT;
+    Err fillRect(double x, double y, double w, double h) TBAG_NOEXCEPT;
+    Err fillCircle(double cx, double cy, double r) TBAG_NOEXCEPT;
+    Err fillEllipse(double cx, double cy, double rx, double ry) TBAG_NOEXCEPT;
+    Err fillRoundRect(double x, double y, double w, double h, double r) TBAG_NOEXCEPT;
+    Err fillRoundRect(double x, double y, double w, double h, double rx, double ry) TBAG_NOEXCEPT;
+    Err fillChord(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT;
+    Err fillChord(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT;
+    Err fillPie(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT;
+    Err fillPie(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT;
+    Err fillTriangle(double x0, double y0, double x1, double y1, double x2, double y2) TBAG_NOEXCEPT;
+    Err fillPolygon(Point2d const * poly, size_t n) TBAG_NOEXCEPT;
+    Err fillPolygon(Point2i const * poly, size_t n) TBAG_NOEXCEPT;
+    Err fillRectArray(Rect2d const * data, size_t n) TBAG_NOEXCEPT;
+    Err fillRectArray(Rect2i const * data, size_t n) TBAG_NOEXCEPT;
 
 public:
     Err toBox(libtbag::box::Box & output) const;
