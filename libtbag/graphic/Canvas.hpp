@@ -134,6 +134,38 @@ public:
     Err fillRectArray(Rect2i const * data, size_t n) TBAG_NOEXCEPT;
 
 public:
+    Err strokeBox(double x0, double y0, double x1, double y1) TBAG_NOEXCEPT;
+    Err strokeRect(double x, double y, double w, double h) TBAG_NOEXCEPT;
+    Err strokeLine(double x0, double y0, double x1, double y1) TBAG_NOEXCEPT;
+    Err strokeCircle(double cx, double cy, double r) TBAG_NOEXCEPT;
+    Err strokeEllipse(double cx, double cy, double rx, double ry) TBAG_NOEXCEPT;
+    Err strokeRoundRect(double x, double y, double w, double h, double r) TBAG_NOEXCEPT;
+    Err strokeRoundRect(double x, double y, double w, double h, double rx, double ry) TBAG_NOEXCEPT;
+    Err strokeArc(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT;
+    Err strokeArc(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT;
+    Err strokeChord(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT;
+    Err strokeChord(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT;
+    Err strokePie(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT;
+    Err strokePie(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT;
+    Err strokeTriangle(double x0, double y0, double x1, double y1, double x2, double y2) TBAG_NOEXCEPT;
+    Err strokePolyline(Point2d const * poly, size_t n) TBAG_NOEXCEPT;
+    Err strokePolyline(Point2i const * poly, size_t n) TBAG_NOEXCEPT;
+    Err strokePolygon(Point2d const * poly, size_t n) TBAG_NOEXCEPT;
+    Err strokePolygon(Point2i const * poly, size_t n) TBAG_NOEXCEPT;
+    Err strokeRectArray(Rect2d const * data, size_t n) TBAG_NOEXCEPT;
+    Err strokeRectArray(Rect2i const * data, size_t n) TBAG_NOEXCEPT;
+
+public:
+    Err blitImage(Point2d const & dst, Box const & src) TBAG_NOEXCEPT;
+    Err blitImage(Point2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+    Err blitImage(Point2i const & dst, Box const & src) TBAG_NOEXCEPT;
+    Err blitImage(Point2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+    Err blitImage(Rect2d const & dst, Box const & src) TBAG_NOEXCEPT;
+    Err blitImage(Rect2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+    Err blitImage(Rect2i const & dst, Box const & src) TBAG_NOEXCEPT;
+    Err blitImage(Rect2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+
+public:
     Err toBox(libtbag::box::Box & output) const;
 };
 

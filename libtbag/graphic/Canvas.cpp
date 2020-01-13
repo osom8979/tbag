@@ -359,6 +359,161 @@ Err Canvas::fillRectArray(Rect2i const * data, size_t n) TBAG_NOEXCEPT
     return _call_blend2d_method(fillRectArray, (BLRectI const *)data, n);
 }
 
+Err Canvas::strokeBox(double x0, double y0, double x1, double y1) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeBox, x0, y0, x1, y1);
+}
+
+Err Canvas::strokeRect(double x, double y, double w, double h) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeRect, x, y, w, h);
+}
+
+Err Canvas::strokeLine(double x0, double y0, double x1, double y1) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeLine, x0, y0, x1, y1);
+}
+
+Err Canvas::strokeCircle(double cx, double cy, double r) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeCircle, cx, cy, r);
+}
+
+Err Canvas::strokeEllipse(double cx, double cy, double rx, double ry) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeEllipse, cx, cy, rx, ry);
+}
+
+Err Canvas::strokeRoundRect(double x, double y, double w, double h, double r) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeRoundRect, x, y, w, h, r);
+}
+
+Err Canvas::strokeRoundRect(double x, double y, double w, double h, double rx, double ry) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeRoundRect, x, y, w, h, rx, ry);
+}
+
+Err Canvas::strokeArc(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeArc, cx, cy, r, start, sweep);
+}
+
+Err Canvas::strokeArc(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeArc, cx, cy, rx, ry, start, sweep);
+}
+
+Err Canvas::strokeChord(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeChord, cx, cy, r, start, sweep);
+}
+
+Err Canvas::strokeChord(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeChord, cx, cy, rx, ry, start, sweep);
+}
+
+Err Canvas::strokePie(double cx, double cy, double r, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokePie, cx, cy, r, start, sweep);
+}
+
+Err Canvas::strokePie(double cx, double cy, double rx, double ry, double start, double sweep) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokePie, cx, cy, rx, ry, start, sweep);
+}
+
+Err Canvas::strokeTriangle(double x0, double y0, double x1, double y1, double x2, double y2) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeTriangle, x0, y0, x1, y1, x2, y2);
+}
+
+Err Canvas::strokePolyline(Point2d const * poly, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokePolyline, (BLPoint const *)poly, n);
+}
+
+Err Canvas::strokePolyline(Point2i const * poly, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokePolyline, (BLPointI const *)poly, n);
+}
+
+Err Canvas::strokePolygon(Point2d const * poly, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokePolygon, (BLPoint const *)poly, n);
+}
+
+Err Canvas::strokePolygon(Point2i const * poly, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokePolygon, (BLPointI const *)poly, n);
+}
+
+Err Canvas::strokeRectArray(Rect2d const * data, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeRectArray, (BLRect const *)data, n);
+}
+
+Err Canvas::strokeRectArray(Rect2i const * data, size_t n) TBAG_NOEXCEPT
+{
+    return _call_blend2d_method(strokeRectArray, (BLRectI const *)data, n);
+}
+
+// blitImage(const BLPoint& dst, const BLImage& src) noexcept { return impl->virt->blitImageD(impl, &dst, &src, nullptr); }
+// blitImage(const BLPoint& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitImageD(impl, &dst, &src, &srcArea); }
+// blitImage(const BLPointI& dst, const BLImage& src) noexcept { return impl->virt->blitImageI(impl, &dst, &src, nullptr); }
+// blitImage(const BLPointI& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitImageI(impl, &dst, &src, &srcArea); }
+// blitImage(const BLRect& dst, const BLImage& src) noexcept { return impl->virt->blitScaledImageD(impl, &dst, &src, nullptr); }
+// blitImage(const BLRect& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitScaledImageD(impl, &dst, &src, &srcArea); }
+// blitImage(const BLRectI& dst, const BLImage& src) noexcept { return impl->virt->blitScaledImageI(impl, &dst, &src, nullptr); }
+// blitImage(const BLRectI& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitScaledImageI(impl, &dst, &src, &srcArea); }
+
+Err Canvas::blitImage(Point2d const & dst, Box const & src) TBAG_NOEXCEPT
+{
+    return E_ENOSYS;
+}
+
+Err Canvas::blitImage(Point2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+{
+    return E_ENOSYS;
+}
+
+Err Canvas::blitImage(Point2i const & dst, Box const & src) TBAG_NOEXCEPT
+{
+    auto const temp = src.slice({ {}, {}, {Box::nop, Box::nop, -1} });
+    auto const height = temp.dim(0);
+    auto const width = temp.dim(1);
+    auto const channels = temp.dim(2);
+    BLImage image;
+    auto const code = image.createFromData(width, height, __get_channels_to_bl_format(channels), (void*)temp.data(), temp.getStrideByte(0));
+    return convertBLResultToErr(_impl->context.blitImage((BLPointI const &)dst, image));
+}
+
+Err Canvas::blitImage(Point2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+{
+    return E_ENOSYS;
+}
+
+Err Canvas::blitImage(Rect2d const & dst, Box const & src) TBAG_NOEXCEPT
+{
+    return E_ENOSYS;
+}
+
+Err Canvas::blitImage(Rect2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+{
+    return E_ENOSYS;
+}
+
+Err Canvas::blitImage(Rect2i const & dst, Box const & src) TBAG_NOEXCEPT
+{
+    return E_ENOSYS;
+}
+
+Err Canvas::blitImage(Rect2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+{
+    return E_ENOSYS;
+}
+
 Err Canvas::toBox(libtbag::box::Box & output) const
 {
     if (!_impl) {

@@ -6,7 +6,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <tester/DemoAsset.hpp>
 #include <libtbag/graphic/Canvas.hpp>
+#include <libtbag/graphic/ImageIO.hpp>
 
 using namespace libtbag;
 using namespace libtbag::graphic;
@@ -52,8 +54,8 @@ struct CanvasFixtureTest : public testing::Test
     }
 };
 
-int const CanvasFixtureTest::TEST_WIDTH = 10;
-int const CanvasFixtureTest::TEST_HEIGHT = 20;
+int const CanvasFixtureTest::TEST_WIDTH = 800;
+int const CanvasFixtureTest::TEST_HEIGHT = 600;
 int const CanvasFixtureTest::TEST_CHANNELS = 3;
 
 TEST_F(CanvasFixtureTest, Default)
@@ -83,5 +85,33 @@ TEST_F(CanvasFixtureTest, Fill)
     ASSERT_TRUE((result.slice({ {}, {}, {0, 1} }) == 0x00).all());
     ASSERT_TRUE((result.slice({ {}, {}, {1, 2} }) == 0x00).all());
     ASSERT_TRUE((result.slice({ {}, {}, {2, 3} }) == 0xFF).all());
+}
+
+TEST_F(CanvasFixtureTest, BlitImage)
+{
+    auto path = DemoAsset::get_tester_dir_image() / "lena.png";
+    Box image;
+    ASSERT_EQ(E_SUCCESS, readImage(path.getString(), image));
+
+    ASSERT_TRUE(canvas.exists());
+    ASSERT_EQ(E_SUCCESS, canvas.blitImage(Canvas::Point2i(0, 0), image));
+    ASSERT_EQ(E_SUCCESS, canvas.end());
+
+    Box result;
+    ASSERT_EQ(E_SUCCESS, canvas.toBox(result));
+    ASSERT_TRUE(result.is_ui8());
+    ASSERT_EQ(TEST_HEIGHT, result.dim(0));
+    ASSERT_EQ(TEST_WIDTH, result.dim(1));
+    ASSERT_EQ(TEST_CHANNELS, result.dim(2));
+
+    // Save & Load.
+    tttDir_Automatic();
+    // tttDir_AutoCreate();
+    auto const SAVE_PATH = tttDir_Get() / "save.png";
+    ASSERT_EQ(E_SUCCESS, writeImage(SAVE_PATH.getString(), result));
+
+    Box reload;
+    ASSERT_EQ(E_SUCCESS, readImage(SAVE_PATH.getString(), reload));
+
 }
 
