@@ -54,7 +54,12 @@ static std::shared_ptr<_manager_register> __get_global_manager_register()
     }
 }
 
-void __task_int_signal(int signum)
+static TaskId __get_current_task_id()
+{
+    return (TaskId)(std::intptr_t)__get_global_manager_register()->id.get();
+}
+
+void __task_interrupt_signal(int signum)
 {
     auto const shared = __get_global_manager_register();
     TaskManager * mgr = shared->mgr.cast<TaskManager>();
@@ -70,7 +75,7 @@ static void __init_task_thread(TaskManager * mgr, TaskId id)
     assert(static_cast<bool>(shared));
     shared->mgr.set(mgr);
     shared->id.set((void*)(std::intptr_t)id);
-    std::signal(THREAD_TASK_KILL_SIGNAL, &__task_int_signal);
+    std::signal(THREAD_TASK_KILL_SIGNAL, &__task_interrupt_signal);
 #endif
 }
 
@@ -107,6 +112,11 @@ void TaskManager::clearWithoutChecking()
     _processes_lock.writeLock();
     _processes.clear();
     _processes_lock.writeUnlock();
+}
+
+TaskId TaskManager::getCurrentTaskId()
+{
+    return __get_current_task_id();
 }
 
 TaskId TaskManager::nextTaskId()

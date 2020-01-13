@@ -165,7 +165,13 @@ public:
     void clearWithoutChecking();
 
 private:
-    TBAG_API friend void __task_int_signal(int signum);
+    TBAG_API friend void __task_interrupt_signal(int signum);
+
+public:
+    /**
+     * Can only be called from a thread task.
+     */
+    static TaskId getCurrentTaskId();
 
 public:
     TaskId nextTaskId();

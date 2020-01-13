@@ -37,13 +37,18 @@ TEST(TaskManagerTest, CreateThread)
     bool test1 = false;
     bool test2 = false;
 
+    TaskManager::TaskId id1;
+    TaskManager::TaskId id2;
+
     ThreadParams params1;
     params1.runner = [&](){
+        id1 = TaskManager::getCurrentTaskId();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         test1 = true;
     };
     ThreadParams params2;
     params2.runner = [&](){
+        id2 = TaskManager::getCurrentTaskId();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         test2 = true;
     };
@@ -63,6 +68,9 @@ TEST(TaskManagerTest, CreateThread)
     ASSERT_EQ(E_SUCCESS, join_result1);
     auto const join_result2 = mgr.join(task_list[1]);
     ASSERT_EQ(E_SUCCESS, join_result2);
+
+    ASSERT_EQ(id1, result1.value);
+    ASSERT_EQ(id2, result2.value);
 
     ASSERT_TRUE(test1);
     ASSERT_TRUE(test2);
