@@ -27,6 +27,9 @@ TEST(AuthTest, Default)
     ASSERT_TRUE(client.init(ca_public_key.key(), CLIENT_DATA));
     ASSERT_TRUE(server.init(ca_private_key.key(), SERVER_DATA));
 
+    ASSERT_TRUE(client.isReady());
+    ASSERT_TRUE(server.isReady());
+
     ASSERT_EQ(CLIENT_DATA, client.getClientData());
     ASSERT_EQ(SERVER_DATA, server.getServerData());
 

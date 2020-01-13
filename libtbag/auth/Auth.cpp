@@ -199,6 +199,11 @@ bool AuthClient::init(std::string const & ca_pem_public_key, std::string const &
     return true;
 }
 
+bool AuthClient::isReady() const
+{
+    return _ca_public_key.exists() && _client_public_key.exists() && _client_private_key.exists();
+}
+
 std::string AuthClient::getServerData() const
 {
     return _server_data;
@@ -328,6 +333,11 @@ bool AuthServer::init(std::string const & ca_pem_private_key, std::string const 
     _client_data.clear();
     _validation = false;
     return true;
+}
+
+bool AuthServer::isReady() const
+{
+    return _ca_private_key.exists() && _server_public_key.exists() && _server_private_key.exists();
 }
 
 std::string AuthServer::getServerData() const

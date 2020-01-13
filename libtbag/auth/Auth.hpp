@@ -90,6 +90,7 @@ public:
 
 public:
     bool init(std::string const & ca_pem_public_key, std::string const & client_data);
+    bool isReady() const;
 
 public:
     std::string getServerData() const;
@@ -156,6 +157,7 @@ public:
 
 public:
     bool init(std::string const & ca_pem_private_key, std::string const & server_data);
+    bool isReady() const;
 
 public:
     std::string getServerData() const;
