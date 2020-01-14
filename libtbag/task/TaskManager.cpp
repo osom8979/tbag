@@ -70,11 +70,12 @@ void __task_interrupt_signal(int signum)
 
 static void __init_task_thread(TaskManager * mgr, TaskId id)
 {
-#if !defined(TBAG_PLATFORM_WINDOWS)
     auto const shared = __get_global_manager_register();
     assert(static_cast<bool>(shared));
     shared->mgr.set(mgr);
     shared->id.set((void*)(std::intptr_t)id);
+
+#if !defined(TBAG_PLATFORM_WINDOWS)
     std::signal(THREAD_TASK_KILL_SIGNAL, &__task_interrupt_signal);
 #endif
 }
