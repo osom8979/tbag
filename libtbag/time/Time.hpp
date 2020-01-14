@@ -123,6 +123,18 @@ bool syncedWait(StartTimePoint begin, TimeoutDuration timeout, TickDuration tick
     }
 }
 
+template <typename Predicated>
+Err syncedWait(int32_t timeout_ms, Predicated predicated)
+{
+    auto const begin = std::chrono::system_clock::now();
+    auto const timeout = std::chrono::milliseconds(timeout_ms);
+    auto const tick = std::chrono::milliseconds(1);
+    auto const result = libtbag::time::syncedWait(begin, timeout, tick, [&]() -> bool {
+        return predicated();
+    });
+    return result ? E_SUCCESS : E_TIMEOUT;
+}
+
 } // namespace time
 
 // --------------------

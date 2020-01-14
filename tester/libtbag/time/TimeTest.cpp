@@ -82,3 +82,15 @@ TEST(TimeTest, SyncedWait)
     ASSERT_FALSE(result2);
 }
 
+TEST(TimeTest, SyncedWait2)
+{
+    auto const code1 = syncedWait(1, []() -> bool {
+        return true;
+    });
+    ASSERT_EQ(E_SUCCESS, code1);
+    auto const code2 = syncedWait(1, []() -> bool {
+        return false;
+    });
+    ASSERT_EQ(E_TIMEOUT, code2);
+}
+
