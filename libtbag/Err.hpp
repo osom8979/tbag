@@ -63,7 +63,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_INTERNAL                             , 10026, "Internal error detected"                                 )\
     _TBAG_XX(_SHUTDOWN                             , 10027, "Shutdown error"                                          )\
     _TBAG_XX(_NFOUND                               , 10028, "Not found error"                                         )\
-  /*_TBAG_XX(                                      , 10029, ""                                                      )*/\
+    _TBAG_XX(_INVALID                              , 10029, "Invalid error"                                           )\
     _TBAG_XX(_PARSING                              , 10030, "Parsing error"                                           )\
     _TBAG_XX(_DECODE                               , 10031, "Decode error"                                            )\
     _TBAG_XX(_ENCODE                               , 10032, "Encode error"                                            )\
