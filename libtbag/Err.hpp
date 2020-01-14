@@ -149,6 +149,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_FONT_CFF_INVALID_DATA                , 10112, "Font has an invalid CFF data"                            )\
     _TBAG_XX(_FONT_PROGRAM_TERMINATED              , 10113, "Font program terminated"                                 )\
     _TBAG_XX(_INVALID_GLYPH                        , 10114, "Invalid glyph identifier"                                )\
+    _TBAG_XX(_EXIT_SIGNAL                          , 10115, "Exit signal"                                             )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\
