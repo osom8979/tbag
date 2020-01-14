@@ -157,13 +157,13 @@ public:
 
 public:
     Err blitImage(Point2d const & dst, Box const & src) TBAG_NOEXCEPT;
-    Err blitImage(Point2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+    Err blitImage(Point2d const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT;
     Err blitImage(Point2i const & dst, Box const & src) TBAG_NOEXCEPT;
-    Err blitImage(Point2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+    Err blitImage(Point2i const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT;
     Err blitImage(Rect2d const & dst, Box const & src) TBAG_NOEXCEPT;
-    Err blitImage(Rect2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+    Err blitImage(Rect2d const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT;
     Err blitImage(Rect2i const & dst, Box const & src) TBAG_NOEXCEPT;
-    Err blitImage(Rect2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT;
+    Err blitImage(Rect2i const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT;
 
 public:
     Err toBox(libtbag::box::Box & output) const;

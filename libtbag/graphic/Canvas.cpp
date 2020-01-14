@@ -459,59 +459,119 @@ Err Canvas::strokeRectArray(Rect2i const * data, size_t n) TBAG_NOEXCEPT
     return _call_blend2d_method(strokeRectArray, (BLRectI const *)data, n);
 }
 
-// blitImage(const BLPoint& dst, const BLImage& src) noexcept { return impl->virt->blitImageD(impl, &dst, &src, nullptr); }
-// blitImage(const BLPoint& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitImageD(impl, &dst, &src, &srcArea); }
-// blitImage(const BLPointI& dst, const BLImage& src) noexcept { return impl->virt->blitImageI(impl, &dst, &src, nullptr); }
-// blitImage(const BLPointI& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitImageI(impl, &dst, &src, &srcArea); }
-// blitImage(const BLRect& dst, const BLImage& src) noexcept { return impl->virt->blitScaledImageD(impl, &dst, &src, nullptr); }
-// blitImage(const BLRect& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitScaledImageD(impl, &dst, &src, &srcArea); }
-// blitImage(const BLRectI& dst, const BLImage& src) noexcept { return impl->virt->blitScaledImageI(impl, &dst, &src, nullptr); }
-// blitImage(const BLRectI& dst, const BLImage& src, const BLRectI& srcArea) noexcept { return impl->virt->blitScaledImageI(impl, &dst, &src, &srcArea); }
+static Err __create_rgba_image(Canvas::Box const & box, BLImage & dest)
+{
+    auto const height = box.dim(0);
+    auto const width = box.dim(1);
+    auto const channels = box.dim(2);
+    if (height <= 0 || width <= 0 || channels != 4) {
+        return E_ILLARGS;
+    }
+    auto const format = __get_channels_to_bl_format(channels);
+    assert(format == BL_FORMAT_PRGB32);
+    auto const stride = box.getStrideByte(0);
+    assert(stride >= 4 && stride % 4 == 0);
+    return Canvas::convertBLResultToErr(dest.createFromData(width, height, format, (void*)box.data(), stride));
+}
 
 Err Canvas::blitImage(Point2d const & dst, Box const & src) TBAG_NOEXCEPT
 {
-    return E_ENOSYS;
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLPoint(dst.x, dst.y);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image);
+    return convertBLResultToErr(blit_result);
 }
 
-Err Canvas::blitImage(Point2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+Err Canvas::blitImage(Point2d const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    return E_ENOSYS;
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLPoint(dst.x, dst.y);
+    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
+    return convertBLResultToErr(blit_result);
 }
 
 Err Canvas::blitImage(Point2i const & dst, Box const & src) TBAG_NOEXCEPT
 {
-    auto const temp = src.slice({ {}, {}, {Box::nop, Box::nop, -1} });
-    auto const height = temp.dim(0);
-    auto const width = temp.dim(1);
-    auto const channels = temp.dim(2);
     BLImage image;
-    auto const code = image.createFromData(width, height, __get_channels_to_bl_format(channels), (void*)temp.data(), temp.getStrideByte(0));
-    return convertBLResultToErr(_impl->context.blitImage((BLPointI const &)dst, image));
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLPointI(dst.x, dst.y);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image);
+    return convertBLResultToErr(blit_result);
 }
 
-Err Canvas::blitImage(Point2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+Err Canvas::blitImage(Point2i const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    return E_ENOSYS;
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLPointI(dst.x, dst.y);
+    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
+    return convertBLResultToErr(blit_result);
 }
 
 Err Canvas::blitImage(Rect2d const & dst, Box const & src) TBAG_NOEXCEPT
 {
-    return E_ENOSYS;
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLRect(dst.x, dst.y, dst.width, dst.height);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image);
+    return convertBLResultToErr(blit_result);
 }
 
-Err Canvas::blitImage(Rect2d const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+Err Canvas::blitImage(Rect2d const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    return E_ENOSYS;
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLRect(dst.x, dst.y, dst.width, dst.height);
+    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
+    return convertBLResultToErr(blit_result);
 }
 
 Err Canvas::blitImage(Rect2i const & dst, Box const & src) TBAG_NOEXCEPT
 {
-    return E_ENOSYS;
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLRectI(dst.x, dst.y, dst.width, dst.height);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image);
+    return convertBLResultToErr(blit_result);
 }
 
-Err Canvas::blitImage(Rect2i const & dst, Box const & src, Rect2i const & srcArea) TBAG_NOEXCEPT
+Err Canvas::blitImage(Rect2i const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    return E_ENOSYS;
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    auto const bl_dst = BLRectI(dst.x, dst.y, dst.width, dst.height);
+    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
+    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
+    return convertBLResultToErr(blit_result);
 }
 
 Err Canvas::toBox(libtbag::box::Box & output) const
@@ -543,9 +603,9 @@ Err Canvas::toBox(libtbag::box::Box & output) const
         auto * destination = output.data<std::uint8_t>();
         auto const loop_size = height*width;
         for (auto i = 0; i < loop_size; ++i) {
-            destination[0] = source[0]; // B
-            destination[1] = source[1]; // G
-            destination[2] = source[2]; // R
+            destination[0] = source[0];
+            destination[1] = source[1];
+            destination[2] = source[2];
             // destination[-] = source[3]; // Alpha value!
             destination += 3;
             source += 4;

@@ -166,26 +166,32 @@ Err readRgbaImage(std::string const & path, Box & image)
         switch (c) {
         case 1:
             for (auto i = 0; i < size; ++i) {
-                dest[(i*4)+0] = d[i];
-                dest[(i*4)+1] = d[i];
-                dest[(i*4)+2] = d[i];
-                dest[(i*4)+3] = 0xFF;
+                dest[0] = *d;
+                dest[1] = *d;
+                dest[2] = *d;
+                dest[3] = 0xFF;
+                dest += 4;
+                d += 1;
             }
             break;
         case 2:
             for (auto i = 0; i < size; ++i) {
-                dest[(i*4)+0] = d[(i*2)+0];
-                dest[(i*4)+1] = d[(i*2)+0];
-                dest[(i*4)+2] = d[(i*2)+0];
-                dest[(i*4)+3] = d[(i*2)+1];
+                dest[0] = d[0];
+                dest[1] = d[0];
+                dest[2] = d[0];
+                dest[3] = d[1];
+                dest += 4;
+                d += 2;
             }
             break;
         case 3:
             for (auto i = 0; i < size; ++i) {
-                dest[(i*4)+0] = d[(i*3)+0];
-                dest[(i*4)+1] = d[(i*3)+1];
-                dest[(i*4)+2] = d[(i*3)+2];
-                dest[(i*4)+3] = 0xFF;
+                dest[0] = d[0];
+                dest[1] = d[1];
+                dest[2] = d[2];
+                dest[3] = 0xFF;
+                dest += 4;
+                d += 3;
             }
             break;
         case 4:

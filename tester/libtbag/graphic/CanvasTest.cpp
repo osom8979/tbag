@@ -94,6 +94,8 @@ TEST_F(CanvasFixtureTest, BlitImage)
     ASSERT_EQ(E_SUCCESS, readRgbaImage(path.getString(), image));
 
     ASSERT_TRUE(canvas.exists());
+    ASSERT_EQ(E_SUCCESS, canvas.setFillStyle(libtbag::graphic::BLACK_COLOR));
+    ASSERT_EQ(E_SUCCESS, canvas.fillAll());
     ASSERT_EQ(E_SUCCESS, canvas.blitImage(Canvas::Point2i(0, 0), image));
     ASSERT_EQ(E_SUCCESS, canvas.end());
 
@@ -105,13 +107,25 @@ TEST_F(CanvasFixtureTest, BlitImage)
     ASSERT_EQ(TEST_CHANNELS, result.dim(2));
 
     // Save & Load.
-    //tttDir_Automatic();
-    tttDir_AutoCreate();
+    tttDir_Automatic();
     auto const SAVE_PATH = tttDir_Get() / "save.png";
     ASSERT_EQ(E_SUCCESS, writeImage(SAVE_PATH.getString(), result));
 
     Box reload;
     ASSERT_EQ(E_SUCCESS, readImage(SAVE_PATH.getString(), reload));
 
+    ASSERT_EQ(TEST_HEIGHT, reload.dim(0));
+    ASSERT_EQ(TEST_WIDTH, reload.dim(1));
+    ASSERT_EQ(TEST_CHANNELS, reload.dim(2));
+
+    // First RGB pixel.
+    ASSERT_EQ(226, reload.offset<uint8_t>(0)); // r
+    ASSERT_EQ(137, reload.offset<uint8_t>(1)); // g
+    ASSERT_EQ(125, reload.offset<uint8_t>(2)); // b
+
+    // Last RGB pixel.
+    ASSERT_EQ(0, reload.offset<uint8_t>(reload.size() - 4));
+    ASSERT_EQ(0, reload.offset<uint8_t>(reload.size() - 3));
+    ASSERT_EQ(0, reload.offset<uint8_t>(reload.size() - 2));
 }
 
