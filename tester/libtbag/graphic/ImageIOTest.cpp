@@ -64,6 +64,41 @@ TEST(ImageIOTest, ReadImage)
     ASSERT_EQ( 81, reload.offset<uint8_t>(reload.size() - 1)); // b
 }
 
+TEST(ImageIOTest, ReadRgbaImage)
+{
+    auto path = DemoAsset::get_tester_dir_image() / "lena.png";
+
+    Box image;
+    ASSERT_EQ(E_SUCCESS, readRgbaImage(path.getString(), image));
+
+    ASSERT_EQ(4, image.dim(2));
+    ASSERT_EQ(512, image.dim(1));
+    ASSERT_EQ(512, image.dim(0));
+
+    // First RGB pixel.
+    ASSERT_EQ(226, image.offset<uint8_t>(0)); // r
+    ASSERT_EQ(137, image.offset<uint8_t>(1)); // g
+    ASSERT_EQ(125, image.offset<uint8_t>(2)); // b
+    ASSERT_EQ(255, image.offset<uint8_t>(3)); // a
+
+    // Last RGB pixel.
+    ASSERT_EQ(185, image.offset<uint8_t>(image.size() - 4)); // r
+    ASSERT_EQ( 74, image.offset<uint8_t>(image.size() - 3)); // g
+    ASSERT_EQ( 81, image.offset<uint8_t>(image.size() - 2)); // b
+    ASSERT_EQ(255, image.offset<uint8_t>(image.size() - 1)); // a
+
+    tttDir_Automatic();
+    auto const SAVE_PATH = tttDir_Get() / "save.png";
+    ASSERT_EQ(E_SUCCESS, writeImage(SAVE_PATH.getString(), image));
+
+    Box reload;
+    ASSERT_EQ(E_SUCCESS, readImage(SAVE_PATH.getString(), reload));
+
+    ASSERT_EQ(4, reload.dim(2));
+    ASSERT_EQ(512, reload.dim(1));
+    ASSERT_EQ(512, reload.dim(0));
+}
+
 TEST(ImageIOTest, UseJpeg)
 {
     auto path = DemoAsset::get_tester_dir_image() / "lena.png";

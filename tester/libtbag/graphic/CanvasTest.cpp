@@ -91,7 +91,7 @@ TEST_F(CanvasFixtureTest, BlitImage)
 {
     auto path = DemoAsset::get_tester_dir_image() / "lena.png";
     Box image;
-    ASSERT_EQ(E_SUCCESS, readImage(path.getString(), image));
+    ASSERT_EQ(E_SUCCESS, readRgbaImage(path.getString(), image));
 
     ASSERT_TRUE(canvas.exists());
     ASSERT_EQ(E_SUCCESS, canvas.blitImage(Canvas::Point2i(0, 0), image));
@@ -105,8 +105,8 @@ TEST_F(CanvasFixtureTest, BlitImage)
     ASSERT_EQ(TEST_CHANNELS, result.dim(2));
 
     // Save & Load.
-    tttDir_Automatic();
-    // tttDir_AutoCreate();
+    //tttDir_Automatic();
+    tttDir_AutoCreate();
     auto const SAVE_PATH = tttDir_Get() / "save.png";
     ASSERT_EQ(E_SUCCESS, writeImage(SAVE_PATH.getString(), result));
 

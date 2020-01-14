@@ -73,6 +73,7 @@ TBAG_API bool writeTga(int width, int height, int channels, char const * data,
 
 /** Read image file. */
 TBAG_API Err readImage(std::string const & path, Box & image);
+TBAG_API Err readRgbaImage(std::string const & path, Box & image);
 
 /** Write image file. */
 TBAG_API Err writeImage(std::string const & path, Box const & image);

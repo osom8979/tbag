@@ -115,7 +115,8 @@ bool writeTga(int width, int height, int channels, char const * data, libtbag::u
     return stbi_write_tga_core(&s, width, height, channels, (void*)data);
 }
 
-Err readImage(std::string const & path, Box & image)
+template <typename Predicated>
+static Err __read_image_cb(std::string const & path, Predicated predicated)
 {
     if (!filesystem::Path(path).exists()) {
         return E_EEXIST;
@@ -141,11 +142,57 @@ Err readImage(std::string const & path, Box & image)
     assert(1 <= COMPARE_AND(channels) <= 4);
     assert(width >= 1);
     assert(height >= 1);
-    image.resize<uint8_t>(height, width, channels);
-    memcpy(image.data(), data, image.size());
+
+    predicated(width, height, channels, data);
 
     stbi_image_free(data);
     return E_SUCCESS;
+}
+
+Err readImage(std::string const & path, Box & image)
+{
+    return __read_image_cb(path, [&](int w, int h, int c, unsigned char * d){
+        image.resize<uint8_t>(h, w, c);
+        memcpy(image.data(), d, image.size());
+    });
+}
+
+Err readRgbaImage(std::string const & path, Box & image)
+{
+    return __read_image_cb(path, [&](int w, int h, int c, unsigned char * d){
+        image.resize<uint8_t>(h, w, 4);
+        auto * dest = image.data<uint8_t>();
+        auto const size = w*h;
+        switch (c) {
+        case 1:
+            for (auto i = 0; i < size; ++i) {
+                dest[(i*4)+0] = d[i];
+                dest[(i*4)+1] = d[i];
+                dest[(i*4)+2] = d[i];
+                dest[(i*4)+3] = 0xFF;
+            }
+            break;
+        case 2:
+            for (auto i = 0; i < size; ++i) {
+                dest[(i*4)+0] = d[(i*2)+0];
+                dest[(i*4)+1] = d[(i*2)+0];
+                dest[(i*4)+2] = d[(i*2)+0];
+                dest[(i*4)+3] = d[(i*2)+1];
+            }
+            break;
+        case 3:
+            for (auto i = 0; i < size; ++i) {
+                dest[(i*4)+0] = d[(i*3)+0];
+                dest[(i*4)+1] = d[(i*3)+1];
+                dest[(i*4)+2] = d[(i*3)+2];
+                dest[(i*4)+3] = 0xFF;
+            }
+            break;
+        case 4:
+            memcpy(image.data(), d, image.size());
+            break;
+        }
+    });
 }
 
 Err writeImage(std::string const & path, Box const & image)
@@ -194,24 +241,24 @@ static void __write_image_cb(void * context, void * data, int size)
 
 Err writeImage(util::Buffer & buffer, Box const & image, ImageFileFormat format)
 {
-    auto const HEIGHT    = image.dim(0);
-    auto const WIDTH     = image.dim(1);
-    auto const CHANNELS  = image.dim(2);
-    auto const * DATA    = (char const *)image.data();
+    auto const height = image.dim(0);
+    auto const width = image.dim(1);
+    auto const channels = image.dim(2);
+    auto const * data = (char const *)image.data();
 
     int result = 0;
     switch (format) {
     case ImageFileFormat::IFF_PNG:
-        result = stbi_write_png_to_func(&__write_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA, WIDTH * CHANNELS);
+        result = stbi_write_png_to_func(&__write_image_cb, &buffer, width, height, channels, data, width * channels);
         break;
     case ImageFileFormat::IFF_JPG:
-        result = stbi_write_jpg_to_func(&__write_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA, DEFAULT_JPG_QUALITY);
+        result = stbi_write_jpg_to_func(&__write_image_cb, &buffer, width, height, channels, data, DEFAULT_JPG_QUALITY);
         break;
     case ImageFileFormat::IFF_BMP:
-        result = stbi_write_bmp_to_func(&__write_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
+        result = stbi_write_bmp_to_func(&__write_image_cb, &buffer, width, height, channels, data);
         break;
     case ImageFileFormat::IFF_TGA:
-        result = stbi_write_tga_to_func(&__write_image_cb, &buffer, WIDTH, HEIGHT, CHANNELS, DATA);
+        result = stbi_write_tga_to_func(&__write_image_cb, &buffer, width, height, channels, data);
         break;
     default:
         return E_ILLARGS;
