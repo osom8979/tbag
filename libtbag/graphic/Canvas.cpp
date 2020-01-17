@@ -474,104 +474,88 @@ static Err __create_rgba_image(Canvas::Box const & box, BLImage & dest)
     return Canvas::convertBLResultToErr(dest.createFromData(width, height, format, (void*)box.data(), stride));
 }
 
-Err Canvas::blitImage(Point2d const & dst, Box const & src) TBAG_NOEXCEPT
+static BLPoint __convert_bl_structure(Canvas::Point2d const & p)
+{
+    return {p.x, p.y};
+}
+
+static BLPointI __convert_bl_structure(Canvas::Point2i const & p)
+{
+    return {p.x, p.y};
+}
+
+static BLRect __convert_bl_structure(Canvas::Rect2d const & r)
+{
+    return {r.x, r.y, r.width, r.height};
+}
+
+static BLRectI __convert_bl_structure(Canvas::Rect2i const & r)
+{
+    return {r.x, r.y, r.width, r.height};
+}
+
+template <typename PointT>
+static Err __blit_image(BLContext & context, PointT p, Canvas::Box const & src)
 {
     BLImage image;
     auto const code = __create_rgba_image(src, image);
     if (isFailure(code)) {
         return code;
     }
-    auto const bl_dst = BLPoint(dst.x, dst.y);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image);
-    return convertBLResultToErr(blit_result);
+    return Canvas::convertBLResultToErr(context.blitImage(__convert_bl_structure(p), image));
+}
+
+template <typename PointT, typename RectT>
+static Err __blit_image(BLContext & context, PointT p, Canvas::Box const & src, RectT r)
+{
+    BLImage image;
+    auto const code = __create_rgba_image(src, image);
+    if (isFailure(code)) {
+        return code;
+    }
+    return Canvas::convertBLResultToErr(context.blitImage(__convert_bl_structure(p),
+                                                          image,
+                                                          __convert_bl_structure(r)));
+}
+
+Err Canvas::blitImage(Point2d const & dst, Box const & src) TBAG_NOEXCEPT
+{
+    return __blit_image(_impl->context, dst, src);
 }
 
 Err Canvas::blitImage(Point2d const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    BLImage image;
-    auto const code = __create_rgba_image(src, image);
-    if (isFailure(code)) {
-        return code;
-    }
-    auto const bl_dst = BLPoint(dst.x, dst.y);
-    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
-    return convertBLResultToErr(blit_result);
+    return __blit_image(_impl->context, dst, src, src_area);
 }
 
 Err Canvas::blitImage(Point2i const & dst, Box const & src) TBAG_NOEXCEPT
 {
-    BLImage image;
-    auto const code = __create_rgba_image(src, image);
-    if (isFailure(code)) {
-        return code;
-    }
-    auto const bl_dst = BLPointI(dst.x, dst.y);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image);
-    return convertBLResultToErr(blit_result);
+    return __blit_image(_impl->context, dst, src);
 }
 
 Err Canvas::blitImage(Point2i const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    BLImage image;
-    auto const code = __create_rgba_image(src, image);
-    if (isFailure(code)) {
-        return code;
-    }
-    auto const bl_dst = BLPointI(dst.x, dst.y);
-    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
-    return convertBLResultToErr(blit_result);
+    return __blit_image(_impl->context, dst, src, src_area);
 }
 
 Err Canvas::blitImage(Rect2d const & dst, Box const & src) TBAG_NOEXCEPT
 {
-    BLImage image;
-    auto const code = __create_rgba_image(src, image);
-    if (isFailure(code)) {
-        return code;
-    }
-    auto const bl_dst = BLRect(dst.x, dst.y, dst.width, dst.height);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image);
-    return convertBLResultToErr(blit_result);
+    return __blit_image(_impl->context, dst, src);
 }
 
 Err Canvas::blitImage(Rect2d const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    BLImage image;
-    auto const code = __create_rgba_image(src, image);
-    if (isFailure(code)) {
-        return code;
-    }
-    auto const bl_dst = BLRect(dst.x, dst.y, dst.width, dst.height);
-    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
-    return convertBLResultToErr(blit_result);
+    return __blit_image(_impl->context, dst, src, src_area);
 }
 
 Err Canvas::blitImage(Rect2i const & dst, Box const & src) TBAG_NOEXCEPT
 {
-    BLImage image;
-    auto const code = __create_rgba_image(src, image);
-    if (isFailure(code)) {
-        return code;
-    }
-    auto const bl_dst = BLRectI(dst.x, dst.y, dst.width, dst.height);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image);
-    return convertBLResultToErr(blit_result);
+    return __blit_image(_impl->context, dst, src);
 }
 
 Err Canvas::blitImage(Rect2i const & dst, Box const & src, Rect2i const & src_area) TBAG_NOEXCEPT
 {
-    BLImage image;
-    auto const code = __create_rgba_image(src, image);
-    if (isFailure(code)) {
-        return code;
-    }
-    auto const bl_dst = BLRectI(dst.x, dst.y, dst.width, dst.height);
-    auto const bl_src_area = BLRectI(src_area.x, src_area.y, src_area.width, src_area.height);
-    auto const blit_result = _impl->context.blitImage(bl_dst, image, bl_src_area);
-    return convertBLResultToErr(blit_result);
+    return __blit_image(_impl->context, dst, src, src_area);
 }
 
 Err Canvas::toBox(libtbag::box::Box & output) const
