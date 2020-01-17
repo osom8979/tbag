@@ -156,6 +156,20 @@ UV_ERRNO_MAP(_XX)
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
+TBAG_CONSTEXPR static int __get_err_count() TBAG_NOEXCEPT
+{
+    int i = 0;
+#define _TBAG_XX(name, num, message) ++i;
+    TBAG_ERROR_INFO_MAP(_TBAG_XX, _TBAG_XX)
+#undef _TBAG_XX
+    return i;
+}
+
+int getErrCount() TBAG_NOEXCEPT
+{
+    return __get_err_count();
+}
+
 Err getErr(char const * upper_text) TBAG_NOEXCEPT
 {
     assert(upper_text != nullptr);
