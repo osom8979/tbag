@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/util/OffsetOf.hpp>
 
 #include <cstddef>
 
@@ -72,6 +73,30 @@
 #define STATIC_ASSERT_CHECK_IS_DEFAULT_CONSTRUCTIBLE(class_name)    \
     static_assert(std::is_default_constructible<class_name>::value, \
             "The " #class_name " class must support the default constructor.")
+#endif
+
+#ifndef STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE2
+#define STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE2(left, le1, le2, right, re1, re2)   \
+    static_assert(sizeof(left) == sizeof(right) && alignof(left) == alignof(right) &&   \
+                  TBAG_OFFSET_OF(left, le1) == TBAG_OFFSET_OF(right, re1) &&            \
+                  TBAG_OFFSET_OF(left, le2) == TBAG_OFFSET_OF(right, re2) &&            \
+                  std::is_same<decltype(left::le1), decltype(right::re1)>::value &&     \
+                  std::is_same<decltype(left::le2), decltype(right::re2)>::value,       \
+                  #left " and " #right " are not reinterpret cast.")
+#endif
+
+#ifndef STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE4
+#define STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE4(left, le1, le2, le3, le4, right, re1, re2, re3, re4) \
+    static_assert(sizeof(left) == sizeof(right) && alignof(left) == alignof(right) && \
+                  TBAG_OFFSET_OF(left, le1) == TBAG_OFFSET_OF(right, re1) &&          \
+                  TBAG_OFFSET_OF(left, le2) == TBAG_OFFSET_OF(right, re2) &&          \
+                  TBAG_OFFSET_OF(left, le3) == TBAG_OFFSET_OF(right, re3) &&          \
+                  TBAG_OFFSET_OF(left, le4) == TBAG_OFFSET_OF(right, re4) &&          \
+                  std::is_same<decltype(left::le1), decltype(right::re1)>::value &&   \
+                  std::is_same<decltype(left::le2), decltype(right::re2)>::value &&   \
+                  std::is_same<decltype(left::le3), decltype(right::re3)>::value &&   \
+                  std::is_same<decltype(left::le4), decltype(right::re4)>::value,     \
+                  #left " and " #right " are not reinterpret cast.")
 #endif
 
 // -------------------
