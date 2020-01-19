@@ -85,6 +85,18 @@
                   #left " and " #right " are not reinterpret cast.")
 #endif
 
+#ifndef STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE3
+#define STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE3(left, le1, le2, le3, right, re1, re2, re3) \
+    static_assert(sizeof(left) == sizeof(right) && alignof(left) == alignof(right) && \
+                  TBAG_OFFSET_OF(left, le1) == TBAG_OFFSET_OF(right, re1) &&          \
+                  TBAG_OFFSET_OF(left, le2) == TBAG_OFFSET_OF(right, re2) &&          \
+                  TBAG_OFFSET_OF(left, le3) == TBAG_OFFSET_OF(right, re3) &&          \
+                  std::is_same<decltype(left::le1), decltype(right::re1)>::value &&   \
+                  std::is_same<decltype(left::le2), decltype(right::re2)>::value &&   \
+                  std::is_same<decltype(left::le3), decltype(right::re3)>::value,     \
+                  #left " and " #right " are not reinterpret cast.")
+#endif
+
 #ifndef STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE4
 #define STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE4(left, le1, le2, le3, le4, right, re1, re2, re3, re4) \
     static_assert(sizeof(left) == sizeof(right) && alignof(left) == alignof(right) && \
@@ -96,6 +108,40 @@
                   std::is_same<decltype(left::le2), decltype(right::re2)>::value &&   \
                   std::is_same<decltype(left::le3), decltype(right::re3)>::value &&   \
                   std::is_same<decltype(left::le4), decltype(right::re4)>::value,     \
+                  #left " and " #right " are not reinterpret cast.")
+#endif
+
+#ifndef STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE5
+#define STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE5(left, le1, le2, le3, le4, le5, right, re1, re2, re3, re4, re5) \
+    static_assert(sizeof(left) == sizeof(right) && alignof(left) == alignof(right) && \
+                  TBAG_OFFSET_OF(left, le1) == TBAG_OFFSET_OF(right, re1) &&          \
+                  TBAG_OFFSET_OF(left, le2) == TBAG_OFFSET_OF(right, re2) &&          \
+                  TBAG_OFFSET_OF(left, le3) == TBAG_OFFSET_OF(right, re3) &&          \
+                  TBAG_OFFSET_OF(left, le4) == TBAG_OFFSET_OF(right, re4) &&          \
+                  TBAG_OFFSET_OF(left, le5) == TBAG_OFFSET_OF(right, re5) &&          \
+                  std::is_same<decltype(left::le1), decltype(right::re1)>::value &&   \
+                  std::is_same<decltype(left::le2), decltype(right::re2)>::value &&   \
+                  std::is_same<decltype(left::le3), decltype(right::re3)>::value &&   \
+                  std::is_same<decltype(left::le4), decltype(right::re4)>::value &&   \
+                  std::is_same<decltype(left::le5), decltype(right::re5)>::value,     \
+                  #left " and " #right " are not reinterpret cast.")
+#endif
+
+#ifndef STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE6
+#define STATIC_ASSERT_IS_REINTERPRET_CAST_STRUCTURE6(left, le1, le2, le3, le4, le5, le6, right, re1, re2, re3, re4, re5, re6) \
+    static_assert(sizeof(left) == sizeof(right) && alignof(left) == alignof(right) && \
+                  TBAG_OFFSET_OF(left, le1) == TBAG_OFFSET_OF(right, re1) &&          \
+                  TBAG_OFFSET_OF(left, le2) == TBAG_OFFSET_OF(right, re2) &&          \
+                  TBAG_OFFSET_OF(left, le3) == TBAG_OFFSET_OF(right, re3) &&          \
+                  TBAG_OFFSET_OF(left, le4) == TBAG_OFFSET_OF(right, re4) &&          \
+                  TBAG_OFFSET_OF(left, le5) == TBAG_OFFSET_OF(right, re5) &&          \
+                  TBAG_OFFSET_OF(left, le6) == TBAG_OFFSET_OF(right, re6) &&          \
+                  std::is_same<decltype(left::le1), decltype(right::re1)>::value &&   \
+                  std::is_same<decltype(left::le2), decltype(right::re2)>::value &&   \
+                  std::is_same<decltype(left::le3), decltype(right::re3)>::value &&   \
+                  std::is_same<decltype(left::le4), decltype(right::re4)>::value &&   \
+                  std::is_same<decltype(left::le5), decltype(right::re5)>::value &&   \
+                  std::is_same<decltype(left::le6), decltype(right::re6)>::value,     \
                   #left " and " #right " are not reinterpret cast.")
 #endif
 
