@@ -87,6 +87,8 @@ TEST(TaskManagerTest, CreateThread)
     ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info2.value.type);
     ASSERT_TRUE(task_info1.value.done);
     ASSERT_TRUE(task_info2.value.done);
+    ASSERT_FALSE(task_info1.value.killed);
+    ASSERT_FALSE(task_info2.value.killed);
 
     auto const erase_result1 = mgr.erase(task_list[0]);
     ASSERT_EQ(E_SUCCESS, erase_result1);
@@ -138,6 +140,7 @@ TEST(TaskManagerTest, KillThread)
     auto const & task_info = err_task_info.value;
     ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info.type);
     ASSERT_TRUE(task_info.done);
+    ASSERT_TRUE(task_info.killed);
     ASSERT_EQ(EXIT_FAILURE, task_info.exit_status);
     ASSERT_EQ(libtbag::signal::TBAG_SIGNAL_INTERRUPT, task_info.term_signal);
 
@@ -173,6 +176,7 @@ TEST(TaskManagerTest, CreateProcess)
     auto const & task_info = err_task_info.value;
     ASSERT_EQ(TaskManager::TaskType::TT_PROCESS, task_info.type);
     ASSERT_TRUE(task_info.done);
+    ASSERT_FALSE(task_info.killed);
     ASSERT_EQ(0, task_info.exit_status);
     ASSERT_EQ(0, task_info.term_signal);
 
@@ -209,6 +213,7 @@ TEST(TaskManagerTest, KillProcess)
     auto const & task_info = err_task_info.value;
     ASSERT_EQ(TaskManager::TaskType::TT_PROCESS, task_info.type);
     ASSERT_TRUE(task_info.done);
+    ASSERT_TRUE(task_info.killed);
     if (isWindowsPlatform()) {
         ASSERT_EQ(1, task_info.exit_status);
     } else {

@@ -335,8 +335,6 @@ Err TaskManager::join(TaskId id)
     }
     auto const & task_info = err_task_info.value;
 
-    // [IMPORTANT] Do not change the calling order.
-
     if (task_info.type == TaskType::TT_PROCESS) {
         auto const pid = task_info.internal_id.process;
         tDLogN("TaskManager::join(task_id={}) Process ID: {}", id, pid);
@@ -353,28 +351,24 @@ Err TaskManager::join(TaskId id)
 
 Err TaskManager::erase(TaskId id)
 {
-    auto const err_task_info = getTaskInfo(id);
-    if (!err_task_info) {
-        return err_task_info.code;
+    WriteLockGuard const __task_guard__(_tasks_lock);
+    auto const itr = _tasks.find(id);
+    if (itr == _tasks.end()) {
+        return E_NFOUND;
     }
-    auto const & task_info = err_task_info.value;
-
-    // [IMPORTANT] Do not change the calling order.
+    auto & task_info = itr->second;
 
     if (task_info.type == TaskType::TT_PROCESS) {
-        WriteLockGuard const G2(_processes_lock);
+        WriteLockGuard const __process_guard__(_processes_lock);
         auto const erase_result = _processes.erase(task_info.internal_id.process);
         assert(erase_result);
     } else {
         assert(task_info.type == TaskType::TT_THREAD);
-        WriteLockGuard const G2(_threads_lock);
+        WriteLockGuard const __thread_guard__(_threads_lock);
         auto const erase_result = _threads.erase(task_info.internal_id.thread);
         assert(erase_result);
     }
 
-    // [IMPORTANT] Do not change the calling order.
-
-    WriteLockGuard const G2(_tasks_lock);
     if (task_info.type == TaskType::TT_PROCESS) {
         auto const pid2task_erase_result = _pid2task.erase(task_info.internal_id.process);
         assert(pid2task_erase_result == 1u);
@@ -384,8 +378,6 @@ Err TaskManager::erase(TaskId id)
 
 Err TaskManager::kill(TaskId id)
 {
-    // [IMPORTANT] Do not change the calling order.
-
     WriteLockGuard const __task_guard__(_tasks_lock);
     auto const itr = _tasks.find(id);
     if (itr == _tasks.end()) {
