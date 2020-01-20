@@ -394,9 +394,10 @@ std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, Traits
 }
 
 /** General color structure. */
-using Rgb   = Rgb24;
-using Rgba  = Rgb32;
-using Color = Rgb32;
+using Rgb    = Rgb24;
+using Rgba   = Rgb32;
+using Color  = Rgb32;
+using Rgba32 = Rgb32;
 
 /**
  * @defgroup __DOXYGEN_GROUP__PREDEFINED_COLORS__ Predefined colors

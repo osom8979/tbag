@@ -198,17 +198,16 @@ struct TBAG_API TmxMap : protected libtbag::dom::xml::XmlHelper
     int height;
     int tile_width;
     int tile_height;
-    int hexside_length;
+    int hex_side_length;
     StaggerAxis stagger_axis;
     StaggerIndex stagger_index;
     Color background_color;
     int next_layer_id;
     int next_object_id;
-
     bool infinite = false;
 
     TmxProperties properties;
-    TileSets tile_sets;
+    TileSets tilesets;
     Layers layers;
     ObjectGroups object_groups;
     ImageLayers image_layers;

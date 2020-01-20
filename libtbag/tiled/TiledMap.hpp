@@ -37,25 +37,45 @@ class TBAG_API TiledMap : private Noncopyable
 {
 public:
     using TmxMap = libtbag::tiled::details::TmxMap;
+    using TmxTileSet = libtbag::tiled::details::TmxTileSet;
+
+public:
+    struct Callbacks
+    {
+        Callbacks() { /* EMPTY. */ }
+        virtual ~Callbacks() { /* EMPTY. */ }
+
+        virtual void onInitMap(TmxMap const & map) { /* EMPTY. */ }
+    };
+
+private:
+    Callbacks * _cb;
 
 private:
     TmxMap _map;
 
 public:
-    TiledMap();
+    TiledMap(Callbacks * cb = nullptr);
     virtual ~TiledMap();
+
+public:
+    inline Callbacks * getCallbacks() const TBAG_NOEXCEPT { return _cb; }
+    inline void setCallbacks(Callbacks * cb) TBAG_NOEXCEPT { _cb = cb; }
 
 public:
     inline TmxMap       & map()       TBAG_NOEXCEPT { return _map; }
     inline TmxMap const & map() const TBAG_NOEXCEPT { return _map; }
 
 public:
-    Err readFromFile(std::string const & path);
-    Err readFromXmlText(std::string const & xml);
+    Err readFromFile(std::string const & path, bool auto_init = true);
+    Err readFromXmlText(std::string const & xml, bool auto_init = true);
 
 public:
     Err writeToFile(std::string const & path) const;
     Err writeToXmlText(std::string & xml) const;
+
+public:
+    void init();
 };
 
 } // namespace tiled

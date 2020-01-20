@@ -161,7 +161,7 @@ Err TmxMap::read(Element const & elem)
     optAttr(elem, ATT_HEIGHT, height);
     optAttr(elem, ATT_TILEWIDTH, tile_width);
     optAttr(elem, ATT_TILEHEIGHT, tile_height);
-    optAttr(elem, ATT_HEXSIDELENGTH, hexside_length);
+    optAttr(elem, ATT_HEXSIDELENGTH, hex_side_length);
 
     std::string stagger_axis_text;
     optAttr(elem, ATT_STAGGERAXIS, stagger_axis_text);
@@ -177,6 +177,7 @@ Err TmxMap::read(Element const & elem)
 
     optAttr(elem, ATT_NEXTLAYERID, next_layer_id);
     optAttr(elem, ATT_NEXTOBJECTID, next_object_id);
+    optAttr(elem, ATT_INFINITE, infinite);
 
     auto const * properties_elem = elem.FirstChildElement(TmxProperties::TAG_NAME);
     if (properties_elem != nullptr) {
@@ -186,7 +187,7 @@ Err TmxMap::read(Element const & elem)
     foreachElement(elem, TmxTileSet::TAG_NAME, [&](Element const & e){
         TmxTileSet tile_set;
         if (isSuccess(tile_set.read(e))) {
-            tile_sets.push_back(std::move(tile_set));
+            tilesets.push_back(std::move(tile_set));
         }
     });
 
@@ -247,12 +248,13 @@ Err TmxMap::write(Element & elem) const
     setAttr(elem, ATT_HEIGHT         , height);
     setAttr(elem, ATT_TILEWIDTH      , tile_width);
     setAttr(elem, ATT_TILEHEIGHT     , tile_height);
-    setAttr(elem, ATT_HEXSIDELENGTH  , hexside_length);
+    setAttr(elem, ATT_HEXSIDELENGTH  , hex_side_length);
     setAttr(elem, ATT_STAGGERAXIS    , getStaggerAxisName(stagger_axis));
     setAttr(elem, ATT_STAGGERINDEX   , getStaggerIndexName(stagger_index));
     setAttr(elem, ATT_BACKGROUNDCOLOR, background_color.toArgbString());
     setAttr(elem, ATT_NEXTLAYERID    , next_layer_id);
     setAttr(elem, ATT_NEXTOBJECTID   , next_object_id);
+    setAttr(elem, ATT_INFINITE       , infinite);
 
     if (!properties.empty()) {
         newElement(elem, TmxProperties::TAG_NAME, [&](Element & d){
@@ -260,9 +262,9 @@ Err TmxMap::write(Element & elem) const
         });
     }
 
-    for (auto & tile_set : tile_sets) {
+    for (auto & tileset : tilesets) {
         newElement(elem, TmxTileSet::TAG_NAME, [&](Element & p){
-            tile_set.write(p);
+            tileset.write(p);
         });
     }
 
