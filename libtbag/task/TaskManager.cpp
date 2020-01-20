@@ -85,8 +85,8 @@ static void __init_task_thread(TaskManager * mgr, TaskId id)
 // TaskManager implementation
 // --------------------------
 
-TaskManager::TaskManager(Callback * cb)
-        : TASK_CALLBACK(cb), _task_number(BEGIN_TASK_ID)
+TaskManager::TaskManager(Callback * cb, bool auto_clear)
+        : TASK_CALLBACK(cb), AUTO_CLEAR(auto_clear), _task_number(BEGIN_TASK_ID)
 {
     auto const shared = __get_global_manager_register();
     assert(static_cast<bool>(shared));
@@ -98,22 +98,48 @@ TaskManager::TaskManager(Callback * cb)
 
 TaskManager::~TaskManager()
 {
-    clearWithoutChecking();
+    if (AUTO_CLEAR) {
+        clear();
+    }
 }
 
-void TaskManager::clearWithoutChecking()
+void TaskManager::clearUnsafe()
 {
-    WriteLockGuard const G(_tasks_lock);
     _tasks.clear();
     _pid2task.clear();
-
-    _threads_lock.writeLock();
     _threads.clear();
-    _threads_lock.writeUnlock();
-
-    _processes_lock.writeLock();
     _processes.clear();
-    _processes_lock.writeUnlock();
+}
+
+void TaskManager::clear()
+{
+    WriteLockGuard const __task_lock__(_tasks_lock);
+    WriteLockGuard const __thread_lock__(_threads_lock);
+    WriteLockGuard const __process_lock__(_processes_lock);
+
+    for (auto const & task : _tasks) {
+        auto const & task_info = task.second;
+        if (!task_info.done && !task_info.killed) {
+            if (task_info.type == TaskType::TT_PROCESS) {
+                _processes.kill(task_info.internal_id.process, libtbag::signal::TBAG_SIGNAL_KILL);
+            } else {
+                assert(task_info.type == TaskType::TT_THREAD);
+                if (isWindowsPlatform()) {
+                    _threads.cancel(task_info.internal_id.thread);
+                } else {
+                    _threads.kill(task_info.internal_id.thread, THREAD_TASK_KILL_SIGNAL);
+                }
+            }
+        }
+        if (task_info.type == TaskType::TT_PROCESS) {
+            _processes.join(task_info.internal_id.process);
+        } else {
+            assert(task_info.type == TaskType::TT_THREAD);
+            _threads.join(task_info.internal_id.thread, false);
+        }
+    }
+
+    clearUnsafe();
 }
 
 TaskId TaskManager::getCurrentTaskId()

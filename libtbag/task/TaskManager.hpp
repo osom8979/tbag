@@ -144,8 +144,11 @@ public:
     };
 
 private:
-    // "CALLBACK" are being used as macros in MSVC.
+    /** @warning 'CALLBACK' are being used as macros in MSVC. */
     Callback * const TASK_CALLBACK;
+
+    /** Call the 'clear' method by the destructor. */
+    bool const AUTO_CLEAR;
 
 private:
     RwLock mutable _threads_lock;
@@ -164,11 +167,12 @@ private:
     std::atomic<TaskId> _task_number;
 
 public:
-    TaskManager(Callback * cb = nullptr);
+    TaskManager(Callback * cb = nullptr, bool auto_clear = true);
     virtual ~TaskManager();
 
 public:
-    void clearWithoutChecking();
+    void clearUnsafe();
+    void clear();
 
 private:
     TBAG_API friend void __task_interrupt_signal(int signum);
