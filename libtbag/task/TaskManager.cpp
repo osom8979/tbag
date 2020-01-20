@@ -26,6 +26,7 @@ namespace task {
 using TaskId = TaskManager::TaskId;
 using ErrTaskId = TaskManager::ErrTaskId;
 using ErrTaskInfo = TaskManager::ErrTaskInfo;
+using TaskInfoMap = TaskManager::TaskInfoMap;
 
 TBAG_CONSTEXPR static char const * const GLOBAL_MANAGER_REGISTER_KEY =
         "libtbag::task::_manager_register";
@@ -174,6 +175,16 @@ ErrTaskInfo TaskManager::getTaskInfo(TaskId id) const
     return { E_SUCCESS, itr->second };
 }
 
+TaskInfoMap TaskManager::getTaskInfos() const
+{
+    TaskInfoMap result;
+    ReadLockGuard const G(_tasks_lock);
+    for (auto const & itr : _tasks) {
+        result.emplace(itr.first, itr.second);
+    }
+    return result;
+}
+
 void TaskManager::_on_thread_exit(TaskId id, int64_t exit_status, int term_signal)
 {
     tDLogN("TaskManager::_on_thread_exit(task_id={},exit={},signum={}) function was called.",
@@ -305,7 +316,8 @@ ErrTaskId TaskManager::runProcess(ProcessParams const & params, void * opaque)
     WriteLockGuard const G(_tasks_lock);
 
     _processes_lock.writeLock();
-    auto const pid = _processes.exec(params.file, params.args, params.envs, params.cwd, params.input);
+    auto const pid = _processes.exec(params.file, params.args, params.envs, params.cwd, params.input,
+                                     params.enable_stdout, params.enable_stderr);
     _processes_lock.writeUnlock();
 
     if (pid == 0) {

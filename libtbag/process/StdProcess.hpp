@@ -99,7 +99,9 @@ public:
               std::vector<std::string> const & args = std::vector<std::string>(),
               std::vector<std::string> const & envs = std::vector<std::string>(),
               std::string const & cwd = std::string(),
-              std::string const & input = std::string());
+              std::string const & input = std::string(),
+              bool enable_stdout = true,
+              bool enable_stderr = true);
 
 public:
     // clang-format off

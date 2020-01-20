@@ -83,6 +83,9 @@ TEST(TaskManagerTest, CreateThread)
     auto const task_info2 = mgr.getTaskInfo(task_list[1]);
     ASSERT_EQ(E_SUCCESS, task_info2.code);
 
+    auto const infos = mgr.getTaskInfos();
+    ASSERT_EQ(2, infos.size());
+
     ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info1.value.type);
     ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info2.value.type);
     ASSERT_TRUE(task_info1.value.done);

@@ -68,9 +68,11 @@ Err ProcessManager::Proc::exec(std::string const & file,
                                std::vector<std::string> const & args,
                                std::vector<std::string> const & envs,
                                std::string const & cwd,
-                               std::string const & input)
+                               std::string const & input,
+                               bool enable_stdout,
+                               bool enable_stderr)
 {
-    Err const CODE = spawn(_loop, file, args, envs, cwd, input);
+    Err const CODE = spawn(_loop, file, args, envs, cwd, input, enable_stdout, enable_stderr);
     if (isFailure(CODE)) {
         return CODE;
     }
@@ -208,11 +210,13 @@ int ProcessManager::exec(std::string const & file,
                          std::vector<std::string> const & args,
                          std::vector<std::string> const & envs,
                          std::string const & cwd,
-                         std::string const & input)
+                         std::string const & input,
+                         bool enable_stdout,
+                         bool enable_stderr)
 {
     Guard g(_mutex);
     SharedProc proc(new Proc(this));
-    Err const SPAWN_CODE = proc->exec(file, args, envs, cwd, input);
+    Err const SPAWN_CODE = proc->exec(file, args, envs, cwd, input, enable_stdout, enable_stderr);
     if (isFailure(SPAWN_CODE)) {
         tDLogE("ProcessManager::spawn() process spawn error.", getErrName(SPAWN_CODE));
         return 0;

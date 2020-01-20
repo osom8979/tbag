@@ -113,6 +113,7 @@ public:
     using ErrTaskInfo = libtbag::ErrPair<TaskInfo>;
     using TaskMap = std::unordered_map<TaskId, TaskInfo>;
     using Pid2Task = std::unordered_map<int, TaskId>;
+    using TaskInfoMap = std::unordered_map<TaskId, TaskInfo>;
 
     struct Callback
     {
@@ -138,6 +139,8 @@ public:
         std::vector<std::string> envs;
         std::string cwd;
         std::string input;
+        bool enable_stdout = true;
+        bool enable_stderr = true;
     };
 
 private:
@@ -190,6 +193,7 @@ public:
 public:
     bool exists(TaskId id) const;
     ErrTaskInfo getTaskInfo(TaskId id) const;
+    TaskInfoMap getTaskInfos() const;
 
 private:
     void _on_thread_exit(TaskId id, int64_t exit_status, int term_signal);
