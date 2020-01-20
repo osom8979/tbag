@@ -280,6 +280,7 @@ ErrTaskId TaskManager::runThread(ThreadParams const & params, void * opaque)
     info.type = TaskType::TT_THREAD;
     info.internal_id = createThreadTaskId(thread_id);
     info.done = false;
+    info.killed = false;
     info.exit_status = 0;
     info.term_signal = 0;
     info.opaque = opaque;
@@ -315,6 +316,7 @@ ErrTaskId TaskManager::runProcess(ProcessParams const & params, void * opaque)
     info.type = TaskType::TT_PROCESS;
     info.internal_id = createProcessTaskId(pid);
     info.done = false;
+    info.killed = false;
     info.exit_status = 0;
     info.term_signal = 0;
     info.opaque = opaque;
@@ -382,40 +384,41 @@ Err TaskManager::erase(TaskId id)
 
 Err TaskManager::kill(TaskId id)
 {
-    auto const err_task_info = getTaskInfo(id);
-    if (!err_task_info) {
-        return err_task_info.code;
-    }
-    auto const & task_info = err_task_info.value;
-
     // [IMPORTANT] Do not change the calling order.
+
+    WriteLockGuard const __task_guard__(_tasks_lock);
+    auto const itr = _tasks.find(id);
+    if (itr == _tasks.end()) {
+        return E_NFOUND;
+    }
+
+    auto & task_info = itr->second;
+    if (task_info.done) {
+        return E_ALREADY;
+    }
+    if (task_info.killed) {
+        return E_ILLSTATE;
+    }
+
+    Err kill_result = E_UNKNOWN;
 
     if (task_info.type == TaskType::TT_PROCESS) {
         auto const pid = task_info.internal_id.process;
         tDLogN("TaskManager::kill(task_id={}) Process ID: {}", id, pid);
-        WriteLockGuard const G2(_processes_lock);
-        return _processes.kill(pid, libtbag::signal::TBAG_SIGNAL_KILL);
+        WriteLockGuard const __process_guard__(_processes_lock);
+        kill_result = _processes.kill(pid, libtbag::signal::TBAG_SIGNAL_KILL);
     } else {
         assert(task_info.type == TaskType::TT_THREAD);
         auto const thread_id = task_info.internal_id.thread;
         tDLogN("TaskManager::kill(task_id={}) Thread ID: {}", id, (void*)thread_id);
 
+        WriteLockGuard const __thread_guard__(_threads_lock);
         if (isWindowsPlatform()) {
+            auto const cancel_result = _threads.cancel(thread_id);
+
             // [IMPORTANT]
             // On Windows platforms, the thread terminates immediately.
             // Therefore, you must manipulate the attribute yourself.
-            WriteLockGuard const G2(_tasks_lock);
-            auto const itr = _tasks.find(id);
-            if (itr == _tasks.end()) {
-                return E_NFOUND;
-            }
-            if (itr->second.done) {
-                return E_ALREADY;
-            }
-
-            WriteLockGuard const G3(_threads_lock);
-            auto const cancel_result = _threads.cancel(thread_id);
-
             if (isSuccess(cancel_result)) {
                 itr->second.done = true;
                 itr->second.exit_status = EXIT_FAILURE;
@@ -424,12 +427,16 @@ Err TaskManager::kill(TaskId id)
             if (TASK_CALLBACK) {
                 TASK_CALLBACK->onThreadExit(id, EXIT_FAILURE, THREAD_TASK_KILL_SIGNAL);
             }
-            return cancel_result;
+            kill_result = cancel_result;
         } else {
-            WriteLockGuard const G3(_threads_lock);
-            return _threads.kill(thread_id, THREAD_TASK_KILL_SIGNAL);
+            kill_result = _threads.kill(thread_id, THREAD_TASK_KILL_SIGNAL);
         }
     }
+
+    if (isSuccess(kill_result)) {
+        task_info.killed = true;
+    }
+    return kill_result;
 }
 
 } // namespace task

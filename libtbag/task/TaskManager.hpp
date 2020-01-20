@@ -97,6 +97,9 @@ public:
         /** Task id done? */
         bool done = false;
 
+        /** Task id killed? */
+        bool killed = false;
+
         /** Exit status code. */
         int64_t exit_status = 0;
 

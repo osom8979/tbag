@@ -230,18 +230,16 @@ Err ProcessManager::kill(int pid, int signum)
 {
     Guard const g(_mutex);
     auto itr = _procs.find(pid);
-    if (itr != _procs.end()) {
-        if (itr->second) {
-            if (itr->second->isRunning()) {
-                return itr->second->kill(signum);
-            } else {
-                return E_ILLSTATE;
-            }
-        } else {
-            return E_EXPIRED;
-        }
+    if (itr == _procs.end()) {
+        return E_NFOUND;
     }
-    return E_NFOUND;
+    if (!itr->second) {
+        return E_EXPIRED;
+    }
+    if (!itr->second->isRunning()) {
+        return E_ILLSTATE;
+    }
+    return itr->second->kill(signum);
 }
 
 void ProcessManager::killAll(int signum)
