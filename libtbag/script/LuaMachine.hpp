@@ -124,6 +124,13 @@ public:
     bool isInitialized() const;
 
 public:
+    bool isLuaFunction(std::string const & package, std::string const & symbol) const;
+    bool isLuaFunction(std::string const & symbol) const;
+
+public:
+    std::string getGlobalString(std::string const & symbol) const;
+
+public:
     bool runScriptFile(std::string const & path);
     bool runScript(std::string const & code);
 

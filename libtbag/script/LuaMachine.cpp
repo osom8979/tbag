@@ -366,6 +366,49 @@ bool LuaMachine::isInitialized() const
     return !getTbagVersion().empty();
 }
 
+bool LuaMachine::isLuaFunction(std::string const & package, std::string const & symbol) const
+{
+    auto * L = _state.get();
+    assert(L != nullptr);
+
+    bool result = false;
+    lua_getglobal(L, package.c_str());
+    if (lua_istable(L, -1)) {
+        lua_getfield(L, -1, symbol.c_str());
+        if (lua_isfunction(L, -1)) {
+            result = true;
+        }
+        lua_pop(L, 1);
+    }
+    lua_pop(L, 1);
+    return result;
+}
+
+bool LuaMachine::isLuaFunction(std::string const & symbol) const
+{
+    auto * L = _state.get();
+    assert(L != nullptr);
+
+    bool result = false;
+    lua_getglobal(L, symbol.c_str());
+    if (lua_isfunction(L, -1)) {
+        result = true;
+    }
+    lua_pop(L, 1);
+    return result;
+}
+
+std::string LuaMachine::getGlobalString(std::string const & symbol) const
+{
+    auto * L = _state.get();
+    assert(L != nullptr);
+
+    lua_getglobal(L, symbol.c_str());
+    std::string const result = lua_tostring(L, -1);
+    lua_pop(L, 1);
+    return result;
+}
+
 bool LuaMachine::runScriptFile(std::string const & path)
 {
     using namespace libtbag::filesystem;

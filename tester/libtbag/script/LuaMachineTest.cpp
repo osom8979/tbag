@@ -29,12 +29,10 @@ TEST(LuaMachineTest, StringLua_format)
     libtbag::log::SeverityGuard guard;
     LuaMachine lua;
     lua.initDefault();
+    ASSERT_TRUE(lua.isLuaFunction("tbag", "format"));
     char const * const TEST_SCRIPT = "text = tbag.format('Format: {}, {}, {}, {}', 'haha', 100, 1.9, true)";
     char const * const RESULT_TEXT = "Format: haha, 100, 1.9, true";
     ASSERT_TRUE(lua.runScript(TEST_SCRIPT));
-
-    lua._getglobal("text");
-    ASSERT_STREQ(RESULT_TEXT, lua._tostring(-1));
-    lua._pop(1);
+    ASSERT_STREQ(RESULT_TEXT, lua.getGlobalString("text").c_str());
 }
 
