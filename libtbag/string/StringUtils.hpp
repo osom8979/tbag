@@ -301,6 +301,26 @@ inline std::string toString(bool val)
     return std::to_string(val ? 1 : 0);
 }
 
+inline std::string toString(char const * val)
+{
+    return std::string(val);
+}
+
+inline std::string toString(char * val)
+{
+    return std::string(val);
+}
+
+inline std::string toString(std::string && val)
+{
+    return std::move(val);
+}
+
+inline std::string toString(std::string const & val)
+{
+    return val;
+}
+
 TBAG_API std::string toHexString(unsigned char val, bool upper = true);
 TBAG_API std::string toHexString(unsigned short val, bool upper = true);
 TBAG_API std::string toHexString(unsigned int val, bool upper = true);

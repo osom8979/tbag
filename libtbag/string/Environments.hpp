@@ -20,6 +20,11 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Flags.hpp>
 
+#include <string>
+#include <vector>
+#include <map>
+#include <utility>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -176,6 +181,26 @@ public:
 public:
     static Environments createDefaultEnvironments(bool with_system = true);
 };
+
+template <typename MapItr>
+std::string convert(std::string const & text, MapItr begin, MapItr end, bool with_system = true)
+{
+    auto envs = Environments::createDefaultEnvironments(with_system);
+    for (; begin != end; ++begin) {
+        envs.push(toString(begin->first), toString(begin->second));
+    }
+    return envs.convert(text);
+}
+
+template <typename KeyT, typename ValT>
+std::string convert(std::string const & text, std::map<KeyT, ValT> const & dict, bool with_system = true)
+{
+    return convert(text, dict.begin(), dict.end(), with_system);
+}
+
+TBAG_API std::string convert(std::string const & text,
+                             std::map<std::string, std::string> const & dict,
+                             bool with_system = true);
 
 } // namespace string
 

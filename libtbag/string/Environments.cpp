@@ -321,6 +321,17 @@ Environments Environments::createDefaultEnvironments(bool with_system)
     return envs;
 }
 
+std::string convert(std::string const & text,
+                    std::map<std::string, std::string> const & dict,
+                    bool with_system)
+{
+    auto envs = Environments::createDefaultEnvironments(with_system);
+    for (auto const & itr : dict) {
+        envs.push(itr.first, itr.second);
+    }
+    return envs.convert(text);
+}
+
 } // namespace string
 
 // --------------------
