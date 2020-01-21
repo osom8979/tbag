@@ -86,6 +86,18 @@ public:
         TT_PROCESS,
     };
 
+    inline static char const * getTaskTypeName(TaskType t) TBAG_NOEXCEPT
+    {
+        switch (t) {
+        case TaskType::TT_THREAD:
+            return "thread";
+        case TaskType::TT_PROCESS:
+            return "process";
+        default:
+            return "unknown";
+        }
+    }
+
     struct TaskInfo
     {
         /** thread or process? */
