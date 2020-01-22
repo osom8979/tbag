@@ -6,23 +6,23 @@ from .properties import *
 
 HELP_MESSAGE = 'Usage: python ' + sys.argv[0] + ' {package/path/classname} {author}'
 
-def generateCppTest(classpath):
-    dic = createDefaultDictionary(classpath)
+
+# noinspection PyUnresolvedReferences
+def generate_cpp_test(classpath):
+    dic = create_default_dictionary(classpath)
 
     if os.path.isfile(dic[TEST_FILEPATH]):
         print('Exists header file: ' + dic[TEST_FILEPATH])
         exit(1)
 
-    TEST_CONTENT = readFile(TEST_TEMPLATE)
+    test_content = read_file(TEST_TEMPLATE)
 
-    saveFile(dic[TEST_FILEPATH], replaceContent(TEST_CONTENT, dic))
+    save_file(dic[TEST_FILEPATH], replace_content(test_content, dic))
     print('Generate tester.')
+
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
         print(HELP_MESSAGE)
         exit(1)
-
-    generateCppTest(sys.argv[1])
-    pass
-
+    generate_cpp_test(sys.argv[1])

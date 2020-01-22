@@ -6,17 +6,20 @@ from .genfullclass import *
 from .genpimplclass import *
 from .gentest import *
 
-__add__ = ['genClass', 'genFullClass', 'genPimplClass', 'genTest']
+__add__ = ['gen_class', 'gen_full_class', 'gen_pimpl_class', 'gen_test']
 
-def genClass(classpath):
-    genclass.generateCppClass(classpath)
 
-def genFullClass(classpath):
-    genfullclass.generateFullCppClass(classpath)
+def gen_class(classpath):
+    genclass.generate_cpp_class(classpath)
 
-def genPimplClass(classpath):
-    genpimplclass.generatePimplCppClass(classpath)
 
-def genTest(classpath):
-    gentest.generateCppTest(classpath)
+def gen_full_class(classpath):
+    genfullclass.generate_full_cpp_class(classpath)
 
+
+def gen_pimpl_class(classpath):
+    genpimplclass.generate_pimpl_cpp_class(classpath)
+
+
+def gen_test(classpath):
+    gentest.generate_cpp_test(classpath)

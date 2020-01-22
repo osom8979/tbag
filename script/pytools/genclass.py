@@ -6,8 +6,10 @@ from .properties import *
 
 HELP_MESSAGE = 'Usage: python ' + sys.argv[0] + ' {package/path/classname} {author}'
 
-def generateCppClass(classpath):
-    dic = createDefaultDictionary(classpath)
+
+# noinspection PyUnresolvedReferences
+def generate_cpp_class(classpath):
+    dic = create_default_dictionary(classpath)
 
     if os.path.isfile(dic[HEADER_FILEPATH]):
         print('Exists header file: ' + dic[HEADER_FILEPATH])
@@ -18,21 +20,19 @@ def generateCppClass(classpath):
         exit(1)
 
     if dic[ROOT_CLASSPATH] == 'libtbag':
-        HEADER_CONTENT = readFile(HEADER_TEMPLATE)
-        SOURCE_CONTENT = readFile(SOURCE_TEMPLATE)
+        header_content = read_file(HEADER_TEMPLATE)
+        source_content = read_file(SOURCE_TEMPLATE)
     else:
-        HEADER_CONTENT = readFile(HEADER2_TEMPLATE)
-        SOURCE_CONTENT = readFile(SOURCE2_TEMPLATE)
+        header_content = read_file(HEADER2_TEMPLATE)
+        source_content = read_file(SOURCE2_TEMPLATE)
 
-    saveFile(dic[HEADER_FILEPATH], replaceContent(HEADER_CONTENT, dic))
-    saveFile(dic[SOURCE_FILEPATH], replaceContent(SOURCE_CONTENT, dic))
+    save_file(dic[HEADER_FILEPATH], replace_content(header_content, dic))
+    save_file(dic[SOURCE_FILEPATH], replace_content(source_content, dic))
     print('Generate c++ class.')
+
 
 if __name__ == '__main__':
     if len(sys.argv) <= 1:
         print(HELP_MESSAGE)
         exit(1)
-
-    generateCppClass(sys.argv[1])
-    pass
-
+    generate_cpp_class(sys.argv[1])

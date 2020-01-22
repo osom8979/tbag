@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """! Project tools script.
 @author zer0
 @date   2015-12-19
@@ -7,17 +8,19 @@
 
 import os
 import sys
+# noinspection PyUnresolvedReferences
 import __main__ as main
 from optparse import OptionParser
 
+
 SCRIPT_PATH = os.path.abspath(main.__file__)
 RUNTIME_DIR = os.path.dirname(SCRIPT_PATH)
-SCRIPT_DIR  = os.path.join(RUNTIME_DIR, 'script')
-
+SCRIPT_DIR = os.path.join(RUNTIME_DIR, 'script')
 sys.path.insert(0, SCRIPT_DIR)
 
-# Project packages.
+# noinspection PyUnresolvedReferences
 import pytools as tools
+
 
 TEMPLATE_DIR = os.path.join(RUNTIME_DIR, 'template')
 
@@ -28,34 +31,38 @@ PROJECT_CMAKE_TEMPLATE = os.path.join(TEMPLATE_DIR, PROJECT_CMAKE_TEMPLATE_NAME)
 CONFIG_CMAKE_PATH = 'config.cmake'
 CONFIG_COMMAND = 'cmake -L -P' + CONFIG_CMAKE_PATH
 
-CMD_HELP  = 'help'
+CMD_HELP = 'help'
 CMD_CLASS = 'class'
-CMD_FULL  = 'full'
+CMD_FULL = 'full'
 CMD_PIMPL = 'pimpl'
-CMD_TEST  = 'test'
-CMD_UUID  = 'uuid'
+CMD_TEST = 'test'
+CMD_UUID = 'uuid'
 
 CMD_MAP = {
-    CMD_HELP  : 'Show this help message and exit.',
-    CMD_CLASS : 'Generate default c++ source/header files.',
-    CMD_FULL  : 'Generate default c++ full-class source/header files.',
-    CMD_PIMPL : 'Generate default c++ pimpl-class source/header files.',
-    CMD_TEST  : 'Generate default gtest tester file.',
-    CMD_UUID  : 'Make a random UUID.',
+    CMD_HELP: 'Show this help message and exit.',
+    CMD_CLASS: 'Generate default c++ source/header files.',
+    CMD_FULL: 'Generate default c++ full-class source/header files.',
+    CMD_PIMPL: 'Generate default c++ pimpl-class source/header files.',
+    CMD_TEST: 'Generate default gtest tester file.',
+    CMD_UUID: 'Make a random UUID.',
 }
 
 CMD_MESSAGE = "\nCommand list:\n"
 for key, val in CMD_MAP.items():
     CMD_MESSAGE += '{}\t{}\n'.format(key, val)
 
-def printCommandHelp():
+ENABLE_DEFAULT_HELP_MESSAGE = False
+
+
+def print_command_help():
     print(CMD_MESSAGE)
 
-def getEnvironmentPath():
+
+def get_environment_path():
     return SCRIPT_PATH
 
-def parseArguments(argv, print_help=True):
-    ENABLE_DEFAULT_HELP_MESSAGE = False
+
+def parse_arguments(argv, print_help=True):
     command = None
 
     if len(argv) >= 2:
@@ -77,57 +84,59 @@ def parseArguments(argv, print_help=True):
 
     if print_help is True and (command is None or command == CMD_HELP):
         parser.print_help()
-        printCommandHelp()
+        print_command_help()
 
     return command, options
 
-# ------------
-# ENTRY-POINT.
-# ------------
 
-def main_class(options):
+def main_class():
     if len(sys.argv) <= 1:
         print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_CLASS))
         exit(1)
-    tools.genClass(sys.argv[1])
+    tools.gen_class(sys.argv[1])
 
-def main_full(options):
+
+def main_full():
     if len(sys.argv) <= 1:
         print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_FULL))
         exit(1)
-    tools.genFullClass(sys.argv[1])
+    tools.gen_full_class(sys.argv[1])
 
-def main_pimpl(options):
+
+def main_pimpl():
     if len(sys.argv) <= 1:
         print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_PIMPL))
         exit(1)
-    tools.genPimplClass(sys.argv[1])
+    tools.gen_pimpl_class(sys.argv[1])
 
-def main_test(options):
+
+def main_test():
     if len(sys.argv) <= 1:
         print("Usage: python {} {} {{package/path/classname}}".format(sys.argv[0], CMD_TEST))
         exit(1)
-    tools.genTest(sys.argv[1])
+    tools.gen_test(sys.argv[1])
 
-def main_uuid(options):
+
+def main_uuid():
     import uuid
     print(uuid.uuid4())
 
+
 def main():
-    command, options = parseArguments(sys.argv)
+    command, _ = parse_arguments(sys.argv)
     if command is None or command == CMD_HELP:
         return
     elif command == CMD_CLASS:
-        main_class(options)
+        main_class()
     elif command == CMD_FULL:
-        main_full(options)
+        main_full()
     elif command == CMD_PIMPL:
-        main_pimpl(options)
+        main_pimpl()
     elif command == CMD_TEST:
-        main_test(options)
+        main_test()
     elif command == CMD_UUID:
-        main_uuid(options)
+        main_uuid()
+
 
 if __name__ == '__main__':
     main()
-
