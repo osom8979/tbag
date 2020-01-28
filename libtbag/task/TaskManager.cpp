@@ -32,6 +32,7 @@ TBAG_CONSTEXPR static char const * const GLOBAL_MANAGER_REGISTER_KEY =
         "libtbag::task::_manager_register";
 TBAG_CONSTEXPR static int const THREAD_TASK_KILL_SIGNAL =
         libtbag::signal::TBAG_SIGNAL_INTERRUPT;
+TBAG_CONSTEXPR static bool const RETHROW_JOIN = true;
 
 struct _manager_register TBAG_FINAL : private Noncopyable
 {
@@ -90,10 +91,7 @@ TaskManager::TaskManager(Callback * cb, bool auto_clear)
 {
     auto const shared = __get_global_manager_register();
     assert(static_cast<bool>(shared));
-    using namespace std::placeholders;
-    _processes.out_read_cb = std::bind(&TaskManager::_on_process_out, this, _1, _2, _3);
-    _processes.err_read_cb = std::bind(&TaskManager::_on_process_err, this, _1, _2, _3);
-    _processes.exit_cb = std::bind(&TaskManager::_on_process_exit, this, _1, _2, _3);
+    registerCallbacks();
 }
 
 TaskManager::~TaskManager()
@@ -103,43 +101,53 @@ TaskManager::~TaskManager()
     }
 }
 
-void TaskManager::clearUnsafe()
+void TaskManager::registerCallbacks()
 {
-    _tasks.clear();
-    _pid2task.clear();
-    _threads.clear();
-    _processes.clear();
+    using namespace std::placeholders;
+    _processes.out_read_cb = std::bind(&TaskManager::_on_process_out, this, _1, _2, _3);
+    _processes.err_read_cb = std::bind(&TaskManager::_on_process_err, this, _1, _2, _3);
+    _processes.exit_cb = std::bind(&TaskManager::_on_process_exit, this, _1, _2, _3);
 }
 
 void TaskManager::clear()
 {
-    WriteLockGuard const __task_lock__(_tasks_lock);
-    WriteLockGuard const __thread_lock__(_threads_lock);
-    WriteLockGuard const __process_lock__(_processes_lock);
+    _tasks_lock.writeLock();
+    _threads_lock.writeLock();
+    _processes_lock.writeLock();
+    auto tasks = std::move(_tasks);
+    auto pid2task = std::move(_pid2task);
+    auto threads = std::move(_threads);
+    auto processes = std::move(_processes);
+    assert(_tasks.empty());
+    assert(_pid2task.empty());
+    assert(_threads.empty());
+    assert(_processes.empty());
+    registerCallbacks();
+    _processes_lock.writeUnlock();
+    _threads_lock.writeUnlock();
+    _tasks_lock.writeUnlock();
 
-    for (auto const & task : _tasks) {
+    for (auto const & task : tasks) {
         auto const & task_info = task.second;
         if (!task_info.done && !task_info.killed) {
             if (task_info.type == TaskType::TT_PROCESS) {
-                _processes.kill(task_info.internal_id.process, libtbag::signal::TBAG_SIGNAL_KILL);
+                processes.kill(task_info.internal_id.process, libtbag::signal::TBAG_SIGNAL_KILL);
             } else {
                 assert(task_info.type == TaskType::TT_THREAD);
                 if (isWindowsPlatform()) {
-                    _threads.cancel(task_info.internal_id.thread);
+                    threads.cancel(task_info.internal_id.thread);
                 } else {
-                    _threads.kill(task_info.internal_id.thread, THREAD_TASK_KILL_SIGNAL);
+                    threads.kill(task_info.internal_id.thread, THREAD_TASK_KILL_SIGNAL);
                 }
             }
         }
         if (task_info.type == TaskType::TT_PROCESS) {
-            _processes.join(task_info.internal_id.process);
+            processes.join(task_info.internal_id.process);
         } else {
             assert(task_info.type == TaskType::TT_THREAD);
-            _threads.join(task_info.internal_id.thread, false);
+            threads.join(task_info.internal_id.thread, false);
         }
     }
-
-    clearUnsafe();
 }
 
 TaskId TaskManager::getCurrentTaskId()
@@ -218,10 +226,13 @@ void TaskManager::_on_thread_exit(TaskId id, int64_t exit_status, int term_signa
     COMMENT("Tasks lock") {
         WriteLockGuard const G(_tasks_lock);
         auto itr = _tasks.find(id);
-        assert(itr != _tasks.end());
-        itr->second.done = true;
-        itr->second.exit_status = exit_status;
-        itr->second.term_signal = term_signal;
+        if (itr != _tasks.end()) {
+            itr->second.done = true;
+            itr->second.exit_status = exit_status;
+            itr->second.term_signal = term_signal;
+        } else {
+            // Clearing state ...
+        }
     }
     if (TASK_CALLBACK) {
         TASK_CALLBACK->onThreadExit(id, exit_status, term_signal);
@@ -233,11 +244,13 @@ void TaskManager::_on_process_out(int pid, char const * buffer, std::size_t size
     TaskId task_id;
     COMMENT("Tasks lock") {
         ReadLockGuard const G(_tasks_lock);
-        auto itr0 = _pid2task.find(pid);
-        assert(itr0 != _pid2task.end());
-        task_id = itr0->second;
-        auto itr = _tasks.find(task_id);
-        assert(itr != _tasks.end());
+        auto itr = _pid2task.find(pid);
+        if (itr != _pid2task.end()) {
+            task_id = itr->second;
+            assert(_tasks.find(task_id) != _tasks.end());
+        } else {
+            task_id = UNKNOWN_TASK_ID;
+        }
     }
     if (TASK_CALLBACK) {
         TASK_CALLBACK->onProcessOut(task_id, buffer, size);
@@ -249,11 +262,13 @@ void TaskManager::_on_process_err(int pid, char const * buffer, std::size_t size
     TaskId task_id;
     COMMENT("Tasks lock") {
         ReadLockGuard const G(_tasks_lock);
-        auto itr0 = _pid2task.find(pid);
-        assert(itr0 != _pid2task.end());
-        task_id = itr0->second;
-        auto itr = _tasks.find(task_id);
-        assert(itr != _tasks.end());
+        auto itr = _pid2task.find(pid);
+        if (itr != _pid2task.end()) {
+            task_id = itr->second;
+            assert(_tasks.find(task_id) != _tasks.end());
+        } else {
+            task_id = UNKNOWN_TASK_ID;
+        }
     }
     if (TASK_CALLBACK) {
         TASK_CALLBACK->onProcessErr(task_id, buffer, size);
@@ -266,13 +281,16 @@ void TaskManager::_on_process_exit(int pid, int64_t exit_status, int term_signal
     COMMENT("Tasks lock") {
         WriteLockGuard const G(_tasks_lock);
         auto itr0 = _pid2task.find(pid);
-        assert(itr0 != _pid2task.end());
-        task_id = itr0->second;
-        auto itr = _tasks.find(task_id);
-        assert(itr != _tasks.end());
-        itr->second.done = true;
-        itr->second.exit_status = exit_status;
-        itr->second.term_signal = term_signal;
+        if (itr0 != _pid2task.end()) {
+            task_id = itr0->second;
+            auto itr = _tasks.find(task_id);
+            assert(itr != _tasks.end());
+            itr->second.done = true;
+            itr->second.exit_status = exit_status;
+            itr->second.term_signal = term_signal;
+        } else {
+            task_id = UNKNOWN_TASK_ID;
+        }
     }
     tDLogN("TaskManager::_on_process_exit(task_id={},pid={},exit={},signum={}) function was called.",
            task_id, pid, exit_status, term_signal);
@@ -376,14 +394,35 @@ Err TaskManager::join(TaskId id)
     if (task_info.type == TaskType::TT_PROCESS) {
         auto const pid = task_info.internal_id.process;
         tDLogN("TaskManager::join(task_id={}) Process ID: {}", id, pid);
-        WriteLockGuard const G2(_processes_lock);
-        return _processes.join(pid);
+
+        _processes_lock.readLock();
+        auto shared_process = _processes.get(pid).lock();
+        _processes_lock.readUnlock();
+
+        if (!shared_process) {
+            return E_EXPIRED;
+        }
+        if (!shared_process->joinable()) {
+            return E_ILLSTATE;
+        }
+        shared_process->join();
+        return E_SUCCESS;
     } else {
         assert(task_info.type == TaskType::TT_THREAD);
         auto const thread_id = task_info.internal_id.thread;
         tDLogN("TaskManager::join(task_id={}) Thread ID: {}", id, (void*)thread_id);
-        WriteLockGuard const G2(_threads_lock);
-        return _threads.join(thread_id, true);
+
+        _threads_lock.readLock();
+        auto shared_thread = _threads.get(thread_id).lock();
+        _threads_lock.readUnlock();
+
+        if (!shared_thread) {
+            return E_EXPIRED;
+        }
+        if (!shared_thread->joinable()) {
+            return E_ILLSTATE;
+        }
+        return shared_thread->join(RETHROW_JOIN);
     }
 }
 

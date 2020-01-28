@@ -38,6 +38,7 @@ class TBAG_API ThreadGroup : private Noncopyable
 public:
     using uthread = Thread::uthread;
     using SharedThread = std::shared_ptr<Thread>;
+    using WeakThread = std::weak_ptr<Thread>;
     using ThreadMap = std::unordered_map<uthread, SharedThread>;
 
     using iterator = ThreadMap::iterator;
@@ -48,7 +49,18 @@ private:
 
 public:
     ThreadGroup();
+    ThreadGroup(ThreadGroup && obj) TBAG_NOEXCEPT;
     ~ThreadGroup();
+
+public:
+    ThreadGroup & operator =(ThreadGroup && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(ThreadGroup & obj) TBAG_NOEXCEPT;
+    friend void swap(ThreadGroup & lh, ThreadGroup & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
 
 public:
     inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_threads.size())
@@ -79,6 +91,9 @@ public:
     bool exists(uthread const & tid) const;
     bool exists(Thread const & thread) const;
     bool existsCurrentThread() const;
+
+public:
+    WeakThread get(uthread const & tid) const;
 
 public:
     bool insert(SharedThread const & thread);

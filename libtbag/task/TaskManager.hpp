@@ -183,7 +183,7 @@ public:
     virtual ~TaskManager();
 
 public:
-    void clearUnsafe();
+    void registerCallbacks();
     void clear();
 
 private:

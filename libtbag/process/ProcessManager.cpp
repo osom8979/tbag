@@ -103,9 +103,43 @@ ProcessManager::ProcessManager()
     // EMPTY.
 }
 
+ProcessManager::ProcessManager(ProcessManager && obj) TBAG_NOEXCEPT
+        : _procs(std::move(obj._procs)),
+          out_read_cb(std::move(obj.out_read_cb)),
+          err_read_cb(std::move(obj.err_read_cb)),
+          exit_cb(std::move(obj.exit_cb))
+{
+    // EMPTY.
+}
+
 ProcessManager::~ProcessManager()
 {
     // EMPTY.
+}
+
+ProcessManager & ProcessManager::operator =(ProcessManager && obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        Guard const __self_locker__(_mutex);
+        Guard const __argument_locker__(obj._mutex);
+        _procs = std::move(obj._procs);
+        out_read_cb = std::move(obj.out_read_cb);
+        err_read_cb = std::move(obj.err_read_cb);
+        exit_cb = std::move(obj.exit_cb);
+    }
+    return *this;
+}
+
+void ProcessManager::swap(ProcessManager & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        Guard const __self_locker__(_mutex);
+        Guard const __argument_locker__(obj._mutex);
+        _procs.swap(obj._procs);
+        out_read_cb.swap(obj.out_read_cb);
+        err_read_cb.swap(obj.err_read_cb);
+        exit_cb.swap(obj.exit_cb);
+    }
 }
 
 bool ProcessManager::empty() const

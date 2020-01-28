@@ -14,6 +14,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace thread {
 
+using WeakThread = ThreadGroup::WeakThread;
 using uthread = ThreadGroup::uthread;
 
 ThreadGroup::ThreadGroup()
@@ -21,9 +22,29 @@ ThreadGroup::ThreadGroup()
     // EMPTY.
 }
 
+ThreadGroup::ThreadGroup(ThreadGroup && obj) TBAG_NOEXCEPT : _threads(std::move(obj._threads))
+{
+    // EMPTY.
+}
+
 ThreadGroup::~ThreadGroup()
 {
     // EMPTY.
+}
+
+ThreadGroup & ThreadGroup::operator =(ThreadGroup && obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _threads = std::move(obj._threads);
+    }
+    return *this;
+}
+
+void ThreadGroup::swap(ThreadGroup & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _threads.swap(obj._threads);
+    }
 }
 
 void ThreadGroup::clear()
@@ -44,6 +65,15 @@ bool ThreadGroup::exists(Thread const & thread) const
 bool ThreadGroup::existsCurrentThread() const
 {
     return exists(Thread::getCurrentThreadId());
+}
+
+WeakThread ThreadGroup::get(uthread const & tid) const
+{
+    auto itr = _threads.find(tid);
+    if (itr == _threads.end()) {
+        return {};
+    }
+    return itr->second;
 }
 
 bool ThreadGroup::insert(SharedThread const & thread)

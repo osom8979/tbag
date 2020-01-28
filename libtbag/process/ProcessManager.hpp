@@ -117,7 +117,18 @@ public:
 
 public:
     ProcessManager();
+    ProcessManager(ProcessManager && obj) TBAG_NOEXCEPT;
     virtual ~ProcessManager();
+
+public:
+    ProcessManager & operator =(ProcessManager && obj) TBAG_NOEXCEPT;
+
+public:
+    void swap(ProcessManager & obj) TBAG_NOEXCEPT;
+    friend void swap(ProcessManager & lh, ProcessManager & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
 
 public:
     bool empty() const;
