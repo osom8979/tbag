@@ -41,16 +41,18 @@ TEST(TaskManagerTest, CreateThread)
     TaskManager::TaskId id2;
 
     ThreadParams params1;
-    params1.runner = [&](){
+    params1.runner = [&]() -> int {
         id1 = TaskManager::getCurrentTaskId();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         test1 = true;
+        return EXIT_SUCCESS;
     };
     ThreadParams params2;
-    params2.runner = [&](){
+    params2.runner = [&]() -> int {
         id2 = TaskManager::getCurrentTaskId();
         std::this_thread::sleep_for(std::chrono::seconds(1));
         test2 = true;
+        return EXIT_SUCCESS;
     };
 
     auto const result1 = mgr.runThread(params1);
@@ -105,8 +107,9 @@ TEST(TaskManagerTest, CreateThread)
 TEST(TaskManagerTest, ThreadException)
 {
     ThreadParams params;
-    params.runner = [&](){
+    params.runner = [&]() -> int {
         throw ErrException(E_UNKNOWN);
+        return EXIT_FAILURE;
     };
 
     TaskManager mgr;
@@ -125,8 +128,9 @@ TEST(TaskManagerTest, ThreadException)
 TEST(TaskManagerTest, KillThread)
 {
     ThreadParams params;
-    params.runner = [&](){
+    params.runner = [&]() -> int {
         std::this_thread::sleep_for(std::chrono::minutes(1));
+        return EXIT_FAILURE;
     };
 
     TaskManager mgr;

@@ -140,7 +140,7 @@ public:
 
     struct ThreadParams
     {
-        using Callback = libtbag::thread::FunctionalThread::Callback;
+        using Callback = std::function<int(void)>;
         Callback runner;
     };
 

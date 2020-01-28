@@ -319,11 +319,12 @@ ErrTaskId TaskManager::runThread(ThreadParams const & params, void * opaque)
         signal.signal();
         lock.unlock();
 
+        int exit_code = 0;
         if (params.runner) {
-            params.runner();
+            exit_code = params.runner();
         }
 
-        _on_thread_exit(task_id, EXIT_SUCCESS, 0);
+        _on_thread_exit(task_id, exit_code, 0);
     });
     _threads_lock.writeUnlock();
 
