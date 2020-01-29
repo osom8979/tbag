@@ -184,6 +184,8 @@ public:
     // clang-format on
 
 public:
+    bool existsLayout(std::string const & name) const
+    { return asset().exists(name); }
     Path getLayout(std::string const & name) const
     { return asset().get(name); }
 

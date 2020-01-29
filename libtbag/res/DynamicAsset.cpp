@@ -14,6 +14,10 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace res {
 
+using Path = DynamicAsset::Path;
+using Paths = DynamicAsset::Paths;
+using Strings = DynamicAsset::Strings;
+
 DynamicAsset::DynamicAsset()
 {
     // EMPTY.
@@ -92,16 +96,16 @@ void DynamicAsset::set(std::string const & key, Path const & path)
     }
 }
 
-DynamicAsset::Path DynamicAsset::get(std::string const & key) const
+Path DynamicAsset::get(std::string const & key) const
 {
     auto itr = _paths.find(key);
     if (itr == _paths.end()) {
-        return Path();
+        return {};
     }
     return itr->second;
 }
 
-DynamicAsset::Strings DynamicAsset::getKeys() const
+Strings DynamicAsset::getKeys() const
 {
     Strings result;
     for (auto & path : _paths) {
@@ -110,7 +114,7 @@ DynamicAsset::Strings DynamicAsset::getKeys() const
     return result;
 }
 
-DynamicAsset::Paths DynamicAsset::getPaths() const
+Paths DynamicAsset::getPaths() const
 {
     Paths result;
     for (auto & path : _paths) {
@@ -142,7 +146,7 @@ bool DynamicAsset::removeAll(std::string const & key) const
     return itr->second.removeAll();
 }
 
-DynamicAsset::Paths DynamicAsset::scan(std::string const & key) const
+Paths DynamicAsset::scan(std::string const & key) const
 {
     auto itr = _paths.find(key);
     if (itr == _paths.end()) {
