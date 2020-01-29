@@ -137,8 +137,9 @@ public:
     bool existsByValue(std::string const & value) const;
 
 public:
-    bool get(std::string const & key, std::string & val) const;
     void set(std::string const & key, std::string const & val);
+    bool get(std::string const & key, std::string & val) const;
+    std::string get(std::string const & key) const;
 
     std::string opt(std::string const & key, std::string const & default_val) const;
     std::string opt(std::string const & key) const;

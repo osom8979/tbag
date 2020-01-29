@@ -6,8 +6,8 @@
  */
 
 #include <libtbag/string/Arguments.hpp>
-#include <libtbag/debug/Assert.hpp>
-#include <libtbag/Exception.hpp>
+#include <sstream>
+#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -16,31 +16,25 @@ NAMESPACE_LIBTBAG_OPEN
 namespace string {
 
 Arguments::Arguments()
-        : delimiter(DEFAULT_ARGUMENTS_DELIMITER),
-          point_delimiter(DEFAULT_ARGUMENTS_POINT_DELIMITER)
 {
     // EMPTY.
 }
 
-Arguments::Arguments(std::string const & arguments,
-                     std::string const & delimiter,
-                     std::string const & point_delimiter)
-        : delimiter(delimiter),
-          point_delimiter(point_delimiter)
+Arguments::Arguments(std::string const & arguments, std::string const & delimiter)
 {
-    if (!parse(arguments)) {
+    if (!parse(arguments, delimiter)) {
         throw std::bad_alloc();
     }
 }
 
-Arguments::Arguments(Arguments const & obj)
+Arguments::Arguments(Arguments const & obj) : _args(obj._args)
 {
-    (*this) = obj;
+    // EMPTY.
 }
 
-Arguments::Arguments(Arguments && obj) TBAG_NOEXCEPT
+Arguments::Arguments(Arguments && obj) TBAG_NOEXCEPT : _args(std::move(obj._args))
 {
-    (*this) = std::move(obj);
+    // EMPTY.
 }
 
 Arguments::~Arguments()
@@ -52,8 +46,6 @@ Arguments & Arguments::operator =(Arguments const & obj)
 {
     if (this != &obj) {
         _args = obj._args;
-        delimiter = obj.delimiter;
-        point_delimiter = obj.point_delimiter;
     }
     return *this;
 }
@@ -61,11 +53,16 @@ Arguments & Arguments::operator =(Arguments const & obj)
 Arguments & Arguments::operator =(Arguments && obj) TBAG_NOEXCEPT
 {
     if (this != &obj) {
-        _args.swap(obj._args);
-        delimiter.swap(obj.delimiter);
-        point_delimiter.swap(obj.point_delimiter);
+        _args = std::move(obj._args);
     }
     return *this;
+}
+
+void Arguments::swap(Arguments & obj) TBAG_NOEXCEPT
+{
+    if (this != &obj) {
+        _args.swap(obj._args);
+    }
 }
 
 void Arguments::insert(std::size_t index, std::string const & argument)
@@ -73,7 +70,7 @@ void Arguments::insert(std::size_t index, std::string const & argument)
     _args.insert(_args.begin() + index, argument);
 }
 
-bool Arguments::parse(std::string const & arguments)
+bool Arguments::parse(std::string const & arguments, std::string const & delimiter)
 {
     for (auto const & cursor : libtbag::string::splitTokens(arguments, delimiter)) {
         push_back(cursor);
@@ -81,132 +78,24 @@ bool Arguments::parse(std::string const & arguments)
     return true;
 }
 
-std::string Arguments::toString() const
+std::string Arguments::toString(std::string const & delimiter) const
 {
     if (_args.empty()) {
         return std::string();
-    } else if (_args.size() == 1) {
-        return _args.at(0);
     }
 
     auto const size = _args.size();
-    std::string result = _args[0];
-    for (auto index = 1u; index < size; ++index) {
-        result += delimiter + _args.at(index);
+    if (size == 1) {
+        return _args[0];
     }
-    return result;
-}
 
-bool Arguments::optBoolean(std::size_t index, bool * output, bool check_grammar) const
-{
-    return tryObtainArgument(index, output, [this, check_grammar](std::string const & value){
-        if (check_grammar && value.find(this->point_delimiter) != std::string::npos) {
-            throw ParseException();
-        }
-        std::string const UPPER = string::upper(string::trim(value));
-        if (UPPER == DEFAULT_BOOLEAN_TRUE_CASE1 ) { return  true; }
-        if (UPPER == DEFAULT_BOOLEAN_TRUE_CASE2 ) { return  true; }
-        if (UPPER == DEFAULT_BOOLEAN_TRUE_CASE3 ) { return  true; }
-        if (UPPER == DEFAULT_BOOLEAN_FALSE_CASE1) { return false; }
-        if (UPPER == DEFAULT_BOOLEAN_FALSE_CASE2) { return false; }
-        if (UPPER == DEFAULT_BOOLEAN_FALSE_CASE3) { return false; }
-        return std::stoi(value) != 0 ? true : false;
-    });
-}
-
-#ifndef __TBAG_ARGUMENTS_OBTAIN_TRY
-#define __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, param_name, retval) \
-    return tryObtainArgument(index, output, [this, check_grammar](std::string const & param_name){ \
-        if (check_grammar && param_name.find(this->point_delimiter) != std::string::npos) { \
-            throw ParseException(); \
-        } \
-        return retval; \
-    });
-#endif
-
-bool Arguments::optChar(std::size_t index, char * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<char>(std::stoi(value))); }
-
-bool Arguments::optUnsignedChar(std::size_t index, unsigned char * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<unsigned char>(std::stoi(value))); }
-
-bool Arguments::optShort(std::size_t index, short * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<short>(std::stoi(value))); }
-
-bool Arguments::optUnsignedShort(std::size_t index, unsigned short * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, static_cast<unsigned short>(std::stoi(value))); }
-
-bool Arguments::optInteger(std::size_t index, int * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoi(value)); }
-
-bool Arguments::optLong(std::size_t index, long * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stol(value)); }
-
-bool Arguments::optUnsignedLong(std::size_t index, unsigned long * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoul(value)); }
-
-bool Arguments::optLongLong(std::size_t index, long long * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoll(value)); }
-
-bool Arguments::optUnsignedLongLong(std::size_t index, unsigned long long * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stoull(value)); }
-
-bool Arguments::optFloat(std::size_t index, float * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stof(value)); }
-
-bool Arguments::optDouble(std::size_t index, double * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stod(value)); }
-
-bool Arguments::optLongDouble(std::size_t index, long double * output, bool check_grammar) const
-{ __TBAG_ARGUMENTS_OBTAIN_TRY(index, output, check_grammar, value, std::stold(value)); }
-
-#undef __TBAG_ARGUMENTS_OBTAIN_TRY
-
-bool Arguments::optString(std::size_t index, std::string * output) const
-{
-    return tryObtainArgument(index, output, [](std::string const & value){
-        return value;
-    });
-}
-
-bool Arguments::optIntegerPoint(std::size_t index, Pointi * output, bool check_grammar) const
-{
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Pointi {
-        if (check_grammar && tokens.size() != 2) {
-            throw ParseException();
-        }
-        return Pointi(std::stoi(tokens.at(0)), std::stoi(tokens.at(1)));
-    });
-}
-
-bool Arguments::optDoublePoint(std::size_t index, Pointd * output, bool check_grammar) const
-{
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Pointd {
-        if (check_grammar && tokens.size() != 2) {
-            throw ParseException();
-        }
-        return Pointd(std::stod(tokens.at(0)), std::stod(tokens.at(1)));
-    });
-}
-
-bool Arguments::optIntegerRect(std::size_t index, Recti * output, bool check_grammar) const
-{
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Recti {
-        if (check_grammar && tokens.size() != 4) {
-            throw ParseException();
-        }
-        return Recti(std::stoi(tokens.at(0)), std::stoi(tokens.at(1)), std::stoi(tokens.at(2)), std::stoi(tokens.at(3)));
-    });
-}
-
-bool Arguments::optDoubleRect(std::size_t index, Rectd * output, bool check_grammar) const
-{
-    return tryObtainTokens(index, output, [check_grammar](std::vector<std::string> const & tokens) -> Rectd {
-        if (check_grammar && tokens.size() != 4) {
-            throw ParseException();
-        }
-        return Rectd(std::stod(tokens.at(0)), std::stod(tokens.at(1)), std::stod(tokens.at(2)), std::stod(tokens.at(3)));
-    });
+    assert(size >= 1u);
+    std::stringstream ss;
+    ss << _args[0];
+    for (auto index = 1u; index < size; ++index) {
+        ss << delimiter + _args[index];
+    }
+    return ss.str();
 }
 
 } // namespace string

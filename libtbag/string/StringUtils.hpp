@@ -279,6 +279,7 @@ TBAG_API bool toVal(std::string const & str, unsigned long long & to, std::size_
 TBAG_API bool toVal(std::string const & str,              float & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str,             double & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str,        long double & to, std::size_t * index = nullptr, int base = 10);
+TBAG_API bool toVal(std::string const & str,        std::string & to, std::size_t * index = nullptr, int base = 10);
 
 template <typename T>
 inline T toValue(std::string const & str, T default_value = T(), int base = 10)

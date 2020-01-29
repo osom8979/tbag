@@ -129,6 +129,18 @@ bool Flags::existsByValue(std::string const & value) const
     return itr != _flags.cend();
 }
 
+void Flags::set(std::string const & key, std::string const & val)
+{
+    auto itr = std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
+        return flag.key == key;
+    });
+    if (itr == _flags.end()) {
+        push(key, val);
+    } else {
+        itr->value = val;
+    }
+}
+
 bool Flags::get(std::string const & key, std::string & val) const
 {
     auto const itr = std::find_if(_flags.cbegin(), _flags.cend(), [&key](Flag const & flag) -> bool {
@@ -141,16 +153,13 @@ bool Flags::get(std::string const & key, std::string & val) const
     return false;
 }
 
-void Flags::set(std::string const & key, std::string const & val)
+std::string Flags::get(std::string const & key) const
 {
-    auto itr = std::find_if(_flags.begin(), _flags.end(), [&key](Flag const & flag) -> bool {
-        return flag.key == key;
-    });
-    if (itr == _flags.end()) {
-        push(key, val);
-    } else {
-        itr->value = val;
+    std::string val;
+    if (get(key, val)) {
+        return val;
     }
+    return {};
 }
 
 std::string Flags::opt(std::string const & key, std::string const & default_val) const

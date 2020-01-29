@@ -16,10 +16,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/string/StringUtils.hpp>
-#include <libtbag/geometry/Point2.hpp>
-#include <libtbag/geometry/Rect2.hpp>
 
 #include <vector>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -33,7 +32,7 @@ namespace string {
  * Example:
  * @code{.cpp}
  * Arguments args;
- * args.parse("test,1,2.1,9x10,100.10x200.2x300x400,x");
+ * args.parse("test,8,123.456,9999");
  * @endcode
  *
  * @author zer0
@@ -42,29 +41,14 @@ namespace string {
 class TBAG_API Arguments
 {
 public:
-    TBAG_CONSTEXPR static char const * const DEFAULT_ARGUMENTS_DELIMITER       = ",";
-    TBAG_CONSTEXPR static char const * const DEFAULT_ARGUMENTS_POINT_DELIMITER = "x";
-
-    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_TRUE_CASE1 = "ON";
-    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_TRUE_CASE2 = "YES";
-    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_TRUE_CASE3 = "TRUE";
-
-    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE1 = "OFF";
-    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE2 = "NO";
-    TBAG_CONSTEXPR static char const * const DEFAULT_BOOLEAN_FALSE_CASE3 = "FALSE";
+    TBAG_CONSTEXPR static char const * const DELIMITER = ",";
 
 private:
     std::vector<std::string> _args;
 
 public:
-    std::string delimiter;
-    std::string point_delimiter;
-
-public:
     Arguments();
-    Arguments(std::string const & arguments,
-              std::string const & delimiter = DEFAULT_ARGUMENTS_DELIMITER,
-              std::string const & point_delimiter = DEFAULT_ARGUMENTS_POINT_DELIMITER);
+    Arguments(std::string const & arguments, std::string const & delimiter = DELIMITER);
     Arguments(Arguments const & obj);
     Arguments(Arguments && obj) TBAG_NOEXCEPT;
     ~Arguments();
@@ -74,22 +58,29 @@ public:
     Arguments & operator =(Arguments && obj) TBAG_NOEXCEPT;
 
 public:
+    void swap(Arguments & obj) TBAG_NOEXCEPT;
+    friend void swap(Arguments & lh, Arguments & rh) TBAG_NOEXCEPT
+    {
+        lh.swap(rh);
+    }
+
+public:
     inline std::vector<std::string>       & args()       TBAG_NOEXCEPT { return _args; }
     inline std::vector<std::string> const & args() const TBAG_NOEXCEPT { return _args; }
 
 public:
-    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_args.empty())
-    { return _args.empty(); }
+    inline void clear() TBAG_NOEXCEPT_SP_OP(_args.clear())
+    { _args.clear(); }
     inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_args.size())
     { return _args.size(); }
+    inline bool empty() const TBAG_NOEXCEPT_SP_OP(_args.empty())
+    { return _args.empty(); }
 
 public:
-    inline std::string       & at(std::size_t index)       { return _args.at(index); }
-    inline std::string const & at(std::size_t index) const { return _args.at(index); }
-
-public:
-    void clear()
-    { _args.clear(); }
+    inline std::string & at(std::size_t index) TBAG_NOEXCEPT_SP_OP(_args.at(index))
+    { return _args.at(index); }
+    inline std::string const & at(std::size_t index) const TBAG_NOEXCEPT_SP_OP(_args.at(index))
+    { return _args.at(index); }
 
 public:
     void erase(std::size_t index)
@@ -111,115 +102,31 @@ public:
 
 public:
     void insert(std::size_t index, std::string const & argument);
-    bool parse(std::string const & arguments);
+    bool parse(std::string const & arguments, std::string const & delimiter = DELIMITER);
 
 public:
-    std::string toString() const;
+    std::string toString(std::string const & delimiter = DELIMITER) const;
 
-private:
-    template <typename OutputType, typename Predicated>
-    inline bool tryObtainArgument(std::size_t index, OutputType * output, Predicated predicated) const
+public:
+    template <typename T>
+    bool opt(std::size_t index, T * output) const
     {
-        try {
-            OutputType result = predicated(_args.at(index));
-            if (output != nullptr) {
-                *output = result;
-            }
-            return true;
-        } catch (...) {
-            return false;
+        if (index < _args.size()) {
+            return libtbag::string::toVal(_args[index], *output);
         }
+        return false;
     }
 
-public:
-    bool optBoolean         (std::size_t index, bool               * output, bool check_grammar = true) const;
-    bool optChar            (std::size_t index, char               * output, bool check_grammar = true) const;
-    bool optUnsignedChar    (std::size_t index, unsigned char      * output, bool check_grammar = true) const;
-    bool optShort           (std::size_t index, short              * output, bool check_grammar = true) const;
-    bool optUnsignedShort   (std::size_t index, unsigned short     * output, bool check_grammar = true) const;
-    bool optInteger         (std::size_t index, int                * output, bool check_grammar = true) const;
-    bool optLong            (std::size_t index, long               * output, bool check_grammar = true) const;
-    bool optUnsignedLong    (std::size_t index, unsigned long      * output, bool check_grammar = true) const;
-    bool optLongLong        (std::size_t index, long long          * output, bool check_grammar = true) const;
-    bool optUnsignedLongLong(std::size_t index, unsigned long long * output, bool check_grammar = true) const;
-    bool optFloat           (std::size_t index, float              * output, bool check_grammar = true) const;
-    bool optDouble          (std::size_t index, double             * output, bool check_grammar = true) const;
-    bool optLongDouble      (std::size_t index, long double        * output, bool check_grammar = true) const;
-    bool optString          (std::size_t index, std::string        * output) const;
-
-// ----------
-// EXTENSION.
-// ----------
-
-public:
-    using Pointi = libtbag::geometry::Pointi;
-    using Pointd = libtbag::geometry::Pointd;
-
-    using Recti = libtbag::geometry::Recti;
-    using Rectd = libtbag::geometry::Rectd;
-
-private:
-    template <typename OutputType, typename Predicated>
-    inline bool tryObtainTokens(std::size_t index, OutputType * output, Predicated predicated) const
+    template <typename T>
+    T get(std::size_t index, T def = T()) const
     {
-        try {
-            auto tokens = libtbag::string::splitTokens(_args.at(index), point_delimiter);
-            if (tokens.empty()) {
-                return false;
-            }
-
-            OutputType result = predicated(tokens);
-            if (output != nullptr) {
-                *output = result;
-            }
-            return true;
-        } catch (...) {
-            return false;
+        T output;
+        if (opt(index, &output)) {
+            return output;
+        } else {
+            return def;
         }
     }
-
-public:
-    bool optIntegerPoint(std::size_t index, Pointi * output, bool check_grammar = true) const;
-    bool optDoublePoint (std::size_t index, Pointd * output, bool check_grammar = true) const;
-    bool optIntegerRect (std::size_t index, Recti  * output, bool check_grammar = true) const;
-    bool optDoubleRect  (std::size_t index, Rectd  * output, bool check_grammar = true) const;
-
-private:
-    template <typename Type, typename Predicated>
-    inline std::vector<Type> getVector(Predicated predicated) const
-    {
-        std::size_t const SIZE = _args.size();
-        std::vector<Type> result;
-        Type temp;
-        for (std::size_t index = 0 ; index < SIZE; ++index) {
-            if (predicated(index, &temp)) {
-                result.push_back(temp);
-            }
-        }
-        return result;
-    }
-
-public:
-    // clang-format off
-    bool opt(std::size_t i, bool               * o, bool c = true) const { return optBoolean         (i, o, c); }
-    bool opt(std::size_t i, char               * o, bool c = true) const { return optChar            (i, o, c); }
-    bool opt(std::size_t i, unsigned char      * o, bool c = true) const { return optUnsignedChar    (i, o, c); }
-    bool opt(std::size_t i, short              * o, bool c = true) const { return optShort           (i, o, c); }
-    bool opt(std::size_t i, unsigned short     * o, bool c = true) const { return optUnsignedShort   (i, o, c); }
-    bool opt(std::size_t i, int                * o, bool c = true) const { return optInteger         (i, o, c); }
-    bool opt(std::size_t i, long               * o, bool c = true) const { return optLong            (i, o, c); }
-    bool opt(std::size_t i, unsigned long      * o, bool c = true) const { return optUnsignedLong    (i, o, c); }
-    bool opt(std::size_t i, long long          * o, bool c = true) const { return optLongLong        (i, o, c); }
-    bool opt(std::size_t i, unsigned long long * o, bool c = true) const { return optUnsignedLongLong(i, o, c); }
-    bool opt(std::size_t i, float              * o, bool c = true) const { return optFloat           (i, o, c); }
-    bool opt(std::size_t i, double             * o, bool c = true) const { return optDouble          (i, o, c); }
-    bool opt(std::size_t i, long double        * o, bool c = true) const { return optLongDouble      (i, o, c); }
-    bool opt(std::size_t i, std::string        * o, bool c = true) const { return optString          (i, o);    }
-    bool opt(std::size_t i, Pointi             * o, bool c = true) const { return optIntegerPoint    (i, o, c); }
-    bool opt(std::size_t i, Pointd             * o, bool c = true) const { return optDoublePoint     (i, o, c); }
-    bool opt(std::size_t i, Recti              * o, bool c = true) const { return optIntegerRect     (i, o, c); }
-    bool opt(std::size_t i, Rectd              * o, bool c = true) const { return optDoubleRect      (i, o, c); }
-    // clang-format on
 };
 
 } // namespace string
