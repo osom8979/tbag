@@ -36,6 +36,7 @@ CMD_CLASS = 'class'
 CMD_FULL = 'full'
 CMD_PIMPL = 'pimpl'
 CMD_TEST = 'test'
+CMD_TEXT = 'text'
 CMD_UUID = 'uuid'
 
 CMD_MAP = {
@@ -44,6 +45,7 @@ CMD_MAP = {
     CMD_FULL: 'Generate default c++ full-class source/header files.',
     CMD_PIMPL: 'Generate default c++ pimpl-class source/header files.',
     CMD_TEST: 'Generate default gtest tester file.',
+    CMD_TEXT: 'Generate text id header.',
     CMD_UUID: 'Make a random UUID.',
 }
 
@@ -117,6 +119,13 @@ def main_test():
     tools.gen_test(sys.argv[1])
 
 
+def main_text():
+    if len(sys.argv) <= 2:
+        print("Usage: python {} {} {{input_xml}} {{output_header}}".format(sys.argv[0], CMD_TEXT))
+        exit(1)
+    tools.gen_test(sys.argv[1], sys.argv[2])
+
+
 def main_uuid():
     import uuid
     print(uuid.uuid4())
@@ -134,6 +143,8 @@ def main():
         main_pimpl()
     elif command == CMD_TEST:
         main_test()
+    elif command == CMD_TEXT:
+        main_text()
     elif command == CMD_UUID:
         main_uuid()
 

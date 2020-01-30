@@ -4,7 +4,7 @@
 import sys
 from .properties import *
 
-HELP_MESSAGE = 'Usage: python ' + sys.argv[0] + ' {package/path/classname} {author}'
+HELP_MESSAGE = 'Usage: python ' + sys.argv[0] + ' {package/path/classname}'
 
 
 # noinspection PyUnresolvedReferences
