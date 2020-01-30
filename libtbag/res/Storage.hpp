@@ -212,9 +212,9 @@ public:
     void setEnvFilename(std::string const & filename);
     void setLayoutEnv(std::string const & dir, std::string const & filename, bool auto_load = false);
 
-    bool readEnv();
-    void readEnvDefault(bool with_system = true);
-    void readEnvParams(char ** envs);
+    bool pushEnv();
+    void pushEnvDefault(bool with_system = true);
+    void pushEnvParams(char ** envs);
     bool saveEnv();
 
     void addAssetsToEnv(std::string const & key_prefix, bool make_upper_key = true);
@@ -225,6 +225,7 @@ public:
     void setEnv(std::string const & key, std::string const & value);
     bool getEnv(std::string const & key, std::string & value) const;
 
+    std::string getEnvFilename() const;
     std::vector<std::string> getEnvFilenames() const;
     std::string convert(std::string const & value) const;
 

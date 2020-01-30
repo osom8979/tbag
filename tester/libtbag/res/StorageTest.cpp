@@ -50,7 +50,7 @@ TEST(StorageTest, Envs)
 
     storage.clear();
     storage.setLayoutEnv(PATH, NAME1);
-    ASSERT_TRUE(storage.readEnv());
+    ASSERT_TRUE(storage.pushEnv());
     ASSERT_EQ(2, storage.envs().size());
     ASSERT_TRUE(storage.getEnv(KEY1, read));
     ASSERT_EQ(VAL1, read);
@@ -59,7 +59,7 @@ TEST(StorageTest, Envs)
 
     storage.clear();
     storage.setLayoutEnv(PATH, NAME2);
-    ASSERT_TRUE(storage.readEnv());
+    ASSERT_TRUE(storage.pushEnv());
     ASSERT_EQ(1, storage.envs().size());
     ASSERT_TRUE(storage.getEnv(KEY3, read));
     ASSERT_EQ(VAL3, read);

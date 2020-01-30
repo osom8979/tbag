@@ -375,14 +375,14 @@ StoragePref::Storage StoragePref::loadStorage() const
 
         if (!_prop.env.name.empty()) {
             storage.setEnvFilename(_prop.env.name);
-            storage.readEnv();
+            storage.pushEnv();
         }
 
         if (_prop.env.def) {
-            storage.readEnvDefault(_prop.env.sys);
+            storage.pushEnvDefault(_prop.env.sys);
         }
     } else {
-        storage.readEnvDefault();
+        storage.pushEnvDefault();
     }
 
     // ----------------------------------------

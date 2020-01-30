@@ -140,12 +140,12 @@ void Storage::setLayoutEnv(std::string const & dir, std::string const & filename
 {
     setLayoutEnv(dir);
     setEnvFilename(filename);
-    if (auto_load && !readEnv()) {
+    if (auto_load && !pushEnv()) {
         tDLogE("Storage::setLayoutEnv() auto load failure: {}", libtbag::filesystem::Path(dir) / filename);
     }
 }
 
-bool Storage::readEnv()
+bool Storage::pushEnv()
 {
     if (_impl->envs_filename.empty()) {
         return false;
@@ -157,12 +157,14 @@ bool Storage::readEnv()
     return true;
 }
 
-void Storage::readEnvDefault(bool with_system)
+void Storage::pushEnvDefault(bool with_system)
 {
-    _impl->envs = Environments::createDefaultEnvironments(true);
+    if (with_system) {
+        _impl->envs.pushSystemEnvs();
+    }
 }
 
-void Storage::readEnvParams(char ** envs)
+void Storage::pushEnvParams(char ** envs)
 {
     if (envs != nullptr) {
         _impl->envs.pushEnvs(envs);
@@ -217,6 +219,11 @@ void Storage::setEnv(std::string const & key, std::string const & value)
 bool Storage::getEnv(std::string const & key, std::string & value) const
 {
     return _impl->envs.get(key, value);
+}
+
+std::string Storage::getEnvFilename() const
+{
+    return _impl->envs_filename;
 }
 
 std::vector<std::string> Storage::getEnvFilenames() const
@@ -559,7 +566,7 @@ std::string Storage::getPrintableInformationText() const
 
     auto const ENV_KEYS = envs().keys();
     if (!ENV_KEYS.empty()) {
-        ss << "[ENVIRONMENTS]\n";
+        ss << "[ENVIRONMENTS] (Current: " << getEnvFilename() << ")\n";
         for (auto & env_key : ENV_KEYS) {
             ss << fformat(" {}={}\n", env_key, envs().opt(env_key));
         }
