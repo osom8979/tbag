@@ -26,6 +26,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace filesystem {
 
+TBAG_API std::vector<std::string> splitPaths(std::string const & paths, std::string const & splitter, bool unique = true);
+TBAG_API std::vector<std::string> splitPaths(std::string const & paths, bool unique = true);
+
+TBAG_API std::string mergePaths(std::vector<std::string> const & paths, std::string const & splitter, bool unique = true);
+TBAG_API std::string mergePaths(std::vector<std::string> const & paths, bool unique = true);
+
+TBAG_API std::vector<std::string> getPathsEnv(std::string const & env);
+TBAG_API Err setPathsEnv(std::string const & env, std::vector<std::string> const & paths);
+
 TBAG_API std::vector<Path> findUtf8File(std::vector<std::string> const & paths,
                                         std::string const & regex,
                                         Path::DirentType type = Path::DIRENT_ALL);

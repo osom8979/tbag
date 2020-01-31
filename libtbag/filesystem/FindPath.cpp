@@ -10,11 +10,58 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/uvpp/UvUtils.hpp>
 
+#include <set>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace filesystem {
+
+std::vector<std::string> splitPaths(std::string const & paths, std::string const & splitter, bool unique)
+{
+    if (unique) {
+        auto const tokens = libtbag::string::splitTokens(paths, splitter);
+        auto const temp = std::set<std::string>(tokens.begin(), tokens.end());
+        return std::vector<std::string>(temp.begin(), temp.end());
+    } else {
+        return libtbag::string::splitTokens(paths, splitter);
+    }
+}
+
+std::vector<std::string> splitPaths(std::string const & paths, bool unique)
+{
+    return splitPaths(paths, std::string(1, libtbag::filesystem::details::PATH_SPLITTER), unique);
+}
+
+std::string mergePaths(std::vector<std::string> const & paths, std::string const & splitter, bool unique)
+{
+    if (unique) {
+        auto const temp = std::set<std::string>(paths.begin(), paths.end());
+        return libtbag::string::mergeTokens(temp.begin(), temp.end(), splitter);
+    } else {
+        return libtbag::string::mergeTokens(paths, splitter);
+    }
+}
+
+std::string mergePaths(std::vector<std::string> const & paths, bool unique)
+{
+    return mergePaths(paths, std::string(1, libtbag::filesystem::details::PATH_SPLITTER), unique);
+}
+
+std::vector<std::string> getPathsEnv(std::string const & env)
+{
+    std::string path_env;
+    if (isFailure(libtbag::uvpp::getEnv(env, path_env))) {
+        return {};
+    }
+    return splitPaths(path_env);
+}
+
+Err setPathsEnv(std::string const & env, std::vector<std::string> const & paths)
+{
+    return libtbag::uvpp::setEnv(env, mergePaths(paths));
+}
 
 std::vector<Path> findUtf8File(std::vector<std::string> const & paths,
                                std::string const & regex,
@@ -33,12 +80,7 @@ std::vector<Path> findUtf8File(std::vector<std::string> const & paths,
 
 std::vector<Path> findUtf8ExecuteFile(std::string const & regex)
 {
-    std::string path_env;
-    if (isFailure(uvpp::getEnv("PATH", path_env))) {
-        return std::vector<Path>();
-    }
-    auto const PATHS = string::splitTokens(path_env, std::string(1, details::PATH_SPLITTER));
-    return findUtf8File(PATHS, regex, Path::DIRENT_FILE | Path::DIRENT_LINK);
+    return findUtf8File(getPathsEnv("PATH"), regex, Path::DIRENT_FILE|Path::DIRENT_LINK); // NOLINT
 }
 
 Path findFirstUtf8ExecuteFile(std::string const & regex)

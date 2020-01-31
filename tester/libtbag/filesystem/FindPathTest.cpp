@@ -12,6 +12,18 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
+TEST(FindPathTest, Paths)
+{
+    auto const merged_paths = mergePaths({"A", "B", "A", "C", "B", "D"});
+    ASSERT_FALSE(merged_paths.empty());
+    auto const divided_path = splitPaths(merged_paths);
+    ASSERT_EQ(4, divided_path.size());
+    ASSERT_STREQ("A", divided_path[0].c_str());
+    ASSERT_STREQ("B", divided_path[1].c_str());
+    ASSERT_STREQ("C", divided_path[2].c_str());
+    ASSERT_STREQ("D", divided_path[3].c_str());
+}
+
 TEST(FindPathTest, FindUtf8File)
 {
     auto image_dir = DemoAsset::get_tester_dir_image();
