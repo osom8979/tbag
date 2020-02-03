@@ -137,7 +137,7 @@ void Flags::set(std::string const & key, std::string const & val)
     if (itr == _flags.end()) {
         push(key, val);
     } else {
-        itr->value = val;
+        _flags[std::distance(_flags.begin(), itr)] = Flag(key, val);
     }
 }
 
@@ -153,15 +153,6 @@ bool Flags::get(std::string const & key, std::string & val) const
     return false;
 }
 
-std::string Flags::get(std::string const & key) const
-{
-    std::string val;
-    if (get(key, val)) {
-        return val;
-    }
-    return {};
-}
-
 std::string Flags::opt(std::string const & key, std::string const & default_val) const
 {
     std::string value;
@@ -174,6 +165,11 @@ std::string Flags::opt(std::string const & key, std::string const & default_val)
 std::string Flags::opt(std::string const & key) const
 {
     return opt(key, {});
+}
+
+std::string Flags::operator [](std::string const & key) const
+{
+    return opt(key);
 }
 
 bool Flags::remove(std::size_t index)

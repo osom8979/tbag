@@ -50,6 +50,26 @@ TEST(FlagsTest, ConvertFlag)
     ASSERT_STREQ("value=temp", t3.value.c_str());
 }
 
+TEST(FlagsTest, Set)
+{
+    Flags flags;
+    flags.push(Flags::Flag("1", "A"));
+    flags.push(Flags::Flag("2", "B"));
+    ASSERT_STREQ("A", flags["1"].c_str());
+    ASSERT_STREQ("B", flags["2"].c_str());
+    ASSERT_EQ(2, flags.size());
+
+    flags.set("1", "C");
+    ASSERT_STREQ("C", flags["1"].c_str());
+    ASSERT_EQ(2, flags.size());
+
+    flags.set("3", "D");
+    ASSERT_EQ(3, flags.size());
+    ASSERT_STREQ("C", flags["1"].c_str());
+    ASSERT_STREQ("B", flags["2"].c_str());
+    ASSERT_STREQ("D", flags["3"].c_str());
+}
+
 TEST(FlagsTest, At)
 {
     Flags flags;

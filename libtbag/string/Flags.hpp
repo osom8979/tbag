@@ -139,10 +139,11 @@ public:
 public:
     void set(std::string const & key, std::string const & val);
     bool get(std::string const & key, std::string & val) const;
-    std::string get(std::string const & key) const;
 
     std::string opt(std::string const & key, std::string const & default_val) const;
     std::string opt(std::string const & key) const;
+
+    std::string operator [](std::string const & key) const;
 
 public:
     bool remove(std::size_t index);
