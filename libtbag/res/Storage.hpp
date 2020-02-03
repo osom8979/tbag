@@ -224,6 +224,9 @@ public:
 
     void setEnv(std::string const & key, std::string const & value);
     bool getEnv(std::string const & key, std::string & value) const;
+    std::string optEnv(std::string const & key, std::string const & def = {}) const;
+
+    void updateToSystemEnvs() const;
 
     std::string getEnvFilename() const;
     std::vector<std::string> getEnvFilenames() const;

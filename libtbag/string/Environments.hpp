@@ -148,6 +148,9 @@ public:
     bool pushEnvs(std::vector<std::string> const & envs, std::string const & delimiter);
 
 public:
+    void updateToSystemEnvs() const;
+
+public:
     void readFromResource(Resource const & res);
     void readFromResourceXmlString(std::string const & xml);
     void readFromResourceXmlFile(std::string const & path);
@@ -181,6 +184,10 @@ public:
 public:
     static Environments createDefaultEnvironments(bool with_system = true);
 };
+
+// -----------------------
+// Miscellaneous utilities
+// -----------------------
 
 template <typename MapItr>
 std::string convert(std::string const & text, MapItr begin, MapItr end, bool with_system = true)

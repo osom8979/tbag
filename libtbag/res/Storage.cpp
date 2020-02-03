@@ -221,6 +221,16 @@ bool Storage::getEnv(std::string const & key, std::string & value) const
     return _impl->envs.get(key, value);
 }
 
+std::string Storage::optEnv(std::string const & key, std::string const & def) const
+{
+    return _impl->envs.opt(key, def);
+}
+
+void Storage::updateToSystemEnvs() const
+{
+    return _impl->envs.updateToSystemEnvs();
+}
+
 std::string Storage::getEnvFilename() const
 {
     return _impl->envs_filename;

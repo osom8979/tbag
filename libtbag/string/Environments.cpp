@@ -9,6 +9,7 @@
 #include <libtbag/string/ParameterExpansion.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/filesystem/Path.hpp>
+#include <libtbag/uvpp/UvUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
 #include <climits>
@@ -156,6 +157,13 @@ bool Environments::pushEnvs(std::string const & envs, std::string const & delimi
 bool Environments::pushEnvs(std::vector<std::string> const & envs, std::string const & delimiter)
 {
     return _flags.parse(envs, _NO_PREFIX_STRING, delimiter);
+}
+
+void Environments::updateToSystemEnvs() const
+{
+    for (auto const & cursor : _flags) {
+        libtbag::uvpp::setEnv(cursor.key, cursor.value);
+    }
 }
 
 void Environments::readFromResource(Resource const & res)

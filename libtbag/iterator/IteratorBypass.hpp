@@ -107,7 +107,7 @@ struct HasReverseIterator
     const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(container.cbegin())   \
     { return container.cbegin(); }                                          \
     const_iterator cend() const TBAG_NOEXCEPT_SP_OP(container.cend())       \
-    { return container.  cend(); }                                          \
+    { return container.cend(); }                                            \
     /* -- END -- */
 #endif
 

@@ -98,6 +98,11 @@ public:
     Flags & operator =(Flags && obj) TBAG_NOEXCEPT;
 
 public:
+    void swap(Flags & obj) TBAG_NOEXCEPT;
+    friend void swap(Flags & lh, Flags & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
+
+public:
     inline void clear() TBAG_NOEXCEPT_SP_OP(_flags.clear())
     { _flags.clear(); }
     inline std::size_t size() const TBAG_NOEXCEPT_SP_OP(_flags.size())
@@ -122,11 +127,42 @@ public:
     { return _flags.at(index); }
 
 public:
-    void swap(Flags & obj) TBAG_NOEXCEPT;
+    using       iterator = typename FlagVector::iterator;
+    using const_iterator = typename FlagVector::const_iterator;
+
+    iterator begin() TBAG_NOEXCEPT_SP_OP(_flags.begin())
+    { return _flags.begin(); }
+    iterator end() TBAG_NOEXCEPT_SP_OP(_flags.end())
+    { return _flags.end(); }
+
+    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(_flags.begin())
+    { return _flags.begin(); }
+    const_iterator end() const TBAG_NOEXCEPT_SP_OP(_flags.end())
+    { return _flags.end(); }
+
+    const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(_flags.cbegin())
+    { return _flags.cbegin(); }
+    const_iterator cend() const TBAG_NOEXCEPT_SP_OP(_flags.cend())
+    { return _flags.cend(); }
 
 public:
-    friend void swap(Flags & lh, Flags & rh) TBAG_NOEXCEPT
-    { lh.swap(rh); }
+    using       reverse_iterator = typename FlagVector::reverse_iterator;
+    using const_reverse_iterator = typename FlagVector::const_reverse_iterator;
+
+    reverse_iterator rbegin() TBAG_NOEXCEPT_SP_OP(_flags.rbegin())
+    { return _flags.rbegin(); }
+    reverse_iterator rend() TBAG_NOEXCEPT_SP_OP(_flags.rend())
+    { return _flags.rend(); }
+
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT_SP_OP(_flags.rbegin())
+    { return _flags.rbegin(); }
+    const_reverse_iterator rend() const TBAG_NOEXCEPT_SP_OP(_flags.rend())
+    { return _flags.rend(); }
+
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(_flags.crbegin())
+    { return _flags.crbegin(); }
+    const_reverse_iterator crend() const TBAG_NOEXCEPT_SP_OP(_flags.crend())
+    { return _flags.crend(); }
 
 public:
     Flag findByKey(std::string const & key) const;
