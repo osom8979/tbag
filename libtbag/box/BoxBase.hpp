@@ -163,7 +163,7 @@ public:
         return libtbag::box::details::box_support_device(getDevice());
     }
 
-    inline char const * getDeviceName(bdev dev) const TBAG_NOEXCEPT
+    inline char const * getDeviceName() const TBAG_NOEXCEPT
     {
         return libtbag::box::details::box_get_device_name(getType());
     }
