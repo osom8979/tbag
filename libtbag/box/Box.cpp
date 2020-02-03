@@ -8,6 +8,7 @@
 #include <libtbag/box/Box.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <cstdlib>
@@ -498,6 +499,43 @@ std::vector<ui32> Box::diffs() const
     return diffs(static_cast<box_slice const *>(nullptr), static_cast<std::size_t>(0u));
 }
 
+std::vector<box_slice> Box::parseSliceText(std::string const & slice_text,
+                                           std::string const & argument_delimiter,
+                                           std::string const & slice_delimiter)
+{
+    std::vector<box_slice> result;
+    using namespace libtbag::string;
+    for (auto const & token : splitTokens(slice_text, slice_delimiter, true)) {
+        auto const args = splitTokens(trim(token), argument_delimiter, false);
+        auto const args_size = args.size();
+
+        box_slice slice = {box_nop, box_nop, 1};
+        if (args_size >= 1) {
+            auto const begin = trim(args[0]);
+            if (!begin.empty()) {
+                slice.begin = toValue<int>(begin, box_nop);
+            }
+        }
+
+        if (args_size >= 2) {
+            auto const end = trim(args[1]);
+            if (!end.empty()) {
+                slice.end = toValue<int>(end, box_nop);
+            }
+        }
+
+        if (args_size >= 3) {
+            auto const step = trim(args[2]);
+            if (!step.empty()) {
+                slice.step = toValue<int>(step, 1);
+            }
+        }
+
+        result.emplace_back(std::move(slice));
+    }
+    return result;
+}
+
 Err Box::sliceTo(Box & result, box_slice const * slice_begin, box_slice const * slice_end) const
 {
     if (!exists()) {
@@ -525,6 +563,13 @@ Err Box::sliceTo(Box & result, std::vector<box_slice> const & slices) const
     return sliceTo(result, slices.data(), slices.size());
 }
 
+Err Box::sliceTo(Box & result, std::string const & slice_text,
+                 std::string const & argument_delimiter,
+                 std::string const & slice_delimiter) const
+{
+    return sliceTo(result, parseSliceText(slice_text, argument_delimiter, slice_delimiter));
+}
+
 Box Box::slice(box_slice const * slice_begin, box_slice const * slice_end) const
 {
     if (!exists()) {
@@ -546,6 +591,13 @@ Box Box::slice(box_slice const * slices, std::size_t size) const
 Box Box::slice(std::vector<box_slice> const & slices) const
 {
     return slice(slices.data(), slices.size());
+}
+
+Box Box::slice(std::string const & slice_text,
+               std::string const & argument_delimiter,
+               std::string const & slice_delimiter) const
+{
+    return slice(parseSliceText(slice_text, argument_delimiter, slice_delimiter));
 }
 
 Err Box::zeros()

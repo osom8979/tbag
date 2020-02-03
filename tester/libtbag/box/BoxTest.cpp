@@ -106,3 +106,29 @@ TEST(BoxTest, Diffs4)
     ASSERT_EQ(1, diffs[3]);
 }
 
+TEST(BoxTest, ParseSliceText)
+{
+    auto const slices = Box::parseSliceText("::, 1:2:, ::-3, 4, 5:6");
+    ASSERT_EQ(5, slices.size());
+
+    ASSERT_EQ(nop, slices[0].begin);
+    ASSERT_EQ(nop, slices[0].end);
+    ASSERT_EQ(1, slices[0].step);
+
+    ASSERT_EQ(1, slices[1].begin);
+    ASSERT_EQ(2, slices[1].end);
+    ASSERT_EQ(1, slices[1].step);
+
+    ASSERT_EQ(nop, slices[2].begin);
+    ASSERT_EQ(nop, slices[2].end);
+    ASSERT_EQ(-3, slices[2].step);
+
+    ASSERT_EQ(4, slices[3].begin);
+    ASSERT_EQ(nop, slices[3].end);
+    ASSERT_EQ(1, slices[3].step);
+
+    ASSERT_EQ(5, slices[4].begin);
+    ASSERT_EQ(6, slices[4].end);
+    ASSERT_EQ(1, slices[4].step);
+}
+

@@ -758,13 +758,33 @@ public:
     std::vector<ui32> diffs(std::vector<box_slice> const & slices) const;
     std::vector<ui32> diffs() const;
 
+    TBAG_CONSTEXPR static char const * const SLICE_ARGUMENT_DELIMITER = ":";
+    TBAG_CONSTEXPR static char const * const SLICE_DELIMITER = ",";
+
+    /**
+     * Example:
+     * @code{.cpp}
+     *  auto slices = Box::parseSliceText("::, 1:2:, ::-3, 4, 5:6")
+     * @endcode
+     */
+    static std::vector<box_slice> parseSliceText(
+            std::string const & slice_text,
+            std::string const & argument_delimiter = SLICE_ARGUMENT_DELIMITER,
+            std::string const & slice_delimiter = SLICE_DELIMITER);
+
     Err sliceTo(Box & result, box_slice const * slice_begin, box_slice const * slice_end) const;
     Err sliceTo(Box & result, box_slice const * slices, std::size_t size) const;
     Err sliceTo(Box & result, std::vector<box_slice> const & slices) const;
+    Err sliceTo(Box & result, std::string const & slice_text,
+                std::string const & argument_delimiter = SLICE_ARGUMENT_DELIMITER,
+                std::string const & slice_delimiter = SLICE_DELIMITER) const;
 
     Box slice(box_slice const * slice_begin, box_slice const * slice_end) const;
     Box slice(box_slice const * slices, std::size_t size) const;
     Box slice(std::vector<box_slice> const & slices) const;
+    Box slice(std::string const & slice_text,
+              std::string const & argument_delimiter = SLICE_ARGUMENT_DELIMITER,
+              std::string const & slice_delimiter = SLICE_DELIMITER) const;
 
 public:
     template <typename T>
