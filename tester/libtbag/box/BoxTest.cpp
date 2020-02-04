@@ -132,3 +132,10 @@ TEST(BoxTest, ParseSliceText)
     ASSERT_EQ(1, slices[4].step);
 }
 
+TEST(BoxTest, ConvertSliceText)
+{
+    std::vector<box_slice> const slices = {{}, {1,2}, {nop,nop,-3}, {4}, {5,6}};
+    auto const text = Box::convertSliceText(slices);
+    ASSERT_STREQ("::,1:2:,::-3,4::,5:6:", text.c_str());
+}
+

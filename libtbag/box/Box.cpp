@@ -16,6 +16,7 @@
 
 #include <functional>
 #include <algorithm>
+#include <sstream>
 #include <utility>
 
 // -------------------
@@ -509,18 +510,18 @@ std::vector<box_slice> Box::parseSliceText(std::string const & slice_text,
         auto const args = splitTokens(trim(token), argument_delimiter, false);
         auto const args_size = args.size();
 
-        box_slice slice = {box_nop, box_nop, 1};
+        box_slice slice = {nop, nop, 1};
         if (args_size >= 1) {
             auto const begin = trim(args[0]);
             if (!begin.empty()) {
-                slice.begin = toValue<int>(begin, box_nop);
+                slice.begin = toValue<int>(begin, nop);
             }
         }
 
         if (args_size >= 2) {
             auto const end = trim(args[1]);
             if (!end.empty()) {
-                slice.end = toValue<int>(end, box_nop);
+                slice.end = toValue<int>(end, nop);
             }
         }
 
@@ -531,9 +532,49 @@ std::vector<box_slice> Box::parseSliceText(std::string const & slice_text,
             }
         }
 
-        result.emplace_back(std::move(slice));
+        result.emplace_back(slice);
     }
     return result;
+}
+
+std::string Box::convertSliceText(box_slice const & slice,
+                                  std::string const & argument_delimiter)
+{
+    std::stringstream ss;
+    if (slice.begin != nop) {
+        ss << slice.begin;
+    }
+    ss << argument_delimiter;
+    if (slice.end != nop) {
+        ss << slice.end;
+    }
+    ss << argument_delimiter;
+    if (slice.step != 1) {
+        ss << slice.step;
+    }
+    return ss.str();
+}
+
+std::string Box::convertSliceText(std::vector<box_slice> const & slices,
+                                  std::string const & argument_delimiter,
+                                  std::string const & slice_delimiter)
+{
+    if (slices.empty()) {
+        return {};
+    }
+
+    auto const size = slices.size();
+    if (size == 1) {
+        return convertSliceText(slices[0], argument_delimiter);
+    }
+
+    assert(size >= 2);
+    std::stringstream ss;
+    ss << convertSliceText(slices[0], argument_delimiter);
+    for (auto i = 1; i < size; ++i) {
+        ss << slice_delimiter << convertSliceText(slices[i], argument_delimiter);
+    }
+    return ss.str();
 }
 
 Err Box::sliceTo(Box & result, box_slice const * slice_begin, box_slice const * slice_end) const

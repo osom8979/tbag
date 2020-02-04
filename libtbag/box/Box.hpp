@@ -771,6 +771,13 @@ public:
             std::string const & slice_text,
             std::string const & argument_delimiter = SLICE_ARGUMENT_DELIMITER,
             std::string const & slice_delimiter = SLICE_DELIMITER);
+    static std::string convertSliceText(
+            box_slice const & slice,
+            std::string const & argument_delimiter = SLICE_ARGUMENT_DELIMITER);
+    static std::string convertSliceText(
+            std::vector<box_slice> const & slices,
+            std::string const & argument_delimiter = SLICE_ARGUMENT_DELIMITER,
+            std::string const & slice_delimiter = SLICE_DELIMITER);
 
     Err sliceTo(Box & result, box_slice const * slice_begin, box_slice const * slice_end) const;
     Err sliceTo(Box & result, box_slice const * slices, std::size_t size) const;
