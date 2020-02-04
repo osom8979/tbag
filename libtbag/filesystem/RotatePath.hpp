@@ -233,6 +233,8 @@ struct CounterUpdater : public UpdaterInterface
  *
  * @author zer0
  * @date   2017-11-20
+ *
+ * @see libtbag::time::TimePoint::onEscape
  */
 struct TimeFormatUpdater : public UpdaterInterface
 {

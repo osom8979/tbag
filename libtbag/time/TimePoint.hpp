@@ -252,24 +252,23 @@ public:
 
 public:
     /**
+     * Format list:
+     *  - [p][Yy]: Year
+     *  - [p][Ee]: Year divided by 100 and truncated to integer
+     *  - [p][Mm]: Month
+     *  - [p][Dd]: Day
+     *  - [p][Hh]: Hours
+     *  - [p][Ii]: Minutes
+     *  - [p][Ss]: Seconds
+     *  - [p][Ll]: Millisec
+     *  - [p][Cc]: Microsec
+     *  - [p][Nn]: Nanosec
+     *  - [f]: Local diff
+     * If you use 'p', the 'padding' option applies. @n
+     * If you use lowercase letters, use local time.
+     *
      * @warning
      *  Not equals strftime() format. @n
-     *
-     * @remarks
-     *  Format list:
-     *   - [p][Yy]: Year
-     *   - [p][Ee]: Year divided by 100 and truncated to integer
-     *   - [p][Mm]: Month
-     *   - [p][Dd]: Day
-     *   - [p][Hh]: Hours
-     *   - [p][Ii]: Minutes
-     *   - [p][Ss]: Seconds
-     *   - [p][Ll]: Millisec
-     *   - [p][Cc]: Microsec
-     *   - [p][Nn]: Nanosec
-     *   - [f]: Local diff
-     *  If you use 'p', the 'padding' option applies. @n
-     *  If you use lowercase letters, use local time.
      */
     virtual int onEscape(std::string const & source, std::size_t index, std::string & output) const override;
 
