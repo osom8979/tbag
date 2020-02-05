@@ -59,6 +59,8 @@ Storage::Impl::~Impl()
 // Storage class implementation
 // ----------------------------
 
+using Path = Storage::Path;
+
 Storage::Storage() : _impl(std::make_shared<Impl>())
 {
     assert(static_cast<bool>(_impl));
@@ -120,11 +122,50 @@ void Storage::clear()
     _impl = std::make_shared<Impl>();
 }
 
-std::vector<std::string> Storage::getFilenames(std::string const & key) const
+void Storage::setLayout(std::string const & name, std::string const & dir)
+{
+    asset().set(name, Path(dir));
+}
+
+// clang-format off
+void Storage::setLayoutEnv     (std::string const & dir) { setLayout(LAYOUT_ENV     , dir); }
+void Storage::setLayoutConfig  (std::string const & dir) { setLayout(LAYOUT_CONFIG  , dir); }
+void Storage::setLayoutModule  (std::string const & dir) { setLayout(LAYOUT_MODULE  , dir); }
+void Storage::setLayoutText    (std::string const & dir) { setLayout(LAYOUT_TEXT    , dir); }
+void Storage::setLayoutSqlite  (std::string const & dir) { setLayout(LAYOUT_SQLITE  , dir); }
+void Storage::setLayoutTemp    (std::string const & dir) { setLayout(LAYOUT_TEMP    , dir); }
+void Storage::setLayoutKeystore(std::string const & dir) { setLayout(LAYOUT_KEYSTORE, dir); }
+void Storage::setLayoutLua     (std::string const & dir) { setLayout(LAYOUT_LUA     , dir); }
+void Storage::setLayoutLuaRocks(std::string const & dir) { setLayout(LAYOUT_LUAROCKS, dir); }
+// clang-format on
+
+bool Storage::existsLayout(std::string const & name) const
+{
+    return asset().exists(name);
+}
+
+Path Storage::getLayout(std::string const & name) const
+{
+    return asset().get(name);
+}
+
+// clang-format off
+Path Storage::getLayoutEnv     () const { return getLayout(LAYOUT_ENV     ); }
+Path Storage::getLayoutConfig  () const { return getLayout(LAYOUT_CONFIG  ); }
+Path Storage::getLayoutModule  () const { return getLayout(LAYOUT_MODULE  ); }
+Path Storage::getLayoutText    () const { return getLayout(LAYOUT_TEXT    ); }
+Path Storage::getLayoutSqlite  () const { return getLayout(LAYOUT_SQLITE  ); }
+Path Storage::getLayoutTemp    () const { return getLayout(LAYOUT_TEMP    ); }
+Path Storage::getLayoutKeystore() const { return getLayout(LAYOUT_KEYSTORE); }
+Path Storage::getLayoutLua     () const { return getLayout(LAYOUT_LUA     ); }
+Path Storage::getLayoutLuaRocks() const { return getLayout(LAYOUT_LUAROCKS); }
+// clang-format on
+
+std::vector<std::string> Storage::getFilenames(std::string const & name) const
 {
     std::vector<std::string> result;
-    if (asset().exists(key)) {
-        for (auto & cursor : asset().get(key).scanNameOnly()) {
+    if (asset().exists(name)) {
+        for (auto & cursor : asset().get(name).scanNameOnly()) {
             result.push_back(cursor);
         }
     }

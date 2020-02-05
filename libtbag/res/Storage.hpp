@@ -171,39 +171,38 @@ public:
     // clang-format on
 
 public:
-    // clang-format off
-    void setLayoutEnv     (std::string const & dir) { asset().set(LAYOUT_ENV     , Path(dir)); }
-    void setLayoutConfig  (std::string const & dir) { asset().set(LAYOUT_CONFIG  , Path(dir)); }
-    void setLayoutModule  (std::string const & dir) { asset().set(LAYOUT_MODULE  , Path(dir)); }
-    void setLayoutText    (std::string const & dir) { asset().set(LAYOUT_TEXT    , Path(dir)); }
-    void setLayoutSqlite  (std::string const & dir) { asset().set(LAYOUT_SQLITE  , Path(dir)); }
-    void setLayoutTemp    (std::string const & dir) { asset().set(LAYOUT_TEMP    , Path(dir)); }
-    void setLayoutKeystore(std::string const & dir) { asset().set(LAYOUT_KEYSTORE, Path(dir)); }
-    void setLayoutLua     (std::string const & dir) { asset().set(LAYOUT_LUA     , Path(dir)); }
-    void setLayoutLuaRocks(std::string const & dir) { asset().set(LAYOUT_LUAROCKS, Path(dir)); }
-    // clang-format on
-
-public:
-    bool existsLayout(std::string const & name) const
-    { return asset().exists(name); }
-    Path getLayout(std::string const & name) const
-    { return asset().get(name); }
+    void setLayout(std::string const & name, std::string const & dir);
 
 public:
     // clang-format off
-    Path getLayoutEnv     () const { return getLayout(LAYOUT_ENV     ); }
-    Path getLayoutConfig  () const { return getLayout(LAYOUT_CONFIG  ); }
-    Path getLayoutModule  () const { return getLayout(LAYOUT_MODULE  ); }
-    Path getLayoutText    () const { return getLayout(LAYOUT_TEXT    ); }
-    Path getLayoutSqlite  () const { return getLayout(LAYOUT_SQLITE  ); }
-    Path getLayoutTemp    () const { return getLayout(LAYOUT_TEMP    ); }
-    Path getLayoutKeystore() const { return getLayout(LAYOUT_KEYSTORE); }
-    Path getLayoutLua     () const { return getLayout(LAYOUT_LUA     ); }
-    Path getLayoutLuaRocks() const { return getLayout(LAYOUT_LUAROCKS); }
+    void setLayoutEnv     (std::string const & dir);
+    void setLayoutConfig  (std::string const & dir);
+    void setLayoutModule  (std::string const & dir);
+    void setLayoutText    (std::string const & dir);
+    void setLayoutSqlite  (std::string const & dir);
+    void setLayoutTemp    (std::string const & dir);
+    void setLayoutKeystore(std::string const & dir);
+    void setLayoutLua     (std::string const & dir);
+    void setLayoutLuaRocks(std::string const & dir);
     // clang-format on
 
 public:
-    std::vector<std::string> getFilenames(std::string const & key) const;
+    bool existsLayout(std::string const & name) const;
+    Path getLayout(std::string const & name) const;
+
+public:
+    Path getLayoutEnv     () const;
+    Path getLayoutConfig  () const;
+    Path getLayoutModule  () const;
+    Path getLayoutText    () const;
+    Path getLayoutSqlite  () const;
+    Path getLayoutTemp    () const;
+    Path getLayoutKeystore() const;
+    Path getLayoutLua     () const;
+    Path getLayoutLuaRocks() const;
+
+public:
+    std::vector<std::string> getFilenames(std::string const & name) const;
 
 public:
     Environments       & envs()       TBAG_NOEXCEPT { return _impl->envs; }
