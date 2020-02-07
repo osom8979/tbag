@@ -94,6 +94,70 @@ bool existsArray   (Json::Value const & v, std::string const & key) { return exi
 bool existsObject  (Json::Value const & v, std::string const & key) { return exists(v, key) && v[key].isObject  (); }
 // clang-format on
 
+bool optBool(Json::Value const & v, std::string const & key, bool def)
+{
+    if (existsBool(v, key)) {
+        return v[key].asBool();
+    }
+    return def;
+}
+
+int optInt(Json::Value const & v, std::string const & key, int def)
+{
+    if (existsInt(v, key)) {
+        return v[key].asInt();
+    }
+    return def;
+}
+
+unsigned optUInt(Json::Value const & v, std::string const & key, unsigned def)
+{
+    if (existsUInt(v, key)) {
+        return v[key].asUInt();
+    }
+    return def;
+}
+
+std::int64_t optInt64(Json::Value const & v, std::string const & key, std::int64_t def)
+{
+    if (existsInt64(v, key)) {
+        return v[key].asInt64();
+    }
+    return def;
+}
+
+std::uint64_t optUInt64(Json::Value const & v, std::string const & key, std::uint64_t def)
+{
+    if (existsUInt64(v, key)) {
+        return v[key].asUInt64();
+    }
+    return def;
+}
+
+float optFloat(Json::Value const & v, std::string const & key, float def)
+{
+    if (existsNumeric(v, key)) {
+        return v[key].asFloat();
+    }
+    return def;
+}
+
+double optDouble(Json::Value const & v, std::string const & key, double def)
+{
+    if (existsDouble(v, key)) {
+        return v[key].asDouble();
+    }
+    return def;
+}
+
+std::string optString(Json::Value const & v, std::string const & key, std::string const & def)
+{
+    if (existsString(v, key)) {
+        return v[key].asString();
+    }
+    return def;
+}
+
 std::string getForceString(Json::Value const & v)
 {
     std::string result;

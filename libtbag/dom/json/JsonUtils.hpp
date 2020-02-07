@@ -18,6 +18,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/dom/json/jsoncpp/json.h>
 
+#include <cstdint>
 #include <vector>
 #include <string>
 
@@ -51,6 +52,17 @@ TBAG_API bool existsNumeric (Json::Value const & v, std::string const & key);
 TBAG_API bool existsString  (Json::Value const & v, std::string const & key);
 TBAG_API bool existsArray   (Json::Value const & v, std::string const & key);
 TBAG_API bool existsObject  (Json::Value const & v, std::string const & key);
+// clang-format on
+
+// clang-format off
+TBAG_API bool optBool(Json::Value const & v, std::string const & key, bool def = false);
+TBAG_API int optInt(Json::Value const & v, std::string const & key, int def = 0);
+TBAG_API unsigned optUInt(Json::Value const & v, std::string const & key, unsigned def = 0u);
+TBAG_API std::int64_t optInt64(Json::Value const & v, std::string const & key, std::int64_t def = 0);
+TBAG_API std::uint64_t optUInt64(Json::Value const & v, std::string const & key, std::uint64_t def = 0u);
+TBAG_API float optFloat(Json::Value const & v, std::string const & key, float def = 0.0f);
+TBAG_API double optDouble(Json::Value const & v, std::string const & key, double def = 0.0);
+TBAG_API std::string optString(Json::Value const & v, std::string const & key, std::string const & def = {});
 // clang-format on
 
 TBAG_API std::string getForceString(Json::Value const & v);

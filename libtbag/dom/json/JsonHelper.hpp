@@ -57,6 +57,15 @@ struct TBAG_API JsonHelper
     static bool existsObject  (Value const & v, std::string const & key);
     // clang-format on
 
+    static bool optBool(Json::Value const & v, std::string const & key, bool def = false);
+    static int optInt(Json::Value const & v, std::string const & key, int def = 0);
+    static unsigned optUInt(Json::Value const & v, std::string const & key, unsigned def = 0u);
+    static std::int64_t optInt64(Json::Value const & v, std::string const & key, std::int64_t def = 0);
+    static std::uint64_t optUInt64(Json::Value const & v, std::string const & key, std::uint64_t def = 0u);
+    static float optFloat(Json::Value const & v, std::string const & key, float def = 0.0f);
+    static double optDouble(Json::Value const & v, std::string const & key, double def = 0.0);
+    static std::string optString(Json::Value const & v, std::string const & key, std::string const & def = {});
+
     static std::string getForceString(Json::Value const & v);
     static std::string getForceString(Json::Value const & v, std::string const & key);
 

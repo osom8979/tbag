@@ -99,6 +99,46 @@ bool JsonHelper::existsObject(Value const & v, std::string const & key)
     return libtbag::dom::json::existsObject(v, key);
 }
 
+bool JsonHelper::optBool(Json::Value const & v, std::string const & key, bool def)
+{
+    return libtbag::dom::json::optBool(v, key, def);
+}
+
+int JsonHelper::optInt(Json::Value const & v, std::string const & key, int def)
+{
+    return libtbag::dom::json::optInt(v, key, def);
+}
+
+unsigned JsonHelper::optUInt(Json::Value const & v, std::string const & key, unsigned def)
+{
+    return libtbag::dom::json::optUInt(v, key, def);
+}
+
+std::int64_t JsonHelper::optInt64(Json::Value const & v, std::string const & key, std::int64_t def)
+{
+    return libtbag::dom::json::optInt64(v, key, def);
+}
+
+std::uint64_t JsonHelper::optUInt64(Json::Value const & v, std::string const & key, std::uint64_t def)
+{
+    return libtbag::dom::json::optUInt64(v, key, def);
+}
+
+float JsonHelper::optFloat(Json::Value const & v, std::string const & key, float def)
+{
+    return libtbag::dom::json::optFloat(v, key, def);
+}
+
+double JsonHelper::optDouble(Json::Value const & v, std::string const & key, double def)
+{
+    return libtbag::dom::json::optDouble(v, key, def);
+}
+
+std::string JsonHelper::optString(Json::Value const & v, std::string const & key, std::string const & def)
+{
+    return libtbag::dom::json::optString(v, key, def);
+}
+
 std::string JsonHelper::getForceString(Json::Value const & v)
 {
     return libtbag::dom::json::getForceString(v);
