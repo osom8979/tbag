@@ -23,6 +23,7 @@
 #include <libtbag/box/BoxIteratorGenerator.hpp>
 #include <libtbag/box/BoxPacket.hpp>
 #include <libtbag/box/BoxTraits.hpp>
+#include <libtbag/dom/json/JsonUtils.hpp>
 
 #include <cstddef>
 #include <cstdlib>
@@ -716,7 +717,9 @@ public:
 
 public:
     std::string toJsonText(Err * code = nullptr) const;
+    Json::Value toJsonValue(Err * code = nullptr) const;
     bool fromJsonText(std::string const & json, Err * code = nullptr);
+    bool fromJsonValue(Json::Value const & json, Err * code = nullptr);
 
 public:
     ErrPair<BoxCursor> cursor(box_slice const & slice) const;

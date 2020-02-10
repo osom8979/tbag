@@ -407,6 +407,25 @@ std::string Box::toJsonText(Err * code) const
     return json;
 }
 
+Json::Value Box::toJsonValue(Err * code) const
+{
+    std::string json_text;
+    auto const encode_result = encodeToJson(json_text);
+    if (isFailure(encode_result)) {
+        if (code != nullptr) {
+            *code = encode_result;
+        }
+        return {};
+    }
+
+    Json::Value json_value;
+    auto const parse_result = libtbag::dom::json::parse(json_text, json_value) ? E_SUCCESS : E_PARSING;
+    if (code != nullptr) {
+        *code = parse_result;
+    }
+    return json_value;
+}
+
 bool Box::fromJsonText(std::string const & json, Err * code)
 {
     auto const result = decodeFromJson(json);
@@ -414,6 +433,11 @@ bool Box::fromJsonText(std::string const & json, Err * code)
         *code = result;
     }
     return isSuccess(result);
+}
+
+bool Box::fromJsonValue(Json::Value const & json, Err * code)
+{
+    return fromJsonText(libtbag::dom::json::writeFast(json), code);
 }
 
 ErrPair<BoxCursor> Box::cursor(box_slice const & slice) const

@@ -107,4 +107,33 @@ TEST(Box_Encode_Test, Json)
     ASSERT_EQ(20, b1.at<si32>(1));
 }
 
+TEST(Box_Encode_Test, JsonValue)
+{
+    Box b0 = {10, 20};
+    ASSERT_TRUE(b0.is_device_cpu());
+    ASSERT_TRUE(b0.is_si32());
+    ASSERT_EQ(1, b0.rank());
+    ASSERT_EQ(2, b0.size());
+    ASSERT_EQ(2, b0.dim(0));
+    ASSERT_EQ(10, b0.at<si32>(0));
+    ASSERT_EQ(20, b0.at<si32>(1));
+
+    Err code0;
+    auto const json = b0.toJsonValue(&code0);
+    ASSERT_EQ(E_SUCCESS, code0);
+    ASSERT_FALSE(json.empty());
+
+    Err code1;
+    Box b1;
+    ASSERT_TRUE(b1.fromJsonValue(json, &code1));
+    ASSERT_EQ(E_SUCCESS, code1);
+    ASSERT_TRUE(b1.is_device_cpu());
+    ASSERT_TRUE(b1.is_si32());
+    ASSERT_EQ(1, b1.rank());
+    ASSERT_EQ(2, b1.size());
+    ASSERT_EQ(2, b1.dim(0));
+    ASSERT_EQ(10, b1.at<si32>(0));
+    ASSERT_EQ(20, b1.at<si32>(1));
+}
+
 
