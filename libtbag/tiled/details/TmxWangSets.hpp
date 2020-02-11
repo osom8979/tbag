@@ -50,8 +50,44 @@ struct TBAG_API TmxWangSets : protected libtbag::dom::xml::XmlHelper
     TmxWangSets(WangSets const & w);
     ~TmxWangSets();
 
+    using       iterator = typename WangSets::iterator;
+    using const_iterator = typename WangSets::const_iterator;
+    using       reverse_iterator = typename WangSets::reverse_iterator;
+    using const_reverse_iterator = typename WangSets::const_reverse_iterator;
+
+    iterator begin() TBAG_NOEXCEPT_SP_OP(wang_sets.begin())
+    { return wang_sets.begin(); }
+    iterator end() TBAG_NOEXCEPT_SP_OP(wang_sets.end())
+    { return wang_sets.end(); }
+
+    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(wang_sets.begin())
+    { return wang_sets.begin(); }
+    const_iterator end() const TBAG_NOEXCEPT_SP_OP(wang_sets.end())
+    { return wang_sets.end(); }
+
+    const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(wang_sets.cbegin())
+    { return wang_sets.cbegin(); }
+    const_iterator cend() const TBAG_NOEXCEPT_SP_OP(wang_sets.cend())
+    { return wang_sets.cend(); }
+
+    reverse_iterator rbegin() TBAG_NOEXCEPT_SP_OP(wang_sets.rbegin())
+    { return wang_sets.rbegin(); }
+    reverse_iterator rend() TBAG_NOEXCEPT_SP_OP(wang_sets.rend())
+    { return wang_sets.rend(); }
+
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT_SP_OP(wang_sets.rbegin())
+    { return wang_sets.rbegin(); }
+    const_reverse_iterator rend() const TBAG_NOEXCEPT_SP_OP(wang_sets.rend())
+    { return wang_sets.rend(); }
+
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(wang_sets.crbegin())
+    { return wang_sets.crbegin(); }
+    const_reverse_iterator crend() const TBAG_NOEXCEPT_SP_OP(wang_sets.crend())
+    { return wang_sets.crend(); }
+
     bool empty() const;
     std::size_t size() const;
+    void clear();
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

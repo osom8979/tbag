@@ -39,6 +39,11 @@ std::size_t TmxPolygon::size() const
     return points.size();
 }
 
+void TmxPolygon::clear()
+{
+    points.clear();
+}
+
 Err TmxPolygon::read(Element const & elem)
 {
     return readToPoints(TAG_NAME, elem, points);

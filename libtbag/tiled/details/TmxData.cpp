@@ -41,14 +41,14 @@ TmxData::TileLayerFormat TmxData::getTileLayerFormat() const TBAG_NOEXCEPT
     return TmxDataCommon::getTileLayerFormat(encoding, compression);
 }
 
-bool TmxData::isInfinieMap() const TBAG_NOEXCEPT
+bool TmxData::isInfiniteMap() const TBAG_NOEXCEPT
 {
     return data_type == DataType::CHUNK;
 }
 
 bool TmxData::empty() const
 {
-    if (isInfinieMap()) {
+    if (isInfiniteMap()) {
         return chunks.empty();
     } else {
         return gids.empty();
@@ -57,10 +57,19 @@ bool TmxData::empty() const
 
 std::size_t TmxData::size() const
 {
-    if (isInfinieMap()) {
+    if (isInfiniteMap()) {
         return chunks.size();
     } else {
         return gids.size();
+    }
+}
+
+void TmxData::clear()
+{
+    if (isInfiniteMap()) {
+        chunks.clear();
+    } else {
+        gids.clear();
     }
 }
 

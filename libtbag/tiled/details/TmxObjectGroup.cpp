@@ -53,6 +53,21 @@ char const * const TmxObjectGroup::getDrawOrderName(DrawOrder order) TBAG_NOEXCE
     // clang-format on
 }
 
+bool TmxObjectGroup::empty() const
+{
+    return objects.empty();
+}
+
+std::size_t TmxObjectGroup::size() const
+{
+    return objects.size();
+}
+
+void TmxObjectGroup::clear()
+{
+    objects.clear();
+}
+
 Err TmxObjectGroup::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {

@@ -44,6 +44,11 @@ std::size_t TmxAnimation::size() const
     return frames.size();
 }
 
+void TmxAnimation::clear()
+{
+    frames.clear();
+}
+
 Err TmxAnimation::onRead(Element const & elem)
 {
     read(elem, frames);

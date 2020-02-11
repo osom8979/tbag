@@ -63,10 +63,71 @@ void TiledMap::init()
     if (!_cb) {
         return;
     }
-    _cb->onInitMap(_map);
-    // for (auto const & tileset : _map.tilesets) {
-    //     _cb->onInitTileSet(tileset);
-    // }
+
+    for (auto const & tileset : _map.tilesets) {
+        for (auto const & terrain_type : tileset.terrain_types) {
+        }
+        for (auto const & wang_set : tileset.wang_sets) {
+            for (auto const & cc : wang_set.wang_corner_colors) {
+            }
+            for (auto const & ec : wang_set.wang_edge_colors) {
+            }
+            for (auto const & t : wang_set.wang_tiles) {
+            }
+        }
+        for (auto const & offset : tileset.tile_offsets) {
+        }
+        for (auto const & grid : tileset.grids) {
+        }
+        for (auto const & image : tileset.images) {
+            // image.data
+        }
+        for (auto const & tile : tileset.tiles) {
+            for (auto const & group : tile.object_group) {
+            }
+            for (auto const & frame : tile.animation) {
+            }
+            // tile.image.data
+        }
+    }
+
+    for (auto const & layer : _map.layers) {
+        // data;
+    }
+
+    for (auto const & object_group : _map.object_groups) {
+        for (auto const & object : object_group) {
+            // object.ellipse
+            // object.polygon
+            // object.polyline
+            // object.text
+            // object.image
+        }
+    }
+
+    for (auto const & image_layer : _map.image_layers) {
+        // image_layer.image
+        // image_layer.image.data
+    }
+
+    for (auto const & group : _map.groups) {
+        for (auto const & layer : group.layers) {
+            // data;
+        }
+        for (auto const & object_group : group.object_groups) {
+            for (auto const & object : object_group) {
+            }
+        }
+        for (auto const & image_layer : group.image_layers) {
+            // image_layer.image
+            // image_layer.image.data
+        }
+
+        //while (true) {
+        //    for (auto const & sub_group : group.groups) {
+        //    }
+        //}
+    }
 }
 
 } // namespace tiled

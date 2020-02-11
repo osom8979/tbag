@@ -29,7 +29,7 @@ struct TmxDataTestDatas
     TmxData::Compression compression;
     TmxData::DataType data_type;
     TmxData::TileLayerFormat format;
-    bool infinie;
+    bool infinite;
 };
 
 TEST(TmxDataTest, ReadAndWrite_Data)
@@ -91,7 +91,7 @@ TEST(TmxDataTest, ReadAndWrite_Data)
                 ASSERT_EQ(test_data.compression, data.compression);
                 ASSERT_EQ(test_data.data_type, data.data_type);
                 ASSERT_EQ(test_data.format, data.getTileLayerFormat());
-                ASSERT_EQ(test_data.infinie, data.isInfinieMap());
+                ASSERT_EQ(test_data.infinite, data.isInfiniteMap());
                 ASSERT_EQ(4, data.gids.size());
                 ASSERT_EQ(1, data.gids[0]);
                 ASSERT_EQ(2, data.gids[1]);
@@ -107,7 +107,7 @@ TEST(TmxDataTest, ReadAndWrite_Data)
                 ASSERT_EQ(test_data.compression, data2.compression);
                 ASSERT_EQ(test_data.data_type, data2.data_type);
                 ASSERT_EQ(test_data.format, data2.getTileLayerFormat());
-                ASSERT_EQ(test_data.infinie, data2.isInfinieMap());
+                ASSERT_EQ(test_data.infinite, data2.isInfiniteMap());
                 ASSERT_EQ(4, data2.gids.size());
                 ASSERT_EQ(1, data2.gids[0]);
                 ASSERT_EQ(2, data2.gids[1]);
@@ -149,7 +149,7 @@ TEST(TmxDataTest, ReadAndWrite_Chunk)
     ASSERT_EQ(TmxData::Compression::NONE, data.compression);
     ASSERT_EQ(TmxData::DataType::CHUNK, data.data_type);
     ASSERT_EQ(TmxData::TileLayerFormat::CSV, data.getTileLayerFormat());
-    ASSERT_TRUE(data.isInfinieMap());
+    ASSERT_TRUE(data.isInfiniteMap());
     ASSERT_TRUE(data.gids.empty());
     ASSERT_EQ(1, data.chunks.size());
     ASSERT_EQ(16*16, data.chunks[0].gids.size());
@@ -177,7 +177,7 @@ TEST(TmxDataTest, ReadAndWrite_Chunk)
     ASSERT_EQ(TmxData::Compression::NONE, data2.compression);
     ASSERT_EQ(TmxData::DataType::CHUNK, data2.data_type);
     ASSERT_EQ(TmxData::TileLayerFormat::CSV, data2.getTileLayerFormat());
-    ASSERT_TRUE(data2.isInfinieMap());
+    ASSERT_TRUE(data2.isInfiniteMap());
     ASSERT_TRUE(data2.gids.empty());
     ASSERT_EQ(1, data2.chunks.size());
     ASSERT_EQ(16*16, data2.chunks[0].gids.size());

@@ -131,8 +131,47 @@ struct TBAG_API TmxObjectGroup : protected libtbag::dom::xml::XmlHelper
     TmxObjectGroup();
     ~TmxObjectGroup();
 
+    using       iterator = typename Objects::iterator;
+    using const_iterator = typename Objects::const_iterator;
+    using       reverse_iterator = typename Objects::reverse_iterator;
+    using const_reverse_iterator = typename Objects::const_reverse_iterator;
+
+    iterator begin() TBAG_NOEXCEPT_SP_OP(objects.begin())
+    { return objects.begin(); }
+    iterator end() TBAG_NOEXCEPT_SP_OP(objects.end())
+    { return objects.end(); }
+
+    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(objects.begin())
+    { return objects.begin(); }
+    const_iterator end() const TBAG_NOEXCEPT_SP_OP(objects.end())
+    { return objects.end(); }
+
+    const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(objects.cbegin())
+    { return objects.cbegin(); }
+    const_iterator cend() const TBAG_NOEXCEPT_SP_OP(objects.cend())
+    { return objects.cend(); }
+
+    reverse_iterator rbegin() TBAG_NOEXCEPT_SP_OP(objects.rbegin())
+    { return objects.rbegin(); }
+    reverse_iterator rend() TBAG_NOEXCEPT_SP_OP(objects.rend())
+    { return objects.rend(); }
+
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT_SP_OP(objects.rbegin())
+    { return objects.rbegin(); }
+    const_reverse_iterator rend() const TBAG_NOEXCEPT_SP_OP(objects.rend())
+    { return objects.rend(); }
+
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(objects.crbegin())
+    { return objects.crbegin(); }
+    const_reverse_iterator crend() const TBAG_NOEXCEPT_SP_OP(objects.crend())
+    { return objects.crend(); }
+
     static DrawOrder getDrawOrder(std::string const & text) TBAG_NOEXCEPT;
     static char const * const getDrawOrderName(DrawOrder order) TBAG_NOEXCEPT;
+
+    bool empty() const;
+    std::size_t size() const;
+    void clear();
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

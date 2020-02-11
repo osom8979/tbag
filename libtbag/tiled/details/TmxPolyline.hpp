@@ -43,8 +43,44 @@ struct TBAG_API TmxPolyline : protected libtbag::tiled::details::TmxPointsCommon
     TmxPolyline(Points const & p);
     ~TmxPolyline();
 
+    using       iterator = typename Points::iterator;
+    using const_iterator = typename Points::const_iterator;
+    using       reverse_iterator = typename Points::reverse_iterator;
+    using const_reverse_iterator = typename Points::const_reverse_iterator;
+
+    iterator begin() TBAG_NOEXCEPT_SP_OP(points.begin())
+    { return points.begin(); }
+    iterator end() TBAG_NOEXCEPT_SP_OP(points.end())
+    { return points.end(); }
+
+    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(points.begin())
+    { return points.begin(); }
+    const_iterator end() const TBAG_NOEXCEPT_SP_OP(points.end())
+    { return points.end(); }
+
+    const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(points.cbegin())
+    { return points.cbegin(); }
+    const_iterator cend() const TBAG_NOEXCEPT_SP_OP(points.cend())
+    { return points.cend(); }
+
+    reverse_iterator rbegin() TBAG_NOEXCEPT_SP_OP(points.rbegin())
+    { return points.rbegin(); }
+    reverse_iterator rend() TBAG_NOEXCEPT_SP_OP(points.rend())
+    { return points.rend(); }
+
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT_SP_OP(points.rbegin())
+    { return points.rbegin(); }
+    const_reverse_iterator rend() const TBAG_NOEXCEPT_SP_OP(points.rend())
+    { return points.rend(); }
+
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(points.crbegin())
+    { return points.crbegin(); }
+    const_reverse_iterator crend() const TBAG_NOEXCEPT_SP_OP(points.crend())
+    { return points.crend(); }
+
     bool empty() const;
     std::size_t size() const;
+    void clear();
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

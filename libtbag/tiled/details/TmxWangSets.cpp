@@ -43,6 +43,11 @@ std::size_t TmxWangSets::size() const
     return wang_sets.size();
 }
 
+void TmxWangSets::clear()
+{
+    wang_sets.clear();
+}
+
 Err TmxWangSets::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {

@@ -43,6 +43,11 @@ std::size_t TmxTerrainTypes::size() const
     return terrains.size();
 }
 
+void TmxTerrainTypes::clear()
+{
+    terrains.clear();
+}
+
 Err TmxTerrainTypes::read(Element const & elem)
 {
     if (strncmp(elem.Name(), TAG_NAME, libtbag::string::string_length(TAG_NAME)) != 0) {

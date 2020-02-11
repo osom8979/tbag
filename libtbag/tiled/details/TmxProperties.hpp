@@ -47,8 +47,44 @@ struct TBAG_API TmxProperties : protected libtbag::dom::xml::XmlHelper
     TmxProperties(Properties const & p);
     ~TmxProperties();
 
+    using       iterator = typename Properties::iterator;
+    using const_iterator = typename Properties::const_iterator;
+    using       reverse_iterator = typename Properties::reverse_iterator;
+    using const_reverse_iterator = typename Properties::const_reverse_iterator;
+
+    iterator begin() TBAG_NOEXCEPT_SP_OP(properties.begin())
+    { return properties.begin(); }
+    iterator end() TBAG_NOEXCEPT_SP_OP(properties.end())
+    { return properties.end(); }
+
+    const_iterator begin() const TBAG_NOEXCEPT_SP_OP(properties.begin())
+    { return properties.begin(); }
+    const_iterator end() const TBAG_NOEXCEPT_SP_OP(properties.end())
+    { return properties.end(); }
+
+    const_iterator cbegin() const TBAG_NOEXCEPT_SP_OP(properties.cbegin())
+    { return properties.cbegin(); }
+    const_iterator cend() const TBAG_NOEXCEPT_SP_OP(properties.cend())
+    { return properties.cend(); }
+
+    reverse_iterator rbegin() TBAG_NOEXCEPT_SP_OP(properties.rbegin())
+    { return properties.rbegin(); }
+    reverse_iterator rend() TBAG_NOEXCEPT_SP_OP(properties.rend())
+    { return properties.rend(); }
+
+    const_reverse_iterator rbegin() const TBAG_NOEXCEPT_SP_OP(properties.rbegin())
+    { return properties.rbegin(); }
+    const_reverse_iterator rend() const TBAG_NOEXCEPT_SP_OP(properties.rend())
+    { return properties.rend(); }
+
+    const_reverse_iterator crbegin() const TBAG_NOEXCEPT_SP_OP(properties.crbegin())
+    { return properties.crbegin(); }
+    const_reverse_iterator crend() const TBAG_NOEXCEPT_SP_OP(properties.crend())
+    { return properties.crend(); }
+
     bool empty() const;
     std::size_t size() const;
+    void clear();
 
     Err read(Element const & elem);
     Err read(std::string const & xml);

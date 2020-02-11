@@ -39,6 +39,11 @@ std::size_t TmxPolyline::size() const
     return points.size();
 }
 
+void TmxPolyline::clear()
+{
+    points.clear();
+}
+
 Err TmxPolyline::read(Element const & elem)
 {
     return readToPoints(TAG_NAME, elem, points);
