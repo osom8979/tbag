@@ -122,6 +122,11 @@ void Storage::clear()
     _impl = std::make_shared<Impl>();
 }
 
+std::vector<std::string> Storage::getLayouts() const
+{
+    return asset().getKeys();
+}
+
 void Storage::setLayout(std::string const & name, std::string const & dir)
 {
     asset().set(name, Path(dir));

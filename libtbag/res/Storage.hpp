@@ -171,6 +171,7 @@ public:
     // clang-format on
 
 public:
+    std::vector<std::string> getLayouts() const;
     void setLayout(std::string const & name, std::string const & dir);
 
 public:
