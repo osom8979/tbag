@@ -150,6 +150,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_FONT_PROGRAM_TERMINATED              , 10113, "Font program terminated"                                 )\
     _TBAG_XX(_INVALID_GLYPH                        , 10114, "Invalid glyph identifier"                                )\
     _TBAG_XX(_EXIT_SIGNAL                          , 10115, "Exit signal"                                             )\
+    _TBAG_XX(_CONVERT                              , 10116, "Convert error"                                           )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\
