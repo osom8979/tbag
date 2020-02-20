@@ -284,6 +284,7 @@ public:
     void clearTempDir();
 
     std::string generateTempPath(std::size_t name_size = DEFAULT_RANDOM_STRING_SIZE) const;
+    std::string generateTempPath(std::string const & suffix, std::size_t name_size = DEFAULT_RANDOM_STRING_SIZE) const;
 
 public:
     KeyStore       & keystore()       TBAG_NOEXCEPT { return _impl->keystore; }

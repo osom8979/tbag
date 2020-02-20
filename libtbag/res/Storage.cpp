@@ -504,18 +504,23 @@ void Storage::clearTempDir()
 
 std::string Storage::generateTempPath(std::size_t name_size) const
 {
+    return generateTempPath(libtbag::string::STRING_EMPTY, name_size);
+}
+
+std::string Storage::generateTempPath(std::string const & suffix, std::size_t name_size) const
+{
     std::string name;
     name.resize(name_size);
-    auto const TEMP_PREFIX = asset().get(LAYOUT_TEMP);
-    for (std::size_t i = 0; i < RETRY_COUNT_OF_TEMP_NAME; ++i) {
+    auto const temp_prefix = asset().get(LAYOUT_TEMP);
+    for (auto i = 0; i < RETRY_COUNT_OF_TEMP_NAME; ++i) {
         if (libtbag::string::createRandomString(&name[0], name_size)) {
-            auto const TEMP_PATH = TEMP_PREFIX / name;
-            if (!TEMP_PATH.exists()) {
-                return TEMP_PATH.toString();
+            auto const temp_path = temp_prefix / (name + suffix);
+            if (!temp_path.exists()) {
+                return temp_path.toString();
             }
         }
     }
-    return std::string();
+    return {};
 }
 
 bool Storage::openKeyStore(std::string const & filename)
