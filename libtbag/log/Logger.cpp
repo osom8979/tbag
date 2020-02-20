@@ -44,7 +44,7 @@ bool Logger::write(int level, char const * level_name, char const * message, int
     if (youShallNotPass(level)) {
         return true;
     }
-    if (_sink) {
+    if (!_sink) {
         return false;
     }
 
