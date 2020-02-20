@@ -48,7 +48,7 @@ TEST(PollTest, Default)
     auto path = tttDir_Get() / TEST_FILENAME;
 
     filesystem::File f;
-    ASSERT_TRUE(f.open(path));
+    ASSERT_EQ(E_SUCCESS, f.open(path));
     ASSERT_TRUE(f.isOpen());
 
     Loop loop;

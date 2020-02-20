@@ -85,7 +85,7 @@ TEST(UxFsEventTest, Default)
     ASSERT_EQ(E_SUCCESS, check.start());
 
     libtbag::filesystem::File f;
-    ASSERT_TRUE(f.open(PATH));
+    ASSERT_EQ(E_SUCCESS, f.open(PATH));
     ASSERT_TRUE(f.isOpen());
 
     int event_counter = 0;

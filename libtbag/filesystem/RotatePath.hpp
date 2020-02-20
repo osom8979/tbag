@@ -101,12 +101,12 @@ struct MaxSizeWriter : public WriterInterface
         }
     }
 
-    virtual bool ready() const override
+    bool ready() const override
     {
         return file.isOpen();
     }
 
-    virtual bool open(char const * path) override
+    bool open(char const * path) override
     {
         auto const parent = Path(path).getParent();
         if (!parent.exists()) {
@@ -116,24 +116,26 @@ struct MaxSizeWriter : public WriterInterface
             }
         }
         using namespace libtbag::filesystem::details;
-        if (file.open(path, File::Flags(FILE_OPEN_FLAG_WRITE_ONLY | FILE_OPEN_CREATE))) {
-            file.seek(0);
-            return true;
+        auto const flags = File::Flags(FILE_OPEN_FLAG_WRITE_ONLY | FILE_OPEN_CREATE);
+        auto const open_result = file.open(path, flags);
+        if (isFailure(open_result)) {
+            return false;
         }
-        return false;
+        file.seek(0);
+        return true;
     }
 
-    virtual void flush() override
+    void flush() override
     {
         // EMPTY.
     }
 
-    virtual void close() override
+    void close() override
     {
         file.close();
     }
 
-    virtual Err write(char const * buffer, int size, int * written) override
+    Err write(char const * buffer, int size, int * written) override
     {
         assert(buffer != nullptr);
         assert(written != nullptr);
@@ -217,7 +219,7 @@ struct CounterUpdater : public UpdaterInterface
     virtual ~CounterUpdater()
     { /* EMPTY. */ }
 
-    virtual Path update(Path const & prev) override
+    Path update(Path const & prev) override
     {
         Path next;
         do {
@@ -249,7 +251,7 @@ struct TimeFormatUpdater : public UpdaterInterface
     virtual ~TimeFormatUpdater()
     { /* EMPTY. */ }
 
-    virtual Path update(Path const & prev) override
+    Path update(Path const & prev) override
     {
         return Path(libtbag::time::TimePoint::now().fformat(format));
     }
@@ -305,7 +307,7 @@ struct ArchiveCleaner : public CleanerInterface
     virtual ~ArchiveCleaner()
     { /* EMPTY. */ }
 
-    virtual void clean(Path const & path) override
+    void clean(Path const & path) override
     {
         using namespace libtbag::archive;
         auto const success_count = compressArchive(path.toString() + archive_suffix,

@@ -39,7 +39,7 @@ TEST(UxPollTest, Default)
     ASSERT_TRUE(loop.empty());
 
     libtbag::filesystem::File f;
-    ASSERT_TRUE(f.open(PATH));
+    ASSERT_EQ(E_SUCCESS, f.open(PATH));
     ASSERT_TRUE(f.isOpen());
 
     ASSERT_EQ(E_SUCCESS, poll.initFile(loop, static_cast<int>(f.getFd())));

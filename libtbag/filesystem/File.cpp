@@ -22,8 +22,9 @@ File::File() : _file(0), _offset(0)
 
 File::File(std::string const & path, Flags flags, int mode) : File()
 {
-    if (!File::open(path, flags, mode)) {
-        throw ErrException(E_OPEN);
+    auto const code = File::open(path, flags, mode);
+    if (isFailure(code)) {
+        throw ErrException(code);
     }
 }
 
@@ -32,13 +33,14 @@ File::~File()
     close();
 }
 
-bool File::open(std::string const & path, Flags flags, int mode)
+Err File::open(std::string const & path, Flags flags, int mode)
 {
-    _file = details::open(path, flags.flags, mode);
-    if (_file > 0) {
-        return true;
+    auto const f = details::open(path, flags.flags, mode);
+    if (f > 0) {
+        _file = f;
+        return E_SUCCESS;
     }
-    return false;
+    return libtbag::convertUvErrorToErr(f);
 }
 
 bool File::close()
@@ -126,9 +128,11 @@ template <typename StlContainerType>
 static Err readToBuffer(std::string const & path, StlContainerType & result, uint64_t limit_size)
 {
     File f;
-    if (!f.open(path, File::Flags().clear().rdonly())) {
-        return E_ENOENT;
+    auto const open_result = f.open(path, File::Flags().clear().rdonly());
+    if (isFailure(open_result)) {
+        return open_result;
     }
+    assert(f.isOpen());
 
     uint64_t const SIZE = f.getState().size;
     if (SIZE > limit_size) {
@@ -156,10 +160,12 @@ static Err writeFromBuffer(std::string const & path, char const * buffer, std::s
         FILE_PATH.remove();
     }
 
-    File f(path, File::Flags().clear().creat().wronly());
-    if (!f.isOpen()) {
-        return E_ENOENT;
+    File f;
+    auto const open_result = f.open(path, File::Flags().clear().creat().wronly());
+    if (isFailure(open_result)) {
+        return open_result;
     }
+    assert(f.isOpen());
 
     int const WRITE_SIZE = f.write(buffer, size, 0);
     if (size != static_cast<uint64_t>(WRITE_SIZE)) {

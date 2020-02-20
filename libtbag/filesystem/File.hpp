@@ -70,7 +70,7 @@ public:
     { _offset = offset; }
 
 public:
-    bool open(std::string const & path, Flags flags = Flags(), int mode = 0664);
+    Err open(std::string const & path, Flags flags = Flags(), int mode = 0664);
     bool close();
 
 public:
