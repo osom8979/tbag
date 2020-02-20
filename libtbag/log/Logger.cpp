@@ -44,8 +44,10 @@ bool Logger::write(int level, char const * level_name, char const * message, int
     if (youShallNotPass(level)) {
         return true;
     }
+    if (_sink) {
+        return false;
+    }
 
-    assert(static_cast<bool>(_sink));
     assert(level_name != nullptr);
     assert(message != nullptr);
     assert(size >= 1);
