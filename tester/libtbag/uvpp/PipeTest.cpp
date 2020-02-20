@@ -46,7 +46,7 @@ struct PipeClientTest : public Pipe
         Pipe::connect(connect_req, name);
     }
 
-    virtual void onConnect(ConnectRequest & request, Err code) override
+    void onConnect(ConnectRequest & request, Err code) override
     {
         assert(step1 == 0);
         assert(step2 == 0);
@@ -60,7 +60,7 @@ struct PipeClientTest : public Pipe
         }
     }
 
-    virtual void onWrite(WriteRequest & request, Err code) override
+    void onWrite(WriteRequest & request, Err code) override
     {
         assert(step1 == 1);
         assert(step2 == 0);
@@ -69,12 +69,12 @@ struct PipeClientTest : public Pipe
         ++step2;
     }
 
-    virtual binf onAlloc(std::size_t suggested_size) override
+    binf onAlloc(std::size_t suggested_size) override
     {
         return defaultOnAlloc(buffer, suggested_size);
     }
 
-    virtual void onRead(Err code, char const * buffer, std::size_t size) override
+    void onRead(Err code, char const * buffer, std::size_t size) override
     {
         assert(step1 == 1);
         assert(step2 == 1);
@@ -91,7 +91,7 @@ struct PipeClientTest : public Pipe
         close();
     }
 
-    virtual void onClose() override
+    void onClose() override
     {
         assert(step1 == 1);
         assert(step2 == 1);
@@ -113,29 +113,35 @@ struct PipeServerTest : public Pipe
         Client(Loop & loop, PipeServerTest & s) : Pipe(loop), server(s)
         { /* EMPTY. */ }
 
-        virtual binf onAlloc(std::size_t suggested_size) override
+        binf onAlloc(std::size_t suggested_size) override
         {
             return defaultOnAlloc(buffer, suggested_size);
         }
 
-        virtual void onRead(Err code, char const * buffer, std::size_t size) override
+        void onRead(Err code, char const * buffer, std::size_t size) override
         {
             assert(server.step1 == 1);
+
+            // [WARNING] Assertion failed in MSVC.
+            // https://ci.appveyor.com/project/osom8979/tbag/builds/30925339
             assert(server.step2 == 0);
+
             assert(server.step3 == 0);
             assert(server.step4 == 0);
             assert(server.step5 == 0);
 
-            if (code == E_SUCCESS) {
-                if (std::string(buffer, buffer + size) == std::string(PIPE_WRITE_TEST_MSG)) {
-                    if (write(write_req, buffer, size) == E_SUCCESS) {
+            if (isSuccess(code)) {
+                auto const read_message = std::string(buffer, buffer + size);
+                if (read_message == PIPE_WRITE_TEST_MSG) {
+                    auto const write_result = write(write_req, buffer, size);
+                    if (isSuccess(write_result)) {
                         ++server.step2;
                     }
                 }
             }
         }
 
-        virtual void onWrite(WriteRequest & request, Err code) override
+        void onWrite(WriteRequest & request, Err code) override
         {
             assert(server.step1 == 1);
             assert(server.step2 == 1);
@@ -147,7 +153,7 @@ struct PipeServerTest : public Pipe
             close();
         }
 
-        virtual void onClose() override
+        void onClose() override
         {
             assert(server.step1 == 1);
             assert(server.step2 == 1);
@@ -174,7 +180,7 @@ struct PipeServerTest : public Pipe
     PipeServerTest(Loop & loop) : Pipe(loop)
     { /* EMPTY. */ }
 
-    virtual void onConnection(Err code) override
+    void onConnection(Err code) override
     {
         assert(step1 == 0);
         assert(step2 == 0);
@@ -190,7 +196,7 @@ struct PipeServerTest : public Pipe
         }
     }
 
-    virtual void onClose() override
+    void onClose() override
     {
         assert(step1 == 1);
         assert(step2 == 1);

@@ -134,19 +134,19 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
     }
     assert(f.isOpen());
 
-    uint64_t const SIZE = f.getState().size;
-    if (SIZE > limit_size) {
-        // limit size error: file_size({}) vs limit_siz({})", SIZE, limit_size
+    auto const size = f.getState().size;
+    if (size > limit_size) {
+        // limit size error: file_size({}) vs limit_siz({})", size, limit_size
         return E_SMALLBUF;
     }
 
-    if (result.size() < SIZE) {
-        result.resize(SIZE);
+    if (result.size() < size) {
+        result.resize(size);
     }
 
-    int const READ_SIZE = f.read((char*)&result[0], SIZE, 0);
-    if (SIZE != static_cast<uint64_t>(READ_SIZE)) {
-        // Read size is not the same: {}/{}.", READ_SIZE, SIZE);
+    auto const read_size = f.read((char*)&result[0], size, 0);
+    if (size != static_cast<uint64_t>(read_size)) {
+        // Read size is not the same: {}/{}.", read_size, size);
     }
 
     return E_SUCCESS;
@@ -155,9 +155,9 @@ static Err readToBuffer(std::string const & path, StlContainerType & result, uin
 static Err writeFromBuffer(std::string const & path, char const * buffer, std::size_t size)
 {
     // If not remove the original file, the existing content remains.
-    auto const FILE_PATH = Path(path);
-    if (FILE_PATH.isRegularFile()) {
-        FILE_PATH.remove();
+    auto const file_path = Path(path);
+    if (file_path.isRegularFile()) {
+        file_path.remove();
     }
 
     File f;
@@ -167,9 +167,9 @@ static Err writeFromBuffer(std::string const & path, char const * buffer, std::s
     }
     assert(f.isOpen());
 
-    int const WRITE_SIZE = f.write(buffer, size, 0);
-    if (size != static_cast<uint64_t>(WRITE_SIZE)) {
-        // Read size is not the same: {}/{}.", WRITE_SIZE, size
+    auto const write_size = f.write(buffer, size, 0);
+    if (size != static_cast<uint64_t>(write_size)) {
+        // Read size is not the same: {}/{}.", write_size, size
     }
 
     return E_SUCCESS;
