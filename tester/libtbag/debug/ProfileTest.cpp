@@ -31,6 +31,8 @@ TEST(ProfileTest, Default)
 
 TEST(ProfileTest, GetUnitString)
 {
-    ASSERT_FALSE(std::string(Profile::getTimeUnitString()).empty());
+    auto const text = Profile::getTimeUnitString();
+    std::cout << "TimeUnit: " << text << std::endl;
+    ASSERT_FALSE(std::string(text).empty());
 }
 
