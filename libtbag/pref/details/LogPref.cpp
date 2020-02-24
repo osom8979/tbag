@@ -15,8 +15,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace pref    {
 namespace details {
 
-using Init = LogPref::Init;
-using Inits = LogPref::Inits;
+using LoggerInitParams = LogPref::LoggerInitParams;
+using LoggerInitParamsList = LogPref::LoggerInitParamsList;
 
 LogPref::LogPref()
 {
@@ -35,23 +35,23 @@ std::string LogPref::name() const
 
 bool LogPref::init()
 {
-    _inits.clear();
+    _params_list.clear();
     return true;
 }
 
 void LogPref::clear()
 {
-    _inits.clear();
+    _params_list.clear();
 }
 
 void LogPref::load(Element const & element)
 {
-    _inits = getInits(element);
+    _params_list = getInits(element);
 }
 
 void LogPref::save(Element & element) const
 {
-    for (auto & info : _inits) {
+    for (auto & info : _params_list) {
         newElement(element, XML_ELEMENT_LOGGER_NAME, [&](Element & e){
             // clang-format off
             set(e, XML_ELEMENT_NAME      , info.name      );
@@ -67,9 +67,9 @@ void LogPref::save(Element & element) const
     }
 }
 
-Init LogPref::getInit(Element const & element)
+LoggerInitParams LogPref::getInit(Element const & element)
 {
-    Init info;
+    LoggerInitParams info;
     // clang-format off
     info.name       = get<std::string>(element, XML_ELEMENT_NAME      );
     info.sink       = get<std::string>(element, XML_ELEMENT_SINK      );
@@ -83,9 +83,9 @@ Init LogPref::getInit(Element const & element)
     return info;
 }
 
-Inits LogPref::getInits(Element const & parent)
+LoggerInitParamsList LogPref::getInits(Element const & parent)
 {
-    Inits result;
+    LoggerInitParamsList result;
     Element const * cursor = parent.FirstChildElement(XML_ELEMENT_LOGGER_NAME);
     while (cursor != nullptr) {
         result.push_back(getInit(*cursor));

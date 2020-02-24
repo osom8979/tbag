@@ -102,8 +102,8 @@ namespace details {
 class TBAG_API LogPref : public libtbag::pref::Preferences::NodeInterface
 {
 public:
-    using Init = libtbag::log::LoggerInitParams;
-    using Inits = std::vector<Init>;
+    using LoggerInitParams = libtbag::log::LoggerInitParams;
+    using LoggerInitParamsList = std::vector<LoggerInitParams>;
 
 public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_LOGGERS_NAME = "loggers";
@@ -119,15 +119,15 @@ public:
     TBAG_CONSTEXPR static char const * const XML_ELEMENT_THREAD     = "thread";
 
 public:
-    Inits _inits;
+    LoggerInitParamsList _params_list;
 
 public:
     LogPref();
     virtual ~LogPref();
 
 public:
-    inline Inits       & inits()       TBAG_NOEXCEPT { return _inits; }
-    inline Inits const & inits() const TBAG_NOEXCEPT { return _inits; }
+    LoggerInitParamsList       & list()       TBAG_NOEXCEPT { return _params_list; }
+    LoggerInitParamsList const & list() const TBAG_NOEXCEPT { return _params_list; }
 
 public:
     std::string name() const override;
@@ -137,8 +137,8 @@ public:
     void save(Element & element) const override;
 
 public:
-    Init getInit(Element const & element);
-    Inits getInits(Element const & parent);
+    LoggerInitParams getInit(Element const & element);
+    LoggerInitParamsList getInits(Element const & parent);
 };
 
 } // namespace details
