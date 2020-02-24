@@ -36,6 +36,7 @@ struct GeneratorInterface
     GeneratorInterface() TBAG_NOEXCEPT { /* EMPTY. */ }
     virtual ~GeneratorInterface() { /* EMPTY. */ }
 
+    virtual int getPaddingByte() const = 0;
     virtual int make(char * buffer, int buffer_size,
                      char const * logger,
                      int level, char const * level_name,
@@ -64,6 +65,10 @@ public:
     Generator(LineFeedStyle line_feed = LineFeedStyle::LFS_UNIX);
     Generator(std::string const & line_feed);
     virtual ~Generator();
+
+public:
+    static int getLineFeedLength(LineFeedStyle line_feed);
+    int getLineFeedLength() const;
 
 public:
     std::string make_string(char const * logger, int level, char const * level_name,

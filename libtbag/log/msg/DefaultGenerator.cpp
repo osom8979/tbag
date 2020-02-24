@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/log/msg/DefaultGenerator.hpp>
+#include <libtbag/log/msg/DefaultMsg.hpp>
 #include <libtbag/log/Severity.hpp>
 #include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/time/TimePoint.hpp>
@@ -41,6 +42,17 @@ DefaultGenerator::~DefaultGenerator()
     // EMPTY.
 }
 
+int DefaultGenerator::getPaddingByte() const
+{
+    // clang-format on
+    using namespace libtbag::string;
+    TBAG_CONSTEXPR static auto const padding_byte =
+            string_length(DEFAULT_MSG_PREFIX_SAMPLE) +
+            string_length(TBAG_WINDOWS_NEW_LINE);
+    return padding_byte;
+    // clang-format off
+}
+
 int DefaultGenerator::make(char * buffer, int buffer_size,
                            char const * UNUSED_PARAM(logger),
                            int level, char const * UNUSED_PARAM(level_name),
@@ -52,11 +64,9 @@ int DefaultGenerator::make(char * buffer, int buffer_size,
     assert(msg_size >= 1);
 
     std::stringstream ss;
-    ss << getShortPrefix(level)
-       << ' ' << libtbag::time::TimePoint::now().toLocalLongString()
-       << " @" << std::this_thread::get_id()
-       << ' ' << std::string(msg, msg + msg_size)
-       << LINE_FEED_STR;
+    makeDefaultPrefix(ss, level);
+    ss.write(msg, msg_size);
+    ss << LINE_FEED_STR;
 
     auto const result_message = ss.str();
     auto const result_message_size = result_message.size();

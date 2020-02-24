@@ -43,13 +43,11 @@ public:
     virtual ~DefaultColorGenerator();
 
 public:
-    void updateCache();
-
-public:
-    virtual int make(char * buffer, int buffer_size,
-                     char const * logger,
-                     int level, char const * level_name,
-                     char const * msg, int msg_size) const override;
+    int getPaddingByte() const override;
+    int make(char * buffer, int buffer_size,
+             char const * logger,
+             int level, char const * level_name,
+             char const * msg, int msg_size) const override;
 };
 
 } // namespace msg

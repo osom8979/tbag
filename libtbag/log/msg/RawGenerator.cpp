@@ -33,6 +33,11 @@ RawGenerator::~RawGenerator()
     // EMPTY.
 }
 
+int RawGenerator::getPaddingByte() const
+{
+    return getLineFeedLength();
+}
+
 int RawGenerator::make(char * buffer, int buffer_size,
                        char const * UNUSED_PARAM(logger),
                        int UNUSED_PARAM(level), char const * UNUSED_PARAM(level_name),
