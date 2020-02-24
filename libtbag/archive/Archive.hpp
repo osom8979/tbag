@@ -194,9 +194,10 @@ public:
 class TBAG_API FileArchiveWriter : public ArchiveWriter
 {
 public:
-    FileArchiveWriter(std::string const & path,
-                      std::string const & format = COMPRESS_FORMAT_PAXR,
-                      CompressType compress = CompressType::CT_NONE);
+    FileArchiveWriter();
+    FileArchiveWriter(std::string const & format, CompressType compress);
+    FileArchiveWriter(std::string const & path);
+    FileArchiveWriter(std::string const & path, std::string const & format, CompressType compress);
     virtual ~FileArchiveWriter();
 };
 

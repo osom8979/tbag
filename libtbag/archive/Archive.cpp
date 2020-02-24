@@ -626,12 +626,30 @@ std::size_t ArchiveReader::readName(std::vector<std::string> & names)
 // FileArchiveWriter
 // -----------------
 
+FileArchiveWriter::FileArchiveWriter()
+        : FileArchiveWriter(COMPRESS_FORMAT_PAXR, CompressType::CT_NONE)
+{
+    // EMPTY.
+}
+
+FileArchiveWriter::FileArchiveWriter(std::string const & format, CompressType compress)
+        : ArchiveWriter(format, compress)
+{
+    // EMPTY.
+}
+
+FileArchiveWriter::FileArchiveWriter(std::string const & path)
+        : FileArchiveWriter(path, COMPRESS_FORMAT_PAXR, CompressType::CT_NONE)
+{
+    // EMPTY.
+}
+
 FileArchiveWriter::FileArchiveWriter(std::string const & path, std::string const & format, CompressType compress)
         : ArchiveWriter(format, compress)
 {
-    auto const CODE = openFile(path);
-    if (isFailure(CODE)) {
-        throw ErrException(CODE);
+    auto const code = openFile(path);
+    if (isFailure(code)) {
+        throw ErrException(code);
     }
 }
 
@@ -734,13 +752,24 @@ std::size_t compressArchive(std::string const & output_filename,
                             CompressType compress)
 {
     std::size_t success_count = 0;
-    FileArchiveWriter writer(output_filename, format, compress);
-    for (auto & file : input_filenames) {
-        if (isSuccess(writer.writeFromFile(file))) {
-            ++success_count;
+    try {
+        FileArchiveWriter writer(output_filename, format, compress);
+        for (auto & file : input_filenames) {
+            if (isSuccess(writer.writeFromFile(file))) {
+                ++success_count;
+            }
         }
+        return success_count;
+    } catch (ErrException const & e) {
+        tDLogE("compressArchive() ErrException({}): {}", e.CODE, e.what());
+        return 0;
+    } catch (std::exception const & e) {
+        tDLogE("compressArchive() std::exception(): {}", e.what());
+        return 0;
+    } catch (...) {
+        tDLogE("compressArchive() Unknown exception.");
+        return 0;
     }
-    return success_count;
 }
 
 std::size_t compressArchive(std::string const & output_filename,

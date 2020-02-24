@@ -313,7 +313,6 @@ struct ArchiveCleaner : public CleanerInterface
         auto const success_count = compressArchive(path.toString() + archive_suffix,
                                                    { path.toString() },
                                                    getCompressFormatFromOutputFileName(archive_suffix));
-        assert(success_count == 1);
         if (remove_source_file) {
             path.remove();
         }
