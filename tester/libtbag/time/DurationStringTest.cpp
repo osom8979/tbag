@@ -26,6 +26,15 @@ TEST(DurationStringTest, Default)
     ASSERT_EQ(0, strlen(getDurationString<TestDuration>()));
 }
 
+TEST(DurationStringTest, SystemClock)
+{
+    using system_duration = std::chrono::system_clock::duration;
+    auto const text = getDurationString<system_duration>();
+    std::cout << "System clock(rep=" << system_duration::period::num
+              << "/" << system_duration::period::den
+              << ") duration text: " << text << std::endl;
+}
+
 TEST(DurationStringTest, ToMilliseconds)
 {
     ASSERT_EQ(4000, toMilliseconds("4000"));
