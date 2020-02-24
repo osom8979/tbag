@@ -7,6 +7,8 @@
  */
 
 #include <libtbag/log/Logger.hpp>
+#include <libtbag/util/BufferInfo.hpp>
+
 #include <cassert>
 #include <cstring>
 
@@ -52,23 +54,30 @@ bool Logger::write(int level, char const * level_name, char const * message, int
     assert(message != nullptr);
     assert(size >= 1);
 
-    char buffer[Generator::STACK_BUFFER_SIZE];
-    int write_buffer_size;
-    if (_generator) {
-        write_buffer_size = _generator->make(buffer, Generator::STACK_BUFFER_SIZE, NAME.c_str(),
-                                             level, level_name, message, size);
-    } else {
-        write_buffer_size = 0;
-    }
-
     bool write_result;
-    if (write_buffer_size >= 1) {
-        write_result = _sink->write(level, buffer, write_buffer_size);
+    if (_generator) {
+        auto const required_buffer_size = _generator->getPaddingByte() + size;
+        if (Generator::STACK_BUFFER_SIZE >= required_buffer_size) {
+            TBAG_CONSTEXPR static auto const buffer_size = Generator::STACK_BUFFER_SIZE;
+            char buffer[buffer_size];
+            auto const generated_size = _generator->make(buffer, buffer_size, NAME.c_str(),
+                                                         level, level_name, message, size);
+            assert(generated_size >= 1);
+            assert(generated_size <= buffer_size);
+            write_result = _sink->write(level, buffer, generated_size);
+        } else {
+            libtbag::util::Buffer buffer(required_buffer_size);
+            auto const generated_size = _generator->make(buffer.data(), required_buffer_size, NAME.c_str(),
+                                                         level, level_name, message, size);
+            assert(generated_size >= 1);
+            assert(generated_size <= required_buffer_size);
+            write_result = _sink->write(level, buffer.data(), generated_size);
+        }
     } else {
         write_result = _sink->write(level, message, size);
     }
 
-    if (_auto_flush) {
+    if (write_result && _auto_flush) {
         _sink->flush();
     }
 
