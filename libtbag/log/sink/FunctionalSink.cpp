@@ -37,6 +37,11 @@ bool FunctionalSink::write(int level, char const * message, int size)
     return WRITE_CALLBACK(level, message, size, USER_DATA);
 }
 
+bool FunctionalSink::isRequiredFlush()
+{
+    return true;
+}
+
 void FunctionalSink::flush()
 {
     if (FLUSH_CALLBACK) {

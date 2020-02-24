@@ -37,6 +37,11 @@ bool CallbackSink::write(int level, char const * message, int size)
     return WRITE_CALLBACK(level, message, size, USER_DATA);
 }
 
+bool CallbackSink::isRequiredFlush()
+{
+    return true;
+}
+
 void CallbackSink::flush()
 {
     if (FLUSH_CALLBACK) {

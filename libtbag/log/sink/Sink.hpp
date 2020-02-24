@@ -36,6 +36,7 @@ struct SinkInterface
     virtual ~SinkInterface() { /* EMPTY. */ }
 
     virtual bool write(int level, char const * message, int size) = 0;
+    virtual bool isRequiredFlush() = 0;
     virtual void flush() = 0;
 };
 

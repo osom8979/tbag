@@ -56,6 +56,11 @@ bool StringQueueSink::write(int level, char const * message, int size)
     return true;
 }
 
+bool StringQueueSink::isRequiredFlush()
+{
+    return true;
+}
+
 void StringQueueSink::flush()
 {
     // EMPTY.

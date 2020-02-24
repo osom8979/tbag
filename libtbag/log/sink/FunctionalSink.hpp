@@ -60,6 +60,7 @@ public:
 
 public:
     bool write(int level, char const * message, int size) override;
+    bool isRequiredFlush() override;
     void flush() override;
 };
 
