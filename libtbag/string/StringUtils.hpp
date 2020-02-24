@@ -245,6 +245,7 @@ TBAG_API bool isVariableName(std::string const & str);
 TBAG_API std::string trimLeft(std::string const & str);
 TBAG_API std::string trimRight(std::string const & str);
 TBAG_API std::string trim(std::string const & str);
+TBAG_API std::vector<std::string> trim(std::vector<std::string> const & strs, bool remove_empty = false);
 
 TBAG_API bool createRandomString(char * buffer, std::size_t size);
 
