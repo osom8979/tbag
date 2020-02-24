@@ -81,7 +81,7 @@ RotatePath::~RotatePath()
             writer->close();
         }
     }
-    if (cleaner) {
+    if (cleaner && !path.empty()) {
         cleaner->clean(path);
     }
     writer.reset();
