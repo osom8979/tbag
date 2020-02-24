@@ -88,8 +88,8 @@ TBAG_API int getNanosec(SystemTimePoint const & time);
 
 TBAG_API int getDays(SystemTimePoint const & time);
 
-TBAG_API std::string getMillisecMbs(SystemTimePoint const & time);
-TBAG_API void getMillisecString(SystemTimePoint const & time, std::string & result);
+TBAG_API std::string getMillisecondsText(SystemTimePoint const & time);
+TBAG_API void getMillisecondsText(SystemTimePoint const & time, std::string & result);
 
 TBAG_API SystemTimePoint getNowSystemClock() TBAG_NOEXCEPT;
 TBAG_API time_t getTime(SystemTimePoint const & time_point) TBAG_NOEXCEPT;

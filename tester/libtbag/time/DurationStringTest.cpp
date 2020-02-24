@@ -7,22 +7,23 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/time/DurationString.hpp>
+#include <cstring>
 
 using namespace libtbag;
 using namespace libtbag::time;
 
 TEST(DurationStringTest, Default)
 {
-    ASSERT_STRNE(TBAG_DEFAULT_DURATION_STRING, getDurationString<std::chrono::nanoseconds >());
-    ASSERT_STRNE(TBAG_DEFAULT_DURATION_STRING, getDurationString<std::chrono::microseconds>());
-    ASSERT_STRNE(TBAG_DEFAULT_DURATION_STRING, getDurationString<std::chrono::milliseconds>());
-    ASSERT_STRNE(TBAG_DEFAULT_DURATION_STRING, getDurationString<std::chrono::seconds     >());
-    ASSERT_STRNE(TBAG_DEFAULT_DURATION_STRING, getDurationString<std::chrono::minutes     >());
-    ASSERT_STRNE(TBAG_DEFAULT_DURATION_STRING, getDurationString<std::chrono::hours       >());
+    ASSERT_STREQ(TBAG_NANO_DURATION_STRING, getDurationString<std::chrono::nanoseconds >());
+    ASSERT_STREQ(TBAG_MICRO_DURATION_STRING, getDurationString<std::chrono::microseconds>());
+    ASSERT_STREQ(TBAG_MILLI_DURATION_STRING, getDurationString<std::chrono::milliseconds>());
+    ASSERT_STREQ(TBAG_SEC_DURATION_STRING, getDurationString<std::chrono::seconds     >());
+    ASSERT_STREQ(TBAG_MIN_DURATION_STRING, getDurationString<std::chrono::minutes     >());
+    ASSERT_STREQ(TBAG_HOUR_DURATION_STRING, getDurationString<std::chrono::hours       >());
 
     using TestRatio = std::ratio<10>;
     using TestDuration = std::chrono::duration<char, TestRatio>;
-    ASSERT_STREQ(TBAG_DEFAULT_DURATION_STRING, getDurationString<TestDuration>());
+    ASSERT_EQ(0, strlen(getDurationString<TestDuration>()));
 }
 
 TEST(DurationStringTest, ToMilliseconds)
@@ -57,5 +58,12 @@ TEST(DurationStringTest, ToHours)
     ASSERT_EQ(0, toHours("1mil"));
     ASSERT_EQ(0, toHours("1mic"));
     ASSERT_EQ(0, toHours("1nano"));
+}
+
+TEST(DurationStringTest, GetUpperTimeText)
+{
+    ASSERT_STREQ("1day", getUpperTimeTextByHours(24).c_str());
+    ASSERT_STREQ("1month", getUpperTimeTextByHours(24*30).c_str());
+    ASSERT_STREQ("1year", getUpperTimeTextByHours(24*365).c_str());
 }
 

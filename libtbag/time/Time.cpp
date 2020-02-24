@@ -288,7 +288,7 @@ int getDays(SystemTimePoint const & time)
     return date::floor<date::days>(time).time_since_epoch().count();
 }
 
-std::string getMillisecMbs(SystemTimePoint const & time)
+std::string getMillisecondsText(SystemTimePoint const & time)
 {
     std::string millisec = std::to_string(getMillisec(time));
     switch (millisec.size()) {
@@ -299,9 +299,9 @@ std::string getMillisecMbs(SystemTimePoint const & time)
     }
 }
 
-void getMillisecString(SystemTimePoint const & time, std::string & result)
+void getMillisecondsText(SystemTimePoint const & time, std::string & result)
 {
-    result = getMillisecMbs(time);
+    result = getMillisecondsText(time);
 }
 
 SystemTimePoint getNowSystemClock() TBAG_NOEXCEPT
