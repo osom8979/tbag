@@ -14,6 +14,14 @@
 using namespace libtbag;
 using namespace libtbag::filesystem;
 
+TEST(RotatePathTest, Empty)
+{
+    auto rotate = RotatePath(std::make_shared<MaxSizeWriter>(),
+                             std::make_shared<TimeFormatUpdater>(),
+                             std::make_shared<ArchiveCleaner>());
+    ASSERT_TRUE(rotate.isReady());
+}
+
 TEST(RotatePathTest, Default)
 {
     tttDir_Automatic();
