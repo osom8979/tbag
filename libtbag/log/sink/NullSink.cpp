@@ -34,11 +34,6 @@ bool NullSink::write(int level, char const * message, int size)
     return true;
 }
 
-bool NullSink::isRequiredFlush()
-{
-    return true;
-}
-
 void NullSink::flush()
 {
     // EMPTY.

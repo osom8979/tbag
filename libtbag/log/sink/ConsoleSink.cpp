@@ -105,11 +105,6 @@ bool ConsoleSink::write(int level, char const * message, int size)
     }
 }
 
-bool ConsoleSink::isRequiredFlush()
-{
-    return true;
-}
-
 void ConsoleSink::flush()
 {
     switch (CONSOLE_TYPE) {

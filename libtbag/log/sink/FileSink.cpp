@@ -40,11 +40,6 @@ bool FileSink::write(int level, char const * message, int size)
     return ::fwrite(message, size, 1, _file) == 1;
 }
 
-bool FileSink::isRequiredFlush()
-{
-    return true;
-}
-
 void FileSink::flush()
 {
     ::fflush(_file);

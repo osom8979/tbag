@@ -44,11 +44,6 @@ bool ThreadSink::write(int level, char const * message, int size)
     return true;
 }
 
-bool ThreadSink::isRequiredFlush()
-{
-    return true;
-}
-
 void ThreadSink::flush()
 {
     UvGuard const G(_lock);

@@ -49,11 +49,6 @@ bool RotateFileSink::write(int level, char const * message, int size)
     return _rotate.write(message, size) == E_SUCCESS;
 }
 
-bool RotateFileSink::isRequiredFlush()
-{
-    return true;
-}
-
 void RotateFileSink::flush()
 {
     _rotate.flush();

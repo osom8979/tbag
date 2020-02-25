@@ -29,6 +29,15 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace log {
 
+namespace __static_assert_test__ {
+using namespace libtbag::string;
+using namespace libtbag::log::sink;
+static_assert(string_equal(ConsoleSink::sink_name(), SINK_CONSOLE), "ConsoleSink name mismatch.");
+static_assert(string_equal(FileSink::sink_name(), SINK_FILE), "FileSink name mismatch.");
+static_assert(string_equal(NullSink::sink_name(), SINK_NULL), "NullSink name mismatch.");
+static_assert(string_equal(RotateFileSink::sink_name(), SINK_ROTATE_FILE), "RotateFileSink name mismatch.");
+} // namespace __static_assert_test__
+
 LoggerManager::LoggerId LoggerManager::getLoggerId(std::string const & name)
 {
     return std::hash<std::string>()(name);
