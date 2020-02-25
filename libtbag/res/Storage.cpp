@@ -235,15 +235,26 @@ bool Storage::saveEnv()
     return _impl->envs.saveToResourceXmlFile(ENV_DIR / _impl->envs_filename);
 }
 
+std::string Storage::genAssetEnvKey(std::string const & key, std::string const & prefix, bool make_upper_key)
+{
+    using namespace libtbag::string;
+    auto const env_key = trim(make_upper_key ? upper(key) : key);
+    return prefix + env_key;
+}
+
+std::string Storage::genAssetEnvKey(std::string const & key, bool make_upper_key)
+{
+    return genAssetEnvKey(key, DEFAULT_STORAGE_KEY_PREFIX, make_upper_key);
+}
+
 void Storage::addAssetsToEnv(std::string const & key_prefix, bool make_upper_key)
 {
     for (auto const & key : asset().getKeys()) {
         if (key.empty()) {
             continue;
         }
-        using namespace libtbag::string;
-        auto const env_key = trim(make_upper_key ? upper(key) : key);
-        setEnv(key_prefix + env_key, asset().get(key).getGenericString());
+        setEnv(genAssetEnvKey(key, key_prefix, make_upper_key),
+               asset().get(key).getGenericString());
     }
 }
 

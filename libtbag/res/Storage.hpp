@@ -217,6 +217,9 @@ public:
     void pushEnvParams(char ** envs);
     bool saveEnv();
 
+    static std::string genAssetEnvKey(std::string const & key, std::string const & prefix, bool make_upper_key = true);
+    static std::string genAssetEnvKey(std::string const & key, bool make_upper_key = true);
+
     void addAssetsToEnv(std::string const & key_prefix, bool make_upper_key = true);
     void addAssetsToEnv(bool make_upper_key = true);
 
