@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 #include <tester/DemoAsset.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <cctype>
 #include <algorithm>
@@ -491,5 +492,22 @@ TEST(StringUtilsTest, ToByteSize)
 
     ASSERT_EQ(2*1024*1024*(std::size_t)1024, toByteSize("2Gb"));
     ASSERT_EQ(6*1024*1024*(std::size_t)1024, toByteSize("6g"));
+}
+
+TEST(StringUtilsTest, ToUpperByteText)
+{
+#if 0
+    // [WARNING] Outbound of 64bit size_t type.
+    // ASSERT_STREQ("1y", toUpperByteText(YOTTA_BYTE_TO_BYTE).c_str());
+    // ASSERT_STREQ("1z", toUpperByteText(ZETTA_BYTE_TO_BYTE).c_str());
+#endif
+
+    ASSERT_STREQ("1e", toUpperByteText(EXA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1p", toUpperByteText(PETA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1t", toUpperByteText(TERA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1g", toUpperByteText(GIGA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1m", toUpperByteText(MEGA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1k", toUpperByteText(KILO_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1b", toUpperByteText(1).c_str());
 }
 

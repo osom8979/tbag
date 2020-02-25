@@ -389,6 +389,7 @@ TBAG_API std::string toHexString(unsigned long val, bool upper = true);
 TBAG_API std::string toHexString(unsigned long long val, bool upper = true);
 
 TBAG_API std::size_t toByteSize(std::string const & str);
+TBAG_API std::string toUpperByteText(std::size_t byte);
 
 } // namespace string
 
