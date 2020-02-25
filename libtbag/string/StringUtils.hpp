@@ -260,6 +260,18 @@ std::string convertByteVectorToPrettyHexStringBox(
                                                 line_width, print_address, print_ascii);
 }
 
+template <typename T>
+std::string toPrettyHexBox(T const * bytes, std::size_t size)
+{
+    return convertByteArrayToPrettyHexStringBox((uint8_t const *)bytes, size);
+}
+
+template <typename T>
+std::string toPrettyHexBox(std::vector<T> const & bytes)
+{
+    return convertByteVectorToPrettyHexStringBox(bytes);
+}
+
 /**
  * Regex based token.
  */
