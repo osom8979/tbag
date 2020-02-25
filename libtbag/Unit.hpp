@@ -84,6 +84,23 @@ TBAG_CONSTEXPR char const   EXA_BYTE_LOWER_CHAR = 'e';
 TBAG_CONSTEXPR char const ZETTA_BYTE_LOWER_CHAR = 'z';
 TBAG_CONSTEXPR char const YOTTA_BYTE_LOWER_CHAR = 'y';
 
+//typedef ratio<1LL, 1000000000000000000LL> atto;
+//typedef ratio<1LL,    1000000000000000LL> femto;
+//typedef ratio<1LL,       1000000000000LL> pico;
+//typedef ratio<1LL,          1000000000LL> nano;
+//typedef ratio<1LL,             1000000LL> micro;
+//typedef ratio<1LL,                1000LL> milli;
+//typedef ratio<1LL,                 100LL> centi;
+//typedef ratio<1LL,                  10LL> deci;
+//typedef ratio<                 10LL, 1LL> deca;
+//typedef ratio<                100LL, 1LL> hecto;
+//typedef ratio<               1000LL, 1LL> kilo;
+//typedef ratio<            1000000LL, 1LL> mega;
+//typedef ratio<         1000000000LL, 1LL> giga;
+//typedef ratio<      1000000000000LL, 1LL> tera;
+//typedef ratio<   1000000000000000LL, 1LL> peta;
+//typedef ratio<1000000000000000000LL, 1LL> exa;
+
 /**
  * @defgroup __DOXYGEN_GROUP__BYTE__ Byte.
  * @brief Unit of digital information.

@@ -22,7 +22,8 @@ Profile::Timer::Timer(Profile & profile) : _profile(profile), _start(std::chrono
 
 Profile::Timer::~Timer()
 {
-    _profile.update(std::chrono::system_clock::now() - _start);
+    using namespace std::chrono;
+    _profile.update(duration_cast<Duration>(system_clock::now() - _start));
 }
 
 Profile::Profile(std::size_t cycle, RepeatCallback const & callback, bool enable)

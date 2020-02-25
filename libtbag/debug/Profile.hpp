@@ -38,11 +38,34 @@ namespace debug {
 class TBAG_API Profile : private Noncopyable
 {
 public:
+    /**
+     * All platforms must use unified units.
+     *
+     * OSX-Clang:
+     * @code{.cpp}
+     *  struct system_clock
+     *  {
+     *      typedef microseconds duration;
+     *      // ...
+     *  };
+     * @endcode
+     *
+     * MSVC:
+     * @code{.cpp}
+     *  struct system_clock
+     *  {   // wraps GetSystemTimePreciseAsFileTime/GetSystemTimeAsFileTime
+     *      #define _XTIME_NSECS_PER_TICK 100
+     *      using rep = long long;
+     *      using period = ratio_multiply<ratio<_XTIME_NSECS_PER_TICK, 1>, nano>;
+     *      using duration = chrono::duration<rep, period>;
+     *      // ...
+     *  };
+     * @endcode
+     */
+    using Duration = std::chrono::nanoseconds;
+    using Rep = Duration::rep;
+    using Period = Duration::period;
     using TimePoint = std::chrono::system_clock::time_point;
-    using Duration  = TimePoint::duration;
-    using Rep       = TimePoint::rep;
-    using Period    = TimePoint::period;
-
     using RepeatCallback = std::function<void(Rep average)>;
 
 public:
