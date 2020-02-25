@@ -502,12 +502,12 @@ TEST(StringUtilsTest, ToUpperByteText)
     // ASSERT_STREQ("1z", toUpperByteText(ZETTA_BYTE_TO_BYTE).c_str());
 #endif
 
-    ASSERT_STREQ("1e", toUpperByteText(EXA_BYTE_TO_BYTE).c_str());
-    ASSERT_STREQ("1p", toUpperByteText(PETA_BYTE_TO_BYTE).c_str());
-    ASSERT_STREQ("1t", toUpperByteText(TERA_BYTE_TO_BYTE).c_str());
-    ASSERT_STREQ("1g", toUpperByteText(GIGA_BYTE_TO_BYTE).c_str());
-    ASSERT_STREQ("1m", toUpperByteText(MEGA_BYTE_TO_BYTE).c_str());
-    ASSERT_STREQ("1k", toUpperByteText(KILO_BYTE_TO_BYTE).c_str());
-    ASSERT_STREQ("1b", toUpperByteText(1).c_str());
+    ASSERT_STREQ("1EB", toUpperByteText(EXA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1PB", toUpperByteText(PETA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1TB", toUpperByteText(TERA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1GB", toUpperByteText(GIGA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1MB", toUpperByteText(MEGA_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1KB", toUpperByteText(KILO_BYTE_TO_BYTE).c_str());
+    ASSERT_STREQ("1B", toUpperByteText(1).c_str());
 }
 
