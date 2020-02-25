@@ -84,6 +84,26 @@ TBAG_CONSTEXPR char const   EXA_BYTE_LOWER_CHAR = 'e';
 TBAG_CONSTEXPR char const ZETTA_BYTE_LOWER_CHAR = 'z';
 TBAG_CONSTEXPR char const YOTTA_BYTE_LOWER_CHAR = 'y';
 
+TBAG_CONSTEXPR char const * const       BYTE_LONG_NAME = "Byte";
+TBAG_CONSTEXPR char const * const  KILO_BYTE_LONG_NAME = "KiloByte";
+TBAG_CONSTEXPR char const * const  MEGA_BYTE_LONG_NAME = "MegaByte";
+TBAG_CONSTEXPR char const * const  GIGA_BYTE_LONG_NAME = "GigaByte";
+TBAG_CONSTEXPR char const * const  TERA_BYTE_LONG_NAME = "TeraByte";
+TBAG_CONSTEXPR char const * const  PETA_BYTE_LONG_NAME = "PetaByte";
+TBAG_CONSTEXPR char const * const   EXA_BYTE_LONG_NAME = "ExaByte";
+TBAG_CONSTEXPR char const * const ZETTA_BYTE_LONG_NAME = "ZettaByte";
+TBAG_CONSTEXPR char const * const YOTTA_BYTE_LONG_NAME = "YottaByte";
+
+TBAG_CONSTEXPR char const * const       BYTE_SHORT_NAME = "B";
+TBAG_CONSTEXPR char const * const  KILO_BYTE_SHORT_NAME = "KB";
+TBAG_CONSTEXPR char const * const  MEGA_BYTE_SHORT_NAME = "MB";
+TBAG_CONSTEXPR char const * const  GIGA_BYTE_SHORT_NAME = "GB";
+TBAG_CONSTEXPR char const * const  TERA_BYTE_SHORT_NAME = "TB";
+TBAG_CONSTEXPR char const * const  PETA_BYTE_SHORT_NAME = "PB";
+TBAG_CONSTEXPR char const * const   EXA_BYTE_SHORT_NAME = "EB";
+TBAG_CONSTEXPR char const * const ZETTA_BYTE_SHORT_NAME = "ZB";
+TBAG_CONSTEXPR char const * const YOTTA_BYTE_SHORT_NAME = "YB";
+
 //typedef ratio<1LL, 1000000000000000000LL> atto;
 //typedef ratio<1LL,    1000000000000000LL> femto;
 //typedef ratio<1LL,       1000000000000LL> pico;
