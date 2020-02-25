@@ -85,6 +85,22 @@ inline TBAG_CONSTEXPR std::size_t string_length(CharT const * text)
     return (text == nullptr || *text == '\0') ? 0U : 1U + string_length(text + 1U);
 }
 
+template <typename CharT>
+inline TBAG_CONSTEXPR bool string_equal(CharT const * lt, CharT const * rt)
+{
+    if (lt == nullptr || rt == nullptr) {
+        return false;
+    }
+    if (*lt == '\0' && *rt == '\0') {
+        return true;
+    }
+    if (*lt == *rt) {
+        return string_equal(lt+1, rt+1);
+    } else {
+        return false;
+    }
+}
+
 template <typename FloatingType>
 std::string convertStringWithFloatingPoint(FloatingType floating, int precision = 2)
 {
