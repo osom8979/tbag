@@ -8,6 +8,8 @@
 #include <libtbag/mq/NngSocket.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/debug/Assert.hpp>
+#include <libtbag/time/DurationString.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -485,71 +487,73 @@ Err NngSocket::getPeerProtocolName(std::string & name) const
 
 std::string NngSocket::getPrintableInformationText() const
 {
+    using namespace libtbag::time;
+    using namespace libtbag::string;
     std::stringstream ss;
 
     nng_duration recv_timeout;
     if (isSuccess(getRecvTimeout(&recv_timeout))) {
-        ss << "RecvTimeout: " << recv_timeout << "ms\n";
+        ss << "RecvTimeout: " << getUpperTimeTextByMilliseconds(recv_timeout) << NEW_LINE;
     }
 
     nng_duration send_timeout;
     if (isSuccess(getSendTimeout(&send_timeout))) {
-        ss << "SendTimeout: " << send_timeout << "ms\n";
+        ss << "SendTimeout: " << getUpperTimeTextByMilliseconds(send_timeout) << NEW_LINE;
     }
 
     int recv_messages;
     if (isSuccess(getRecvNumberOfMessages(&recv_messages))) {
-        ss << "RecvNumberOfMessages: " << recv_messages << "\n";
+        ss << "RecvNumberOfMessages: " << recv_messages << NEW_LINE;
     }
 
     int send_messages;
     if (isSuccess(getSendNumberOfMessages(&send_messages))) {
-        ss << "SendNumberOfMessages: " << send_messages << "\n";
+        ss << "SendNumberOfMessages: " << send_messages << NEW_LINE;
     }
 
     std::size_t recv_max_size;
     if (isSuccess(getRecvMaxSize(&recv_max_size))) {
-        ss << "RecvMaxSize: " << recv_max_size << "\n";
+        ss << "RecvMaxSize: " << toUpperByteText(recv_max_size) << NEW_LINE;
     }
 
     nng_duration reconnect_min;
     if (isSuccess(getReconnectTimeMin(&reconnect_min))) {
-        ss << "ReconnectTimeMin: " << reconnect_min << "ms\n";
+        ss << "ReconnectTimeMin: " << getUpperTimeTextByMilliseconds(reconnect_min) << NEW_LINE;
     }
 
     nng_duration reconnect_max;
     if (isSuccess(getReconnectTimeMax(&reconnect_max))) {
-        ss << "ReconnectTimeMax: " << reconnect_max << "ms\n";
+        ss << "ReconnectTimeMax: " << getUpperTimeTextByMilliseconds(reconnect_max) << NEW_LINE;
     }
 
     std::string socket_name;
     if (isSuccess(getSocketName(socket_name))) {
-        ss << "SocketName: " << socket_name << "\n";
+        ss << "SocketName: " << socket_name << NEW_LINE;
     }
 
     int ttl_size;
     if (isSuccess(getMaxTTL(&ttl_size))) {
-        ss << "MaxTTL: " << ttl_size << "hops\n";
+        ss << "MaxTTL: " << ttl_size << "hops" << NEW_LINE;
     }
 
     bool raw_mode;
     if (isSuccess(getRaw(&raw_mode))) {
-        ss << "Raw mode: " << (raw_mode ? "Enable" : "Disable") << "\n";
+        ss << "Raw mode: " << (raw_mode ? "Enable" : "Disable") << NEW_LINE;
     }
 
     std::string url;
     if (isSuccess(getUrl(url))) {
-        ss << "URL: " << url << "\n";
+        ss << "URL: " << url << NEW_LINE;
     }
 
     std::string protocol;
     if (isSuccess(getProtocolName(protocol))) {
-        ss << "ProtocolName: " << protocol << "\n";
+        ss << "ProtocolName: " << protocol << NEW_LINE;
     }
 
     std::string peer_protocol;
     if (isSuccess(getPeerProtocolName(peer_protocol))) {
-        ss << "PeerProtocolName: " << peer_protocol << "\n";
+        ss << "PeerProtocolName: " << peer_protocol << NEW_LINE;
     }
 
     return ss.str();

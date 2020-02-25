@@ -193,9 +193,9 @@ public:
      * This is the maximum message size that the will be accepted from a remote peer.
      * If a peer attempts to send a message larger than this, then the message will be discarded.
      * If the value of this is zero, then no limit on message sizes is enforced.
-     * This option exists to prevent certain kinds of denial-of-service attacks,
+     * <strong>This option exists to prevent certain kinds of denial-of-service attacks,
      * where a malicious agent can claim to want to send an extraordinarily large message,
-     * without sending any data. This option can be set for the socket,
+     * without sending any data.</strong> This option can be set for the socket,
      * but may be overridden for on a per-dialer or per-listener basis.
      */
     Err setRecvMaxSize(std::size_t size);
