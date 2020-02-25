@@ -13,6 +13,7 @@
 #include <cassert>
 #include <cstdio>
 
+#include <iomanip>
 #include <algorithm>
 #include <random>
 
@@ -254,9 +255,11 @@ std::string convertByteToHexString(uint8_t hex)
     return std::string(result);
 }
 
-std::string convertByteArrayToHexString(uint8_t const * bytes, std::size_t size,
-                                        std::string const & prefix,
-                                        std::string const & separator)
+std::string convertByteArrayToHexString(
+        uint8_t const * bytes,
+        std::size_t size,
+        std::string const & prefix,
+        std::string const & separator)
 {
     if (size == 0) {
         return std::string();
@@ -275,8 +278,13 @@ std::string convertByteArrayToHexString(uint8_t const * bytes, std::size_t size,
     return result;
 }
 
-std::string convertByteArrayToHexStringBox(uint8_t const * bytes, std::size_t size, int line_width,
-                                           std::string const & prefix, std::string const & separator, std::string const & new_line)
+std::string convertByteArrayToHexStringBox(
+        uint8_t const * bytes,
+        std::size_t size,
+        int line_width,
+        std::string const & prefix,
+        std::string const & separator,
+        std::string const & new_line)
 {
     if (line_width < 1) {
         line_width = DEFAULT_LINE_WIDTH;
@@ -398,6 +406,67 @@ std::string convertAddressHexStringToString(AddressHexString const & address)
 std::string convertAddressToString(void const * address)
 {
     return convertAddressHexStringToString(convertAddressToHexString(address));
+}
+
+std::string convertByteArrayToPrettyHexStringLine(
+        uint8_t const * bytes,
+        std::size_t size,
+        int line_width,
+        bool print_address,
+        bool print_ascii)
+{
+    std::stringstream ss;
+    if (print_address) {
+        ss << convertAddressToString(bytes) << ": ";
+    }
+
+    auto const hex_string_width = (line_width*2/*hex_text*/)+(line_width/2/*space_text*/);
+    ss << std::left << std::setfill(CHAR_SPACE) << std::setw(hex_string_width)
+       << convertByteArrayToHexStringBox(bytes, size, 2, STRING_EMPTY, STRING_EMPTY, STRING_SPACE);
+
+    if (print_ascii) {
+        ss.put(CHAR_SPACE);
+        for (auto i = 0; i < size; ++i) {
+            auto const c = bytes[i];
+            if (std::isprint(c)) {
+                ss.put(c);
+            } else {
+                ss.put(CHAR_SPACE);
+            }
+        }
+    }
+    return ss.str();
+}
+
+std::string convertByteArrayToPrettyHexStringBox(
+        uint8_t const * bytes,
+        std::size_t size,
+        int line_width,
+        bool print_address,
+        bool print_ascii)
+{
+    if (line_width < 1) {
+        line_width = DEFAULT_LINE_WIDTH;
+    }
+    if (line_width >= size) {
+        return convertByteArrayToPrettyHexStringLine(bytes, size, line_width, print_address, print_ascii);
+    }
+
+    std::stringstream ss;
+    ss << convertByteArrayToPrettyHexStringLine(bytes, line_width, line_width, print_address, print_ascii);
+    bytes += line_width;
+    size = size > line_width ? size - line_width : 0;
+
+    std::size_t data_size;
+    while (size > 0) {
+        auto const current_byte_size = (line_width < size ? line_width : size);
+        ss << NEW_LINE << convertByteArrayToPrettyHexStringLine(bytes, current_byte_size, line_width,
+                                                                print_address, print_ascii);
+        bytes += line_width;
+        size = size > line_width ? size - line_width : 0;
+    }
+
+    return ss.str();
 }
 
 std::vector<std::string> splitMatch(std::string const & source, std::regex const & match)

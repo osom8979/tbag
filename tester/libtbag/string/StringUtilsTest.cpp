@@ -328,21 +328,18 @@ TEST(StringUtilsTest, ConvertAddressToHexString)
     void * temp1 = nullptr;
     int    temp2 = 0;
 
-    auto result1 = convertAddressToHexString(temp1);
-    auto result2 = convertAddressToHexString(&temp2);
-
-    auto str1 = convertAddressHexStringToString(result1);
-    auto str2 = convertAddressHexStringToString(result2);
+    auto const str1 = convertAddressToString(temp1);
+    auto const str2 = convertAddressToString(&temp2);
 
     std::cout << "HEX Address 01: " << str1 << std::endl;
     std::cout << "HEX Address 02: " << str2 << std::endl;
 
-    std::string const REGEX = std::string("^0x[0-9A-F]+$");
-    ASSERT_TRUE(isMatch(str1, REGEX));
-    ASSERT_TRUE(isMatch(str2, REGEX));
+    auto const hex_regex = std::string("^0x[0-9A-F]+$");
+    ASSERT_TRUE(isMatch(str1, hex_regex));
+    ASSERT_TRUE(isMatch(str2, hex_regex));
 }
 
-TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
+TEST(StringUtilsTest, ConvertByteVectorToHexStringBox)
 {
     std::vector<uint8_t> const DATA1 = {0x01,0x02};
     std::vector<uint8_t> const DATA2 = {0x01,0x02,0x03,0x04};
@@ -368,25 +365,18 @@ TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
     ASSERT_EQ(RESULT5, convertByteVectorToHexStringBox(DATA5, WIDTH, PREFIX, SEPARATOR, NEW_LINE));
 }
 
-//TEST(StringUtilsTest, ConvertByteArrayToHexStringBox)
-//{
-//    int const WIDTH = 16;
-//    int const HEIGHT = 5;
-//    int const SIZE = WIDTH * HEIGHT;
-//
-//    int i = 0;
-//    std::vector<uint8_t> buffer;
-//    for (i = 0; i < SIZE - 1; ++i) {
-//        buffer.push_back(i);
-//    }
-//    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
-//
-//    buffer.push_back(i++);
-//    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
-//
-//    buffer.push_back(i++);
-//    std::cout << convertByteVectorToHexStringBox(buffer, WIDTH) << std::endl;
-//}
+TEST(StringUtilsTest, ConvertByteVectorToPrettyHexStringBox)
+{
+    int const width = 16;
+    int const height = 16;
+    int const size = width * height;
+
+    std::vector<uint8_t> buffer;
+    for (auto i = 0; i < size; ++i) {
+        buffer.push_back(i);
+    }
+    std::cout << convertByteVectorToPrettyHexStringBox(buffer, width) << std::endl;
+}
 
 TEST(StringUtilsTest, ToString)
 {

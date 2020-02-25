@@ -167,28 +167,35 @@ TBAG_CONSTEXPR int const DEFAULT_LINE_WIDTH = 2 * 8;
  */
 TBAG_API char convertHalfByteToHexChar(uint8_t half_byte);
 TBAG_API std::string convertByteToHexString(uint8_t hex);
-TBAG_API std::string convertByteArrayToHexString(uint8_t const * bytes, std::size_t size,
-                                                 std::string const & prefix = STRING_HEX_PREFIX,
-                                                 std::string const & separator = STRING_EMPTY);
-TBAG_API std::string convertByteArrayToHexStringBox(uint8_t const * bytes, std::size_t size,
-                                                    int line_width = DEFAULT_LINE_WIDTH,
-                                                    std::string const & prefix = STRING_HEX_PREFIX,
-                                                    std::string const & separator = STRING_SPACE,
-                                                    std::string const & new_line = NEW_LINE);
+TBAG_API std::string convertByteArrayToHexString(
+        uint8_t const * bytes,
+        std::size_t size,
+        std::string const & prefix = STRING_HEX_PREFIX,
+        std::string const & separator = STRING_EMPTY);
+TBAG_API std::string convertByteArrayToHexStringBox(
+        uint8_t const * bytes,
+        std::size_t size,
+        int line_width = DEFAULT_LINE_WIDTH,
+        std::string const & prefix = STRING_HEX_PREFIX,
+        std::string const & separator = STRING_SPACE,
+        std::string const & new_line = NEW_LINE);
 
 template <typename T>
-std::string convertByteVectorToHexString(std::vector<T> const & bytes,
-                                         std::string const & prefix = STRING_HEX_PREFIX,
-                                         std::string const & separator = STRING_EMPTY)
+std::string convertByteVectorToHexString(
+        std::vector<T> const & bytes,
+        std::string const & prefix = STRING_HEX_PREFIX,
+        std::string const & separator = STRING_EMPTY)
 {
     return convertByteArrayToHexString((uint8_t const *)bytes.data(), bytes.size(), prefix, separator);
 }
 
 template <typename T>
-std::string convertByteVectorToHexStringBox(std::vector<T> const & bytes, int line_width = DEFAULT_LINE_WIDTH,
-                                            std::string const & prefix = STRING_HEX_PREFIX,
-                                            std::string const & separator = STRING_SPACE,
-                                            std::string const & new_line = NEW_LINE)
+std::string convertByteVectorToHexStringBox(
+        std::vector<T> const & bytes,
+        int line_width = DEFAULT_LINE_WIDTH,
+        std::string const & prefix = STRING_HEX_PREFIX,
+        std::string const & separator = STRING_SPACE,
+        std::string const & new_line = NEW_LINE)
 {
     return convertByteArrayToHexStringBox((uint8_t const *)bytes.data(),
                                           bytes.size(), line_width, prefix, separator, new_line);
@@ -212,6 +219,30 @@ TBAG_API AddressHexString convertAddressToHexString(void const * address) TBAG_N
 TBAG_API AddressHexString convertUnsignedIntegerToHexString(std::uint64_t value) TBAG_NOEXCEPT;
 TBAG_API std::string convertAddressHexStringToString(AddressHexString const & address);
 TBAG_API std::string convertAddressToString(void const * address);
+
+TBAG_API std::string convertByteArrayToPrettyHexStringLine(
+        uint8_t const * bytes,
+        std::size_t size,
+        int line_width,
+        bool print_address = true,
+        bool print_ascii = true);
+TBAG_API std::string convertByteArrayToPrettyHexStringBox(
+        uint8_t const * bytes,
+        std::size_t size,
+        int line_width = DEFAULT_LINE_WIDTH,
+        bool print_address = true,
+        bool print_ascii = true);
+
+template <typename T>
+std::string convertByteVectorToPrettyHexStringBox(
+        std::vector<T> const & bytes,
+        int line_width = DEFAULT_LINE_WIDTH,
+        bool print_address = true,
+        bool print_ascii = true)
+{
+    return convertByteArrayToPrettyHexStringBox((uint8_t const *)bytes.data(), bytes.size(),
+                                                line_width, print_address, print_ascii);
+}
 
 /**
  * Regex based token.
