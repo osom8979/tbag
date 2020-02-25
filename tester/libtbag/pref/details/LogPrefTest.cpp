@@ -7,16 +7,14 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/pref/details/LogPref.hpp>
-#include <libtbag/log/Log.hpp>
 
 using namespace libtbag;
 using namespace libtbag::pref;
 using namespace libtbag::pref::details;
-using namespace libtbag::log;
 
 TEST(LogPrefTest, Default)
 {
-    TBAG_CONSTEXPR static char const * const TEST_XML = R"XML(
+    TBAG_CONSTEXPR static char const * const TEST_XML = R"__xml__(
         <loggers>
           <logger>
             <name>test</name>
@@ -26,7 +24,7 @@ TEST(LogPrefTest, Default)
             <severity>debug</severity>
             <auto_flush>true</auto_flush>
           </logger>
-        </loggers>)XML";
+        </loggers>)__xml__";
 
     LogPref pref;
 

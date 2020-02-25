@@ -291,6 +291,7 @@ public:
                                Property::def_layout const & layout, Environments const & env);
 
 public:
+    Storage loadStorage(Environments const & default_envs) const;
     Storage loadStorage() const;
 };
 

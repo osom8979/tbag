@@ -15,6 +15,8 @@ NAMESPACE_LIBTBAG_OPEN
 namespace pref    {
 namespace details {
 
+using Storage = StoragePref::Storage;
+
 StoragePref::StoragePref()
 {
     // EMPTY.
@@ -358,20 +360,19 @@ std::string StoragePref::getPath(std::string const & root, std::string const & t
     return getPath(root, tag, layout.text, env, layout.abs, layout.raw);
 }
 
-StoragePref::Storage StoragePref::loadStorage() const
+Storage StoragePref::loadStorage(Environments const & default_envs) const
 {
-    auto const DEFAULT_ENVS = Environments::createDefaultEnvironments(true);
     Storage storage;
 
     std::string updated_root;
     if (_prop.root.empty()) {
         updated_root = libtbag::filesystem::Path::getWorkDir();
     } else {
-        updated_root = DEFAULT_ENVS.convert(_prop.root);
+        updated_root = default_envs.convert(_prop.root);
     }
 
     if (_prop.env.exists) {
-        storage.setLayoutEnv(getPath(updated_root, TAG_ENV, _prop.env.text, DEFAULT_ENVS, _prop.env.abs));
+        storage.setLayoutEnv(getPath(updated_root, TAG_ENV, _prop.env.text, default_envs, _prop.env.abs));
 
         if (!_prop.env.name.empty()) {
             storage.setEnvFilename(_prop.env.name);
@@ -450,6 +451,11 @@ StoragePref::Storage StoragePref::loadStorage() const
     storage.addAssetsToEnv();
     storage.setEnv(ENV_KEY_STORAGE_ROOT, updated_root);
     return storage;
+}
+
+Storage StoragePref::loadStorage() const
+{
+    return loadStorage(Environments::createDefaultEnvironments(true));
 }
 
 } // namespace details
