@@ -9,6 +9,7 @@
 #include <libtbag/mq/NngSocket.hpp>
 #include <libtbag/lock/UvCondition.hpp>
 #include <libtbag/lock/UvLock.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <string>
 #include <vector>
@@ -123,6 +124,34 @@ TEST(NngSocketTest, ClientRecvTimeout_After)
 
     ASSERT_EQ(4, server_step);
     ASSERT_EQ(4, client_step);
+
+    ASSERT_EQ(E_SUCCESS, sock_server.close());
+    ASSERT_EQ(E_SUCCESS, sock_client.close());
+}
+
+TEST(NngSocketTest, RecvBufferSizeIsSmall)
+{
+    NngSocket sock_server;
+    NngSocket sock_client;
+
+    ASSERT_EQ(E_SUCCESS, sock_server.open(NngSocket::SocketType::ST_REP0));
+    ASSERT_EQ(E_SUCCESS, sock_client.open(NngSocket::SocketType::ST_REQ0));
+
+    auto const socket_url = std::string("inproc://") + test_info_->test_case_name() + test_info_->name();
+    ASSERT_EQ(E_SUCCESS, sock_server.listen(socket_url));
+    ASSERT_EQ(E_SUCCESS, sock_server.setRecvTimeout(1));
+    ASSERT_EQ(E_SUCCESS, sock_client.dial(socket_url));
+
+    auto const recv_buffer_size = 1024;
+    std::vector<char> recv_buffer(recv_buffer_size);
+
+    auto const send_message_size = recv_buffer_size*2;
+    std::string const send_message(send_message_size, '0');
+
+    ASSERT_EQ(E_SUCCESS, sock_client.send((void*)send_message.data(), send_message.size()));
+    std::size_t temp_recv_size = recv_buffer.size();
+    ASSERT_EQ(E_SUCCESS, sock_server.recv(recv_buffer.data(), &temp_recv_size));
+    ASSERT_EQ(send_message_size, temp_recv_size);
 
     ASSERT_EQ(E_SUCCESS, sock_server.close());
     ASSERT_EQ(E_SUCCESS, sock_client.close());
