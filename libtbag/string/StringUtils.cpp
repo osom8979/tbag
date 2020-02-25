@@ -417,24 +417,28 @@ std::string convertByteArrayToPrettyHexStringLine(
 {
     std::stringstream ss;
     if (print_address) {
-        ss << convertAddressToString(bytes) << ": ";
+        ss << convertAddressToString(bytes);
+        ss.put('|');
     }
 
-    auto const hex_string_width = (line_width*2/*hex_text*/)+(line_width/2/*space_text*/);
-    ss << std::left << std::setfill(CHAR_SPACE) << std::setw(hex_string_width)
-       << convertByteArrayToHexStringBox(bytes, size, 2, STRING_EMPTY, STRING_EMPTY, STRING_SPACE);
-
     if (print_ascii) {
-        ss.put(CHAR_SPACE);
-        for (auto i = 0; i < size; ++i) {
-            auto const c = bytes[i];
-            if (std::isprint(c)) {
-                ss.put(c);
+        for (auto i = 0; i < line_width; ++i) {
+            if (i < size) {
+                auto const c = bytes[i];
+                if (std::isprint(c)) {
+                    ss.put(c);
+                } else {
+                    ss.put(CHAR_SPACE);
+                }
             } else {
                 ss.put(CHAR_SPACE);
             }
         }
+        ss.put('|');
     }
+
+    ss << convertByteArrayToHexStringBox(bytes, size, 2, STRING_EMPTY, STRING_EMPTY, STRING_SPACE);
+
     return ss.str();
 }
 

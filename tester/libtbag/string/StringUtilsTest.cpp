@@ -375,7 +375,10 @@ TEST(StringUtilsTest, ConvertByteVectorToPrettyHexStringBox)
     for (auto i = 0; i < size; ++i) {
         buffer.push_back(i);
     }
-    std::cout << convertByteVectorToPrettyHexStringBox(buffer, width) << std::endl;
+
+    auto const hex_box = convertByteVectorToPrettyHexStringBox(buffer, width);
+    ASSERT_FALSE(hex_box.empty());
+    std::cout << hex_box << std::endl;
 }
 
 TEST(StringUtilsTest, ToString)
