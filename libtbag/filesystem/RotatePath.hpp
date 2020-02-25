@@ -310,9 +310,9 @@ struct ArchiveCleaner : public CleanerInterface
     void clean(Path const & path) override
     {
         using namespace libtbag::archive;
-        auto const success_count = compressArchive(path.toString() + archive_suffix,
-                                                   { path.toString() },
-                                                   getCompressFormatFromOutputFileName(archive_suffix));
+        compressArchive(path.toString() + archive_suffix,
+                        { path.toString() },
+                        getCompressFormatFromOutputFileName(archive_suffix));
         if (remove_source_file) {
             path.remove();
         }
