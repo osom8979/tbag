@@ -142,9 +142,50 @@ public:
         /** User's data. */
         void * opaque = nullptr;
 
+        inline bool isThreadType() const TBAG_NOEXCEPT
+        {
+            return type == TaskType::TT_THREAD;
+        }
+
+        inline bool isProcessType() const TBAG_NOEXCEPT
+        {
+            return type == TaskType::TT_PROCESS;
+        }
+
+        inline uthread getThreadId() const TBAG_NOEXCEPT
+        {
+            if (isThreadType()) {
+                return internal_id.thread;
+            }
+            return uthread();
+        }
+
+        inline int getProcessId() const TBAG_NOEXCEPT
+        {
+            if (isProcessType()) {
+                return internal_id.process;
+            }
+            return 0;
+        }
+
+        inline bool isStopped() const TBAG_NOEXCEPT
+        {
+            return done || killed;
+        }
+
+        inline bool isAbnormallyTerminated() const TBAG_NOEXCEPT
+        {
+            return exit_status != 0u || term_signal != 0;
+        }
+
+        bool existsInitParams() const TBAG_NOEXCEPT
+        {
+            return static_cast<bool>(params);
+        }
+
         std::weak_ptr<ThreadParams> getThreadParams() const
         {
-            if (type == TaskType::TT_THREAD) {
+            if (isThreadType() && existsInitParams()) {
                 return std::static_pointer_cast<ThreadParams>(params);
             }
             return {};
@@ -152,7 +193,7 @@ public:
 
         std::weak_ptr<ProcessParams> getProcessParams() const
         {
-            if (type == TaskType::TT_PROCESS) {
+            if (isProcessType() && existsInitParams()) {
                 return std::static_pointer_cast<ProcessParams>(params);
             }
             return {};
