@@ -27,6 +27,7 @@
 #include <atomic>
 #include <functional>
 #include <unordered_map>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -98,6 +99,23 @@ public:
         }
     }
 
+    struct ThreadParams
+    {
+        using Callback = std::function<int(void)>;
+        Callback runner;
+    };
+
+    struct ProcessParams
+    {
+        std::string file;
+        std::vector<std::string> args;
+        std::vector<std::string> envs;
+        std::string cwd;
+        std::string input;
+        bool enable_stdout = true;
+        bool enable_stderr = true;
+    };
+
     struct TaskInfo
     {
         /** thread or process? */
@@ -105,6 +123,9 @@ public:
 
         /** Internal ID. */
         InternalTaskId internal_id;
+
+        /** Initialize params. */
+        std::shared_ptr<void> params;
 
         /** Task id done? */
         bool done = false;
@@ -120,6 +141,22 @@ public:
 
         /** User's data. */
         void * opaque = nullptr;
+
+        std::weak_ptr<ThreadParams> getThreadParams() const
+        {
+            if (type == TaskType::TT_THREAD) {
+                return std::static_pointer_cast<ThreadParams>(params);
+            }
+            return {};
+        }
+
+        std::weak_ptr<ProcessParams> getProcessParams() const
+        {
+            if (type == TaskType::TT_PROCESS) {
+                return std::static_pointer_cast<ProcessParams>(params);
+            }
+            return {};
+        }
     };
 
     using ErrTaskInfo = libtbag::ErrPair<TaskInfo>;
@@ -136,23 +173,6 @@ public:
         virtual void onProcessOut(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
         virtual void onProcessErr(TaskId id, char const * buffer, std::size_t size) { /* EMPTY. */ }
         virtual void onProcessExit(TaskId id, int64_t exit_status, int term_signal) { /* EMPTY. */ }
-    };
-
-    struct ThreadParams
-    {
-        using Callback = std::function<int(void)>;
-        Callback runner;
-    };
-
-    struct ProcessParams
-    {
-        std::string file;
-        std::vector<std::string> args;
-        std::vector<std::string> envs;
-        std::string cwd;
-        std::string input;
-        bool enable_stdout = true;
-        bool enable_stderr = true;
     };
 
 private:

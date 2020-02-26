@@ -335,6 +335,7 @@ ErrTaskId TaskManager::runThread(ThreadParams const & params, void * opaque)
     TaskInfo info = {};
     info.type = TaskType::TT_THREAD;
     info.internal_id = createThreadTaskId(thread_id);
+    info.params = std::static_pointer_cast<void>(std::make_shared<ThreadParams>(params));
     info.done = false;
     info.killed = false;
     info.exit_status = 0;
@@ -372,6 +373,7 @@ ErrTaskId TaskManager::runProcess(ProcessParams const & params, void * opaque)
     TaskInfo info = {};
     info.type = TaskType::TT_PROCESS;
     info.internal_id = createProcessTaskId(pid);
+    info.params = std::static_pointer_cast<void>(std::make_shared<ProcessParams>(params));
     info.done = false;
     info.killed = false;
     info.exit_status = 0;
