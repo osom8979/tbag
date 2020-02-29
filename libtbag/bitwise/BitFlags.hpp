@@ -43,6 +43,11 @@ inline bool checkFlag(T original, T flag) TBAG_NOEXCEPT
     return (original & flag) == flag;
 }
 
+#ifndef TBAG_CHECK_BIT_FLAG
+#define TBAG_CHECK_BIT_FLAG(ori, f) \
+    ::libtbag::bitwise::checkFlag<decltype(ori)>(ori, f)
+#endif
+
 } // namespace bitwise
 
 // --------------------
