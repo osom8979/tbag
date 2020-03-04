@@ -47,7 +47,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace auth {
 
-/* [NO DOC] Example:
+/* [NO DOC] SERVER and CLIENT Handshake example:
  * <pre>
  *  ------------------------------------------------------------------------------------------------------
  *                  CLIENT SIDE                         |                SERVER SIDE
@@ -62,7 +62,7 @@ namespace auth {
  *  std::string client_data = "...";                    | std::string server_data = "...";
  *                                                      |
  *  AuthClient client;                                  | AuthServer server;
- *  client.init(ca_public_key.key(), client_data));     | server.init(ca_private_key.key(), server_data));
+ *  client.init(ca_public_key.key(), client_data);      | server.init(ca_private_key.key(), server_data);
  *                                                      |
  *  ------------------------------------------------------------------------------------------------------
  *                                                Initalize DONE.
@@ -132,6 +132,52 @@ namespace auth {
  *  ------------------------------------------------------------------------------------------------------
  */
 
+/* [NO DOC] CA Encode/Decode example:
+ * <pre>
+ *  ------------------------------------------------------------------------------------------------------
+ *                 CA PUBLIC SIDE                       |               CA PRIVATE SIDE
+ *  ------------------------------------------------------------------------------------------------------
+ *                                                      |
+ *  using namespace libtbag::crypto;                    | using namespace libtbag::crypto;
+ *  std::string ca_public_key_pem;                      | std::string ca_private_key_pem;
+ *                                                      |
+ *  PublicKey ca_public_key;                            | PrivateKey ca_private_key;
+ *  ca_public_key.readPem(ca_public_key_pem);           | ca_private_key.readPem(ca_private_key_pem);
+ *                                                      |
+ *  AuthClient client;                                  | AuthServer server;
+ *  client.init(ca_public_key.key());                   | server.init(ca_private_key.key());
+ *                                                      |
+ *  ------------------------------------------------------------------------------------------------------
+ *                                                Initalize DONE.
+ *  ------------------------------------------------------------------------------------------------------
+ *                                                      |
+ *  assert(client.isReady();                            | assert(server.isReady();
+ *                                                      |
+ *  std::string const original_data = "...";            |
+ *  auto const encoded_data =                           |
+ *      client.encodeByCaPublic(original_data);         |
+ *  // Send 'encoded_data'                              >
+ *                                                      > // Recv 'encoded_data'
+ *                                                      | auto const original_data =
+ *                                                      |     server.decodeByCaPrivate(encoded_data);
+ *                                                      |
+ *                                                      | // Use 'original_data' ...
+ *                                                      |
+ *                                                      | std::string const original_data2 = "...";
+ *                                                      | auto const encoded_data2 =
+ *                                                      |     server.encodeByCaPrivate(original_data2);
+ *                                                      < // Send 'encoded_data2' ...
+ *  // Recv 'encoded_data2' ...                         <
+ *  auto const original_data2 =                         |
+ *      client.decodeByCaPublic(encoded_data2);         |
+ *                                                      |
+ *  // Use 'original_data' ...                          |
+ *                                                      |
+ *  ------------------------------------------------------------------------------------------------------
+ *                                             SEND AND RECV DONE.
+ *  ------------------------------------------------------------------------------------------------------
+ */
+
 using PublicKey = libtbag::crypto::PublicKey;
 using PrivateKey = libtbag::crypto::PrivateKey;
 using Padding = libtbag::crypto::Rsa::Padding;
@@ -183,11 +229,16 @@ public:
 
 public:
     bool init(std::string const & ca_pem_public_key, std::string const & client_data);
+    bool init(std::string const & ca_pem_public_key);
     bool isReady() const;
 
 public:
     std::string getServerData() const;
     std::string getClientData() const;
+
+public:
+    std::string encodeByCaPublic(std::string const & original_data) const;
+    std::string decodeByCaPublic(std::string const & encoded_data) const;
 
 public:
     std::string encodeAuth0() const;
@@ -250,11 +301,16 @@ public:
 
 public:
     bool init(std::string const & ca_pem_private_key, std::string const & server_data);
+    bool init(std::string const & ca_pem_private_key);
     bool isReady() const;
 
 public:
     std::string getServerData() const;
     std::string getClientData() const;
+
+public:
+    std::string encodeByCaPrivate(std::string const & original_data) const;
+    std::string decodeByCaPrivate(std::string const & encoded_data) const;
 
 public:
     bool decodeAuth0(std::string const & encoded_data);

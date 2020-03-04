@@ -81,3 +81,29 @@ TEST(AuthTest, Default)
     ASSERT_EQ(TEST_DATA2, client.decode(encode_data2));
 }
 
+TEST(AuthTest, UseCaOnly)
+{
+    auto ca_keys = libtbag::crypto::generateKeys();
+    auto const ca_public_key = std::move(ca_keys.first);
+    auto const ca_private_key = std::move(ca_keys.second);
+
+    AuthClient client;
+    AuthServer server;
+
+    ASSERT_TRUE(client.init(ca_public_key.key()));
+    ASSERT_TRUE(server.init(ca_private_key.key()));
+
+    ASSERT_TRUE(client.isReady());
+    ASSERT_TRUE(server.isReady());
+
+    std::string const CLIENT_TO_SERVER_DATA = "CLIENT_TO_SERVER_DATA";
+    auto const c2s_encode = client.encodeByCaPublic(CLIENT_TO_SERVER_DATA);
+    ASSERT_FALSE(c2s_encode.empty());
+    ASSERT_EQ(CLIENT_TO_SERVER_DATA, server.decodeByCaPrivate(c2s_encode));
+
+    std::string const SERVER_TO_CLIENT_DATA = "SERVER_TO_CLIENT_DATA";
+    auto const s2c_encode = server.encodeByCaPrivate(SERVER_TO_CLIENT_DATA);
+    ASSERT_FALSE(s2c_encode.empty());
+    ASSERT_EQ(SERVER_TO_CLIENT_DATA, client.decodeByCaPublic(s2c_encode));
+}
+

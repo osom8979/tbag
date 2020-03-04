@@ -199,6 +199,11 @@ bool AuthClient::init(std::string const & ca_pem_public_key, std::string const &
     return true;
 }
 
+bool AuthClient::init(std::string const & ca_pem_public_key)
+{
+    return init(ca_pem_public_key, libtbag::string::STRING_EMPTY);
+}
+
 bool AuthClient::isReady() const
 {
     return _ca_public_key.exists() && _client_public_key.exists() && _client_private_key.exists();
@@ -212,6 +217,16 @@ std::string AuthClient::getServerData() const
 std::string AuthClient::getClientData() const
 {
     return _client_data;
+}
+
+std::string AuthClient::encodeByCaPublic(std::string const & original_data) const
+{
+    return __encrypt(_ca_public_key, original_data);
+}
+
+std::string AuthClient::decodeByCaPublic(std::string const & encoded_data) const
+{
+    return __decrypt(_ca_public_key, encoded_data);
 }
 
 std::string AuthClient::encodeAuth0() const
@@ -335,6 +350,11 @@ bool AuthServer::init(std::string const & ca_pem_private_key, std::string const 
     return true;
 }
 
+bool AuthServer::init(std::string const & ca_pem_private_key)
+{
+    return init(ca_pem_private_key, libtbag::string::STRING_EMPTY);
+}
+
 bool AuthServer::isReady() const
 {
     return _ca_private_key.exists() && _server_public_key.exists() && _server_private_key.exists();
@@ -348,6 +368,16 @@ std::string AuthServer::getServerData() const
 std::string AuthServer::getClientData() const
 {
     return _client_data;
+}
+
+std::string AuthServer::encodeByCaPrivate(std::string const & original_data) const
+{
+    return __encrypt(_ca_private_key, original_data);
+}
+
+std::string AuthServer::decodeByCaPrivate(std::string const & encoded_data) const
+{
+    return __decrypt(_ca_private_key, encoded_data);
 }
 
 bool AuthServer::decodeAuth0(std::string const & encoded_data)
