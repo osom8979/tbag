@@ -16,15 +16,16 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/ErrPair.hpp>
+#include <libtbag/time/TimePoint.hpp>
+
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace time {
-
-// Forward declaration.
 
 /**
  * NtpClient class prototype.
@@ -34,12 +35,26 @@ namespace time {
  */
 class TBAG_API NtpClient : private Noncopyable
 {
-private:
-    // Insert member variables.
+public:
+    using TimeResult = libtbag::ErrPair<TimePoint>;
 
 public:
-    NtpClient();
+    /** Difference between Jan 1, 1900 and Jan 1, 1970 */
+    TBAG_CONSTEXPR static std::size_t const TIMESTAMP_DELTA = 2208988800ul;
+    TBAG_CONSTEXPR static char const * const DEFAULT_SERVER = "us.pool.ntp.org";
+    TBAG_CONSTEXPR static int const DEFAULT_PORT = 123;
+    TBAG_CONSTEXPR static int const TIMEOUT_MS = 8*1000;
+
+private:
+    std::string _server;
+    int _port;
+
+public:
+    NtpClient(std::string const & server = DEFAULT_SERVER, int port = DEFAULT_PORT);
     virtual ~NtpClient();
+
+public:
+    TimeResult request(int timeout_ms = TIMEOUT_MS) const;
 };
 
 } // namespace time
