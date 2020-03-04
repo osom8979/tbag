@@ -62,6 +62,20 @@
 # endif
 #endif
 
+#ifndef TBAG_ATTRIBUTE_VISIBILITY
+# if defined(TBAG_COMP_GNUC) && (TBAG_COMP_GNUC_VERSION >= 40000)
+#  define TBAG_ATTRIBUTE_VISIBILITY_DEFAULT    __attribute__((visibility("default")))
+#  define TBAG_ATTRIBUTE_VISIBILITY_PROTECTED  __attribute__((visibility("protected")))
+#  define TBAG_ATTRIBUTE_VISIBILITY_HIDDEN     __attribute__((visibility("hidden")))
+#  define TBAG_ATTRIBUTE_VISIBILITY_INTERNAL   __attribute__((visibility("internal")))
+# else
+#  define TBAG_ATTRIBUTE_VISIBILITY_DEFAULT
+#  define TBAG_ATTRIBUTE_VISIBILITY_PROTECTED
+#  define TBAG_ATTRIBUTE_VISIBILITY_HIDDEN
+#  define TBAG_ATTRIBUTE_VISIBILITY_INTERNAL
+# endif
+#endif
+
 #ifndef TBAG_ATTRIBUTE_ALIGN
 # if defined(TBAG_COMP_GNUC)
 #  define TBAG_ATTRIBUTE_ALIGN(n) __attribute__((__aligned__(n)))
