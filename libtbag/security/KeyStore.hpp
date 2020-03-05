@@ -15,10 +15,15 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
+#include <libtbag/ErrPair.hpp>
 #include <libtbag/Noncopyable.hpp>
 #include <libtbag/security/store/KeyStoreInterface.hpp>
 
 #include <memory>
+#include <string>
+#include <vector>
+#include <set>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -37,6 +42,7 @@ class TBAG_API KeyStore : private Noncopyable
 public:
     using KeyStoreInterface = libtbag::security::store::KeyStoreInterface;
     using SharedKeyStore = std::shared_ptr<KeyStoreInterface>;
+    using ErrString = libtbag::ErrPair<std::string>;
 
 public:
     enum class Type
@@ -68,6 +74,11 @@ public:
     bool cmp(std::string const & key, std::string const & value, bool encrypt = false) const;
 
     std::vector<std::string> list() const;
+    std::set<std::string> listSet() const;
+
+public:
+    ErrString get(std::string const & key) const;
+    Err setSafe(std::string const & key, std::string const & value, bool encrypt = false);
 };
 
 } // namespace security

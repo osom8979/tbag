@@ -9,6 +9,8 @@
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/log/Log.hpp>
 
+#include <cassert>
+
 #include <libtbag/security/store/FileKeyStore.hpp>
 #include <libtbag/security/store/GnomeKeyStore.hpp>
 #include <libtbag/security/store/MacKeyStore.hpp>
@@ -19,6 +21,8 @@ NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace security {
+
+using ErrString = KeyStore::ErrString;
 
 KeyStore::KeyStore()
 {
@@ -105,9 +109,43 @@ bool KeyStore::cmp(std::string const & key, std::string const & value, bool encr
 std::vector<std::string> KeyStore::list() const
 {
     if (!_store) {
-        return std::vector<std::string>();
+        return {};
     }
     return _store->list();
+}
+
+std::set<std::string> KeyStore::listSet() const
+{
+    auto const keys = list();
+    return std::set<std::string>(keys.cbegin(), keys.cend());
+}
+
+ErrString KeyStore::get(std::string const & key) const
+{
+    if (!_store) {
+        return E_EXPIRED;
+    }
+    std::string value;
+    if (get(key, value)) {
+        return { E_SUCCESS, value };
+    } else {
+        return E_GET;
+    }
+}
+
+Err KeyStore::setSafe(std::string const & key, std::string const & value, bool encrypt)
+{
+    if (!_store) {
+        return E_EXPIRED;
+    }
+    auto const keys = listSet();
+    auto const itr = keys.find(key);
+    if (itr == keys.cend()) {
+        if (!create(key)) {
+            return E_CREATE;
+        }
+    }
+    return set(key, value, encrypt) ? E_SUCCESS : E_SET;
 }
 
 } // namespace security
