@@ -35,6 +35,11 @@ bool WindowsKeyStore::remove(std::string const & key)
     return false;
 }
 
+bool WindowsKeyStore::exists(std::string const & key) const
+{
+    return false;
+}
+
 bool WindowsKeyStore::get(std::string const & key, std::string & result) const
 {
     return false;
@@ -50,9 +55,9 @@ bool WindowsKeyStore::cmp(std::string const & key, std::string const & value, bo
     return false;
 }
 
-std::vector<std::string> WindowsKeyStore::list() const
+std::set<std::string> WindowsKeyStore::list() const
 {
-    return std::vector<std::string>();
+    return {};
 }
 
 } // namespace store

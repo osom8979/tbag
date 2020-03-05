@@ -304,7 +304,7 @@ public:
     bool setKey(std::string const & key, std::string const & value, bool encrypt = false);
     bool cmpKey(std::string const & key, std::string const & value, bool encrypt = false);
 
-    std::vector<std::string> listKey();
+    std::set<std::string> listKey();
     std::vector<std::string> getKeyStoreFilenames() const;
 
 public:

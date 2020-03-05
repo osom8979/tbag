@@ -16,7 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 
-#include <vector>
+#include <set>
 #include <string>
 
 // -------------------
@@ -37,11 +37,12 @@ struct KeyStoreInterface
     virtual bool create(std::string const & key) = 0;
     virtual bool remove(std::string const & key) = 0;
 
+    virtual bool exists(std::string const & key) const = 0;
     virtual bool get(std::string const & key, std::string & result) const = 0;
     virtual bool set(std::string const & key, std::string const & value, bool encrypt = false) = 0;
     virtual bool cmp(std::string const & key, std::string const & value, bool encrypt = false) const = 0;
 
-    virtual std::vector<std::string> list() const = 0;
+    virtual std::set<std::string> list() const = 0;
 };
 
 } // namespace store

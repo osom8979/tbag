@@ -82,6 +82,14 @@ bool KeyStore::remove(std::string const & key)
     return _store->remove(key);
 }
 
+bool KeyStore::exists(std::string const & key) const
+{
+    if (!_store) {
+        return false;
+    }
+    return _store->exists(key);
+}
+
 bool KeyStore::get(std::string const & key, std::string & result) const
 {
     if (!_store) {
@@ -106,18 +114,12 @@ bool KeyStore::cmp(std::string const & key, std::string const & value, bool encr
     return _store->cmp(key, value, encrypt);
 }
 
-std::vector<std::string> KeyStore::list() const
+std::set<std::string> KeyStore::list() const
 {
     if (!_store) {
         return {};
     }
     return _store->list();
-}
-
-std::set<std::string> KeyStore::listSet() const
-{
-    auto const keys = list();
-    return std::set<std::string>(keys.cbegin(), keys.cend());
 }
 
 ErrString KeyStore::get(std::string const & key) const
@@ -138,9 +140,7 @@ Err KeyStore::setSafe(std::string const & key, std::string const & value, bool e
     if (!_store) {
         return E_EXPIRED;
     }
-    auto const keys = listSet();
-    auto const itr = keys.find(key);
-    if (itr == keys.cend()) {
+    if (!exists(key)) {
         if (!create(key)) {
             return E_CREATE;
         }

@@ -35,6 +35,11 @@ bool MacKeyStore::remove(std::string const & key)
     return false;
 }
 
+bool MacKeyStore::exists(std::string const & key) const
+{
+    return false;
+}
+
 bool MacKeyStore::get(std::string const & key, std::string & result) const
 {
     return false;
@@ -50,9 +55,9 @@ bool MacKeyStore::cmp(std::string const & key, std::string const & value, bool e
     return false;
 }
 
-std::vector<std::string> MacKeyStore::list() const
+std::set<std::string> MacKeyStore::list() const
 {
-    return std::vector<std::string>();
+    return {};
 }
 
 } // namespace store

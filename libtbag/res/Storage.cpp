@@ -574,7 +574,7 @@ bool Storage::cmpKey(std::string const & key, std::string const & value, bool en
     return _impl->keystore.cmp(key, value, encrypt);
 }
 
-std::vector<std::string> Storage::listKey()
+std::set<std::string> Storage::listKey()
 {
     return _impl->keystore.list();
 }

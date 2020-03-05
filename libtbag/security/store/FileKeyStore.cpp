@@ -63,6 +63,14 @@ static std::string getSelectQuery(std::string const & key)
                    FileKeyStore::getTableName(), FileKeyStore::getKeyName(), key);
 }
 
+static std::string getExistsSelectQuery(std::string const & key)
+{
+    using namespace libtbag::string;
+    return fformat("SELECT {} FROM {} WHERE {}='{}';",
+                   FileKeyStore::getKeyName(), FileKeyStore::getTableName(),
+                   FileKeyStore::getKeyName(), key);
+}
+
 static std::string getSelectKeysQuery()
 {
     using namespace libtbag::string;
@@ -74,6 +82,22 @@ static std::string getDeleteQuery(std::string const & key)
     using namespace libtbag::string;
     return fformat("DELETE FROM {} WHERE {}='{}';",
                    FileKeyStore::getTableName(), FileKeyStore::getKeyName(), key);
+}
+
+static bool exists(FileKeyStore::Sqlite & db, std::string const & key)
+{
+    using Row = std::tuple<std::string>;
+    using Statement = FileKeyStore::Sqlite::Statement;
+
+    auto rows = db.prepare<Row>(getExistsSelectQuery(key), [](Statement const & statement) -> Row {
+        return Row(statement.getString(0));
+    });
+    if (rows.empty()) {
+        return false;
+    }
+    assert(rows.size() == 1u);
+    assert(std::get<0>(rows[0]) == key);
+    return true;
 }
 
 static bool get(FileKeyStore::Sqlite & db, std::string const & key, std::string & salt, std::string & value)
@@ -88,7 +112,7 @@ static bool get(FileKeyStore::Sqlite & db, std::string const & key, std::string 
         return false;
     }
 
-    assert(rows.size() == 1U);
+    assert(rows.size() == 1u);
     salt = std::get<0>(rows[0]);
     value = std::get<1>(rows[0]);
     return true;
@@ -100,7 +124,7 @@ static bool get(FileKeyStore::Sqlite & db, std::string const & key, std::string 
 
 FileKeyStore::FileKeyStore(std::string const & path)
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
     if (!_db.open(path)) {
         throw std::bad_alloc();
     }
@@ -111,32 +135,38 @@ FileKeyStore::FileKeyStore(std::string const & path)
 
 FileKeyStore::~FileKeyStore()
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
     _db.close();
 }
 
 bool FileKeyStore::create(std::string const & key)
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
     return _db.execute(__impl::getInsertQuery(key, std::string(), std::string()));
 }
 
 bool FileKeyStore::remove(std::string const & key)
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
     return _db.execute(__impl::getDeleteQuery(key));
+}
+
+bool FileKeyStore::exists(std::string const & key) const
+{
+    Guard const G(_mutex);
+    return __impl::exists(_db, key);
 }
 
 bool FileKeyStore::get(std::string const & key, std::string & result) const
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
     std::string salt;
     return __impl::get(_db, key, salt, result);
 }
 
 bool FileKeyStore::set(std::string const & key, std::string const & value, bool encrypt)
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
     std::string salt;
     std::string update_value;
     if (encrypt) {
@@ -150,7 +180,7 @@ bool FileKeyStore::set(std::string const & key, std::string const & value, bool 
 
 bool FileKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt) const
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
     std::string read_salt;
     std::string read_value;
     if (!__impl::get(_db, key, read_salt, read_value)) {
@@ -164,9 +194,9 @@ bool FileKeyStore::cmp(std::string const & key, std::string const & value, bool 
     }
 }
 
-std::vector<std::string> FileKeyStore::list() const
+std::set<std::string> FileKeyStore::list() const
 {
-    Guard const LOCK(_mutex);
+    Guard const G(_mutex);
 
     using Row = std::tuple<std::string>;
     using Statement = FileKeyStore::Sqlite::Statement;
@@ -179,10 +209,9 @@ std::vector<std::string> FileKeyStore::list() const
         return {};
     }
 
-    auto const size = rows.size();
-    std::vector<std::string> result(size);
-    for (auto i = 0; i < size; ++i) {
-        result[i] = std::get<0>(rows[i]);
+    std::set<std::string> result;
+    for (auto const & r : rows) {
+        result.emplace(std::get<0>(r));
     }
     return result;
 }

@@ -35,6 +35,11 @@ bool GnomeKeyStore::remove(std::string const & key)
     return false;
 }
 
+bool GnomeKeyStore::exists(std::string const & key) const
+{
+    return false;
+}
+
 bool GnomeKeyStore::get(std::string const & key, std::string & result) const
 {
     return false;
@@ -50,9 +55,9 @@ bool GnomeKeyStore::cmp(std::string const & key, std::string const & value, bool
     return false;
 }
 
-std::vector<std::string> GnomeKeyStore::list() const
+std::set<std::string> GnomeKeyStore::list() const
 {
-    return std::vector<std::string>();
+    return {};
 }
 
 } // namespace store

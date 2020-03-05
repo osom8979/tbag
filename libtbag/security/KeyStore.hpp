@@ -69,12 +69,12 @@ public:
     bool create(std::string const & key);
     bool remove(std::string const & key);
 
+    bool exists(std::string const & key) const;
     bool get(std::string const & key, std::string & result) const;
     bool set(std::string const & key, std::string const & value, bool encrypt = false);
     bool cmp(std::string const & key, std::string const & value, bool encrypt = false) const;
 
-    std::vector<std::string> list() const;
-    std::set<std::string> listSet() const;
+    std::set<std::string> list() const;
 
 public:
     ErrString get(std::string const & key) const;

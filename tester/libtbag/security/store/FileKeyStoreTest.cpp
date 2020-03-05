@@ -9,7 +9,7 @@
 #include <tester/DemoAsset.hpp>
 #include <libtbag/security/store/FileKeyStore.hpp>
 
-#include <vector>
+#include <set>
 #include <string>
 
 using namespace libtbag;
@@ -25,16 +25,18 @@ TEST(FileKeyStoreTest, Default)
     std::string const VAL1 = "value1";
 
     std::string value;
-    std::vector<std::string> keys;
+    std::set<std::string> keys;
 
     FileKeyStore store(FILE_PATH.toString());
     ASSERT_TRUE(store.list().empty());
     ASSERT_FALSE(store.get(KEY1, value));
+    ASSERT_FALSE(store.exists(KEY1));
 
     ASSERT_TRUE(store.create(KEY1));
+    ASSERT_TRUE(store.exists(KEY1));
     keys = store.list();
     ASSERT_EQ(1, keys.size());
-    ASSERT_EQ(KEY1, keys[0]);
+    ASSERT_NE(keys.end(), keys.find(KEY1));
 
     ASSERT_TRUE(store.set(KEY1, VAL1));
     ASSERT_TRUE(store.get(KEY1, value));
@@ -60,16 +62,18 @@ TEST(FileKeyStoreTest, Encrypt)
     std::string const VAL1 = "value1";
 
     std::string value;
-    std::vector<std::string> keys;
+    std::set<std::string> keys;
 
     FileKeyStore store(FILE_PATH.toString());
     ASSERT_TRUE(store.list().empty());
     ASSERT_FALSE(store.get(KEY1, value));
+    ASSERT_FALSE(store.exists(KEY1));
 
     ASSERT_TRUE(store.create(KEY1));
+    ASSERT_TRUE(store.exists(KEY1));
     keys = store.list();
     ASSERT_EQ(1, keys.size());
-    ASSERT_EQ(KEY1, keys[0]);
+    ASSERT_NE(keys.end(), keys.find(KEY1));
 
     ASSERT_TRUE(store.set(KEY1, VAL1, true));
     ASSERT_TRUE(store.get(KEY1, value));

@@ -38,14 +38,15 @@ public:
     virtual ~WindowsKeyStore();
 
 public:
-    virtual bool create(std::string const & key) override;
-    virtual bool remove(std::string const & key) override;
+    bool create(std::string const & key) override;
+    bool remove(std::string const & key) override;
 
-    virtual bool get(std::string const & key, std::string & result) const override;
-    virtual bool set(std::string const & key, std::string const & value, bool encrypt = false) override;
-    virtual bool cmp(std::string const & key, std::string const & value, bool encrypt = false) const override;
+    bool exists(std::string const & key) const override;
+    bool get(std::string const & key, std::string & result) const override;
+    bool set(std::string const & key, std::string const & value, bool encrypt = false) override;
+    bool cmp(std::string const & key, std::string const & value, bool encrypt = false) const override;
 
-    virtual std::vector<std::string> list() const override;
+    std::set<std::string> list() const override;
 };
 
 } // namespace store
