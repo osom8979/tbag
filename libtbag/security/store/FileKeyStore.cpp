@@ -9,7 +9,6 @@
 #include <libtbag/string/Format.hpp>
 #include <libtbag/crypto/PseudoRandom.hpp>
 #include <libtbag/crypto/Pbkdf2.hpp>
-#include <libtbag/log/Log.hpp>
 
 #include <cassert>
 #include <tuple>
@@ -27,48 +26,54 @@ namespace __impl {
 
 static std::string getCreateTableQuery()
 {
-    return string::fformat("CREATE TABLE IF NOT EXISTS {} ({} TEXT PRIMARY KEY, {} TEXT, {} TEXT);",
-                           FileKeyStore::getTableName(), FileKeyStore::getKeyName(),
-                           FileKeyStore::getSaltName(), FileKeyStore::getValueName());
+    using namespace libtbag::string;
+    return fformat("CREATE TABLE IF NOT EXISTS {} ({} TEXT PRIMARY KEY, {} TEXT, {} TEXT);",
+                   FileKeyStore::getTableName(), FileKeyStore::getKeyName(),
+                   FileKeyStore::getSaltName(), FileKeyStore::getValueName());
 }
 
 static std::string getInsertQuery(std::string const & key,
                                   std::string const & salt,
                                   std::string const & value)
 {
-    return string::fformat("INSERT INTO {}({}, {}, {}) VALUES('{}', '{}', '{}');",
-                           FileKeyStore::getTableName(), FileKeyStore::getKeyName(),
-                           FileKeyStore::getSaltName(), FileKeyStore::getValueName(),
-                           key, salt, value);
+    using namespace libtbag::string;
+    return fformat("INSERT INTO {}({}, {}, {}) VALUES('{}', '{}', '{}');",
+                   FileKeyStore::getTableName(), FileKeyStore::getKeyName(),
+                   FileKeyStore::getSaltName(), FileKeyStore::getValueName(),
+                   key, salt, value);
 }
 
 static std::string getUpdateQuery(std::string const & key,
                                   std::string const & salt,
                                   std::string const & value)
 {
-    return string::fformat("UPDATE {} SET {}='{}', {}='{}' WHERE {} LIKE '{}';",
-                           FileKeyStore::getTableName(),
-                           FileKeyStore::getSaltName(), salt,
-                           FileKeyStore::getValueName(), value,
-                           FileKeyStore::getKeyName(), key);
+    using namespace libtbag::string;
+    return fformat("UPDATE {} SET {}='{}', {}='{}' WHERE {} LIKE '{}';",
+                   FileKeyStore::getTableName(),
+                   FileKeyStore::getSaltName(), salt,
+                   FileKeyStore::getValueName(), value,
+                   FileKeyStore::getKeyName(), key);
 }
 
 static std::string getSelectQuery(std::string const & key)
 {
-    return string::fformat("SELECT {}, {} FROM {} WHERE {}='{}';",
-                           FileKeyStore::getSaltName(), FileKeyStore::getValueName(),
-                           FileKeyStore::getTableName(), FileKeyStore::getKeyName(), key);
+    using namespace libtbag::string;
+    return fformat("SELECT {}, {} FROM {} WHERE {}='{}';",
+                   FileKeyStore::getSaltName(), FileKeyStore::getValueName(),
+                   FileKeyStore::getTableName(), FileKeyStore::getKeyName(), key);
 }
 
 static std::string getSelectKeysQuery()
 {
-    return string::fformat("SELECT {} FROM {};", FileKeyStore::getKeyName(), FileKeyStore::getTableName());
+    using namespace libtbag::string;
+    return fformat("SELECT {} FROM {};", FileKeyStore::getKeyName(), FileKeyStore::getTableName());
 }
 
 static std::string getDeleteQuery(std::string const & key)
 {
-    return string::fformat("DELETE FROM {} WHERE {}='{}';",
-                           FileKeyStore::getTableName(), FileKeyStore::getKeyName(), key);
+    using namespace libtbag::string;
+    return fformat("DELETE FROM {} WHERE {}='{}';",
+                   FileKeyStore::getTableName(), FileKeyStore::getKeyName(), key);
 }
 
 static bool get(FileKeyStore::Sqlite & db, std::string const & key, std::string & salt, std::string & value)
@@ -96,10 +101,10 @@ static bool get(FileKeyStore::Sqlite & db, std::string const & key, std::string 
 FileKeyStore::FileKeyStore(std::string const & path)
 {
     Guard const LOCK(_mutex);
-    if (_db.open(path) == false) {
+    if (!_db.open(path)) {
         throw std::bad_alloc();
     }
-    if (_db.execute(__impl::getCreateTableQuery()) == false) {
+    if (!_db.execute(__impl::getCreateTableQuery())) {
         throw std::bad_alloc();
     }
 }
@@ -122,7 +127,7 @@ bool FileKeyStore::remove(std::string const & key)
     return _db.execute(__impl::getDeleteQuery(key));
 }
 
-bool FileKeyStore::get(std::string const & key, std::string & result)
+bool FileKeyStore::get(std::string const & key, std::string & result) const
 {
     Guard const LOCK(_mutex);
     std::string salt;
@@ -143,12 +148,12 @@ bool FileKeyStore::set(std::string const & key, std::string const & value, bool 
     return _db.execute(__impl::getUpdateQuery(key, salt, update_value));
 }
 
-bool FileKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt)
+bool FileKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt) const
 {
     Guard const LOCK(_mutex);
     std::string read_salt;
     std::string read_value;
-    if (__impl::get(_db, key, read_salt, read_value) == false) {
+    if (!__impl::get(_db, key, read_salt, read_value)) {
         return false;
     }
 
@@ -159,7 +164,7 @@ bool FileKeyStore::cmp(std::string const & key, std::string const & value, bool 
     }
 }
 
-std::vector<std::string> FileKeyStore::list()
+std::vector<std::string> FileKeyStore::list() const
 {
     Guard const LOCK(_mutex);
 
@@ -170,9 +175,14 @@ std::vector<std::string> FileKeyStore::list()
         return Row(statement.getString(0));
     });
 
-    std::vector<std::string> result;
-    for (auto & r : rows) {
-        result.push_back(std::get<0>(r));
+    if (rows.empty()) {
+        return {};
+    }
+
+    auto const size = rows.size();
+    std::vector<std::string> result(size);
+    for (auto i = 0; i < size; ++i) {
+        result[i] = std::get<0>(rows[i]);
     }
     return result;
 }

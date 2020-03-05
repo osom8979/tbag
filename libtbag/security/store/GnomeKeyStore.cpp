@@ -35,7 +35,7 @@ bool GnomeKeyStore::remove(std::string const & key)
     return false;
 }
 
-bool GnomeKeyStore::get(std::string const & key, std::string & result)
+bool GnomeKeyStore::get(std::string const & key, std::string & result) const
 {
     return false;
 }
@@ -45,12 +45,12 @@ bool GnomeKeyStore::set(std::string const & key, std::string const & value, bool
     return false;
 }
 
-bool GnomeKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt)
+bool GnomeKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt) const
 {
     return false;
 }
 
-std::vector<std::string> GnomeKeyStore::list()
+std::vector<std::string> GnomeKeyStore::list() const
 {
     return std::vector<std::string>();
 }

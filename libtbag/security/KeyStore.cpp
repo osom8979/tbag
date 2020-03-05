@@ -78,7 +78,7 @@ bool KeyStore::remove(std::string const & key)
     return _store->remove(key);
 }
 
-bool KeyStore::get(std::string const & key, std::string & result)
+bool KeyStore::get(std::string const & key, std::string & result) const
 {
     if (!_store) {
         return false;
@@ -94,7 +94,7 @@ bool KeyStore::set(std::string const & key, std::string const & value, bool encr
     return _store->set(key, value, encrypt);
 }
 
-bool KeyStore::cmp(std::string const & key, std::string const & value, bool encrypt)
+bool KeyStore::cmp(std::string const & key, std::string const & value, bool encrypt) const
 {
     if (!_store) {
         return false;
@@ -102,7 +102,7 @@ bool KeyStore::cmp(std::string const & key, std::string const & value, bool encr
     return _store->cmp(key, value, encrypt);
 }
 
-std::vector<std::string> KeyStore::list()
+std::vector<std::string> KeyStore::list() const
 {
     if (!_store) {
         return std::vector<std::string>();

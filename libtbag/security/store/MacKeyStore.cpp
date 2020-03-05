@@ -35,7 +35,7 @@ bool MacKeyStore::remove(std::string const & key)
     return false;
 }
 
-bool MacKeyStore::get(std::string const & key, std::string & result)
+bool MacKeyStore::get(std::string const & key, std::string & result) const
 {
     return false;
 }
@@ -45,12 +45,12 @@ bool MacKeyStore::set(std::string const & key, std::string const & value, bool e
     return false;
 }
 
-bool MacKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt)
+bool MacKeyStore::cmp(std::string const & key, std::string const & value, bool encrypt) const
 {
     return false;
 }
 
-std::vector<std::string> MacKeyStore::list()
+std::vector<std::string> MacKeyStore::list() const
 {
     return std::vector<std::string>();
 }

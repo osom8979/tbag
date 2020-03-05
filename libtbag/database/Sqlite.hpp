@@ -120,8 +120,8 @@ public:
 
 public:
     template <typename Tuple>
-    std::vector<Tuple> prepare(std::string const & query
-                             , std::function<Tuple(Statement const &)> const & callback)
+    std::vector<Tuple> prepare(std::string const & query,
+                               std::function<Tuple(Statement const &)> const & callback)
     {
         Transaction guard(*this);
         FakeStatement * stmt = prepareStatement(query);

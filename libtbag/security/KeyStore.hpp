@@ -63,11 +63,11 @@ public:
     bool create(std::string const & key);
     bool remove(std::string const & key);
 
-    bool get(std::string const & key, std::string & result);
+    bool get(std::string const & key, std::string & result) const;
     bool set(std::string const & key, std::string const & value, bool encrypt = false);
-    bool cmp(std::string const & key, std::string const & value, bool encrypt = false);
+    bool cmp(std::string const & key, std::string const & value, bool encrypt = false) const;
 
-    std::vector<std::string> list();
+    std::vector<std::string> list() const;
 };
 
 } // namespace security
