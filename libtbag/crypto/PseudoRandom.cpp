@@ -17,30 +17,32 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace crypto {
 
-util::Buffer generateRandom(std::size_t size)
+libtbag::util::Buffer generateRandom(std::size_t size)
 {
-    util::Buffer result(size);
-    int const WRITTEN = RAND_bytes((unsigned char *)result.data(), result.size());
-    RAND_seed(result.data(), WRITTEN);
+    libtbag::util::Buffer result(size);
+    auto const written = RAND_bytes((unsigned char *)result.data(), result.size());
+    RAND_seed(result.data(), written);
     return result;
 }
 
-util::Buffer generatePseudoRandom(std::size_t size)
+libtbag::util::Buffer generatePseudoRandom(std::size_t size)
 {
-    util::Buffer result(size);
-    int const WRITTEN = RAND_pseudo_bytes((unsigned char *)result.data(), result.size());
-    RAND_seed(result.data(), WRITTEN);
+    libtbag::util::Buffer result(size);
+    auto const written = RAND_pseudo_bytes((unsigned char *)result.data(), result.size());
+    RAND_seed(result.data(), written);
     return result;
 }
 
 std::string generateRandomString(std::size_t size)
 {
-    return string::convertByteVectorToHexString(generateRandom(size), std::string(), std::string());
+    using namespace libtbag::string;
+    return convertByteVectorToHexString(generateRandom(size), STRING_EMPTY, STRING_EMPTY).substr(0, size);
 }
 
 std::string generatePseudoRandomString(std::size_t size)
 {
-    return string::convertByteVectorToHexString(generatePseudoRandom(size), std::string(), std::string());
+    using namespace libtbag::string;
+    return convertByteVectorToHexString(generatePseudoRandom(size), STRING_EMPTY, STRING_EMPTY).substr(0, size);
 }
 
 } // namespace crypto

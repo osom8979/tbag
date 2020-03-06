@@ -25,8 +25,8 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace crypto {
 
-TBAG_API util::Buffer generateRandom(std::size_t size);
-TBAG_API util::Buffer generatePseudoRandom(std::size_t size);
+TBAG_API libtbag::util::Buffer generateRandom(std::size_t size);
+TBAG_API libtbag::util::Buffer generatePseudoRandom(std::size_t size);
 
 TBAG_API std::string generateRandomString(std::size_t size);
 TBAG_API std::string generatePseudoRandomString(std::size_t size);
