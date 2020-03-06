@@ -6,6 +6,7 @@
  */
 
 #include <libtbag/crypto/Aes.hpp>
+#include <libtbag/crypto/Base64.hpp>
 
 #include <cassert>
 #include <memory>
@@ -113,20 +114,26 @@ ErrBuffer decryptAes256Cbc(KeyArray const & key, IvArray const & iv, Buffer cons
     return { E_SUCCESS, output };
 }
 
-ErrString encryptAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input)
+ErrString encryptAes256CbcToBase64(KeyArray const & key, IvArray const & iv, std::string const & input)
 {
-    Buffer input_buffer(input.cbegin(), input.cend());
-    auto const result = encryptAes256Cbc(key, iv, input_buffer);
+    auto const result = encryptAes256Cbc(key, iv, Buffer(input.cbegin(), input.cend()));
     if (!result) {
         return result.code;
     }
-    return { E_SUCCESS, std::string(result.value.cbegin(), result.value.cend()) };
+    std::string encoded_base64;
+    if (!encodeBase64(result.value, encoded_base64)) {
+        return E_ENCODE;
+    }
+    return { E_SUCCESS, encoded_base64 };
 }
 
-ErrString decryptAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input)
+ErrString decryptBase64ToAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input)
 {
-    Buffer input_buffer(input.cbegin(), input.cend());
-    auto const result = decryptAes256Cbc(key, iv, input_buffer);
+    Buffer buffer;
+    if (!decodeBase64(input, buffer)) {
+        return E_DECODE;
+    }
+    auto const result = decryptAes256Cbc(key, iv, buffer);
     if (!result) {
         return result.code;
     }

@@ -24,18 +24,19 @@ TEST(AesTest, Default)
         iv[i] = i;
     }
 
-    auto const test_length = 2000;
+    auto const test_length = 128;
     std::string plain_text(test_length, '\0');
+    ASSERT_TRUE(libtbag::string::createRandomString(&plain_text[0], plain_text.size()));
+    std::cout << "Plain Text: " << plain_text << std::endl;
 
-    using namespace libtbag::string;
-    ASSERT_TRUE(createRandomString(&plain_text[0], plain_text.size()));
-
-    auto const encrypt_result = encryptAes256Cbc(key, iv, plain_text);
+    auto const encrypt_result = encryptAes256CbcToBase64(key, iv, plain_text);
     ASSERT_EQ(E_SUCCESS, encrypt_result.code);
     ASSERT_GE(encrypt_result.value.size(), plain_text.size());
+    std::cout << "Encrypt Text: " << encrypt_result.value << std::endl;
 
-    auto const decrypt_result = decryptAes256Cbc(key, iv, encrypt_result.value);
+    auto const decrypt_result = decryptBase64ToAes256Cbc(key, iv, encrypt_result.value);
     ASSERT_EQ(E_SUCCESS, decrypt_result.code);
     ASSERT_EQ(plain_text, decrypt_result.value);
+    std::cout << "Decrypt Text: " << decrypt_result.value << std::endl;
 }
 

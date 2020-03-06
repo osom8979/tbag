@@ -41,8 +41,8 @@ using ErrString = libtbag::ErrPair<std::string>;
 TBAG_API ErrBuffer encryptAes256Cbc(KeyArray const & key, IvArray const & iv, Buffer const & input);
 TBAG_API ErrBuffer decryptAes256Cbc(KeyArray const & key, IvArray const & iv, Buffer const & input);
 
-TBAG_API ErrString encryptAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input);
-TBAG_API ErrString decryptAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input);
+TBAG_API ErrString encryptAes256CbcToBase64(KeyArray const & key, IvArray const & iv, std::string const & input);
+TBAG_API ErrString decryptBase64ToAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input);
 
 } // namespace crypto
 
