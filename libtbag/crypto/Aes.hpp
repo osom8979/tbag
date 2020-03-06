@@ -15,8 +15,12 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/ErrPair.hpp>
+#include <libtbag/util/BufferInfo.hpp>
+
+#include <cstdint>
+#include <array>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,23 +28,21 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace crypto {
 
-// Forward declaration.
+TBAG_CONSTEXPR std::size_t const AES_256BIT_TO_BYTE = (256/8);
+using KeyArray = std::array<std::uint8_t, AES_256BIT_TO_BYTE>;
 
-/**
- * Aes class prototype.
- *
- * @author zer0
- * @date   2020-03-05
- */
-class TBAG_API Aes : private Noncopyable
-{
-private:
-    // Insert member variables.
+TBAG_CONSTEXPR std::size_t const IV_128BIT_TO_BYTE = (128/8);
+using IvArray = std::array<std::uint8_t, IV_128BIT_TO_BYTE>;
 
-public:
-    Aes();
-    virtual ~Aes();
-};
+using Buffer = libtbag::util::Buffer;
+using ErrBuffer = libtbag::ErrPair<Buffer>;
+using ErrString = libtbag::ErrPair<std::string>;
+
+TBAG_API ErrBuffer encryptAes256Cbc(KeyArray const & key, IvArray const & iv, Buffer const & input);
+TBAG_API ErrBuffer decryptAes256Cbc(KeyArray const & key, IvArray const & iv, Buffer const & input);
+
+TBAG_API ErrString encryptAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input);
+TBAG_API ErrString decryptAes256Cbc(KeyArray const & key, IvArray const & iv, std::string const & input);
 
 } // namespace crypto
 
