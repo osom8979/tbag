@@ -343,6 +343,86 @@ Err optErr(Json::Value const & v, Err def)
     }
 }
 
+std::vector<std::string> getStringArray(Json::Value const & v)
+{
+    std::vector<std::string> result;
+    if (getStringArray(v, &result)) {
+        return result;
+    }
+    return {};
+}
+
+std::vector<std::string> getStringArray(Json::Value const & v, std::string const & key)
+{
+    if (exists(v, key)) {
+        return getStringArray(v[key]);
+    }
+    return {};
+}
+
+bool getStringArray(Json::Value const & v, std::vector<std::string> * out)
+{
+    switch (v.type()) {
+    case Json::nullValue:
+        if (out != nullptr) {
+            out->clear();
+        }
+        return true;
+    case Json::intValue:
+        if (out != nullptr) {
+            out->clear();
+            out->push_back(libtbag::string::toString(v.asInt()));
+        }
+        return true;
+    case Json::uintValue:
+        if (out != nullptr) {
+            out->clear();
+            out->push_back(libtbag::string::toString(v.asUInt()));
+        }
+        return true;
+    case Json::realValue:
+        if (out != nullptr) {
+            out->clear();
+            out->push_back(libtbag::string::toString(v.asDouble()));
+        }
+        return true;
+    case Json::stringValue:
+        if (out != nullptr) {
+            out->clear();
+            out->push_back(v.asString());
+        }
+        return true;
+    case Json::booleanValue:
+        if (out != nullptr) {
+            out->clear();
+            out->push_back(libtbag::string::toString(v.asBool()));
+        }
+        return true;
+    case Json::arrayValue:
+        if (out != nullptr) {
+            auto const size = v.size();
+            out->clear();
+            out->resize(size);
+            for (auto i = 0; i < size; ++i) {
+                (*out)[i] = getForceString(v[i]);
+            }
+        }
+        return true;
+    case Json::objectValue:
+        TBAG_FALLTHROUGH
+    default:
+        return false;
+    }
+}
+
+bool getStringArray(Json::Value const & v, std::string const & key, std::vector<std::string> * out)
+{
+    if (exists(v, key)) {
+        return getStringArray(v[key], out);
+    }
+    return false;
+}
+
 } // namespace json
 } // namespace dom
 

@@ -29,6 +29,16 @@ JsonHelper::Value JsonHelper::getJsonValueFromJsonText(std::string const & json)
     return libtbag::dom::json::getJsonValue(json);
 }
 
+std::string JsonHelper::writeToFastJsonText(Json::Value const & value)
+{
+    return libtbag::dom::json::writeFast(value);
+}
+
+std::string JsonHelper::writeToStyledJsonText(Json::Value const & value)
+{
+    return libtbag::dom::json::writeStyled(value);
+}
+
 std::string JsonHelper::writeToJsonText(Value const & value, bool fast)
 {
     return libtbag::dom::json::write(value, fast);
@@ -177,6 +187,26 @@ bool JsonHelper::getErr(Json::Value const & v, Err * out)
 Err JsonHelper::optErr(Json::Value const & v, Err def)
 {
     return libtbag::dom::json::optErr(v, def);
+}
+
+std::vector<std::string> JsonHelper::getStringArray(Json::Value const & v)
+{
+    return libtbag::dom::json::getStringArray(v);
+}
+
+std::vector<std::string> JsonHelper::getStringArray(Json::Value const & v, std::string const & key)
+{
+    return libtbag::dom::json::getStringArray(v, key);
+}
+
+bool JsonHelper::getStringArray(Json::Value const & v, std::vector<std::string> * out)
+{
+    return libtbag::dom::json::getStringArray(v, out);
+}
+
+bool JsonHelper::getStringArray(Json::Value const & v, std::string const & key, std::vector<std::string> * out)
+{
+    return libtbag::dom::json::getStringArray(v, key, out);
 }
 
 } // namespace json

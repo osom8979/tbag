@@ -399,6 +399,10 @@ TEST(StringUtilsTest, ToString)
     ASSERT_STREQ("201", toString((     double)201).substr(0, 3).c_str());
     ASSERT_STREQ("202", toString((long double)202).substr(0, 3).c_str());
 
+    ASSERT_STREQ("200", toString(200.0).substr(0, 3).c_str());
+    ASSERT_STREQ("201", toString(201.0).substr(0, 3).c_str());
+    ASSERT_STREQ("202", toString(202.0).substr(0, 3).c_str());
+
     std::string str;
     str = toString(std::numeric_limits<float>::infinity());
     std::cout << "Infinity (float): " << str << std::endl;

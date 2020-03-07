@@ -301,6 +301,14 @@ TBAG_API bool isDigit(std::string const & str);
 TBAG_API bool isVariableName(char c);
 TBAG_API bool isVariableName(std::string const & str);
 
+TBAG_API std::string trimLeft(std::string const & str, std::string const & trim_list);
+TBAG_API std::string trimRight(std::string const & str, std::string const & trim_list);
+TBAG_API std::string trim(std::string const & str, std::string const & trim_list);
+
+TBAG_API std::string trimLeft(std::string const & str, char trim_value);
+TBAG_API std::string trimRight(std::string const & str, char trim_value);
+TBAG_API std::string trim(std::string const & str, char trim_value);
+
 TBAG_API std::string trimLeft(std::string const & str);
 TBAG_API std::string trimRight(std::string const & str);
 TBAG_API std::string trim(std::string const & str);
@@ -324,6 +332,12 @@ TBAG_CONSTEXPR char const * const FALSE_LOWER_STR1 =   "off";
 TBAG_CONSTEXPR char const * const FALSE_LOWER_STR2 = "false";
 TBAG_CONSTEXPR char const * const FALSE_LOWER_STR3 =    "no";
 TBAG_CONSTEXPR char const * const FALSE_LOWER_STR4 =     "n";
+
+TBAG_CONSTEXPR char const * const DEFAULT_TRUE_LOWER_STR = TRUE_LOWER_STR2;
+TBAG_CONSTEXPR char const * const DEFAULT_FALSE_LOWER_STR = FALSE_LOWER_STR2;
+
+TBAG_CONSTEXPR char const * const DEFAULT_TRUE_STR = DEFAULT_TRUE_LOWER_STR;
+TBAG_CONSTEXPR char const * const DEFAULT_FALSE_STR = DEFAULT_FALSE_LOWER_STR;
 
 TBAG_API bool toVal(std::string const & str,               bool & to, std::size_t * index = nullptr, int base = 10);
 TBAG_API bool toVal(std::string const & str,               char & to, std::size_t * index = nullptr, int base = 10);
@@ -351,15 +365,47 @@ inline T toValue(std::string const & str, T default_value = T(), int base = 10)
     return default_value;
 }
 
+template <typename T, bool is_floating>
+struct __internal_to_string;
+
+template <typename T>
+struct __internal_to_string<T, true>
+{
+    static std::string run(T val)
+    {
+        return std::to_string(val);
+        // auto const text = std::to_string(val);
+        // if (std::find(text.begin(), text.end(), '.') == text.end()) {
+        //     return text;
+        // }
+        // auto itr = text.rbegin();
+        // for (; itr != text.rend(); ++itr) {
+        //     if (*itr != '0') {
+        //         break;
+        //     }
+        // }
+        // return std::string(text.begin(), itr.base());
+    }
+};
+
+template <typename T>
+struct __internal_to_string<T, false>
+{
+    static std::string run(T val)
+    {
+        return std::to_string(val);
+    }
+};
+
 template <typename T>
 inline std::string toString(T val)
 {
-    return std::to_string(val);
+    return __internal_to_string<T, std::is_floating_point<T>::value>::run(val);
 }
 
 inline std::string toString(bool val)
 {
-    return std::to_string(val ? 1 : 0);
+    return val ? DEFAULT_TRUE_STR : DEFAULT_FALSE_STR;
 }
 
 inline std::string toString(char const * val)

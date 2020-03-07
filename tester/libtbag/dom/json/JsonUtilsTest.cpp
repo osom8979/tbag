@@ -69,3 +69,24 @@ TEST(JsonUtilsTest, OptErr)
     ASSERT_EQ(E_WARNING, optErr(value["key"]));
 }
 
+TEST(JsonUtilsTest, GetString)
+{
+    ASSERT_STREQ("test", getForceString(getJsonValue("\"test\"")).c_str());
+    ASSERT_STREQ("0.1", getForceString(getJsonValue("0.1")).c_str());
+}
+
+TEST(JsonUtilsTest, GetStringArray)
+{
+    char const * const TEST_JSON_TEXT = R"(["test", 0.1, 99, "a", null, "b"])";
+    Json::Value value;
+    ASSERT_TRUE(parse(TEST_JSON_TEXT, value));
+    auto const result = getStringArray(value);
+    ASSERT_EQ(6, result.size());
+    ASSERT_STREQ("test", result[0].c_str());
+    ASSERT_STREQ("0.1", result[1].c_str());
+    ASSERT_STREQ("99", result[2].c_str());
+    ASSERT_STREQ("a", result[3].c_str());
+    ASSERT_STREQ("", result[4].c_str());
+    ASSERT_STREQ("b", result[5].c_str());
+}
+

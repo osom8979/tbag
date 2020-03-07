@@ -77,6 +77,12 @@ TBAG_API bool getInt(Json::Value const & v, std::string const & key, int * out);
 TBAG_API bool getErr(Json::Value const & v, Err * out);
 TBAG_API Err optErr(Json::Value const & v, Err def = E_UNKNOWN);
 
+TBAG_API std::vector<std::string> getStringArray(Json::Value const & v);
+TBAG_API std::vector<std::string> getStringArray(Json::Value const & v, std::string const & key);
+
+TBAG_API bool getStringArray(Json::Value const & v, std::vector<std::string> * out);
+TBAG_API bool getStringArray(Json::Value const & v, std::string const & key, std::vector<std::string> * out);
+
 template <typename Iterator>
 Json::Value toJsonArray(Iterator begin, Iterator end)
 {

@@ -609,6 +609,60 @@ bool isVariableName(std::string const & str)
     return true;
 }
 
+std::string trimLeft(std::string const & str, std::string const & trim_list)
+{
+    auto itr = str.begin();
+    for (; itr != str.end(); ++itr) {
+        if (std::find(trim_list.cbegin(), trim_list.cend(), *itr) == trim_list.cend()) {
+            break;
+        }
+    }
+    return std::string(itr, str.end());
+}
+
+std::string trimRight(std::string const & str, std::string const & trim_list)
+{
+    auto itr = str.rbegin();
+    for (; itr != str.rend(); ++itr) {
+        if (std::find(trim_list.cbegin(), trim_list.cend(), *itr) == trim_list.cend()) {
+            break;
+        }
+    }
+    return std::string(str.begin(), itr.base());
+}
+
+std::string trim(std::string const & str, std::string const & trim_list)
+{
+    return trimRight(trimLeft(str, trim_list), trim_list);
+}
+
+std::string trimLeft(std::string const & str, char trim_value)
+{
+    auto itr = str.begin();
+    for (; itr != str.end(); ++itr) {
+        if (*itr != trim_value) {
+            break;
+        }
+    }
+    return std::string(itr, str.end());
+}
+
+std::string trimRight(std::string const & str, char trim_value)
+{
+    auto itr = str.rbegin();
+    for (; itr != str.rend(); ++itr) {
+        if (*itr != trim_value) {
+            break;
+        }
+    }
+    return std::string(str.begin(), itr.base());
+}
+
+std::string trim(std::string const & str, char trim_value)
+{
+    return trimRight(trimLeft(str, trim_value), trim_value);
+}
+
 std::string trimLeft(std::string const & str)
 {
     auto itr = str.begin();

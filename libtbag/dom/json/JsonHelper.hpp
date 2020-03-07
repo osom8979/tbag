@@ -39,6 +39,8 @@ struct TBAG_API JsonHelper
     static bool testFromJsonText(std::string const & json);
     static Value getJsonValueFromJsonText(std::string const & json);
 
+    static std::string writeToFastJsonText(Json::Value const & value);
+    static std::string writeToStyledJsonText(Json::Value const & value);
     static std::string writeToJsonText(Value const & value, bool fast = false);
 
     // clang-format off
@@ -77,6 +79,12 @@ struct TBAG_API JsonHelper
 
     static bool getErr(Json::Value const & v, Err * out);
     static Err optErr(Json::Value const & v, Err def = E_UNKNOWN);
+
+    static std::vector<std::string> getStringArray(Json::Value const & v);
+    static std::vector<std::string> getStringArray(Json::Value const & v, std::string const & key);
+
+    static bool getStringArray(Json::Value const & v, std::vector<std::string> * out);
+    static bool getStringArray(Json::Value const & v, std::string const & key, std::vector<std::string> * out);
 
     template <typename Iterator>
     Json::Value toJsonArray(Iterator begin, Iterator end)
