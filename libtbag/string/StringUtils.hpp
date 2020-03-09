@@ -23,6 +23,7 @@
 #include <libtbag/util/BufferInfo.hpp>
 
 #include <cstdint>
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -286,7 +287,6 @@ TBAG_API std::string removeRegex(std::string const & source, std::string const &
  * Simple replace.
  */
 TBAG_API std::string replace(std::string const & source, std::string const & find, std::string const & replace);
-
 TBAG_API bool isMatch(std::string const & source, std::regex const & regex);
 TBAG_API bool isMatch(std::string const & source, std::string const & regex);
 TBAG_API bool isUtf8Match(std::string const & utf8_source, std::string const & regex);
@@ -375,16 +375,21 @@ struct __internal_to_string<T, true>
     {
         return std::to_string(val);
         // auto const text = std::to_string(val);
-        // if (std::find(text.begin(), text.end(), '.') == text.end()) {
+        // auto itr = std::find(text.begin(), text.end(), '.');
+        // if (itr == text.end()) {
         //     return text;
         // }
-        // auto itr = text.rbegin();
-        // for (; itr != text.rend(); ++itr) {
-        //     if (*itr != '0') {
+        // ++itr;
+        // if (itr == text.end()) {
+        //     return text + '0'; // "0." -> "0.0"
+        // }
+        // auto ritr = text.rbegin();
+        // for (; ritr.base() != itr; ++ritr) {
+        //     if (*ritr != '0') {
         //         break;
         //     }
         // }
-        // return std::string(text.begin(), itr.base());
+        // return std::string(text.begin(), ritr.base());
     }
 };
 
