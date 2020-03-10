@@ -25,6 +25,16 @@ TEST(ColorTest, Constructor)
     ASSERT_EQ(c2, c3);
 }
 
+TEST(ColorTest, FromString)
+{
+    Color c;
+    ASSERT_EQ(E_SUCCESS, c.fromString("#8C6BF0FF"));
+    ASSERT_EQ(0x8C, c.r);
+    ASSERT_EQ(0x6B, c.g);
+    ASSERT_EQ(0xF0, c.b);
+    ASSERT_EQ(0xFF, c.a);
+}
+
 TEST(ColorTest, String)
 {
     ASSERT_EQ(BLACK_COLOR, Color("#000"));
