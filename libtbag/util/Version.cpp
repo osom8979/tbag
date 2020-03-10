@@ -7,6 +7,7 @@
 
 #include <libtbag/util/Version.hpp>
 #include <libtbag/algorithm/Swap.hpp>
+#include <libtbag/string/Format.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/log/Log.hpp>
 
@@ -199,6 +200,15 @@ Version getTbagPacketVersion() TBAG_NOEXCEPT
 Version getTbagReleaseVersion() TBAG_NOEXCEPT
 {
     return Version(LIBTBAG_VERSION_RELEASE);
+}
+
+std::string getFullVersionString()
+{
+    using namespace libtbag::string;
+    return fformat("{}.{}.{}-{}.{}-{}",
+                   LIBTBAG_VERSION_MAJOR, LIBTBAG_VERSION_MINOR, LIBTBAG_VERSION_PATCH,
+                   LIBTBAG_VERSION_PACKET_MAJOR, LIBTBAG_VERSION_PACKET_MINOR,
+                   LIBTBAG_VERSION_RELEASE);
 }
 
 } // namespace util

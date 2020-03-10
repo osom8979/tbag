@@ -97,3 +97,10 @@ TEST(VersionTest, TbagVersion)
     ASSERT_EQ(ver.getPatch(), LIBTBAG_VERSION_PATCH);
 }
 
+TEST(VersionTest, GetFullVersionString)
+{
+    auto const text = getFullVersionString();
+    ASSERT_FALSE(text.empty());
+    std::cout << "Full version string: " << text << std::endl;
+}
+
