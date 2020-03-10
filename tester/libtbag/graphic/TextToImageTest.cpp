@@ -31,7 +31,7 @@ TEST(TextToImageTest, Default)
 
         libtbag::box::Box image;
         auto const render_result = renderCenteredText(RENDER_TEXT, width, height, channels, 20,
-                                                      WHITE_COLOR, GRAY_COLOR, image);
+                                                      BLUE_COLOR, RED_COLOR, image);
         ASSERT_TRUE(isSuccess(render_result));
         ASSERT_EQ(height, image.dim(0));
         ASSERT_EQ(width, image.dim(1));
@@ -45,6 +45,19 @@ TEST(TextToImageTest, Default)
         ASSERT_EQ(height, image2.dim(0));
         ASSERT_EQ(width, image2.dim(1));
         ASSERT_EQ(channels, image2.dim(2));
+
+        if (channels == 1) {
+            ASSERT_EQ(static_cast<int>(255/3), image.get<int>(0, 0, 0));
+        } else if (channels == 3) {
+            ASSERT_EQ(255, image.get<int>(0, 0, 0)); // R
+            ASSERT_EQ(  0, image.get<int>(0, 0, 1)); // G
+            ASSERT_EQ(  0, image.get<int>(0, 0, 2)); // B
+        } else if (channels == 4) {
+            ASSERT_EQ(255, image.get<int>(0, 0, 0)); // R
+            ASSERT_EQ(  0, image.get<int>(0, 0, 1)); // G
+            ASSERT_EQ(  0, image.get<int>(0, 0, 2)); // B
+            ASSERT_EQ(255, image.get<int>(0, 0, 3)); // A
+        }
     };
 
     internal_task(600, 400, 4);

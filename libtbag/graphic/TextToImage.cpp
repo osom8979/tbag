@@ -12,6 +12,8 @@
 
 #include <blend2d.h>
 
+#define _REVERSE_RGBA_ORDER
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -44,16 +46,26 @@ Err renderCenteredText(std::string const & text,
         format_type = BL_FORMAT_PRGB32;
     }
 
+    BLRgba32 bg;
+    BLRgba32 fg;
+#if defined(_REVERSE_RGBA_ORDER)
+    bg.reset(background_color.b, background_color.g, background_color.r, background_color.a);
+    fg.reset(text_color.b, text_color.g, text_color.r, text_color.a);
+#else
+    bg.reset(background_color.r, background_color.g, background_color.b, background_color.a);
+    fg.reset(text_color.r, text_color.g, text_color.b, text_color.a);
+#endif
+
     BLImage img(width, height, format_type);
     BLContext ctx(img);
     ctx.setCompOp(BL_COMP_OP_SRC_COPY);
 
     // Fill the background.
-    ctx.setFillStyle(BLRgba32(background_color.r, background_color.g, background_color.b, background_color.a));
+    ctx.setFillStyle(bg);
     ctx.fillAll();
 
     // Set the text color.
-    ctx.setFillStyle(BLRgba32(text_color.r, text_color.g, text_color.b, text_color.a));
+    ctx.setFillStyle(fg);
 
     if (!text.empty()) {
         BLFontLoader loader;
