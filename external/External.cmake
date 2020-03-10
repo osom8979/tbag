@@ -659,7 +659,7 @@ if (NOT civetweb_EXT_EXISTS)
                        "-DCIVETWEB_DISABLE_CGI=OFF"
                        "-DCIVETWEB_DISABLE_CACHING=OFF"
                        "-DCIVETWEB_ENABLE_CXX=OFF"
-                       "-DCIVETWEB_ENABLE_IPV6=OFF"
+                       "-DCIVETWEB_ENABLE_IPV6=ON"
                        "-DCIVETWEB_ENABLE_WEBSOCKETS=ON"
                        "-DCIVETWEB_ENABLE_SERVER_STATS=OFF"
                        "-DCIVETWEB_ENABLE_MEMORY_DEBUGGING=OFF"
