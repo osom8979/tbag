@@ -814,6 +814,33 @@ bool toVal(std::string const & str, std::string & to, std::size_t * UNUSED_PARAM
     return true;
 }
 
+std::string trimRightOfRealNumberText(std::string const & real_number_text)
+{
+    auto itr = std::find(real_number_text.begin(), real_number_text.end(), '.');
+    if (itr == real_number_text.end()) {
+        // Not found dot('.') character.
+        // In this case it can be an integer real_number_text.
+        return real_number_text;
+    }
+
+    assert(*itr == '.');
+
+    ++itr;
+    if (itr == real_number_text.end()) {
+        return real_number_text + "0"; // e.g. "0." -> "0.0"
+    }
+
+    assert(std::isdigit(*itr));
+
+    auto ritr = real_number_text.rbegin();
+    for (; (ritr+1).base() != itr; ++ritr) {
+        if (*ritr != '0') {
+            break;
+        }
+    }
+    return std::string(real_number_text.begin(), ritr.base());
+}
+
 template <typename T>
 static std::string __to_hex_string(char const * format, T val)
 {

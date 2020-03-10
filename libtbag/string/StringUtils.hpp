@@ -365,6 +365,8 @@ inline T toValue(std::string const & str, T default_value = T(), int base = 10)
     return default_value;
 }
 
+TBAG_API std::string trimRightOfRealNumberText(std::string const & real_number_text);
+
 template <typename T, bool is_floating>
 struct __internal_to_string;
 
@@ -373,23 +375,7 @@ struct __internal_to_string<T, true>
 {
     static std::string run(T val)
     {
-        return std::to_string(val);
-        // auto const text = std::to_string(val);
-        // auto itr = std::find(text.begin(), text.end(), '.');
-        // if (itr == text.end()) {
-        //     return text;
-        // }
-        // ++itr;
-        // if (itr == text.end()) {
-        //     return text + '0'; // "0." -> "0.0"
-        // }
-        // auto ritr = text.rbegin();
-        // for (; ritr.base() != itr; ++ritr) {
-        //     if (*ritr != '0') {
-        //         break;
-        //     }
-        // }
-        // return std::string(text.begin(), ritr.base());
+        return trimRightOfRealNumberText(std::to_string(val));
     }
 };
 

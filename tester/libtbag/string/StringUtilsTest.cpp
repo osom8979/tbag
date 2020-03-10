@@ -382,6 +382,18 @@ TEST(StringUtilsTest, ConvertByteVectorToPrettyHexStringBox)
     std::cout << hex_box << std::endl;
 }
 
+TEST(StringUtilsTest, TrimRightOfRealNumberText)
+{
+    ASSERT_STREQ("100", trimRightOfRealNumberText("100").c_str());
+    ASSERT_STREQ("9.0", trimRightOfRealNumberText("9.").c_str());
+    ASSERT_STREQ("9.0", trimRightOfRealNumberText("9.0").c_str());
+    ASSERT_STREQ("9.0", trimRightOfRealNumberText("9.00").c_str());
+    ASSERT_STREQ("9.0", trimRightOfRealNumberText("9.00000").c_str());
+    ASSERT_STREQ("9.001", trimRightOfRealNumberText("9.00100").c_str());
+    ASSERT_STREQ("9.00001", trimRightOfRealNumberText("9.00001").c_str());
+    ASSERT_STREQ("9.00f", trimRightOfRealNumberText("9.00f").c_str());
+}
+
 TEST(StringUtilsTest, ToString)
 {
     ASSERT_STREQ("10", toString((              char)10).c_str());
@@ -395,13 +407,13 @@ TEST(StringUtilsTest, ToString)
     ASSERT_STREQ("18", toString((         long long)18).c_str());
     ASSERT_STREQ("19", toString((unsigned long long)19).c_str());
 
-    ASSERT_STREQ("200", toString((      float)200).substr(0, 3).c_str());
-    ASSERT_STREQ("201", toString((     double)201).substr(0, 3).c_str());
-    ASSERT_STREQ("202", toString((long double)202).substr(0, 3).c_str());
+    ASSERT_STREQ("200.0", toString((      float)200).c_str());
+    ASSERT_STREQ("201.0", toString((     double)201).c_str());
+    ASSERT_STREQ("202.0", toString((long double)202).c_str());
 
-    ASSERT_STREQ("200", toString(200.0).substr(0, 3).c_str());
-    ASSERT_STREQ("201", toString(201.0).substr(0, 3).c_str());
-    ASSERT_STREQ("202", toString(202.0).substr(0, 3).c_str());
+    ASSERT_STREQ("200.0", toString(200.0).c_str());
+    ASSERT_STREQ("201.0", toString(201.0).c_str());
+    ASSERT_STREQ("202.0", toString(202.0).c_str());
 
     std::string str;
     str = toString(std::numeric_limits<float>::infinity());
