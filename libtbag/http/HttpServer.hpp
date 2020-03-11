@@ -19,7 +19,8 @@
 #include <libtbag/ErrPair.hpp>
 #include <libtbag/http/CivetWebBypass.hpp>
 #include <libtbag/http/CivetWebServer.hpp>
-#include <libtbag/http/CivetWebRequestHandler.hpp>
+#include <libtbag/http/CivetWebEventHandler.hpp>
+#include <libtbag/http/CivetWebSocketEventHandler.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN

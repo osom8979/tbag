@@ -1,12 +1,12 @@
 /**
- * @file   CivetWebRequestHandler.hpp
- * @brief  CivetWebRequestHandler class prototype.
+ * @file   CivetWebEventHandler.hpp
+ * @brief  CivetWebEventHandler class prototype.
  * @author zer0
  * @date   2020-03-11
  */
 
-#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_CIVETWEBREQUESTHANDLER_HPP__
-#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_CIVETWEBREQUESTHANDLER_HPP__
+#ifndef __INCLUDE_LIBTBAG__LIBTBAG_HTTP_CIVETWEBEVENTHANDLER_HPP__
+#define __INCLUDE_LIBTBAG__LIBTBAG_HTTP_CIVETWEBEVENTHANDLER_HPP__
 
 // MS compatible compilers support #pragma once
 #if defined(_MSC_VER) && (_MSC_VER >= 1020)
@@ -24,13 +24,13 @@ NAMESPACE_LIBTBAG_OPEN
 namespace http {
 
 /**
- * CivetWebRequestHandler prototype.
+ * CivetWebEventHandler class prototype.
  *
  * @author zer0
  * @date   2020-03-11
  */
 template <typename T>
-struct CivetWebRequestHandler : public CivetHandler
+struct CivetWebEventHandler : public CivetHandler
 {
     using Base = T;
     using Callback = bool(Base::*)(CivetServer*, mg_connection*);
@@ -44,24 +44,9 @@ struct CivetWebRequestHandler : public CivetHandler
     Callback options_cb = nullptr;
     Callback patch_cb = nullptr;
 
-    CivetWebRequestHandler(Base * b,
-                           Callback get = nullptr,
-                           Callback post = nullptr,
-                           Callback head = nullptr,
-                           Callback put = nullptr,
-                           Callback del = nullptr,
-                           Callback options = nullptr,
-                           Callback patch = nullptr)
-            : base(b),
-              get_cb(get),
-              post_cb(post),
-              head_cb(head),
-              put_cb(put),
-              delete_cb(del),
-              options_cb(options),
-              patch_cb(patch)
+    CivetWebEventHandler(Base * b) : base(b)
     { /* EMPTY. */ }
-    virtual ~CivetWebRequestHandler()
+    virtual ~CivetWebEventHandler()
     { /* EMPTY. */ }
 
     bool handleGet(CivetServer * server, mg_connection * conn) override
@@ -127,5 +112,5 @@ struct CivetWebRequestHandler : public CivetHandler
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
-#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_CIVETWEBREQUESTHANDLER_HPP__
+#endif // __INCLUDE_LIBTBAG__LIBTBAG_HTTP_CIVETWEBEVENTHANDLER_HPP__
 
