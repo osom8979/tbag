@@ -153,6 +153,17 @@ TEST(PathTest, SplitNodes_Canonical2)
     ASSERT_STREQ(TEMP, temp.getString().c_str());
 }
 
+TEST(PathTest, ExistsNode)
+{
+    Path const test_path("exists/node/with/canonical/exists");
+    ASSERT_EQ(0, test_path.findNode("exists"));
+    ASSERT_EQ(1, test_path.findNode("node"));
+    ASSERT_EQ(2, test_path.findNode("with"));
+    ASSERT_EQ(3, test_path.findNode("canonical"));
+    ASSERT_EQ(4, test_path.findNode("exists", 1));
+    ASSERT_EQ(static_cast<std::size_t>(Path::nop), test_path.findNode("__"));
+}
+
 TEST(PathTest, SpecialDirectories)
 {
     ASSERT_FALSE(Path::getWorkDir().getString().empty());

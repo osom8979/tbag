@@ -18,6 +18,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/filesystem/details/FsTypes.hpp>
+#include <libtbag/type/TypeTable.hpp>
 
 #include <string>
 #include <vector>
@@ -54,6 +55,9 @@ TBAG_API std::string getExecutableName(std::string const & name);
  */
 class TBAG_API Path
 {
+public:
+    TBAG_CONSTEXPR static std::size_t const nop = libtbag::type::TypeInfo<std::size_t>::maximum();
+
 public:
     /** Update Generic Format. */
     struct update_generic { /* EMPTY */ };
@@ -216,6 +220,13 @@ public:
 public:
     std::vector<std::string> splitNodes() const;
     std::vector<std::string> splitNodesWithCanonical() const;
+
+public:
+    std::size_t findNode(std::string const & name, std::size_t start = 0) const;
+    std::size_t findNodeWithCanonical(std::string const & name, std::size_t start = 0) const;
+
+    bool existsNode(std::string const & name, std::size_t start = 0) const;
+    bool existsNodeWithCanonical(std::string const & name, std::size_t start = 0) const;
 
 public:
     /** Filename except path. */

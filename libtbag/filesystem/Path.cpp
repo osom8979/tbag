@@ -360,6 +360,38 @@ std::vector<std::string> Path::splitNodesWithCanonical() const
     return details::splitNodesWithCanonical(_path);
 }
 
+std::size_t Path::findNode(std::string const & name, std::size_t start) const
+{
+    auto const nodes = splitNodes();
+    auto const itr = std::find(std::next(nodes.begin(), start), nodes.end(), name);
+    if (itr == nodes.end()) {
+        return nop;
+    }
+    return std::distance(nodes.begin(), itr);
+}
+
+std::size_t Path::findNodeWithCanonical(std::string const & name, std::size_t start) const
+{
+    auto const nodes = splitNodesWithCanonical();
+    auto const itr = std::find(std::next(nodes.begin(), start), nodes.end(), name);
+    if (itr == nodes.end()) {
+        return nop;
+    }
+    return std::distance(nodes.begin(), itr);
+}
+
+bool Path::existsNode(std::string const & name, std::size_t start) const
+{
+    auto const nodes = splitNodes();
+    return std::find(std::next(nodes.begin(), start), nodes.end(), name) != nodes.end();
+}
+
+bool Path::existsNodeWithCanonical(std::string const & name, std::size_t start) const
+{
+    auto const nodes = splitNodesWithCanonical();
+    return std::find(std::next(nodes.begin(), start), nodes.end(), name) != nodes.end();
+}
+
 std::string Path::getName() const
 {
     auto nodes = splitNodes();
