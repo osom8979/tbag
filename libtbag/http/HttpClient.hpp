@@ -16,15 +16,17 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
-// Include preprocessor.
+#include <libtbag/ErrPair.hpp>
+#include <libtbag/http/CivetWebBypass.hpp>
+
+#include <string>
+#include <memory>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace http {
-
-// Forward declaration.
 
 /**
  * HttpClient class prototype.
@@ -34,12 +36,25 @@ namespace http {
  */
 class TBAG_API HttpClient : private Noncopyable
 {
+public:
+    using SharedConnection = std::shared_ptr<mg_connection>;
+
+public:
+    TBAG_CONSTEXPR static int const ERROR_MESSAGE_BUFFER_SIZE = 1024;
+
 private:
-    // Insert member variables.
+    SharedConnection _conn;
 
 public:
     HttpClient();
     virtual ~HttpClient();
+
+public:
+    ErrMsg open(std::string const & host, int port, bool use_ssl = false);
+    void close();
+
+public:
+    bool isOpen() const;
 };
 
 } // namespace http
