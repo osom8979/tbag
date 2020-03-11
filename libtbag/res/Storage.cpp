@@ -177,6 +177,11 @@ std::vector<std::string> Storage::getFilenames(std::string const & name) const
     return result;
 }
 
+bool Storage::createLayoutDirectories() const
+{
+    return asset().size() == asset().createLayoutDirectories();
+}
+
 void Storage::setEnvFilename(std::string const & filename)
 {
     _impl->envs_filename = filename;

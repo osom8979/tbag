@@ -22,7 +22,7 @@ TEST(DynamicAssetTest, Default)
     Path path = tttDir_Get() / "dynamic_asset";
 
     ASSERT_TRUE(asset.add(KEY, path));
-    ASSERT_EQ(1, asset.createLayouts());
+    ASSERT_EQ(1, asset.createLayoutDirectories());
 
     ASSERT_TRUE(asset.get(KEY).isDirectory());
     ASSERT_TRUE(asset.exists(KEY));

@@ -204,6 +204,7 @@ public:
 
 public:
     std::vector<std::string> getFilenames(std::string const & name) const;
+    bool createLayoutDirectories() const;
 
 public:
     Environments       & envs()       TBAG_NOEXCEPT { return _impl->envs; }
