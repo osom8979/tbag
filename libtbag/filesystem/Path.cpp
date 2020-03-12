@@ -11,6 +11,9 @@
 #include <libtbag/filesystem/details/FsProhibited.hpp>
 #include <libtbag/filesystem/details/FsCommon.hpp>
 
+#include <algorithm>
+#include <iterator>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
