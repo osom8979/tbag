@@ -6,6 +6,9 @@
  */
 
 #include <libtbag/http/HttpClient.hpp>
+#include <libtbag/http/CivetWebExtension.hpp>
+
+#include <cassert>
 #include <cstring>
 
 // -------------------
@@ -14,7 +17,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace http {
 
-HttpClient::HttpClient()
+using ErrString = HttpClient::ErrString;
+
+HttpClient::HttpClient() : _conn(nullptr, &mg_close_connection)
 {
     // EMPTY.
 }
@@ -40,9 +45,7 @@ ErrMsg HttpClient::open(std::string const & host, int port, bool use_ssl)
         return { std::string(error_buffer), E_OPEN };
     }
 
-    _conn.reset(conn, [](typename decltype(_conn)::element_type * v){
-        mg_close_connection(v);
-    });
+    _conn = UniqueConnection(conn, &mg_close_connection);
     return E_SUCCESS;
 }
 
@@ -54,6 +57,66 @@ void HttpClient::close()
 bool HttpClient::isOpen() const
 {
     return static_cast<bool>(_conn);
+}
+
+Err HttpClient::write(std::string const & body) const
+{
+    auto const written_size = mg_write_string(_conn.get(), body);
+    if (written_size == 0) {
+        return E_CLOSED;
+    } else if (written_size == -1) {
+        return E_WRERR;
+    }
+    assert(written_size >= 1);
+    if (body.size() == static_cast<std::size_t>(written_size)) {
+        return E_SUCCESS;
+    } else {
+        return E_WARNING;
+    }
+}
+
+ErrMsg HttpClient::wait(int timeout_ms)
+{
+    char error_buffer[ERROR_MESSAGE_BUFFER_SIZE];
+    memset(error_buffer, 0x00, sizeof(error_buffer));
+    auto const code = mg_get_response(_conn.get(), error_buffer, ERROR_MESSAGE_BUFFER_SIZE, timeout_ms);
+    if (code < 0) {
+        error_buffer[ERROR_MESSAGE_BUFFER_SIZE-1] = '\0';
+        return { std::string(error_buffer), E_TIMEOUT };
+    }
+    return E_SUCCESS;
+}
+
+bool HttpClient::getResponseInfo(mg_response_info * out) const
+{
+    auto const * info = mg_get_response_info(_conn.get());
+    if (info == nullptr) {
+        return false;
+    }
+    if (out) {
+        *out = *info;
+    }
+    return true;
+}
+
+ErrString HttpClient::read() const
+{
+    mg_response_info info = {};
+    if (!getResponseInfo(&info)) {
+        return E_NREADY;
+    }
+
+    std::string buffer;
+    buffer.resize(info.content_length);
+    auto const read_size = mg_read(_conn.get(), &buffer[0], info.content_length);
+    if (read_size == 0) {
+        return E_ECONNREFUSED;
+    } else if (read_size < 0) {
+        return E_READ_ERROR;
+    } else if (read_size < info.content_length) {
+        buffer.resize(read_size);
+    }
+    return { E_SUCCESS, buffer };
 }
 
 } // namespace http

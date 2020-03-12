@@ -17,6 +17,8 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/http/CivetWebServer.hpp>
 
+#include <functional>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -103,6 +105,89 @@ struct CivetWebEventHandler : public CivetHandler
             return CivetHandler::handlePatch(server, conn);
         }
         return (base->*patch_cb)(server, conn);
+    }
+};
+
+/**
+ * CivetWebEventFunctional class prototype.
+ *
+ * @author zer0
+ * @date   2020-03-12
+ */
+struct CivetWebEventFunctional : public CivetHandler
+{
+    using CallbackArg0 = CivetServer*;
+    using CallbackArg1 = mg_connection*;
+    using CallbackReturn = bool;
+    using Callback = std::function<CallbackReturn(CallbackArg0, CallbackArg1)>;
+
+    Callback get_cb;
+    Callback post_cb;
+    Callback head_cb;
+    Callback put_cb;
+    Callback delete_cb;
+    Callback options_cb;
+    Callback patch_cb;
+
+    CivetWebEventFunctional()
+    { /* EMPTY. */ }
+    virtual ~CivetWebEventFunctional()
+    { /* EMPTY. */ }
+
+    bool handleGet(CivetServer * server, mg_connection * conn) override
+    {
+        if (!get_cb) {
+            return CivetHandler::handleGet(server, conn);
+        }
+        return get_cb(server, conn);
+    }
+
+    bool handlePost(CivetServer * server, mg_connection * conn) override
+    {
+        if (!post_cb) {
+            return CivetHandler::handlePost(server, conn);
+        }
+        return post_cb(server, conn);
+    }
+
+    bool handleHead(CivetServer * server, mg_connection * conn) override
+    {
+        if (!head_cb) {
+            return CivetHandler::handleHead(server, conn);
+        }
+        return head_cb(server, conn);
+    }
+
+    bool handlePut(CivetServer * server, mg_connection * conn) override
+    {
+        if (!put_cb) {
+            return CivetHandler::handlePut(server, conn);
+        }
+        return put_cb(server, conn);
+    }
+
+    bool handleDelete(CivetServer * server, mg_connection * conn) override
+    {
+        if (!delete_cb) {
+            return CivetHandler::handleDelete(server, conn);
+        }
+        return delete_cb(server, conn);
+    }
+
+    bool handleOptions(CivetServer * server, mg_connection * conn) override
+    {
+        if (!options_cb) {
+            return CivetHandler::handleOptions(server, conn);
+        }
+        return options_cb(server, conn);
+    }
+
+    bool handlePatch(CivetServer * server, mg_connection * conn) override
+    {
+        if (!patch_cb) {
+            return CivetHandler::handlePatch(server, conn);
+        }
+        return patch_cb(server, conn);
     }
 };
 

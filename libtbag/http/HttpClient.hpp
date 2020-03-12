@@ -37,13 +37,15 @@ namespace http {
 class TBAG_API HttpClient : private Noncopyable
 {
 public:
-    using SharedConnection = std::shared_ptr<mg_connection>;
+    using ErrString = libtbag::ErrPair<std::string>;
+    using UniqueConnection = std::unique_ptr<mg_connection, decltype(&mg_close_connection)>;
 
 public:
     TBAG_CONSTEXPR static int const ERROR_MESSAGE_BUFFER_SIZE = 1024;
+    TBAG_CONSTEXPR static int const INFINITY_TIMEOUT = -1;
 
 private:
-    SharedConnection _conn;
+    UniqueConnection _conn;
 
 public:
     HttpClient();
@@ -55,6 +57,12 @@ public:
 
 public:
     bool isOpen() const;
+
+public:
+    Err write(std::string const & body) const;
+    ErrMsg wait(int timeout_ms = INFINITY_TIMEOUT);
+    bool getResponseInfo(mg_response_info * out) const;
+    ErrString read() const;
 };
 
 } // namespace http

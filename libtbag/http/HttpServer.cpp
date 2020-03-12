@@ -7,6 +7,9 @@
 
 #include <libtbag/http/HttpServer.hpp>
 #include <libtbag/http/CivetWebExtension.hpp>
+#include <libtbag/string/StringUtils.hpp>
+
+#include <cassert>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -106,7 +109,42 @@ static CivetCallbacks __create_default_callbacks()
     // clang-format on
 }
 
-HttpServer::HttpServer()
+// ----------
+// HttpServer
+// ----------
+
+void HttpServer::__close_cb(CivetServer * s)
+{
+    assert(s != nullptr);
+    s->close();
+}
+
+void HttpServer::opt(Options & o, char const * key, bool arg)
+{
+    o.emplace_back(key);
+    o.emplace_back(arg ? "yes" : "no");
+}
+
+void HttpServer::opt(Options & o, char const * key, int arg)
+{
+    o.emplace_back(key);
+    o.emplace_back(libtbag::string::toString(arg));
+}
+
+void HttpServer::opt(Options & o, char const * key, std::string const & arg)
+{
+    o.emplace_back(key);
+    o.emplace_back(arg);
+}
+
+void HttpServer::opt(Options & o, char const * key, std::vector<std::string> const & args)
+{
+    o.emplace_back(key);
+    o.emplace_back(libtbag::string::mergeTokens(args, ","));
+}
+
+HttpServer::HttpServer() : CALLBACKS(__create_default_callbacks()),
+                           _server(nullptr, &HttpServer::__close_cb)
 {
     // EMPTY.
 }
@@ -114,6 +152,65 @@ HttpServer::HttpServer()
 HttpServer::~HttpServer()
 {
     // EMPTY.
+}
+
+bool HttpServer::req(RequestMap & r, std::string const & path, CivetWebEventFunctional const & f)
+{
+    std::shared_ptr<CivetWebEventFunctional> handler;
+    try {
+        handler = std::make_shared<CivetWebEventFunctional>(f);
+    } catch (...) {
+        return false;
+    }
+    return r.emplace(path, std::static_pointer_cast<CivetHandler>(handler)).second;
+}
+
+ErrMsg HttpServer::open(Options const & options, RequestMap const & requests, void * user)
+{
+    if (_server) {
+        return E_ALREADY;
+    }
+
+    try {
+        auto * server = new CivetServer(options, &CALLBACKS, user);
+        _server = UniqueCivetServer(server, &HttpServer::__close_cb);
+    } catch (std::exception const & e) {
+        return { std::string(e.what()), E_OPEN };
+    } catch (...) {
+        return E_UNKEXCP;
+    }
+
+    _requests = requests;
+    for (auto & req : _requests) {
+        _server->addHandler(req.first, req.second.get());
+    }
+    return E_SUCCESS;
+}
+
+void HttpServer::close()
+{
+    _server.reset();
+}
+
+bool HttpServer::isOpen() const
+{
+    return static_cast<bool>(_server);
+}
+
+Err HttpServer::write(mg_connection * conn, std::string const & body)
+{
+    auto const written_size = mg_write_string(conn, body);
+    if (written_size == 0) {
+        return E_CLOSED;
+    } else if (written_size == -1) {
+        return E_WRERR;
+    }
+    assert(written_size >= 1);
+    if (body.size() == static_cast<std::size_t>(written_size)) {
+        return E_SUCCESS;
+    } else {
+        return E_WARNING;
+    }
 }
 
 } // namespace http
