@@ -26,8 +26,9 @@ TEST(HttpServerClientTest, DefaultHttp)
     auto const port = 8080;
 #endif
     std::string const host = "0.0.0.0";
+    std::string const connect_ip = "127.0.0.1";
     std::string const bind_address = host + ":" + libtbag::string::toString(port);
-    std::string const test_body = "__test__";
+    std::string const test_body = "__test_http__";
     std::string const test_path = "/test.html";
 
     std::stringstream req_ss;
@@ -71,7 +72,7 @@ TEST(HttpServerClientTest, DefaultHttp)
 
     HttpClient client;
     ASSERT_FALSE(client.isOpen());
-    auto const client_open_result = client.open(host, port);
+    auto const client_open_result = client.open(connect_ip, port);
     if (!client_open_result) {
         std::cerr << client_open_result.msg << std::endl;
     }
@@ -112,6 +113,7 @@ TEST(HttpServerClientTest, DefaultHttps)
     auto const port = 8080;
 #endif
     std::string const host = "0.0.0.0";
+    std::string const connect_ip = "127.0.0.1";
     std::string const bind_address = host + ":" + libtbag::string::toString(port);
     std::string const test_body = "__test_https__";
     std::string const test_path = "/test.html";
@@ -158,7 +160,7 @@ TEST(HttpServerClientTest, DefaultHttps)
 
     HttpClient client;
     ASSERT_FALSE(client.isOpen());
-    auto const client_open_result = client.open(host, port, true);
+    auto const client_open_result = client.open(connect_ip, port, true);
     if (!client_open_result) {
         std::cerr << client_open_result.msg << std::endl;
     }
