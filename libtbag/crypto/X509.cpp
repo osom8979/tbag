@@ -8,6 +8,7 @@
 #include <libtbag/crypto/X509.hpp>
 #include <libtbag/log/Log.hpp>
 #include <libtbag/crypto/Rsa.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -501,6 +502,12 @@ X509Pem genX509Pem()
     result.private_key = Rsa::generatePemPrivateKey();
     result.certificate = generateSelfSignedCertificate(result.private_key, generateCsrVersion1(result.private_key));
     return result;
+}
+
+std::string genX509PemToSingleText()
+{
+    auto const pem = genX509Pem();
+    return pem.certificate + libtbag::string::NEW_LINE + pem.private_key;
 }
 
 } // namespace crypto

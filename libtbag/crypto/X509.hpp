@@ -124,12 +124,10 @@ struct X509Pem
 {
     std::string private_key;
     std::string certificate;
-
-    X509Pem() { /* EMPTY. */ }
-    ~X509Pem() { /* EMPTY. */ }
 };
 
 TBAG_API X509Pem genX509Pem();
+TBAG_API std::string genX509PemToSingleText();
 
 } // namespace crypto
 

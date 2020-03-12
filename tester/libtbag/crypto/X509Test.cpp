@@ -37,3 +37,8 @@ TEST(X509Test, Sign)
     std::cout << getPrintbleInformationFromPemX509(CERTIFICATE) << std::endl;
 }
 
+TEST(X509Test, GenX509PemToSingleText)
+{
+    std::cout << genX509PemToSingleText() << std::endl;
+}
+
