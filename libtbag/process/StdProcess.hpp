@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/ErrPair.hpp>
 #include <libtbag/uvpp/func/FunctionalProcess.hpp>
 #include <libtbag/uvpp/func/FunctionalPipe.hpp>
 #include <libtbag/uvpp/Loop.hpp>
@@ -126,14 +127,30 @@ public:
 // ------------------------
 
 TBAG_API Err subprocess(std::string const & file,
-                        std::vector<std::string> const & args = std::vector<std::string>(),
-                        std::vector<std::string> const & envs = std::vector<std::string>(),
-                        std::string const & cwd = std::string(),
-                        std::string const & input = std::string(),
+                        std::vector<std::string> const & args = {},
+                        std::vector<std::string> const & envs = {},
+                        std::string const & cwd = {},
+                        std::string const & input = {},
                         int64_t * exit = nullptr,
                         int * term = nullptr,
                         std::string * output = nullptr,
                         std::string * error = nullptr);
+
+struct SpawnResult
+{
+    int64_t exit;
+    int term;
+    std::string output;
+    std::string error;
+};
+
+using ErrSpawnResult = libtbag::ErrPair<SpawnResult>;
+
+TBAG_API ErrSpawnResult subprocessSafe(std::string const & file,
+                                       std::vector<std::string> const & args = {},
+                                       std::vector<std::string> const & envs = {},
+                                       std::string const & cwd = {},
+                                       std::string const & input = {});
 
 } // namespace process
 

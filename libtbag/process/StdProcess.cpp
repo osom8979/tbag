@@ -10,6 +10,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/filesystem/FindPath.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/string/Environments.hpp>
 #include <libtbag/uvpp/Loop.hpp>
 
 #include <cassert>
@@ -286,6 +287,46 @@ Err subprocess(std::string const & file,
         *error = error_result;
     }
     return E_SUCCESS;
+}
+
+ErrSpawnResult subprocessSafe(std::string const & file,
+                              std::vector<std::string> const & args,
+                              std::vector<std::string> const & envs,
+                              std::string const & cwd,
+                              std::string const & input)
+{
+    auto const file_path = libtbag::filesystem::Path(file).getCanonical();
+    if (!file_path.isRegularFile()) {
+        return E_ENOENT;
+    }
+    if (!file_path.isExecutable()) {
+        return E_EACCES;
+    }
+
+    std::vector<std::string> updated_envs;
+    if (envs.empty()) {
+        updated_envs = libtbag::string::Environments::createDefaultEnvironments().toStrings();
+    } else {
+        updated_envs = envs;
+    }
+
+    std::string updated_cwd;
+    if (cwd.empty()) {
+        updated_cwd = libtbag::filesystem::Path::getWorkDir();
+    } else {
+        updated_cwd = cwd;
+    }
+
+    SpawnResult result;
+    auto const code = subprocess(file_path, args, updated_envs, updated_cwd, input,
+                                 &result.exit,
+                                 &result.term,
+                                 &result.output,
+                                 &result.error);
+    if (isFailure(code)) {
+        return code;
+    }
+    return { E_SUCCESS, result };
 }
 
 } // namespace process
