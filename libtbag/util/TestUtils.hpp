@@ -128,7 +128,9 @@ NAMESPACE_LIBTBAG_CLOSE
 #define TBAG_TEST_TEMP_DIR(case_name, name, first_create, last_remove)  \
     ::libtbag::filesystem::TempDirGuard TBAG_TEST_TEMP_DIR_NAME(        \
             case_name, name, first_create, last_remove);                \
-    ASSERT_TRUE(TBAG_TEST_TEMP_DIR_NAME.getDir().isDirectory());
+    do {                                                                \
+        ASSERT_TRUE(TBAG_TEST_TEMP_DIR_NAME.getDir().isDirectory());    \
+    } while (0) /* -- END -- */
 #endif
 
 #ifndef TBAG_TEST_TEMP_DIR2
