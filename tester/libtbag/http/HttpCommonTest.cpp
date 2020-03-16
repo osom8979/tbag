@@ -14,7 +14,7 @@ using namespace libtbag::http;
 
 TEST(HttpCommonTest, DefaultHeader)
 {
-    HttpHeader header;
+    HttpHeaders header;
     ASSERT_EQ(1, insert(header, "Host", "localhost"));
     ASSERT_EQ(1, insert(header, "Sec-WebSocket-Version", "7, 9, 13"));
     ASSERT_EQ(1, insertIfNotExists(header, "Upgrade", "WebSocket"));
@@ -44,7 +44,7 @@ TEST(HttpCommonTest, DefaultHeader)
 
 TEST(HttpCommonTest, MultiHeader)
 {
-    HttpHeader header;
+    HttpHeaders header;
     ASSERT_EQ(1, insert(header, "Host", "localhost"));
     ASSERT_EQ(1, insert(header, "Sec-WebSocket-Version", "7, 9, 13"));
     ASSERT_EQ(1, insert(header, "Upgrade", "WebSocket"));

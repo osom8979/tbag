@@ -118,9 +118,9 @@ HttpStatus getHttpStatus(std::string const & status)
     return getHttpStatus(number);
 }
 
-HttpHeader getRegularization(HttpHeader const & header)
+HttpHeaders getRegularization(HttpHeaders const & header)
 {
-    HttpHeader result;
+    HttpHeaders result;
     for (auto & item : header) {
         using namespace libtbag::string;
         result.insert(std::make_pair(lower(trim(item.first)), lower(trim(item.second))));
@@ -128,7 +128,7 @@ HttpHeader getRegularization(HttpHeader const & header)
     return result;
 }
 
-std::string getHeaderValue(HttpHeader const & header, std::string const & key)
+std::string getHeaderValue(HttpHeaders const & header, std::string const & key)
 {
     if (!key.empty()) {
         auto itr = header.find(key);
@@ -139,7 +139,7 @@ std::string getHeaderValue(HttpHeader const & header, std::string const & key)
     return std::string();
 }
 
-std::string getIgnoreCase(HttpHeader const & header, std::string const & key)
+std::string getIgnoreCase(HttpHeaders const & header, std::string const & key)
 {
     using namespace libtbag::string;
     auto const COMPARE_KEY = lower(trim(key));
@@ -151,12 +151,12 @@ std::string getIgnoreCase(HttpHeader const & header, std::string const & key)
     return std::string();
 }
 
-std::size_t insert(HttpHeader & header, std::string const & key, std::string const & val)
+std::size_t insert(HttpHeaders & header, std::string const & key, std::string const & val)
 {
     return header.insert(std::make_pair(key, val)) != header.end() ? 1 : 0;
 }
 
-std::size_t insert(HttpHeader & header, HttpHeader const & insert_header)
+std::size_t insert(HttpHeaders & header, HttpHeaders const & insert_header)
 {
     std::size_t count = 0;
     for (auto & item : insert_header) {
@@ -167,7 +167,7 @@ std::size_t insert(HttpHeader & header, HttpHeader const & insert_header)
     return count;
 }
 
-std::size_t insertIfNotExists(HttpHeader & header, std::string const & key, std::string const & val)
+std::size_t insertIfNotExists(HttpHeaders & header, std::string const & key, std::string const & val)
 {
     if (!exists(header, key)) {
         return header.insert(std::make_pair(key, val)) != header.end() ? 1 : 0;
@@ -175,7 +175,7 @@ std::size_t insertIfNotExists(HttpHeader & header, std::string const & key, std:
     return 0;
 }
 
-std::size_t insertIfNotExists(HttpHeader & header, HttpHeader const & insert_header)
+std::size_t insertIfNotExists(HttpHeaders & header, HttpHeaders const & insert_header)
 {
     std::size_t count = 0;
     for (auto & item : header) {
@@ -184,12 +184,12 @@ std::size_t insertIfNotExists(HttpHeader & header, HttpHeader const & insert_hea
     return count;
 }
 
-bool exists(HttpHeader const & header, std::string const & key)
+bool exists(HttpHeaders const & header, std::string const & key)
 {
     return header.find(key) != header.end();
 }
 
-bool exists(HttpHeader const & header, std::string const & key, std::string const & val)
+bool exists(HttpHeaders const & header, std::string const & key, std::string const & val)
 {
     auto pair = header.equal_range(key);
     for (; pair.first != pair.second; ++pair.first) {
@@ -200,14 +200,14 @@ bool exists(HttpHeader const & header, std::string const & key, std::string cons
     return false;
 }
 
-bool existsInSplitValues(HttpHeader const & header,
+bool existsInSplitValues(HttpHeaders const & header,
                          std::string const & key,
                          std::string const & val)
 {
     return existsInSplitValues(header, key, val, VALUE_DELIMITER);
 }
 
-bool existsInSplitValues(HttpHeader const & header,
+bool existsInSplitValues(HttpHeaders const & header,
                          std::string const & key,
                          std::string const & val,
                          std::string const & delimiter)
@@ -226,7 +226,7 @@ bool existsInSplitValues(HttpHeader const & header,
     return false;
 }
 
-std::string toMessageHeader(HttpHeader const & header)
+std::string toMessageHeader(HttpHeaders const & header)
 {
     std::stringstream ss;
     for (auto & item : header) {
@@ -245,7 +245,7 @@ std::string toVersionString(HttpCommon const & common)
     return toVersionString(common.http_major, common.http_minor);
 }
 
-std::string toDebugHeaderString(HttpHeader const & header)
+std::string toDebugHeaderString(HttpHeaders const & header)
 {
     std::stringstream ss;
     std::size_t const SIZE = header.size();
@@ -264,7 +264,7 @@ std::string toDebugHeaderString(HttpCommon const & common)
     return toDebugHeaderString(common.header);
 }
 
-std::vector<int> getWsVersions(HttpHeader const & header)
+std::vector<int> getWsVersions(HttpHeaders const & header)
 {
     std::vector<int> result;
     using namespace libtbag::string;
@@ -279,7 +279,7 @@ std::vector<int> getWsVersions(HttpHeader const & header)
     return result;
 }
 
-bool testWsVersion(HttpHeader const & header, int test_version)
+bool testWsVersion(HttpHeaders const & header, int test_version)
 {
     for (auto & ver : getWsVersions(header)) {
         if (ver == test_version) {
@@ -415,7 +415,7 @@ void swap(HttpProperty & lh, HttpProperty & rh) TBAG_NOEXCEPT
     swap((HttpBaseResponse&)lh, (HttpBaseResponse&)rh);
 }
 
-bool checkWsRequest(HttpMethod method, HttpHeader const & header, int test_version)
+bool checkWsRequest(HttpMethod method, HttpHeaders const & header, int test_version)
 {
     if (method != HttpMethod::M_GET) {
         return false;
@@ -432,7 +432,7 @@ bool checkWsRequest(HttpMethod method, HttpHeader const & header, int test_versi
     return true;
 }
 
-bool checkWsRequest(std::string const & method, HttpHeader const & header, int test_version)
+bool checkWsRequest(std::string const & method, HttpHeaders const & header, int test_version)
 {
     return checkWsRequest(getHttpMethod(method), header, test_version);
 }
@@ -571,7 +571,7 @@ HttpStatus getHttpStatus(HttpBaseResponse const & response)
     return getHttpStatus(response.code);
 }
 
-bool checkWsResponse(int code, HttpHeader const & header, std::string const & original_key)
+bool checkWsResponse(int code, HttpHeaders const & header, std::string const & original_key)
 {
     if (code != getHttpStatusNumber(HttpStatus::SC_SWITCHING_PROTOCOLS)) {
         return false;
@@ -645,7 +645,7 @@ void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, s
     // clang-format on
 }
 
-void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, HttpHeader const & request_header)
+void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, HttpHeaders const & request_header)
 {
     updateDefaultWsResponse(common, response, getHeaderValue(request_header, HEADER_SEC_WEBSOCKET_KEY));
 }
@@ -660,7 +660,7 @@ void updateDefaultWsResponse(HttpResponse & response, std::string const & key)
     updateDefaultWsResponse(response, response, key);
 }
 
-void updateDefaultWsResponse(HttpResponse & response, HttpHeader const & request_header)
+void updateDefaultWsResponse(HttpResponse & response, HttpHeaders const & request_header)
 {
     updateDefaultWsResponse(response, response, request_header);
 }
@@ -675,7 +675,7 @@ void updateDefaultWsResponse(HttpProperty & property, std::string const & key)
     updateDefaultWsResponse(property, property, key);
 }
 
-void updateDefaultWsResponse(HttpProperty & property, HttpHeader const & request_header)
+void updateDefaultWsResponse(HttpProperty & property, HttpHeaders const & request_header)
 {
     updateDefaultWsResponse(property, property, request_header);
 }

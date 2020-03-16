@@ -22,13 +22,13 @@ int mg_write_string(mg_connection * conn, std::string const & text)
     return mg_write(conn, text.c_str(), text.size());
 }
 
-Headers getHeaders(mg_connection const * conn, bool lower_key)
+HttpUniqueHeaders getHeaders(mg_connection const * conn, bool lower_key)
 {
     auto const size = mg_get_request_info(conn)->num_headers;
     auto const * headers = mg_get_request_info(conn)->http_headers;
     assert(headers != nullptr);
 
-    Headers result;
+    HttpUniqueHeaders result;
     for (auto i = 0; i < size; ++i) {
         std::string name;
         if (headers[i].name != nullptr) {

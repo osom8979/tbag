@@ -291,27 +291,28 @@ TBAG_API HttpStatus getHttpStatus(int status) TBAG_NOEXCEPT;
 TBAG_API HttpStatus getHttpStatus(std::string const & status);
 
 using HttpBuffer = libtbag::util::Buffer;
-using HttpHeader = std::multimap<std::string, std::string>;
+using HttpHeaders = std::multimap<std::string, std::string>;
+using HttpUniqueHeaders = std::map<std::string, std::string>;
 
 /**
  * Lowercase and trim of all tokens.
  */
-TBAG_API HttpHeader getRegularization(HttpHeader const & header);
+TBAG_API HttpHeaders getRegularization(HttpHeaders const & header);
 
-TBAG_API std::string getHeaderValue(HttpHeader const & header, std::string const & key);
-TBAG_API std::string getIgnoreCase(HttpHeader const & header, std::string const & key);
+TBAG_API std::string getHeaderValue(HttpHeaders const & header, std::string const & key);
+TBAG_API std::string getIgnoreCase(HttpHeaders const & header, std::string const & key);
 
-TBAG_API std::size_t insert(HttpHeader & header, std::string const & key, std::string const & val);
-TBAG_API std::size_t insert(HttpHeader & header, HttpHeader const & insert_header);
+TBAG_API std::size_t insert(HttpHeaders & header, std::string const & key, std::string const & val);
+TBAG_API std::size_t insert(HttpHeaders & header, HttpHeaders const & insert_header);
 
-TBAG_API std::size_t insertIfNotExists(HttpHeader & header, std::string const & key, std::string const & val);
-TBAG_API std::size_t insertIfNotExists(HttpHeader & header, HttpHeader const & insert_header);
+TBAG_API std::size_t insertIfNotExists(HttpHeaders & header, std::string const & key, std::string const & val);
+TBAG_API std::size_t insertIfNotExists(HttpHeaders & header, HttpHeaders const & insert_header);
 
-TBAG_API bool exists(HttpHeader const & header, std::string const & key);
-TBAG_API bool exists(HttpHeader const & header, std::string const & key, std::string const & val);
+TBAG_API bool exists(HttpHeaders const & header, std::string const & key);
+TBAG_API bool exists(HttpHeaders const & header, std::string const & key, std::string const & val);
 
-TBAG_API bool existsInSplitValues(HttpHeader const & header, std::string const & key, std::string const & val);
-TBAG_API bool existsInSplitValues(HttpHeader const & header, std::string const & key, std::string const & val, std::string const & delimiter);
+TBAG_API bool existsInSplitValues(HttpHeaders const & header, std::string const & key, std::string const & val);
+TBAG_API bool existsInSplitValues(HttpHeaders const & header, std::string const & key, std::string const & val, std::string const & delimiter);
 
 /**
  * Generate HTTP Message Headers.
@@ -328,7 +329,7 @@ TBAG_API bool existsInSplitValues(HttpHeader const & header, std::string const &
  *
  * @see <https://tools.ietf.org/html/rfc2616#section-4.2>
  */
-TBAG_API std::string toMessageHeader(HttpHeader const & header);
+TBAG_API std::string toMessageHeader(HttpHeaders const & header);
 
 // Forward declarations.
 struct HttpCommon;
@@ -349,11 +350,11 @@ struct HttpProperty;
 TBAG_API std::string toVersionString(int http_major, int http_minor);
 TBAG_API std::string toVersionString(HttpCommon const & common);
 
-TBAG_API std::string toDebugHeaderString(HttpHeader const & header);
+TBAG_API std::string toDebugHeaderString(HttpHeaders const & header);
 TBAG_API std::string toDebugHeaderString(HttpCommon const & common);
 
-TBAG_API std::vector<int> getWsVersions(HttpHeader const & header);
-TBAG_API bool testWsVersion(HttpHeader const & header, int test_version = WEBSOCKET_VERSION_HYBI13);
+TBAG_API std::vector<int> getWsVersions(HttpHeaders const & header);
+TBAG_API bool testWsVersion(HttpHeaders const & header, int test_version = WEBSOCKET_VERSION_HYBI13);
 
 /**
  * HttpCommon structure.
@@ -367,10 +368,10 @@ struct HttpCommon
     int http_major = DEFAULT_HTTP_VERSION_MAJOR;
     int http_minor = DEFAULT_HTTP_VERSION_MINOR;
 
-    HttpHeader header;
+    HttpHeaders header;
     HttpBuffer body;
 
-    HttpHeader getRegularization() const
+    HttpHeaders getRegularization() const
     { return libtbag::http::getRegularization(header); }
     void regularization()
     { header = getRegularization(); }
@@ -382,12 +383,12 @@ struct HttpCommon
 
     std::size_t insert(std::string const & key, std::string const & val)
     { return libtbag::http::insert(header, key, val); }
-    std::size_t insert(HttpHeader const & insert_header)
+    std::size_t insert(HttpHeaders const & insert_header)
     { return libtbag::http::insert(header, insert_header); }
 
     std::size_t insertIfNotExists(std::string const & key, std::string const & val)
     { return libtbag::http::insertIfNotExists(header, key, val); }
-    std::size_t insertIfNotExists(HttpHeader const & insert_header)
+    std::size_t insertIfNotExists(HttpHeaders const & insert_header)
     { return libtbag::http::insertIfNotExists(header, insert_header); }
 
     bool exists(std::string const & key) const
@@ -440,8 +441,8 @@ TBAG_API void swap(HttpProperty     & lh, HttpProperty     & rh) TBAG_NOEXCEPT;
 /**
  * Generally, Called from the server side.
  */
-TBAG_API bool checkWsRequest(HttpMethod method, HttpHeader const & header, int test_version = WEBSOCKET_VERSION_HYBI13);
-TBAG_API bool checkWsRequest(std::string const & method, HttpHeader const & header, int test_version = WEBSOCKET_VERSION_HYBI13);
+TBAG_API bool checkWsRequest(HttpMethod method, HttpHeaders const & header, int test_version = WEBSOCKET_VERSION_HYBI13);
+TBAG_API bool checkWsRequest(std::string const & method, HttpHeaders const & header, int test_version = WEBSOCKET_VERSION_HYBI13);
 TBAG_API bool checkWsRequest(HttpRequest const & request, int test_version = WEBSOCKET_VERSION_HYBI13);
 TBAG_API bool checkWsRequest(HttpProperty const & property, int test_version = WEBSOCKET_VERSION_HYBI13);
 
@@ -513,7 +514,7 @@ TBAG_API HttpStatus getHttpStatus(HttpBaseResponse const & response);
 /**
  * Generally, Called from the client side.
  */
-TBAG_API bool checkWsResponse(int code, HttpHeader const & header, std::string const & original_key);
+TBAG_API bool checkWsResponse(int code, HttpHeaders const & header, std::string const & original_key);
 TBAG_API bool checkWsResponse(int code, HttpCommon const & common, std::string const & original_key);
 TBAG_API bool checkWsResponse(HttpResponse const & response, std::string const & original_key);
 TBAG_API bool checkWsResponse(HttpProperty const & property, std::string const & original_key);
@@ -523,13 +524,13 @@ TBAG_API void updateDefaultResponse(HttpResponse & response);
 TBAG_API void updateDefaultResponse(HttpProperty & property);
 
 TBAG_API void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, std::string const & key);
-TBAG_API void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, HttpHeader const & request_header);
+TBAG_API void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, HttpHeaders const & request_header);
 TBAG_API void updateDefaultWsResponse(HttpCommon & common, HttpBaseResponse & response, HttpCommon const & request_common);
 TBAG_API void updateDefaultWsResponse(HttpResponse & response, std::string const & key);
-TBAG_API void updateDefaultWsResponse(HttpResponse & response, HttpHeader const & request_header);
+TBAG_API void updateDefaultWsResponse(HttpResponse & response, HttpHeaders const & request_header);
 TBAG_API void updateDefaultWsResponse(HttpResponse & response, HttpCommon const & request_common);
 TBAG_API void updateDefaultWsResponse(HttpProperty & property, std::string const & key);
-TBAG_API void updateDefaultWsResponse(HttpProperty & property, HttpHeader const & request_header);
+TBAG_API void updateDefaultWsResponse(HttpProperty & property, HttpHeaders const & request_header);
 TBAG_API void updateDefaultWsResponse(HttpProperty & property, HttpCommon const & request_common);
 
 /**
@@ -581,7 +582,7 @@ struct HttpResponse : public HttpCommon, public HttpBaseResponse
     { libtbag::http::updateDefaultResponse(*this); }
     void updateDefaultWsResponse(std::string const & key)
     { libtbag::http::updateDefaultWsResponse(*this, key); }
-    void updateDefaultWsResponse(HttpHeader const & request_header)
+    void updateDefaultWsResponse(HttpHeaders const & request_header)
     { libtbag::http::updateDefaultWsResponse(*this, request_header); }
     void updateDefaultWsResponse(HttpCommon const & request_common)
     { libtbag::http::updateDefaultWsResponse(*this, request_common); }
@@ -654,7 +655,7 @@ struct HttpProperty : public HttpCommon, public HttpBaseRequest, public HttpBase
     { libtbag::http::updateDefaultResponse(*this); }
     void updateDefaultWsResponse(std::string const & key)
     { libtbag::http::updateDefaultWsResponse(*this, key); }
-    void updateDefaultWsResponse(HttpHeader const & request_header)
+    void updateDefaultWsResponse(HttpHeaders const & request_header)
     { libtbag::http::updateDefaultWsResponse(*this, request_header); }
     void updateDefaultWsResponse(HttpCommon const & request_common)
     { libtbag::http::updateDefaultWsResponse(*this, request_common); }
