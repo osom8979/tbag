@@ -22,7 +22,7 @@ int mg_write_string(mg_connection * conn, std::string const & text)
 
 TBAG_CONSTEXPR static std::size_t TEMP_BUFFER_SIZE = (4*1024);
 
-Json::Value getJsonBody(mg_connection * conn)
+std::string getBody(mg_connection * conn)
 {
     auto const content_length = mg_get_request_info(conn)->content_length;
     if (content_length <= 0) {
@@ -48,7 +48,12 @@ Json::Value getJsonBody(mg_connection * conn)
         total_read_size += read_size;
     }
 
-    return libtbag::dom::json::getJsonValue(ss.str());
+    return ss.str();
+}
+
+Json::Value getJsonBody(mg_connection * conn)
+{
+    return libtbag::dom::json::getJsonValue(getBody(conn));
 }
 
 } // namespace http
