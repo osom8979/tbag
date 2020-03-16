@@ -6,7 +6,9 @@
  */
 
 #include <libtbag/http/CivetWebExtension.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
+#include <cassert>
 #include <sstream>
 
 // -------------------
@@ -18,6 +20,31 @@ namespace http {
 int mg_write_string(mg_connection * conn, std::string const & text)
 {
     return mg_write(conn, text.c_str(), text.size());
+}
+
+Headers getHeaders(mg_connection const * conn, bool lower_key)
+{
+    auto const size = mg_get_request_info(conn)->num_headers;
+    auto const * headers = mg_get_request_info(conn)->http_headers;
+    assert(headers != nullptr);
+
+    Headers result;
+    for (auto i = 0; i < size; ++i) {
+        std::string name;
+        if (headers[i].name != nullptr) {
+            if (lower_key) {
+                name = libtbag::string::lower(headers[i].name);
+            } else {
+                name = headers[i].name;
+            }
+            std::string value;
+            if (headers[i].value != nullptr) {
+                value = headers[i].value;
+            }
+            result.emplace(std::move(name), std::move(value));
+        }
+    }
+    return result;
 }
 
 TBAG_CONSTEXPR static std::size_t TEMP_BUFFER_SIZE = (4*1024);

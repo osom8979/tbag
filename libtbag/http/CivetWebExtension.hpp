@@ -20,6 +20,7 @@
 #include <libtbag/string/Format.hpp>
 
 #include <string>
+#include <map>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -35,6 +36,9 @@ inline int mg_write_format(mg_connection * conn, std::string const & format, Arg
     return mg_write_string(conn, libtbag::string::fformat(format, std::forward<Args>(args) ...));
 }
 
+using Headers = std::map<std::string, std::string>;
+
+TBAG_API Headers getHeaders(mg_connection const * conn, bool lower_key = false);
 TBAG_API std::string getBody(mg_connection * conn);
 TBAG_API Json::Value getJsonBody(mg_connection * conn);
 
