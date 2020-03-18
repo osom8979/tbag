@@ -28,7 +28,7 @@ std::string getRequestLine(mg_connection const * conn)
     std::stringstream ss;
     ss << mg_get_request_info(conn)->request_method << SP
        << mg_get_request_info(conn)->request_uri << SP
-       << mg_get_request_info(conn)->http_version;
+       << HTTP << "/" << mg_get_request_info(conn)->http_version;
     return ss.str();
 }
 
