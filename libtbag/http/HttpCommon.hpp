@@ -374,6 +374,7 @@ TBAG_API std::string toVersionString(int http_major, int http_minor);
 TBAG_API std::string toVersionString(HttpCommon const & common);
 
 TBAG_API std::string toDebugHeaderString(HttpHeaders const & header);
+TBAG_API std::string toDebugHeaderString(HttpUniqueHeaders const & header);
 TBAG_API std::string toDebugHeaderString(HttpCommon const & common);
 
 TBAG_API std::vector<int> getWsVersions(HttpHeaders const & header);

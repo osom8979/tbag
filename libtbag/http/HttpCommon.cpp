@@ -245,18 +245,28 @@ std::string toVersionString(HttpCommon const & common)
     return toVersionString(common.http_major, common.http_minor);
 }
 
-std::string toDebugHeaderString(HttpHeaders const & header)
+template <typename Iterator>
+static std::string __to_debug_header_string(Iterator begin, Iterator end)
 {
     std::stringstream ss;
-    std::size_t const SIZE = header.size();
-    auto itr = header.begin();
-    for (std::size_t i = 0; i < SIZE; ++i, ++itr) {
-        ss << "[H] " << itr->first << HEADER_DELIMITER << itr->second;
-        if (i + 1 < SIZE) {
+    auto const size = std::distance(begin, end);
+    for (auto i = 0; i < size; ++i, ++begin) {
+        ss << "[H] " << begin->first << HEADER_DELIMITER << begin->second;
+        if (i + 1 < size) {
             ss << std::endl;
         }
     }
     return ss.str();
+}
+
+std::string toDebugHeaderString(HttpHeaders const & header)
+{
+    return __to_debug_header_string(header.begin(), header.end());
+}
+
+std::string toDebugHeaderString(HttpUniqueHeaders const & header)
+{
+    return __to_debug_header_string(header.begin(), header.end());
 }
 
 std::string toDebugHeaderString(HttpCommon const & common)
