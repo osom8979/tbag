@@ -187,22 +187,26 @@ Err SocketAddress::init(Uri const & uri)
 
 std::string SocketAddress::getIpName() const
 {
-    if (_addr.ipv4.sin_port == AF_INET) {
+    switch (_addr.common.sa_family) {
+    case AF_INET:
         return uvpp::getIpName(&_addr.ipv4);
-    } else if (_addr.ipv6.sin6_port == AF_INET6) {
+    case AF_INET6:
         return uvpp::getIpName(&_addr.ipv6);
+    default:
+        return {};
     }
-    return std::string();
 }
 
 int SocketAddress::getPortNumber() const
 {
-    if (_addr.ipv4.sin_port == AF_INET) {
+    switch (_addr.common.sa_family) {
+    case AF_INET:
         return uvpp::getPortNumber(&_addr.ipv4);
-    } else if (_addr.ipv6.sin6_port == AF_INET6) {
+    case AF_INET6:
         return uvpp::getPortNumber(&_addr.ipv6);
+    default:
+        return 0;
     }
-    return 0;
 }
 
 // -----------------------
