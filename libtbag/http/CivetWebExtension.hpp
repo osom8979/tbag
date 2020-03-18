@@ -37,6 +37,7 @@ inline int mg_write_format(mg_connection * conn, std::string const & format, Arg
     return mg_write_string(conn, libtbag::string::fformat(format, std::forward<Args>(args) ...));
 }
 
+TBAG_API std::string getRequestLine(mg_connection const * conn);
 TBAG_API HttpUniqueHeaders getHeaders(mg_connection const * conn, bool lower_key = false);
 TBAG_API std::string getBody(mg_connection * conn);
 TBAG_API Json::Value getJsonBody(mg_connection * conn);

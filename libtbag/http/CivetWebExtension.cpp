@@ -22,8 +22,20 @@ int mg_write_string(mg_connection * conn, std::string const & text)
     return mg_write(conn, text.c_str(), text.size());
 }
 
+std::string getRequestLine(mg_connection const * conn)
+{
+    assert(conn != nullptr);
+    std::stringstream ss;
+    ss << mg_get_request_info(conn)->request_method << SP
+       << mg_get_request_info(conn)->request_uri << SP
+       << mg_get_request_info(conn)->http_version;
+    return ss.str();
+}
+
 HttpUniqueHeaders getHeaders(mg_connection const * conn, bool lower_key)
 {
+    assert(conn != nullptr);
+
     auto const size = mg_get_request_info(conn)->num_headers;
     auto const * headers = mg_get_request_info(conn)->http_headers;
     assert(headers != nullptr);
@@ -51,6 +63,8 @@ TBAG_CONSTEXPR static std::size_t TEMP_BUFFER_SIZE = (4*1024);
 
 std::string getBody(mg_connection * conn)
 {
+    assert(conn != nullptr);
+
     auto const content_length = mg_get_request_info(conn)->content_length;
     if (content_length <= 0) {
         return {};
