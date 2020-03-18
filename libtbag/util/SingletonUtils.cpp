@@ -16,6 +16,7 @@
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/container/Global.hpp>
 #include <libtbag/time/Time.hpp>
+#include <libtbag/http/CivetWebExtension.hpp>
 
 #include <functional>
 #include <initializer_list>
@@ -97,9 +98,11 @@ static void runCreateOrRelease(bool is_create = true)
               [](){ time::__impl::releaseInstance(); });
     Func global([](){ container::Global::createInstance(); },
                 [](){ container::Global::releaseInstance(); });
+    Func http([](){ http::mg_init_library(MG_FEATURES_TLS); },
+              [](){ http::mg_exit_library(); });
     // clang-format on
 
-    CreateOrRelease init({dlog, com, log, signal, time, global});
+    CreateOrRelease init({dlog, com, log, signal, time, global, http});
 
     if (is_create) {
         init.create();
