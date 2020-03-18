@@ -36,6 +36,10 @@ USE_MATHJAX             = YES
 MATHJAX_RELPATH         = https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 QUIET                   = YES
 
+# Doxygen v1.8.6 unsupported tag.
+#PLANTUML_JAR_PATH      = "${PLANTUML_JAR_PATH}"
+#PLANTUML_INCLUDE_PATH  = "${PLANTUML_INCLUDE_PATH}"
+
 ## -----------------
 ## Doxyfile content.
 ## -----------------
@@ -321,8 +325,6 @@ QUIET                   = YES
 #DOTFILE_DIRS             =
 #MSCFILE_DIRS             =
 #DIAFILE_DIRS             =
-#PLANTUML_JAR_PATH        = # Doxygen v1.8.6 unsupported tag.
-#PLANTUML_INCLUDE_PATH    = # Doxygen v1.8.6 unsupported tag.
 #DOT_GRAPH_MAX_NODES      = 50
 #MAX_DOT_GRAPH_DEPTH      = 0
 
