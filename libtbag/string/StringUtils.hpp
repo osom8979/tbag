@@ -57,9 +57,24 @@ TBAG_CONSTEXPR char const * const WINDOWS_NEW_LINE = TBAG_WINDOWS_NEW_LINE;
 TBAG_CONSTEXPR char const * const UNIX_NEW_LINE = TBAG_UNIX_NEW_LINE;
 TBAG_CONSTEXPR char const * const NEW_LINE = TBAG_NEW_LINE;
 
+TBAG_CONSTEXPR char const CHAR_ALERT = '\a';
+TBAG_CONSTEXPR char const CHAR_BACKSPACE = '\b';
+TBAG_CONSTEXPR char const CHAR_FORM_FEED = '\f';
+TBAG_CONSTEXPR char const CHAR_PAGE_BREAK = CHAR_FORM_FEED;
+TBAG_CONSTEXPR char const CHAR_NEWLINE = '\n';
+TBAG_CONSTEXPR char const CHAR_LINE_FEED = CHAR_NEWLINE;
+TBAG_CONSTEXPR char const CHAR_CARRIAGE_RETURN = '\r';
+TBAG_CONSTEXPR char const CHAR_HORIZONTAL_TAB = '\t';
+TBAG_CONSTEXPR char const CHAR_VERTICAL_TAB = '\v';
+TBAG_CONSTEXPR char const CHAR_BACKSLASH = '\\';
+TBAG_CONSTEXPR char const CHAR_APOSTROPHE = '\'';
+TBAG_CONSTEXPR char const CHAR_SINGLE_QUOTATION_MARK = CHAR_APOSTROPHE;
+TBAG_CONSTEXPR char const CHAR_DOUBLE_QUOTATION_MARK = '\"';
+TBAG_CONSTEXPR char const CHAR_QUESTION_MARK = '\?';
+
 TBAG_CONSTEXPR char const CHAR_SPACE  = ' ';
-TBAG_CONSTEXPR char const CHAR_TAB    = '\t';
-TBAG_CONSTEXPR char const CHAR_RETURN = '\n';
+TBAG_CONSTEXPR char const CHAR_TAB    = CHAR_HORIZONTAL_TAB;
+TBAG_CONSTEXPR char const CHAR_RETURN = CHAR_NEWLINE;
 
 template <typename T>
 TBAG_CONSTEXPR T const * charOrWidechar(char const * c, wchar_t const * w);
@@ -298,8 +313,9 @@ TBAG_API bool isUtf8Match(std::string const & utf8_source, std::string const & r
  *  Decimal digits are any of: 0 1 2 3 4 5 6 7 8 9
  */
 TBAG_API bool isDigit(std::string const & str);
-TBAG_API bool isVariableName(char c);
+TBAG_API bool isVariableName(char c) TBAG_NOEXCEPT;
 TBAG_API bool isVariableName(std::string const & str);
+TBAG_API bool isWhiteSpace(char c) TBAG_NOEXCEPT;
 
 TBAG_API std::string trimLeft(std::string const & str, std::string const & trim_list);
 TBAG_API std::string trimRight(std::string const & str, std::string const & trim_list);

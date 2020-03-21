@@ -555,7 +555,7 @@ bool isDigit(std::string const & str)
     return true;
 }
 
-bool isVariableName(char c)
+bool isVariableName(char c) TBAG_NOEXCEPT
 {
     // clang-format off
     switch (c) {
@@ -607,6 +607,19 @@ bool isVariableName(std::string const & str)
         }
     }
     return true;
+}
+
+bool isWhiteSpace(char c) TBAG_NOEXCEPT
+{
+    switch (c) {
+    case CHAR_SPACE:
+    case CHAR_TAB:
+    case CHAR_RETURN:
+    case CHAR_CARRIAGE_RETURN:
+        return true;
+    default:
+        return false;
+    }
 }
 
 std::string trimLeft(std::string const & str, std::string const & trim_list)
@@ -667,7 +680,7 @@ std::string trimLeft(std::string const & str)
 {
     auto itr = str.begin();
     for (; itr != str.end(); ++itr) {
-        if (*itr != CHAR_SPACE && *itr != CHAR_TAB && *itr != CHAR_RETURN) {
+        if (!isWhiteSpace(*itr)) {
             break;
         }
     }
@@ -678,7 +691,7 @@ std::string trimRight(std::string const & str)
 {
     auto itr = str.rbegin();
     for (; itr != str.rend(); ++itr) {
-        if (*itr != CHAR_SPACE && *itr != CHAR_TAB && *itr != CHAR_RETURN) {
+        if (!isWhiteSpace(*itr)) {
             break;
         }
     }
