@@ -17,7 +17,10 @@ TEST(NtpClientTest, Default)
     NtpClient client;
     auto const result = client.request();
     if (result) {
-        std::cout << "NTP request success: " << result.value.toLocalLongString() << std::endl;
+        auto const sys = TimePoint::now().toLocalLongString();
+        auto const ntp = result.value.toLocalLongString();
+        std::cout << "NTP time: " << ntp << std::endl
+                  << "SYS time: " << sys << std::endl;
     } else {
         std::cout << "NTP request error: " << result.code << std::endl;
     }
