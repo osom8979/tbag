@@ -188,10 +188,21 @@ std::vector<std::string> splitSize(std::string const & source, std::size_t size)
     if (source.empty()) {
         return {};
     }
+
+    auto const * data = source.c_str();
+    assert(data != nullptr);
+
     std::vector<std::string> result;
-    for (std::size_t i = 0; i < source.size(); i += size) {
-        result.emplace_back(source.substr(i, i + size));
-    }
+    auto remain_size = source.size();
+    auto length = remain_size <= size ? remain_size : size;
+
+    do {
+        result.emplace_back(std::string(data, data + length));
+        data += length;
+        remain_size -= length;
+        length = remain_size <= size ? remain_size : size;
+    } while (remain_size >= 1);
+
     return result;
 }
 

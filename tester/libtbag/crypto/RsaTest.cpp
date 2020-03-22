@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 #include <libtbag/crypto/Rsa.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 using namespace libtbag;
 using namespace libtbag::crypto;
@@ -112,5 +113,35 @@ TEST(RsaTest, PublicKey_PrivateKey)
         ASSERT_FALSE(decrypt_data.empty());
         ASSERT_EQ(test_data, decrypt_data);
     }
+}
+
+TEST(RsaTest, PrivateKey_Encode_01)
+{
+    auto key = generateKeys().second;
+    std::string data = R"({"approval_date":{"days":22,"hours":20,"minutes":23,"months":3,"seconds":18,)"
+                       R"("years":2020},"authentication_key":"RDRGNDRDQTRFOTZCM0Y2MEU3NDFDOTBCMjA2Rjc5MEY=",)"
+                       R"("deadline":{"days":22,"hours":20,"minutes":23,"months":4,"seconds":18,"years":2020},)"
+                       R"("features":[""],"initialization_vector":"QjZCODdDM0U3REQ1Qjg4OA==","request_date":)"
+                       R"({"days":22,"hours":20,"minutes":23,"months":3,"seconds":18,"years":2020},"session":)"
+                       R"({"machine_id":"","product_uuid":"","session_key":"4DAADE70-EAA0-FED3-A2BE-70CD9CAAF4C0"}})";
+    ASSERT_TRUE(key.exists());
+
+    auto const default_padding = Rsa::Padding::P_PKCS1;
+    ASSERT_TRUE(key.exists());
+    ASSERT_FALSE(data.empty());
+    auto const max_data_size = key.getMaxDataSize(default_padding);
+    auto const tokens = libtbag::string::splitSize(data, max_data_size);
+    ASSERT_EQ(3, tokens.size());
+
+    auto const token0_size = tokens[0].size();
+    ASSERT_GE(max_data_size, token0_size);
+    auto const token1_size = tokens[1].size();
+    ASSERT_GE(max_data_size, token1_size);
+    auto const token2_size = tokens[2].size();
+    ASSERT_GE(max_data_size, token2_size);
+
+    ASSERT_FALSE(key.encrypt(tokens[0]).empty());
+    ASSERT_FALSE(key.encrypt(tokens[1]).empty());
+    ASSERT_FALSE(key.encrypt(tokens[2]).empty());
 }
 
