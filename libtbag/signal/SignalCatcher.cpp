@@ -7,7 +7,6 @@
 
 #include <libtbag/signal/SignalCatcher.hpp>
 #include <libtbag/log/Log.hpp>
-#include <libtbag/Noncopyable.hpp>
 
 #include <libtbag/signal/SignalHandler.hpp>
 #include <libtbag/thread/ThreadPool.hpp>
@@ -17,7 +16,6 @@
 
 #include <cassert>
 #include <algorithm>
-#include <utility>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -131,7 +129,7 @@ struct SignalCatcher::Impl : private Noncopyable
         thread.exit();
         try {
             thread.join();
-        } catch (std::exception e) {
+        } catch (std::exception const & e) {
             tDLogE("SignalCatcher::Impl::exit() Event loop join error: {}", e.what());
         } catch (...) {
             tDLogE("SignalCatcher::Impl::exit() Event loop join, unknown error.");
@@ -148,12 +146,12 @@ struct SignalCatcher::Impl : private Noncopyable
 // SignalCatcher
 // -------------
 
-SignalCatcher::SignalCatcher() : _impl()
+SignalCatcher::SignalCatcher()
 {
     // EMPTY.
 }
 
-SignalCatcher::SignalCatcher(int signum, Callback const & cb) : _impl()
+SignalCatcher::SignalCatcher(int signum, Callback const & cb)
 {
     auto const CODE = start(signum, cb);
     if (isFailure(CODE)) {
@@ -173,7 +171,7 @@ Err SignalCatcher::start(int signum, Callback const & cb)
     }
     try {
         _impl = std::make_unique<Impl>(signum, cb);
-    } catch (ErrException e) {
+    } catch (ErrException const & e) {
         return e.CODE;
     } catch (...) {
         return E_UNKEXCP;

@@ -70,6 +70,10 @@ using uuser  = uint32_t;
 using ugroup = uint32_t;
 #endif
 
+TBAG_CONSTEXPR ufile const STANDARD_INPUT = 0;
+TBAG_CONSTEXPR ufile const STANDARD_OUTPUT = 1;
+TBAG_CONSTEXPR ufile const STANDARD_ERROR = 2;
+
 #if defined(TBAG_PLATFORM_WINDOWS)
 using uthread = HANDLE;
 #elif defined(TBAG_USE_PTHREADS)
