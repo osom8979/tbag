@@ -20,6 +20,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/res/DynamicAsset.hpp>
 #include <libtbag/string/Environments.hpp>
+#include <libtbag/string/StringUtils.hpp>
 #include <libtbag/dom/xml/Resource.hpp>
 #include <libtbag/lib/SharedLibrary.hpp>
 #include <libtbag/res/GetText.hpp>
@@ -229,6 +230,17 @@ public:
     void setEnv(std::string const & key, std::string const & value);
     bool getEnv(std::string const & key, std::string & value) const;
     std::string optEnv(std::string const & key, std::string const & def = {}) const;
+
+    template <typename T>
+    T optEnvCast(std::string const & key, T const & def = {}) const
+    {
+        std::string value;
+        if (getEnv(key, value)) {
+            return libtbag::string::toValue<T>(value, def);
+        } else {
+            return def;
+        }
+    }
 
     void updateToSystemEnvs() const;
 
