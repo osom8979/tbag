@@ -623,6 +623,7 @@ bool isVariableName(std::string const & str)
 bool isWhiteSpace(char c) TBAG_NOEXCEPT
 {
     switch (c) {
+    case CHAR_NULL:
     case CHAR_SPACE:
     case CHAR_TAB:
     case CHAR_RETURN:
