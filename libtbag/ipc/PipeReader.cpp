@@ -47,7 +47,7 @@ struct PipeReader::Impl : private Noncopyable
     TBAG_CONSTEXPR static bool const SIGNAL_HANDING = false;
     TBAG_CONSTEXPR static int const SIGNAL_NUMBER = libtbag::signal::TBAG_SIGNAL_INTERRUPT;
 
-    Callback    CALLBACK;
+    Callback    READ_CALLBACK;
     ThreadPool  thread;
     UxLoop      loop;
     UxSignal    signal;
@@ -57,10 +57,10 @@ struct PipeReader::Impl : private Noncopyable
     Buffer      pipe_buffer;
 
     Impl(ufile f, Callback const & cb)
-            : CALLBACK(cb),
+            : READ_CALLBACK(cb),
               thread(THREAD_COUNT, WAIT_ACTIVE, SIGNAL_HANDING)
     {
-        assert(CALLBACK);
+        assert(READ_CALLBACK);
         auto const code = init(f);
         if (isFailure(code)) {
             throw ErrException(code);
@@ -142,7 +142,7 @@ struct PipeReader::Impl : private Noncopyable
             } else if (isFailure(code)) {
                 pipe.close();
             } else {
-                if (!CALLBACK(data, size)) {
+                if (!READ_CALLBACK(data, size)) {
                     pipe.close();
                 }
             }
