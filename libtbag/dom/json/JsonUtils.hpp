@@ -22,6 +22,9 @@
 #include <vector>
 #include <string>
 
+#include <map>
+#include <unordered_map>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
@@ -97,6 +100,28 @@ template <typename T>
 Json::Value toJsonArray(std::vector<T> const & val)
 {
     return toJsonArray(val.begin(), val.end());
+}
+
+template <typename Iterator>
+Json::Value toJsonObject(Iterator begin, Iterator end)
+{
+    Json::Value result(Json::objectValue);
+    for (; begin != end; ++begin) {
+        result[begin->first] = begin->second;
+    }
+    return result;
+}
+
+template <typename K, typename V>
+Json::Value toJsonObject(std::map<K, V> const & val)
+{
+    return toJsonObject(val.begin(), val.end());
+}
+
+template <typename K, typename V>
+Json::Value toJsonObject(std::unordered_map<K, V> const & val)
+{
+    return toJsonObject(val.begin(), val.end());
 }
 
 } // namespace json

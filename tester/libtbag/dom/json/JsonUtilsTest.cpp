@@ -90,3 +90,31 @@ TEST(JsonUtilsTest, GetStringArray)
     ASSERT_STREQ("b", result[5].c_str());
 }
 
+TEST(JsonUtilsTest, toJsonArray)
+{
+    auto const json = toJsonArray(std::vector<int>({10, 20, 30}));
+    ASSERT_TRUE(json.isArray());
+    ASSERT_EQ(3, json.size());
+    ASSERT_EQ(10, json[0].asInt());
+    ASSERT_EQ(20, json[1].asInt());
+    ASSERT_EQ(30, json[2].asInt());
+}
+
+TEST(JsonUtilsTest, toJsonObject_1)
+{
+    auto const json = toJsonObject(std::map<std::string, std::string>({ {"A","B"}, {"C","D"} }));
+    ASSERT_TRUE(json.isObject());
+    ASSERT_EQ(2, json.size());
+    ASSERT_STREQ("B", json["A"].asCString());
+    ASSERT_STREQ("D", json["C"].asCString());
+}
+
+TEST(JsonUtilsTest, toJsonObject_2)
+{
+    auto const json = toJsonObject(std::unordered_map<std::string, std::string>({ {"A","B"}, {"C","D"} }));
+    ASSERT_TRUE(json.isObject());
+    ASSERT_EQ(2, json.size());
+    ASSERT_STREQ("B", json["A"].asCString());
+    ASSERT_STREQ("D", json["C"].asCString());
+}
+
