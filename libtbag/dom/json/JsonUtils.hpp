@@ -57,7 +57,6 @@ TBAG_API bool existsArray   (Json::Value const & v, std::string const & key);
 TBAG_API bool existsObject  (Json::Value const & v, std::string const & key);
 // clang-format on
 
-// clang-format off
 TBAG_API bool optBool(Json::Value const & v, std::string const & key, bool def = false);
 TBAG_API int optInt(Json::Value const & v, std::string const & key, int def = 0);
 TBAG_API unsigned optUInt(Json::Value const & v, std::string const & key, unsigned def = 0u);
@@ -66,7 +65,15 @@ TBAG_API std::uint64_t optUInt64(Json::Value const & v, std::string const & key,
 TBAG_API float optFloat(Json::Value const & v, std::string const & key, float def = 0.0f);
 TBAG_API double optDouble(Json::Value const & v, std::string const & key, double def = 0.0);
 TBAG_API std::string optString(Json::Value const & v, std::string const & key, std::string const & def = {});
-// clang-format on
+
+TBAG_API bool getValue(Json::Value const & v, bool & val);
+TBAG_API bool getValue(Json::Value const & v, int & val);
+TBAG_API bool getValue(Json::Value const & v, unsigned & val);
+TBAG_API bool getValue(Json::Value const & v, std::int64_t & val);
+TBAG_API bool getValue(Json::Value const & v, std::uint64_t & val);
+TBAG_API bool getValue(Json::Value const & v, float & val);
+TBAG_API bool getValue(Json::Value const & v, double & val);
+TBAG_API bool getValue(Json::Value const & v, std::string & val);
 
 TBAG_API std::string getForceString(Json::Value const & v);
 TBAG_API std::string getForceString(Json::Value const & v, std::string const & key);
@@ -101,6 +108,18 @@ Json::Value toJsonArray(std::vector<T> const & val)
 {
     return toJsonArray(val.begin(), val.end());
 }
+
+TBAG_API std::map<std::string, std::string> getStringMap(Json::Value const & v);
+TBAG_API std::map<std::string, std::string> getStringMap(Json::Value const & v, std::string const & key);
+
+TBAG_API bool getStringMap(Json::Value const & v, std::map<std::string, std::string> * out);
+TBAG_API bool getStringMap(Json::Value const & v, std::string const & key, std::map<std::string, std::string> * out);
+
+TBAG_API std::unordered_map<std::string, std::string> getStringUnorderedMap(Json::Value const & v);
+TBAG_API std::unordered_map<std::string, std::string> getStringUnorderedMap(Json::Value const & v, std::string const & key);
+
+TBAG_API bool getStringUnorderedMap(Json::Value const & v, std::unordered_map<std::string, std::string> * out);
+TBAG_API bool getStringUnorderedMap(Json::Value const & v, std::string const & key, std::unordered_map<std::string, std::string> * out);
 
 template <typename Iterator>
 Json::Value toJsonObject(Iterator begin, Iterator end)

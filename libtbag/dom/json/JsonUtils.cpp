@@ -7,6 +7,7 @@
 
 #include <libtbag/dom/json/JsonUtils.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <type_traits>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -156,6 +157,78 @@ std::string optString(Json::Value const & v, std::string const & key, std::strin
         return v[key].asString();
     }
     return def;
+}
+
+bool getValue(Json::Value const & v, bool & val)
+{
+    if (v.isBool()) {
+        val = v.asBool();
+        return true;
+    }
+    return false;
+}
+
+bool getValue(Json::Value const & v, int & val)
+{
+    if (v.isInt()) {
+        val = v.asInt();
+        return true;
+    }
+    return false;
+}
+
+bool getValue(Json::Value const & v, unsigned & val)
+{
+    if (v.isUInt()) {
+        val = v.asUInt();
+        return true;
+    }
+    return false;
+}
+
+bool getValue(Json::Value const & v, std::int64_t & val)
+{
+    if (v.isInt64()) {
+        val = v.asInt64();
+        return true;
+    }
+    return false;
+}
+
+bool getValue(Json::Value const & v, std::uint64_t & val)
+{
+    if (v.isUInt64()) {
+        val = v.asUInt64();
+        return true;
+    }
+    return false;
+}
+
+bool getValue(Json::Value const & v, float & val)
+{
+    if (v.isDouble()) {
+        val = v.asFloat();
+        return true;
+    }
+    return false;
+}
+
+bool getValue(Json::Value const & v, double & val)
+{
+    if (v.isDouble()) {
+        val = v.asDouble();
+        return true;
+    }
+    return false;
+}
+
+bool getValue(Json::Value const & v, std::string & val)
+{
+    if (v.isString()) {
+        val = v.asString();
+        return true;
+    }
+    return false;
 }
 
 std::string getForceString(Json::Value const & v)
@@ -419,6 +492,95 @@ bool getStringArray(Json::Value const & v, std::string const & key, std::vector<
 {
     if (exists(v, key)) {
         return getStringArray(v[key], out);
+    }
+    return false;
+}
+
+template <typename MapT>
+static bool getStringObject(Json::Value const & v, MapT * out)
+{
+    using K = typename MapT::key_type;
+    using V = typename MapT::mapped_type;
+    using std_map = std::map<K, V>;
+    using std_unordered_map = std::unordered_map<K, V>;
+    static_assert(std::is_same<MapT, std_map>::value || std::is_same<MapT, std_unordered_map>::value,
+                  "Only std::map or std::unordered_map is supported.");
+
+    if (v.type() != Json::objectValue) {
+        return false;
+    }
+
+    MapT result;
+    for (auto const & member : v.getMemberNames()) {
+        V member_value;
+        if (!getValue(v[member], member_value)) {
+            return false;
+        }
+        result.emplace(K(member), std::move(member_value));
+    }
+
+    if (out != nullptr) {
+        *out = std::move(result);
+    }
+    return true;
+}
+
+std::map<std::string, std::string> getStringMap(Json::Value const & v)
+{
+    std::map<std::string, std::string> result;
+    if (getStringMap(v, &result)) {
+        return result;
+    }
+    return {};
+}
+
+std::map<std::string, std::string> getStringMap(Json::Value const & v, std::string const & key)
+{
+    if (exists(v, key)) {
+        return getStringMap(v[key]);
+    }
+    return {};
+}
+
+bool getStringMap(Json::Value const & v, std::map<std::string, std::string> * out)
+{
+    return getStringObject(v, out);
+}
+
+bool getStringMap(Json::Value const & v, std::string const & key, std::map<std::string, std::string> * out)
+{
+    if (exists(v, key)) {
+        return getStringMap(v[key], out);
+    }
+    return false;
+}
+
+std::unordered_map<std::string, std::string> getStringUnorderedMap(Json::Value const & v)
+{
+    std::unordered_map<std::string, std::string> result;
+    if (getStringUnorderedMap(v, &result)) {
+        return result;
+    }
+    return {};
+}
+
+std::unordered_map<std::string, std::string> getStringUnorderedMap(Json::Value const & v, std::string const & key)
+{
+    if (exists(v, key)) {
+        return getStringUnorderedMap(v[key]);
+    }
+    return {};
+}
+
+bool getStringUnorderedMap(Json::Value const & v, std::unordered_map<std::string, std::string> * out)
+{
+    return getStringObject(v, out);
+}
+
+bool getStringUnorderedMap(Json::Value const & v, std::string const & key, std::unordered_map<std::string, std::string> * out)
+{
+    if (exists(v, key)) {
+        return getStringUnorderedMap(v[key], out);
     }
     return false;
 }

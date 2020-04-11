@@ -118,3 +118,21 @@ TEST(JsonUtilsTest, toJsonObject_2)
     ASSERT_STREQ("D", json["C"].asCString());
 }
 
+TEST(JsonUtilsTest, getStringMap)
+{
+    char const * const TEST_JSON_TEXT = R"(
+{
+    "key1": "temp1",
+    "key2": "temp2",
+    "key3": "temp3"
+})";
+    Json::Value original;
+    ASSERT_TRUE(parse(TEST_JSON_TEXT, original));
+
+    auto result = getStringMap(original);
+    ASSERT_EQ(3, result.size());
+    ASSERT_STREQ("temp1", result["key1"].c_str());
+    ASSERT_STREQ("temp2", result["key2"].c_str());
+    ASSERT_STREQ("temp3", result["key3"].c_str());
+}
+
