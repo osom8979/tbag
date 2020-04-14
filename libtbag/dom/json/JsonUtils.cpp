@@ -161,20 +161,26 @@ std::string optString(Json::Value const & v, std::string const & key, std::strin
 
 bool getValue(Json::Value const & v, bool & val)
 {
-    if (v.isBool()) {
+    switch (v.type()) {
+    case Json::booleanValue:
+        TBAG_FALLTHROUGH
+    case Json::nullValue:
+        TBAG_FALLTHROUGH
+    case Json::intValue:
+        TBAG_FALLTHROUGH
+    case Json::uintValue:
+        TBAG_FALLTHROUGH
+    case Json::realValue:
         val = v.asBool();
         return true;
+    default:
+        return false;
     }
-    return false;
 }
 
 bool getValue(Json::Value const & v, int & val)
 {
-    if (v.isInt()) {
-        val = v.asInt();
-        return true;
-    }
-    return false;
+    return getInt(v, &val);
 }
 
 bool getValue(Json::Value const & v, unsigned & val)
@@ -224,11 +230,7 @@ bool getValue(Json::Value const & v, double & val)
 
 bool getValue(Json::Value const & v, std::string & val)
 {
-    if (v.isString()) {
-        val = v.asString();
-        return true;
-    }
-    return false;
+    return getString(v, &val);
 }
 
 std::string getForceString(Json::Value const & v)
