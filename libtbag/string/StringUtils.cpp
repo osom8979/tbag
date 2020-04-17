@@ -206,6 +206,15 @@ std::vector<std::string> splitSize(std::string const & source, std::size_t size)
     return result;
 }
 
+std::pair<std::string, std::string> divideTwo(std::string const & source, std::string const & delimiter)
+{
+    auto const end = source.find(delimiter);
+    if (end == std::string::npos) {
+        return {source, STRING_EMPTY};
+    }
+    return {source.substr(0, end), source.substr(end+delimiter.size())};
+}
+
 std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter)
 {
     return mergeTokens(tokens.begin(), tokens.end(), delimiter);

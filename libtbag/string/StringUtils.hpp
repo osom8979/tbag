@@ -163,6 +163,8 @@ TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::s
 TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter, bool remove_empty = true);
 TBAG_API std::vector<std::string> splitSize(std::string const & source, std::size_t size);
 
+TBAG_API std::pair<std::string, std::string> divideTwo(std::string const & source, std::string const & delimiter);
+
 template <typename Iterator>
 std::string mergeTokens(Iterator begin, Iterator end, std::string const & delimiter)
 {

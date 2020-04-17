@@ -197,3 +197,38 @@ Distribution code: 6)";
     ASSERT_STREQ("0.3.5", result[0].c_str());
 }
 
+TEST(StringUtilsTest, DivideTwo)
+{
+    auto const result0 = divideTwo("", ":");
+    ASSERT_STREQ("", result0.first.c_str());
+    ASSERT_STREQ("", result0.second.c_str());
+
+    auto const result1 = divideTwo("a:b:", ":");
+    ASSERT_STREQ("a", result1.first.c_str());
+    ASSERT_STREQ("b:", result1.second.c_str());
+
+    auto const result2 = divideTwo(":b:", ":");
+    ASSERT_STREQ("", result2.first.c_str());
+    ASSERT_STREQ("b:", result2.second.c_str());
+
+    auto const result3 = divideTwo("a:", ":");
+    ASSERT_STREQ("a", result3.first.c_str());
+    ASSERT_STREQ("", result3.second.c_str());
+
+    auto const result4 = divideTwo("a", ":");
+    ASSERT_STREQ("a", result4.first.c_str());
+    ASSERT_STREQ("", result4.second.c_str());
+
+    auto const result5 = divideTwo(":a", ":");
+    ASSERT_STREQ("", result5.first.c_str());
+    ASSERT_STREQ("a", result5.second.c_str());
+
+    auto const result6 = divideTwo(":a:", ":a");
+    ASSERT_STREQ("", result6.first.c_str());
+    ASSERT_STREQ(":", result6.second.c_str());
+
+    auto const result7 = divideTwo("-1:-", "-1-");
+    ASSERT_STREQ("-1:-", result7.first.c_str());
+    ASSERT_STREQ("", result7.second.c_str());
+}
+
