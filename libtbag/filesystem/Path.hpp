@@ -333,5 +333,43 @@ std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, Traits
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
+#include <utility>
+#include <functional>
+
+// ------------
+namespace std {
+// ------------
+
+template <>
+struct hash<libtbag::filesystem::Path>
+{
+    inline std::size_t operator()(libtbag::filesystem::Path const & v) const
+    {
+        return std::hash<std::string>()(v.toString());
+    }
+};
+
+template <>
+struct equal_to<libtbag::filesystem::Path>
+{
+    inline bool operator()(libtbag::filesystem::Path const & x, libtbag::filesystem::Path const & y) const
+    {
+        return x.toString() == y.toString();
+    }
+};
+
+template <>
+struct less<libtbag::filesystem::Path>
+{
+    inline bool operator()(libtbag::filesystem::Path const & x, libtbag::filesystem::Path const & y) const
+    {
+        return x.toString() < y.toString();
+    }
+};
+
+// ---------------
+} // namespace std
+// ---------------
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_FILESYSTEM_PATH_HPP__
 

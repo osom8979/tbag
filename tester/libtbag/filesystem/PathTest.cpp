@@ -10,6 +10,7 @@
 #include <libtbag/filesystem/Path.hpp>
 #include <libtbag/util/TestUtils.hpp>
 
+#include <algorithm>
 #include <fstream>
 
 using namespace libtbag;
@@ -218,5 +219,32 @@ TEST(PathTest, ScanRecurrentDir)
     ASSERT_EQ(4, TEMP_DIR.scanRecurrentDir().size());
     ASSERT_EQ(2, TEMP_DIR.scanRecurrentDir(Path::DIRENT_DIR).size());
     ASSERT_EQ(2, TEMP_DIR.scanRecurrentDir(Path::DIRENT_FILE).size());
+}
+
+TEST(PathTest, ScanRecurrentNameOnly)
+{
+    tttDir_Automatic();
+    auto const TEMP_DIR = tttDir_Get();
+
+    std::string const TEST_DIR1  = "test1";
+    std::string const TEST_DIR2  = "test2";
+    std::string const TEST_FILE1 = "file1";
+    std::string const TEST_FILE2 = "file2";
+
+    BRACE("Create default resource") {
+        (TEMP_DIR / TEST_DIR1).createDir();
+        (TEMP_DIR / TEST_DIR2).createDir();
+        std::ofstream f1((TEMP_DIR / TEST_FILE1).toString(), std::ios_base::out);
+        std::ofstream f2((TEMP_DIR / TEST_DIR2 / TEST_FILE2).toString(), std::ios_base::out);
+        f1 << "content";
+        f2 << "content";
+    }
+
+    ASSERT_EQ(4, TEMP_DIR.scanRecurrentNameOnly().size());
+    ASSERT_EQ(2, TEMP_DIR.scanRecurrentNameOnly(Path::DIRENT_DIR).size());
+    auto const names = TEMP_DIR.scanRecurrentNameOnly();
+    std::cout << names[0] << std::endl;
+    std::cout << names[1] << std::endl;
+    ASSERT_EQ(2, TEMP_DIR.scanRecurrentNameOnly(Path::DIRENT_FILE).size());
 }
 
