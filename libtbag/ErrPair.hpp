@@ -293,7 +293,7 @@ NAMESPACE_LIBTBAG_CLOSE
 
 #ifndef TBAG_ERR_FMT
 #define TBAG_ERR_FMT(code, ...) \
-    ErrMsg(TBAG_MAKE_ERR_MSG(::libtbag::string::fformat(__VA_ARGS__), code))
+    ::libtbag::ErrMsg(TBAG_MAKE_ERR_MSG(::libtbag::string::fformat(__VA_ARGS__), code))
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_ERRPAIR_HPP__
