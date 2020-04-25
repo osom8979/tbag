@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <libtbag/ErrPair.hpp>
 #include <libtbag/util/TestUtils.hpp>
+#include <libtbag/string/StringUtils.hpp>
 
 #include <string>
 #include <sstream>
@@ -76,6 +77,22 @@ TEST(ErrPairTest, MakeErrMsg)
         ASSERT_FALSE(err4.msg.empty());
     }
     ASSERT_EQ(E_ALREADY, err4.code);
+}
+
+TEST(ErrPairTest, ErrFmt)
+{
+    auto const err = TBAG_ERR_FMT(E_UNKNOWN, "0:{}:{}", 1, "2");
+    ASSERT_EQ(E_UNKNOWN, err.code);
+    auto const tokens = libtbag::string::splitTokens(err.msg, " ");
+    std::string format_message;
+    if (isReleaseMode()) {
+        ASSERT_EQ(1, tokens.size());
+        format_message = tokens[0];
+    } else {
+        ASSERT_EQ(2, tokens.size());
+        format_message = tokens[1];
+    }
+    ASSERT_STREQ("0:1:2", format_message.c_str());
 }
 
 TEST(ErrPairTest, CastErrMsg)

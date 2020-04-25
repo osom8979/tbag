@@ -289,5 +289,12 @@ NAMESPACE_LIBTBAG_CLOSE
 # define TBAG_MAKE_ERR_MSG(...) TBAG_PP_OVERLOAD(TBAG_MAKE_ERR_MSG, __VA_ARGS__)(__VA_ARGS__)
 #endif
 
+#include <libtbag/string/Format.hpp>
+
+#ifndef TBAG_ERR_FMT
+#define TBAG_ERR_FMT(code, ...) \
+    ErrMsg(TBAG_MAKE_ERR_MSG(::libtbag::string::fformat(__VA_ARGS__), code))
+#endif
+
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_ERRPAIR_HPP__
 
