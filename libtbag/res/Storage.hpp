@@ -247,6 +247,7 @@ public:
     std::string getEnvFilename() const;
     std::vector<std::string> getEnvFilenames() const;
     std::string convert(std::string const & value) const;
+    std::vector<std::string> convert(std::vector<std::string> const & value) const;
 
 public:
     bool readConfig(std::string const & filename, std::string const & key, std::string & value);

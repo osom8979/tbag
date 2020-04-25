@@ -307,6 +307,16 @@ std::string Storage::convert(std::string const & value) const
     return _impl->envs.convert(value);
 }
 
+std::vector<std::string> Storage::convert(std::vector<std::string> const & value) const
+{
+    auto const size = value.size();
+    std::vector<std::string> result(size);
+    for (auto i = 0; i < size; ++i) {
+        result[i] = convert(value[i]);
+    }
+    return result;
+}
+
 bool Storage::readConfig(std::string const & filename, std::string const & key, std::string & value)
 {
     if (!asset().exists(LAYOUT_CONFIG)) {

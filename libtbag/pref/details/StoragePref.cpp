@@ -78,7 +78,8 @@ void StoragePref::clear()
 
 void StoragePref::load(Element const & element)
 {
-    optAttr(element, ATT_ROOT, _prop.root);
+    optAttr(element, ATT_ROOT , _prop.root);
+    optAttr(element, ATT_MKDIR, _prop.mkdir);
 
     // clang-format off
     readElement(element, TAG_ENV     , _prop.env);
@@ -101,7 +102,8 @@ void StoragePref::load(Element const & element)
 
 void StoragePref::save(Element & element) const
 {
-    setAttr(element, ATT_ROOT, _prop.root);
+    setAttr(element, ATT_ROOT , _prop.root);
+    setAttr(element, ATT_MKDIR, _prop.mkdir);
 
     // clang-format off
     addNewElement(element, TAG_ENV      , _prop.env);
@@ -450,6 +452,11 @@ Storage StoragePref::loadStorage(Environments const & default_envs) const
 
     storage.addAssetsToEnv();
     storage.setEnv(ENV_KEY_STORAGE_ROOT, updated_root);
+
+    if (_prop.mkdir) {
+        storage.createLayoutDirectories();
+    }
+
     return storage;
 }
 

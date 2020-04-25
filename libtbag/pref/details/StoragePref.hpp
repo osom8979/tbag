@@ -44,7 +44,7 @@ namespace details {
  *  <!-- ${EXE_DIR}  : EXE directory         -->
  *  <!-- ${WORK_DIR} : Working directory     -->
  *  <!-- ${HOME_DIR} : User's HOME directory -->
- *  <storage root='dir'>
+ *  <storage root='dir' mkdir='true'>
  *
  *    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
  *    <!-- Used for special purposes.                                  -->
@@ -144,6 +144,7 @@ public:
     // clang-format on
 
     TBAG_CONSTEXPR static char const * const ATT_ROOT       = "root";
+    TBAG_CONSTEXPR static char const * const ATT_MKDIR      = "mkdir";
     TBAG_CONSTEXPR static char const * const ATT_ABSOLUTE   = "absolute";
     TBAG_CONSTEXPR static char const * const ATT_RAW        = "raw";
     TBAG_CONSTEXPR static char const * const ATT_EXTENSION  = "ext";
@@ -227,7 +228,9 @@ public:
             // EMPTY.
         };
 
-        str        root;
+        str root;
+        bool mkdir = false;
+
         env_layout env;
         cfg_layout config;
         mod_layout module;
