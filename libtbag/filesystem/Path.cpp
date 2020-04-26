@@ -421,6 +421,23 @@ std::string Path::getExtensionName() const
     return std::string();
 }
 
+bool Path::testSuffix(std::string const & suffix) const
+{
+    auto path_itr = _path.crbegin();
+    auto path_end = _path.crend();
+    auto itr = suffix.crbegin();
+    auto end = suffix.crend();
+    for (; itr != end; ++path_itr, ++itr) {
+        if (path_itr == path_end) {
+            return false;
+        }
+        if (*path_itr != *itr) {
+            return false;
+        }
+    }
+    return true;
+}
+
 Path::FileState Path::getState(bool * result) const
 {
     FileState state = { 0, };
@@ -520,6 +537,72 @@ std::vector<Path> Path::scanRecurrentDir(DirentType type) const
     for (auto & cursor : scanRecurrentNameOnly(type)) {
         result.push_back(PARENT_DIR / cursor);
     }
+    return result;
+}
+
+std::vector<std::string> Path::scanRecurrentFiles(
+    std::vector<std::string> const & suffixes,
+    bool ignore_hidden) const
+{
+    using namespace libtbag::filesystem;
+    if (!isDirectory()) {
+        return {};
+    }
+
+    std::vector<std::string> dir_names;
+    for (auto const & dir : scanRecurrentNameOnly(Path::DIRENT_DIR)) {
+        if (dir.empty()) {
+            continue;
+        }
+
+        bool exists_ignore_node = false;
+        for (auto const & node : Path(dir).splitNodes()) {
+            if (node.empty()) {
+                continue;
+            }
+            if (node[0] == '.') {
+                exists_ignore_node = true;
+                break;
+            }
+        }
+
+        if (ignore_hidden && exists_ignore_node) {
+            continue;
+        }
+
+        dir_names.emplace_back(dir);
+    }
+
+    std::vector<std::string> result;
+    for (auto const & dir_name : dir_names) {
+        for (auto const & file_name : (*this / dir_name).scanNameOnly(Path::DIRENT_FILE)) {
+            if (file_name.empty()) {
+                continue;
+            }
+            if (ignore_hidden && file_name[0] == '.') {
+                continue;
+            }
+
+            auto const name_path = Path(file_name);
+            bool match_extension = false;
+
+            if (suffixes.empty()) {
+                match_extension = true;
+            } else {
+                for (auto const & suffix : suffixes) {
+                    if (name_path.testSuffix(suffix)) {
+                        match_extension = true;
+                        break;
+                    }
+                }
+            }
+
+            if (match_extension) {
+                result.emplace_back((Path(dir_name) / file_name).toString());
+            }
+        }
+    }
+
     return result;
 }
 

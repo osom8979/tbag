@@ -249,6 +249,12 @@ public:
     std::string convert(std::string const & value) const;
     std::vector<std::string> convert(std::vector<std::string> const & value) const;
 
+    template <typename Iterator>
+    std::vector<std::string> convert(Iterator begin, Iterator end) const
+    {
+        return convert(std::vector<std::string>(begin, end));
+    }
+
 public:
     bool readConfig(std::string const & filename, std::string const & key, std::string & value);
     bool saveConfig(std::string const & filename, std::string const & key, std::string const & value);

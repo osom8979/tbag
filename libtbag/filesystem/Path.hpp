@@ -238,6 +238,9 @@ public:
     /** File extension name except path. */
     std::string getExtensionName() const;
 
+    /** Test suffix text. not extension! */
+    bool testSuffix(std::string const & suffix) const;
+
 public:
     using TimeSpec  = details::TimeSpec;
     using FileState = details::FileState;
@@ -296,6 +299,11 @@ public:
     /** Scan for child nodes. */
     std::vector<Path> scanDir(DirentType type = DIRENT_ALL) const;
     std::vector<Path> scanRecurrentDir(DirentType type = DIRENT_ALL) const;
+
+public:
+    std::vector<std::string> scanRecurrentFiles(
+        std::vector<std::string> const & suffixes,
+        bool ignore_hidden = true) const;
 
 public:
     static void scanRecurrentNameOnly(DirentType type,
