@@ -39,10 +39,8 @@ namespace util {
  * @retval E_ILLARGS
  *  Illegal arguments.
  */
-TBAG_API Err testCompatible(Version const & origin,
-                            std::string const & requirement);
-TBAG_API bool isCompatible(Version const & origin,
-                           std::string const & requirement);
+TBAG_API Err testCompatible(Version const & origin, std::string const & requirement);
+TBAG_API bool isCompatible(Version const & origin, std::string const & requirement);
 
 } // namespace util
 
