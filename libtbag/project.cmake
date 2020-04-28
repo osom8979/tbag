@@ -7,11 +7,11 @@ tbag_modules__apply_default ()
 tbag_modules__update_c_family_subdir_objects (
         algorithm animation archive auth bitwise box codec common container
         crypto database debug dom dummy filesystem flow functional game
-        geometry gpu graph graphic http id io ipc iterator lib locale lock
-        lockfree log loop macro math media memory mq net network parallel
-        pattern pref preprocessor process proto random ray res rstl scene
-        science script security service signal string system task thread
-        tiled time tmp tty type typography util uvpp uvxx)
+        geometry gpu graph graphic http id io ipc iterator lexer lib locale
+        lock lockfree log loop macro math media memory mq net network
+        parallel pattern pref preprocessor process proto random ray res
+        rstl scene science script security service signal string system
+        task thread tiled time tmp tty type typography util uvpp uvxx)
 tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
 
 ## TBAG EXPORT API.
