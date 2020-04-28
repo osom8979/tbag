@@ -27,18 +27,18 @@ enum logical_operator_t
 {
     logical_operator_and,
     logical_operator_or,
-    logical_operator_done, ///< Don't use the right-side statement.
-    logical_operator_error
+    logical_operator_last, ///< Don't use the right-side statement.
+    logical_operator_error,
 };
 
-struct Statement
+struct Logical
 {
-    logical_operator_t op = logical_operator_done;
+    logical_operator_t op = logical_operator_last;
     std::string left;
     std::string right;
 };
 
-TBAG_API Statement splitStatement(std::string const & origin);
+TBAG_API Logical splitLogical(std::string const & origin);
 
 } // namespace lexer
 

@@ -7,6 +7,7 @@
 
 #include <libtbag/util/VersionCompatible.hpp>
 #include <libtbag/debug/Assert.hpp>
+#include <libtbag/lexer/LogicalOperator.hpp>
 #include <libtbag/string/StringUtils.hpp>
 
 // -------------------
@@ -17,13 +18,25 @@ namespace util {
 
 Err testCompatible(Version const & origin, std::string const & requirement)
 {
-    auto const req = libtbag::string::trim(requirement);
-    if (req.empty()) {
-        return E_ILLARGS;
-    }
-
-    std::string left;
-    std::string right;
+//    libtbag::string::replace(requirement, ",", "&&")
+//    using namespace libtbag::lexer;
+//    auto logical = splitLogical(libtbag::string::trim(requirement));
+//    if (logical.op == logical_operator_error) {
+//        return E_PARSING;
+//    }
+//
+//    libtbag::string::trim(logical.left);
+//    libtbag::string::trim(logical.right);
+//
+//    switch (logical.op) {
+//    case logical_operator_and:
+//    case logical_operator_or:
+//    case logical_operator_done:
+//    case logical_operator_error:
+//    default:
+//        TBAG_INACCESSIBLE_BLOCK_ASSERT();
+//        return E_INACCESSIBLE_BLOCK;
+//    }
 
     return E_SUCCESS;
 }
