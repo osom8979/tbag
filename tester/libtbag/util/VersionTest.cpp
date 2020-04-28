@@ -11,7 +11,7 @@
 using namespace libtbag;
 using namespace libtbag::util;
 
-TEST(VersionTest, Default)
+TEST(VersionTest, Compare)
 {
     Version lh;
     Version rh;
@@ -52,6 +52,10 @@ TEST(VersionTest, Default)
     ASSERT_FALSE(lh <= rh);
     ASSERT_TRUE (lh >  rh);
     ASSERT_FALSE(lh <  rh);
+
+    ASSERT_EQ(Version(4,3,1), Version(4));
+    ASSERT_EQ(Version(4,3,1), Version(4,3));
+    ASSERT_EQ(Version(4,3,1), Version(4,3,1));
 }
 
 TEST(VersionTest, String1)
@@ -67,9 +71,19 @@ TEST(VersionTest, String2)
 {
     Version ver;
     ASSERT_EQ(E_SUCCESS, ver.fromString("1."));
-    ASSERT_EQ(Version(1), ver);
-    ASSERT_EQ(Version(1, 0), ver);
+    ASSERT_EQ(ver, Version(1));
+    ASSERT_EQ(ver, Version(1, 0));
     ASSERT_STREQ("1", ver.toString().c_str());
+}
+
+TEST(VersionTest, String3)
+{
+    Version ver;
+    ASSERT_EQ(E_SUCCESS, ver.fromString("0.77"));
+    ASSERT_EQ(ver, Version(0));
+    ASSERT_EQ(ver, Version(0, 77));
+    ASSERT_NE(ver, Version(0, 77, 1));
+    ASSERT_STREQ("0.77", ver.toString().c_str());
 }
 
 TEST(VersionTest, StringConstructor)

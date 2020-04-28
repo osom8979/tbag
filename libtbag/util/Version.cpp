@@ -86,10 +86,77 @@ void Version::clear()
 
 void Version::swap(Version & obj)
 {
-    algorithm::swapWithPod(_major, obj._major);
-    algorithm::swapWithPod(_minor, obj._minor);
-    algorithm::swapWithPod(_patch, obj._patch);
+    using namespace libtbag::algorithm;
+    swapWithPod(_major, obj._major);
+    swapWithPod(_minor, obj._minor);
+    swapWithPod(_patch, obj._patch);
     _tweak.swap(obj._tweak);
+}
+
+bool Version::eq(Version const & ver) const TBAG_NOEXCEPT
+{
+    if (ver._patch != 0) {
+        return _major == ver._major && _minor == ver._minor && _patch == ver._patch;
+    }
+    if (ver._minor != 0) {
+        return _major == ver._major && _minor == ver._minor;
+    }
+    return _major == ver._major;
+}
+
+bool Version::ne(Version const & ver) const TBAG_NOEXCEPT
+{
+    return !eq(ver);
+}
+
+bool Version::lt(Version const & ver) const TBAG_NOEXCEPT
+{
+    if (_major < ver._major) {
+        return true;
+    } else if (_major > ver._major) {
+        return false;
+    }
+    if (_minor < ver._minor) {
+        return true;
+    } else if (_minor > ver._minor) {
+        return false;
+    }
+    if (_patch < ver._patch) {
+        return true;
+    } else if (_patch > ver._patch) {
+        return false;
+    }
+    return false;
+}
+
+bool Version::gt(Version const & ver) const TBAG_NOEXCEPT
+{
+    if (_major > ver._major) {
+        return true;
+    } else if (_major < ver._major) {
+        return false;
+    }
+    if (_minor > ver._minor) {
+        return true;
+    } else if (_minor < ver._minor) {
+        return false;
+    }
+    if (_patch > ver._patch) {
+        return true;
+    } else if (_patch < ver._patch) {
+        return false;
+    }
+    return false;
+}
+
+bool Version::le(Version const & ver) const TBAG_NOEXCEPT
+{
+    return lt(ver) || eq(ver);
+}
+
+bool Version::ge(Version const & ver) const TBAG_NOEXCEPT
+{
+    return gt(ver) || eq(ver);
 }
 
 Err Version::fromString(std::string const & version)
@@ -122,31 +189,78 @@ std::string Version::toLongString() const
     return toLongString(*this);
 }
 
+static Err __version_parser(char const * begin, char const * end,
+                            std::uint32_t & result, std::size_t & written)
+{
+    if (begin == end) {
+        result = 0;
+        written = 0;
+        return E_SUCCESS;
+    }
+
+    using namespace libtbag::string;
+    auto itr = begin;
+    for (; itr != end; ++itr) {
+        if (*itr == Version::POINT_CHAR) {
+            result = toValue<std::uint32_t>(std::string(begin, itr));
+            written = std::distance(begin, itr)+1;
+            return E_SUCCESS;
+        }
+        if (!std::isdigit(*itr)) {
+            // Don't use the E_ILLARGS error (Reason: duplicate return value)
+            return E_PARSING;
+        }
+    }
+
+    result = toValue<std::uint32_t>(std::string(begin, itr));
+    written = std::distance(begin, itr);
+    return E_SUCCESS;
+}
+
 Err Version::fromString(std::string const & version, Version & result)
 {
     if (version.empty()) {
         return E_ILLARGS;
     }
 
-    auto tokens = string::splitTokens(version, std::string(POINT_STR));
-    auto size = tokens.size();
+    using namespace libtbag::string;
+    auto const src = trim(version);
+    auto const size = src.size();
+    auto const begin = src.c_str();
+    auto const end = begin + size;
 
-    try {
-        // clang-format off
-        if (size >= 1) { result.setMajor(static_cast<uint32_t>(std::stoul(tokens[0]))); }
-        if (size >= 2) { result.setMinor(static_cast<uint32_t>(std::stoul(tokens[1]))); }
-        if (size >= 3) { result.setPatch(static_cast<uint32_t>(std::stoul(tokens[2]))); }
-        // clang-format on
-        if (size >= 4) {
-            result.setTweak(version.substr(tokens[0].size() + tokens[1].size() + tokens[2].size() + 3/*POINT('.') COUNT*/));
-        }
-    } catch (std::invalid_argument & e) {
-        return E_PARSING; // Don't use the E_ILLARGS error (Reason: duplicate return value).
-    } catch (std::out_of_range & e) {
-        return E_OORANGE;
-    } catch (...) {
-        return E_UNKNOWN;
+    std::size_t i = 0;
+    std::size_t written;
+    Err code;
+
+    std::uint32_t major_version;
+    code = __version_parser(begin+i, end, major_version, written);
+    if (isFailure(code)) {
+        return code;
     }
+
+    std::uint32_t minor_version;
+    i += written;
+    code = __version_parser(begin+i, end, minor_version, written);
+    if (isFailure(code)) {
+        return code;
+    }
+
+    std::uint32_t patch_version;
+    i += written;
+    code = __version_parser(begin+i, end, patch_version, written);
+    if (isFailure(code)) {
+        return code;
+    }
+
+    std::string tweak_version;
+    i += written;
+    if (i < size) {
+        tweak_version = std::string(begin+i, end);
+    }
+
+    result = Version(major_version, minor_version,
+                     patch_version, tweak_version);
     return E_SUCCESS;
 }
 
@@ -158,14 +272,14 @@ std::string Version::toShortString(Version const & version)
 
     if (PATCH) {
         std::stringstream ss;
-        ss << MAJOR << POINT_STR << MINOR << POINT_STR << PATCH;
+        ss << MAJOR << POINT_CHAR << MINOR << POINT_CHAR << PATCH;
         return ss.str();
     }
 
     assert(PATCH == 0);
     if (MINOR) {
         std::stringstream ss;
-        ss << MAJOR << POINT_STR << MINOR;
+        ss << MAJOR << POINT_CHAR << MINOR;
         return ss.str();
     }
 
@@ -177,9 +291,9 @@ std::string Version::toLongString(Version const & version)
 {
     std::stringstream ss;
     ss << version.getMajor()
-       << POINT_STR << version.getMinor()
-       << POINT_STR << version.getPatch()
-       << POINT_STR << version.getTweak();
+       << POINT_CHAR << version.getMinor()
+       << POINT_CHAR << version.getPatch()
+       << POINT_CHAR << version.getTweak();
     return ss.str();
 }
 

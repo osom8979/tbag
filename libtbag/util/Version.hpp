@@ -35,7 +35,7 @@ namespace util {
 class TBAG_API Version
 {
 public:
-    TBAG_CONSTEXPR static char const * const POINT_STR = ".";
+    TBAG_CONSTEXPR static char const POINT_CHAR = '.';
 
 private:
     uint32_t _major;
@@ -79,36 +79,26 @@ public:
     void swap(Version & obj);
 
 public:
+    bool eq(Version const & ver) const TBAG_NOEXCEPT;
+    bool ne(Version const & ver) const TBAG_NOEXCEPT;
+    bool lt(Version const & ver) const TBAG_NOEXCEPT;
+    bool gt(Version const & ver) const TBAG_NOEXCEPT;
+    bool le(Version const & ver) const TBAG_NOEXCEPT;
+    bool ge(Version const & ver) const TBAG_NOEXCEPT;
+
+public:
     inline friend bool operator ==(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    { return lh._major == rh._major && lh._minor == rh._minor && lh._patch == rh._patch; }
+    { return lh.eq(rh); }
     inline friend bool operator !=(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    { return !(lh == rh); }
-
+    { return lh.ne(rh); }
     inline friend bool operator <(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    {
-        // clang-format off
-        if (lh._major < rh._major) { return true; } else if (lh._major > rh._major) { return false; }
-        if (lh._minor < rh._minor) { return true; } else if (lh._minor > rh._minor) { return false; }
-        if (lh._patch < rh._patch) { return true; } else if (lh._patch > rh._patch) { return false; }
-        // clang-format on
-        return false;
-    }
-
+    { return lh.lt(rh); }
     inline friend bool operator >(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    {
-        // clang-format off
-        if (lh._major > rh._major) { return true; } else if (lh._major < rh._major) { return false; }
-        if (lh._minor > rh._minor) { return true; } else if (lh._minor < rh._minor) { return false; }
-        if (lh._patch > rh._patch) { return true; } else if (lh._patch < rh._patch) { return false; }
-        // clang-format on
-        return false;
-    }
-
+    { return lh.gt(rh); }
     inline friend bool operator <=(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    { return !(lh > rh); }
-
+    { return lh.le(rh); }
     inline friend bool operator >=(Version const & lh, Version const & rh) TBAG_NOEXCEPT
-    { return !(lh < rh); }
+    { return lh.ge(rh); }
 
 public:
     Err fromString(std::string const & version);
