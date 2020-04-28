@@ -18,11 +18,31 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/util/Version.hpp>
 
+#include <string>
+#include <vector>
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace util {
+
+enum logical_operator_t
+{
+    logical_operator_and,
+    logical_operator_or,
+    logical_operator_done, ///< Don't use the right-side statement.
+    logical_operator_error
+};
+
+struct Statement
+{
+    logical_operator_t op = logical_operator_done;
+    std::string left;
+    std::string right;
+};
+
+TBAG_API Statement splitStatement(std::string const & origin);
 
 /**
  * Test version compatibility.
@@ -33,6 +53,8 @@ namespace util {
  *  Incompatible version.
  * @retval E_PARSING
  *  Parsing error.
+ * @retval E_ILLARGS
+ *  Illegal arguments.
  */
 TBAG_API Err testCompatible(Version const & origin,
                             std::string const & requirement);
