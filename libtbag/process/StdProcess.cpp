@@ -226,6 +226,71 @@ void StdProcess::onClose()
 // Miscellaneous utilities.
 // ------------------------
 
+Err subprocessCallbacks(std::string const & file,
+                        std::vector<std::string> const & args,
+                        std::vector<std::string> const & envs,
+                        std::string const & cwd,
+                        std::string const & input,
+                        int64_t * exit,
+                        int * term,
+                        StdProcess::OnOutRead const & out_cb,
+                        StdProcess::OnErrRead const & err_cb)
+{
+    if (file.empty()) {
+        return E_ILLARGS;
+    }
+
+    auto const file_path = libtbag::filesystem::Path(file).getCanonical();
+    if (!file_path.isRegularFile()) {
+        return E_ENOENT;
+    }
+    if (!file_path.isExecutable()) {
+        return E_EACCES;
+    }
+
+    int64_t exit_result = 0;
+    int term_result = 0;
+    bool on_close = false;
+
+    StdProcess proc;
+    proc.out_read_cb = out_cb;
+    proc.err_read_cb = err_cb;
+    proc.exit_cb = [&](int64_t exit_status, int term_signal){
+      exit_result = exit_status;
+      term_result = term_signal;
+    };
+    proc.close_cb = [&](){
+      on_close = true;
+    };
+
+    libtbag::uvpp::Loop loop;
+    auto const spawn_code = proc.spawn(loop, file, args, envs, cwd, input,
+                                       static_cast<bool>(out_cb),
+                                       static_cast<bool>(err_cb));
+    if (isFailure(spawn_code)) {
+        tDLogE("subprocess() Spawn error: {}", spawn_code);
+        return spawn_code;
+    }
+
+    auto const run_code = loop.run();
+    if (isFailure(run_code)) {
+        tDLogE("subprocess() Loop run error: {}", run_code);
+        return run_code;
+    }
+
+    assert(on_close);
+    assert(isSuccess(spawn_code));
+    assert(isSuccess(run_code));
+
+    if (exit != nullptr) {
+        *exit = exit_result;
+    }
+    if (term != nullptr) {
+        *term = term_result;
+    }
+    return E_SUCCESS;
+}
+
 Err subprocess(std::string const & file,
                std::vector<std::string> const & args,
                std::vector<std::string> const & envs,
@@ -238,48 +303,21 @@ Err subprocess(std::string const & file,
 {
     std::string output_result;
     std::string error_result;
-    int64_t exit_result = 0;
-    int term_result = 0;
-    bool on_close = false;
 
-    StdProcess proc;
-    proc.out_read_cb = [&](char const * buffer, std::size_t size){
+    auto const out_read_cb = [&](char const * buffer, std::size_t size){
         output_result.append(buffer, size);
     };
-    proc.err_read_cb = [&](char const * buffer, std::size_t size){
+    auto const err_read_cb = [&](char const * buffer, std::size_t size){
         error_result.append(buffer, size);
     };
-    proc.exit_cb = [&](int64_t exit_status, int term_signal){
-        exit_result = exit_status;
-        term_result = term_signal;
-    };
-    proc.close_cb = [&](){
-        on_close = true;
-    };
 
-    libtbag::uvpp::Loop loop;
-    auto const SPAWN_CODE = proc.spawn(loop, file, args, envs, cwd, input, output != nullptr, error != nullptr);
-    if (isFailure(SPAWN_CODE)) {
-        tDLogE("subprocess() Spawn error: {}", SPAWN_CODE);
-        return SPAWN_CODE;
+    auto const code = subprocessCallbacks(file, args, envs, cwd, input,
+                                          exit, term,
+                                          out_read_cb, err_read_cb);
+    if (isFailure(code)) {
+        return code;
     }
 
-    auto const RUN_CODE = loop.run();
-    if (isFailure(RUN_CODE)) {
-        tDLogE("subprocess() Loop run error: {}", RUN_CODE);
-        return RUN_CODE;
-    }
-
-    assert(on_close);
-    assert(isSuccess(SPAWN_CODE));
-    assert(isSuccess(RUN_CODE));
-
-    if (exit != nullptr) {
-        *exit = exit_result;
-    }
-    if (term != nullptr) {
-        *term = term_result;
-    }
     if (output != nullptr) {
         *output = output_result;
     }
@@ -295,14 +333,6 @@ ErrSpawnResult subprocessSafe(std::string const & file,
                               std::string const & cwd,
                               std::string const & input)
 {
-    auto const file_path = libtbag::filesystem::Path(file).getCanonical();
-    if (!file_path.isRegularFile()) {
-        return E_ENOENT;
-    }
-    if (!file_path.isExecutable()) {
-        return E_EACCES;
-    }
-
     std::vector<std::string> updated_envs;
     if (envs.empty()) {
         updated_envs = libtbag::string::Environments::createDefaultEnvironments().toStrings();
@@ -318,7 +348,7 @@ ErrSpawnResult subprocessSafe(std::string const & file,
     }
 
     SpawnResult result;
-    auto const code = subprocess(file_path, args, updated_envs, updated_cwd, input,
+    auto const code = subprocess(file, args, updated_envs, updated_cwd, input,
                                  &result.exit,
                                  &result.term,
                                  &result.output,

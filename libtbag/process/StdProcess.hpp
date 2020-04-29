@@ -126,6 +126,16 @@ public:
 // Miscellaneous utilities.
 // ------------------------
 
+TBAG_API Err subprocessCallbacks(std::string const & file = {},
+                                 std::vector<std::string> const & args = {},
+                                 std::vector<std::string> const & envs = {},
+                                 std::string const & cwd = {},
+                                 std::string const & input = {},
+                                 int64_t * exit = nullptr,
+                                 int * term = nullptr,
+                                 StdProcess::OnOutRead const & out_cb = {},
+                                 StdProcess::OnErrRead const & err_cb = {});
+
 TBAG_API Err subprocess(std::string const & file,
                         std::vector<std::string> const & args = {},
                         std::vector<std::string> const & envs = {},
