@@ -15,6 +15,7 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/Err.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 
 #include <cstdint>
@@ -130,7 +131,7 @@ TBAG_API std::vector<InterfaceAddress> getInterfaceAddresses();
 TBAG_API std::string convertPhysicalToString(PhysicalAddress const & physical);
 
 /** Changes the current working directory. */
-TBAG_API void changeDirectory(std::string const & dir);
+TBAG_API Err changeDirectory(std::string const & dir);
 
 /**
  * Gets the load average.

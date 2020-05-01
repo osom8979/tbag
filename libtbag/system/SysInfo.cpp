@@ -235,12 +235,13 @@ std::string convertPhysicalToString(PhysicalAddress const & physical)
     return libtbag::string::convertByteVectorToHexString(BUFFER, std::string(), std::string(":"));
 }
 
-void changeDirectory(std::string const & dir)
+Err changeDirectory(std::string const & dir)
 {
-    int const CODE = ::uv_chdir(dir.c_str());
-    if (CODE != 0) {
-        tDLogE("changeDirectory() {} error", getUvErrorName(CODE));
+    int const code = ::uv_chdir(dir.c_str());
+    if (code != 0) {
+        tDLogE("changeDirectory() {} error", getUvErrorName(code));
     }
+    return convertUvErrorToErr(code);
 }
 
 std::vector<double> getLoadAverage()
