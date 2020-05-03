@@ -33,6 +33,11 @@ TEST(ErrPairTest, StreamCast)
     std::stringstream ss;
     ss << obj;
     ASSERT_STREQ("E_ILLARGS", ss.str().c_str());
+
+    ErrMsg obj2("MSG", E_ILLARGS);
+    std::stringstream ss2;
+    ss2 << obj2;
+    ASSERT_STREQ("Err(E_ILLARGS) MSG", ss2.str().c_str());
 }
 
 TEST(ErrPairTest, BooleanCast)

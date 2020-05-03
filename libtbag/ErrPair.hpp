@@ -251,6 +251,16 @@ struct ErrMsgPair : public ErrPair<T>
     {
         return ErrPair<ValueType>(this->code, this->value);
     }
+
+    template <class CharT, class TraitsT>
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, ErrMsgPair const & err)
+    {
+        if (err.msg.empty()) {
+            return os << "Err(" << err.name() << ")";
+        } else {
+            return os << "Err(" << err.name() << ") " << err.msg;
+        }
+    }
 };
 
 using ErrMsg = ErrMsgPair<std::nullptr_t>;
