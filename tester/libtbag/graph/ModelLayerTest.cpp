@@ -30,9 +30,3 @@ TEST(ModelLayerTest, Constructor)
     ASSERT_TRUE(static_cast<bool>(obj5));
 }
 
-TEST(ModelLayerTest, Default)
-{
-    ModelLayer net;
-    std::cout << net.toString() << std::endl;
-}
-

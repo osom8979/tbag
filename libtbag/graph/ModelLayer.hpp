@@ -50,7 +50,6 @@ public:
 
 public:
     using Err = libtbag::Err;
-    using Layers = std::vector<ModelLayer>;
 
 public:
     enum class Direction
@@ -61,7 +60,6 @@ public:
 
 public:
     TBAG_CONSTEXPR static int const NO_ASSIGN_ID = -1;
-    TBAG_CONSTEXPR static int const DEFAULT_PROPERTY_BUFFER_SIZE = 1024;
 
 private:
     /**
@@ -82,37 +80,22 @@ private:
      */
     int _assign_id = NO_ASSIGN_ID;
 
-    /**
-     * Whether the operation(forward or backward) is complete.
-     *
-     * @warning
-     *  This value is controlled by the model. @n
-     *  The user should not modify this value.
-     */
-    bool _complete = false;
-
 public:
     /** User's data. */
     void * opaque = nullptr;
 
 public:
-    LayerBase() : TYPE("UNKNOWN") { /* EMPTY. */ }
-    LayerBase(char const * type) : TYPE(type) { /* EMPTY. */ }
+    LayerBase(char const * type = nullptr) : TYPE(type) { /* EMPTY. */ }
     virtual ~LayerBase() { /* EMPTY. */ }
 
 public:
     inline char const * type() const TBAG_NOEXCEPT
     { return TYPE; }
 
-public:
     inline int id() const TBAG_NOEXCEPT
     { return _assign_id; }
 
-    inline bool complete() const TBAG_NOEXCEPT
-    { return _complete; }
-
-public:
-    virtual Err runner(Direction direction, Layers const & input, void * user)
+    virtual Err runner(Direction direction, void * user)
     { return E_SUCCESS; }
 };
 
@@ -139,8 +122,7 @@ private:
 public:
     ModelLayer();
     explicit ModelLayer(std::nullptr_t) TBAG_NOEXCEPT;
-    explicit ModelLayer(LayerBase * base) TBAG_NOEXCEPT;
-    explicit ModelLayer(SharedBase const & base) TBAG_NOEXCEPT;
+    explicit ModelLayer(SharedBase base) TBAG_NOEXCEPT;
     ModelLayer(ModelLayer const & obj) TBAG_NOEXCEPT;
     ModelLayer(ModelLayer && obj) TBAG_NOEXCEPT;
     ~ModelLayer();
@@ -150,7 +132,6 @@ public:
     ModelLayer & operator =(ModelLayer && obj) TBAG_NOEXCEPT;
 
 public:
-    void copy(ModelLayer const & obj) TBAG_NOEXCEPT;
     void swap(ModelLayer & obj) TBAG_NOEXCEPT;
 
 public:
@@ -171,48 +152,42 @@ public:
     inline LayerBase const & operator *() const TBAG_NOEXCEPT { return ref(); }
 
 public:
+    template <typename LayerType = LayerBase>
+    std::shared_ptr<LayerType> base() const TBAG_NOEXCEPT
+    {
+        return std::static_pointer_cast<LayerType>(_base);
+    }
+
+    template <typename T>
+    inline T * cast() TBAG_NOEXCEPT
+    {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(LayerBase, T);
+        return (T*)_base.get();
+    }
+
+    template <typename T>
+    inline T const * cast() const TBAG_NOEXCEPT
+    {
+        STATIC_ASSERT_CHECK_IS_BASE_OF(LayerBase, T);
+        return (T const *)_base.get();
+    }
+
+public:
     inline bool exists() const TBAG_NOEXCEPT
     { return static_cast<bool>(_base); }
 
     inline operator bool() const TBAG_NOEXCEPT
     { return exists(); }
 
-public:
-    friend inline bool operator <(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
-    { return x.get() < y.get(); }
-
-    friend inline bool operator >(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
-    { return x.get() > y.get(); }
-
-    friend inline bool operator <=(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
-    { return x.get() <= y.get(); }
-
-    friend inline bool operator >=(ModelLayer const & x, ModelLayer const & y) TBAG_NOEXCEPT
-    { return x.get() >= y.get(); }
-
-    inline bool operator ==(ModelLayer const & obj) const TBAG_NOEXCEPT
-    { return get() == obj.get(); }
-
-    inline bool operator !=(ModelLayer const & obj) const TBAG_NOEXCEPT
-    { return get() != obj.get(); }
-
 private:
-    void _complete();
-    void _incomplete();
     void _assign_id(int id);
 
 public:
     char const * type() const;
-
-public:
     int id() const;
-    bool isComplete() const;
 
 public:
-    Err runner(Direction direction, Layers const & input, void * user);
-
-public:
-    std::string toString() const;
+    Err runner(Direction direction, void * user);
 
 public:
     template <typename LayerType, typename ... Args>
@@ -227,28 +202,6 @@ public:
         }
         return ModelLayer(nullptr);
     }
-
-public:
-    template <typename LayerType = LayerBase>
-    inline std::shared_ptr<LayerType> base() const TBAG_NOEXCEPT
-    {
-        return std::static_pointer_cast<LayerType>(_base);
-    }
-
-public:
-    /**
-     * The class that sorts the IDs in the std::set container.
-     *
-     * @author zer0
-     * @date   2019-07-11
-     */
-    struct IdLess
-    {
-        inline bool operator()(ModelLayer const & x, ModelLayer const & y) const
-        {
-            return x.id() < y.id();
-        }
-    };
 };
 
 } // namespace graph
@@ -256,6 +209,46 @@ public:
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
+
+#include <utility>
+#include <functional>
+
+// ------------
+namespace std {
+// ------------
+
+template <>
+struct hash<libtbag::graph::ModelLayer>
+{
+    inline std::size_t operator()(libtbag::graph::ModelLayer const & v) const
+    {
+        return reinterpret_cast<std::size_t>(v.get());
+    }
+};
+
+template <>
+struct equal_to<libtbag::graph::ModelLayer>
+{
+    inline bool operator()(libtbag::graph::ModelLayer const & x,
+                           libtbag::graph::ModelLayer const & y) const
+    {
+        return x.get() == y.get();
+    }
+};
+
+template <>
+struct less<libtbag::graph::ModelLayer>
+{
+    inline bool operator()(libtbag::graph::ModelLayer const & x,
+                           libtbag::graph::ModelLayer const & y) const
+    {
+        return x.get() < y.get();
+    }
+};
+
+// ---------------
+} // namespace std
+// ---------------
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_GRAPH_MODELLAYER_HPP__
 

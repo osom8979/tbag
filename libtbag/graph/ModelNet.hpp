@@ -74,7 +74,6 @@ public:
     ModelNet & operator =(ModelNet && obj) TBAG_NOEXCEPT;
 
 public:
-    void copy(ModelNet const & obj) TBAG_NOEXCEPT;
     void swap(ModelNet & obj) TBAG_NOEXCEPT;
 
 public:
@@ -96,14 +95,7 @@ public:
     std::size_t size() const;
 
 public:
-    /** Unplug the finished flags. */
-    void updateIncomplete();
-    void updateComplete();
-
-public:
-    void addFirst(ModelLayer const & layer);
     void addNode(ModelLayer const & layer);
-    void addLast(ModelLayer const & layer);
     void addArc(ModelLayer const & source, ModelLayer const & target);
 
 public:
@@ -116,21 +108,16 @@ public:
     std::vector<int> getTargetNodeIds(int node_id) const;
     std::vector<int> getNodeIds(int node_id, ArcOrder order) const;
     std::vector<int> getChildrenNodeIds(int node_id, Direction direction) const;
-
-public:
-    std::set<int> getFirstIds() const;
-    std::set<int> getLastIds() const;
+    std::vector<int> getParentNodeIds(int node_id, Direction direction) const;
 
 public:
     Layers getInputLayers(int node_id, ArcOrder order) const;
     Layers getInputLayers(int node_id, Direction direction) const;
 
 public:
-    bool isReady(int node_id, ArcOrder order) const;
-    bool isChildrenReady(int node_id, Direction direction) const;
-
-public:
     /**
+     * Run the graph.
+     *
      * @param[in] start
      *      List of start node ids.
      * @param[in] direction
@@ -149,28 +136,49 @@ public:
             std::size_t max_depth = MAX_RUN_DEPTH,
             void * user = nullptr,
             std::vector<int> * sequence = nullptr,
-            bool simulate = false);
+            bool simulate = false) const;
+
+    /**
+     * Check and run the graph dependency.
+     *
+     * @param[in] skip_first_dep_test
+     *      Skip dependency tests of the first nodes.
+     *
+     * @see run
+     */
+    Err dependencyRun(std::set<int> const & start,
+                      Direction direction = Direction::D_FORWARD,
+                      std::size_t max_depth = MAX_RUN_DEPTH,
+                      void * user = nullptr,
+                      std::vector<int> * sequence = nullptr,
+                      bool simulate = false,
+                      bool skip_first_dep_test = false) const;
 
 public:
-    Err forward(std::size_t max_depth, void * user = nullptr);
-    Err backward(std::size_t max_depth, void * user = nullptr);
+    Err forward(std::set<int> const & start,
+                std::size_t max_depth = MAX_RUN_DEPTH,
+                void * user = nullptr,
+                std::vector<int> * sequence = nullptr,
+                bool simulate = false) const;
+    Err backward(std::set<int> const & start,
+                 std::size_t max_depth = MAX_RUN_DEPTH,
+                 void * user = nullptr,
+                 std::vector<int> * sequence = nullptr,
+                 bool simulate = false) const;
 
 public:
-    Err forward(void * user = nullptr);
-    Err backward(void * user = nullptr);
-
-public:
-    std::vector<int> getForwardSequence(std::size_t max_depth = MAX_RUN_DEPTH,
-                                        void * user = nullptr,
-                                        Err * run_result = nullptr,
-                                        bool simulate = true);
-    std::vector<int> getBackwardSequence(std::size_t max_depth = MAX_RUN_DEPTH,
-                                         void * user = nullptr,
-                                         Err * run_result = nullptr,
-                                         bool simulate = true);
-
-public:
-    std::string toString() const;
+    Err dependencyForward(std::set<int> const & start,
+                          std::size_t max_depth = MAX_RUN_DEPTH,
+                          void * user = nullptr,
+                          std::vector<int> * sequence = nullptr,
+                          bool simulate = false,
+                          bool skip_first_dep_test = false) const;
+    Err dependencyBackward(std::set<int> const & start,
+                           std::size_t max_depth = MAX_RUN_DEPTH,
+                           void * user = nullptr,
+                           std::vector<int> * sequence = nullptr,
+                           bool simulate = false,
+                           bool skip_first_dep_test = false) const;
 };
 
 } // namespace graph
