@@ -141,9 +141,12 @@ TEST(StringUtilsTest, CreateRandomString)
     std::string buffer;
     buffer.resize(BUFFER_SIZE);
 
-    for (std::size_t i = 0; i < TEST_COUNT; ++i) {
-        ASSERT_TRUE(createRandomString(&buffer[0], BUFFER_SIZE));
-        ASSERT_TRUE(std::all_of(buffer.begin(), buffer.end(), [](char & v)->bool{return ::isdigit(v) || ::isalpha(v);}));
+    for (auto i = 0; i < TEST_COUNT; ++i) {
+        createRandomString(&buffer[0], BUFFER_SIZE);
+        auto const result = std::all_of(buffer.begin(), buffer.end(), [](char & v)->bool{
+            return ::isdigit(v) || ::isalpha(v);
+        });
+        ASSERT_TRUE(result);
     }
 }
 

@@ -538,11 +538,10 @@ std::string Storage::generateTempPath(std::string const & suffix, std::size_t na
     name.resize(name_size);
     auto const temp_prefix = asset().get(LAYOUT_TEMP);
     for (auto i = 0; i < RETRY_COUNT_OF_TEMP_NAME; ++i) {
-        if (libtbag::string::createRandomString(&name[0], name_size)) {
-            auto const temp_path = temp_prefix / (name + suffix);
-            if (!temp_path.exists()) {
-                return temp_path.toString();
-            }
+        libtbag::string::createRandomString(&name[0], name_size);
+        auto const temp_path = temp_prefix / (name + suffix);
+        if (!temp_path.exists()) {
+            return temp_path.toString();
         }
     }
     return {};

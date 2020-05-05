@@ -26,7 +26,7 @@ TEST(AesTest, Default)
 
     auto const test_length = 128;
     std::string plain_text(test_length, '\0');
-    ASSERT_TRUE(libtbag::string::createRandomString(&plain_text[0], plain_text.size()));
+    libtbag::string::createRandomString(&plain_text[0], plain_text.size());
     std::cout << "Plain Text: " << plain_text << std::endl;
 
     auto const encrypt_result = encryptAes256CbcToBase64(key, iv, plain_text);

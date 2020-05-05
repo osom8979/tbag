@@ -745,22 +745,30 @@ std::vector<std::string> trim(std::vector<std::string> const & strs, bool remove
     }
 }
 
-bool createRandomString(char * buffer, std::size_t size)
+void createRandomString(char * buffer, std::size_t size, char const * table,
+                        std::size_t min, std::size_t max)
 {
-    static const char STRING_TEMPLATE[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    static const std::size_t MIN = 0;
-    static const std::size_t MAX = sizeof(STRING_TEMPLATE) / sizeof(STRING_TEMPLATE[0]) - 1/*NULL CHAR*/ - 1/*SIZE TO INDEX*/;
-
     std::random_device device;
     std::mt19937 engine(device());
-    std::uniform_int_distribution<std::size_t> distribution(MIN, MAX);
-
-    std::size_t cursor = 0;
-    for (std::size_t i = 0; i < size; ++i) {
-        buffer[i] = STRING_TEMPLATE[distribution(engine)];
+    std::uniform_int_distribution<std::size_t> distribution(min, max);
+    for (auto i = 0; i < size; ++i) {
+        buffer[i] = table[distribution(engine)];
     }
+}
 
-    return true;
+void createRandomString(char * buffer, std::size_t size)
+{
+    static const char table[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static const std::size_t min = 0;
+    static const std::size_t max = sizeof(table) / sizeof(table[0]) - 1/*NULL CHAR*/ - 1/*SIZE TO INDEX*/;
+    createRandomString(buffer, size, table, min, max);
+}
+
+std::string createRandomString(std::size_t size)
+{
+    std::string result(CHAR_SPACE, size);
+    createRandomString(&result[0], size);
+    return result;
 }
 
 std::string lower(std::string const & str)
