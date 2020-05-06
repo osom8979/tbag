@@ -12,6 +12,26 @@ using namespace libtbag;
 using namespace libtbag::dom;
 using namespace libtbag::dom::json;
 
+TEST(JsonUtilsTest, Example_Foreach_Object)
+{
+    char const * const TEST_JSON_TEXT = R"(
+{
+    "key1": { "temp": 1 },
+    "key2": { "temp": 2 }
+})";
+
+    Json::Value json;
+    ASSERT_TRUE(parse(TEST_JSON_TEXT, json));
+
+    auto itr = json.begin();
+    auto const end = json.end();
+    for (; itr != end; ++itr) {
+        std::cout << "Key: " << itr.key() << std::endl;
+        assert(itr->isObject());
+        std::cout << "Value['temp']: " << (*itr)["temp"].asInt() << std::endl;
+    }
+}
+
 TEST(JsonUtilsTest, Path)
 {
     char const * const TEST_JSON_TEXT = R"(
