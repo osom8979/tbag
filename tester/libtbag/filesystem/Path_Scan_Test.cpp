@@ -56,23 +56,23 @@ struct PathScanFixture : public testing::Test
         ASSERT_EQ(E_SUCCESS, writeFile(dir/TEST_PATH10, TEST_CONTENT));
     }
 
-    template <typename T>
-    static bool exists_path(std::vector<T> const paths, T const & path)
+    template <typename L, typename R>
+    static bool exists_path(std::vector<L> const & paths, R const & path)
     {
         for (auto const & cursor : paths) {
-            if (cursor == path) {
+            if (Path(cursor) == Path(path)) {
                 return true;
             }
         }
         return false;
     }
 
-    static bool exists_dir(std::vector<Path> const paths, Path const & path)
+    static bool exists_dir(std::vector<Path> const & paths, Path const & path)
     {
         return path.isDirectory() && exists_path(paths, path);
     }
 
-    static bool exists_file(std::vector<Path> const paths, Path const & path)
+    static bool exists_file(std::vector<Path> const & paths, Path const & path)
     {
         return path.isRegularFile() && exists_path(paths, path);
     }
@@ -119,6 +119,9 @@ TEST_F(PathScanFixture, ScanRecurrentNameOnly)
     initDirectory(TEMP_DIR);
 
     auto const names = TEMP_DIR.scanRecurrentNameOnly(Path::DIRENT_DIR);
+    for (auto const & name : names) {
+        std::cout << name << std::endl;
+    }
     ASSERT_EQ(4, names.size());
     ASSERT_TRUE(exists_path(names, std::string(TEST_DIR1)));
     ASSERT_TRUE(exists_path(names, std::string(TEST_DIR2)));
@@ -133,6 +136,9 @@ TEST_F(PathScanFixture, ScanRecurrentFiles)
     initDirectory(TEMP_DIR);
 
     auto const names1 = TEMP_DIR.scanRecurrentFiles({".txt"}, false);
+    for (auto const & name : names1) {
+        std::cout << name << std::endl;
+    }
     ASSERT_EQ(4, names1.size());
     ASSERT_TRUE(exists_path(names1, std::string(TEST_PATH7)));
     ASSERT_TRUE(exists_path(names1, std::string(TEST_PATH8)));
