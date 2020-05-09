@@ -1,23 +1,15 @@
 /**
- * @file   DefaultColorGenerator.cpp
- * @brief  DefaultColorGenerator class implementation.
+ * @file   RawColorGenerator.cpp
+ * @brief  RawColorGenerator class implementation.
  * @author zer0
- * @date   2019-07-02
+ * @date   2020-05-09
  */
 
-#include <libtbag/log/msg/DefaultColorGenerator.hpp>
-#include <libtbag/log/msg/DefaultMsg.hpp>
+#include <libtbag/log/msg/RawColorGenerator.hpp>
 #include <libtbag/log/Severity.hpp>
 #include <libtbag/log/details/ColorGeneratorHelper.hpp>
 #include <libtbag/algorithm/MinMax.hpp>
 #include <libtbag/string/Format.hpp>
-#include <libtbag/string/StringUtils.hpp>
-
-#include <cassert>
-#include <cstring>
-
-#include <sstream>
-#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -26,40 +18,39 @@ NAMESPACE_LIBTBAG_OPEN
 namespace log {
 namespace msg {
 
-DefaultColorGenerator::DefaultColorGenerator(LineFeedStyle line_feed)
+RawColorGenerator::RawColorGenerator(LineFeedStyle line_feed)
         : Generator(line_feed)
 {
     // EMPTY.
 }
 
-DefaultColorGenerator::DefaultColorGenerator(std::string const & line_feed)
+RawColorGenerator::RawColorGenerator(std::string const & line_feed)
         : Generator(line_feed)
 {
     // EMPTY.
 }
 
-DefaultColorGenerator::~DefaultColorGenerator()
+RawColorGenerator::~RawColorGenerator()
 {
     // EMPTY.
 }
 
-int DefaultColorGenerator::getPaddingByte() const
+int RawColorGenerator::getPaddingByte() const
 {
     // clang-format on
     using namespace libtbag::string;
     TBAG_CONSTEXPR static auto const padding_byte =
-            string_length(_EMERGENCY_ATTRIBUTE_BG) + // NOLINT
-            string_length(DEFAULT_MSG_PREFIX_SAMPLE) +
-            string_length(TBAG_TTY_DISPLAY_ATTRIBUTE_RESET) +
-            string_length(TBAG_WINDOWS_NEW_LINE);
+        string_length(_EMERGENCY_ATTRIBUTE_BG) + // NOLINT
+        string_length(TBAG_TTY_DISPLAY_ATTRIBUTE_RESET) +
+        string_length(TBAG_WINDOWS_NEW_LINE);
     return padding_byte;
     // clang-format off
 }
 
-int DefaultColorGenerator::make(char * buffer, int buffer_size,
-                                char const * UNUSED_PARAM(logger),
-                                int level, char const * UNUSED_PARAM(level_name),
-                                char const * msg, int msg_size) const
+int RawColorGenerator::make(char * buffer, int buffer_size,
+                            char const * UNUSED_PARAM(logger),
+                            int level, char const * UNUSED_PARAM(level_name),
+                            char const * msg, int msg_size) const
 {
     assert(buffer != nullptr);
     assert(buffer_size >= 1);
@@ -68,7 +59,6 @@ int DefaultColorGenerator::make(char * buffer, int buffer_size,
 
     std::stringstream ss;
     ss << libtbag::log::details::getColorPrefix(level);
-    makeDefaultPrefix(ss, level);
     ss.write(msg, msg_size);
     ss << libtbag::log::details::getColorSuffix(level) << LINE_FEED_STR;
 

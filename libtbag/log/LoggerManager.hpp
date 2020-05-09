@@ -154,6 +154,7 @@ TBAG_CONSTEXPR char const * const SINK_ROTATE_FILE = "rotate_file";
 TBAG_CONSTEXPR char const * const GENERATOR_DEFAULT       = "default";
 TBAG_CONSTEXPR char const * const GENERATOR_DEFAULT_COLOR = "default_color";
 TBAG_CONSTEXPR char const * const GENERATOR_RAW           = "raw";
+TBAG_CONSTEXPR char const * const GENERATOR_RAW_COLOR     = "raw_color";
 
 struct LoggerInitParams
 {

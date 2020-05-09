@@ -13,6 +13,7 @@
 #include <libtbag/log/msg/DefaultColorGenerator.hpp>
 #include <libtbag/log/msg/DefaultGenerator.hpp>
 #include <libtbag/log/msg/RawGenerator.hpp>
+#include <libtbag/log/msg/RawColorGenerator.hpp>
 
 #include <libtbag/log/sink/ConsoleSink.hpp>
 #include <libtbag/log/sink/FileSink.hpp>
@@ -287,6 +288,8 @@ bool existsGeneratorName(std::string const & name)
         return true;
     } else if (lower == GENERATOR_RAW) {
         return true;
+    } else if (lower == GENERATOR_RAW_COLOR) {
+        return true;
     }
     return false;
 }
@@ -323,6 +326,8 @@ Logger::SharedGenerator newGenerator(std::string const & name, std::string const
         return std::make_shared<DefaultColorGenerator>(line_feed);
     } else if (lower == GENERATOR_RAW) {
         return std::make_shared<RawGenerator>(line_feed);
+    } else if (lower == GENERATOR_RAW_COLOR) {
+        return std::make_shared<RawColorGenerator>(line_feed);
     } else {
         return Logger::SharedGenerator(nullptr);
     }
