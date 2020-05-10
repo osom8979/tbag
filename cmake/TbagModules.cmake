@@ -305,6 +305,25 @@ macro (tbag_modules__data_to_string __target __output_path __name __source_path 
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
 
+#/// Write strip-regex.
+#///
+#/// @param __target      [in] Target name.
+#/// @param __output_path [in] Output file path.
+#/// @param __source_path [in] Source file path.
+#/// @param __regex       [in] Remove regex.
+macro (tbag_modules__strip_regex __target __output_path __source_path __regex)
+    add_custom_command (
+            OUTPUT  "${__output_path}"
+            COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
+                                     "-DSOURCE_PATH=${__source_path}"
+                                     "-DREGEX=${__regex}"
+                                     -P "${TBAG_SCRIPT_DIR}/TbagStripRegex.cmake"
+            DEPENDS ${__source_path}
+            COMMENT "Data to String: ${__output_path}" VERBATIM)
+    add_custom_target (${__target} SOURCES "${__output_path}")
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
+endmacro ()
+
 #/// Write Data to 7zip to String header file.
 #///
 #/// @param __target      [in] Target name.
