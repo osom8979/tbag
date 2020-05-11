@@ -9,6 +9,10 @@ if (NOT IS_DIRECTORY "${OUTPUT_DIR}")
     file (MAKE_DIRECTORY "${OUTPUT_DIR}")
 endif ()
 
+if (EXISTS "${OUTPUT_PATH}")
+    file (REMOVE "${OUTPUT_PATH}")
+endif ()
+
 file (STRINGS "${SOURCE_PATH}" __content ENCODING UTF-8)
 foreach (__cursor ${__content})
     if (NOT __cursor MATCHES ${REGEX})
