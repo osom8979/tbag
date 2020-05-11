@@ -319,7 +319,34 @@ macro (tbag_modules__strip_regex __target __output_path __source_path __regex)
                                      "-DREGEX=${__regex}"
                                      -P "${TBAG_SCRIPT_DIR}/TbagStripRegex.cmake"
             DEPENDS ${__source_path}
-            COMMENT "Data to String: ${__output_path}" VERBATIM)
+            COMMENT "Strip regex: ${__output_path}" VERBATIM)
+    add_custom_target (${__target} SOURCES "${__output_path}")
+    list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
+endmacro ()
+
+#/// StripRegex and Data2String.
+#///
+#/// @param __target      [in] Target name.
+#/// @param __output_path [in] Output file path.
+#/// @param __name        [in] Variable name.
+#/// @param __source_path [in] Source file path.
+#/// @param __regex       [in] Remove regex.
+#/// @param __hex_mode    [in] Hex mode (ON/OFF)
+macro (tbag_modules__strip_regex_to_string __target __output_path __name __source_path __regex __hex_mode)
+    set (__strip_output_temp_path "${CMAKE_BINARY_DIR}/${__target}.strip")
+    add_custom_command (
+            OUTPUT  "${__strip_output_temp_path}" "${__output_path}"
+            COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__strip_output_temp_path}"
+                                     "-DSOURCE_PATH=${__source_path}"
+                                     "-DREGEX=${__regex}"
+                                     -P "${TBAG_SCRIPT_DIR}/TbagStripRegex.cmake"
+            COMMAND ${CMAKE_COMMAND} "-DOUTPUT_PATH=${__output_path}"
+                                     "-DNAME=${__name}"
+                                     "-DSOURCE_PATH=${__strip_output_temp_path}"
+                                     "-DHEX_MODE=${__hex_mode}"
+                                     -P "${TBAG_SCRIPT_DIR}/TbagData2String.cmake"
+            DEPENDS ${__source_path}
+            COMMENT "StripRegex -> Data2String: ${__output_path}" VERBATIM)
     add_custom_target (${__target} SOURCES "${__output_path}")
     list (APPEND TBAG_PROJECT_DEPENDENCIES ${__target})
 endmacro ()
