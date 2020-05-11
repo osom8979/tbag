@@ -40,7 +40,8 @@ struct TBAG_API Mime
     TBAG_CONSTEXPR static char const * const ALL = "*";
 
     TBAG_CONSTEXPR static char const * const TEXT_PLAIN = "text/plain";
-    TBAG_CONSTEXPR static char const * const TEXT_html = "text/html";
+    TBAG_CONSTEXPR static char const * const TEXT_HTML = "text/html";
+    TBAG_CONSTEXPR static char const * const TEXT_CSV = "text/csv";
     TBAG_CONSTEXPR static char const * const IMAGE_JPEG = "image/jpeg";
     TBAG_CONSTEXPR static char const * const IMAGE_PNG = "image/png";
     TBAG_CONSTEXPR static char const * const AUDIO_MPEG = "audio/mpeg";
