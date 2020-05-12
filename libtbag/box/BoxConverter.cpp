@@ -6,7 +6,6 @@
  */
 
 #include <libtbag/box/BoxConverter.hpp>
-#include <libtbag/net/Mime.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/graphic/ImageIO.hpp>
 
@@ -50,7 +49,7 @@ static Err __convert_text(Box const & src, Box & dest)
     return E_SUCCESS;
 }
 
-static Err __convert(libtbag::net::Mime const & mime, Box const & src, Box & dest)
+Err convert(libtbag::net::Mime const & mime, Box const & src, Box & dest)
 {
     using namespace libtbag::string;
     auto const subtype = lower(trim(mime.subtype));
@@ -69,7 +68,7 @@ static Err __convert(libtbag::net::Mime const & mime, Box const & src, Box & des
 
 Err convert(std::string const & mime, Box const & src, Box & dest)
 {
-    return __convert(libtbag::net::Mime(mime), src, dest);
+    return convert(libtbag::net::Mime(mime), src, dest);
 }
 
 } // namespace box

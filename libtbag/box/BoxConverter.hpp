@@ -17,6 +17,7 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/box/Box.hpp>
+#include <libtbag/net/Mime.hpp>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -24,6 +25,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace box {
 
+TBAG_API Err convert(libtbag::net::Mime const & mime, Box const & src, Box & dest);
 TBAG_API Err convert(std::string const & mime, Box const & src, Box & dest);
 
 } // namespace box
