@@ -6,6 +6,7 @@
  *
  * @see <https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types>
  * @see <https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types>
+ * @see <https://www.iana.org/assignments/media-types/media-types.xhtml>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NET_MIME_HPP__
@@ -19,7 +20,9 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+
 #include <string>
+#include <ostream>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -53,7 +56,34 @@ struct TBAG_API Mime
     std::string subtype;
     std::string parameter;
 
+    Mime();
+    Mime(std::string const & mime);
+    Mime(std::string const & t, std::string const & s);
+    Mime(std::string const & t, std::string const & s, std::string const & p);
+    Mime(Mime const & obj);
+    Mime(Mime && obj) TBAG_NOEXCEPT;
+    ~Mime();
+
+    Mime & operator =(Mime const & obj);
+    Mime & operator =(Mime && obj) TBAG_NOEXCEPT;
+
+    void swap(Mime & obj) TBAG_NOEXCEPT;
+    friend void swap(Mime & lh, Mime & rh) TBAG_NOEXCEPT
+    { lh.swap(rh); }
+
+    bool isCompatible(Mime const & obj) const;
+
+    bool operator ==(Mime const & obj) const;
+    bool operator !=(Mime const & obj) const;
+
+    void fromString(std::string const & mime);
     std::string toString() const;
+
+    template <class CharT, class TraitsT>
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os, Mime const & mime)
+    {
+        return os << mime.toString();
+    }
 };
 
 } // namespace net
