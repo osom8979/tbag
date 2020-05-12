@@ -14,7 +14,7 @@ using namespace libtbag::filesystem;
 
 TEST(CwdGuardTest, Default)
 {
-    tttDir_AutoCreate();
+    tttDir_Automatic();
     auto const dir = tttDir_Get();
     auto const cwd = Path::getWorkDir();
     COMMENT("Save state") {

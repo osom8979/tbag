@@ -239,10 +239,15 @@ static void __write_image_cb(void * context, void * data, int size)
     auto * buffer = static_cast<libtbag::util::Buffer*>(context);
     assert(buffer != nullptr);
 
+    auto const begin = (libtbag::util::Buffer::const_pointer)data;
+    auto const end = begin + size;
+    buffer->insert(buffer->end(), begin, end);
+#if 0
     buffer->resize(static_cast<std::size_t>(size));
     for (int i = 0; i < size; ++i) {
         (*buffer)[i] = ((libtbag::util::Buffer::const_pointer)data)[i];
     }
+#endif
 }
 
 Err writeImage(util::Buffer & buffer, Box const & image, ImageFileFormat format)
@@ -251,6 +256,8 @@ Err writeImage(util::Buffer & buffer, Box const & image, ImageFileFormat format)
     auto const width = image.dim(1);
     auto const channels = image.dim(2);
     auto const * data = (char const *)image.data();
+
+    buffer.clear();
 
     int result = 0;
     switch (format) {
