@@ -28,6 +28,28 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace graphic {
 
+int convertFactorToJpegQuality(float factor)
+{
+    if (factor <= 0.0f) {
+        return MIN_JPG_QUALITY;
+    }
+    if (factor >= 1.0f) {
+        return MAX_JPG_QUALITY;
+    }
+    return static_cast<int>(MAX_JPG_QUALITY*factor);
+}
+
+float convertJpegQualityToFactor(int jpeg_quality)
+{
+    if (jpeg_quality <= MIN_JPG_QUALITY) {
+        return 0.01f;
+    }
+    if (jpeg_quality >= MAX_JPG_QUALITY) {
+        return 1.0f;
+    }
+    return static_cast<float>(jpeg_quality)/MAX_JPG_QUALITY;
+}
+
 bool writePng(char const * path, int width, int height, int channels, char const * data, int stride_bytes)
 {
     return stbi_write_png(path, width, height, channels, data, stride_bytes) != 0;
@@ -250,7 +272,7 @@ static void __write_image_cb(void * context, void * data, int size)
 #endif
 }
 
-Err writeImage(util::Buffer & buffer, Box const & image, ImageFileFormat format)
+Err writeImage(util::Buffer & buffer, Box const & image, ImageFileFormat format, float factor)
 {
     auto const height = image.dim(0);
     auto const width = image.dim(1);
@@ -262,10 +284,12 @@ Err writeImage(util::Buffer & buffer, Box const & image, ImageFileFormat format)
     int result = 0;
     switch (format) {
     case ImageFileFormat::IFF_PNG:
-        result = stbi_write_png_to_func(&__write_image_cb, &buffer, width, height, channels, data, width * channels);
+        result = stbi_write_png_to_func(&__write_image_cb, &buffer, width, height, channels, data,
+                                        width*channels);
         break;
     case ImageFileFormat::IFF_JPG:
-        result = stbi_write_jpg_to_func(&__write_image_cb, &buffer, width, height, channels, data, DEFAULT_JPG_QUALITY);
+        result = stbi_write_jpg_to_func(&__write_image_cb, &buffer, width, height, channels, data,
+                                        convertFactorToJpegQuality(factor));
         break;
     case ImageFileFormat::IFF_BMP:
         result = stbi_write_bmp_to_func(&__write_image_cb, &buffer, width, height, channels, data);

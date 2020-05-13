@@ -20,7 +20,7 @@ namespace box {
 
 using ImageFileFormat = libtbag::graphic::ImageFileFormat;
 
-static Err __convert_image(Box const & src, Box & dest, ImageFileFormat format)
+static Err __convert_image(Box const & src, Box & dest, ImageFileFormat format, float factor)
 {
     using namespace libtbag::graphic;
     using namespace libtbag::util;
@@ -55,10 +55,20 @@ Err convert(libtbag::net::Mime const & mime, Box const & src, Box & dest)
     auto const subtype = lower(trim(mime.subtype));
 
     if (mime.isImageType()) {
+        float q;
+        auto q_itr = mime.parameters.find("q");
+        if (q_itr != mime.parameters.end()) {
+            q = toValue<float>(q_itr->second, libtbag::graphic::DEFAULT_FACTOR);
+        } else {
+            q = libtbag::graphic::DEFAULT_FACTOR;
+        }
+
         if (subtype == "jpeg") {
-            return __convert_image(src, dest, ImageFileFormat::IFF_JPG);
+            return __convert_image(src, dest, ImageFileFormat::IFF_JPG, q);
         } else if (subtype == "png") {
-            return __convert_image(src, dest, ImageFileFormat::IFF_PNG);
+            return __convert_image(src, dest, ImageFileFormat::IFF_PNG, q);
+        } else if (subtype == "bmp") {
+            return __convert_image(src, dest, ImageFileFormat::IFF_BMP, q);
         }
     } else if (mime.isTextType()) {
         return __convert_text(src, dest);

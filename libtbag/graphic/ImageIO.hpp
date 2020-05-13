@@ -50,6 +50,10 @@ TBAG_CONSTEXPR char const * const TGA_LOWER_EXT = ".tga";
 TBAG_CONSTEXPR int const MAX_JPG_QUALITY = 100;
 TBAG_CONSTEXPR int const MIN_JPG_QUALITY = 1;
 TBAG_CONSTEXPR int const DEFAULT_JPG_QUALITY = 80;
+TBAG_CONSTEXPR float const DEFAULT_FACTOR = 0.8;
+
+TBAG_API int convertFactorToJpegQuality(float factor);
+TBAG_API float convertJpegQualityToFactor(int jpeg_quality);
 
 TBAG_API bool writePng(char const * path, int width, int height, int channels, char const * data, int stride_bytes);
 TBAG_API bool writePng(char const * path, int width, int height, int channels, char const * data);
@@ -79,7 +83,9 @@ TBAG_API Err readRgbaImage(std::string const & path, Box & image);
 TBAG_API Err writeImage(std::string const & path, Box const & image);
 
 /** Write image buffer. */
-TBAG_API Err writeImage(util::Buffer & buffer, Box const & image, ImageFileFormat format = ImageFileFormat::IFF_PNG);
+TBAG_API Err writeImage(util::Buffer & buffer, Box const & image,
+                        ImageFileFormat format = ImageFileFormat::IFF_PNG,
+                        float factor = DEFAULT_FACTOR);
 
 } // namespace graphic
 
