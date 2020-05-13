@@ -7,6 +7,7 @@
  * @see <https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types>
  * @see <https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types>
  * @see <https://www.iana.org/assignments/media-types/media-types.xhtml>
+ * @see <https://tools.ietf.org/html/rfc1494>
  */
 
 #ifndef __INCLUDE_LIBTBAG__LIBTBAG_NET_MIME_HPP__
@@ -22,6 +23,7 @@
 #include <libtbag/Noncopyable.hpp>
 
 #include <string>
+#include <unordered_map>
 #include <ostream>
 
 // -------------------
@@ -54,6 +56,7 @@ struct TBAG_API Mime
 {
     TBAG_CONSTEXPR static char const * const TYPE_DELIMITER = "/";
     TBAG_CONSTEXPR static char const * const PARAMETER_DELIMITER = ";";
+    TBAG_CONSTEXPR static char const * const PARAMETER_KEY_VALUE_SPLITTER = "=";
     TBAG_CONSTEXPR static char const * const ALL = "*";
 
     TBAG_CONSTEXPR static char const * const APPLICATION_OCTET_STREAM = TBAG_MIME_IANA_TYPE_APPLICATION "/octet-stream";
@@ -86,14 +89,19 @@ struct TBAG_API Mime
     TBAG_CONSTEXPR static char const * const VIDEO_OGG  = TBAG_MIME_IANA_TYPE_VIDEO "/ogg";
     TBAG_CONSTEXPR static char const * const VIDEO_MP4  = TBAG_MIME_IANA_TYPE_VIDEO "/mp4";
 
+    using ParamKey = std::string;
+    using ParamVal = std::string;
+    using Parameters = std::unordered_map<ParamKey, ParamVal>;
+
     std::string type;
     std::string subtype;
-    std::string parameter;
+
+    Parameters parameters;
 
     Mime();
     Mime(std::string const & mime);
     Mime(std::string const & t, std::string const & s);
-    Mime(std::string const & t, std::string const & s, std::string const & p);
+    Mime(std::string const & t, std::string const & s, Parameters const & p);
     Mime(Mime const & obj);
     Mime(Mime && obj) TBAG_NOEXCEPT;
     ~Mime();

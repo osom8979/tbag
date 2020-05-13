@@ -19,10 +19,12 @@ TEST(MimeTest, ToString)
 
 TEST(MimeTest, FromString)
 {
-    auto const obj = Mime("text/plain;charset=UTF-8");
+    auto const obj = Mime("text/plain;charset=UTF-8;q=0.7");
     ASSERT_STREQ("text", obj.type.c_str());
     ASSERT_STREQ("plain", obj.subtype.c_str());
-    ASSERT_STREQ("charset=UTF-8", obj.parameter.c_str());
+    ASSERT_EQ(2, obj.parameters.size());
+    ASSERT_STREQ("UTF-8", obj.parameters.at("charset").c_str());
+    ASSERT_STREQ("0.7", obj.parameters.at("q").c_str());
 }
 
 TEST(MimeTest, IsCompatible)

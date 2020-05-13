@@ -33,8 +33,8 @@ Mime::Mime(std::string const & t, std::string const & s)
     // EMPTY.
 }
 
-Mime::Mime(std::string const & t, std::string const & s, std::string const & p)
-        : type(t), subtype(s), parameter(p)
+Mime::Mime(std::string const & t, std::string const & s, Parameters const & p)
+        : type(t), subtype(s), parameters(p)
 {
     // EMPTY.
 }
@@ -42,7 +42,7 @@ Mime::Mime(std::string const & t, std::string const & s, std::string const & p)
 Mime::Mime(Mime const & obj)
         : type(obj.type),
           subtype(obj.subtype),
-          parameter(obj.parameter)
+          parameters(obj.parameters)
 {
     // EMPTY.
 }
@@ -50,7 +50,7 @@ Mime::Mime(Mime const & obj)
 Mime::Mime(Mime && obj) TBAG_NOEXCEPT
         : type(std::move(obj.type)),
           subtype(std::move(obj.subtype)),
-          parameter(std::move(obj.parameter))
+          parameters(std::move(obj.parameters))
 {
     // EMPTY.
 }
@@ -65,7 +65,7 @@ Mime & Mime::operator =(Mime const & obj)
     if (this != &obj) {
         type = obj.type;
         subtype = obj.subtype;
-        parameter = obj.parameter;
+        parameters = obj.parameters;
     }
     return *this;
 }
@@ -75,7 +75,7 @@ Mime & Mime::operator =(Mime && obj) TBAG_NOEXCEPT
     if (this != &obj) {
         type = std::move(obj.type);
         subtype = std::move(obj.subtype);
-        parameter = std::move(obj.parameter);
+        parameters = std::move(obj.parameters);
     }
     return *this;
 }
@@ -85,7 +85,7 @@ void Mime::swap(Mime & obj) TBAG_NOEXCEPT
     if (this != &obj) {
         type.swap(obj.type);
         subtype.swap(obj.subtype);
-        parameter.swap(obj.parameter);
+        parameters.swap(obj.parameters);
     }
 }
 
@@ -131,16 +131,23 @@ bool Mime::operator !=(Mime const & obj) const
 void Mime::fromString(std::string const & mime)
 {
     using namespace libtbag::string;
-    auto type_subtype = divideTwo(mime, TYPE_DELIMITER);
-    type = std::move(type_subtype.first);
-
-    if (type_subtype.second.empty()) {
+    auto const tokens = splitTokens(mime, PARAMETER_DELIMITER);
+    if (tokens.empty()) {
+        type.clear();
         subtype.clear();
-        parameter.clear();
-    } else {
-        auto subtype_parameter = divideTwo(type_subtype.second, PARAMETER_DELIMITER);
-        subtype = std::move(subtype_parameter.first);
-        parameter = std::move(subtype_parameter.second);
+        parameters.clear();
+        return;
+    }
+
+    auto const types = divideTwo(tokens[0], TYPE_DELIMITER);
+    type = trim(types.first);
+    subtype = trim(types.second);
+
+    auto itr = tokens.begin()+1;
+    auto const end = tokens.end();
+    for (; itr != end; ++itr) {
+        auto const key_value = divideTwo(*itr, PARAMETER_KEY_VALUE_SPLITTER);
+        parameters.emplace(trim(key_value.first), trim(key_value.second));
     }
 }
 
@@ -154,8 +161,9 @@ std::string Mime::toString() const
     if (!subtype.empty()) {
         ss << TYPE_DELIMITER << subtype;
     }
-    if (!parameter.empty()) {
-        ss << PARAMETER_DELIMITER << parameter;
+    for (auto const & param : parameters) {
+        ss << PARAMETER_DELIMITER << param.first
+           << PARAMETER_KEY_VALUE_SPLITTER << param.second;
     }
     return ss.str();
 }
