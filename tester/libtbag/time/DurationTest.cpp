@@ -25,5 +25,14 @@ TEST(DurationTest, Default)
     std::stringstream ss;
     ss << Duration(10000000);
     ASSERT_FALSE(ss.str().empty());
+
+    auto const one_day = Duration("1d");
+    ASSERT_EQ(std::chrono::nanoseconds(1), Duration("1ns"));
+    ASSERT_EQ(std::chrono::microseconds(1), Duration("1us"));
+    ASSERT_EQ(std::chrono::milliseconds(1), Duration("1ms"));
+    ASSERT_EQ(std::chrono::seconds(1), Duration("1s"));
+    ASSERT_EQ(std::chrono::minutes(1), Duration("1min"));
+    ASSERT_EQ(std::chrono::hours(1), Duration("1h"));
+    ASSERT_EQ(std::chrono::hours(24), Duration("1d"));
 }
 

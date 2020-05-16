@@ -161,9 +161,14 @@ std::string Duration::toUpperTimeText() const
     return libtbag::time::getUpperTimeText(_nano);
 }
 
-void Duration::fromString(std::string const & text)
+Err Duration::fromString(std::string const & text)
 {
-    _nano = std::chrono::nanoseconds(libtbag::time::toNanoseconds(text));
+    auto const result = libtbag::time::parseNanoseconds(text);
+    if (!result) {
+        return result;
+    }
+    _nano = std::chrono::nanoseconds(result.value);
+    return E_SUCCESS;
 }
 
 std::string Duration::toString() const

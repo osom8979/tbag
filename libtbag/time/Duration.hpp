@@ -115,6 +115,20 @@ public:
     bool operator !=(Duration const & obj) const { return _nano != obj._nano; }
 
 public:
+    template <typename R, typename P>
+    friend bool operator < (std::chrono::duration<R,P> const & lh, Duration const & rh) { return lh <  rh._nano; }
+    template <typename R, typename P>
+    friend bool operator <=(std::chrono::duration<R,P> const & lh, Duration const & rh) { return lh <= rh._nano; }
+    template <typename R, typename P>
+    friend bool operator > (std::chrono::duration<R,P> const & lh, Duration const & rh) { return lh >  rh._nano; }
+    template <typename R, typename P>
+    friend bool operator >=(std::chrono::duration<R,P> const & lh, Duration const & rh) { return lh >= rh._nano; }
+    template <typename R, typename P>
+    friend bool operator ==(std::chrono::duration<R,P> const & lh, Duration const & rh) { return lh == rh._nano; }
+    template <typename R, typename P>
+    friend bool operator !=(std::chrono::duration<R,P> const & lh, Duration const & rh) { return lh != rh._nano; }
+
+public:
     std::size_t toNanoseconds () const;
     std::size_t toMicroseconds() const;
     std::size_t toMilliseconds() const;
@@ -136,7 +150,7 @@ public:
     std::string toUpperTimeText() const;
 
 public:
-    void fromString(std::string const & text);
+    Err fromString(std::string const & text);
     std::string toString() const;
 
 public:

@@ -47,6 +47,22 @@
 #define TBAG_EMPTY_STRING_WIDE  L""
 #define TBAG_SPACE_STRING       " "
 
+#define TBAG_STRCMP1(l, r) l[0] == r[0]
+#define TBAG_STRCMP2(l, r) TBAG_STRCMP1(l, r) && l[1] == r[1]
+#define TBAG_STRCMP3(l, r) TBAG_STRCMP2(l, r) && l[2] == r[2]
+#define TBAG_STRCMP4(l, r) TBAG_STRCMP3(l, r) && l[3] == r[3]
+#define TBAG_STRCMP5(l, r) TBAG_STRCMP4(l, r) && l[4] == r[4]
+#define TBAG_STRCMP6(l, r) TBAG_STRCMP5(l, r) && l[5] == r[5]
+#define TBAG_STRCMP7(l, r) TBAG_STRCMP6(l, r) && l[6] == r[6]
+#define TBAG_STRCMP8(l, r) TBAG_STRCMP7(l, r) && l[7] == r[7]
+#define TBAG_STRCMP9(l, r) TBAG_STRCMP8(l, r) && l[8] == r[8]
+#define TBAG_STRCMP10(l, r) TBAG_STRCMP9(l, r) && l[9] == r[9]
+#define TBAG_STRCMP11(l, r) TBAG_STRCMP10(l, r) && l[10] == r[10]
+#define TBAG_STRCMP12(l, r) TBAG_STRCMP11(l, r) && l[11] == r[11]
+#define TBAG_STRCMP13(l, r) TBAG_STRCMP12(l, r) && l[12] == r[12]
+#define TBAG_STRCMP14(l, r) TBAG_STRCMP13(l, r) && l[13] == r[13]
+#define TBAG_STRCMP15(l, r) TBAG_STRCMP14(l, r) && l[14] == r[14]
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------

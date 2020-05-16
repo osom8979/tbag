@@ -15,17 +15,18 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
+#include <libtbag/ErrPair.hpp>
 
 #include <chrono>
 #include <string>
 
-#define TBAG_NANO_DURATION_STRING   "ns"
-#define TBAG_MICRO_DURATION_STRING  "us"
-#define TBAG_MILLI_DURATION_STRING  "ms"
-#define TBAG_SEC_DURATION_STRING    "s"
-#define TBAG_MIN_DURATION_STRING    "min"
-#define TBAG_HOUR_DURATION_STRING   "h"
-#define TBAG_DAY_DURATION_STRING    "d"
+#define TBAG_NANO_DURATION_STRING  "ns"
+#define TBAG_MICRO_DURATION_STRING "us"
+#define TBAG_MILLI_DURATION_STRING "ms"
+#define TBAG_SEC_DURATION_STRING   "s"
+#define TBAG_MIN_DURATION_STRING   "min"
+#define TBAG_HOUR_DURATION_STRING  "h"
+#define TBAG_DAY_DURATION_STRING   "d"
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -39,23 +40,32 @@ inline TBAG_CONSTEXPR char const * getDurationString() TBAG_NOEXCEPT
     return "";
 }
 
-// clang-format off
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::nanoseconds> () TBAG_NOEXCEPT { return TBAG_NANO_DURATION_STRING; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::microseconds>() TBAG_NOEXCEPT { return TBAG_MICRO_DURATION_STRING; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::milliseconds>() TBAG_NOEXCEPT { return TBAG_MILLI_DURATION_STRING; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::seconds>     () TBAG_NOEXCEPT { return TBAG_SEC_DURATION_STRING; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::minutes>     () TBAG_NOEXCEPT { return TBAG_MIN_DURATION_STRING; }
-template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::hours>       () TBAG_NOEXCEPT { return TBAG_HOUR_DURATION_STRING; }
-// clang-format on
+TBAG_CONSTEXPR char const * const NANO_DURATION_STRING  = TBAG_NANO_DURATION_STRING ;
+TBAG_CONSTEXPR char const * const MICRO_DURATION_STRING = TBAG_MICRO_DURATION_STRING;
+TBAG_CONSTEXPR char const * const MILLI_DURATION_STRING = TBAG_MILLI_DURATION_STRING;
+TBAG_CONSTEXPR char const * const SEC_DURATION_STRING   = TBAG_SEC_DURATION_STRING  ;
+TBAG_CONSTEXPR char const * const MIN_DURATION_STRING   = TBAG_MIN_DURATION_STRING  ;
+TBAG_CONSTEXPR char const * const HOUR_DURATION_STRING  = TBAG_HOUR_DURATION_STRING ;
+TBAG_CONSTEXPR char const * const DAY_DURATION_STRING   = TBAG_DAY_DURATION_STRING  ;
 
 // clang-format off
-TBAG_API std::size_t toNanoseconds (std::string const & str);
-TBAG_API std::size_t toMicroseconds(std::string const & str);
-TBAG_API std::size_t toMilliseconds(std::string const & str);
-TBAG_API std::size_t toSeconds     (std::string const & str);
-TBAG_API std::size_t toMinutes     (std::string const & str);
-TBAG_API std::size_t toHours       (std::string const & str);
-TBAG_API std::size_t toDays        (std::string const & str);
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::nanoseconds> () TBAG_NOEXCEPT { return NANO_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::microseconds>() TBAG_NOEXCEPT { return MICRO_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::milliseconds>() TBAG_NOEXCEPT { return MILLI_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::seconds>     () TBAG_NOEXCEPT { return SEC_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::minutes>     () TBAG_NOEXCEPT { return MIN_DURATION_STRING; }
+template <> inline TBAG_CONSTEXPR char const * getDurationString<std::chrono::hours>       () TBAG_NOEXCEPT { return HOUR_DURATION_STRING; }
+// clang-format on
+
+using ErrSize = libtbag::ErrPair<std::size_t>;
+
+// clang-format off
+TBAG_API ErrSize parseNanoseconds (std::string const & str);
+TBAG_API ErrSize parseMicroseconds(std::string const & str);
+TBAG_API ErrSize parseMilliseconds(std::string const & str);
+TBAG_API ErrSize parseSeconds     (std::string const & str);
+TBAG_API ErrSize parseMinutes     (std::string const & str);
+TBAG_API ErrSize parseHours       (std::string const & str);
 // clang-format on
 
 template <typename Duration>

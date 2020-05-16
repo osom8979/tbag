@@ -35,44 +35,43 @@ TEST(DurationStringTest, SystemClock)
               << ") duration text: " << text << std::endl;
 }
 
-TEST(DurationStringTest, ToMilliseconds)
+TEST(DurationStringTest, ParseMilliseconds)
 {
-    ASSERT_EQ(4000, toMilliseconds("4000"));
-    ASSERT_EQ(2000, toMilliseconds("2000mil"));
-    ASSERT_EQ(1000, toMilliseconds("1000milliseconds"));
-    ASSERT_EQ(1000, toMilliseconds("1sec"));
-    ASSERT_EQ(0, toMilliseconds("1nano"));
-    ASSERT_EQ(0, toMilliseconds("1micro"));
-    ASSERT_EQ(60*1000, toMilliseconds("1min"));
-    ASSERT_EQ(2000, toMilliseconds("2s"));
-    ASSERT_EQ(2*60*60*1000, toMilliseconds("2h"));
+    ASSERT_EQ(4000, parseMilliseconds("4000").value);
+    ASSERT_EQ(2000, parseMilliseconds("2000milli").value);
+    ASSERT_EQ(1000, parseMilliseconds("1000milliseconds").value);
+    ASSERT_EQ(1000, parseMilliseconds("1sec").value);
+
+    ASSERT_EQ(0, parseMilliseconds("1 nano").value);
+    ASSERT_EQ(0, parseMilliseconds("1 micro").value);
+    ASSERT_EQ(60*1000, parseMilliseconds("1 min").value);
+    ASSERT_EQ(2000, parseMilliseconds("2 s").value);
+    ASSERT_EQ(2*60*60*1000, parseMilliseconds("2 h").value);
 }
 
-TEST(DurationStringTest, ToNanoseconds)
+TEST(DurationStringTest, ParseNanoseconds)
 {
-    ASSERT_EQ(4000, toNanoseconds("4000"));
-    ASSERT_EQ(2000, toNanoseconds("2000nano"));
-    ASSERT_EQ(1000, toNanoseconds("1000n"));
-    ASSERT_EQ(1000*1000, toNanoseconds("1000micro"));
-    ASSERT_EQ(1000*1000*1000, toNanoseconds("1000milli"));
-    ASSERT_EQ(1000*1000*1000, toNanoseconds("1sec"));
+    ASSERT_EQ(4000, parseNanoseconds("4000").value);
+    ASSERT_EQ(2000, parseNanoseconds("2000nano").value);
+    ASSERT_EQ(1000, parseNanoseconds("1000n").value);
+    ASSERT_EQ(1000*1000, parseNanoseconds("1000micro").value);
+    ASSERT_EQ(1000*1000*1000, parseNanoseconds("1000milli").value);
+    ASSERT_EQ(1000*1000*1000, parseNanoseconds("1sec").value);
 }
 
-TEST(DurationStringTest, ToHours)
+TEST(DurationStringTest, ParseHours)
 {
-    ASSERT_EQ(1, toHours("1"));
-    ASSERT_EQ(1, toHours("1h"));
-    ASSERT_EQ(0, toHours("1min"));
-    ASSERT_EQ(0, toHours("1sec"));
-    ASSERT_EQ(0, toHours("1mil"));
-    ASSERT_EQ(0, toHours("1mic"));
-    ASSERT_EQ(0, toHours("1nano"));
+    ASSERT_EQ(1, parseHours("1").value);
+    ASSERT_EQ(1, parseHours("1h").value);
+    ASSERT_EQ(0, parseHours("1min").value);
+    ASSERT_EQ(0, parseHours("1sec").value);
+    ASSERT_EQ(0, parseHours("1mil").value);
+    ASSERT_EQ(0, parseHours("1mic").value);
+    ASSERT_EQ(0, parseHours("1nano").value);
 }
 
 TEST(DurationStringTest, GetUpperTimeText)
 {
-    ASSERT_STREQ("1day", getUpperTimeTextByHours(24).c_str());
-    ASSERT_STREQ("1month", getUpperTimeTextByHours(24*30).c_str());
-    ASSERT_STREQ("1year", getUpperTimeTextByHours(24*365).c_str());
+    ASSERT_STREQ("1d", getUpperTimeTextByHours(24).c_str());
 }
 
