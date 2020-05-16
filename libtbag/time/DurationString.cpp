@@ -7,6 +7,7 @@
 
 #include <libtbag/time/DurationString.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/Unit.hpp>
 
 #include <cctype>
 #include <cassert>
@@ -45,25 +46,26 @@ static std::size_t __to_chrono_duration(std::string const & str)
         return value;
     }
 
-    assert(suffix_size >= 1);
-    if (suffix[0] == 'h') {
-        return duration_cast<DefaultDurationT>(hours(value)).count();
-    } else if (suffix[0] == 's') {
-        return duration_cast<DefaultDurationT>(seconds(value)).count();
-    } else if (suffix[0] == 'n') {
+    if (suffix == TBAG_NANO_DURATION_STRING) {
         return duration_cast<DefaultDurationT>(nanoseconds(value)).count();
-    } else if (suffix[0] == 'm') {
-        if (suffix_size >= 2 && suffix[1] == 'i') {
-            if (suffix_size >= 3) {
-                if (suffix[2] == 'c') { // mic
-                    return duration_cast<DefaultDurationT>(microseconds(value)).count();
-                } else if (suffix[2] == 'l') { // mil
-                    return duration_cast<DefaultDurationT>(milliseconds(value)).count();
-                } else if (suffix[2] == 'n') { // min
-                    return duration_cast<DefaultDurationT>(minutes(value)).count();
-                }
-            }
-        }
+    }
+    if (suffix == TBAG_MICRO_DURATION_STRING) {
+        return duration_cast<DefaultDurationT>(microseconds(value)).count();
+    }
+    if (suffix == TBAG_MILLI_DURATION_STRING) {
+        return duration_cast<DefaultDurationT>(milliseconds(value)).count();
+    }
+    if (suffix == TBAG_SEC_DURATION_STRING) {
+        return duration_cast<DefaultDurationT>(seconds(value)).count();
+    }
+    if (suffix == TBAG_MIN_DURATION_STRING) {
+        return duration_cast<DefaultDurationT>(minutes(value)).count();
+    }
+    if (suffix == TBAG_HOUR_DURATION_STRING) {
+        return duration_cast<DefaultDurationT>(hours(value)).count();
+    }
+    if (suffix == TBAG_DAY_DURATION_STRING) {
+        return duration_cast<DefaultDurationT>(hours(value*DAY_TO_HOURS)).count();
     }
 
     return value;
@@ -99,19 +101,14 @@ std::size_t toHours(std::string const & str)
     return __to_chrono_duration<std::chrono::hours>(str);
 }
 
-std::string getDayText(int day)
+std::size_t toDays(std::string const & str)
+{
+    return __to_chrono_duration<std::chrono::hours>(str)/DAY_TO_HOURS;
+}
+
+std::string getDayText(std::size_t day)
 {
     return std::to_string(day) + TBAG_DAY_DURATION_STRING;
-}
-
-std::string getMonthText(int month)
-{
-    return std::to_string(month) + TBAG_MONTH_DURATION_STRING;
-}
-
-std::string getYearText(int year)
-{
-    return std::to_string(year) + TBAG_YEAR_DURATION_STRING;
 }
 
 std::string getUpperTimeText(std::chrono::nanoseconds const & duration)
@@ -166,10 +163,9 @@ std::string getUpperTimeText(std::chrono::minutes const & duration)
 
 std::string getUpperTimeText(std::chrono::hours const & duration)
 {
-    auto const hours = duration.count();
-    auto const days = static_cast<int>(hours/24);
+    auto const days = duration.count()/DAY_TO_HOURS;
     if (days >= 1) {
-        return getUpperTimeTextByDay(days);
+        return getUpperTimeTextByDays(days);
     } else {
         return getTimeText(duration);
     }
@@ -205,29 +201,9 @@ std::string getUpperTimeTextByHours(std::size_t count)
     return getUpperTimeText(std::chrono::hours(count));
 }
 
-std::string getUpperTimeTextByDay(std::size_t count)
+std::string getUpperTimeTextByDays(std::size_t count)
 {
-    if (count >= 365) {
-        return getYearText(static_cast<int>(count/365));
-    } else if (count >= 30) {
-        return getMonthText(static_cast<int>(count/30));
-    } else {
-        return getDayText(static_cast<int>(count));
-    }
-}
-
-std::string getUpperTimeTextByMonth(std::size_t count)
-{
-    if (count >= 12) {
-        return getYearText(static_cast<int>(count/12));
-    } else {
-        return getMonthText(static_cast<int>(count));
-    }
-}
-
-std::string getUpperTimeTextByYear(std::size_t count)
-{
-    return getYearText(static_cast<int>(count));
+    return getDayText(count);
 }
 
 } // namespace time

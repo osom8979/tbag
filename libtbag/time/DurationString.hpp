@@ -19,21 +19,19 @@
 #include <chrono>
 #include <string>
 
+#define TBAG_NANO_DURATION_STRING   "ns"
+#define TBAG_MICRO_DURATION_STRING  "us"
+#define TBAG_MILLI_DURATION_STRING  "ms"
+#define TBAG_SEC_DURATION_STRING    "s"
+#define TBAG_MIN_DURATION_STRING    "min"
+#define TBAG_HOUR_DURATION_STRING   "h"
+#define TBAG_DAY_DURATION_STRING    "d"
+
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
 // -------------------
 
 namespace time {
-
-TBAG_CONSTEXPR char const * const  TBAG_NANO_DURATION_STRING =  "nano";
-TBAG_CONSTEXPR char const * const TBAG_MICRO_DURATION_STRING = "micro";
-TBAG_CONSTEXPR char const * const TBAG_MILLI_DURATION_STRING = "milli";
-TBAG_CONSTEXPR char const * const   TBAG_SEC_DURATION_STRING =   "sec";
-TBAG_CONSTEXPR char const * const   TBAG_MIN_DURATION_STRING =   "min";
-TBAG_CONSTEXPR char const * const  TBAG_HOUR_DURATION_STRING =  "hour";
-TBAG_CONSTEXPR char const * const   TBAG_DAY_DURATION_STRING =   "day";
-TBAG_CONSTEXPR char const * const TBAG_MONTH_DURATION_STRING = "month";
-TBAG_CONSTEXPR char const * const  TBAG_YEAR_DURATION_STRING =  "year";
 
 template <typename Duration>
 inline TBAG_CONSTEXPR char const * getDurationString() TBAG_NOEXCEPT
@@ -57,6 +55,7 @@ TBAG_API std::size_t toMilliseconds(std::string const & str);
 TBAG_API std::size_t toSeconds     (std::string const & str);
 TBAG_API std::size_t toMinutes     (std::string const & str);
 TBAG_API std::size_t toHours       (std::string const & str);
+TBAG_API std::size_t toDays        (std::string const & str);
 // clang-format on
 
 template <typename Duration>
@@ -65,9 +64,7 @@ std::string getTimeText(Duration const & duration)
     return std::to_string(duration.count()) + getDurationString<Duration>();
 }
 
-TBAG_API std::string getDayText(int day);
-TBAG_API std::string getMonthText(int month);
-TBAG_API std::string getYearText(int year);
+TBAG_API std::string getDayText(std::size_t day);
 
 // clang-format off
 TBAG_API std::string getUpperTimeText(std::chrono::nanoseconds  const & duration);
@@ -82,9 +79,7 @@ TBAG_API std::string getUpperTimeTextByMilliseconds(std::size_t count);
 TBAG_API std::string getUpperTimeTextBySeconds     (std::size_t count);
 TBAG_API std::string getUpperTimeTextByMinutes     (std::size_t count);
 TBAG_API std::string getUpperTimeTextByHours       (std::size_t count);
-TBAG_API std::string getUpperTimeTextByDay         (std::size_t count);
-TBAG_API std::string getUpperTimeTextByMonth       (std::size_t count);
-TBAG_API std::string getUpperTimeTextByYear        (std::size_t count);
+TBAG_API std::string getUpperTimeTextByDays        (std::size_t count);
 // clang-format on
 
 } // namespace time
