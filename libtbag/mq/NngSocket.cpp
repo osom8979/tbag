@@ -10,6 +10,7 @@
 #include <libtbag/debug/Assert.hpp>
 #include <libtbag/time/DurationString.hpp>
 #include <libtbag/string/StringUtils.hpp>
+#include <libtbag/util/ByteString.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -513,7 +514,7 @@ std::string NngSocket::getPrintableInformationText() const
 
     std::size_t recv_max_size;
     if (isSuccess(getRecvMaxSize(&recv_max_size))) {
-        ss << "RecvMaxSize: " << toUpperByteText(recv_max_size) << NEW_LINE;
+        ss << "RecvMaxSize: " << libtbag::util::toUpperByteText(recv_max_size) << NEW_LINE;
     }
 
     nng_duration reconnect_min;

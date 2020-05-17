@@ -9,6 +9,7 @@
 #include <libtbag/filesystem/details/FsCommon.hpp>
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Arguments.hpp>
+#include <libtbag/util/ByteString.hpp>
 
 #include <cassert>
 #include <utility>
@@ -113,7 +114,7 @@ RotatePath::InitParams RotatePath::createParams(std::string const & arguments, E
             if (args.empty()) {
                 result.writer = std::make_shared<MaxSizeWriter>();
             } else {
-                result.writer = std::make_shared<MaxSizeWriter>(toByteSize(args.at(0)));
+                result.writer = std::make_shared<MaxSizeWriter>(libtbag::util::toByteSize(args.at(0)));
             }
 
         } else if (command == UPDATER_KEY_TIME) {
