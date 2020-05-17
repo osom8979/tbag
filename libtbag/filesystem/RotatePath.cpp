@@ -112,9 +112,14 @@ RotatePath::InitParams RotatePath::createParams(std::string const & arguments, E
         auto const command = trim(key_val[0]);
         if (command == WRITER_KEY_SIZE) {
             if (args.empty()) {
-                result.writer = std::make_shared<MaxSizeWriter>();
+                result.writer = std::make_shared<MaxSizeWriter>(0);
             } else {
-                result.writer = std::make_shared<MaxSizeWriter>(libtbag::util::toByteSize(args.at(0)));
+                auto const byte_size_result = libtbag::util::toByteSize(args.at(0));
+                if (byte_size_result) {
+                    result.writer = std::make_shared<MaxSizeWriter>(byte_size_result.value);
+                } else {
+                    result.writer = std::make_shared<MaxSizeWriter>(0);
+                }
             }
 
         } else if (command == UPDATER_KEY_TIME) {

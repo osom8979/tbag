@@ -107,7 +107,11 @@ std::string Byte::toUpperByteText() const
 
 Err Byte::fromString(std::string const & text)
 {
-    _byte = libtbag::util::toByteSize(text);
+    auto const result = libtbag::util::toByteSize(text);
+    if (!result) {
+        return result;
+    }
+    _byte = result.value;
     return E_SUCCESS;
 }
 

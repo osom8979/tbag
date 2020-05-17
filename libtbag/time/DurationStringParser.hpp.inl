@@ -224,42 +224,31 @@ struct DurationStringParser : private Noncopyable
 
     static ErrSize parse(std::string const & str)
     {
-        auto const lower_str = libtbag::string::trim(libtbag::string::lower(str));
-        auto const size = lower_str.size();
-
-        std::size_t i = 0;
-        for (; i < size; ++i) {
-            if (!std::isdigit(lower_str[i])) {
-                break;
-            }
+        std::string number;
+        std::string unit;
+        auto const split_code = libtbag::string::splitNumberAndUnit(str, number, unit);
+        if (isFailure(split_code)) {
+            return split_code;
         }
 
-        // Skip space;
-        for (; i < size; ++i) {
-            if (lower_str[i] != ' ') {
-                break;
-            }
-        }
-
-        auto const value = libtbag::string::toValue<std::size_t>(lower_str.substr(0, i));
-        auto const suffix = lower_str.substr(i);
-        auto const suffix_size = suffix.size();
+        auto const value = libtbag::string::toValue<std::size_t>(number);
+        auto const unit_size = unit.size();
 
         // clang-format off
-        switch (suffix_size) {
+        switch (unit_size) {
         case  0: return { E_SUCCESS, value };
-        case  1: return parse1(value, suffix);
-        case  2: return parse2(value, suffix);
-        case  3: return parse3(value, suffix);
-        case  4: return parse4(value, suffix);
-        case  5: return parse5(value, suffix);
-        case  6: return parse6(value, suffix);
-        case  7: return parse7(value, suffix);
-        case  8: return parse8(value, suffix);
-        case  9: return parse9(value, suffix);
-        case 10: return parse10(value, suffix);
-        case 11: return parse11(value, suffix);
-        case 12: return parse12(value, suffix);
+        case  1: return parse1(value, unit);
+        case  2: return parse2(value, unit);
+        case  3: return parse3(value, unit);
+        case  4: return parse4(value, unit);
+        case  5: return parse5(value, unit);
+        case  6: return parse6(value, unit);
+        case  7: return parse7(value, unit);
+        case  8: return parse8(value, unit);
+        case  9: return parse9(value, unit);
+        case 10: return parse10(value, unit);
+        case 11: return parse11(value, unit);
+        case 12: return parse12(value, unit);
         default: return E_PARSING;
         }
         // clang-format on

@@ -16,46 +16,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace util {
 
-std::size_t toByteSize(std::string const & str)
+ErrSize toByteSize(std::string const & str)
 {
-    using namespace libtbag::string;
-    auto const lower_str = trim(lower(str));
-    auto const size = lower_str.size();
-
-    std::size_t i = 0;
-    char last_c = '\0';
-
-    for (; i < size; ++i) {
-        last_c = lower_str[i];
-        if (!std::isdigit(last_c)) {
-            break;
-        }
-    }
-
-    // Skip space;
-    for (; i < size; ++i) {
-        last_c = lower_str[i];
-        if (last_c != ' ') {
-            break;
-        }
-    }
-
-    auto const value = toValue<std::size_t>(lower_str.substr(0, i));
-
-    // clang-format off
-    switch (last_c) {
-    case BYTE_LOWER_CHAR:       return value;
-    case KILO_BYTE_LOWER_CHAR:  return value *  KILO_BYTE_TO_BYTE;
-    case MEGA_BYTE_LOWER_CHAR:  return value *  MEGA_BYTE_TO_BYTE;
-    case GIGA_BYTE_LOWER_CHAR:  return value *  GIGA_BYTE_TO_BYTE;
-    case TERA_BYTE_LOWER_CHAR:  return value *  TERA_BYTE_TO_BYTE;
-    case PETA_BYTE_LOWER_CHAR:  return value *  PETA_BYTE_TO_BYTE;
-    case EXA_BYTE_LOWER_CHAR:   return value *   EXA_BYTE_TO_BYTE;
-    case ZETTA_BYTE_LOWER_CHAR: return value * ZETTA_BYTE_TO_BYTE;
-    case YOTTA_BYTE_LOWER_CHAR: return value * YOTTA_BYTE_TO_BYTE;
-    default:                    return value;
-    }
-    // clang-format on
+    return ByteStringParser::parse(str);
 }
 
 std::string toUpperByteText(std::size_t byte)

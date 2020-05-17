@@ -47,21 +47,26 @@
 #define TBAG_EMPTY_STRING_WIDE  L""
 #define TBAG_SPACE_STRING       " "
 
-#define TBAG_STRCMP1(l, r)  l[0] == r[0]
-#define TBAG_STRCMP2(l, r)  TBAG_STRCMP1(l, r)  && l[1] == r[1]
-#define TBAG_STRCMP3(l, r)  TBAG_STRCMP2(l, r)  && l[2] == r[2]
-#define TBAG_STRCMP4(l, r)  TBAG_STRCMP3(l, r)  && l[3] == r[3]
-#define TBAG_STRCMP5(l, r)  TBAG_STRCMP4(l, r)  && l[4] == r[4]
-#define TBAG_STRCMP6(l, r)  TBAG_STRCMP5(l, r)  && l[5] == r[5]
-#define TBAG_STRCMP7(l, r)  TBAG_STRCMP6(l, r)  && l[6] == r[6]
-#define TBAG_STRCMP8(l, r)  TBAG_STRCMP7(l, r)  && l[7] == r[7]
-#define TBAG_STRCMP9(l, r)  TBAG_STRCMP8(l, r)  && l[8] == r[8]
-#define TBAG_STRCMP10(l, r) TBAG_STRCMP9(l, r)  && l[9] == r[9]
-#define TBAG_STRCMP11(l, r) TBAG_STRCMP10(l, r) && l[10] == r[10]
-#define TBAG_STRCMP12(l, r) TBAG_STRCMP11(l, r) && l[11] == r[11]
-#define TBAG_STRCMP13(l, r) TBAG_STRCMP12(l, r) && l[12] == r[12]
-#define TBAG_STRCMP14(l, r) TBAG_STRCMP13(l, r) && l[13] == r[13]
-#define TBAG_STRCMP15(l, r) TBAG_STRCMP14(l, r) && l[14] == r[14]
+#define TBAG_STRCMP1(l, r)  (l[0] == r[0])
+#define TBAG_STRCMP2(l, r)  (TBAG_STRCMP1(l, r)  && (l[1] == r[1]))
+#define TBAG_STRCMP3(l, r)  (TBAG_STRCMP2(l, r)  && (l[2] == r[2]))
+#define TBAG_STRCMP4(l, r)  (TBAG_STRCMP3(l, r)  && (l[3] == r[3]))
+#define TBAG_STRCMP5(l, r)  (TBAG_STRCMP4(l, r)  && (l[4] == r[4]))
+#define TBAG_STRCMP6(l, r)  (TBAG_STRCMP5(l, r)  && (l[5] == r[5]))
+#define TBAG_STRCMP7(l, r)  (TBAG_STRCMP6(l, r)  && (l[6] == r[6]))
+#define TBAG_STRCMP8(l, r)  (TBAG_STRCMP7(l, r)  && (l[7] == r[7]))
+#define TBAG_STRCMP9(l, r)  (TBAG_STRCMP8(l, r)  && (l[8] == r[8]))
+#define TBAG_STRCMP10(l, r) (TBAG_STRCMP9(l, r)  && (l[9] == r[9]))
+#define TBAG_STRCMP11(l, r) (TBAG_STRCMP10(l, r) && (l[10] == r[10]))
+#define TBAG_STRCMP12(l, r) (TBAG_STRCMP11(l, r) && (l[11] == r[11]))
+#define TBAG_STRCMP13(l, r) (TBAG_STRCMP12(l, r) && (l[12] == r[12]))
+#define TBAG_STRCMP14(l, r) (TBAG_STRCMP13(l, r) && (l[13] == r[13]))
+#define TBAG_STRCMP15(l, r) (TBAG_STRCMP14(l, r) && (l[14] == r[14]))
+#define TBAG_STRCMP16(l, r) (TBAG_STRCMP15(l, r) && (l[15] == r[15]))
+#define TBAG_STRCMP17(l, r) (TBAG_STRCMP16(l, r) && (l[16] == r[16]))
+#define TBAG_STRCMP18(l, r) (TBAG_STRCMP17(l, r) && (l[17] == r[17]))
+#define TBAG_STRCMP19(l, r) (TBAG_STRCMP18(l, r) && (l[18] == r[18]))
+#define TBAG_STRCMP20(l, r) (TBAG_STRCMP19(l, r) && (l[19] == r[19]))
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -178,6 +183,10 @@ TBAG_API bool appendLineFeed(LineFeedStyle style, char * buffer, int buffer_size
 TBAG_API std::vector<std::string> splitTokens(std::string const & source, std::string const & delimiter, bool remove_empty = true);
 TBAG_API std::vector<std::string> splitUtf8Tokens(std::string const & utf8_source, std::string const & utf8_delimiter, bool remove_empty = true);
 TBAG_API std::vector<std::string> splitSize(std::string const & source, std::size_t size);
+
+TBAG_API Err splitNumberAndUnit(std::string const & str,
+                                std::string & number,
+                                std::string & unit);
 
 TBAG_API std::pair<std::string, std::string> divideTwo(std::string const & source, std::string const & delimiter);
 

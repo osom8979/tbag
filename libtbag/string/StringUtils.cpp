@@ -16,6 +16,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <random>
+#include <sstream>
 
 #include <unicode/unistr.h>
 #include <unicode/regex.h>
@@ -213,6 +214,48 @@ std::pair<std::string, std::string> divideTwo(std::string const & source, std::s
         return {source, STRING_EMPTY};
     }
     return {source.substr(0, end), source.substr(end+delimiter.size())};
+}
+
+Err splitNumberAndUnit(std::string const & str,
+                       std::string & number,
+                       std::string & unit)
+{
+    auto const lower_str = lower(trim(str));
+    auto const size = lower_str.size();
+
+    std::stringstream number_ss;
+    std::size_t i = 0;
+    bool is_floating = false;
+    char c;
+
+    for (; i < size; ++i) {
+        c = lower_str[i];
+        if (std::isdigit(c)) {
+            number_ss << lower_str[i];
+        } else if (c == ',') {
+            // Skip.
+        } else if (c == '.') {
+            if (is_floating) {
+                return E_PARSING;
+            } else {
+                is_floating = true;
+                number_ss.put('.');
+            }
+        } else {
+            break;
+        }
+    }
+
+    // Skip space;
+    for (; i < size; ++i) {
+        if (!isWhiteSpace(lower_str[i])) {
+            break;
+        }
+    }
+
+    number = number_ss.str();
+    unit = lower_str.substr(i);
+    return E_SUCCESS;
 }
 
 std::string mergeTokens(std::vector<std::string> const & tokens, std::string const & delimiter)

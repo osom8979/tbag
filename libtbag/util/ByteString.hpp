@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/ErrPair.hpp>
 
 #include <string>
 
@@ -25,7 +26,9 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace util {
 
-TBAG_API std::size_t toByteSize(std::string const & str);
+using ErrSize = ErrPair<std::size_t>;
+
+TBAG_API ErrSize toByteSize(std::string const & str);
 TBAG_API std::string toUpperByteText(std::size_t byte);
 
 } // namespace util
