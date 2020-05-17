@@ -28,7 +28,7 @@ namespace util {
 
 using ErrSize = ErrPair<std::size_t>;
 
-TBAG_API ErrSize toByteSize(std::string const & str);
+TBAG_API ErrSize parseByteSize(std::string const & str);
 TBAG_API std::string toUpperByteText(std::size_t byte);
 
 } // namespace util

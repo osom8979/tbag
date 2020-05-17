@@ -16,7 +16,7 @@ NAMESPACE_LIBTBAG_OPEN
 
 namespace util {
 
-ErrSize toByteSize(std::string const & str)
+ErrSize parseByteSize(std::string const & str)
 {
     return ByteStringParser::parse(str);
 }
