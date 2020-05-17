@@ -35,6 +35,27 @@ TEST(DurationStringTest, SystemClock)
               << ") duration text: " << text << std::endl;
 }
 
+TEST(DurationStringTest, ParseNanoseconds)
+{
+    ASSERT_EQ(4000, parseNanoseconds("4000").value);
+    ASSERT_EQ(2000, parseNanoseconds("2000nano").value);
+    ASSERT_EQ(1000, parseNanoseconds("1000n").value);
+    ASSERT_EQ(1000*1000, parseNanoseconds("1000micro").value);
+    ASSERT_EQ(1000*1000*1000, parseNanoseconds("1000milli").value);
+    ASSERT_EQ(1000*1000*1000, parseNanoseconds("1sec").value);
+}
+
+TEST(DurationStringTest, ParseMicroseconds)
+{
+    ASSERT_EQ(1000, parseMicroseconds("1000").value);
+    ASSERT_EQ(1, parseMicroseconds("1000nano").value);
+    ASSERT_EQ(1000, parseMicroseconds("1000micro").value);
+    ASSERT_EQ(1000*1000, parseMicroseconds("1000milli").value);
+    ASSERT_EQ(1000*1000*1000, parseMicroseconds("1000sec").value);
+    ASSERT_EQ(60*1000*1000, parseMicroseconds("1min").value);
+    ASSERT_EQ(1llu*60*60*1000*1000, parseMicroseconds("1h").value);
+}
+
 TEST(DurationStringTest, ParseMilliseconds)
 {
     ASSERT_EQ(4000, parseMilliseconds("4000").value);
@@ -49,14 +70,26 @@ TEST(DurationStringTest, ParseMilliseconds)
     ASSERT_EQ(2*60*60*1000, parseMilliseconds("2 h").value);
 }
 
-TEST(DurationStringTest, ParseNanoseconds)
+TEST(DurationStringTest, ParseSeconds)
 {
-    ASSERT_EQ(4000, parseNanoseconds("4000").value);
-    ASSERT_EQ(2000, parseNanoseconds("2000nano").value);
-    ASSERT_EQ(1000, parseNanoseconds("1000n").value);
-    ASSERT_EQ(1000*1000, parseNanoseconds("1000micro").value);
-    ASSERT_EQ(1000*1000*1000, parseNanoseconds("1000milli").value);
-    ASSERT_EQ(1000*1000*1000, parseNanoseconds("1sec").value);
+    ASSERT_EQ(1000, parseSeconds("1000").value);
+    ASSERT_EQ(0, parseSeconds("1000nano").value);
+    ASSERT_EQ(0, parseSeconds("1000micro").value);
+    ASSERT_EQ(1, parseSeconds("1000milli").value);
+    ASSERT_EQ(1000, parseSeconds("1000sec").value);
+    ASSERT_EQ(60, parseSeconds("1min").value);
+    ASSERT_EQ(60*60, parseSeconds("1h").value);
+}
+
+TEST(DurationStringTest, ParseMinutes)
+{
+    ASSERT_EQ(1000, parseMinutes("1000").value);
+    ASSERT_EQ(0, parseMinutes("1000nano").value);
+    ASSERT_EQ(0, parseMinutes("1000micro").value);
+    ASSERT_EQ(0, parseMinutes("1000milli").value);
+    ASSERT_EQ(1000/60, parseMinutes("1000sec").value);
+    ASSERT_EQ(1, parseMinutes("1min").value);
+    ASSERT_EQ(60, parseMinutes("1h").value);
 }
 
 TEST(DurationStringTest, ParseHours)
