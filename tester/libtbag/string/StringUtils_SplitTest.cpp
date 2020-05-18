@@ -232,3 +232,12 @@ TEST(StringUtilsTest, DivideTwo)
     ASSERT_STREQ("", result7.second.c_str());
 }
 
+TEST(StringUtilsTest, SplitNumberAndUnit)
+{
+    std::string number;
+    std::string unit;
+    ASSERT_EQ(E_SUCCESS, splitNumberAndUnit(" 100,000.999,111 kbyte ", number, unit));
+    ASSERT_STREQ("100000.999111", number.c_str());
+    ASSERT_STREQ("kbyte", unit.c_str());
+}
+
