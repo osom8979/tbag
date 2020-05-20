@@ -32,11 +32,14 @@ TEST(ErrPairTest, StreamCast)
     std::stringstream ss1;
     ss1 << obj1;
     ASSERT_STREQ("E_ILLARGS", ss1.str().c_str());
+}
 
-    ErrMsg obj2(E_ILLARGS, "msg");
-    std::stringstream ss2;
-    ss2 << obj2;
-    ASSERT_STREQ("E_ILLARGS('msg')", ss2.str().c_str());
+TEST(ErrPairTest, ErrMsg)
+{
+    ErrMsg obj = TBAG_ERR_FMT(E_ILLARGS, "{}.{}", 10, "msg");
+    std::stringstream ss;
+    ss << obj;
+    ASSERT_STREQ("E_ILLARGS('10.msg')", ss.str().c_str());
 }
 
 TEST(ErrPairTest, BooleanCast)
@@ -46,12 +49,5 @@ TEST(ErrPairTest, BooleanCast)
 
     ErrPair<int> obj2(E_SUCCESS);
     ASSERT_TRUE(static_cast<bool>(obj2));
-}
-
-TEST(ErrPairTest, Macro)
-{
-    auto const result = TBAG_ERR_FMT(E_SUCCESS, "{}.{}", 10, "msg");
-    ASSERT_EQ(E_SUCCESS, result);
-    ASSERT_STREQ("10.msg", result.value.c_str());
 }
 

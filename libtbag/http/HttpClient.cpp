@@ -42,7 +42,7 @@ ErrMsg HttpClient::open(std::string const & host, int port, bool use_ssl)
                                         error_buffer, ERROR_MESSAGE_BUFFER_SIZE);
     if (!conn) {
         error_buffer[ERROR_MESSAGE_BUFFER_SIZE-1] = '\0';
-        return { E_OPEN, std::string(error_buffer) };
+        return TBAG_ERR_FMT(E_OPEN, std::string(error_buffer));
     }
 
     _conn = UniqueConnection(conn, &mg_close_connection);
@@ -82,7 +82,7 @@ ErrMsg HttpClient::wait(int timeout_ms)
     auto const code = mg_get_response(_conn.get(), error_buffer, ERROR_MESSAGE_BUFFER_SIZE, timeout_ms);
     if (code < 0) {
         error_buffer[ERROR_MESSAGE_BUFFER_SIZE-1] = '\0';
-        return { E_TIMEOUT, std::string(error_buffer) };
+        return TBAG_ERR_FMT(E_TIMEOUT, std::string(error_buffer));
     }
     return E_SUCCESS;
 }

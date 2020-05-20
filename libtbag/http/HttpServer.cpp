@@ -172,10 +172,9 @@ ErrMsg HttpServer::open(Options const & options, RequestMap const & requests, vo
     }
 
     try {
-        auto * server = new CivetServer(options, &CALLBACKS, user);
-        _server = UniqueCivetServer(server, &HttpServer::__close_cb);
+        _server = UniqueCivetServer(new CivetServer(options, &CALLBACKS, user), &HttpServer::__close_cb);
     } catch (std::exception const & e) {
-        return { E_OPEN, std::string(e.what()) };
+        return TBAG_ERR_FMT(E_OPEN, std::string(e.what()));
     } catch (...) {
         return E_UNKEXCP;
     }

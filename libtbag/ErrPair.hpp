@@ -17,7 +17,6 @@
 #include <libtbag/predef.hpp>
 #include <libtbag/Err.hpp>
 #include <libtbag/Type.hpp>
-#include <libtbag/string/Format.hpp>
 
 #include <type_traits>
 #include <string>
@@ -36,19 +35,19 @@ NAMESPACE_LIBTBAG_OPEN
 template <typename T>
 struct ErrPair
 {
-    using ValueType = T;
+    using Val = T;
 
-    static_assert(!std::is_void<ValueType>::value, "Void type is not supported.");
-    static_assert(!std::is_reference<ValueType>::value, "Reference type is not supported.");
+    static_assert(!std::is_void<Val>::value, "Void type is not supported.");
+    static_assert(!std::is_reference<Val>::value, "Reference type is not supported.");
 
     Err code;
-    ValueType value;
+    Val value;
 
-    TBAG_CONSTEXPR static bool const _nothrow_def = std::is_nothrow_default_constructible<ValueType>::value;
-    TBAG_CONSTEXPR static bool const _nothrow_copy = std::is_nothrow_copy_constructible<ValueType>::value;
-    TBAG_CONSTEXPR static bool const _nothrow_move = std::is_nothrow_move_constructible<ValueType>::value;
-    TBAG_CONSTEXPR static bool const _nothrow_copy_assign = std::is_nothrow_copy_assignable<ValueType>::value;
-    TBAG_CONSTEXPR static bool const _nothrow_move_assign = std::is_nothrow_move_assignable<ValueType>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_def = std::is_nothrow_default_constructible<Val>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_copy = std::is_nothrow_copy_constructible<Val>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_move = std::is_nothrow_move_constructible<Val>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_copy_assign = std::is_nothrow_copy_assignable<Val>::value;
+    TBAG_CONSTEXPR static bool const _nothrow_move_assign = std::is_nothrow_move_assignable<Val>::value;
 
     ErrPair() TBAG_NOEXCEPT_SPECIFIER(_nothrow_def)
             : code(E_UNKNOWN), value()
@@ -57,17 +56,17 @@ struct ErrPair
             : code(c), value()
     { /* EMPTY. */ }
 
-    ErrPair(ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy)
+    ErrPair(Val const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy)
             : code(E_UNKNOWN), value(v)
     { /* EMPTY. */ }
-    ErrPair(Err c, ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy)
+    ErrPair(Err c, Val const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy)
             : code(c), value(v)
     { /* EMPTY. */ }
 
-    ErrPair(ValueType && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move)
+    ErrPair(Val && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move)
             : code(E_UNKNOWN), value(std::move(v))
     { /* EMPTY. */ }
-    ErrPair(Err c, ValueType && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move)
+    ErrPair(Err c, Val && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move)
             : code(c), value(std::move(v))
     { /* EMPTY. */ }
 
@@ -87,13 +86,13 @@ struct ErrPair
         return *this;
     }
 
-    ErrPair & operator =(ValueType const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy_assign)
+    ErrPair & operator =(Val const & v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_copy_assign)
     {
         value = v;
         return *this;
     }
 
-    ErrPair & operator =(ValueType && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move_assign)
+    ErrPair & operator =(Val && v) TBAG_NOEXCEPT_SPECIFIER(_nothrow_move_assign)
     {
         value = std::move(v);
         return *this;
@@ -167,49 +166,126 @@ struct ErrPair
         code = static_cast<Err>(v);
     }
 
-    template <typename ... Args>
-    void format(std::string const & f, Args && ... args)
+    template <class CharT, class TraitsT, class ValueT>
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os,
+                                                           ErrPair const & err)
     {
-        value = libtbag::string::fformat(f, std::forward<Args>(args) ...);
-    }
-
-    template <typename ... Args>
-    static ErrPair createFmt(Err code, std::string const & f, Args && ... args)
-    {
-        ErrPair result(code);
-        result.format(f, std::forward<Args>(args) ...);
-        return result;
+        return os << err.name();
     }
 };
 
-template <class CharT, class TraitsT, class ValueT>
-std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os,
-                                                ErrPair<ValueT> const & err)
+/**
+ * ErrMsgPair class template.
+ *
+ * @author zer0
+ * @date   2019-11-11
+ */
+template <typename T>
+struct ErrMsgPair : public ErrPair<T>
 {
-    return os << err.name();
-}
+    using Base = ErrPair<T>;
+    using Val = typename Base::Val;
+    using Msg = std::string;
 
-template <class CharT, class TraitsT>
-std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os,
-                                                ErrPair<std::string> const & err)
-{
-    if (err.value.empty()) {
-        return os << err.name();
-    } else {
-        return os << err.name() << "('" << err.value << "')";
+    TBAG_CONSTEXPR static bool const _base_nothrow_move = std::is_nothrow_move_constructible<Base>::value;
+    TBAG_CONSTEXPR static bool const _base_nothrow_move_assign = std::is_nothrow_move_assignable<Base>::value;
+    TBAG_CONSTEXPR static bool const _msg_nothrow_move = std::is_nothrow_move_constructible<Msg>::value;
+    TBAG_CONSTEXPR static bool const _msg_nothrow_move_assign = std::is_nothrow_move_assignable<Msg>::value;
+
+    Msg msg;
+
+    ErrMsgPair() : ErrPair<T>()
+    { /* EMPTY. */ }
+    ErrMsgPair(Err c) : ErrPair<T>(c)
+    { /* EMPTY. */ }
+    ErrMsgPair(Msg const & m, Err c) : ErrPair<T>(c), msg(m)
+    { /* EMPTY. */ }
+    ErrMsgPair(Msg && m, Err c) : ErrPair<T>(c), msg(std::move(m))
+    { /* EMPTY. */ }
+
+    ErrMsgPair(Val const & v) : ErrPair<T>(v)
+    { /* EMPTY. */ }
+    ErrMsgPair(Err c, Val const & v) : ErrPair<T>(c, v)
+    { /* EMPTY. */ }
+    ErrMsgPair(Msg const & m, Err c, Val const & v) : ErrPair<T>(c, v), msg(m)
+    { /* EMPTY. */ }
+    ErrMsgPair(Msg && m, Err c, Val const & v) : ErrPair<T>(c, v), msg(std::move(m))
+    { /* EMPTY. */ }
+
+    ErrMsgPair(Val && v) : ErrPair<T>(std::move(v))
+    { /* EMPTY. */ }
+    ErrMsgPair(Err c, Val && v) : ErrPair<T>(c, std::move(v))
+    { /* EMPTY. */ }
+    ErrMsgPair(Msg const & m, Err c, Val && v) : ErrPair<T>(c, std::move(v)), msg(m)
+    { /* EMPTY. */ }
+    ErrMsgPair(Msg && m, Err c, Val && v) : ErrPair<T>(c, std::move(v)), msg(std::move(m))
+    { /* EMPTY. */ }
+
+    ErrMsgPair(ErrMsgPair const & obj) : ErrPair<T>(obj), msg(obj.msg)
+    { /* EMPTY. */ }
+    ErrMsgPair(ErrMsgPair && obj) TBAG_NOEXCEPT_SPECIFIER(_base_nothrow_move && _msg_nothrow_move)
+            : ErrPair<T>(std::move(obj)), msg(std::move(obj.msg))
+    { /* EMPTY. */ }
+
+    ~ErrMsgPair()
+    { /* EMPTY. */ }
+
+    ErrMsgPair & operator =(ErrMsgPair const & obj)
+    {
+        if (this != &obj) {
+            ErrPair<T>::operator =(obj);
+            msg = obj.msg;
+        }
+        return *this;
     }
-}
 
-using ErrString = ErrPair<std::string>;
-using ErrStr = ErrString;
-using ErrMsg = ErrString;
+    ErrMsgPair & operator =(ErrMsgPair && obj)
+            TBAG_NOEXCEPT_SPECIFIER(_base_nothrow_move_assign && _msg_nothrow_move_assign)
+    {
+        if (this != &obj) {
+            ErrPair<T>::operator =(std::move(obj));
+            msg = std::move(obj.msg);
+        }
+        return *this;
+    }
+
+    operator ErrMsgPair<std::nullptr_t>() const
+    {
+        return ErrMsgPair<std::nullptr_t>(this->msg, this->code);
+    }
+
+    operator ErrPair<Val>() const
+    {
+        return ErrPair<Val>(this->code, this->value);
+    }
+
+    template <class CharT, class TraitsT>
+    friend std::basic_ostream<CharT, TraitsT> & operator<<(std::basic_ostream<CharT, TraitsT> & os,
+                                                           ErrMsgPair const & obj)
+    {
+        if (obj.msg.empty()) {
+            return os << obj.name();
+        } else {
+            return os << obj.name() << "('" << obj.msg << "')";
+        }
+    }
+};
+
+using ErrMsg = ErrMsgPair<std::nullptr_t>;
+STATIC_ASSERT_CHECK_IS_SAME(typename ErrMsg::Val, std::nullptr_t);
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
 // --------------------
 
+#include <libtbag/string/Format.hpp>
+
 #ifndef TBAG_ERR_FMT
-#define TBAG_ERR_FMT(err, ...) ::libtbag::ErrMsg::createFmt(err, __VA_ARGS__)
+#define TBAG_ERR_FMT(code, ...) { ::libtbag::string::fformat(__VA_ARGS__), code }
+#endif
+
+#ifndef TBAG_ERR_OK
+#define TBAG_ERR_OK(value) { E_SUCCESS, value }
 #endif
 
 #endif // __INCLUDE_LIBTBAG__LIBTBAG_ERRPAIR_HPP__
