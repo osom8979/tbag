@@ -51,7 +51,7 @@ TEST_F(box_cursor_rank1_fixture, Default)
 TEST_F(box_cursor_rank1_fixture, Cursor_all)
 {
     auto err_cursor = box.init_cursor();
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(0, *(si32*)(cursor.begin));
@@ -79,7 +79,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_all)
 TEST_F(box_cursor_rank1_fixture, Cursor_m1_0_m1)
 {
     auto err_cursor = box.init_cursor(0, -1, 0, -1);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(9, *(si32*)(cursor.begin));
@@ -105,7 +105,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_m1_0_m1)
 TEST_F(box_cursor_rank1_fixture, Cursor_nop_nop_m1)
 {
     auto err_cursor = box.init_cursor(0, box_nop, box_nop, -1);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(9, *(si32*)(cursor.begin));
@@ -133,7 +133,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_nop_nop_m1)
 TEST_F(box_cursor_rank1_fixture, Cursor_0_m1)
 {
     auto err_cursor = box.init_cursor(0, 0, -1);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(0, *(si32*)(cursor.begin));
@@ -159,7 +159,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_0_m1)
 TEST_F(box_cursor_rank1_fixture, Cursor_m2_m1)
 {
     auto err_cursor = box.init_cursor(0, -2, -1);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(8, *(si32*)(cursor.begin));
@@ -169,7 +169,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_m2_m1)
 TEST_F(box_cursor_rank1_fixture, Cursor_m8_0_m1)
 {
     auto err_cursor = box.init_cursor(0, -8, 0, -1);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(2, *(si32*)(cursor.begin));
@@ -181,7 +181,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_m8_0_m1)
 TEST_F(box_cursor_rank1_fixture, Cursor_5)
 {
     auto err_cursor = box.init_cursor(0, 5);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(5, *(si32*)(cursor.begin));
@@ -199,7 +199,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_5)
 TEST_F(box_cursor_rank1_fixture, Cursor_5_8)
 {
     auto err_cursor = box.init_cursor(0, 5, 8);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(5, *(si32*)(cursor.begin));
@@ -213,7 +213,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_5_8)
 TEST_F(box_cursor_rank1_fixture, Cursor_5_8_2)
 {
     auto err_cursor = box.init_cursor(0, 5, 8, 2);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(5, *(si32*)(cursor.begin));
@@ -225,7 +225,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_5_8_2)
 TEST_F(box_cursor_rank1_fixture, Cursor_5_8_3)
 {
     auto err_cursor = box.init_cursor(0, 5, 8, 3);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(5, *(si32*)(cursor.begin));
@@ -235,7 +235,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_5_8_3)
 TEST_F(box_cursor_rank1_fixture, Cursor_1_4_10)
 {
     auto err_cursor = box.init_cursor(0, 1, 4, 10);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(1, *(si32*)(cursor.begin));
@@ -257,7 +257,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_4_1)
 TEST_F(box_cursor_rank1_fixture, Cursor_4_1_m1)
 {
     auto err_cursor = box.init_cursor(0, 4, 1, -1);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(4, *(si32*)(cursor.begin));
@@ -271,7 +271,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_4_1_m1)
 TEST_F(box_cursor_rank1_fixture, Cursor_4_1_m2)
 {
     auto err_cursor = box.init_cursor(0, 4, 1, -2);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(4, *(si32*)(cursor.begin));
@@ -283,7 +283,7 @@ TEST_F(box_cursor_rank1_fixture, Cursor_4_1_m2)
 TEST_F(box_cursor_rank1_fixture, Cursor_4_1_m10)
 {
     auto err_cursor = box.init_cursor(0, 4, 1, -10);
-    ASSERT_TRUE(err_cursor);
+    ASSERT_EQ(E_SUCCESS, err_cursor);
     auto cursor = err_cursor.value;
 
     ASSERT_EQ(4, *(si32*)(cursor.begin));

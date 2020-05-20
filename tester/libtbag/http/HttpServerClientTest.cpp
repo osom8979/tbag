@@ -64,27 +64,18 @@ TEST(HttpServerClientTest, DefaultHttp)
     HttpServer server;
     ASSERT_FALSE(server.isOpen());
     auto const server_open_result = server.open(options, reqs);
-    if (!server_open_result) {
-        std::cerr << server_open_result.msg << std::endl;
-    }
-    ASSERT_EQ(E_SUCCESS, server_open_result.code);
+    ASSERT_EQ(E_SUCCESS, server_open_result);
     ASSERT_TRUE(server.isOpen());
 
     HttpClient client;
     ASSERT_FALSE(client.isOpen());
     auto const client_open_result = client.open(connect_ip, port);
-    if (!client_open_result) {
-        std::cerr << client_open_result.msg << std::endl;
-    }
-    ASSERT_EQ(E_SUCCESS, client_open_result.code);
+    ASSERT_EQ(E_SUCCESS, client_open_result);
     ASSERT_TRUE(client.isOpen());
 
     ASSERT_EQ(E_SUCCESS, client.write(test_request));
     auto const wait_result = client.wait();
-    if (!wait_result) {
-        std::cerr << wait_result.msg << std::endl;
-    }
-    ASSERT_EQ(E_SUCCESS, wait_result.code);
+    ASSERT_EQ(E_SUCCESS, wait_result);
 
     auto const response_result = client.read();
     ASSERT_EQ(E_SUCCESS, response_result.code);
@@ -152,27 +143,18 @@ TEST(HttpServerClientTest, DefaultHttps)
     HttpServer server;
     ASSERT_FALSE(server.isOpen());
     auto const server_open_result = server.open(options, reqs);
-    if (!server_open_result) {
-        std::cerr << server_open_result.msg << std::endl;
-    }
-    ASSERT_EQ(E_SUCCESS, server_open_result.code);
+    ASSERT_EQ(E_SUCCESS, server_open_result);
     ASSERT_TRUE(server.isOpen());
 
     HttpClient client;
     ASSERT_FALSE(client.isOpen());
     auto const client_open_result = client.open(connect_ip, port, true);
-    if (!client_open_result) {
-        std::cerr << client_open_result.msg << std::endl;
-    }
-    ASSERT_EQ(E_SUCCESS, client_open_result.code);
+    ASSERT_EQ(E_SUCCESS, client_open_result);
     ASSERT_TRUE(client.isOpen());
 
     ASSERT_EQ(E_SUCCESS, client.write(test_request));
     auto const wait_result = client.wait();
-    if (!wait_result) {
-        std::cerr << wait_result.msg << std::endl;
-    }
-    ASSERT_EQ(E_SUCCESS, wait_result.code);
+    ASSERT_EQ(E_SUCCESS, wait_result);
 
     auto const response_result = client.read();
     ASSERT_EQ(E_SUCCESS, response_result.code);

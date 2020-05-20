@@ -165,7 +165,7 @@ Err Duration::fromString(std::string const & text)
 {
     auto const result = libtbag::time::parseNanoseconds(text);
     if (!result) {
-        return result;
+        return result.code;
     }
     _nano = std::chrono::nanoseconds(result.value);
     return E_SUCCESS;

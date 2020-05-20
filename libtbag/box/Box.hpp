@@ -75,7 +75,6 @@ class TBAG_API Box : public BoxBase
 {
 public:
     using ErrBox = libtbag::ErrPair<Box>;
-    using ErrMsgBox = libtbag::ErrMsgPair<Box>;
 
 public:
     using si8   = libtbag::box::si8;

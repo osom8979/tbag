@@ -177,7 +177,7 @@ TEST(box_api_test, Clone)
     }
 
     auto err_box2 = box.clone();
-    ASSERT_TRUE(err_box2);
+    ASSERT_EQ(E_SUCCESS, err_box2);
     box_data box2 = std::move(err_box2.value);
 
     ASSERT_EQ(box.type, box2.type);

@@ -109,7 +109,7 @@ Err Byte::fromString(std::string const & text)
 {
     auto const result = libtbag::util::parseByteSize(text);
     if (!result) {
-        return result;
+        return result.code;
     }
     _byte = result.value;
     return E_SUCCESS;

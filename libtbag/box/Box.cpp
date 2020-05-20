@@ -26,9 +26,7 @@ NAMESPACE_LIBTBAG_OPEN
 namespace box {
 
 using namespace libtbag::box::details;
-
 using ErrBox = Box::ErrBox;
-using ErrMsgBox = Box::ErrMsgBox;
 
 Box::Box() : BoxBase()
 {

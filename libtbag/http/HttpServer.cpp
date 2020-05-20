@@ -175,7 +175,7 @@ ErrMsg HttpServer::open(Options const & options, RequestMap const & requests, vo
         auto * server = new CivetServer(options, &CALLBACKS, user);
         _server = UniqueCivetServer(server, &HttpServer::__close_cb);
     } catch (std::exception const & e) {
-        return { std::string(e.what()), E_OPEN };
+        return { E_OPEN, std::string(e.what()) };
     } catch (...) {
         return E_UNKEXCP;
     }

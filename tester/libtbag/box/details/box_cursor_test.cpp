@@ -56,21 +56,21 @@ TEST_F(box_cursor_fixture, Cursor_all__all__all)
     int loop_counter0 = 0;
 
     auto err_cursor0 = box.init_cursor();
-    ASSERT_TRUE(err_cursor0);
+    ASSERT_EQ(E_SUCCESS, err_cursor0);
     auto cursor0 = err_cursor0.value;
 
     do {
         int loop_counter1 = 0;
 
         auto err_cursor1 = cursor0.init_cursor(1);
-        ASSERT_TRUE(err_cursor1);
+        ASSERT_EQ(E_SUCCESS, err_cursor1);
         auto cursor1 = err_cursor1.value;
 
         do {
             int loop_counter2 = 0;
 
             auto err_cursor2 = cursor1.init_cursor(2);
-            ASSERT_TRUE(err_cursor2);
+            ASSERT_EQ(E_SUCCESS, err_cursor2);
             auto cursor2 = err_cursor2.value;
 
             do {
