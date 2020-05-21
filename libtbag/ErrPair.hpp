@@ -19,6 +19,8 @@
 #include <libtbag/Type.hpp>
 #include <libtbag/string/Format.hpp>
 
+#include <cstdint>
+
 #include <type_traits>
 #include <string>
 #include <ostream>
@@ -218,6 +220,31 @@ struct ErrPair
 
 using ErrMsg = ErrPair<std::nullptr_t>;
 STATIC_ASSERT_CHECK_IS_SAME(typename ErrMsg::Val, std::nullptr_t);
+
+using ErrString  = ErrPair<std::string>;
+using ErrStr     = ErrString;
+using ErrInt8    = ErrPair<std::int8_t>;
+using ErrInt16   = ErrPair<std::int16_t>;
+using ErrInt32   = ErrPair<std::int32_t>;
+using ErrInt64   = ErrPair<std::int64_t>;
+using ErrUint8   = ErrPair<std::uint8_t>;
+using ErrUint16  = ErrPair<std::uint16_t>;
+using ErrUint32  = ErrPair<std::uint32_t>;
+using ErrUint64  = ErrPair<std::uint64_t>;
+using ErrBool    = ErrPair<bool>;
+using ErrChar    = ErrPair<char>;
+using ErrShort   = ErrPair<short>;
+using ErrInt     = ErrPair<int>;
+using ErrLong    = ErrPair<long>;
+using ErrLlong   = ErrPair<long long>;
+using ErrUchar   = ErrPair<unsigned char>;
+using ErrUshort  = ErrPair<unsigned short>;
+using ErrUint    = ErrPair<unsigned int>;
+using ErrUlong   = ErrPair<unsigned long>;
+using ErrUllong  = ErrPair<unsigned long long>;
+using ErrFloat   = ErrPair<float>;
+using ErrDouble  = ErrPair<double>;
+using ErrLdouble = ErrPair<long double>;
 
 // --------------------
 NAMESPACE_LIBTBAG_CLOSE
