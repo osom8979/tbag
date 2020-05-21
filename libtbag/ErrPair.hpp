@@ -199,7 +199,7 @@ struct ErrPair
     {
         static ErrPair<OtherT> convert(ErrPair const & original)
         {
-            return { original.msg, original.code, original.val };
+            return { original.msg, original.code, static_cast<OtherT>(original.val) };
         }
     };
 

@@ -52,13 +52,33 @@ TBAG_API std::string vformat(char const * f, std::size_t buffer_size_step, va_li
  */
 TBAG_API std::string format(char const * f, ...);
 
+template <std::size_t ArgsSize>
+struct _FormatBackend
+{
+    template <typename ... Args>
+    static std::string format(std::string const & f, Args && ... args)
+    {
+        return ::fmt::format(f, std::forward<Args>(args) ...);
+    }
+};
+
+template <>
+struct _FormatBackend<0>
+{
+    template <typename ... Args>
+    static std::string format(std::string const & f, Args && ... UNUSED_PARAM(args))
+    {
+        return f;
+    }
+};
+
 /**
  * Fmt style formatting string.
  */
 template <typename ... Args>
 std::string fformat(std::string const & f, Args && ... args)
 {
-    return ::fmt::format(f, std::forward<Args>(args) ...);
+    return _FormatBackend<sizeof...(Args)>::format(f, std::forward<Args>(args) ...);
 }
 
 /**
