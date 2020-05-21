@@ -43,6 +43,7 @@ struct ErrPair
 
     static_assert(!std::is_void<Val>::value, "Void type is not supported.");
     static_assert(!std::is_reference<Val>::value, "Reference type is not supported.");
+    static_assert(!std::is_same<Err, Val>::value, "Err type is not supported.");
 
     TBAG_CONSTEXPR static bool const m_def_cons = std::is_nothrow_default_constructible<Msg>::value;
     TBAG_CONSTEXPR static bool const m_copy_cons = std::is_nothrow_copy_constructible<Msg>::value;
@@ -61,31 +62,31 @@ struct ErrPair
     Val val;
 
     ErrPair() TBAG_NOEXCEPT_SPECIFIER(m_def_cons&&v_def_cons)
-            : code(E_UNKNOWN)
+            : msg(), code(E_UNKNOWN), val()
     { /* EMPTY. */ }
     ErrPair(Err c) TBAG_NOEXCEPT_SPECIFIER(m_def_cons&&v_def_cons)
-            : code(c)
+            : msg(), code(c), val()
     { /* EMPTY. */ }
 
     ErrPair(Val const & v) TBAG_NOEXCEPT_SPECIFIER(m_def_cons&&v_copy_cons)
-            : code(E_SUCCESS), val(v)
+            : msg(), code(E_SUCCESS), val(v)
     { /* EMPTY. */ }
     ErrPair(Val && v) TBAG_NOEXCEPT_SPECIFIER(m_def_cons&&v_move_cons)
-            : code(E_SUCCESS), val(std::move(v))
+            : msg(), code(E_SUCCESS), val(std::move(v))
     { /* EMPTY. */ }
 
     ErrPair(Err c, Val const & v) TBAG_NOEXCEPT_SPECIFIER(m_def_cons&&v_copy_cons)
-            : code(c), val(v)
+            : msg(), code(c), val(v)
     { /* EMPTY. */ }
     ErrPair(Err c, Val && v) TBAG_NOEXCEPT_SPECIFIER(m_def_cons&&v_move_cons)
-            : code(c), val(std::move(v))
+            : msg(), code(c), val(std::move(v))
     { /* EMPTY. */ }
 
     ErrPair(Msg const & m, Err c) TBAG_NOEXCEPT_SPECIFIER(m_copy_cons&&v_def_cons)
-            : msg(m), code(c)
+            : msg(m), code(c), val()
     { /* EMPTY. */ }
     ErrPair(Msg && m, Err c) TBAG_NOEXCEPT_SPECIFIER(m_move_cons&&v_def_cons)
-            : msg(std::move(m)), code(c)
+            : msg(std::move(m)), code(c), val()
     { /* EMPTY. */ }
 
     ErrPair(Msg const & m, Err c, Val const & v) TBAG_NOEXCEPT_SPECIFIER(m_copy_cons&&v_copy_cons)
@@ -188,6 +189,33 @@ struct ErrPair
     inline explicit operator bool() const TBAG_NOEXCEPT
     {
         return this->isSuccess();
+    }
+
+    template <typename OtherT, bool IsConvertible>
+    struct ErrCaster;
+
+    template <typename OtherT>
+    struct ErrCaster<OtherT, true>
+    {
+        static ErrPair<OtherT> convert(ErrPair const & original)
+        {
+            return { original.msg, original.code, original.val };
+        }
+    };
+
+    template <typename OtherT>
+    struct ErrCaster<OtherT, false>
+    {
+        static ErrPair<OtherT> convert(ErrPair const & original)
+        {
+            return { original.msg, original.code };
+        }
+    };
+
+    template <typename OtherT>
+    inline operator ErrPair<OtherT>() const
+    {
+        return ErrCaster<OtherT, std::is_convertible<Val, OtherT>::value>::convert(*this);
     }
 
     inline int toInt() const TBAG_NOEXCEPT

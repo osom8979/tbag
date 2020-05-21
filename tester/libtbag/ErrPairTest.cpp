@@ -51,3 +51,30 @@ TEST(ErrPairTest, BooleanCast)
     ASSERT_TRUE(static_cast<bool>(obj2));
 }
 
+TEST(ErrPairTest, CastOtherType)
+{
+    ErrPair<int> obj1("msg", E_ILLARGS, 100);
+    ASSERT_STREQ("msg", obj1.msg.c_str());
+    ASSERT_EQ(E_ILLARGS, obj1.code);
+    ASSERT_EQ(100, obj1.val);
+
+    ErrPair<short> obj2 = obj1;
+    ASSERT_STREQ("msg", obj2.msg.c_str());
+    ASSERT_EQ(E_ILLARGS, obj2.code);
+    ASSERT_EQ(100, obj2.val);
+
+    ErrPair<std::string> obj3 = obj1;
+    ASSERT_STREQ("msg", obj3.msg.c_str());
+    ASSERT_EQ(E_ILLARGS, obj3.code);
+    ASSERT_TRUE(obj3.val.empty());
+
+    ErrMsg obj4 = obj1;
+    ASSERT_STREQ("msg", obj4.msg.c_str());
+    ASSERT_EQ(E_ILLARGS, obj4.code);
+
+    ErrPair<int> obj5 = obj4;
+    ASSERT_STREQ("msg", obj5.msg.c_str());
+    ASSERT_EQ(E_ILLARGS, obj5.code);
+    ASSERT_EQ(0, obj5.val);
+}
+
