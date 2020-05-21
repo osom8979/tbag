@@ -275,7 +275,7 @@ Box Box::clone() const
     }
     auto result = _base->clone();
     if (result) {
-        return Box(std::move(result.value));
+        return Box(std::move(result.val));
     }
     return Box(nullptr);
 }
@@ -452,7 +452,7 @@ ErrPair<BoxCursor> Box::cursor(int begin, int end, int step) const
         return E_EINVAL;
     }
     auto const result = _base->init_cursor(0u, begin, end, step);
-    return { result.code, result.value };
+    return { result.code, result.val };
 }
 
 ErrPair<BoxCursor> Box::cursor(int begin, int end) const
@@ -486,20 +486,20 @@ std::vector<ui32> Box::diffs(box_slice const * slice_begin, box_slice const * sl
 
     std::vector<ui32> result;
     if (err_cursor) {
-        result.emplace_back(err_cursor.value.getDiff());
+        result.emplace_back(err_cursor.val.getDiff());
     } else {
         return {};
     }
 
     while (true) {
         if (slice_begin == slice_end) {
-            err_cursor = err_cursor.value.sub();
+            err_cursor = err_cursor.val.sub();
         } else {
-            err_cursor = err_cursor.value.sub(*slice_begin);
+            err_cursor = err_cursor.val.sub(*slice_begin);
             ++slice_begin;
         }
         if (err_cursor) {
-            result.emplace_back(err_cursor.value.getDiff());
+            result.emplace_back(err_cursor.val.getDiff());
         } else {
             break;
         }

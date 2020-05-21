@@ -14,18 +14,18 @@ using namespace libtbag::util;
 
 TEST(ByteStringTest, ParseByteSize)
 {
-    ASSERT_EQ(100, parseByteSize(" 100 ").value);
-    ASSERT_EQ(10, parseByteSize(" 10 byte").value);
-    ASSERT_EQ(5, parseByteSize("  5b").value);
+    ASSERT_EQ(100, parseByteSize(" 100 ").val);
+    ASSERT_EQ(10, parseByteSize(" 10 byte").val);
+    ASSERT_EQ(5, parseByteSize("  5b").val);
 
-    ASSERT_EQ(1024, parseByteSize("1Kb").value);
-    ASSERT_EQ(1024, parseByteSize("1 kbyte").value);
+    ASSERT_EQ(1024, parseByteSize("1Kb").val);
+    ASSERT_EQ(1024, parseByteSize("1 kbyte").val);
 
-    ASSERT_EQ(1llu*2048*1024*1024, parseByteSize("2048 mb").value);
-    ASSERT_EQ(1llu*9*1024*1024, parseByteSize("9  Mbyte").value);
+    ASSERT_EQ(1llu*2048*1024*1024, parseByteSize("2048 mb").val);
+    ASSERT_EQ(1llu*9*1024*1024, parseByteSize("9  Mbyte").val);
 
-    ASSERT_EQ(1llu*2*1024*1024*1024, parseByteSize("2Gb").value);
-    ASSERT_EQ(1llu*6*1024*1024*1024, parseByteSize("6g").value);
+    ASSERT_EQ(1llu*2*1024*1024*1024, parseByteSize("2Gb").val);
+    ASSERT_EQ(1llu*6*1024*1024*1024, parseByteSize("6g").val);
 
     ASSERT_NE(E_SUCCESS, parseByteSize("1---"));
 }

@@ -18,7 +18,7 @@ TEST(Box_Iterator_Test, Rank1_Const)
 
     auto cursor_code = box.cursor();
     ASSERT_EQ(E_SUCCESS, cursor_code.code);
-    auto const & cursor = cursor_code.value;
+    auto const & cursor = cursor_code.val;
 
     std::vector<int> result;
     for (auto const & data : cursor.itr<int>()) {
@@ -37,7 +37,7 @@ TEST(Box_Iterator_Test, Rank1_Mutable)
 
     auto cursor_code = box.cursor();
     ASSERT_EQ(E_SUCCESS, cursor_code.code);
-    auto & cursor = cursor_code.value;
+    auto & cursor = cursor_code.val;
 
     int i = 0;
     for (auto & data : cursor.itr<int>()) {
@@ -58,7 +58,7 @@ TEST(Box_Iterator_Test, Rank2)
     ASSERT_EQ(E_SUCCESS, cursor_code0.code);
 
     std::vector<int> result0;
-    for (auto const & i : cursor_code0.value.itr<int>()) {
+    for (auto const & i : cursor_code0.val.itr<int>()) {
         result0.emplace_back(i);
     }
     ASSERT_EQ(2, result0.size());
@@ -67,12 +67,12 @@ TEST(Box_Iterator_Test, Rank2)
 
     std::vector<int> result1;
     do {
-        auto cursor_code1 = cursor_code0.value.sub();
+        auto cursor_code1 = cursor_code0.val.sub();
         ASSERT_EQ(E_SUCCESS, cursor_code1.code);
-        for (auto const & j : cursor_code1.value.itr<int>()) {
+        for (auto const & j : cursor_code1.val.itr<int>()) {
             result1.emplace_back(j);
         }
-    } while (cursor_code0.value.next());
+    } while (cursor_code0.val.next());
 
     ASSERT_EQ(4, result1.size());
     ASSERT_EQ(1, result1[0]);

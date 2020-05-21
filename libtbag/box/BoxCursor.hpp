@@ -253,7 +253,7 @@ public:
                 if (!err_cursor) {
                     return err_cursor.code;
                 }
-                auto const code = err_cursor.value.forEach(next_slice_begin, slice_end, predicated);
+                auto const code = err_cursor.val.forEach(next_slice_begin, slice_end, predicated);
                 if (isFailure(code)) {
                     return code;
                 }

@@ -59,10 +59,10 @@ static unsigned long __get_memory_usage_macos(int pid)
 static unsigned long __get_memory_usage_linux(int pid)
 {
     auto const state = libtbag::system::linux::getProcessState(pid);
-    if (state.isFailure()) {
+    if (!state) {
         return 0;
     }
-    return getPageSize() * state.value.rss;
+    return getPageSize() * state.val.rss;
 }
 
 unsigned long getMemoryUsage(int pid)

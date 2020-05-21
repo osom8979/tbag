@@ -116,7 +116,7 @@ RotatePath::InitParams RotatePath::createParams(std::string const & arguments, E
             } else {
                 auto const byte_size_result = libtbag::util::parseByteSize(args.at(0));
                 if (byte_size_result) {
-                    result.writer = std::make_shared<MaxSizeWriter>(byte_size_result.value);
+                    result.writer = std::make_shared<MaxSizeWriter>(byte_size_result.val);
                 } else {
                     result.writer = std::make_shared<MaxSizeWriter>(0);
                 }

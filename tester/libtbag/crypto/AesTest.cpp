@@ -30,13 +30,13 @@ TEST(AesTest, Default)
     std::cout << "Plain Text: " << plain_text << std::endl;
 
     auto const encrypt_result = encryptAes256CbcToBase64(key, iv, plain_text);
-    ASSERT_EQ(E_SUCCESS, encrypt_result.code);
-    ASSERT_GE(encrypt_result.value.size(), plain_text.size());
-    std::cout << "Encrypt Text: " << encrypt_result.value << std::endl;
+    ASSERT_EQ(E_SUCCESS, encrypt_result);
+    ASSERT_GE(encrypt_result.val.size(), plain_text.size());
+    std::cout << "Encrypt Text: " << encrypt_result.val << std::endl;
 
-    auto const decrypt_result = decryptBase64ToAes256Cbc(key, iv, encrypt_result.value);
-    ASSERT_EQ(E_SUCCESS, decrypt_result.code);
-    ASSERT_EQ(plain_text, decrypt_result.value);
-    std::cout << "Decrypt Text: " << decrypt_result.value << std::endl;
+    auto const decrypt_result = decryptBase64ToAes256Cbc(key, iv, encrypt_result.val);
+    ASSERT_EQ(E_SUCCESS, decrypt_result);
+    ASSERT_EQ(plain_text, decrypt_result.val);
+    std::cout << "Decrypt Text: " << decrypt_result.val << std::endl;
 }
 

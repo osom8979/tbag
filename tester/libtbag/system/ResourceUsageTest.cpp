@@ -15,7 +15,7 @@ TEST(ResourceUsageTest, ResourceUsage)
 {
     auto const result = getResourceUsage();
     ASSERT_EQ(E_SUCCESS, result.code);
-    auto const & res = result.value;
+    auto const & res = result.val;
     std::cout << "Resource Usage:\n"
               << "utime: "    << res.utime.sec << "." << res.utime.usec << std::endl
               << "stime: "    << res.stime.sec << "." << res.stime.usec << std::endl

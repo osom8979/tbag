@@ -392,7 +392,7 @@ Err TaskManager::join(TaskId id)
     if (!err_task_info) {
         return err_task_info.code;
     }
-    auto const & task_info = err_task_info.value;
+    auto const & task_info = err_task_info.val;
 
     if (task_info.type == TaskType::TT_PROCESS) {
         auto const pid = task_info.internal_id.process;

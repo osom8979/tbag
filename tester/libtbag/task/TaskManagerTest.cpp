@@ -56,9 +56,9 @@ TEST(TaskManagerTest, CreateThread)
     };
 
     auto const result1 = mgr.runThread(params1);
-    ASSERT_EQ(E_SUCCESS, result1.code);
+    ASSERT_EQ(E_SUCCESS, result1);
     auto const result2 = mgr.runThread(params2);
-    ASSERT_EQ(E_SUCCESS, result2.code);
+    ASSERT_EQ(E_SUCCESS, result2);
 
     ASSERT_FALSE(mgr.empty());
     ASSERT_EQ(2u, mgr.size());
@@ -71,8 +71,8 @@ TEST(TaskManagerTest, CreateThread)
     auto const join_result2 = mgr.join(task_list[1]);
     ASSERT_EQ(E_SUCCESS, join_result2);
 
-    ASSERT_EQ(id1, result1.value);
-    ASSERT_EQ(id2, result2.value);
+    ASSERT_EQ(id1, result1.val);
+    ASSERT_EQ(id2, result2.val);
 
     ASSERT_TRUE(test1);
     ASSERT_TRUE(test2);
@@ -81,19 +81,19 @@ TEST(TaskManagerTest, CreateThread)
     ASSERT_EQ(2u, mgr.size());
 
     auto const task_info1 = mgr.getTaskInfo(task_list[0]);
-    ASSERT_EQ(E_SUCCESS, task_info1.code);
+    ASSERT_EQ(E_SUCCESS, task_info1);
     auto const task_info2 = mgr.getTaskInfo(task_list[1]);
-    ASSERT_EQ(E_SUCCESS, task_info2.code);
+    ASSERT_EQ(E_SUCCESS, task_info2);
 
     auto const infos = mgr.getTaskInfos();
     ASSERT_EQ(2, infos.size());
 
-    ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info1.value.type);
-    ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info2.value.type);
-    ASSERT_TRUE(task_info1.value.done);
-    ASSERT_TRUE(task_info2.value.done);
-    ASSERT_FALSE(task_info1.value.killed);
-    ASSERT_FALSE(task_info2.value.killed);
+    ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info1.val.type);
+    ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info2.val.type);
+    ASSERT_TRUE(task_info1.val.done);
+    ASSERT_TRUE(task_info2.val.done);
+    ASSERT_FALSE(task_info1.val.killed);
+    ASSERT_FALSE(task_info2.val.killed);
 
     auto const erase_result1 = mgr.erase(task_list[0]);
     ASSERT_EQ(E_SUCCESS, erase_result1);
@@ -136,15 +136,15 @@ TEST(TaskManagerTest, KillThread)
     TaskManager mgr;
     auto const result = mgr.runThread(params);
     ASSERT_EQ(1u, mgr.size());
-    ASSERT_EQ(E_SUCCESS, result.code);
+    ASSERT_EQ(E_SUCCESS, result);
 
-    auto const task_id = result.value;
+    auto const task_id = result.val;
     ASSERT_EQ(E_SUCCESS, mgr.kill(task_id));
     ASSERT_EQ(E_SUCCESS, mgr.join(task_id));
 
     auto const err_task_info = mgr.getTaskInfo(task_id);
-    ASSERT_EQ(E_SUCCESS, err_task_info.code);
-    auto const & task_info = err_task_info.value;
+    ASSERT_EQ(E_SUCCESS, err_task_info);
+    auto const & task_info = err_task_info.val;
     ASSERT_EQ(TaskManager::TaskType::TT_THREAD, task_info.type);
     ASSERT_TRUE(task_info.done);
     ASSERT_TRUE(task_info.killed);
@@ -173,14 +173,14 @@ TEST(TaskManagerTest, CreateProcess)
     TaskManager mgr;
     auto const result = mgr.runProcess(params);
     ASSERT_EQ(1u, mgr.size());
-    ASSERT_EQ(E_SUCCESS, result.code);
+    ASSERT_EQ(E_SUCCESS, result);
 
-    auto const task_id = result.value;
+    auto const task_id = result.val;
     ASSERT_EQ(E_SUCCESS, mgr.join(task_id));
 
     auto const err_task_info = mgr.getTaskInfo(task_id);
-    ASSERT_EQ(E_SUCCESS, err_task_info.code);
-    auto const & task_info = err_task_info.value;
+    ASSERT_EQ(E_SUCCESS, err_task_info);
+    auto const & task_info = err_task_info.val;
     ASSERT_EQ(TaskManager::TaskType::TT_PROCESS, task_info.type);
     ASSERT_TRUE(task_info.done);
     ASSERT_FALSE(task_info.killed);
@@ -209,15 +209,15 @@ TEST(TaskManagerTest, KillProcess)
     TaskManager mgr;
     auto const result = mgr.runProcess(params);
     ASSERT_EQ(1u, mgr.size());
-    ASSERT_EQ(E_SUCCESS, result.code);
+    ASSERT_EQ(E_SUCCESS, result);
 
-    auto const task_id = result.value;
+    auto const task_id = result.val;
     ASSERT_EQ(E_SUCCESS, mgr.kill(task_id));
     ASSERT_EQ(E_SUCCESS, mgr.join(task_id));
 
     auto const err_task_info = mgr.getTaskInfo(task_id);
-    ASSERT_EQ(E_SUCCESS, err_task_info.code);
-    auto const & task_info = err_task_info.value;
+    ASSERT_EQ(E_SUCCESS, err_task_info);
+    auto const & task_info = err_task_info.val;
     ASSERT_EQ(TaskManager::TaskType::TT_PROCESS, task_info.type);
     ASSERT_TRUE(task_info.done);
     ASSERT_TRUE(task_info.killed);

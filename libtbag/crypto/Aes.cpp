@@ -121,7 +121,7 @@ ErrString encryptAes256CbcToBase64(KeyArray const & key, IvArray const & iv, std
         return result.code;
     }
     std::string encoded_base64;
-    if (!encodeBase64(result.value, encoded_base64)) {
+    if (!encodeBase64(result.val, encoded_base64)) {
         return E_ENCODE;
     }
     return { E_SUCCESS, encoded_base64 };
@@ -137,7 +137,7 @@ ErrString decryptBase64ToAes256Cbc(KeyArray const & key, IvArray const & iv, std
     if (!result) {
         return result.code;
     }
-    return { E_SUCCESS, std::string(result.value.cbegin(), result.value.cend()) };
+    return { E_SUCCESS, std::string(result.val.cbegin(), result.val.cend()) };
 }
 
 } // namespace crypto

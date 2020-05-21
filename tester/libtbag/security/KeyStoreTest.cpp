@@ -33,8 +33,8 @@ TEST(KeyStoreTest, File)
     ASSERT_EQ(1, store.list().size());
 
     auto const get2 = store.get(key1);
-    ASSERT_EQ(E_SUCCESS, get2.code);
-    ASSERT_EQ(val1, get2.value);
+    ASSERT_EQ(E_SUCCESS, get2);
+    ASSERT_EQ(val1, get2.val);
     ASSERT_EQ(1, store.list().size());
 }
 

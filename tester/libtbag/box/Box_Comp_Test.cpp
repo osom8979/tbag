@@ -40,9 +40,9 @@ struct Box_Comp_Test_Fixture : public testing::Test
 TEST_F(Box_Comp_Test_Fixture, EqualTo)
 {
     auto const err_result = src.eq(cmp);
-    ASSERT_EQ(E_SUCCESS, err_result.code);
+    ASSERT_EQ(E_SUCCESS, err_result);
 
-    auto const & result = err_result.value;
+    auto const & result = err_result.val;
     ASSERT_TRUE(result.is_bool());
     ASSERT_TRUE(result.is_device_cpu());
     ASSERT_EQ(0, result.ext0());
@@ -84,9 +84,9 @@ TEST_F(Box_Comp_Test_Fixture, EqualTo)
 TEST_F(Box_Comp_Test_Fixture, NotEqual)
 {
     auto const err_result = src.ne(cmp);
-    ASSERT_EQ(E_SUCCESS, err_result.code);
+    ASSERT_EQ(E_SUCCESS, err_result);
 
-    auto const & result = err_result.value;
+    auto const & result = err_result.val;
     ASSERT_TRUE(result.is_bool());
     ASSERT_TRUE(result.is_device_cpu());
     ASSERT_EQ(0, result.ext0());
@@ -128,9 +128,9 @@ TEST_F(Box_Comp_Test_Fixture, NotEqual)
 TEST_F(Box_Comp_Test_Fixture, LessThan)
 {
     auto const err_result = src.lt(cmp);
-    ASSERT_EQ(E_SUCCESS, err_result.code);
+    ASSERT_EQ(E_SUCCESS, err_result);
 
-    auto const & result = err_result.value;
+    auto const & result = err_result.val;
     ASSERT_TRUE(result.is_bool());
     ASSERT_TRUE(result.is_device_cpu());
     ASSERT_EQ(0, result.ext0());
@@ -172,9 +172,9 @@ TEST_F(Box_Comp_Test_Fixture, LessThan)
 TEST_F(Box_Comp_Test_Fixture, LessEqual)
 {
     auto const err_result = src.le(cmp);
-    ASSERT_EQ(E_SUCCESS, err_result.code);
+    ASSERT_EQ(E_SUCCESS, err_result);
 
-    auto const & result = err_result.value;
+    auto const & result = err_result.val;
     ASSERT_TRUE(result.is_bool());
     ASSERT_TRUE(result.is_device_cpu());
     ASSERT_EQ(0, result.ext0());
@@ -216,9 +216,9 @@ TEST_F(Box_Comp_Test_Fixture, LessEqual)
 TEST_F(Box_Comp_Test_Fixture, GreaterThan)
 {
     auto const err_result = src.gt(cmp);
-    ASSERT_EQ(E_SUCCESS, err_result.code);
+    ASSERT_EQ(E_SUCCESS, err_result);
 
-    auto const & result = err_result.value;
+    auto const & result = err_result.val;
     ASSERT_TRUE(result.is_bool());
     ASSERT_TRUE(result.is_device_cpu());
     ASSERT_EQ(0, result.ext0());
@@ -260,9 +260,9 @@ TEST_F(Box_Comp_Test_Fixture, GreaterThan)
 TEST_F(Box_Comp_Test_Fixture, GreaterEqual)
 {
     auto const err_result = src.ge(cmp);
-    ASSERT_EQ(E_SUCCESS, err_result.code);
+    ASSERT_EQ(E_SUCCESS, err_result);
 
-    auto const & result = err_result.value;
+    auto const & result = err_result.val;
     ASSERT_TRUE(result.is_bool());
     ASSERT_TRUE(result.is_device_cpu());
     ASSERT_EQ(0, result.ext0());

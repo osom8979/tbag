@@ -23,11 +23,11 @@ TEST(CommanderTest, Default)
 
     ASSERT_TRUE(commander.exists("test"));
     auto result1 = commander("test", 100, 20);
-    ASSERT_EQ(E_SUCCESS, result1.code);
-    ASSERT_EQ(120, result1.value);
+    ASSERT_EQ(E_SUCCESS, result1);
+    ASSERT_EQ(120, result1.val);
 
     ASSERT_FALSE(commander.exists("rand"));
     auto result2 = commander("rand", 200, 30);
-    ASSERT_EQ(E_NFOUND, result2.code);
+    ASSERT_EQ(E_NFOUND, result2);
 }
 

@@ -78,8 +78,8 @@ TEST(HttpServerClientTest, DefaultHttp)
     ASSERT_EQ(E_SUCCESS, wait_result);
 
     auto const response_result = client.read();
-    ASSERT_EQ(E_SUCCESS, response_result.code);
-    ASSERT_EQ(test_body, response_result.value);
+    ASSERT_EQ(E_SUCCESS, response_result);
+    ASSERT_EQ(test_body, response_result.val);
 
     client.close();
     ASSERT_FALSE(client.isOpen());
@@ -157,8 +157,8 @@ TEST(HttpServerClientTest, DefaultHttps)
     ASSERT_EQ(E_SUCCESS, wait_result);
 
     auto const response_result = client.read();
-    ASSERT_EQ(E_SUCCESS, response_result.code);
-    ASSERT_EQ(test_body, response_result.value);
+    ASSERT_EQ(E_SUCCESS, response_result);
+    ASSERT_EQ(test_body, response_result.val);
 
     client.close();
     ASSERT_FALSE(client.isOpen());

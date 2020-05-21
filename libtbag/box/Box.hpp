@@ -740,7 +740,7 @@ public:
         if (!err_cursor) {
             return err_cursor.code;
         }
-        return err_cursor.value.forEach(slice_begin, slice_end, predicated);
+        return err_cursor.val.forEach(slice_begin, slice_end, predicated);
     }
 
     template <typename ContainerT, typename Predicated>
@@ -995,12 +995,12 @@ public:
     ErrBox eq(Box const & box) const;
     ErrBox ne(Box const & box) const;
 
-    Box operator < (Box const & box) const { return lt(box).value; }
-    Box operator <=(Box const & box) const { return le(box).value; }
-    Box operator > (Box const & box) const { return gt(box).value; }
-    Box operator >=(Box const & box) const { return ge(box).value; }
-    Box operator ==(Box const & box) const { return eq(box).value; }
-    Box operator !=(Box const & box) const { return ne(box).value; }
+    Box operator < (Box const & box) const { return lt(box).val; }
+    Box operator <=(Box const & box) const { return le(box).val; }
+    Box operator > (Box const & box) const { return gt(box).val; }
+    Box operator >=(Box const & box) const { return ge(box).val; }
+    Box operator ==(Box const & box) const { return eq(box).val; }
+    Box operator !=(Box const & box) const { return ne(box).val; }
 
 private:
     using ValCompareMethod = Err (box_data::*)(btype, bdev, ui64 const *, void const *, box_data *) const;
@@ -1076,12 +1076,12 @@ public:
     template <typename T> ErrBox eq(T const & v) const { return eq(&v); }
     template <typename T> ErrBox ne(T const & v) const { return ne(&v); }
 
-    template <typename T> Box operator < (T const & v) const { return lt(v).value; }
-    template <typename T> Box operator <=(T const & v) const { return le(v).value; }
-    template <typename T> Box operator > (T const & v) const { return gt(v).value; }
-    template <typename T> Box operator >=(T const & v) const { return ge(v).value; }
-    template <typename T> Box operator ==(T const & v) const { return eq(v).value; }
-    template <typename T> Box operator !=(T const & v) const { return ne(v).value; }
+    template <typename T> Box operator < (T const & v) const { return lt(v).val; }
+    template <typename T> Box operator <=(T const & v) const { return le(v).val; }
+    template <typename T> Box operator > (T const & v) const { return gt(v).val; }
+    template <typename T> Box operator >=(T const & v) const { return ge(v).val; }
+    template <typename T> Box operator ==(T const & v) const { return eq(v).val; }
+    template <typename T> Box operator !=(T const & v) const { return ne(v).val; }
 
 public:
     bool all() const;

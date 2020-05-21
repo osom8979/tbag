@@ -935,11 +935,11 @@ ErrPair<box_cursor> box_data::init_cursor(void * data_pointer, ui32 dim_index,
 
     ErrPair<box_cursor> result;
     result.code = E_SUCCESS;
-    result.value.box = this;
-    result.value.begin = (void*)(((std::intptr_t)data_pointer) + (stride_byte * begin_abs));
-    result.value.end = (void*)(((std::intptr_t)data_pointer) + (stride_byte * exact_last_position));
-    result.value.stride_byte = stride_byte * step_index;
-    result.value.dim_index = dim_index;
+    result.val.box = this;
+    result.val.begin = (void*)(((std::intptr_t)data_pointer) + (stride_byte * begin_abs));
+    result.val.end = (void*)(((std::intptr_t)data_pointer) + (stride_byte * exact_last_position));
+    result.val.stride_byte = stride_byte * step_index;
+    result.val.dim_index = dim_index;
     return result;
 }
 
@@ -1137,14 +1137,14 @@ Err box_data::resize_dims(btype src_type, bdev src_device, ui64 const * src_ext,
 ErrPair<box_data> box_data::clone(btype change_type, btype change_device, ui64 const * change_ext) const
 {
     ErrPair<box_data> result;
-    auto const code = result.value.checked_assign_data(change_type, change_device, change_ext,
+    auto const code = result.val.checked_assign_data(change_type, change_device, change_ext,
                                                         rank, dims, data);
     if (isFailure(code)) {
         return code;
     }
-    result.value.checked_assign_info_buffer(info, info_size);
-    memcpy(&(result.value.opaque), &opaque, sizeof(opaque));
-    result.value.opaque_deleter = opaque_deleter;
+    result.val.checked_assign_info_buffer(info, info_size);
+    memcpy(&(result.val.opaque), &opaque, sizeof(opaque));
+    result.val.opaque_deleter = opaque_deleter;
     result.code = E_SUCCESS;
     return result;
 }

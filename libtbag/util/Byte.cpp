@@ -111,7 +111,7 @@ Err Byte::fromString(std::string const & text)
     if (!result) {
         return result.code;
     }
-    _byte = result.value;
+    _byte = result.val;
     return E_SUCCESS;
 }
 

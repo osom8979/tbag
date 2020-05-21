@@ -71,7 +71,7 @@ ErrPair<BoxCursor> BoxCursor::sub(int begin_index, int end_index, int step_index
         return libtbag::E_OORANGE;
     }
     auto const err_cursor = _cursor.init_cursor(_cursor.dim_index+1, begin_index, end_index, step_index);
-    return { err_cursor.code, err_cursor.value };
+    return { err_cursor.code, err_cursor.val };
 }
 
 ErrPair<BoxCursor> BoxCursor::sub(int begin_index, int end_index) const

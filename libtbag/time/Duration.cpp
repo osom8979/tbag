@@ -167,7 +167,7 @@ Err Duration::fromString(std::string const & text)
     if (!result) {
         return result.code;
     }
-    _nano = std::chrono::nanoseconds(result.value);
+    _nano = std::chrono::nanoseconds(result.val);
     return E_SUCCESS;
 }
 
