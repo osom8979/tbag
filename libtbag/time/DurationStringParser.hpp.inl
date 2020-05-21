@@ -43,7 +43,7 @@ struct DurationStringParser : private Noncopyable
     using seconds = std::chrono::seconds;
     using minutes = std::chrono::minutes;
     using hours = std::chrono::hours;
-    using ErrSize = libtbag::ErrPair<std::size_t>;
+    using ErrSize = ErrPair<std::size_t>;
 
     template <typename T>
     static std::size_t size(T const & duration) TBAG_NOEXCEPT
@@ -61,6 +61,11 @@ struct DurationStringParser : private Noncopyable
     static ErrSize day  (std::size_t const & v) TBAG_NOEXCEPT { return {E_SUCCESS, size(hours(v*DAY_TO_HOURS))}; }
     // clang-format on
 
+    static ErrSize error() TBAG_NOEXCEPT
+    {
+        return { E_PARSING, 0 };
+    }
+
     static ErrSize parse1(std::size_t value, std::string const & suffix)
     {
         assert(suffix.size() == 1);
@@ -72,7 +77,7 @@ struct DurationStringParser : private Noncopyable
         case 'm': return min(value);
         case 'h': return hour(value);
         case 'd': return day(value);
-        default:  return E_PARSING;
+        default:  return error();
         }
         // clang-format on
     }
@@ -90,12 +95,18 @@ struct DurationStringParser : private Noncopyable
             }
             // clang-format on
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse3(std::size_t value, std::string const & suffix)
     {
         assert(suffix.size() == 3);
+        if (TBAG_STRCMP3(suffix, "mic")) {
+            return micro(value);
+        }
+        if (TBAG_STRCMP3(suffix, "mil")) {
+            return milli(value);
+        }
         if (TBAG_STRCMP3(suffix, "sec")) {
             return sec(value);
         }
@@ -103,9 +114,9 @@ struct DurationStringParser : private Noncopyable
             return min(value);
         }
         if (TBAG_STRCMP3(suffix, "day")) {
-            return min(value);
+            return day(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse4(std::size_t value, std::string const & suffix)
@@ -123,7 +134,7 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP4(suffix, "days")) {
             return day(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse5(std::size_t value, std::string const & suffix)
@@ -138,7 +149,7 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP5(suffix, "hours")) {
             return hour(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse6(std::size_t value, std::string const & suffix)
@@ -150,7 +161,7 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP6(suffix, "minute")) {
             return min(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse7(std::size_t value, std::string const & suffix)
@@ -165,7 +176,7 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP7(suffix, "minutes")) {
             return min(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse8(std::size_t value, std::string const & suffix)
@@ -177,13 +188,13 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP8(suffix, "millisec")) {
             return milli(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse9(std::size_t value, std::string const & suffix)
     {
         assert(suffix.size() == 9);
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse10(std::size_t value, std::string const & suffix)
@@ -192,7 +203,7 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP10(suffix, "nanosecond")) {
             return nano(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse11(std::size_t value, std::string const & suffix)
@@ -207,7 +218,7 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP11(suffix, "millisecond")) {
             return milli(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse12(std::size_t value, std::string const & suffix)
@@ -219,7 +230,7 @@ struct DurationStringParser : private Noncopyable
         if (TBAG_STRCMP12(suffix, "milliseconds")) {
             return milli(value);
         }
-        return E_PARSING;
+        return error();
     }
 
     static ErrSize parse(std::string const & str)
@@ -249,7 +260,7 @@ struct DurationStringParser : private Noncopyable
         case 10: return parse10(value, unit);
         case 11: return parse11(value, unit);
         case 12: return parse12(value, unit);
-        default: return E_PARSING;
+        default: return error();
         }
         // clang-format on
     }
