@@ -152,6 +152,7 @@ NAMESPACE_LIBTBAG_OPEN
     _TBAG_XX(_EXIT_SIGNAL                          , 10115, "Exit signal"                                             )\
     _TBAG_XX(_CONVERT                              , 10116, "Convert error"                                           )\
     _TBAG_XX(_DUPLICATE                            , 10117, "Duplicate error"                                         )\
+    _TBAG_XX(_NOEXT                                , 10118, "There is no extension"                                   )\
     /* OpenSSL/ReSSL error code **************************************************************************************/\
     _TBAG_XX(_SSL                                  , 11000, "SSL library error"                                       )\
     _TBAG_XX(_SSL_NONE                             , 11001, "SSL I/O operation completed"                             )\
