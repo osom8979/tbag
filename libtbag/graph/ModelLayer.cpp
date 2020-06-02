@@ -80,12 +80,6 @@ void ModelLayer::_assign_id(int id)
     _base->_assign_id = id;
 }
 
-char const * ModelLayer::type() const
-{
-    assert(exists());
-    return _base->TYPE;
-}
-
 int ModelLayer::id() const
 {
     assert(exists());

@@ -63,15 +63,6 @@ public:
 
 private:
     /**
-     * Layer class type.
-     *
-     * @warning
-     *  Initialization using static strings is required.
-     */
-    char const * const TYPE;
-
-private:
-    /**
      * Layer instance id.
      *
      * @warning
@@ -85,16 +76,17 @@ public:
     void * opaque = nullptr;
 
 public:
-    LayerBase(char const * type = nullptr) : TYPE(type) { /* EMPTY. */ }
+    LayerBase() { /* EMPTY. */ }
     virtual ~LayerBase() { /* EMPTY. */ }
 
 public:
-    inline char const * type() const TBAG_NOEXCEPT
-    { return TYPE; }
+    inline bool isAssigned() const TBAG_NOEXCEPT
+    { return _assign_id != NO_ASSIGN_ID; }
 
     inline int id() const TBAG_NOEXCEPT
     { return _assign_id; }
 
+public:
     virtual Err runner(Direction direction, void * user)
     { return E_SUCCESS; }
 };
@@ -183,7 +175,6 @@ private:
     void _assign_id(int id);
 
 public:
-    char const * type() const;
     int id() const;
 
 public:

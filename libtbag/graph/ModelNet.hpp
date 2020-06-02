@@ -118,6 +118,9 @@ public:
     /**
      * Run the graph.
      *
+     * @remarks
+     *  It does not check dependencies and completion.
+     *
      * @param[in] start
      *      List of start node ids.
      * @param[in] direction
@@ -130,14 +133,30 @@ public:
      *      Returns the result in the task sequence.
      * @param[in] simulate
      *      If this value is true, the child layer is not executed.
+     *
+     * @return
+     *  Last executed depth.
      */
-    Err run(std::set<int> const & start,
-            Direction direction = Direction::D_FORWARD,
-            std::size_t max_depth = MAX_RUN_DEPTH,
-            void * user = nullptr,
-            std::vector<int> * sequence = nullptr,
-            bool simulate = false) const;
+    std::size_t run(std::set<int> const & start,
+                    Direction direction = Direction::D_FORWARD,
+                    std::size_t max_depth = MAX_RUN_DEPTH,
+                    void * user = nullptr,
+                    std::vector<int> * sequence = nullptr,
+                    bool simulate = false) const;
 
+public:
+    std::size_t forward(std::set<int> const & start,
+                        std::size_t max_depth = MAX_RUN_DEPTH,
+                        void * user = nullptr,
+                        std::vector<int> * sequence = nullptr,
+                        bool simulate = false) const;
+    std::size_t backward(std::set<int> const & start,
+                         std::size_t max_depth = MAX_RUN_DEPTH,
+                         void * user = nullptr,
+                         std::vector<int> * sequence = nullptr,
+                         bool simulate = false) const;
+
+public:
     /**
      * Check and run the graph dependency.
      *
@@ -153,18 +172,6 @@ public:
                       std::vector<int> * sequence = nullptr,
                       bool simulate = false,
                       bool skip_first_dep_test = false) const;
-
-public:
-    Err forward(std::set<int> const & start,
-                std::size_t max_depth = MAX_RUN_DEPTH,
-                void * user = nullptr,
-                std::vector<int> * sequence = nullptr,
-                bool simulate = false) const;
-    Err backward(std::set<int> const & start,
-                 std::size_t max_depth = MAX_RUN_DEPTH,
-                 void * user = nullptr,
-                 std::vector<int> * sequence = nullptr,
-                 bool simulate = false) const;
 
 public:
     Err dependencyForward(std::set<int> const & start,

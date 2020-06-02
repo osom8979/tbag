@@ -245,74 +245,70 @@ ModelNet::Layers ModelNet::getInputLayers(int node_id, Direction direction) cons
     return getInputLayers(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_SOURCE : ArcOrder::AO_TARGET);
 }
 
-Err ModelNet::run(std::set<int> const & start,
-                  Direction direction,
-                  std::size_t max_depth,
-                  void * user,
-                  std::vector<int> * sequence,
-                  bool simulate) const
+std::size_t ModelNet::run(std::set<int> const & start,
+                          Direction direction,
+                          std::size_t max_depth,
+                          void * user,
+                          std::vector<int> * sequence,
+                          bool simulate) const
 {
     assert(exists());
     if (start.empty()) {
-        return E_ILLARGS;
-    }
-
-    auto const all_ids = getLayerIds();
-    assert(!all_ids.empty());
-
-    std::unordered_map<int, bool> completes;
-    for (auto const id : all_ids) {
-        completes.emplace(id, false);
+        return 0;
     }
 
     std::set<int> current = start;
     std::set<int> children;
+    std::size_t depth = 0;
 
-    for (auto depth = 0; depth < max_depth; ++depth) {
-        if (current.empty()) {
-            break; // No more current node exist.
-        }
-
-        // Run current list.
+    for (; depth < max_depth; ++depth) {
         for (auto const id : current) {
-            if (completes[id]) {
-                continue; // This layer has already been run.
-            }
-
             Err code;
             if (simulate) {
                 code = E_SUCCESS;
             } else {
                 code = _impl->layers[__get_node(id)].runner(direction, user);
-                if (isFailure(code)) {
-                    return code;
-                }
             }
 
-            assert(isSuccess(code));
-            completes[id] = true;
+            if (isSuccess(code)) {
+                for (auto const next_id : getChildrenNodeIds(id, direction)) {
+                    children.insert(next_id);
+                }
+            }
 
             if (sequence) {
                 sequence->push_back(id);
             }
         }
 
-        // Update children list.
-        children.clear();
-
-        for (auto const id : current) {
-            for (auto const next_node_id : getChildrenNodeIds(id, direction)) {
-                if (!completes[next_node_id]) {
-                    children.insert(next_node_id);
-                }
-            }
+        if (children.empty()) {
+            break;
         }
 
         // Flip for next iteration.
         current.swap(children);
+        children.clear();
     }
 
-    return E_SUCCESS;
+    return depth;
+}
+
+std::size_t ModelNet::forward(std::set<int> const & start,
+                              std::size_t max_depth,
+                              void * user,
+                              std::vector<int> * sequence,
+                              bool simulate) const
+{
+    return run(start, Direction::D_FORWARD, max_depth, user, sequence, simulate);
+}
+
+std::size_t ModelNet::backward(std::set<int> const & start,
+                               std::size_t max_depth,
+                               void * user,
+                               std::vector<int> * sequence,
+                               bool simulate) const
+{
+    return run(start, Direction::D_BACKWARD, max_depth, user, sequence, simulate);
 }
 
 Err ModelNet::dependencyRun(std::set<int> const & start,
@@ -402,26 +398,6 @@ Err ModelNet::dependencyRun(std::set<int> const & start,
     }
 
     return E_SUCCESS;
-}
-
-Err ModelNet::forward(std::set<int> const & start,
-                      std::size_t max_depth,
-                      void * user,
-                      std::vector<int> * sequence,
-                      bool simulate) const
-{
-    return run(start, Direction::D_FORWARD, max_depth,
-               user, sequence, simulate);
-}
-
-Err ModelNet::backward(std::set<int> const & start,
-                       std::size_t max_depth,
-                       void * user,
-                       std::vector<int> * sequence,
-                       bool simulate) const
-{
-    return run(start, Direction::D_BACKWARD, max_depth,
-               user, sequence, simulate);
 }
 
 Err ModelNet::dependencyForward(std::set<int> const & start,
