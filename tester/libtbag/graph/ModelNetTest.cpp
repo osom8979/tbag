@@ -173,7 +173,7 @@ struct ModelNetFixture : public testing::Test
 
 TEST_F(ModelNetFixture, Case1_Forward_Depth0)
 {
-    ASSERT_EQ(0, net.forward({0}, 0));
+    ASSERT_EQ(E_SUCCESS, net.forward({0}, 0));
     ASSERT_FALSE(isComplete(0));
     ASSERT_FALSE(isComplete(1));
     ASSERT_FALSE(isComplete(2));
@@ -187,7 +187,7 @@ TEST_F(ModelNetFixture, Case1_Forward_Depth0)
 
 TEST_F(ModelNetFixture, Case1_Forward_Depth1)
 {
-    ASSERT_EQ(1, net.forward({0}, 1));
+    ASSERT_EQ(E_SUCCESS, net.forward({0}, 1));
     ASSERT_TRUE(isComplete(0));
     ASSERT_FALSE(isComplete(1));
     ASSERT_FALSE(isComplete(2));
@@ -201,7 +201,7 @@ TEST_F(ModelNetFixture, Case1_Forward_Depth1)
 
 TEST_F(ModelNetFixture, Case1_Forward_Depth2)
 {
-    ASSERT_EQ(2, net.forward({0}, 2));
+    ASSERT_EQ(E_SUCCESS, net.forward({0}, 2));
     ASSERT_TRUE(isComplete(0));
     ASSERT_TRUE(isComplete(1));
     ASSERT_TRUE(isComplete(2));
@@ -215,7 +215,7 @@ TEST_F(ModelNetFixture, Case1_Forward_Depth2)
 
 TEST_F(ModelNetFixture, Case1_Forward_Depth3)
 {
-    ASSERT_EQ(3, net.forward({0}, 3));
+    ASSERT_EQ(E_SUCCESS, net.forward({0}, 3));
     ASSERT_TRUE(isComplete(0));
     ASSERT_TRUE(isComplete(1));
     ASSERT_TRUE(isComplete(2));
@@ -229,7 +229,7 @@ TEST_F(ModelNetFixture, Case1_Forward_Depth3)
 
 TEST_F(ModelNetFixture, Case1_Forward_Depth4)
 {
-    ASSERT_EQ(3, net.forward({0}, 4));
+    ASSERT_EQ(E_SUCCESS, net.forward({0}, 4));
     ASSERT_TRUE(isComplete(0));
     ASSERT_TRUE(isComplete(1));
     ASSERT_TRUE(isComplete(2));
@@ -243,7 +243,7 @@ TEST_F(ModelNetFixture, Case1_Forward_Depth4)
 
 TEST_F(ModelNetFixture, Case2_Backward_Depth0)
 {
-    ASSERT_EQ(0, net.backward({7}, 0));
+    ASSERT_EQ(E_SUCCESS, net.backward({7}, 0));
     ASSERT_FALSE(isComplete(0));
     ASSERT_FALSE(isComplete(1));
     ASSERT_FALSE(isComplete(2));
@@ -257,7 +257,7 @@ TEST_F(ModelNetFixture, Case2_Backward_Depth0)
 
 TEST_F(ModelNetFixture, Case2_Backward_Depth1)
 {
-    ASSERT_EQ(1, net.backward({7}, 1));
+    ASSERT_EQ(E_SUCCESS, net.backward({7}, 1));
     ASSERT_FALSE(isComplete(0));
     ASSERT_FALSE(isComplete(1));
     ASSERT_FALSE(isComplete(2));
@@ -271,7 +271,7 @@ TEST_F(ModelNetFixture, Case2_Backward_Depth1)
 
 TEST_F(ModelNetFixture, Case2_Backward_Depth2)
 {
-    ASSERT_EQ(2, net.backward({7}, 2));
+    ASSERT_EQ(E_SUCCESS, net.backward({7}, 2));
     ASSERT_FALSE(isComplete(0));
     ASSERT_FALSE(isComplete(1));
     ASSERT_FALSE(isComplete(2));
@@ -285,7 +285,7 @@ TEST_F(ModelNetFixture, Case2_Backward_Depth2)
 
 TEST_F(ModelNetFixture, Case2_Backward_Depth3)
 {
-    ASSERT_EQ(3, net.backward({7}, 3));
+    ASSERT_EQ(E_SUCCESS, net.backward({7}, 3));
     ASSERT_TRUE(isComplete(0));
     ASSERT_TRUE(isComplete(1));
     ASSERT_TRUE(isComplete(2));
@@ -299,7 +299,7 @@ TEST_F(ModelNetFixture, Case2_Backward_Depth3)
 
 TEST_F(ModelNetFixture, Case2_Backward_Depth4)
 {
-    ASSERT_EQ(3, net.backward({7}, 4));
+    ASSERT_EQ(E_SUCCESS, net.backward({7}, 4));
     ASSERT_TRUE(isComplete(0));
     ASSERT_TRUE(isComplete(1));
     ASSERT_TRUE(isComplete(2));
@@ -313,7 +313,7 @@ TEST_F(ModelNetFixture, Case2_Backward_Depth4)
 
 TEST_F(ModelNetFixture, Case3_Backward)
 {
-    ASSERT_EQ(2, net.backward({4}));
+    ASSERT_EQ(E_SUCCESS, net.backward({4}));
     ASSERT_TRUE(isComplete(0));
     ASSERT_TRUE(isComplete(1));
     ASSERT_FALSE(isComplete(2));
@@ -327,7 +327,7 @@ TEST_F(ModelNetFixture, Case3_Backward)
 
 TEST_F(ModelNetFixture, Case4_Forward)
 {
-    ASSERT_EQ(1, net.forward({3}));
+    ASSERT_EQ(E_SUCCESS, net.forward({3}));
     ASSERT_FALSE(isComplete(0));
     ASSERT_FALSE(isComplete(1));
     ASSERT_FALSE(isComplete(2));

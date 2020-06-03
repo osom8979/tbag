@@ -245,23 +245,22 @@ ModelNet::Layers ModelNet::getInputLayers(int node_id, Direction direction) cons
     return getInputLayers(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_SOURCE : ArcOrder::AO_TARGET);
 }
 
-std::size_t ModelNet::run(std::set<int> const & start,
-                          Direction direction,
-                          std::size_t max_depth,
-                          void * user,
-                          std::vector<int> * sequence,
-                          bool simulate) const
+Err ModelNet::run(std::set<int> const & start,
+                  Direction direction,
+                  std::size_t max_depth,
+                  void * user,
+                  std::vector<int> * sequence,
+                  bool simulate) const
 {
     assert(exists());
     if (start.empty()) {
-        return 0;
+        return E_ILLARGS;
     }
 
     std::set<int> current = start;
     std::set<int> children;
-    std::size_t depth = 0;
 
-    for (; depth < max_depth; ++depth) {
+    for (auto i = 0; i < max_depth; ++i) {
         for (auto const id : current) {
             Err code;
             if (simulate) {
@@ -290,23 +289,23 @@ std::size_t ModelNet::run(std::set<int> const & start,
         children.clear();
     }
 
-    return depth;
+    return E_SUCCESS;
 }
 
-std::size_t ModelNet::forward(std::set<int> const & start,
-                              std::size_t max_depth,
-                              void * user,
-                              std::vector<int> * sequence,
-                              bool simulate) const
+Err ModelNet::forward(std::set<int> const & start,
+                      std::size_t max_depth,
+                      void * user,
+                      std::vector<int> * sequence,
+                      bool simulate) const
 {
     return run(start, Direction::D_FORWARD, max_depth, user, sequence, simulate);
 }
 
-std::size_t ModelNet::backward(std::set<int> const & start,
-                               std::size_t max_depth,
-                               void * user,
-                               std::vector<int> * sequence,
-                               bool simulate) const
+Err ModelNet::backward(std::set<int> const & start,
+                       std::size_t max_depth,
+                       void * user,
+                       std::vector<int> * sequence,
+                       bool simulate) const
 {
     return run(start, Direction::D_BACKWARD, max_depth, user, sequence, simulate);
 }

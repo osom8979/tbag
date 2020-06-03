@@ -99,6 +99,17 @@ public:
     void addArc(ModelLayer const & source, ModelLayer const & target);
 
 public:
+    template <typename LayerType, typename ... Args>
+    ModelLayer addNewNode(Args && ... args)
+    {
+        auto layer = ModelLayer::create<LayerType>(std::forward<Args>(args) ...);
+        if (layer) {
+            addNode(layer);
+        }
+        return layer;
+    }
+
+public:
     std::vector<int> getLayerIds() const;
     Layers getLayers() const;
     ModelLayer getLayer(int id) const;
@@ -133,28 +144,25 @@ public:
      *      Returns the result in the task sequence.
      * @param[in] simulate
      *      If this value is true, the child layer is not executed.
-     *
-     * @return
-     *  Last executed depth.
      */
-    std::size_t run(std::set<int> const & start,
-                    Direction direction = Direction::D_FORWARD,
-                    std::size_t max_depth = MAX_RUN_DEPTH,
-                    void * user = nullptr,
-                    std::vector<int> * sequence = nullptr,
-                    bool simulate = false) const;
+    Err run(std::set<int> const & start,
+            Direction direction = Direction::D_FORWARD,
+            std::size_t max_depth = MAX_RUN_DEPTH,
+            void * user = nullptr,
+            std::vector<int> * sequence = nullptr,
+            bool simulate = false) const;
 
 public:
-    std::size_t forward(std::set<int> const & start,
-                        std::size_t max_depth = MAX_RUN_DEPTH,
-                        void * user = nullptr,
-                        std::vector<int> * sequence = nullptr,
-                        bool simulate = false) const;
-    std::size_t backward(std::set<int> const & start,
-                         std::size_t max_depth = MAX_RUN_DEPTH,
-                         void * user = nullptr,
-                         std::vector<int> * sequence = nullptr,
-                         bool simulate = false) const;
+    Err forward(std::set<int> const & start,
+                std::size_t max_depth = MAX_RUN_DEPTH,
+                void * user = nullptr,
+                std::vector<int> * sequence = nullptr,
+                bool simulate = false) const;
+    Err backward(std::set<int> const & start,
+                 std::size_t max_depth = MAX_RUN_DEPTH,
+                 void * user = nullptr,
+                 std::vector<int> * sequence = nullptr,
+                 bool simulate = false) const;
 
 public:
     /**
