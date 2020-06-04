@@ -196,9 +196,6 @@ std::string mergeTokens(Iterator begin, Iterator end, std::string const & delimi
     if (begin == end) {
         return {};
     }
-    if (std::distance(begin, end) == 1) {
-        return *begin;
-    }
     std::stringstream ss;
     ss << *begin;
     ++begin;
