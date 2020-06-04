@@ -46,22 +46,20 @@ TEST(ModelNet_Sequence_Test, Case1)
     net.addArc(node2, node1);
 
     std::vector<int> sequence;
-    ASSERT_EQ(E_SUCCESS, net.dependencyBackward({3}, ModelNet::MAX_RUN_DEPTH, nullptr,
-                                                &sequence, false, true));
-    ASSERT_EQ(4, sequence.size());
-    ASSERT_EQ(3, sequence[0]);
-    ASSERT_EQ(1, sequence[1]);
-    ASSERT_EQ(2, sequence[2]);
-    ASSERT_EQ(0, sequence[3]);
-
-    sequence.clear();
-    ASSERT_EQ(E_SUCCESS, net.backward({3}, ModelNet::MAX_RUN_DEPTH, nullptr,
+    ASSERT_EQ(4, net.backward({3}, ModelNet::MAX_RUN_DEPTH, nullptr,
                                       &sequence, false));
     ASSERT_EQ(5, sequence.size());
     ASSERT_EQ(3, sequence[0]);
     ASSERT_EQ(1, sequence[1]);
-    ASSERT_EQ(0, sequence[2]);
-    ASSERT_EQ(2, sequence[3]);
+
+    if (sequence[2] == 0) {
+        ASSERT_EQ(0, sequence[2]);
+        ASSERT_EQ(2, sequence[3]);
+    } else {
+        ASSERT_EQ(2, sequence[2]);
+        ASSERT_EQ(0, sequence[3]);
+    }
+
     ASSERT_EQ(0, sequence[4]);
 }
 

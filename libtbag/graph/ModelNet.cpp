@@ -27,6 +27,13 @@ using LayerMap = lemon::ListDigraph::NodeMap<ModelLayer>;
 using Node = Digraph::Node;
 using Arc  = Digraph::Arc;
 
+struct _NodeInfo
+{
+    int id;
+    int prev;
+    Err prev_code;
+};
+
 inline static int __get_id(Node v) TBAG_NOEXCEPT
 {
     return Digraph::id(v);
@@ -245,34 +252,49 @@ ModelNet::Layers ModelNet::getInputLayers(int node_id, Direction direction) cons
     return getInputLayers(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_SOURCE : ArcOrder::AO_TARGET);
 }
 
-Err ModelNet::run(std::set<int> const & start,
-                  Direction direction,
-                  std::size_t max_depth,
-                  void * user,
-                  std::vector<int> * sequence,
-                  bool simulate) const
+std::size_t ModelNet::run(std::set<int> const & start,
+                          Direction direction,
+                          std::size_t max_depth,
+                          void * user,
+                          std::vector<int> * sequence,
+                          bool simulate) const
 {
     assert(exists());
+
     if (start.empty()) {
-        return E_ILLARGS;
+        return 0;
     }
 
-    std::set<int> current = start;
-    std::set<int> children;
+    std::vector<_NodeInfo> current;
+    std::vector<_NodeInfo> children;
+    std::size_t depth = 0;
+    RunnerInfo info;
 
-    for (auto i = 0; i < max_depth; ++i) {
-        for (auto const id : current) {
+    for (auto start_id : start) {
+        current.emplace_back(_NodeInfo{start_id, NO_ASSIGN_ID, E_SUCCESS});
+    }
+
+    for (; depth < max_depth; ++depth) {
+        for (auto const & node : current) {
+            auto const id = node.id;
+
+            info.direction = direction;
+            info.depth = depth;
+            info.previous_id = node.prev;
+            info.previous_code = node.prev_code;
+            info.parent_ids = getParentNodeIds(id, direction);
+            info.children_ids = getChildrenNodeIds(id, direction);
+            info.user = user;
+
             Err code;
             if (simulate) {
-                code = E_SUCCESS;
+                code = E_SIMULATE;
             } else {
-                code = _impl->layers[__get_node(id)].runner(direction, user);
+                code = _impl->layers[__get_node(id)].runner(info);
             }
 
-            if (isSuccess(code)) {
-                for (auto const next_id : getChildrenNodeIds(id, direction)) {
-                    children.insert(next_id);
-                }
+            for (auto const next_id : info.children_ids) {
+                children.emplace_back(_NodeInfo{next_id, node.prev, code});
             }
 
             if (sequence) {
@@ -281,6 +303,7 @@ Err ModelNet::run(std::set<int> const & start,
         }
 
         if (children.empty()) {
+            ++depth;
             break;
         }
 
@@ -289,136 +312,25 @@ Err ModelNet::run(std::set<int> const & start,
         children.clear();
     }
 
-    return E_SUCCESS;
+    return depth;
 }
 
-Err ModelNet::forward(std::set<int> const & start,
-                      std::size_t max_depth,
-                      void * user,
-                      std::vector<int> * sequence,
-                      bool simulate) const
+std::size_t ModelNet::forward(std::set<int> const & start,
+                              std::size_t max_depth,
+                              void * user,
+                              std::vector<int> * sequence,
+                              bool simulate) const
 {
     return run(start, Direction::D_FORWARD, max_depth, user, sequence, simulate);
 }
 
-Err ModelNet::backward(std::set<int> const & start,
-                       std::size_t max_depth,
-                       void * user,
-                       std::vector<int> * sequence,
-                       bool simulate) const
+std::size_t ModelNet::backward(std::set<int> const & start,
+                               std::size_t max_depth,
+                               void * user,
+                               std::vector<int> * sequence,
+                               bool simulate) const
 {
     return run(start, Direction::D_BACKWARD, max_depth, user, sequence, simulate);
-}
-
-Err ModelNet::dependencyRun(std::set<int> const & start,
-                            Direction direction,
-                            std::size_t max_depth,
-                            void * user,
-                            std::vector<int> * sequence,
-                            bool simulate,
-                            bool skip_first_dep_test) const
-{
-    assert(exists());
-    if (start.empty()) {
-        return E_ILLARGS;
-    }
-
-    if (!skip_first_dep_test) {
-        // The parent node must not exist because it cannot be executed.
-        for (auto const id : start) {
-            if (!getParentNodeIds(id, direction).empty()) {
-                return E_NREADY;
-            }
-        }
-    }
-
-    auto const all_ids = getLayerIds();
-    assert(!all_ids.empty());
-
-    std::unordered_map<int, bool> completes;
-    for (auto const id : all_ids) {
-        completes.emplace(id, false);
-    }
-
-    auto const is_ready = [&](int id) -> bool {
-        for (auto const parent_id : getParentNodeIds(id, direction)) {
-            if (!completes[parent_id]) {
-                return false;
-            }
-        }
-        return true;
-    };
-
-    std::set<int> current = start;
-    std::set<int> children;
-
-    for (auto depth = 0; depth < max_depth; ++depth) {
-        if (current.empty()) {
-            break; // No more current node exist.
-        }
-
-        // Run current list.
-        for (auto const id : current) {
-            if (completes[id]) {
-                continue; // This layer has already been run.
-            }
-
-            Err code;
-            if (simulate) {
-                code = E_SUCCESS;
-            } else {
-                code = _impl->layers[__get_node(id)].runner(direction, user);
-                if (isFailure(code)) {
-                    return code;
-                }
-            }
-
-            assert(isSuccess(code));
-            completes[id] = true;
-
-            if (sequence) {
-                sequence->push_back(id);
-            }
-        }
-
-        // Update children list.
-        children.clear();
-
-        for (auto const id : current) {
-            for (auto const next_node_id : getChildrenNodeIds(id, direction)) {
-                if (!completes[next_node_id] && is_ready(next_node_id)) {
-                    children.insert(next_node_id);
-                }
-            }
-        }
-
-        // Flip for next iteration.
-        current.swap(children);
-    }
-
-    return E_SUCCESS;
-}
-
-Err ModelNet::dependencyForward(std::set<int> const & start,
-                                std::size_t max_depth,
-                                void * user,
-                                std::vector<int> * sequence,
-                                bool simulate,
-                                bool skip_first_dep_test) const
-{
-    return dependencyRun(start, Direction::D_FORWARD, max_depth, user,
-                         sequence, simulate, skip_first_dep_test);
-}
-
-Err ModelNet::dependencyBackward(std::set<int> const & start,
-                                 std::size_t max_depth,
-                                 void * user,
-                                 std::vector<int> * sequence,
-                                 bool simulate,
-                                 bool skip_first_dep_test) const
-{
-    return dependencyRun(start, Direction::D_BACKWARD, max_depth, user,
-                         sequence, simulate, skip_first_dep_test);
 }
 
 } // namespace graph

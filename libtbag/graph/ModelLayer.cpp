@@ -86,10 +86,10 @@ int ModelLayer::id() const
     return _base->_assign_id;
 }
 
-Err ModelLayer::runner(Direction direction, void * user)
+Err ModelLayer::runner(RunnerInfo & info)
 {
     assert(exists());
-    return _base->runner(direction, user);
+    return _base->runner(info);
 }
 
 } // namespace graph

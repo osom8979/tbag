@@ -43,6 +43,7 @@ class TBAG_API ModelNet
 public:
     using Layers = std::vector<ModelLayer>;
     using Direction = LayerBase::Direction;
+    using RunnerInfo = LayerBase::RunnerInfo;
 
 public:
     enum class ArcOrder
@@ -52,6 +53,7 @@ public:
     };
 
 public:
+    TBAG_CONSTEXPR static int const NO_ASSIGN_ID = LayerBase::NO_ASSIGN_ID;
     TBAG_CONSTEXPR static std::size_t const MAX_RUN_DEPTH = 1024;
 
 public:
@@ -144,56 +146,28 @@ public:
      *      Returns the result in the task sequence.
      * @param[in] simulate
      *      If this value is true, the child layer is not executed.
-     */
-    Err run(std::set<int> const & start,
-            Direction direction = Direction::D_FORWARD,
-            std::size_t max_depth = MAX_RUN_DEPTH,
-            void * user = nullptr,
-            std::vector<int> * sequence = nullptr,
-            bool simulate = false) const;
-
-public:
-    Err forward(std::set<int> const & start,
-                std::size_t max_depth = MAX_RUN_DEPTH,
-                void * user = nullptr,
-                std::vector<int> * sequence = nullptr,
-                bool simulate = false) const;
-    Err backward(std::set<int> const & start,
-                 std::size_t max_depth = MAX_RUN_DEPTH,
-                 void * user = nullptr,
-                 std::vector<int> * sequence = nullptr,
-                 bool simulate = false) const;
-
-public:
-    /**
-     * Check and run the graph dependency.
      *
-     * @param[in] skip_first_dep_test
-     *      Skip dependency tests of the first nodes.
-     *
-     * @see run
+     * @return
+     *  The depth at which the graph was last executed.
      */
-    Err dependencyRun(std::set<int> const & start,
-                      Direction direction = Direction::D_FORWARD,
-                      std::size_t max_depth = MAX_RUN_DEPTH,
-                      void * user = nullptr,
-                      std::vector<int> * sequence = nullptr,
-                      bool simulate = false,
-                      bool skip_first_dep_test = false) const;
+    std::size_t run(std::set<int> const & start,
+                    Direction direction = Direction::D_FORWARD,
+                    std::size_t max_depth = MAX_RUN_DEPTH,
+                    void * user = nullptr,
+                    std::vector<int> * sequence = nullptr,
+                    bool simulate = false) const;
 
 public:
-    Err dependencyForward(std::set<int> const & start,
-                          std::size_t max_depth = MAX_RUN_DEPTH,
-                          void * user = nullptr,
-                          std::vector<int> * sequence = nullptr,
-                          bool simulate = false,
-                          bool skip_first_dep_test = false) const;
-    Err dependencyBackward(std::set<int> const & start,
-                           std::size_t max_depth = MAX_RUN_DEPTH,
-                           void * user = nullptr,
-                           std::vector<int> * sequence = nullptr,
-                           bool simulate = false,
-                           bool skip_first_dep_test = false) const;
+    std::size_t forward(std::set<int> const & start,
+                        std::size_t max_depth = MAX_RUN_DEPTH,
+                        void * user = nullptr,
+                        std::vector<int> * sequence = nullptr,
+                        bool simulate = false) const;
+    std::size_t backward(std::set<int> const & start,
+                         std::size_t max_depth = MAX_RUN_DEPTH,
+                         void * user = nullptr,
+                         std::vector<int> * sequence = nullptr,
+                         bool simulate = false) const;
 };
 
 } // namespace graph

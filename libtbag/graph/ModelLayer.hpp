@@ -59,6 +59,18 @@ public:
     };
 
 public:
+    struct RunnerInfo
+    {
+        Direction direction;
+        std::size_t depth;
+        int previous_id;
+        Err previous_code;
+        std::vector<int> parent_ids;
+        std::vector<int> children_ids;
+        void * user;
+    };
+
+public:
     TBAG_CONSTEXPR static int const NO_ASSIGN_ID = -1;
 
 private:
@@ -87,7 +99,7 @@ public:
     { return _assign_id; }
 
 public:
-    virtual Err runner(Direction direction, void * user)
+    virtual Err runner(RunnerInfo & info)
     { return E_SUCCESS; }
 };
 
@@ -107,6 +119,10 @@ public:
     using Layers = std::vector<ModelLayer>;
     using SharedBase = std::shared_ptr<LayerBase>;
     using Direction = LayerBase::Direction;
+    using RunnerInfo = LayerBase::RunnerInfo;
+
+public:
+    TBAG_CONSTEXPR static int const NO_ASSIGN_ID = LayerBase::NO_ASSIGN_ID;
 
 private:
     SharedBase _base;
@@ -178,7 +194,7 @@ public:
     int id() const;
 
 public:
-    Err runner(Direction direction, void * user);
+    Err runner(RunnerInfo & info);
 
 public:
     template <typename LayerType, typename ... Args>
