@@ -41,9 +41,11 @@ namespace graph {
 class TBAG_API ModelNet
 {
 public:
+    using LayerIds = std::vector<int>;
     using Layers = std::vector<ModelLayer>;
     using Direction = LayerBase::Direction;
     using RunnerInfo = LayerBase::RunnerInfo;
+    using IdSet = LayerBase::IdSet;
 
 public:
     enum class ArcOrder
@@ -112,16 +114,16 @@ public:
     }
 
 public:
-    std::vector<int> getLayerIds() const;
+    LayerIds getLayerIds() const;
     Layers getLayers() const;
     ModelLayer getLayer(int id) const;
 
 public:
-    std::vector<int> getSourceNodeIds(int node_id) const;
-    std::vector<int> getTargetNodeIds(int node_id) const;
-    std::vector<int> getNodeIds(int node_id, ArcOrder order) const;
-    std::vector<int> getChildrenNodeIds(int node_id, Direction direction) const;
-    std::vector<int> getParentNodeIds(int node_id, Direction direction) const;
+    IdSet getSourceNodeIds(int node_id) const;
+    IdSet getTargetNodeIds(int node_id) const;
+    IdSet getNodeIds(int node_id, ArcOrder order) const;
+    IdSet getChildrenNodeIds(int node_id, Direction direction) const;
+    IdSet getParentNodeIds(int node_id, Direction direction) const;
 
 public:
     Layers getInputLayers(int node_id, ArcOrder order) const;
@@ -150,7 +152,7 @@ public:
      * @return
      *  The depth at which the graph was last executed.
      */
-    std::size_t run(std::set<int> const & start,
+    std::size_t run(IdSet const & start,
                     Direction direction = Direction::D_FORWARD,
                     std::size_t max_depth = MAX_RUN_DEPTH,
                     void * user = nullptr,
@@ -158,12 +160,12 @@ public:
                     bool simulate = false) const;
 
 public:
-    std::size_t forward(std::set<int> const & start,
+    std::size_t forward(IdSet const & start,
                         std::size_t max_depth = MAX_RUN_DEPTH,
                         void * user = nullptr,
                         std::vector<int> * sequence = nullptr,
                         bool simulate = false) const;
-    std::size_t backward(std::set<int> const & start,
+    std::size_t backward(IdSet const & start,
                          std::size_t max_depth = MAX_RUN_DEPTH,
                          void * user = nullptr,
                          std::vector<int> * sequence = nullptr,

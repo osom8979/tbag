@@ -27,12 +27,8 @@ using LayerMap = lemon::ListDigraph::NodeMap<ModelLayer>;
 using Node = Digraph::Node;
 using Arc  = Digraph::Arc;
 
-struct _NodeInfo
-{
-    int id;
-    int prev;
-    Err prev_code;
-};
+using LayerIds = ModelNet::LayerIds;
+using IdSet = ModelNet::IdSet;
 
 inline static int __get_id(Node v) TBAG_NOEXCEPT
 {
@@ -168,10 +164,10 @@ void ModelNet::addArc(ModelLayer const & source, ModelLayer const & target)
     _impl->graph.addArc(__get_node(source.id()), __get_node(target.id()));
 }
 
-std::vector<int> ModelNet::getLayerIds() const
+LayerIds ModelNet::getLayerIds() const
 {
     assert(exists());
-    std::vector<int> result;
+    LayerIds result;
     for (Digraph::NodeIt n(_impl->graph); n != lemon::INVALID; ++n) {
         result.push_back(__get_id(n));
     }
@@ -197,27 +193,27 @@ ModelLayer ModelNet::getLayer(int id) const
     return _impl->layers[__get_node(id)];
 }
 
-std::vector<int> ModelNet::getSourceNodeIds(int node_id) const
+IdSet ModelNet::getSourceNodeIds(int node_id) const
 {
     assert(exists());
-    std::vector<int> result;
+    IdSet result;
     for (Digraph::InArcIt a(_impl->graph, __get_node(node_id)); a != lemon::INVALID; ++a) {
-        result.push_back(__get_id(_impl->graph.source(a)));
+        result.emplace(__get_id(_impl->graph.source(a)));
     }
     return result;
 }
 
-std::vector<int> ModelNet::getTargetNodeIds(int node_id) const
+IdSet ModelNet::getTargetNodeIds(int node_id) const
 {
     assert(exists());
-    std::vector<int> result;
+    IdSet result;
     for (Digraph::OutArcIt a(_impl->graph, __get_node(node_id)); a != lemon::INVALID; ++a) {
-        result.push_back(__get_id(_impl->graph.target(a)));
+        result.emplace(__get_id(_impl->graph.target(a)));
     }
     return result;
 }
 
-std::vector<int> ModelNet::getNodeIds(int node_id, ArcOrder order) const
+IdSet ModelNet::getNodeIds(int node_id, ArcOrder order) const
 {
     if (order == ArcOrder::AO_SOURCE) {
         return getSourceNodeIds(node_id);
@@ -227,12 +223,12 @@ std::vector<int> ModelNet::getNodeIds(int node_id, ArcOrder order) const
     }
 }
 
-std::vector<int> ModelNet::getChildrenNodeIds(int node_id, Direction direction) const
+IdSet ModelNet::getChildrenNodeIds(int node_id, Direction direction) const
 {
     return getNodeIds(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_TARGET : ArcOrder::AO_SOURCE);
 }
 
-std::vector<int> ModelNet::getParentNodeIds(int node_id, Direction direction) const
+IdSet ModelNet::getParentNodeIds(int node_id, Direction direction) const
 {
     return getNodeIds(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_SOURCE : ArcOrder::AO_TARGET);
 }
@@ -252,7 +248,19 @@ ModelNet::Layers ModelNet::getInputLayers(int node_id, Direction direction) cons
     return getInputLayers(node_id, direction == Direction::D_FORWARD ? ArcOrder::AO_SOURCE : ArcOrder::AO_TARGET);
 }
 
-std::size_t ModelNet::run(std::set<int> const & start,
+struct _NodeInfo
+{
+    /** Layer ID. */
+    int id;
+
+    /** Previous Layer ID. */
+    int prev;
+
+    /** Result code of the previous runner. */
+    Err prev_code;
+};
+
+std::size_t ModelNet::run(IdSet const & start,
                           Direction direction,
                           std::size_t max_depth,
                           void * user,
@@ -270,7 +278,7 @@ std::size_t ModelNet::run(std::set<int> const & start,
     std::size_t depth = 0;
     RunnerInfo info;
 
-    for (auto start_id : start) {
+    for (auto const & start_id : start) {
         current.emplace_back(_NodeInfo{start_id, NO_ASSIGN_ID, E_SUCCESS});
     }
 
@@ -315,7 +323,7 @@ std::size_t ModelNet::run(std::set<int> const & start,
     return depth;
 }
 
-std::size_t ModelNet::forward(std::set<int> const & start,
+std::size_t ModelNet::forward(IdSet const & start,
                               std::size_t max_depth,
                               void * user,
                               std::vector<int> * sequence,
@@ -324,7 +332,7 @@ std::size_t ModelNet::forward(std::set<int> const & start,
     return run(start, Direction::D_FORWARD, max_depth, user, sequence, simulate);
 }
 
-std::size_t ModelNet::backward(std::set<int> const & start,
+std::size_t ModelNet::backward(IdSet const & start,
                                std::size_t max_depth,
                                void * user,
                                std::vector<int> * sequence,

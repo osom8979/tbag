@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <set>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
@@ -50,6 +51,7 @@ public:
 
 public:
     using Err = libtbag::Err;
+    using IdSet = std::set<int>;
 
 public:
     enum class Direction
@@ -65,8 +67,8 @@ public:
         std::size_t depth;
         int previous_id;
         Err previous_code;
-        std::vector<int> parent_ids;
-        std::vector<int> children_ids;
+        IdSet parent_ids;
+        IdSet children_ids;
         void * user;
     };
 
