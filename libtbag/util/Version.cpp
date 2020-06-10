@@ -217,6 +217,27 @@ static Err __version_parser(char const * begin, char const * end,
     return E_SUCCESS;
 }
 
+static void __version_parser_last(char const * begin, char const * end,
+                                  std::uint32_t & result, std::size_t & written)
+{
+    if (begin == end) {
+        result = 0;
+        written = 0;
+        return;
+    }
+
+    using namespace libtbag::string;
+    auto itr = begin;
+    for (; itr != end; ++itr) {
+        if (!std::isdigit(*itr)) {
+            break;
+        }
+    }
+
+    result = toValue<std::uint32_t>(std::string(begin, itr));
+    written = std::distance(begin, itr);
+}
+
 Err Version::fromString(std::string const & version, Version & result)
 {
     if (version.empty()) {
@@ -248,10 +269,7 @@ Err Version::fromString(std::string const & version, Version & result)
 
     std::uint32_t patch_version;
     i += written;
-    code = __version_parser(begin+i, end, patch_version, written);
-    if (isFailure(code)) {
-        return code;
-    }
+    __version_parser_last(begin+i, end, patch_version, written);
 
     std::string tweak_version;
     i += written;
@@ -259,8 +277,7 @@ Err Version::fromString(std::string const & version, Version & result)
         tweak_version = std::string(begin+i, end);
     }
 
-    result = Version(major_version, minor_version,
-                     patch_version, tweak_version);
+    result = Version(major_version, minor_version, patch_version, tweak_version);
     return E_SUCCESS;
 }
 

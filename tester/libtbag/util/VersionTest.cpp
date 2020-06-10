@@ -64,7 +64,7 @@ TEST(VersionTest, String1)
     ASSERT_EQ(E_SUCCESS, ver.fromString("1.2.3.4.9999.a"));
     ASSERT_EQ(Version(1, 2, 3), ver);
     ASSERT_STREQ("1.2.3", ver.toString().c_str());
-    ASSERT_STREQ("4.9999.a", ver.getTweak().c_str());
+    ASSERT_STREQ(".4.9999.a", ver.getTweak().c_str());
 }
 
 TEST(VersionTest, String2)
@@ -86,12 +86,48 @@ TEST(VersionTest, String3)
     ASSERT_STREQ("0.77", ver.toString().c_str());
 }
 
-TEST(VersionTest, StringConstructor)
+TEST(VersionTest, StringConstructor1)
 {
     Version ver("100.2.50");
     ASSERT_EQ(100, ver.getMajor());
     ASSERT_EQ(  2, ver.getMinor());
     ASSERT_EQ( 50, ver.getPatch());
+}
+
+TEST(VersionTest, StringConstructor2)
+{
+    Version ver("1.5.0+cu101");
+    ASSERT_EQ(1, ver.getMajor());
+    ASSERT_EQ(5, ver.getMinor());
+    ASSERT_EQ(0, ver.getPatch());
+    ASSERT_STREQ("+cu101", ver.getTweak().c_str());
+}
+
+//TEST(VersionTest, StringConstructor3)
+//{
+//    Version ver("1+cuda");
+//    ASSERT_EQ(1, ver.getMajor());
+//    ASSERT_EQ(0, ver.getMinor());
+//    ASSERT_EQ(0, ver.getPatch());
+//    ASSERT_STREQ("+cuda", ver.getTweak().c_str());
+//}
+//
+//TEST(VersionTest, StringConstructor4)
+//{
+//    Version ver("0.7+cuda");
+//    ASSERT_EQ(0, ver.getMajor());
+//    ASSERT_EQ(7, ver.getMinor());
+//    ASSERT_EQ(0, ver.getPatch());
+//    ASSERT_STREQ("+cuda", ver.getTweak().c_str());
+//}
+
+TEST(VersionTest, StringConstructor5)
+{
+    Version ver("0.7.9b");
+    ASSERT_EQ(0, ver.getMajor());
+    ASSERT_EQ(7, ver.getMinor());
+    ASSERT_EQ(9, ver.getPatch());
+    ASSERT_STREQ("b", ver.getTweak().c_str());
 }
 
 TEST(VersionTest, Numeric)

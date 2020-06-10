@@ -50,6 +50,10 @@ TEST(VersionCompatibleTest, Single)
     ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo<=5.6"));
     ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo<=5.6.1"));
 
+//    ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo<=5+cu101"));
+//    ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo<=5.6+cu101"));
+//    ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo<=5.6.1+cu101"));
+
     ASSERT_EQ(E_VERSION, testCompatible(TEST_ORIGIN, "foo<5"));
     ASSERT_EQ(E_VERSION, testCompatible(TEST_ORIGIN, "foo<5.6"));
     ASSERT_EQ(E_VERSION, testCompatible(TEST_ORIGIN, "foo<5.6.1"));
@@ -71,12 +75,12 @@ TEST(VersionCompatibleTest, Multiple)
     ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo>0, <5.7"));
 
     ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, ">5 && <5.7"));
-    ASSERT_EQ(E_PARSING, testCompatible(TEST_ORIGIN, ">0 & <5.7.1"));
+    ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, ">0 & <5.7.1"));
 
     ASSERT_EQ(E_VERSION, testCompatible(TEST_ORIGIN, "foo==6 && >5"));
     ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo==6 || >5"));
 
-    ASSERT_EQ(E_PARSING, testCompatible(TEST_ORIGIN, "foo>6 | ==5.6.1"));
-    ASSERT_EQ(E_PARSING, testCompatible(TEST_ORIGIN, "foo>6 | ==5.6.0"));
+    ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo>6 | ==5.6.1"));
+    ASSERT_EQ(E_SUCCESS, testCompatible(TEST_ORIGIN, "foo>6 | ==5.6.0"));
 }
 
