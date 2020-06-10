@@ -17,26 +17,30 @@ namespace lexer {
 
 Logical splitLogical(std::string const & origin)
 {
-    auto const src = libtbag::string::trim(origin);
+    using namespace libtbag::string;
+    auto const src = trim(origin);
     auto const size = src.size();
     if (size == 0) {
         return { logical_operator_error };
     }
 
-    for (auto i = 0; /*i<size&&*/ i+1 < size; ++i) {
-        if (src[i] == '&' && src[i+1] == '&') {
-            return { logical_operator_and,
-                     libtbag::string::trim(src.substr(0, i)),
-                     libtbag::string::trim(src.substr(i+2))
-            };
+    for (auto i = 0; i < size; ++i) {
+        if (src[i] == '&') {
+            if (i+1 < size && src[i+1] == '&') {
+                return { logical_operator_and, trim(src.substr(0, i)), trim(src.substr(i+2)) };
+            } else {
+                return { logical_operator_and, trim(src.substr(0, i)), trim(src.substr(i+1)) };
+            }
         }
-        if (src[i] == '|' && src[i+1] == '|') {
-            return { logical_operator_or,
-                     libtbag::string::trim(src.substr(0, i)),
-                     libtbag::string::trim(src.substr(i+2))
-            };
+        if (src[i] == '|') {
+            if (i+1 < size && src[i+1] == '|') {
+                return { logical_operator_or, trim(src.substr(0, i)), trim(src.substr(i+2)) };
+            } else {
+                return { logical_operator_or, trim(src.substr(0, i)), trim(src.substr(i+1)) };
+            }
         }
     }
+
     return { logical_operator_last, src };
 }
 

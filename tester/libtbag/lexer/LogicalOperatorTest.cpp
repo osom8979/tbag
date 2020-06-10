@@ -35,12 +35,14 @@ TEST(LogicalOperatorTest, SplitLogical)
     ASSERT_STREQ("bb", logical.right.c_str());
 
     logical = splitLogical(" & aa & bb & ");
-    ASSERT_EQ(logical_operator_last, logical.op);
-    ASSERT_STREQ("& aa & bb &", logical.left.c_str());
+    ASSERT_EQ(logical_operator_and, logical.op);
+    ASSERT_STREQ("", logical.left.c_str());
+    ASSERT_STREQ("aa & bb &", logical.right.c_str());
 
     logical = splitLogical("|aa|bb|");
-    ASSERT_EQ(logical_operator_last, logical.op);
-    ASSERT_STREQ("|aa|bb|", logical.left.c_str());
+    ASSERT_EQ(logical_operator_or, logical.op);
+    ASSERT_STREQ("", logical.left.c_str());
+    ASSERT_STREQ("aa|bb|", logical.right.c_str());
 
     logical = splitLogical(" && aa && bb && ");
     ASSERT_EQ(logical_operator_and, logical.op);
@@ -54,12 +56,12 @@ TEST(LogicalOperatorTest, SplitLogical)
 
     logical = splitLogical(" aa & bb && ");
     ASSERT_EQ(logical_operator_and, logical.op);
-    ASSERT_STREQ("aa & bb", logical.left.c_str());
-    ASSERT_TRUE(logical.right.empty());
+    ASSERT_STREQ("aa", logical.left.c_str());
+    ASSERT_STREQ("bb &&", logical.right.c_str());
 
     logical = splitLogical("aa|bb||");
     ASSERT_EQ(logical_operator_or, logical.op);
-    ASSERT_STREQ("aa|bb", logical.left.c_str());
-    ASSERT_TRUE(logical.right.empty());
+    ASSERT_STREQ("aa", logical.left.c_str());
+    ASSERT_STREQ("bb||", logical.right.c_str());
 }
 
