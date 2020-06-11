@@ -38,8 +38,12 @@ namespace time {
 class TBAG_API Duration
 {
 public:
-    using Nanoseconds = std::chrono::nanoseconds;
-    using Rep = typename Nanoseconds::rep;
+    using Nanoseconds  = std::chrono::nanoseconds;
+    using Microseconds = std::chrono::microseconds;
+    using Milliseconds = std::chrono::milliseconds;
+    using Seconds      = std::chrono::seconds;
+    using Minutes      = std::chrono::minutes;
+    using Hours        = std::chrono::hours;
 
 public:
     template <typename T>
@@ -63,22 +67,41 @@ private:
 
 public:
     Duration();
-    Duration(std::size_t nano);
-    Duration(std::string const & text);
 
     template <typename Rep, typename Period>
     Duration(std::chrono::duration<Rep, Period> const & obj)
             : _nano(std::chrono::duration_cast<decltype(_nano)>(obj))
     { /* EMPTY. */ }
 
+    template <typename BaseDurationT>
+    Duration(std::string const & text, BaseDurationT def = {})
+    {
+        auto const code = fromString<BaseDurationT>(text);
+        if (isFailure(code)) {
+            _nano = def;
+        }
+    }
+
     Duration(Duration const & obj);
     Duration(Duration && obj) TBAG_NOEXCEPT;
     ~Duration();
 
 public:
-    Duration & operator =(std::size_t value);
-    Duration & operator =(std::string const & text);
+    static Duration nano (std::size_t val);
+    static Duration micro(std::size_t val);
+    static Duration milli(std::size_t val);
+    static Duration sec  (std::size_t val);
+    static Duration min  (std::size_t val);
+    static Duration hour (std::size_t val);
 
+    static Duration nano (std::string const & text, Nanoseconds  const & def = {});
+    static Duration micro(std::string const & text, Microseconds const & def = {});
+    static Duration milli(std::string const & text, Milliseconds const & def = {});
+    static Duration sec  (std::string const & text, Seconds      const & def = {});
+    static Duration min  (std::string const & text, Minutes      const & def = {});
+    static Duration hour (std::string const & text, Hours        const & def = {});
+
+public:
     template <typename Rep, typename Period>
     Duration & operator =(std::chrono::duration<Rep, Period> const & obj)
     {
@@ -148,10 +171,25 @@ public:
 
 public:
     std::string toUpperTimeText() const;
+    std::string toString() const;
 
 public:
+    Err fromNanosecondsText (std::string const & text);
+    Err fromMicrosecondsText(std::string const & text);
+    Err fromMillisecondsText(std::string const & text);
+    Err fromSecondsText     (std::string const & text);
+    Err fromMinutesText     (std::string const & text);
+    Err fromHoursText       (std::string const & text);
+
+    template <typename BaseT>
     Err fromString(std::string const & text);
-    std::string toString() const;
+
+    template <> Err fromString<Nanoseconds >(std::string const & text) { return fromNanosecondsText (text); }
+    template <> Err fromString<Microseconds>(std::string const & text) { return fromMicrosecondsText(text); }
+    template <> Err fromString<Milliseconds>(std::string const & text) { return fromMillisecondsText(text); }
+    template <> Err fromString<Seconds     >(std::string const & text) { return fromSecondsText     (text); }
+    template <> Err fromString<Minutes     >(std::string const & text) { return fromMinutesText     (text); }
+    template <> Err fromString<Hours       >(std::string const & text) { return fromHoursText       (text); }
 
 public:
     template <class CharT, class TraitsT>
