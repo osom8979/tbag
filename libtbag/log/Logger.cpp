@@ -41,7 +41,7 @@ void Logger::flush() const
     _sink->flush();
 }
 
-bool Logger::write(int level, char const * level_name, char const * message, int size) const
+bool Logger::write(int level, char const * level_name, char const * message, int size, bool generate) const
 {
     if (youShallNotPass(level)) {
         return true;
@@ -55,7 +55,7 @@ bool Logger::write(int level, char const * level_name, char const * message, int
     assert(size >= 1);
 
     bool write_result;
-    if (_generator) {
+    if (generate && _generator) {
         auto const required_buffer_size = _generator->getPaddingByte() + size;
         if (Generator::STACK_BUFFER_SIZE >= required_buffer_size) {
             TBAG_CONSTEXPR static auto const buffer_size = Generator::STACK_BUFFER_SIZE;
@@ -82,6 +82,11 @@ bool Logger::write(int level, char const * level_name, char const * message, int
     }
 
     return write_result;
+}
+
+bool Logger::write(int level, char const * level_name, char const * message, int size) const
+{
+    return write(level, level_name, message, size, static_cast<bool>(_generator));
 }
 
 bool Logger::write(int level, char const * level_name, char const * message) const
@@ -116,12 +121,27 @@ bool Logger::write(Severity const & severity, char const * message, int size) co
 
 bool Logger::write(Severity const & severity, char const * message) const
 {
-    return write(severity.getLevel(), severity.getText(), message);
+    return write(severity, message, ::strlen(message));
 }
 
 bool Logger::write(Severity const & severity, std::string const & message) const
 {
-    return write(severity.getLevel(), severity.getText(), message);
+    return write(severity, message.c_str(), message.size());
+}
+
+bool Logger::raw(Severity const & severity, char const * message, int size) const
+{
+    return write(severity.getLevel(), severity.getText(), message, size, false);
+}
+
+bool Logger::raw(Severity const & severity, char const * message) const
+{
+    return raw(severity, message, ::strlen(message));
+}
+
+bool Logger::raw(Severity const & severity, std::string const & message) const
+{
+    return raw(severity, message.c_str(), message.size());
 }
 
 } // namespace log

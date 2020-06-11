@@ -107,6 +107,7 @@ public:
     void flush() const;
 
 public:
+    bool write(int level, char const * level_name, char const * message, int size, bool generate) const;
     bool write(int level, char const * level_name, char const * message, int size) const;
     bool write(int level, char const * level_name, char const * message) const;
     bool write(int level, char const * level_name, std::string const & message) const;
@@ -120,6 +121,11 @@ public:
     bool write(Severity const & severity, char const * message, int size) const;
     bool write(Severity const & severity, char const * message) const;
     bool write(Severity const & severity, std::string const & message) const;
+
+public:
+    bool raw(Severity const & severity, char const * message, int size) const;
+    bool raw(Severity const & severity, char const * message) const;
+    bool raw(Severity const & severity, std::string const & message) const;
 
 public:
     template <typename FormatT, typename ... Args>
