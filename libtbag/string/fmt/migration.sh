@@ -6,11 +6,11 @@ find . -name '*.h' -o -name '*.cc' | \
     xargs sed -i .tmp 's/^#include "\(.*\)"$/#include <libtbag\/string\/fmt\/\1>/g'
 find . -name '*.tmp' | xargs rm
 
-echo '*******************************************************'
-echo 'Update core.h file:'
-echo '#define FMT_API'
+echo '# /* ==[[ MIGRATION BEGIN ]]== */'
+echo '#if defined(FMT_API)'
+echo '#undef FMT_API'
 echo '#include <libtbag/predef.hpp>'
 echo '#define FMT_API TBAG_API'
 echo '#endif'
-echo '*******************************************************'
+echo '# /* ==[[ MIGRATION END ]]== */'
 

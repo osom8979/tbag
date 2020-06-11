@@ -8,7 +8,7 @@
 #ifndef FMT_COLOR_H_
 #define FMT_COLOR_H_
 
-#include "format.h"
+#include <libtbag/string/fmt/format.h>
 
 FMT_BEGIN_NAMESPACE
 

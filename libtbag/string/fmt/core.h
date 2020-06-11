@@ -203,6 +203,15 @@
 #    define FMT_EXTERN_TEMPLATE_API FMT_API
 #  endif
 #endif
+
+# /* ==[[ MIGRATION BEGIN ]]== */
+#if defined(FMT_API)
+#undef FMT_API
+#include <libtbag/predef.hpp>
+#define FMT_API TBAG_API
+#endif
+# /* ==[[ MIGRATION END ]]== */
+
 #ifndef FMT_CLASS_API
 #  define FMT_CLASS_API
 #endif

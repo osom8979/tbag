@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include "format.h"
+#include <libtbag/string/fmt/format.h>
 
 FMT_BEGIN_NAMESPACE
 namespace internal {

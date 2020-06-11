@@ -15,7 +15,7 @@
 #include <initializer_list>
 #include <type_traits>
 
-#include "format.h"
+#include <libtbag/string/fmt/format.h>
 
 // output only up to N items from the range.
 #ifndef FMT_RANGE_OUTPUT_LENGTH_LIMIT

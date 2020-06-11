@@ -16,7 +16,7 @@
 #include <cstring>  // for std::memmove
 #include <cwchar>
 
-#include "format.h"
+#include <libtbag/string/fmt/format.h>
 #if !defined(FMT_STATIC_THOUSANDS_SEPARATOR)
 #  include <locale>
 #endif

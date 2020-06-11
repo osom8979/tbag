@@ -52,7 +52,7 @@ std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
         case LUA_TBOOLEAN:
             BLOCK_DO("Lua boolean type") {
                 bool value = luaL_checkboolean(L, next_lua_arg_index);
-                array[insert_index] = fmt::internal::make_arg<false, Context>(value);
+                array[insert_index] = fmt::internal::make_arg<Context>(value);
             } BLOCK_END();
             ++insert_index;
             break;
@@ -63,10 +63,10 @@ std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
         case LUA_TNUMBER:
             if (lua_isinteger(L, next_lua_arg_index)) {
                 int value = luaL_checkinteger(L, next_lua_arg_index);
-                array[insert_index] = fmt::internal::make_arg<false, Context>(value);
+                array[insert_index] = fmt::internal::make_arg<Context>(value);
             } else {
                 double value = luaL_checknumber(L, next_lua_arg_index);
-                array[insert_index] = fmt::internal::make_arg<false, Context>(value);
+                array[insert_index] = fmt::internal::make_arg<Context>(value);
             }
             ++insert_index;
             break;
@@ -74,7 +74,7 @@ std::string luaE_checkfformat(lua_State * L, int greater_equals_index)
         case LUA_TSTRING:
             BLOCK_DO("Lua string type") {
                 char const * value = luaL_checkstring(L, next_lua_arg_index);
-                array[insert_index] = fmt::internal::make_arg<false, Context>(value);
+                array[insert_index] = fmt::internal::make_arg<Context>(value);
             } BLOCK_END();
             ++insert_index;
             break;

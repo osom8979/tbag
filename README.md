@@ -52,7 +52,7 @@ Tea-bag is Third party extension utility project.
 
 ## Inline libraries
 
-- fmt 5.3.0 (BSD 2-clause license)
+- fmt 6.2.1 (MIT license)
 - jsoncpp 1.8.4 (MIT license)
 - tinyxml2 7.0.1 (zlib license)
 

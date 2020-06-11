@@ -13,8 +13,8 @@
 #include <locale>
 #include <sstream>
 
-#include "format.h"
-#include "locale.h"
+#include <libtbag/string/fmt/format.h>
+#include <libtbag/string/fmt/locale.h>
 
 FMT_BEGIN_NAMESPACE
 

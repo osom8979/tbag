@@ -41,7 +41,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include "core.h"
+#include <libtbag/string/fmt/core.h>
 
 #ifdef FMT_DEPRECATED_INCLUDE_OS
 #  include "os.h"
