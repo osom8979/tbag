@@ -181,15 +181,18 @@ public:
     Err fromMinutesText     (std::string const & text);
     Err fromHoursText       (std::string const & text);
 
-    template <typename BaseT>
-    Err fromString(std::string const & text);
+    Err fromString(Nanoseconds , std::string const & text) { return fromNanosecondsText (text); }
+    Err fromString(Microseconds, std::string const & text) { return fromMicrosecondsText(text); }
+    Err fromString(Milliseconds, std::string const & text) { return fromMillisecondsText(text); }
+    Err fromString(Seconds     , std::string const & text) { return fromSecondsText     (text); }
+    Err fromString(Minutes     , std::string const & text) { return fromMinutesText     (text); }
+    Err fromString(Hours       , std::string const & text) { return fromHoursText       (text); }
 
-    template <> Err fromString<Nanoseconds >(std::string const & text) { return fromNanosecondsText (text); }
-    template <> Err fromString<Microseconds>(std::string const & text) { return fromMicrosecondsText(text); }
-    template <> Err fromString<Milliseconds>(std::string const & text) { return fromMillisecondsText(text); }
-    template <> Err fromString<Seconds     >(std::string const & text) { return fromSecondsText     (text); }
-    template <> Err fromString<Minutes     >(std::string const & text) { return fromMinutesText     (text); }
-    template <> Err fromString<Hours       >(std::string const & text) { return fromHoursText       (text); }
+    template <typename BaseT>
+    Err fromString(std::string const & text)
+    {
+        return fromString(BaseT{}, text);
+    }
 
 public:
     template <class CharT, class TraitsT>
