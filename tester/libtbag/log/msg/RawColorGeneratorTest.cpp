@@ -15,7 +15,8 @@ using namespace libtbag::log::msg;
 TEST(RawColorGeneratorTest, Default)
 {
     RawColorGenerator gen(RawColorGenerator::LineFeedStyle::LFS_NONE);
-    auto const msg = gen.make_string("A", 8, "D", "abcdefg", 4);
+    std::string msg;
+    gen.make("A", 8, "D", "abcdefg", 4, msg);
     std::cout << "Generated message: " << msg << std::endl;
 }
 

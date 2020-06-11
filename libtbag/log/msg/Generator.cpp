@@ -15,7 +15,7 @@ namespace log {
 namespace msg {
 
 Generator::Generator(LineFeedStyle line_feed)
-        : LINE_FEED(line_feed), LINE_FEED_STR(libtbag::string::getLineFeed(line_feed))
+        : LINE_FEED(line_feed), LINE_FEED_TEXT(libtbag::string::getLineFeed(line_feed))
 {
     // EMPTY.
 }
@@ -29,39 +29,6 @@ Generator::Generator(std::string const & line_feed)
 Generator::~Generator()
 {
     // EMPTY.
-}
-
-int Generator::getLineFeedLength(LineFeedStyle line_feed)
-{
-    switch (line_feed) {
-    case LineFeedStyle::LFS_UNIX:
-        return 1;
-    case LineFeedStyle::LFS_WINDOWS:
-        return 2;
-    case LineFeedStyle::LFS_AUTO:
-        return isWindowsPlatform() ? 2 : 1;
-    case LineFeedStyle::LFS_NONE:
-        TBAG_FALLTHROUGH
-    default:
-        return 0;
-    }
-}
-
-int Generator::getLineFeedLength() const
-{
-    return getLineFeedLength(LINE_FEED);
-}
-
-std::string Generator::make_string(char const * logger, int level, char const * level_name,
-                                   char const * msg, int msg_size) const
-{
-    char buffer[Generator::STACK_BUFFER_SIZE];
-    int const copy_size = make(buffer, Generator::STACK_BUFFER_SIZE, logger, level, level_name, msg, msg_size);
-    if (copy_size >= 1) {
-        return std::string(buffer, buffer + copy_size);
-    } else {
-        return std::string(msg, msg + msg_size);
-    }
 }
 
 } // namespace msg

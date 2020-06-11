@@ -33,28 +33,14 @@ RawGenerator::~RawGenerator()
     // EMPTY.
 }
 
-int RawGenerator::getPaddingByte() const
+void RawGenerator::make(char const * UNUSED_PARAM(logger),
+                        int UNUSED_PARAM(level),
+                        char const * UNUSED_PARAM(level_name),
+                        char const * msg, int msg_size,
+                        std::string & result) const
 {
-    return getLineFeedLength();
-}
-
-int RawGenerator::make(char * buffer, int buffer_size,
-                       char const * UNUSED_PARAM(logger),
-                       int UNUSED_PARAM(level), char const * UNUSED_PARAM(level_name),
-                       char const * msg, int msg_size) const
-{
-    auto const COPY_SIZE = libtbag::algorithm::getMin(buffer_size, msg_size);
-    ::strncpy(buffer, msg, COPY_SIZE);
-    if (libtbag::string::appendLineFeed(LINE_FEED, buffer, buffer_size, COPY_SIZE)) {
-        if (LINE_FEED == LineFeedStyle::LFS_AUTO) {
-            return COPY_SIZE + (isWindowsPlatform() ? 2 : 1);
-        } else if (LINE_FEED == LineFeedStyle::LFS_UNIX) {
-            return COPY_SIZE + 1;
-        } else if (LINE_FEED == LineFeedStyle::LFS_WINDOWS) {
-            return COPY_SIZE + 2;
-        }
-    }
-    return COPY_SIZE;
+    result.assign(msg, msg + msg_size);
+    result += LINE_FEED_TEXT;
 }
 
 } // namespace msg

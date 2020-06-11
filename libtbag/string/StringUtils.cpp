@@ -55,7 +55,7 @@ char const * getLineFeedStyleText(LineFeedStyle style) TBAG_NOEXCEPT
     case LineFeedStyle::LFS_AUTO:
         return "auto";
     default:
-        return "";
+        return TBAG_EMPTY_STRING;
     }
 }
 
@@ -63,7 +63,7 @@ std::string getLineFeed(LineFeedStyle style)
 {
     if (style == LineFeedStyle::LFS_AUTO) {
         if (isWindowsPlatform()) {
-            return TBAG_WINDOWS_NEW_LINE;
+            return WINDOWS_NEW_LINE;
         } else {
             return UNIX_NEW_LINE;
         }
@@ -72,7 +72,7 @@ std::string getLineFeed(LineFeedStyle style)
     } else if (style == LineFeedStyle::LFS_WINDOWS) {
         return WINDOWS_NEW_LINE;
     } else {
-        return UNIX_NEW_LINE;
+        return {};
     }
 }
 

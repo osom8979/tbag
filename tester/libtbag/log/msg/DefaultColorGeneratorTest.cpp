@@ -18,7 +18,8 @@ using namespace libtbag::log::msg;
 TEST(DefaultColorGeneratorTest, Default)
 {
     DefaultColorGenerator gen(DefaultColorGenerator::LineFeedStyle::LFS_NONE);
-    auto const msg = gen.make_string("A", 8, "D", "abcdefg", 4);
+    std::string msg;
+    gen.make("A", 8, "D", "abcdefg", 4, msg);
     std::cout << "Generated message: " << msg << std::endl;
     auto const tokens = libtbag::string::splitTokens(msg, " ");
     ASSERT_EQ(4, tokens.size());
@@ -31,12 +32,10 @@ TEST(DefaultColorGeneratorTest, Default)
 TEST(DefaultColorGeneratorTest, SmallBuffer)
 {
     auto const LINE_FEED = DefaultColorGenerator::LineFeedStyle::LFS_WINDOWS;
-    auto const BUFFER_SIZE = 20;
-    char buffer[BUFFER_SIZE] = { 0, };
     DefaultColorGenerator gen(LINE_FEED);
-    auto const write_size = gen.make(buffer, BUFFER_SIZE, "logger", 8, "debug", "msg", 3);
-    ASSERT_EQ(BUFFER_SIZE, write_size);
-    std::cout << "Generated message: " << std::string(buffer, buffer + write_size) << std::endl;
+    std::string msg;
+    gen.make("logger", 8, "debug", "msg", 3, msg);
+    std::cout << "Generated message: " << msg << std::endl;
 
     auto const blue_fg_attribute_length = strlen(TBAG_TTY_DISPLAY_ATTRIBUTE_FG_BLUE);
     auto const reset_attribute_length = strlen(TBAG_TTY_DISPLAY_ATTRIBUTE_RESET);
@@ -44,7 +43,7 @@ TEST(DefaultColorGeneratorTest, SmallBuffer)
     std::cout << "Blue fg attribute length: " << blue_fg_attribute_length/*5*/ << std::endl;
     std::cout << "Reset attribute length: " << reset_attribute_length/*4*/ << std::endl;
     std::cout << "LineFeed length: " << line_feed.size()/*2*/ << std::endl;
-    ASSERT_EQ(0, ::strncmp(buffer, TBAG_TTY_DISPLAY_ATTRIBUTE_FG_BLUE, blue_fg_attribute_length));
-    ASSERT_EQ(0, ::strncmp(buffer+write_size-line_feed.size(), line_feed.data(), line_feed.size()));
+    ASSERT_EQ(0, ::strncmp(msg.c_str(), TBAG_TTY_DISPLAY_ATTRIBUTE_FG_BLUE, blue_fg_attribute_length));
+    ASSERT_EQ(0, ::strncmp(msg.c_str()+msg.size()-line_feed.size(), line_feed.data(), line_feed.size()));
 }
 

@@ -36,11 +36,8 @@ struct GeneratorInterface
     GeneratorInterface() TBAG_NOEXCEPT { /* EMPTY. */ }
     virtual ~GeneratorInterface() { /* EMPTY. */ }
 
-    virtual int getPaddingByte() const = 0;
-    virtual int make(char * buffer, int buffer_size,
-                     char const * logger,
-                     int level, char const * level_name,
-                     char const * msg, int msg_size) const = 0;
+    virtual void make(char const * logger, int level, char const * level_name,
+                      char const * msg, int msg_size, std::string & buffer) const = 0;
 };
 
 /**
@@ -55,24 +52,13 @@ public:
     using LineFeedStyle = libtbag::string::LineFeedStyle;
 
 public:
-    TBAG_CONSTEXPR static int const STACK_BUFFER_SIZE = 10*1024;
-
-public:
     LineFeedStyle const LINE_FEED;
-    std::string const LINE_FEED_STR;
+    std::string const LINE_FEED_TEXT;
 
 public:
     Generator(LineFeedStyle line_feed = LineFeedStyle::LFS_UNIX);
     Generator(std::string const & line_feed);
     virtual ~Generator();
-
-public:
-    static int getLineFeedLength(LineFeedStyle line_feed);
-    int getLineFeedLength() const;
-
-public:
-    std::string make_string(char const * logger, int level, char const * level_name,
-                            char const * msg, int msg_size) const;
 };
 
 } // namespace msg

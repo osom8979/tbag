@@ -16,7 +16,8 @@ using namespace libtbag::log::msg;
 TEST(DefaultGeneratorTest, Default)
 {
     DefaultGenerator gen(DefaultGenerator::LineFeedStyle::LFS_WINDOWS);
-    auto const msg = gen.make_string("A", 1, "U", "abcdefg", 4);
+    std::string msg;
+    gen.make("A", 1, "U", "abcdefg", 4, msg);
     std::cout << "Generated message: " << msg << std::endl;
     auto const tokens = libtbag::string::splitTokens(msg, " ");
     ASSERT_EQ(4, tokens.size());
@@ -28,11 +29,9 @@ TEST(DefaultGeneratorTest, Default)
 
 TEST(DefaultGeneratorTest, SmallBuffer)
 {
-    auto const BUFFER_SIZE = 20;
-    char buffer[BUFFER_SIZE] = { 0, };
     DefaultGenerator gen(DefaultGenerator::LineFeedStyle::LFS_WINDOWS);
-    auto const write_size = gen.make(buffer, BUFFER_SIZE, "logger", 8, "debug", "msg", 3);
-    ASSERT_EQ(BUFFER_SIZE, write_size);
-    std::cout << "Generated message: " << std::string(buffer, buffer + write_size) << std::endl;
+    std::string msg;
+    gen.make("logger", 8, "debug", "msg", 3, msg);
+    std::cout << "Generated message: " << msg << std::endl;
 }
 

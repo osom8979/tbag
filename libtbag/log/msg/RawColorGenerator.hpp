@@ -38,11 +38,8 @@ public:
     virtual ~RawColorGenerator();
 
 public:
-    int getPaddingByte() const override;
-    int make(char * buffer, int buffer_size,
-             char const * logger,
-             int level, char const * level_name,
-             char const * msg, int msg_size) const override;
+    void make(char const * logger, int level, char const * level_name,
+              char const * msg, int msg_size, std::string & result) const override;
 };
 
 } // namespace msg

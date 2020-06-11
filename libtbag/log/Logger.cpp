@@ -56,23 +56,9 @@ bool Logger::write(int level, char const * level_name, char const * message, int
 
     bool write_result;
     if (generate && _generator) {
-        auto const required_buffer_size = _generator->getPaddingByte() + size;
-        if (Generator::STACK_BUFFER_SIZE >= required_buffer_size) {
-            TBAG_CONSTEXPR static auto const buffer_size = Generator::STACK_BUFFER_SIZE;
-            char buffer[buffer_size];
-            auto const generated_size = _generator->make(buffer, buffer_size, NAME.c_str(),
-                                                         level, level_name, message, size);
-            assert(generated_size >= 1);
-            assert(generated_size <= buffer_size);
-            write_result = _sink->write(level, buffer, generated_size);
-        } else {
-            libtbag::util::Buffer buffer(required_buffer_size);
-            auto const generated_size = _generator->make(buffer.data(), required_buffer_size, NAME.c_str(),
-                                                         level, level_name, message, size);
-            assert(generated_size >= 1);
-            assert(generated_size <= required_buffer_size);
-            write_result = _sink->write(level, buffer.data(), generated_size);
-        }
+        std::string buffer;
+        _generator->make(NAME.c_str(), level, level_name, message, size, buffer);
+        write_result = _sink->write(level, buffer.c_str(), buffer.size());
     } else {
         write_result = _sink->write(level, message, size);
     }
