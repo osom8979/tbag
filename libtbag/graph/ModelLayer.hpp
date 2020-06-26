@@ -61,19 +61,32 @@ public:
     };
 
 public:
-    struct RunnerInfo
-    {
-        Direction direction;
-        std::size_t depth;
-        int previous_id;
-        Err previous_code;
-        IdSet parent_ids;
-        IdSet children_ids;
-        void * user;
-    };
+    TBAG_CONSTEXPR static int const NO_ASSIGN_ID = -1;
 
 public:
-    TBAG_CONSTEXPR static int const NO_ASSIGN_ID = -1;
+    struct RunnerInfo
+    {
+        /** Direction of progress. */
+        Direction direction;
+
+        /** Depth of execution. */
+        std::size_t depth = 0u;
+
+        /** ID of the previous layer. */
+        int previous_id = NO_ASSIGN_ID;
+
+        /** The result of executing the previous layer. */
+        Err previous_code = E_UNKNOWN;
+
+        /** List of parent layer IDs. */
+        IdSet parent_ids;
+
+        /** List of children layer IDs. */
+        IdSet children_ids;
+
+        /** User's data. */
+        void * user = nullptr;
+    };
 
 private:
     /**

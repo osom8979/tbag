@@ -302,7 +302,7 @@ std::size_t ModelNet::run(IdSet const & start,
             }
 
             for (auto const next_id : info.children_ids) {
-                children.emplace_back(_NodeInfo{next_id, node.prev, code});
+                children.emplace_back(_NodeInfo{next_id, id, code});
             }
 
             if (sequence) {
