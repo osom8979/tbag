@@ -45,8 +45,8 @@ environment:
   BUILD_TARGET: tester  # 'tbag' or 'tester'
 
 # build cache to preserve files/folders between builds
-cache:
-  - "%TBAG_BUILD%\\external"
+#cache:
+#  - "%TBAG_BUILD%\\external"
 
 #---------------------------------#
 #       build configuration       #
