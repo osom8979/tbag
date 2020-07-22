@@ -22,8 +22,6 @@ addons:
       - automake
       - build-essential
       - git
-      - cmake
-      - cmake-data
       - curl
       - unzip
       - g++-7
@@ -38,6 +36,9 @@ before_install:
   #- sudo add-apt-repository --yes ppa:george-edison55/precise-backports
   #- sudo apt-get -qq update
   #- sudo apt-get install -y git cmake cmake-data curl unzip g++-7
+  - curl -L -O https://github.com/Kitware/CMake/releases/download/v3.18.0/cmake-3.18.0-Linux-x86_64.sh
+  - chmod +x cmake-3.18.0-Linux-x86_64.sh
+  - ./cmake-3.18.0-Linux-x86_64.sh --skip-license --prefix=/usr/local
   - export TPARTY_HOME=$HOME/tparty
   - export LD_LIBRARY_PATH=$TPARTY_HOME/local/lib:$LD_LIBRARY_PATH
   - export CXX=g++-7
