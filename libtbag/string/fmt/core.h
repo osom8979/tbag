@@ -196,19 +196,19 @@
 #    define FMT_NO_W4275
 #  endif
 #  define FMT_CLASS_API FMT_NO_W4275
-#  ifdef FMT_EXPORT
-#    define FMT_API __declspec(dllexport)
-#  elif defined(FMT_SHARED)
-#    define FMT_API __declspec(dllimport)
-#    define FMT_EXTERN_TEMPLATE_API FMT_API
-#  endif
+//#  ifdef FMT_EXPORT
+//#    define FMT_API __declspec(dllexport)
+//#  elif defined(FMT_SHARED)
+//#    define FMT_API __declspec(dllimport)
+//#    define FMT_EXTERN_TEMPLATE_API FMT_API
+//#  endif
 #endif
 
 # /* ==[[ MIGRATION BEGIN ]]== */
-#if defined(FMT_API)
-#undef FMT_API
+#ifndef FMT_API
 #include <libtbag/predef.hpp>
 #define FMT_API TBAG_API
+#define FMT_EXTERN_TEMPLATE_API FMT_API
 #endif
 # /* ==[[ MIGRATION END ]]== */
 
