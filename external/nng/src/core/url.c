@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2019 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -231,8 +231,21 @@ nni_url_default_port(const char *scheme)
 	const char *s;
 
 	for (int i = 0; (s = nni_url_default_ports[i].scheme) != NULL; i++) {
-		if (strcmp(s, scheme) == 0) {
+		size_t l = strlen(s);
+		if (strncmp(s, scheme, strlen(s)) != 0) {
+			continue;
+		}
+		// It can have a suffix of either "4" or "6" to restrict
+		// the address family.  This is an NNG extension.
+		switch (scheme[l]) {
+		case '\0':
 			return (nni_url_default_ports[i].port);
+		case '4':
+		case '6':
+			if (scheme[l + 1] == '\0') {
+				return (nni_url_default_ports[i].port);
+			}
+			break;
 		}
 	}
 	return ("");
@@ -463,18 +476,69 @@ error:
 void
 nni_url_free(nni_url *url)
 {
-	nni_strfree(url->u_rawurl);
-	nni_strfree(url->u_scheme);
-	nni_strfree(url->u_userinfo);
-	nni_strfree(url->u_host);
-	nni_strfree(url->u_hostname);
-	nni_strfree(url->u_port);
-	nni_strfree(url->u_path);
-	nni_strfree(url->u_query);
-	nni_strfree(url->u_fragment);
-	nni_strfree(url->u_requri);
-	NNI_FREE_STRUCT(url);
+	if (url != NULL) {
+		nni_strfree(url->u_rawurl);
+		nni_strfree(url->u_scheme);
+		nni_strfree(url->u_userinfo);
+		nni_strfree(url->u_host);
+		nni_strfree(url->u_hostname);
+		nni_strfree(url->u_port);
+		nni_strfree(url->u_path);
+		nni_strfree(url->u_query);
+		nni_strfree(url->u_fragment);
+		nni_strfree(url->u_requri);
+		NNI_FREE_STRUCT(url);
+	}
 }
+
+int
+nni_url_asprintf(char **str, const nni_url *url)
+{
+	const char *scheme = url->u_scheme;
+	const char *port   = url->u_port;
+	const char *host   = url->u_hostname;
+	const char *hostob = "";
+	const char *hostcb = "";
+
+	if ((strcmp(scheme, "ipc") == 0) || (strcmp(scheme, "inproc") == 0)) {
+		return (nni_asprintf(str, "%s://%s", scheme, url->u_path));
+	}
+
+	if (port != NULL) {
+		if ((strlen(port) == 0) ||
+		    (strcmp(nni_url_default_port(scheme), port) == 0)) {
+			port = NULL;
+		}
+	}
+	if (strcmp(host, "*") == 0) {
+		host = "";
+	}
+	if (strchr(host, ':') != 0) {
+		hostob = "[";
+		hostcb = "]";
+	}
+	return (nni_asprintf(str, "%s://%s%s%s%s%s%s", scheme, hostob, host,
+	    hostcb, port != NULL ? ":" : "", port != NULL ? port : "",
+	    url->u_requri != NULL ? url->u_requri : ""));
+}
+
+// nni_url_asprintf_port is like nni_url_asprintf, but includes a port
+// override.  If non-zero, this port number replaces the port number
+// in the port string.
+int
+nni_url_asprintf_port(char **str, const nni_url *url, int port)
+{
+	char    portstr[16];
+	nni_url myurl = *url;
+
+	if (port > 0) {
+		(void) snprintf(portstr, sizeof(portstr), "%d", port);
+		myurl.u_port = portstr;
+	}
+	return (nni_url_asprintf(str, &myurl));
+}
+
+#define URL_COPYSTR(d, s) ((s != NULL) && ((d = nni_strdup(s)) == NULL))
 
 int
 nni_url_clone(nni_url **dstp, const nni_url *src)
@@ -484,7 +548,6 @@ nni_url_clone(nni_url **dstp, const nni_url *src)
 	if ((dst = NNI_ALLOC_STRUCT(dst)) == NULL) {
 		return (NNG_ENOMEM);
 	}
-#define URL_COPYSTR(d, s) ((s != NULL) && ((d = nni_strdup(s)) == NULL))
 	if (URL_COPYSTR(dst->u_rawurl, src->u_rawurl) ||
 	    URL_COPYSTR(dst->u_scheme, src->u_scheme) ||
 	    URL_COPYSTR(dst->u_userinfo, src->u_userinfo) ||
@@ -498,7 +561,8 @@ nni_url_clone(nni_url **dstp, const nni_url *src)
 		nni_url_free(dst);
 		return (NNG_ENOMEM);
 	}
-#undef URL_COPYSTR
 	*dstp = dst;
 	return (0);
 }
+
+#undef URL_COPYSTR

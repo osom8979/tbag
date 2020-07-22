@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2020 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -9,10 +9,9 @@
 //
 
 #include <stdlib.h>
-#include <string.h>
 
 #include "core/nng_impl.h"
-#include "protocol/pipeline0/push.h"
+#include "nng/protocol/pipeline0/push.h"
 
 // Push protocol.  The PUSH protocol is the "write" side of a pipeline.
 // Push distributes fairly, or tries to, by giving messages in round-robin
@@ -50,24 +49,17 @@ struct push0_pipe {
 };
 
 static int
-push0_sock_init(void **sp, nni_sock *sock)
+push0_sock_init(void *arg, nni_sock *sock)
 {
-	push0_sock *s;
-
-	if ((s = NNI_ALLOC_STRUCT(s)) == NULL) {
-		return (NNG_ENOMEM);
-	}
-	s->uwq = nni_sock_sendq(sock);
-	*sp    = s;
+	push0_sock *s = arg;
+	s->uwq        = nni_sock_sendq(sock);
 	return (0);
 }
 
 static void
 push0_sock_fini(void *arg)
 {
-	push0_sock *s = arg;
-
-	NNI_FREE_STRUCT(s);
+	NNI_ARG_UNUSED(arg);
 }
 
 static void
@@ -97,31 +89,26 @@ push0_pipe_fini(void *arg)
 {
 	push0_pipe *p = arg;
 
-	nni_aio_fini(p->aio_recv);
-	nni_aio_fini(p->aio_send);
-	nni_aio_fini(p->aio_getq);
-	NNI_FREE_STRUCT(p);
+	nni_aio_free(p->aio_recv);
+	nni_aio_free(p->aio_send);
+	nni_aio_free(p->aio_getq);
 }
 
 static int
-push0_pipe_init(void **pp, nni_pipe *pipe, void *s)
+push0_pipe_init(void *arg, nni_pipe *pipe, void *s)
 {
-	push0_pipe *p;
+	push0_pipe *p = arg;
 	int         rv;
 
-	if ((p = NNI_ALLOC_STRUCT(p)) == NULL) {
-		return (NNG_ENOMEM);
-	}
-	if (((rv = nni_aio_init(&p->aio_recv, push0_recv_cb, p)) != 0) ||
-	    ((rv = nni_aio_init(&p->aio_send, push0_send_cb, p)) != 0) ||
-	    ((rv = nni_aio_init(&p->aio_getq, push0_getq_cb, p)) != 0)) {
+	if (((rv = nni_aio_alloc(&p->aio_recv, push0_recv_cb, p)) != 0) ||
+	    ((rv = nni_aio_alloc(&p->aio_send, push0_send_cb, p)) != 0) ||
+	    ((rv = nni_aio_alloc(&p->aio_getq, push0_getq_cb, p)) != 0)) {
 		push0_pipe_fini(p);
 		return (rv);
 	}
 	NNI_LIST_NODE_INIT(&p->node);
 	p->pipe = pipe;
 	p->push = s;
-	*pp     = p;
 	return (0);
 }
 
@@ -221,6 +208,7 @@ push0_sock_recv(void *arg, nni_aio *aio)
 }
 
 static nni_proto_pipe_ops push0_pipe_ops = {
+	.pipe_size  = sizeof(push0_pipe),
 	.pipe_init  = push0_pipe_init,
 	.pipe_fini  = push0_pipe_fini,
 	.pipe_start = push0_pipe_start,
@@ -228,7 +216,7 @@ static nni_proto_pipe_ops push0_pipe_ops = {
 	.pipe_stop  = push0_pipe_stop,
 };
 
-static nni_proto_option push0_sock_options[] = {
+static nni_option push0_sock_options[] = {
 	// terminate list
 	{
 	    .o_name = NULL,
@@ -236,6 +224,7 @@ static nni_proto_option push0_sock_options[] = {
 };
 
 static nni_proto_sock_ops push0_sock_ops = {
+	.sock_size    = sizeof(push0_sock),
 	.sock_init    = push0_sock_init,
 	.sock_fini    = push0_sock_fini,
 	.sock_open    = push0_sock_open,

@@ -1,6 +1,7 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2019 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
+// Copyright 2019 Devolutions <info@devolutions.net>
 //
 // This software is supplied under the terms of the MIT License, a
 // copy of which should be located in the distribution where this
@@ -11,22 +12,22 @@
 #include "core/nng_impl.h"
 
 #ifdef NNG_TRANSPORT_INPROC
-#include "transport/inproc/inproc.h"
+#include "nng/transport/inproc/inproc.h"
 #endif
 #ifdef NNG_TRANSPORT_IPC
-#include "transport/ipc/ipc.h"
+#include "nng/transport/ipc/ipc.h"
 #endif
 #ifdef NNG_TRANSPORT_TCP
-#include "transport/tcp/tcp.h"
+#include "nng/transport/tcp/tcp.h"
 #endif
 #ifdef NNG_TRANSPORT_TLS
-#include "transport/tls/tls.h"
+#include "nng/transport/tls/tls.h"
 #endif
 #ifdef NNG_TRANSPORT_WS
-#include "transport/ws/websocket.h"
+#include "nng/transport/ws/websocket.h"
 #endif
 #ifdef NNG_TRANSPORT_ZEROTIER
-#include "transport/zerotier/zerotier.h"
+#include "nng/transport/zerotier/zerotier.h"
 #endif
 
 #include <stdio.h>
@@ -120,11 +121,27 @@ nni_tran_chkopt(const char *name, const void *v, size_t sz, int typ)
 	NNI_LIST_FOREACH (&nni_tran_list, t) {
 		const nni_tran_dialer_ops *  dops;
 		const nni_tran_listener_ops *lops;
-		const nni_tran_option *      o;
+		const nni_option *           o;
+
+		// Check option entry point is cleaner than endpoint hacks.
+		if (t->t_tran.tran_checkopt != NULL) {
+			rv = t->t_tran.tran_checkopt(name, v, sz, typ);
+			if (rv != NNG_ENOTSUP) {
+				nni_mtx_unlock(&nni_tran_lk);
+				return (rv);
+			}
+			continue;
+		}
 
 		// Generally we look for endpoint options. We check both
 		// dialers and listeners.
 		dops = t->t_tran.tran_dialer;
+		if ((dops->d_setopt != NULL) &&
+		    ((rv = dops->d_setopt(NULL, name, v, sz, typ)) !=
+		        NNG_ENOTSUP)) {
+			nni_mtx_unlock(&nni_tran_lk);
+			return (rv);
+		}
 		for (o = dops->d_options; o && o->o_name != NULL; o++) {
 			if (strcmp(name, o->o_name) != 0) {
 				continue;
@@ -133,12 +150,17 @@ nni_tran_chkopt(const char *name, const void *v, size_t sz, int typ)
 				nni_mtx_unlock(&nni_tran_lk);
 				return (NNG_EREADONLY);
 			}
-
-			rv = (o->o_chk != NULL) ? o->o_chk(v, sz, typ) : 0;
 			nni_mtx_unlock(&nni_tran_lk);
+			rv = o->o_set(NULL, v, sz, typ);
 			return (rv);
 		}
 		lops = t->t_tran.tran_listener;
+		if ((lops->l_setopt != NULL) &&
+		    ((rv = lops->l_setopt(NULL, name, v, sz, typ)) !=
+		        NNG_ENOTSUP)) {
+			nni_mtx_unlock(&nni_tran_lk);
+			return (rv);
+		}
 		for (o = lops->l_options; o && o->o_name != NULL; o++) {
 			if (strcmp(name, o->o_name) != 0) {
 				continue;
@@ -147,9 +169,8 @@ nni_tran_chkopt(const char *name, const void *v, size_t sz, int typ)
 				nni_mtx_unlock(&nni_tran_lk);
 				return (NNG_EREADONLY);
 			}
-
-			rv = (o->o_chk != NULL) ? o->o_chk(v, sz, typ) : 0;
 			nni_mtx_unlock(&nni_tran_lk);
+			rv = o->o_set(NULL, v, sz, typ);
 			return (rv);
 		}
 	}

@@ -10,7 +10,7 @@
 #ifndef CORE_NNG_IMPL_H
 #define CORE_NNG_IMPL_H
 
-#include "nng.h"
+#include "nng/nng.h"
 
 // Internal implementation things for NNG, common definitions, etc.
 // All internal modules wind up including this file to avoid having
@@ -33,15 +33,16 @@
 #include "core/idhash.h"
 #include "core/init.h"
 #include "core/list.h"
+#include "core/lmq.h"
 #include "core/message.h"
 #include "core/msgqueue.h"
 #include "core/options.h"
 #include "core/panic.h"
 #include "core/pollable.h"
 #include "core/protocol.h"
-#include "core/random.h"
 #include "core/reap.h"
 #include "core/stats.h"
+#include "core/stream.h"
 #include "core/strs.h"
 #include "core/taskq.h"
 #include "core/thread.h"

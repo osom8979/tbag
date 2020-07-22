@@ -98,11 +98,13 @@ static size_t
 nni_hash_find_index(nni_idhash *h, uint64_t id)
 {
 	size_t index;
+	size_t start;
 	if (h->ih_count == 0) {
 		return ((size_t) -1);
 	}
 
 	index = NNI_IDHASH_INDEX(h, id);
+	start = index;
 	for (;;) {
 		// The value of ihe_key is only valid if ihe_val is not NULL.
 		if ((h->ih_entries[index].ihe_key == id) &&
@@ -113,7 +115,13 @@ nni_hash_find_index(nni_idhash *h, uint64_t id)
 			return ((size_t) -1);
 		}
 		index = NNI_IDHASH_NEXTPROBE(h, index);
+
+		if (index == start) {
+			break;
+		}
 	}
+
+	return ((size_t) -1);
 }
 
 static int
@@ -185,11 +193,15 @@ nni_hash_resize(nni_idhash *h)
 		}
 		index = oldents[i].ihe_key & (newsize - 1);
 		for (;;) {
+			// Increment the load unconditionally.  It counts
+			// once for every item stored, plus once for each
+			// hashing operation we use to store the item (i.e.
+			// one for the item, plus once for each rehash.)
+			h->ih_load++;
 			if (newents[index].ihe_val == NULL) {
 				// As we are hitting this entry for the first
 				// time, it won't have any skips.
 				NNI_ASSERT(newents[index].ihe_skips == 0);
-				h->ih_load++;
 				newents[index].ihe_val = oldents[i].ihe_val;
 				newents[index].ihe_key = oldents[i].ihe_key;
 				break;
@@ -221,24 +233,24 @@ nni_idhash_remove(nni_idhash *h, uint64_t id)
 	// to restart the search, until the index matches, to decrement the
 	// skips counter.
 	srch = (int) NNI_IDHASH_INDEX(h, id);
-	while (srch != index) {
+
+	for (;;) {
+		// The load was increased once each hashing operation we used
+		// to place the the item.  Decrement it accordingly.
+		h->ih_load--;
 		ent = &h->ih_entries[srch];
+		if (srch == index) {
+			ent->ihe_val = NULL;
+			ent->ihe_key = (uint64_t) -1; // garbage key
+			break;
+		}
 		NNI_ASSERT(ent->ihe_skips > 0);
 		ent->ihe_skips--;
-		if ((ent->ihe_skips == 0) && (ent->ihe_val == NULL)) {
-			h->ih_load--;
-		}
 		srch = NNI_IDHASH_NEXTPROBE(h, srch);
 	}
 
-	ent = &h->ih_entries[index];
-
-	ent->ihe_val = NULL;
-	ent->ihe_key = (uint64_t) -1; // scribble garbage on the key
-	if (ent->ihe_skips == 0) {
-		h->ih_load--;
-	}
 	h->ih_count--;
+
 	// Shrink -- but it's ok if we can't.
 	(void) nni_hash_resize(h);
 
@@ -253,9 +265,8 @@ nni_hash_insert(nni_idhash *h, uint64_t id, void *val)
 	size_t            index;
 	nni_idhash_entry *ent;
 
-	// Try to resize.  If we can't, but we still have room, go ahead
-	// and store it.
-	if ((nni_hash_resize(h) != 0) && (h->ih_count >= (h->ih_cap - 1))) {
+	// Try to resize -- if we don't need to, this will be a no-op.
+	if (nni_hash_resize(h) != 0) {
 		return (NNG_ENOMEM);
 	}
 
@@ -269,17 +280,21 @@ nni_hash_insert(nni_idhash *h, uint64_t id, void *val)
 	index = NNI_IDHASH_INDEX(h, id);
 	for (;;) {
 		ent = &h->ih_entries[index];
+
+		// Increment the load count.  We do this each time time we
+		// rehash.  This may overcount items that collide on the
+		// same rehashing, but this should just cause a table to
+		// grow sooner, which is probably a good thing.
+		h->ih_load++;
 		if (ent->ihe_val == NULL) {
-			if (ent->ihe_skips == 0) {
-				// Newly used entry, bump the load.
-				h->ih_load++;
-			}
 			h->ih_count++;
 			ent->ihe_key = id;
 			ent->ihe_val = val;
 			return (0);
 		}
-		// Entry already in use, so don't increment the load.
+		// Record the skip count.  This being non-zero informs
+		// that a rehash will be necessary.  Without this we
+		// would need to scan the entire hash for the match.
 		ent->ihe_skips++;
 		index = NNI_IDHASH_NEXTPROBE(h, index);
 	}

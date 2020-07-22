@@ -1,6 +1,9 @@
 #
+# Copyright 2020 Staysail Systems, Inc. <info@staysail.tech>
 # Copyright 2018 Capitar IT Group BV <info@capitar.com>
-# Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+# Copyright 2019 Devolutions <info@devolutions.net>
+#
+
 #
 # This software is supplied under the terms of the MIT License, a
 # copy of which should be located in the distribution where this
@@ -8,40 +11,36 @@
 # found online at https://opensource.org/licenses/MIT.
 #
 
-if (NNG_SUPP_TLS)
-	set(NNG_SUPP_TLS_MBEDTLS ON)
-	set(_DEFS -DNNG_SUPP_TLS)
-endif()
 
-set(_SRCS supplemental/tls/tls.h)
-set(_HDRS supplemental/tls/tls.h)
+if (NNG_ENABLE_TLS)
+    set(NNG_TLS_ENGINES mbed wolf none)
+    # We assume Mbed for now.  (Someday replaced perhaps with Bear.)
+    set(NNG_TLS_ENGINE mbed CACHE STRING "TLS engine to use.")
+    set_property(CACHE NNG_TLS_ENGINE PROPERTY STRINGS ${NNG_TLS_ENGINES})
+else ()
+    set(NNG_TLS_ENGINE none)
+endif ()
 
-# For now we only support the ARM mbedTLS library.
-if (NNG_SUPP_TLS_MBEDTLS)
+# default TLS implementation for now is Mbed.
+nng_headers(nng/supplemental/tls/tls.h)
+nng_headers(nng/supplemental/tls/engine.h)
 
-    message(WARNING "
-        ************************************************************
-        Linking against mbedTLS changes license terms (Apache 2.0).
-        Consult a lawyer and the license files for details.
-        ************************************************************")
+if (NOT NNG_TLS_ENGINE STREQUAL "none")
+    nng_test(tls_test)
+endif ()
 
-	find_package(mbedTLS REQUIRED)
-	set(_LIBS ${MBEDTLS_LIBRARIES})
-	set(_INCS ${MBEDTLS_INCLUDE_DIR})
-	list(APPEND _SRCS supplemental/tls/mbedtls/tls.c)
+add_subdirectory(mbedtls)
+add_subdirectory(wolfssl)
 
-else()
-	list(APPEND _SRCS supplemental/tls/none/tls.c)
-endif()
+nng_sources(tls_common.c)
+nng_sources(tls_api.h)
 
 list(APPEND NNG_DEFS ${_DEFS})
 list(APPEND NNG_SRCS ${_SRCS})
-list(APPEND NNG_HDRS ${_HDRS})
 list(APPEND NNG_LIBS ${_LIBS})
 list(APPEND NNG_INCS ${_INCS})
 
 set(NNG_DEFS ${NNG_DEFS} PARENT_SCOPE)
 set(NNG_SRCS ${NNG_SRCS} PARENT_SCOPE)
-set(NNG_HDRS ${NNG_HDRS} PARENT_SCOPE)
 set(NNG_LIBS ${NNG_LIBS} PARENT_SCOPE)
 set(NNG_INCS ${NNG_INCS} PARENT_SCOPE)

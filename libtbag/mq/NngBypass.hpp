@@ -15,38 +15,42 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/mq/nng-1.1.1/nng.h>
+#include <libtbag/mq/nng/nng.h>
+
+#define TBAG_DISABLE_NNG_TLS
 
 // nng-protocol
-#include <libtbag/mq/nng-1.1.1/protocol/bus0/bus.h>
+#include <libtbag/mq/nng/protocol/bus0/bus.h>
 #ifndef nng_pair_open
 #define nng_pair_open // Don't use this macro.
 #endif
 #ifndef nng_pair_open_raw
 #define nng_pair_open_raw // Don't use this macro.
 #endif
-#include <libtbag/mq/nng-1.1.1/protocol/pair0/pair.h>
-#include <libtbag/mq/nng-1.1.1/protocol/pair1/pair.h>
-#include <libtbag/mq/nng-1.1.1/protocol/pipeline0/pull.h>
-#include <libtbag/mq/nng-1.1.1/protocol/pipeline0/push.h>
-#include <libtbag/mq/nng-1.1.1/protocol/pubsub0/pub.h>
-#include <libtbag/mq/nng-1.1.1/protocol/pubsub0/sub.h>
-#include <libtbag/mq/nng-1.1.1/protocol/reqrep0/rep.h>
-#include <libtbag/mq/nng-1.1.1/protocol/reqrep0/req.h>
-#include <libtbag/mq/nng-1.1.1/protocol/survey0/respond.h>
-#include <libtbag/mq/nng-1.1.1/protocol/survey0/survey.h>
+#include <libtbag/mq/nng/protocol/pair0/pair.h>
+#include <libtbag/mq/nng/protocol/pair1/pair.h>
+#include <libtbag/mq/nng/protocol/pipeline0/pull.h>
+#include <libtbag/mq/nng/protocol/pipeline0/push.h>
+#include <libtbag/mq/nng/protocol/pubsub0/pub.h>
+#include <libtbag/mq/nng/protocol/pubsub0/sub.h>
+#include <libtbag/mq/nng/protocol/reqrep0/rep.h>
+#include <libtbag/mq/nng/protocol/reqrep0/req.h>
+#include <libtbag/mq/nng/protocol/survey0/respond.h>
+#include <libtbag/mq/nng/protocol/survey0/survey.h>
 
 // nng-supplemental
-#include <libtbag/mq/nng-1.1.1/supplemental/http/http.h>
-#include <libtbag/mq/nng-1.1.1/supplemental/tls/tls.h>
-#include <libtbag/mq/nng-1.1.1/supplemental/util/options.h>
-#include <libtbag/mq/nng-1.1.1/supplemental/util/platform.h>
+#include <libtbag/mq/nng/supplemental/http/http.h>
+#if !defined(TBAG_DISABLE_NNG_TLS)
+#include <libtbag/mq/nng/supplemental/tls/tls.h>
+#endif
+#include <libtbag/mq/nng/supplemental/util/options.h>
+#include <libtbag/mq/nng/supplemental/util/platform.h>
 
 // nng-transport
-#include <libtbag/mq/nng-1.1.1/transport/inproc/inproc.h>
-#include <libtbag/mq/nng-1.1.1/transport/ipc/ipc.h>
-#include <libtbag/mq/nng-1.1.1/transport/tcp/tcp.h>
-#include <libtbag/mq/nng-1.1.1/transport/ws/websocket.h>
+#include <libtbag/mq/nng/transport/inproc/inproc.h>
+#include <libtbag/mq/nng/transport/ipc/ipc.h>
+#include <libtbag/mq/nng/transport/tcp/tcp.h>
+#include <libtbag/mq/nng/transport/ws/websocket.h>
 
 #include <cstdbool>
 #include <cstddef>
@@ -82,7 +86,7 @@ TBAG_API int nng_getopt_size(nng_socket, char const *, size_t *);
 TBAG_API int nng_getopt_uint64(nng_socket, char const *, uint64_t *);
 TBAG_API int nng_getopt_ptr(nng_socket, char const *, void **);
 
-TBAG_API int nng_pipe_notify(nng_socket, int, nng_pipe_cb, void *);
+TBAG_API int nng_pipe_notify(nng_socket, nng_pipe_ev, nng_pipe_cb, void *);
 TBAG_API int nng_getopt_string(nng_socket, char const *, char **);
 TBAG_API int nng_listen(nng_socket, char const *, nng_listener *, int);
 TBAG_API int nng_dial(nng_socket, char const *, nng_dialer *, int);
@@ -390,6 +394,7 @@ TBAG_API void nng_http_client_transact(nng_http_client *, nng_http_req *, nng_ht
 # /* supplemental/tls */
 # /********************/
 
+#if !defined(TBAG_DISABLE_NNG_TLS)
 TBAG_API int  nng_tls_config_alloc(nng_tls_config **, nng_tls_mode);
 TBAG_API void nng_tls_config_hold(nng_tls_config *);
 TBAG_API void nng_tls_config_free(nng_tls_config *);
@@ -401,6 +406,7 @@ TBAG_API int  nng_tls_config_pass(nng_tls_config *, const char *);
 TBAG_API int  nng_tls_config_auth_mode(nng_tls_config *, nng_tls_auth_mode);
 TBAG_API int  nng_tls_config_ca_file(nng_tls_config *, const char *);
 TBAG_API int  nng_tls_config_cert_key_file(nng_tls_config *, const char *, const char *);
+#endif
 
 # /*********************/
 # /* supplemental/util */

@@ -1,6 +1,7 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2020 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
+// Copyright 2019 Devolutions <info@devolutions.net>
 //
 // This software is supplied under the terms of the MIT License, a
 // copy of which should be located in the distribution where this
@@ -9,8 +10,6 @@
 //
 
 #include "core/nng_impl.h"
-
-#ifdef NNG_PLATFORM_POSIX
 
 #include <errno.h>
 #include <fcntl.h>
@@ -30,28 +29,20 @@
 
 #include "posix_ipc.h"
 
-int
-nni_ipc_listener_init(nni_ipc_listener **lp)
-{
-	nni_ipc_listener *l;
-	if ((l = NNI_ALLOC_STRUCT(l)) == NULL) {
-		return (NNG_ENOMEM);
-	}
-
-	nni_mtx_init(&l->mtx);
-
-	l->pfd     = NULL;
-	l->closed  = false;
-	l->started = false;
-	l->perms   = 0;
-
-	nni_aio_list_init(&l->acceptq);
-	*lp = l;
-	return (0);
-}
+typedef struct {
+	nng_stream_listener sl;
+	nni_posix_pfd *     pfd;
+	nng_sockaddr        sa;
+	nni_list            acceptq;
+	bool                started;
+	bool                closed;
+	char *              path;
+	mode_t              perms;
+	nni_mtx             mtx;
+} ipc_listener;
 
 static void
-ipc_listener_doclose(nni_ipc_listener *l)
+ipc_listener_doclose(ipc_listener *l)
 {
 	nni_aio *aio;
 	char *   path;
@@ -72,16 +63,17 @@ ipc_listener_doclose(nni_ipc_listener *l)
 	}
 }
 
-void
-nni_ipc_listener_close(nni_ipc_listener *l)
+static void
+ipc_listener_close(void *arg)
 {
+	ipc_listener *l = arg;
 	nni_mtx_lock(&l->mtx);
 	ipc_listener_doclose(l);
 	nni_mtx_unlock(&l->mtx);
 }
 
 static void
-ipc_listener_doaccept(nni_ipc_listener *l)
+ipc_listener_doaccept(ipc_listener *l)
 {
 	nni_aio *aio;
 
@@ -110,7 +102,7 @@ ipc_listener_doaccept(nni_ipc_listener *l)
 			case EWOULDBLOCK:
 #endif
 #endif
-				rv = nni_posix_pfd_arm(l->pfd, POLLIN);
+				rv = nni_posix_pfd_arm(l->pfd, NNI_POLL_IN);
 				if (rv != 0) {
 					nni_aio_list_remove(aio);
 					nni_aio_finish_error(aio, rv);
@@ -132,35 +124,37 @@ ipc_listener_doaccept(nni_ipc_listener *l)
 			}
 		}
 
-		if ((rv = nni_posix_pfd_init(&pfd, newfd)) != 0) {
-			close(newfd);
+		if ((rv = nni_posix_ipc_alloc(&c, NULL)) != 0) {
+			(void) close(newfd);
 			nni_aio_list_remove(aio);
 			nni_aio_finish_error(aio, rv);
 			continue;
 		}
 
-		if ((rv = nni_posix_ipc_conn_init(&c, pfd)) != 0) {
-			nni_posix_pfd_fini(pfd);
+		if ((rv = nni_posix_pfd_init(&pfd, newfd)) != 0) {
+			nng_stream_free(&c->stream);
 			nni_aio_list_remove(aio);
 			nni_aio_finish_error(aio, rv);
 			continue;
 		}
+
+		nni_posix_ipc_init(c, pfd);
 
 		nni_aio_list_remove(aio);
-		nni_posix_ipc_conn_start(c);
+		nni_posix_ipc_start(c);
 		nni_aio_set_output(aio, 0, c);
 		nni_aio_finish(aio, 0, 0);
 	}
 }
 
 static void
-ipc_listener_cb(nni_posix_pfd *pfd, int events, void *arg)
+ipc_listener_cb(nni_posix_pfd *pfd, unsigned events, void *arg)
 {
-	nni_ipc_listener *l = arg;
+	ipc_listener *l = arg;
 	NNI_ARG_UNUSED(pfd);
 
 	nni_mtx_lock(&l->mtx);
-	if (events & POLLNVAL) {
+	if ((events & NNI_POLL_INVAL) != 0) {
 		ipc_listener_doclose(l);
 		nni_mtx_unlock(&l->mtx);
 		return;
@@ -174,7 +168,7 @@ ipc_listener_cb(nni_posix_pfd *pfd, int events, void *arg)
 static void
 ipc_listener_cancel(nni_aio *aio, void *arg, int rv)
 {
-	nni_ipc_listener *l = arg;
+	ipc_listener *l = arg;
 
 	// This is dead easy, because we'll ignore the completion if there
 	// isn't anything to do the accept on!
@@ -191,13 +185,13 @@ static int
 ipc_remove_stale(const char *path)
 {
 	int                fd;
-	struct sockaddr_un sun;
+	struct sockaddr_un sa;
 	size_t             sz;
 
-	sun.sun_family = AF_UNIX;
-	sz             = sizeof(sun.sun_path);
+	sa.sun_family = AF_UNIX;
+	sz             = sizeof(sa.sun_path);
 
-	if (nni_strlcpy(sun.sun_path, path, sz) >= sz) {
+	if (nni_strlcpy(sa.sun_path, path, sz) >= sz) {
 		return (NNG_EADDRINVAL);
 	}
 
@@ -211,7 +205,7 @@ ipc_remove_stale(const char *path)
 	// then the cleanup will fail.  As this is supposed to be an
 	// exceptional case, don't worry.
 	(void) fcntl(fd, F_SETFL, O_NONBLOCK);
-	if (connect(fd, (void *) &sun, sizeof(sun)) < 0) {
+	if (connect(fd, (void *) &sa, sizeof(sa)) < 0) {
 		if (errno == ECONNREFUSED) {
 			(void) unlink(path);
 		}
@@ -220,9 +214,23 @@ ipc_remove_stale(const char *path)
 	return (0);
 }
 
-int
-nni_ipc_listener_set_permissions(nni_ipc_listener *l, int mode)
+static int
+ipc_listener_get_addr(void *arg, void *buf, size_t *szp, nni_type t)
 {
+	ipc_listener *l = arg;
+	return (nni_copyout_sockaddr(&l->sa, buf, szp, t));
+}
+
+static int
+ipc_listener_set_perms(void *arg, const void *buf, size_t sz, nni_type t)
+{
+	ipc_listener *l = arg;
+	int           mode;
+	int           rv;
+
+	if ((rv = nni_copyin_int(&mode, buf, sz, 0, S_IFMT, t)) != 0) {
+		return (rv);
+	}
 	if ((mode & S_IFMT) != 0) {
 		return (NNG_EINVAL);
 	}
@@ -237,17 +245,40 @@ nni_ipc_listener_set_permissions(nni_ipc_listener *l, int mode)
 	return (0);
 }
 
-int
-nni_ipc_listener_set_security_descriptor(nni_ipc_listener *l, void *sd)
+static const nni_option ipc_listener_options[] = {
+	{
+	    .o_name = NNG_OPT_LOCADDR,
+	    .o_get  = ipc_listener_get_addr,
+	},
+	{
+	    .o_name = NNG_OPT_IPC_PERMISSIONS,
+	    .o_set  = ipc_listener_set_perms,
+	},
+	{
+	    .o_name = NULL,
+	},
+};
+
+static int
+ipc_listener_getx(
+    void *arg, const char *name, void *buf, size_t *szp, nni_type t)
 {
-	NNI_ARG_UNUSED(l);
-	NNI_ARG_UNUSED(sd);
-	return (NNG_ENOTSUP);
+	ipc_listener *l = arg;
+	return (nni_getopt(ipc_listener_options, name, l, buf, szp, t));
+}
+
+static int
+ipc_listener_setx(
+    void *arg, const char *name, const void *buf, size_t sz, nni_type t)
+{
+	ipc_listener *l = arg;
+	return (nni_setopt(ipc_listener_options, name, l, buf, sz, t));
 }
 
 int
-nni_ipc_listener_listen(nni_ipc_listener *l, const nni_sockaddr *sa)
+ipc_listener_listen(void *arg)
 {
+	ipc_listener *          l = arg;
 	socklen_t               len;
 	struct sockaddr_storage ss;
 	int                     rv;
@@ -255,7 +286,7 @@ nni_ipc_listener_listen(nni_ipc_listener *l, const nni_sockaddr *sa)
 	nni_posix_pfd *         pfd;
 	char *                  path;
 
-	if (((len = nni_posix_nn2sockaddr(&ss, sa)) == 0) ||
+	if (((len = nni_posix_nn2sockaddr(&ss, &l->sa)) == 0) ||
 	    (ss.ss_family != AF_UNIX)) {
 		return (NNG_EADDRINVAL);
 	}
@@ -269,7 +300,7 @@ nni_ipc_listener_listen(nni_ipc_listener *l, const nni_sockaddr *sa)
 		nni_mtx_unlock(&l->mtx);
 		return (NNG_ECLOSED);
 	}
-	path = nni_strdup(sa->s_ipc.sa_path);
+	path = nni_strdup(l->sa.s_ipc.sa_path);
 	if (path == NULL) {
 		return (NNG_ENOMEM);
 	}
@@ -322,9 +353,10 @@ nni_ipc_listener_listen(nni_ipc_listener *l, const nni_sockaddr *sa)
 	return (0);
 }
 
-void
-nni_ipc_listener_fini(nni_ipc_listener *l)
+static void
+ipc_listener_free(void *arg)
 {
+	ipc_listener * l = arg;
 	nni_posix_pfd *pfd;
 
 	nni_mtx_lock(&l->mtx);
@@ -339,10 +371,11 @@ nni_ipc_listener_fini(nni_ipc_listener *l)
 	NNI_FREE_STRUCT(l);
 }
 
-void
-nni_ipc_listener_accept(nni_ipc_listener *l, nni_aio *aio)
+static void
+ipc_listener_accept(void *arg, nni_aio *aio)
 {
-	int rv;
+	ipc_listener *l = arg;
+	int           rv;
 
 	// Accept is simpler than the connect case.  With accept we just
 	// need to wait for the socket to be readable to indicate an incoming
@@ -375,4 +408,68 @@ nni_ipc_listener_accept(nni_ipc_listener *l, nni_aio *aio)
 	nni_mtx_unlock(&l->mtx);
 }
 
-#endif // NNG_PLATFORM_POSIX
+int
+nni_ipc_listener_alloc(nng_stream_listener **lp, const nng_url *url)
+{
+	ipc_listener *l;
+
+	if ((strcmp(url->u_scheme, "ipc") != 0) || (url->u_path == NULL) ||
+	    (strlen(url->u_path) == 0) ||
+	    (strlen(url->u_path) >= NNG_MAXADDRLEN)) {
+		return (NNG_EADDRINVAL);
+	}
+
+	if ((l = NNI_ALLOC_STRUCT(l)) == NULL) {
+		return (NNG_ENOMEM);
+	}
+
+	nni_mtx_init(&l->mtx);
+	nni_aio_list_init(&l->acceptq);
+
+	l->pfd                = NULL;
+	l->closed             = false;
+	l->started            = false;
+	l->perms              = 0;
+	l->sa.s_ipc.sa_family = NNG_AF_IPC;
+	strcpy(l->sa.s_ipc.sa_path, url->u_path);
+	l->sl.sl_free   = ipc_listener_free;
+	l->sl.sl_close  = ipc_listener_close;
+	l->sl.sl_listen = ipc_listener_listen;
+	l->sl.sl_accept = ipc_listener_accept;
+	l->sl.sl_getx   = ipc_listener_getx;
+	l->sl.sl_setx   = ipc_listener_setx;
+
+	*lp = (void *) l;
+	return (0);
+}
+
+static int
+ipc_check_perms(const void *buf, size_t sz, nni_type t)
+{
+	int32_t mode;
+	int     rv;
+
+	if ((rv = nni_copyin_int(&mode, buf, sz, 0, S_IFMT, t)) != 0) {
+		return (rv);
+	}
+	if ((mode & S_IFMT) != 0) {
+		return (NNG_EINVAL);
+	}
+	return (0);
+}
+
+static const nni_chkoption ipc_chkopts[] = {
+	{
+	    .o_name  = NNG_OPT_IPC_PERMISSIONS,
+	    .o_check = ipc_check_perms,
+	},
+	{
+	    .o_name = NULL,
+	},
+};
+
+int
+nni_ipc_checkopt(const char *name, const void *data, size_t sz, nni_type t)
+{
+	return (nni_chkopt(ipc_chkopts, name, data, sz, t));
+}

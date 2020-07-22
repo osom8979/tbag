@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2020 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitoar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -16,14 +16,14 @@
 // C compilers may get unhappy when named arguments are not used.  While
 // there are things like __attribute__((unused)) which are arguably
 // superior, support for such are not universal.
-#define NNI_ARG_UNUSED(x) ((void) x);
+#define NNI_ARG_UNUSED(x) ((void) x)
 
 #ifndef NDEBUG
 #define NNI_ASSERT(x) \
 	if (!(x))     \
 	nni_panic("%s: %d: assert err: %s", __FILE__, __LINE__, #x)
 #else
-#define NNI_ASSERT(x)
+#define NNI_ASSERT(x) (0)
 #endif
 
 // Returns the size of an array in elements. (Convenience.)
@@ -47,12 +47,10 @@ typedef struct nni_listener nni_listener;
 typedef struct nni_pipe     nni_pipe;
 
 typedef struct nni_tran              nni_tran;
-typedef struct nni_tran_option       nni_tran_option;
 typedef struct nni_tran_dialer_ops   nni_tran_dialer_ops;
 typedef struct nni_tran_listener_ops nni_tran_listener_ops;
 typedef struct nni_tran_pipe_ops     nni_tran_pipe_ops;
 
-typedef struct nni_proto_option   nni_proto_option;
 typedef struct nni_proto_ctx_ops  nni_proto_ctx_ops;
 typedef struct nni_proto_sock_ops nni_proto_sock_ops;
 typedef struct nni_proto_pipe_ops nni_proto_pipe_ops;
@@ -136,12 +134,18 @@ typedef struct {
 // This increments a pointer a fixed number of byte cells.
 #define NNI_INCPTR(ptr, n) ((ptr) = (void *) ((char *) (ptr) + (n)))
 
+// Alignment -- this is used when allocating adjacent objects to ensure
+// that each object begins on a natural alignment boundary.
+#define NNI_ALIGN_SIZE sizeof(void *)
+#define NNI_ALIGN_MASK (NNI_ALIGN_SIZE - 1)
+#define NNI_ALIGN_UP(sz) (((sz) + NNI_ALIGN_MASK) & ~NNI_ALIGN_MASK)
+
 // A few assorted other items.
 #define NNI_FLAG_IPV4ONLY 1
 
 // Types.  These are used to provide more structured access to options
 // (and maybe later statistics).  For now these are internal only.
-typedef enum nni_opt_type {
+typedef enum {
 	NNI_TYPE_OPAQUE,
 	NNI_TYPE_BOOL,
 	NNI_TYPE_INT32,
@@ -153,6 +157,22 @@ typedef enum nni_opt_type {
 	NNI_TYPE_STRING,
 	NNI_TYPE_SOCKADDR,
 	NNI_TYPE_POINTER,
-} nni_opt_type;
+} nni_type;
+
+typedef nni_type nni_opt_type;
+
+// NNI_MAX_MAX_TTL is the maximum value that MAX_TTL can be set to -
+// i.e. the number of nng_device boundaries that a message can traverse.
+// This value drives the size of pre-allocated headers and back-trace
+// buffers -- we need 4 bytes for each hop, plus 4 bytes for the request
+// identifier.  Thus, it is recommended not to set this value too large.
+// (It is possible to scale out to inconceivably large networks with
+// only a few hops - we have yet to see more than 4 in practice.)
+#ifndef NNI_MAX_MAX_TTL
+#define NNI_MAX_MAX_TTL 15
+#endif
+
+// NNI_MAX_HEADER_SIZE is our header size.
+#define NNI_MAX_HEADER_SIZE ((NNI_MAX_MAX_TTL + 1) * sizeof(uint32_t))
 
 #endif // CORE_DEFS_H

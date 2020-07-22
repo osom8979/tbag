@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2019 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -12,43 +12,38 @@
 
 #ifdef NNG_USE_POSIX_RESOLV_GAI
 
-#include <arpa/inet.h>
 #include <ctype.h>
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/uio.h>
 #include <sys/un.h>
-#include <unistd.h>
 
 // We use a single resolver taskq - but we allocate a few threads
 // for it to ensure that names can be looked up concurrently.  This isn't
-// as elegant or scaleable as a true asynchronous resolver would be, but
+// as elegant or scalable as a true asynchronous resolver would be, but
 // it has the advantage of being fairly portable, and concurrent enough for
 // the vast, vast majority of use cases.  The total thread count can be
 // changed with this define.  Note that some platforms may not have a
 // thread-safe getaddrinfo().  In that case they should set this to 1.
 
-#ifndef NNG_POSIX_RESOLV_CONCURRENCY
-#define NNG_POSIX_RESOLV_CONCURRENCY 4
+#ifndef NNG_RESOLV_CONCURRENCY
+#define NNG_RESOLV_CONCURRENCY 4
 #endif
 
 static nni_mtx  resolv_mtx;
 static nni_cv   resolv_cv;
 static bool     resolv_fini;
 static nni_list resolv_aios;
-static nni_thr  resolv_thrs[NNG_POSIX_RESOLV_CONCURRENCY];
+static nni_thr  resolv_thrs[NNG_RESOLV_CONCURRENCY];
 
 typedef struct resolv_item resolv_item;
 struct resolv_item {
 	int          family;
 	int          passive;
-	const char * name;
+	char         name_buf[256];
+	char *       name;
 	int          proto;
 	int          socktype;
 	uint16_t     port;
@@ -110,6 +105,16 @@ posix_gai_errno(int rv)
 
 	case EAI_SOCKTYPE:
 		return (NNG_ENOTSUP);
+
+#ifdef EAI_CANCELED
+	case EAI_CANCELED:
+		return (NNG_ECANCELED);
+#endif
+
+#ifdef EAI_AGAIN
+	case EAI_AGAIN:
+		return (NNG_EAGAIN);
+#endif
 
 	default:
 		return (NNG_ESYSERR + rv);
@@ -249,9 +254,24 @@ resolv_ip(const char *host, const char *serv, int passive, int family,
 		return;
 	}
 
-	// NB: host and serv must remain valid until this is completed.
+	// NB: must remain valid until this is completed.  So we have to
+	// keep our own copy.
+
+	if (host != NULL && nni_strnlen(host, sizeof(item->name_buf)) >=
+	    sizeof(item->name_buf)) {
+		NNI_FREE_STRUCT(item);
+		nni_aio_finish_error(aio, NNG_EADDRINVAL);
+		return;
+	}
+
+	if (host == NULL) {
+		item->name = NULL;
+	} else {
+		nni_strlcpy(item->name_buf, host, sizeof(item->name_buf));
+		item->name = item->name_buf;
+	}
+
 	memset(&item->sa, 0, sizeof(item->sa));
-	item->name     = host;
 	item->proto    = proto;
 	item->aio      = aio;
 	item->family   = fam;
@@ -292,10 +312,10 @@ nni_udp_resolv(
 }
 
 void
-resolv_worker(void *notused)
+resolv_worker(void *unused)
 {
 
-	NNI_ARG_UNUSED(notused);
+	NNI_ARG_UNUSED(unused);
 
 	nni_mtx_lock(&resolv_mtx);
 	for (;;) {
@@ -321,57 +341,16 @@ resolv_worker(void *notused)
 
 		// Check to make sure we were not canceled.
 		if ((aio = item->aio) != NULL) {
-			nng_sockaddr *sa = nni_aio_get_input(aio, 0);
+
 			nni_aio_set_prov_extra(aio, 0, NULL);
 			item->aio = NULL;
-			memcpy(sa, &item->sa, sizeof(*sa));
-			nni_aio_finish(aio, rv, 0);
 
-			NNI_FREE_STRUCT(item);
+			nni_aio_set_sockaddr(aio, &item->sa);
+			nni_aio_finish(aio, rv, 0);
 		}
+		NNI_FREE_STRUCT(item);
 	}
 	nni_mtx_unlock(&resolv_mtx);
-}
-
-int
-nni_ntop(const nni_sockaddr *sa, char *ipstr, char *portstr)
-{
-	const void *ap;
-	uint16_t    port;
-	int         af;
-	switch (sa->s_family) {
-	case NNG_AF_INET:
-		ap   = &sa->s_in.sa_addr;
-		port = sa->s_in.sa_port;
-		af   = AF_INET;
-		break;
-	case NNG_AF_INET6:
-		ap   = &sa->s_in6.sa_addr;
-		port = sa->s_in6.sa_port;
-		af   = AF_INET6;
-		break;
-	default:
-		return (NNG_EINVAL);
-	}
-	if (ipstr != NULL) {
-		if (af == AF_INET6) {
-			size_t l;
-			ipstr[0] = '[';
-			inet_ntop(af, ap, ipstr + 1, INET6_ADDRSTRLEN);
-			l          = strlen(ipstr);
-			ipstr[l++] = ']';
-			ipstr[l++] = '\0';
-		} else {
-			inet_ntop(af, ap, ipstr, INET6_ADDRSTRLEN);
-		}
-	}
-	if (portstr != NULL) {
-#ifdef NNG_LITTLE_ENDIAN
-		port = ((port >> 8) & 0xff) | ((port & 0xff) << 8);
-#endif
-		snprintf(portstr, 6, "%u", port);
-	}
-	return (0);
 }
 
 int
@@ -383,14 +362,14 @@ nni_posix_resolv_sysinit(void)
 
 	resolv_fini = false;
 
-	for (int i = 0; i < NNG_POSIX_RESOLV_CONCURRENCY; i++) {
+	for (int i = 0; i < NNG_RESOLV_CONCURRENCY; i++) {
 		int rv = nni_thr_init(&resolv_thrs[i], resolv_worker, NULL);
 		if (rv != 0) {
 			nni_posix_resolv_sysfini();
 			return (rv);
 		}
 	}
-	for (int i = 0; i < NNG_POSIX_RESOLV_CONCURRENCY; i++) {
+	for (int i = 0; i < NNG_RESOLV_CONCURRENCY; i++) {
 		nni_thr_run(&resolv_thrs[i]);
 	}
 
@@ -405,7 +384,7 @@ nni_posix_resolv_sysfini(void)
 	nni_cv_wake(&resolv_cv);
 	nni_mtx_unlock(&resolv_mtx);
 
-	for (int i = 0; i < NNG_POSIX_RESOLV_CONCURRENCY; i++) {
+	for (int i = 0; i < NNG_RESOLV_CONCURRENCY; i++) {
 		nni_thr_fini(&resolv_thrs[i]);
 	}
 	nni_cv_fini(&resolv_cv);

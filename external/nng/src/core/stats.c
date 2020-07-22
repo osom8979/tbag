@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2020 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -17,8 +17,8 @@ typedef struct nng_stat nni_stat;
 
 struct nng_stat {
 	char *         s_name;
-	const char *   s_desc;
-	const char *   s_string;
+	char *         s_desc;
+	char *         s_string;
 	uint64_t       s_value;
 	nni_time       s_time;
 	nni_stat_type  s_type;
@@ -36,13 +36,9 @@ static nni_mtx *     stats_held = NULL;
 #endif
 
 void
-nni_stat_append(nni_stat_item *parent, nni_stat_item *child)
+nni_stat_add(nni_stat_item *parent, nni_stat_item *child)
 {
 #ifdef NNG_ENABLE_STATS
-	if (parent == NULL) {
-		parent = &stats_root;
-	}
-	nni_mtx_lock(&stats_lock);
 	// Make sure that the lists for both children and parents
 	// are correctly initialized.
 	if (parent->si_children.ll_head.ln_next == NULL) {
@@ -53,15 +49,28 @@ nni_stat_append(nni_stat_item *parent, nni_stat_item *child)
 	}
 	nni_list_append(&parent->si_children, child);
 	child->si_parent = parent;
-	nni_mtx_unlock(&stats_lock);
 #else
 	NNI_ARG_UNUSED(parent);
 	NNI_ARG_UNUSED(child);
 #endif
 }
 
+// nni_stat_register registers a stat tree, acquiring the lock
+// on the stats structures before doing so.
 void
-nni_stat_remove(nni_stat_item *child)
+nni_stat_register(nni_stat_item *child)
+{
+#ifdef NNG_ENABLE_STATS
+	nni_mtx_lock(&stats_lock);
+	nni_stat_add(&stats_root, child);
+	nni_mtx_unlock(&stats_lock);
+#else
+	NNI_ARG_UNUSED(child);
+#endif
+}
+
+void
+nni_stat_unregister(nni_stat_item *child)
 {
 #ifdef NNG_ENABLE_STATS
 	nni_stat_item *parent;
@@ -141,7 +150,6 @@ stat_atomic_update(nni_stat_item *stat, void *notused)
 void
 nni_stat_init_atomic(nni_stat_item *stat, const char *name, const char *desc)
 {
-
 	nni_stat_init(stat, name, desc);
 	stat->si_number  = 0;
 	stat->si_private = NULL;
@@ -152,13 +160,13 @@ nni_stat_init_atomic(nni_stat_item *stat, const char *name, const char *desc)
 void
 nni_stat_inc_atomic(nni_stat_item *stat, uint64_t inc)
 {
-	nni_atomic_inc64(&stat->si_atomic, inc);
+	nni_atomic_add64(&stat->si_atomic, inc);
 }
 
 void
 nni_stat_dec_atomic(nni_stat_item *stat, uint64_t inc)
 {
-	nni_atomic_dec64(&stat->si_atomic, inc);
+	nni_atomic_sub64(&stat->si_atomic, inc);
 }
 #endif
 
@@ -170,17 +178,6 @@ nni_stat_set_value(nni_stat_item *stat, uint64_t v)
 #else
 	NNI_ARG_UNUSED(stat);
 	NNI_ARG_UNUSED(v);
-#endif
-}
-
-void
-nni_stat_set_string(nni_stat_item *stat, const char *str)
-{
-#ifdef NNG_ENABLE_STATS
-	stat->si_string = str;
-#else
-	NNI_ARG_UNUSED(stat);
-	NNI_ARG_UNUSED(str);
 #endif
 }
 
@@ -233,6 +230,8 @@ nng_stats_free(nni_stat *st)
 		nng_stats_free(child);
 	}
 	nni_strfree(st->s_name);
+	nni_strfree(st->s_desc);
+	nni_strfree(st->s_string);
 	NNI_FREE_STRUCT(st);
 #else
 	NNI_ARG_UNUSED(st);
@@ -249,15 +248,21 @@ stat_make_tree(nni_stat_item *item, nni_stat **sp)
 	if ((stat = NNI_ALLOC_STRUCT(stat)) == NULL) {
 		return (NNG_ENOMEM);
 	}
-	if ((stat->s_name = nni_strdup(item->si_name)) == NULL) {
-		NNI_FREE_STRUCT(stat);
+	NNI_LIST_INIT(&stat->s_children, nni_stat, s_node);
+
+	if (((stat->s_name = nni_strdup(item->si_name)) == NULL) ||
+	    ((stat->s_desc = nni_strdup(item->si_desc)) == NULL)) {
+		nng_stats_free(stat);
 		return (NNG_ENOMEM);
 	}
-	NNI_LIST_INIT(&stat->s_children, nni_stat, s_node);
+	if ((item->si_type == NNG_STAT_STRING) &&
+	    ((stat->s_string = nni_strdup(item->si_string)) == NULL)) {
+		nng_stats_free(stat);
+		return (NNG_ENOMEM);
+	}
 	stat->s_item   = item;
 	stat->s_type   = item->si_type;
 	stat->s_unit   = item->si_unit;
-	stat->s_desc   = item->si_desc;
 	stat->s_parent = NULL;
 
 	NNI_LIST_FOREACH (&item->si_children, child) {
@@ -292,9 +297,8 @@ stat_update(nni_stat *stat)
 	if (item->si_update != NULL) {
 		item->si_update(item, item->si_private);
 	}
-	stat->s_value  = item->si_number;
-	stat->s_string = item->si_string;
-	stat->s_time   = nni_clock();
+	stat->s_value = item->si_number;
+	stat->s_time  = nni_clock();
 }
 
 static void
@@ -336,6 +340,10 @@ int
 nng_stats_get(nng_stat **statp)
 {
 #ifdef NNG_ENABLE_STATS
+	int rv;
+	if ((rv = nni_init()) != 0) {
+		return (rv);
+	}
 	return (nni_stat_snapshot(statp, &stats_root));
 #else
 	NNI_ARG_UNUSED(statp);
@@ -406,6 +414,49 @@ nng_stat_desc(nng_stat *stat)
 	return (stat->s_desc);
 }
 
+nng_stat *
+nng_stat_find(nng_stat *stat, const char *name)
+{
+	nng_stat *child;
+	if (stat == NULL) {
+		return (NULL);
+	}
+	if (strcmp(name, stat->s_name) == 0) {
+		return (stat);
+	}
+	NNI_LIST_FOREACH(&stat->s_children, child) {
+		nng_stat *result;
+		if ((result = nng_stat_find(child, name)) != NULL) {
+			return (result);
+		}
+	}
+	return (NULL);
+}
+
+nng_stat *
+nng_stat_find_socket(nng_stat *stat, nng_socket s)
+{
+	char name[16];
+	(void) snprintf(name, sizeof (name), "socket%d", nng_socket_id(s));
+	return (nng_stat_find(stat, name));
+}
+
+nng_stat *
+nng_stat_find_dialer(nng_stat *stat, nng_dialer d)
+{
+	char name[16];
+	(void) snprintf(name, sizeof (name), "dialer%d", nng_dialer_id(d));
+	return (nng_stat_find(stat, name));
+}
+
+nng_stat *
+nng_stat_find_listener(nng_stat *stat, nng_listener l)
+{
+	char name[16];
+	(void) snprintf(name, sizeof (name), "listener%d", nng_listener_id(l));
+	return (nng_stat_find(stat, name));
+}
+
 int
 nni_stat_sys_init(void)
 {
@@ -413,9 +464,8 @@ nni_stat_sys_init(void)
 	nni_mtx_init(&stats_lock);
 	NNI_LIST_INIT(&stats_root.si_children, nni_stat_item, si_node);
 	stats_root.si_name = "";
-	stats_root.si_desc = "all statistsics";
+	stats_root.si_desc = "all statistics";
 #endif
-
 	return (0);
 }
 
@@ -449,7 +499,6 @@ nng_stats_dump(nng_stat *stat)
 {
 #ifdef NNG_ENABLE_STATS
 	static char        buf[128]; // to minimize recursion, not thread safe
-	static char        line[128];
 	int                len;
 	char *             scope;
 	char *             indent = "        ";
@@ -468,53 +517,49 @@ nng_stats_dump(nng_stat *stat)
 			}
 		}
 		if (len > 0) {
-			snprintf(line, sizeof(line), "\n%s:", buf);
+			nni_plat_printf("\n%s:\n", buf);
 		}
 		break;
 	case NNG_STAT_STRING:
-		snprintf(line, sizeof(line), "%s%-32s\"%s\"", indent,
-		    nng_stat_name(stat), nng_stat_string(stat));
+		nni_plat_printf("%s%-32s\"%s\"\n", indent, nng_stat_name(stat),
+		    nng_stat_string(stat));
 		break;
 	case NNG_STAT_BOOLEAN:
 		val = nng_stat_value(stat);
-		snprintf(line, sizeof(line), "%s%-32s%s", indent,
-		    nng_stat_name(stat), val != 0 ? "true" : "false");
+		nni_plat_printf("%s%-32s%s\n", indent, nng_stat_name(stat),
+		    val != 0 ? "true" : "false");
 		break;
 	case NNG_STAT_LEVEL:
 	case NNG_STAT_COUNTER:
 		val = nng_stat_value(stat);
+		nni_plat_printf(
+		    "%s%-32s%llu", indent, nng_stat_name(stat), val);
 		switch (nng_stat_unit(stat)) {
 		case NNG_UNIT_BYTES:
-			snprintf(line, sizeof(line), "%s%-32s%llu bytes",
-			    indent, nng_stat_name(stat), val);
+			nni_plat_printf(" bytes\n");
 			break;
 		case NNG_UNIT_MESSAGES:
-			snprintf(line, sizeof(line), "%s%-32s%llu msgs",
-			    indent, nng_stat_name(stat), val);
+			nni_plat_printf(" msgs\n");
 			break;
 		case NNG_UNIT_MILLIS:
-			snprintf(line, sizeof(line), "%s%-32s%llu msec",
-			    indent, nng_stat_name(stat), val);
+			nni_plat_printf(" msec\n");
 			break;
 		case NNG_UNIT_NONE:
 		case NNG_UNIT_EVENTS:
 		default:
-			snprintf(line, sizeof(line), "%s%-32s%llu", indent,
-			    nng_stat_name(stat), val);
+			nni_plat_printf("\n");
 			break;
 		}
 		break;
 	case NNG_STAT_ID:
 		val = nng_stat_value(stat);
-		snprintf(line, (sizeof line), "%s%-32s%llu", indent,
-		    nng_stat_name(stat), val);
+		nni_plat_printf(
+		    "%s%-32s%llu\n", indent, nng_stat_name(stat), val);
 		break;
 	default:
-		snprintf(line, (sizeof line), "%s%-32s<?>", indent,
-		    nng_stat_name(stat));
+		nni_plat_printf("%s%-32s<?>\n", indent, nng_stat_name(stat));
 		break;
 	}
-	nni_plat_println(line);
 
 	NNI_LIST_FOREACH (&stat->s_children, child) {
 		nng_stats_dump(child);

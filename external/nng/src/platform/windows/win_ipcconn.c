@@ -1,6 +1,7 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2019 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
+// Copyright 2019 Devolutions <info@devolutions.net>
 //
 // This software is supplied under the terms of the MIT License, a
 // copy of which should be located in the distribution where this
@@ -10,14 +11,34 @@
 
 #include "core/nng_impl.h"
 
-#ifdef NNG_PLATFORM_WINDOWS
-
 #include "win_ipc.h"
 
 #include <stdio.h>
 
+#define CONN(c) ((ipc_conn *) (c))
+
+typedef struct ipc_conn {
+	nng_stream    stream;
+	HANDLE        f;
+	nni_win_io    recv_io;
+	nni_win_io    send_io;
+	nni_win_io    conn_io;
+	nni_list      recv_aios;
+	nni_list      send_aios;
+	nni_aio *     conn_aio;
+	nng_sockaddr  sa;
+	bool          dialer;
+	int           recv_rv;
+	int           send_rv;
+	int           conn_rv;
+	bool          closed;
+	nni_mtx       mtx;
+	nni_cv        cv;
+	nni_reap_item reap;
+} ipc_conn;
+
 static void
-ipc_recv_start(nni_ipc_conn *c)
+ipc_recv_start(ipc_conn *c)
 {
 	nni_aio *aio;
 	unsigned idx;
@@ -74,8 +95,8 @@ again:
 static void
 ipc_recv_cb(nni_win_io *io, int rv, size_t num)
 {
-	nni_aio *     aio;
-	nni_ipc_conn *c = io->ptr;
+	nni_aio * aio;
+	ipc_conn *c = io->ptr;
 	nni_mtx_lock(&c->mtx);
 	if ((aio = nni_list_first(&c->recv_aios)) == NULL) {
 		// Should indicate that it was closed.
@@ -95,14 +116,14 @@ ipc_recv_cb(nni_win_io *io, int rv, size_t num)
 
 	if ((rv == 0) && (num == 0)) {
 		// A zero byte receive is a remote close from the peer.
-		rv = NNG_ECLOSED;
+		rv = NNG_ECONNSHUT;
 	}
 	nni_aio_finish_synch(aio, rv, num);
 }
 static void
 ipc_recv_cancel(nni_aio *aio, void *arg, int rv)
 {
-	nni_ipc_conn *c = arg;
+	ipc_conn *c = arg;
 	nni_mtx_lock(&c->mtx);
 	if (aio == nni_list_first(&c->recv_aios)) {
 		c->recv_rv = rv;
@@ -115,10 +136,11 @@ ipc_recv_cancel(nni_aio *aio, void *arg, int rv)
 	nni_mtx_unlock(&c->mtx);
 }
 
-void
-nni_ipc_conn_recv(nni_ipc_conn *c, nni_aio *aio)
+static void
+ipc_recv(void *arg, nni_aio *aio)
 {
-	int rv;
+	ipc_conn *c = arg;
+	int       rv;
 
 	if (nni_aio_begin(aio) != 0) {
 		return;
@@ -142,7 +164,7 @@ nni_ipc_conn_recv(nni_ipc_conn *c, nni_aio *aio)
 }
 
 static void
-ipc_send_start(nni_ipc_conn *c)
+ipc_send_start(ipc_conn *c)
 {
 	nni_aio *aio;
 	unsigned idx;
@@ -199,8 +221,8 @@ again:
 static void
 ipc_send_cb(nni_win_io *io, int rv, size_t num)
 {
-	nni_aio *     aio;
-	nni_ipc_conn *c = io->ptr;
+	nni_aio * aio;
+	ipc_conn *c = io->ptr;
 	nni_mtx_lock(&c->mtx);
 	if ((aio = nni_list_first(&c->send_aios)) == NULL) {
 		// Should indicate that it was closed.
@@ -218,17 +240,13 @@ ipc_send_cb(nni_win_io *io, int rv, size_t num)
 	}
 	nni_mtx_unlock(&c->mtx);
 
-	if ((rv == 0) && (num == 0)) {
-		// A zero byte receive is a remote close from the peer.
-		rv = NNG_ECLOSED;
-	}
 	nni_aio_finish_synch(aio, rv, num);
 }
 
 static void
 ipc_send_cancel(nni_aio *aio, void *arg, int rv)
 {
-	nni_ipc_conn *c = arg;
+	ipc_conn *c = arg;
 	nni_mtx_lock(&c->mtx);
 	if (aio == nni_list_first(&c->send_aios)) {
 		c->send_rv = rv;
@@ -241,10 +259,11 @@ ipc_send_cancel(nni_aio *aio, void *arg, int rv)
 	nni_mtx_unlock(&c->mtx);
 }
 
-void
-nni_ipc_conn_send(nni_ipc_conn *c, nni_aio *aio)
+static void
+ipc_send(void *arg, nni_aio *aio)
 {
-	int rv;
+	ipc_conn *c = arg;
+	int       rv;
 
 	if (nni_aio_begin(aio) != 0) {
 		return;
@@ -267,35 +286,10 @@ nni_ipc_conn_send(nni_ipc_conn *c, nni_aio *aio)
 	nni_mtx_unlock(&c->mtx);
 }
 
-int
-nni_win_ipc_conn_init(nni_ipc_conn **connp, HANDLE p)
+static void
+ipc_close(void *arg)
 {
-	nni_ipc_conn *c;
-	int           rv;
-
-	if ((c = NNI_ALLOC_STRUCT(c)) == NULL) {
-		return (NNG_ENOMEM);
-	}
-	c->f = INVALID_HANDLE_VALUE;
-	nni_mtx_init(&c->mtx);
-	nni_cv_init(&c->cv, &c->mtx);
-	nni_aio_list_init(&c->recv_aios);
-	nni_aio_list_init(&c->send_aios);
-
-	if (((rv = nni_win_io_init(&c->recv_io, ipc_recv_cb, c)) != 0) ||
-	    ((rv = nni_win_io_init(&c->send_io, ipc_send_cb, c)) != 0)) {
-		nni_ipc_conn_fini(c);
-		return (rv);
-	}
-
-	c->f   = p;
-	*connp = c;
-	return (0);
-}
-
-void
-nni_ipc_conn_close(nni_ipc_conn *c)
-{
+	ipc_conn *c = arg;
 	nni_mtx_lock(&c->mtx);
 	if (!c->closed) {
 		c->closed = true;
@@ -315,7 +309,7 @@ nni_ipc_conn_close(nni_ipc_conn *c)
 }
 
 static void
-ipc_conn_reap(nni_ipc_conn *c)
+ipc_conn_reap(ipc_conn *c)
 {
 	nni_mtx_lock(&c->mtx);
 	while ((!nni_list_empty(&c->recv_aios)) ||
@@ -336,53 +330,101 @@ ipc_conn_reap(nni_ipc_conn *c)
 	NNI_FREE_STRUCT(c);
 }
 
-void
-nni_ipc_conn_fini(nni_ipc_conn *c)
+static void
+ipc_free(void *arg)
 {
-	nni_ipc_conn_close(c);
+	ipc_conn *c = arg;
+	ipc_close(c);
 
-	nni_reap(&c->reap, (nni_cb) ipc_conn_reap, c);
+	nni_reap(&c->reap, (nni_cb) ipc_conn_reap, CONN(c));
 }
 
-int
-nni_ipc_conn_get_peer_uid(nni_ipc_conn *c, uint64_t *id)
+static int
+ipc_conn_get_addr(void *c, void *buf, size_t *szp, nni_opt_type t)
 {
-	NNI_ARG_UNUSED(c);
-	NNI_ARG_UNUSED(id);
-	return (NNG_ENOTSUP);
+	return (nni_copyout_sockaddr(&(CONN(c))->sa, buf, szp, t));
 }
 
-int
-nni_ipc_conn_get_peer_gid(nni_ipc_conn *c, uint64_t *id)
-{
-	NNI_ARG_UNUSED(c);
-	NNI_ARG_UNUSED(id);
-	return (NNG_ENOTSUP);
-}
-
-int
-nni_ipc_conn_get_peer_zoneid(nni_ipc_conn *c, uint64_t *id)
-{
-	NNI_ARG_UNUSED(c);
-	NNI_ARG_UNUSED(id);
-	return (NNG_ENOTSUP);
-}
-
-int
-nni_ipc_conn_get_peer_pid(nni_ipc_conn *c, uint64_t *pid)
+static int
+ipc_conn_get_peer_pid(void *c, void *buf, size_t *szp, nni_opt_type t)
 {
 	ULONG id;
-	if (c->dialer) {
-		if (!GetNamedPipeServerProcessId(c->f, &id)) {
+
+	if (CONN(c)->dialer) {
+		if (!GetNamedPipeServerProcessId(CONN(c)->f, &id)) {
 			return (nni_win_error(GetLastError()));
 		}
 	} else {
-		if (!GetNamedPipeClientProcessId(c->f, &id)) {
+		if (!GetNamedPipeClientProcessId(CONN(c)->f, &id)) {
 			return (nni_win_error(GetLastError()));
 		}
 	}
-	*pid = id;
-	return (0);
+	return (nni_copyout_u64(id, buf, szp, t));
 }
 
-#endif // NNG_PLATFORM_WINDOWS
+static const nni_option ipc_conn_options[] = {
+	{
+	    .o_name = NNG_OPT_LOCADDR,
+	    .o_get  = ipc_conn_get_addr,
+	},
+	{
+	    .o_name = NNG_OPT_REMADDR,
+	    .o_get  = ipc_conn_get_addr,
+	},
+	{
+	    .o_name = NNG_OPT_IPC_PEER_PID,
+	    .o_get  = ipc_conn_get_peer_pid,
+	},
+	{
+	    .o_name = NULL, // terminator
+	},
+};
+
+static int
+ipc_setx(void *arg, const char *nm, const void *val, size_t sz, nni_opt_type t)
+{
+	ipc_conn *c = arg;
+	return (nni_setopt(ipc_conn_options, nm, c, val, sz, t));
+}
+
+static int
+ipc_getx(void *arg, const char *nm, void *val, size_t *szp, nni_opt_type t)
+{
+	ipc_conn *c = arg;
+	return (nni_getopt(ipc_conn_options, nm, c, val, szp, t));
+}
+
+int
+nni_win_ipc_init(
+    nng_stream **connp, HANDLE p, const nng_sockaddr *sa, bool dialer)
+{
+	ipc_conn *c;
+	int       rv;
+
+	if ((c = NNI_ALLOC_STRUCT(c)) == NULL) {
+		return (NNG_ENOMEM);
+	}
+	c->f = INVALID_HANDLE_VALUE;
+	nni_mtx_init(&c->mtx);
+	nni_cv_init(&c->cv, &c->mtx);
+	nni_aio_list_init(&c->recv_aios);
+	nni_aio_list_init(&c->send_aios);
+	c->dialer         = dialer;
+	c->sa             = *sa;
+	c->stream.s_free  = ipc_free;
+	c->stream.s_close = ipc_close;
+	c->stream.s_send  = ipc_send;
+	c->stream.s_recv  = ipc_recv;
+	c->stream.s_getx  = ipc_getx;
+	c->stream.s_setx  = ipc_setx;
+
+	if (((rv = nni_win_io_init(&c->recv_io, ipc_recv_cb, c)) != 0) ||
+	    ((rv = nni_win_io_init(&c->send_io, ipc_send_cb, c)) != 0)) {
+		ipc_free(c);
+		return (rv);
+	}
+
+	c->f   = p;
+	*connp = (void *) c;
+	return (0);
+}

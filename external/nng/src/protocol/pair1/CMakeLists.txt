@@ -1,5 +1,5 @@
 #
-# Copyright 2018 Staysail Systems, Inc. <info@staystail.tech>
+# Copyright 2019 Staysail Systems, Inc. <info@staystail.tech>
 # Copyright 2018 Capitar IT Group BV <info@capitar.com>
 #
 # This software is supplied under the terms of the MIT License, a
@@ -12,12 +12,9 @@
 option (NNG_PROTO_PAIR1 "Enable PAIRv1 protocol." ON)
 mark_as_advanced(NNG_PROTO_PAIR1)
 
-if (NNG_PROTO_PAIR1)
-    set(_DEFS -DNNG_HAVE_PAIR1)
-    set(_SRCS protocol/pair1/pair.c protocol/pair1/pair.h)
-    set(_HDRS protocol/pair1/pair.h)
-
-    set(NNG_DEFS ${NNG_DEFS} ${_DEFS} PARENT_SCOPE)
-    set(NNG_SRCS ${NNG_SRCS} ${_SRCS} PARENT_SCOPE)
-    set(NNG_HDRS ${NNG_HDRS} ${_HDRS} PARENT_SCOPE)
-endif()
+# XXX: break pair1_poly into an ifdef.
+nng_sources_if(NNG_PROTO_PAIR1 pair.c pair1_poly.c)
+nng_headers_if(NNG_PROTO_PAIR1 nng/protocol/pair1/pair.h)
+nng_defines_if(NNG_PROTO_PAIR1 NNG_HAVE_PAIR1)
+nng_test(pair1_test)
+nng_test(pair1_poly_test)

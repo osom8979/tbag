@@ -1,5 +1,5 @@
 //
-// Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
+// Copyright 2020 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -11,6 +11,8 @@
 #ifndef CORE_PROTOCOL_H
 #define CORE_PROTOCOL_H
 
+#include "core/options.h"
+
 // Protocol implementation details.  Protocols must implement the
 // interfaces in this file.  Note that implementing new protocols is
 // not necessarily intended to be a trivial task.  The protocol developer
@@ -21,18 +23,15 @@
 // As a consequence, most of the concurrency in nng exists in the protocol
 // implementations.
 
-struct nni_proto_option {
-	const char *o_name;
-	int         o_type;
-	int (*o_get)(void *, void *, size_t *, nni_opt_type);
-	int (*o_set)(void *, const void *, size_t, nni_opt_type);
-};
-
 // nni_proto_pipe contains protocol-specific per-pipe operations.
 struct nni_proto_pipe_ops {
-	// pipe_init creates the protocol-specific per pipe data structure.
+	// pipe_size is the size of a protocol pipe object.  The common
+	// code allocates this memory for the protocol private state.
+	size_t pipe_size;
+
+	// pipe_init2 initializes the protocol-specific pipe data structure.
 	// The last argument is the per-socket protocol private data.
-	int (*pipe_init)(void **, nni_pipe *, void *);
+	int (*pipe_init)(void *, nni_pipe *, void *);
 
 	// pipe_fini releases any pipe data structures.  This is called after
 	// the pipe has been removed from the protocol, and the generic
@@ -58,9 +57,13 @@ struct nni_proto_pipe_ops {
 };
 
 struct nni_proto_ctx_ops {
-	// ctx_init creates a new context. The second argument is the
+	// ctx_size is the size of a protocol context object.  The common
+	// code allocates this memory for the protocol private state.
+	size_t ctx_size;
+
+	// ctx_init initializes a new context. The second argument is the
 	// protocol specific socket structure.
-	int (*ctx_init)(void **, void *);
+	int (*ctx_init)(void *, void *);
 
 	// ctx_fini destroys a context.
 	void (*ctx_fini)(void *);
@@ -80,14 +83,17 @@ struct nni_proto_ctx_ops {
 	void (*ctx_drain)(void *, nni_aio *);
 
 	// ctx_options array.
-	nni_proto_option *ctx_options;
+	nni_option *ctx_options;
 };
 
 struct nni_proto_sock_ops {
-	// sock_init creates the protocol instance, which will be stored on
-	// the socket. This is run without the sock lock held, and allocates
-	// storage or other resources for the socket.
-	int (*sock_init)(void **, nni_sock *);
+	// ctx_size is the size of a protocol socket object.  The common
+	// code allocates this memory for the protocol private state.
+	size_t sock_size;
+
+	// sock_init2 initializes the protocol instance, which will be stored
+	// on the socket. This is run without the sock lock held.
+	int (*sock_init)(void *, nni_sock *);
 
 	// sock_fini destroys the protocol instance.  This is run without the
 	// socket lock held, and is intended to release resources.  It may
@@ -110,20 +116,8 @@ struct nni_proto_sock_ops {
 	// Receive a message.
 	void (*sock_recv)(void *, nni_aio *);
 
-	// Message filter.  This may be NULL, but if it isn't, then
-	// messages coming into the system are routed here just before being
-	// delivered to the application.  To drop the message, the protocol
-	// should return NULL, otherwise the message (possibly modified).
-	nni_msg *(*sock_filter)(void *, nni_msg *);
-
-	// Socket draining is intended to permit protocols to "drain"
-	// before exiting.  For protocols where draining makes no
-	// sense, this may be NULL.  (Example: REQ and SURVEYOR should
-	// not drain, because they cannot receive a reply!)
-	void (*sock_drain)(void *, nni_aio *);
-
 	// Options. Must not be NULL. Final entry should have NULL name.
-	nni_proto_option *sock_options;
+	nni_option *sock_options;
 };
 
 typedef struct nni_proto_id {
@@ -158,8 +152,9 @@ struct nni_proto {
 // during the life of the project.  If we add a new version, please keep
 // the old version around -- it may be possible to automatically convert
 // older versions in the future.
-#define NNI_PROTOCOL_V0 0x50520000 // "pr\0\0"
-#define NNI_PROTOCOL_VERSION NNI_PROTOCOL_V0
+#define NNI_PROTOCOL_V0 0x50520000u // "pr\0\0"
+#define NNI_PROTOCOL_V1 0x50520001u // "pr\0\0"
+#define NNI_PROTOCOL_VERSION NNI_PROTOCOL_V1
 
 // These flags determine which operations make sense.  We use them so that
 // we can reject attempts to create notification fds for operations that make
@@ -167,11 +162,11 @@ struct nni_proto {
 // that at the socket layer (NNG_PROTO_FLAG_RAW).  Finally, we provide the
 // NNI_PROTO_FLAG_NOMSGQ flag for protocols that do not use the upper write
 // or upper read queues.
-#define NNI_PROTO_FLAG_RCV 1    // Protocol can receive
-#define NNI_PROTO_FLAG_SND 2    // Protocol can send
-#define NNI_PROTO_FLAG_SNDRCV 3 // Protocol can both send & recv
-#define NNI_PROTO_FLAG_RAW 4    // Protocol is raw
-#define NNI_PROTO_FLAG_NOMSGQ 8 // Protocol bypasses the upper queues
+#define NNI_PROTO_FLAG_RCV 1u    // Protocol can receive
+#define NNI_PROTO_FLAG_SND 2u    // Protocol can send
+#define NNI_PROTO_FLAG_SNDRCV 3u // Protocol can both send & recv
+#define NNI_PROTO_FLAG_RAW 4u    // Protocol is raw
+#define NNI_PROTO_FLAG_NOMSGQ 8u // Protocol bypasses the upper queues
 
 // nni_proto_open is called by the protocol to create a socket instance
 // with its ops vector.  The intent is that applications will only see

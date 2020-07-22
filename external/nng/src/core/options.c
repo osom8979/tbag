@@ -1,6 +1,7 @@
 //
 // Copyright 2018 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2018 Capitar IT Group BV <info@capitar.com>
+// Copyright 2018 Devolutions <info@devolutions.net>
 //
 // This software is supplied under the terms of the MIT License, a
 // copy of which should be located in the distribution where this
@@ -14,7 +15,7 @@
 #include <string.h>
 
 int
-nni_copyin_ms(nni_duration *dp, const void *v, size_t sz, nni_opt_type t)
+nni_copyin_ms(nni_duration *dp, const void *v, size_t sz, nni_type t)
 {
 	nni_duration dur;
 
@@ -42,7 +43,7 @@ nni_copyin_ms(nni_duration *dp, const void *v, size_t sz, nni_opt_type t)
 }
 
 int
-nni_copyin_bool(bool *bp, const void *v, size_t sz, nni_opt_type t)
+nni_copyin_bool(bool *bp, const void *v, size_t sz, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_BOOL:
@@ -67,7 +68,7 @@ nni_copyin_bool(bool *bp, const void *v, size_t sz, nni_opt_type t)
 
 int
 nni_copyin_int(
-    int *ip, const void *v, size_t sz, int minv, int maxv, nni_opt_type t)
+    int *ip, const void *v, size_t sz, int minv, int maxv, nni_type t)
 {
 	int i;
 
@@ -97,8 +98,8 @@ nni_copyin_int(
 }
 
 int
-nni_copyin_size(size_t *sp, const void *v, size_t sz, size_t minv, size_t maxv,
-    nni_opt_type t)
+nni_copyin_size(
+    size_t *sp, const void *v, size_t sz, size_t minv, size_t maxv, nni_type t)
 {
 	size_t val;
 
@@ -127,7 +128,7 @@ nni_copyin_size(size_t *sp, const void *v, size_t sz, size_t minv, size_t maxv,
 }
 
 int
-nni_copyin_ptr(void **pp, const void *v, size_t sz, nni_opt_type t)
+nni_copyin_ptr(void **pp, const void *v, size_t sz, nni_type t)
 {
 	void *p;
 
@@ -151,7 +152,7 @@ nni_copyin_ptr(void **pp, const void *v, size_t sz, nni_opt_type t)
 }
 
 int
-nni_copyin_str(char *s, const void *v, size_t sz, size_t maxsz, nni_opt_type t)
+nni_copyin_str(char *s, const void *v, size_t sz, size_t maxsz, nni_type t)
 {
 	size_t z;
 
@@ -175,7 +176,7 @@ nni_copyin_str(char *s, const void *v, size_t sz, size_t maxsz, nni_opt_type t)
 }
 
 int
-nni_copyin_u64(uint64_t *up, const void *v, size_t sz, nni_opt_type t)
+nni_copyin_u64(uint64_t *up, const void *v, size_t sz, nni_type t)
 {
 	uint64_t u;
 
@@ -199,7 +200,7 @@ nni_copyin_u64(uint64_t *up, const void *v, size_t sz, nni_opt_type t)
 }
 
 int
-nni_copyin_sockaddr(nng_sockaddr *ap, const void *v, size_t sz, nni_opt_type t)
+nni_copyin_sockaddr(nng_sockaddr *ap, const void *v, size_t sz, nni_type t)
 {
 	nng_sockaddr a;
 
@@ -240,7 +241,7 @@ nni_copyout(const void *src, size_t srcsz, void *dst, size_t *dstszp)
 }
 
 int
-nni_copyout_bool(bool b, void *dst, size_t *szp, nni_opt_type t)
+nni_copyout_bool(bool b, void *dst, size_t *szp, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_BOOL:
@@ -255,7 +256,7 @@ nni_copyout_bool(bool b, void *dst, size_t *szp, nni_opt_type t)
 }
 
 int
-nni_copyout_int(int i, void *dst, size_t *szp, nni_opt_type t)
+nni_copyout_int(int i, void *dst, size_t *szp, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_INT32:
@@ -270,7 +271,7 @@ nni_copyout_int(int i, void *dst, size_t *szp, nni_opt_type t)
 }
 
 int
-nni_copyout_ms(nng_duration d, void *dst, size_t *szp, nni_opt_type t)
+nni_copyout_ms(nng_duration d, void *dst, size_t *szp, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_DURATION:
@@ -285,7 +286,7 @@ nni_copyout_ms(nng_duration d, void *dst, size_t *szp, nni_opt_type t)
 }
 
 int
-nni_copyout_ptr(void *p, void *dst, size_t *szp, nni_opt_type t)
+nni_copyout_ptr(void *p, void *dst, size_t *szp, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_POINTER:
@@ -300,7 +301,7 @@ nni_copyout_ptr(void *p, void *dst, size_t *szp, nni_opt_type t)
 }
 
 int
-nni_copyout_size(size_t s, void *dst, size_t *szp, nni_opt_type t)
+nni_copyout_size(size_t s, void *dst, size_t *szp, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_SIZE:
@@ -316,7 +317,7 @@ nni_copyout_size(size_t s, void *dst, size_t *szp, nni_opt_type t)
 
 int
 nni_copyout_sockaddr(
-    const nng_sockaddr *sap, void *dst, size_t *szp, nni_opt_type t)
+    const nng_sockaddr *sap, void *dst, size_t *szp, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_SOCKADDR:
@@ -331,7 +332,7 @@ nni_copyout_sockaddr(
 }
 
 int
-nni_copyout_u64(uint64_t u, void *dst, size_t *szp, nni_opt_type t)
+nni_copyout_u64(uint64_t u, void *dst, size_t *szp, nni_type t)
 {
 	switch (t) {
 	case NNI_TYPE_UINT64:
@@ -346,7 +347,7 @@ nni_copyout_u64(uint64_t u, void *dst, size_t *szp, nni_opt_type t)
 }
 
 int
-nni_copyout_str(const char *str, void *dst, size_t *szp, nni_opt_type t)
+nni_copyout_str(const char *str, void *dst, size_t *szp, nni_type t)
 {
 	char *s;
 
@@ -365,4 +366,52 @@ nni_copyout_str(const char *str, void *dst, size_t *szp, nni_opt_type t)
 	default:
 		return (NNG_EBADTYPE);
 	}
+}
+
+int
+nni_getopt(const nni_option *opts, const char *nm, void *arg, void *buf,
+    size_t *szp, nni_type otype)
+{
+	while (opts->o_name != NULL) {
+		if (strcmp(opts->o_name, nm) == 0) {
+			if (opts->o_get == NULL) {
+				return (NNG_EWRITEONLY);
+			}
+			return (opts->o_get(arg, buf, szp, otype));
+		}
+		opts++;
+	}
+	return (NNG_ENOTSUP);
+}
+
+int
+nni_setopt(const nni_option *opts, const char *nm, void *arg, const void *buf,
+    size_t sz, nni_type otype)
+{
+	while (opts->o_name != NULL) {
+		if (strcmp(opts->o_name, nm) == 0) {
+			if (opts->o_set == NULL) {
+				return (NNG_EREADONLY);
+			}
+			return (opts->o_set(arg, buf, sz, otype));
+		}
+		opts++;
+	}
+	return (NNG_ENOTSUP);
+}
+
+int
+nni_chkopt(const nni_chkoption *opts, const char *nm, const void *buf,
+    size_t sz, nni_type t)
+{
+	while (opts->o_name != NULL) {
+		if (strcmp(opts->o_name, nm) == 0) {
+			if (opts->o_check == NULL) {
+				return (NNG_EREADONLY);
+			}
+			return (opts->o_check(buf, sz, t));
+		}
+		opts++;
+	}
+	return (NNG_ENOTSUP);
 }

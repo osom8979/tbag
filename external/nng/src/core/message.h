@@ -1,5 +1,5 @@
 //
-// Copyright 2017 Garrett D'Amore <garrett@damore.org>
+// Copyright 2020 Staysail Systems, Inc. <info@staysail.tech>
 // Copyright 2017 Capitar IT Group BV <info@capitar.com>
 //
 // This software is supplied under the terms of the MIT License, a
@@ -32,34 +32,25 @@ extern void     nni_msg_clear(nni_msg *);
 extern void     nni_msg_header_clear(nni_msg *);
 extern int      nni_msg_header_trim(nni_msg *, size_t);
 extern int      nni_msg_header_chop(nni_msg *, size_t);
-extern int      nni_msg_setopt(nni_msg *, int, const void *, size_t);
-extern int      nni_msg_getopt(nni_msg *, int, void *, size_t *);
 extern void     nni_msg_dump(const char *, const nni_msg *);
-extern int      nni_msg_append_u16(nni_msg *, uint16_t);
-extern int      nni_msg_append_u32(nni_msg *, uint32_t);
-extern int      nni_msg_append_u64(nni_msg *, uint64_t);
-extern int      nni_msg_insert_u16(nni_msg *, uint16_t);
-extern int      nni_msg_insert_u32(nni_msg *, uint32_t);
-extern int      nni_msg_insert_u64(nni_msg *, uint64_t);
-extern int      nni_msg_header_append_u16(nni_msg *, uint16_t);
-extern int      nni_msg_header_append_u32(nni_msg *, uint32_t);
-extern int      nni_msg_header_append_u64(nni_msg *, uint64_t);
-extern int      nni_msg_header_insert_u16(nni_msg *, uint16_t);
-extern int      nni_msg_header_insert_u32(nni_msg *, uint32_t);
-extern int      nni_msg_header_insert_u64(nni_msg *, uint64_t);
-extern uint16_t nni_msg_trim_u16(nni_msg *);
-extern uint32_t nni_msg_trim_u32(nni_msg *);
-extern uint64_t nni_msg_trim_u64(nni_msg *);
-extern uint16_t nni_msg_chop_u16(nni_msg *);
-extern uint32_t nni_msg_chop_u32(nni_msg *);
-extern uint64_t nni_msg_chop_u64(nni_msg *);
-extern uint16_t nni_msg_header_trim_u16(nni_msg *);
+extern void     nni_msg_header_append_u32(nni_msg *, uint32_t);
 extern uint32_t nni_msg_header_trim_u32(nni_msg *);
-extern uint64_t nni_msg_header_trim_u64(nni_msg *);
-extern uint16_t nni_msg_header_chop_u16(nni_msg *);
-extern uint32_t nni_msg_header_chop_u32(nni_msg *);
-extern uint64_t nni_msg_header_chop_u64(nni_msg *);
+extern uint32_t nni_msg_trim_u32(nni_msg *);
 extern void     nni_msg_set_pipe(nni_msg *, uint32_t);
 extern uint32_t nni_msg_get_pipe(const nni_msg *);
+
+// Reference counting messages. This allows the same message to be
+// cheaply reused instead of copied over and over again.  Callers of
+// this functionality MUST be certain to use nni_msg_unique() before
+// passing a message out of their control (e.g. to user programs.)
+// Failure to do so will likely result in corruption.
+extern void     nni_msg_clone(nni_msg *);
+extern nni_msg *nni_msg_unique(nni_msg *);
+// nni_msg_pull_up ensures that the message is unique, and that any
+// header present is "pulled up" into the message body.  If the function
+// cannot do this for any reason (out of space in the body), then NULL
+// is returned.  It is the responsibility of the caller to free the
+// original message in that case (same semantics as realloc).
+extern nni_msg *nni_msg_pull_up(nni_msg *);
 
 #endif // CORE_SOCKET_H

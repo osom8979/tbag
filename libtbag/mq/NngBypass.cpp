@@ -142,7 +142,7 @@ int nng_getopt_ptr(nng_socket v0, char const * v1, void ** v2)
     return ::nng_getopt_ptr(v0, v1, v2);
 }
 
-int nng_pipe_notify(nng_socket v0, int v1, nng_pipe_cb v2, void * v3)
+int nng_pipe_notify(nng_socket v0, nng_pipe_ev v1, nng_pipe_cb v2, void * v3)
 {
     return ::nng_pipe_notify(v0, v1, v2, v3);
 }
@@ -1469,6 +1469,7 @@ void nng_http_client_transact(nng_http_client * v0, nng_http_req * v1, nng_http_
 # /* supplemental/tls */
 # /********************/
 
+#if !defined(TBAG_DISABLE_NNG_TLS)
 int nng_tls_config_alloc(nng_tls_config ** v0, nng_tls_mode v1)
 {
     return ::nng_tls_config_alloc(v0, v1);
@@ -1523,6 +1524,7 @@ int nng_tls_config_cert_key_file(nng_tls_config * v0, char const * v1, char cons
 {
     return ::nng_tls_config_cert_key_file(v0, v1, v2);
 }
+#endif // #if !defined(TBAG_DISABLE_NNG_TLS)
 
 # /*********************/
 # /* supplemental/util */

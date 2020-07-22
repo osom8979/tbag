@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include "core/nng_impl.h"
-#include "supplemental/util/platform.h"
+#include "nng/supplemental/util/platform.h"
 
 nng_time
 nng_clock(void)
@@ -155,5 +155,6 @@ nng_cv_wake1(nng_cv *cv)
 uint32_t
 nng_random(void)
 {
+	(void) nni_init();
 	return (nni_random());
 }
