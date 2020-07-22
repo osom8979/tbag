@@ -46,8 +46,8 @@ before_install:
 script:
   - if [[ ! -d cmake_build ]]; then mkdir cmake_build; fi
   - cd cmake_build
-  - cmake -DRUN_TRAVIS=ON ..
-  - cmake --build . --target tester
+  - /usr/local/bin/cmake -DRUN_TRAVIS=ON ..
+  - /usr/local/bin/cmake --build . --target tester
   - ./tester --gtest_filter=*
 
 after_success:
