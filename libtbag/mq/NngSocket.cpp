@@ -62,34 +62,34 @@ public:
         int code = 0;
         if (raw) {
             switch (type) {
-            case SocketType::ST_BUS0:        code = mq::nng_bus0_open_raw       (&_socket); break;
-            case SocketType::ST_PAIR0:       code = mq::nng_pair0_open_raw      (&_socket); break;
-            case SocketType::ST_PAIR1:       code = mq::nng_pair1_open_raw      (&_socket); break;
-            case SocketType::ST_PULL0:       code = mq::nng_pull0_open_raw      (&_socket); break;
-            case SocketType::ST_PUSH0:       code = mq::nng_push0_open_raw      (&_socket); break;
-            case SocketType::ST_PUB0:        code = mq::nng_pub0_open_raw       (&_socket); break;
-            case SocketType::ST_SUB0:        code = mq::nng_sub0_open_raw       (&_socket); break;
-            case SocketType::ST_REP0:        code = mq::nng_rep0_open_raw       (&_socket); break;
-            case SocketType::ST_REQ0:        code = mq::nng_req0_open_raw       (&_socket); break;
-            case SocketType::ST_RESPONDENT0: code = mq::nng_respondent0_open_raw(&_socket); break;
-            case SocketType::ST_SURVEYOR0:   code = mq::nng_surveyor0_open_raw  (&_socket); break;
+            case SocketType::ST_BUS0:        code = nng_bus0_open_raw       (&_socket); break;
+            case SocketType::ST_PAIR0:       code = nng_pair0_open_raw      (&_socket); break;
+            case SocketType::ST_PAIR1:       code = nng_pair1_open_raw      (&_socket); break;
+            case SocketType::ST_PULL0:       code = nng_pull0_open_raw      (&_socket); break;
+            case SocketType::ST_PUSH0:       code = nng_push0_open_raw      (&_socket); break;
+            case SocketType::ST_PUB0:        code = nng_pub0_open_raw       (&_socket); break;
+            case SocketType::ST_SUB0:        code = nng_sub0_open_raw       (&_socket); break;
+            case SocketType::ST_REP0:        code = nng_rep0_open_raw       (&_socket); break;
+            case SocketType::ST_REQ0:        code = nng_req0_open_raw       (&_socket); break;
+            case SocketType::ST_RESPONDENT0: code = nng_respondent0_open_raw(&_socket); break;
+            case SocketType::ST_SURVEYOR0:   code = nng_surveyor0_open_raw  (&_socket); break;
             default:
                 TBAG_INACCESSIBLE_BLOCK_ASSERT();
                 return E_ILLARGS;
             }
         } else {
             switch (type) {
-            case SocketType::ST_BUS0:        code = mq::nng_bus0_open       (&_socket); break;
-            case SocketType::ST_PAIR0:       code = mq::nng_pair0_open      (&_socket); break;
-            case SocketType::ST_PAIR1:       code = mq::nng_pair1_open      (&_socket); break;
-            case SocketType::ST_PULL0:       code = mq::nng_pull0_open      (&_socket); break;
-            case SocketType::ST_PUSH0:       code = mq::nng_push0_open      (&_socket); break;
-            case SocketType::ST_PUB0:        code = mq::nng_pub0_open       (&_socket); break;
-            case SocketType::ST_SUB0:        code = mq::nng_sub0_open       (&_socket); break;
-            case SocketType::ST_REP0:        code = mq::nng_rep0_open       (&_socket); break;
-            case SocketType::ST_REQ0:        code = mq::nng_req0_open       (&_socket); break;
-            case SocketType::ST_RESPONDENT0: code = mq::nng_respondent0_open(&_socket); break;
-            case SocketType::ST_SURVEYOR0:   code = mq::nng_surveyor0_open  (&_socket); break;
+            case SocketType::ST_BUS0:        code = nng_bus0_open       (&_socket); break;
+            case SocketType::ST_PAIR0:       code = nng_pair0_open      (&_socket); break;
+            case SocketType::ST_PAIR1:       code = nng_pair1_open      (&_socket); break;
+            case SocketType::ST_PULL0:       code = nng_pull0_open      (&_socket); break;
+            case SocketType::ST_PUSH0:       code = nng_push0_open      (&_socket); break;
+            case SocketType::ST_PUB0:        code = nng_pub0_open       (&_socket); break;
+            case SocketType::ST_SUB0:        code = nng_sub0_open       (&_socket); break;
+            case SocketType::ST_REP0:        code = nng_rep0_open       (&_socket); break;
+            case SocketType::ST_REQ0:        code = nng_req0_open       (&_socket); break;
+            case SocketType::ST_RESPONDENT0: code = nng_respondent0_open(&_socket); break;
+            case SocketType::ST_SURVEYOR0:   code = nng_surveyor0_open  (&_socket); break;
             default:
                 TBAG_INACCESSIBLE_BLOCK_ASSERT();
                 return E_ILLARGS;
@@ -110,7 +110,7 @@ public:
             return E_ILLSTATE;
         }
         _opened = false;
-        return nng_code_err(mq::nng_close(_socket));
+        return nng_code_err(nng_close(_socket));
     }
 };
 
@@ -242,80 +242,80 @@ nng_socket NngSocket::getSocket() const
 Err NngSocket::listen(std::string const & url, nng_listener * lp, int flags)
 {
     assert(exists());
-    return nng_code_err(mq::nng_listen(getSocket(), url.c_str(), lp, flags));
+    return nng_code_err(nng_listen(getSocket(), url.c_str(), lp, flags));
 }
 
 Err NngSocket::dial(std::string const & url, nng_dialer * lp, int flags)
 {
     assert(exists());
-    return nng_code_err(mq::nng_dial(getSocket(), url.c_str(), lp, flags));
+    return nng_code_err(nng_dial(getSocket(), url.c_str(), lp, flags));
 }
 
 Err NngSocket::send(void * data, size_t size, int flags)
 {
     assert(exists());
-    return nng_code_err(mq::nng_send(getSocket(), data, size, flags));
+    return nng_code_err(nng_send(getSocket(), data, size, flags));
 }
 
 Err NngSocket::recv(void * data, size_t * size, int flags)
 {
     assert(exists());
-    return nng_code_err(mq::nng_recv(getSocket(), data, size, flags));
+    return nng_code_err(nng_recv(getSocket(), data, size, flags));
 }
 
 Err NngSocket::setopt(std::string const & key, bool value)
 {
     assert(exists());
-    return nng_code_err(mq::nng_setopt_bool(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_setopt_bool(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::setopt(std::string const & key, int value)
 {
     assert(exists());
-    return nng_code_err(mq::nng_setopt_int(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_setopt_int(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::setopt(std::string const & key, size_t value)
 {
     assert(exists());
-    return nng_code_err(mq::nng_setopt_size(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_setopt_size(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::setopt(std::string const & key, std::string const & value)
 {
     assert(exists());
-    return nng_code_err(mq::nng_setopt_string(getSocket(), key.c_str(), value.c_str()));
+    return nng_code_err(nng_setopt_string(getSocket(), key.c_str(), value.c_str()));
 }
 
 Err NngSocket::setopt(std::string const & key, void * value)
 {
     assert(exists());
-    return nng_code_err(mq::nng_setopt_ptr(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_setopt_ptr(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::getopt(std::string const & key, bool * value) const
 {
     assert(exists());
-    return nng_code_err(mq::nng_getopt_bool(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_getopt_bool(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::getopt(std::string const & key, int * value) const
 {
     assert(exists());
-    return nng_code_err(mq::nng_getopt_int(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_getopt_int(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::getopt(std::string const & key, size_t * value) const
 {
     assert(exists());
-    return nng_code_err(mq::nng_getopt_size(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_getopt_size(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::getopt(std::string const & key, std::string & value) const
 {
     assert(exists());
     char * buffer = nullptr;
-    auto const code = mq::nng_getopt_string(getSocket(), key.c_str(), &buffer);
+    auto const code = nng_getopt_string(getSocket(), key.c_str(), &buffer);
     if (buffer != nullptr) {
         assert(code == 0);
         value.assign(buffer);
@@ -327,31 +327,31 @@ Err NngSocket::getopt(std::string const & key, std::string & value) const
 Err NngSocket::getopt(std::string const & key, void ** value) const
 {
     assert(exists());
-    return nng_code_err(mq::nng_getopt_ptr(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_getopt_ptr(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::setopt_uint64(std::string const & key, uint64_t value)
 {
     assert(exists());
-    return nng_code_err(mq::nng_setopt_uint64(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_setopt_uint64(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::getopt_uint64(std::string const & key, uint64_t * value) const
 {
     assert(exists());
-    return nng_code_err(mq::nng_getopt_uint64(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_getopt_uint64(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::setopt_duration(std::string const & key, nng_duration value)
 {
     assert(exists());
-    return nng_code_err(mq::nng_setopt_ms(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_setopt_ms(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::getopt_duration(std::string const & key, nng_duration * value) const
 {
     assert(exists());
-    return nng_code_err(mq::nng_getopt_ms(getSocket(), key.c_str(), value));
+    return nng_code_err(nng_getopt_ms(getSocket(), key.c_str(), value));
 }
 
 Err NngSocket::setRecvTimeout(nng_duration ms)
@@ -563,18 +563,18 @@ std::string NngSocket::getPrintableInformationText() const
 void NngSocket::dumpState()
 {
     nng_stat * stats;
-    mq::nng_stats_get(&stats);
-    mq::nng_stats_dump(stats);
-    mq::nng_stats_free(stats);
+    nng_stats_get(&stats);
+    nng_stats_dump(stats);
+    nng_stats_free(stats);
 }
 
 std::vector<NngSocket::State> NngSocket::getState()
 {
     std::vector<State> result;
     nng_stat * stats;
-    mq::nng_stats_get(&stats);
+    nng_stats_get(&stats);
     // TODO
-    mq::nng_stats_free(stats);
+    nng_stats_free(stats);
     return result;
 }
 
