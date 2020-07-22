@@ -26,7 +26,6 @@
 #include <uv.h>
 
 #define _FS_HOTFIX_TRACE
-
 #if defined(_FS_HOTFIX_TRACE)
 #include <cstdlib>
 #include <iostream>
@@ -43,35 +42,60 @@ namespace details    {
 namespace __impl {
 // ---------------
 
+TBAG_CONSTEXPR static bool is_fs_hotfix_trace_defined() TBAG_NOEXCEPT
+{
+#if defined(_FS_HOTFIX_TRACE)
+    return true;
+#else
+    return false;
+#endif
+}
+
+static bool is_fs_hotfix_trace() TBAG_NOEXCEPT
+{
+    if (!is_fs_hotfix_trace_defined()) {
+        return false;
+    }
+
+    auto const * val = getenv("FS_HOTFIX_TRACE");
+    if (val == nullptr) {
+        return false;
+    }
+    if (val[0] == '\0' || val[0] == '0') {
+        return false;
+    }
+    return true;
+}
+
 using DirFunction = int (*)(char * buffer, std::size_t * size);
 
 /** For the libuv miscellaneous function. */
 static std::string getRepresentationDirectory(DirFunction func)
 {
-#if defined(_FS_HOTFIX_TRACE)
-    std::cerr << "[FS_HOTFIX_TRACE] getRepresentationDirectory()" << std::endl;
-#endif
+    if (is_fs_hotfix_trace()) {
+        std::cerr << "[FS_HOTFIX_TRACE] getRepresentationDirectory()" << std::endl;
+    }
 
     std::size_t const BUFFER_SIZE = MAX_PATH_LENGTH + 1;
     std::size_t length = MAX_PATH_LENGTH;
     char buffer[BUFFER_SIZE] = {0,};
 
-#if defined(_FS_HOTFIX_TRACE)
-    std::cerr << " - BUFFER_SIZE: " << BUFFER_SIZE << std::endl;
-    std::cerr << " - length: " << length << std::endl;
-#endif
+    if (is_fs_hotfix_trace()) {
+        std::cerr << " - BUFFER_SIZE: " << BUFFER_SIZE << std::endl;
+        std::cerr << " - length: " << length << std::endl;
+    }
 
     auto const ret = func(&buffer[0], &length);
 
-#if defined(_FS_HOTFIX_TRACE)
-    std::cerr << " -- ret(" << ret << "), length(" << length << ")" << std::endl;
-#endif
+    if (is_fs_hotfix_trace()) {
+        std::cerr << " -- ret(" << ret << "), length(" << length << ")" << std::endl;
+    }
 
     if (ret != 0) {
         return std::string();
     }
 
-    return std::string(buffer, buffer + length);
+    return std::string(buffer, buffer + length);  // FIX.
 }
 
 inline static bool isDirentType(DirentType type, uv_dirent_type_t uv_type)
@@ -117,24 +141,24 @@ static bool setMode(Predicated predicated, Param param, int mode)
 
 std::string getTempDir()
 {
-#if defined(_FS_HOTFIX_TRACE)
-    auto const log_prefix = "[FS_HOTFIX_TRACE] getTempDir()";
-    auto * v0 = getenv("TMPDIR");
-    auto * v1 = getenv("TMP");
-    auto * v2 = getenv("TEMP");
-    auto * v3 = getenv("TEMPDIR");
-    if (v0 != nullptr) {
-        std::cerr << log_prefix << " TMPDIR: " << v0 << std::endl;
-    } else if (v1 != nullptr) {
-        std::cerr << log_prefix << " TMP: " << v1 << std::endl;
-    } else if (v2 != nullptr) {
-        std::cerr << log_prefix << " TEMP: " << v2 << std::endl;
-    } else if (v3 != nullptr) {
-        std::cerr << log_prefix << " TEMPDIR: " << v3 << std::endl;
-    } else {
-        std::cerr << log_prefix << " ==[[ NONE ]]==" << std::endl;
+    if (__impl::is_fs_hotfix_trace()) {
+        auto const log_prefix = "[FS_HOTFIX_TRACE] getTempDir()";
+        auto * v0 = getenv("TMPDIR");
+        auto * v1 = getenv("TMP");
+        auto * v2 = getenv("TEMP");
+        auto * v3 = getenv("TEMPDIR");
+        if (v0 != nullptr) {
+            std::cerr << log_prefix << " TMPDIR: " << v0 << std::endl;
+        } else if (v1 != nullptr) {
+            std::cerr << log_prefix << " TMP: " << v1 << std::endl;
+        } else if (v2 != nullptr) {
+            std::cerr << log_prefix << " TEMP: " << v2 << std::endl;
+        } else if (v3 != nullptr) {
+            std::cerr << log_prefix << " TEMPDIR: " << v3 << std::endl;
+        } else {
+            std::cerr << log_prefix << " ==[[ NONE ]]==" << std::endl;
+        }
     }
-#endif
 
     // On Windows, uv_os_tmpdir() uses GetTempPathW().
     //
@@ -150,9 +174,9 @@ std::string getTempDir()
 
 std::string getWorkDir()
 {
-#if defined(_FS_HOTFIX_TRACE)
-    std::cerr << "[FS_HOTFIX_TRACE] getWorkDir()" << std::endl;
-#endif
+    if (__impl::is_fs_hotfix_trace()) {
+        std::cerr << "[FS_HOTFIX_TRACE] getWorkDir()" << std::endl;
+    }
 
     // If the current working directory is too large to fit in buffer,
     // this function returns UV_ENOBUFS, and sets size to the required length, including the null terminator.
@@ -168,15 +192,15 @@ std::string getWorkDir()
 
 std::string getHomeDir()
 {
-#if defined(_FS_HOTFIX_TRACE)
-    auto const log_prefix = "[FS_HOTFIX_TRACE] getHomeDir()";
-    auto * v0 = getenv("HOME");
-    if (v0 != nullptr) {
-        std::cerr << log_prefix << " HOME: " << v0 << std::endl;
-    } else {
-        std::cerr << log_prefix << " ==[[ NONE ]]==" << std::endl;
+    if (__impl::is_fs_hotfix_trace()) {
+        auto const log_prefix = "[FS_HOTFIX_TRACE] getHomeDir()";
+        auto * v0 = getenv("HOME");
+        if (v0 != nullptr) {
+            std::cerr << log_prefix << " HOME: " << v0 << std::endl;
+        } else {
+            std::cerr << log_prefix << " ==[[ NONE ]]==" << std::endl;
+        }
     }
-#endif
 
     // On Windows, uv_os_homedir() first checks the USERPROFILE environment variable using GetEnvironmentVariableW().
     // If USERPROFILE is not set, GetUserProfileDirectoryW() is called.
@@ -191,9 +215,9 @@ std::string getHomeDir()
 
 std::string getExePath()
 {
-#if defined(_FS_HOTFIX_TRACE)
-    std::cerr << "[FS_HOTFIX_TRACE] getExePath()" << std::endl;
-#endif
+    if (__impl::is_fs_hotfix_trace()) {
+        std::cerr << "[FS_HOTFIX_TRACE] getExePath()" << std::endl;
+    }
 
     return __impl::getRepresentationDirectory(&uv_exepath);
 }
