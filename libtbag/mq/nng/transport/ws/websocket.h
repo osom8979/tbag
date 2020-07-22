@@ -2,7 +2,7 @@
 #ifndef NNG_TRANSPORT_WS_WEBSOCKET_H
 #define NNG_TRANSPORT_WS_WEBSOCKET_H
 
-#include <nng/nng.h>
+#include <libtbag/mq/nng/nng.h>
 
 #ifdef __cplusplus
 extern "C" {

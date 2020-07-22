@@ -33,6 +33,7 @@ def find_semicolon(text):
 def run_migration(path, lines):
     remove_newline_re = re.compile(r'\n$')
     remove_comment_re = re.compile(r'[ \t]*//.*')
+    replace_include_prefix_re = re.compile(r'\s*#\s*include\s+<nng/')
     is_macro_re = re.compile(r'^\s*#')
     is_nn_decl_re = re.compile(r'^\s*NNG?_DECL')
     sequence_point_completion = True
@@ -54,7 +55,8 @@ def run_migration(path, lines):
             continue
 
         if is_macro_re.match(line) is not None:
-            result_lines.append(line)
+            text = replace_include_prefix_re.sub('#include <libtbag/mq/nng/', line, count=1)
+            result_lines.append(text)
             continue
 
         if is_nn_decl_re.match(line) is not None:

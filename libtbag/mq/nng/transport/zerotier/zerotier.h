@@ -2,7 +2,7 @@
 #ifndef NNG_TRANSPORT_ZEROTIER_ZEROTIER_H
 #define NNG_TRANSPORT_ZEROTIER_ZEROTIER_H
 
-#include <nng/nng.h>
+#include <libtbag/mq/nng/nng.h>
 
 
 
