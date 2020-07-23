@@ -15,42 +15,42 @@
 
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
-#include <libtbag/mq/nng/nng.h>
 
 #define TBAG_DISABLE_NNG_TLS
 
+#if !defined(__TBAG_MQ_NNG_INCLUDED)
+# include <libtbag/mq/nng/nng.h>
 // nng-protocol
-#include <libtbag/mq/nng/protocol/bus0/bus.h>
-#ifndef nng_pair_open
-#define nng_pair_open // Don't use this macro.
-#endif
-#ifndef nng_pair_open_raw
-#define nng_pair_open_raw // Don't use this macro.
-#endif
-#include <libtbag/mq/nng/protocol/pair0/pair.h>
-#include <libtbag/mq/nng/protocol/pair1/pair.h>
-#include <libtbag/mq/nng/protocol/pipeline0/pull.h>
-#include <libtbag/mq/nng/protocol/pipeline0/push.h>
-#include <libtbag/mq/nng/protocol/pubsub0/pub.h>
-#include <libtbag/mq/nng/protocol/pubsub0/sub.h>
-#include <libtbag/mq/nng/protocol/reqrep0/rep.h>
-#include <libtbag/mq/nng/protocol/reqrep0/req.h>
-#include <libtbag/mq/nng/protocol/survey0/respond.h>
-#include <libtbag/mq/nng/protocol/survey0/survey.h>
-
+# include <libtbag/mq/nng/protocol/bus0/bus.h>
+# ifndef nng_pair_open
+#  define nng_pair_open // Don't use this macro.
+# endif
+# ifndef nng_pair_open_raw
+#  define nng_pair_open_raw // Don't use this macro.
+# endif
+# include <libtbag/mq/nng/protocol/pair0/pair.h>
+# include <libtbag/mq/nng/protocol/pair1/pair.h>
+# include <libtbag/mq/nng/protocol/pipeline0/pull.h>
+# include <libtbag/mq/nng/protocol/pipeline0/push.h>
+# include <libtbag/mq/nng/protocol/pubsub0/pub.h>
+# include <libtbag/mq/nng/protocol/pubsub0/sub.h>
+# include <libtbag/mq/nng/protocol/reqrep0/rep.h>
+# include <libtbag/mq/nng/protocol/reqrep0/req.h>
+# include <libtbag/mq/nng/protocol/survey0/respond.h>
+# include <libtbag/mq/nng/protocol/survey0/survey.h>
 // nng-supplemental
-#include <libtbag/mq/nng/supplemental/http/http.h>
-#if !defined(TBAG_DISABLE_NNG_TLS)
-#include <libtbag/mq/nng/supplemental/tls/tls.h>
-#endif
-#include <libtbag/mq/nng/supplemental/util/options.h>
-#include <libtbag/mq/nng/supplemental/util/platform.h>
-
+# include <libtbag/mq/nng/supplemental/http/http.h>
+# if !defined(TBAG_DISABLE_NNG_TLS)
+# include <libtbag/mq/nng/supplemental/tls/tls.h>
+# endif
+# include <libtbag/mq/nng/supplemental/util/options.h>
+# include <libtbag/mq/nng/supplemental/util/platform.h>
 // nng-transport
-#include <libtbag/mq/nng/transport/inproc/inproc.h>
-#include <libtbag/mq/nng/transport/ipc/ipc.h>
-#include <libtbag/mq/nng/transport/tcp/tcp.h>
-#include <libtbag/mq/nng/transport/ws/websocket.h>
+# include <libtbag/mq/nng/transport/inproc/inproc.h>
+# include <libtbag/mq/nng/transport/ipc/ipc.h>
+# include <libtbag/mq/nng/transport/tcp/tcp.h>
+# include <libtbag/mq/nng/transport/ws/websocket.h>
+#endif  // #if !defined(__TBAG_MQ_NNG_INCLUDED)
 
 #include <cstdbool>
 #include <cstddef>

@@ -12,13 +12,6 @@ extern "C" {
 #include <stdint.h>
 
 
-# /* ==[[ MIGRATION BEGIN ]]== */
-#ifndef NNG_DECL
-#include <libtbag/predef.hpp>
-#define NNG_DECL TBAG_API
-#endif
-# /* ==[[ MIGRATION END ]]== */
-
 #define NNG_MAJOR_VERSION 1
 #define NNG_MINOR_VERSION 3
 #define NNG_PATCH_VERSION 0

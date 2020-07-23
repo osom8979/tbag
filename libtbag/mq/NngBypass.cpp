@@ -39,6 +39,7 @@
 #include <nng/transport/tcp/tcp.h>
 #include <nng/transport/ws/websocket.h>
 
+#define __TBAG_MQ_NNG_INCLUDED
 #include <libtbag/mq/NngBypass.hpp>
 
 // -------------------
