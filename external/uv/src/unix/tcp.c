@@ -308,17 +308,37 @@ int uv_tcp_getpeername(const uv_tcp_t* handle,
 }
 
 
+int uv_tcp_close_reset(uv_tcp_t* handle, uv_close_cb close_cb) {
+  int fd;
+  struct linger l = { 1, 0 };
+
+  /* Disallow setting SO_LINGER to zero due to some platform inconsistencies */
+  if (handle->flags & UV_HANDLE_SHUTTING)
+    return UV_EINVAL;
+
+  fd = uv__stream_fd(handle);
+  if (0 != setsockopt(fd, SOL_SOCKET, SO_LINGER, &l, sizeof(l)))
+    return UV__ERR(errno);
+
+  uv_close((uv_handle_t*) handle, close_cb);
+  return 0;
+}
+
+
 int uv_tcp_listen(uv_tcp_t* tcp, int backlog, uv_connection_cb cb) {
-  static int single_accept = -1;
+  static int single_accept_cached = -1;
   unsigned long flags;
+  int single_accept;
   int err;
 
   if (tcp->delayed_error)
     return tcp->delayed_error;
 
+  single_accept = uv__load_relaxed(&single_accept_cached);
   if (single_accept == -1) {
     const char* val = getenv("UV_TCP_SINGLE_ACCEPT");
     single_accept = (val != NULL && atoi(val) != 0);  /* Off by default. */
+    uv__store_relaxed(&single_accept_cached, single_accept);
   }
 
   if (single_accept)
@@ -362,8 +382,16 @@ int uv__tcp_keepalive(int fd, int on, unsigned int delay) {
     return UV__ERR(errno);
 
 #ifdef TCP_KEEPIDLE
-  if (on && setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &delay, sizeof(delay)))
-    return UV__ERR(errno);
+  if (on) {
+    int intvl = 1;  /*  1 second; same as default on Win32 */
+    int cnt = 10;  /* 10 retries; same as hardcoded on Win32 */
+    if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &delay, sizeof(delay)))
+      return UV__ERR(errno);
+    if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &intvl, sizeof(intvl)))
+      return UV__ERR(errno);
+    if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &cnt, sizeof(cnt)))
+      return UV__ERR(errno);
+  }
 #endif
 
   /* Solaris/SmartOS, if you don't support keep-alive,
