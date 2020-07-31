@@ -51,9 +51,11 @@ void UvCondition::wait(UvLock & lock)
     ::uv_cond_wait(cast_uv_cond(_handle), static_cast<uv_mutex_t*>(lock.getHandle()));
 }
 
-void UvCondition::wait(UvLock & lock, int64_t timeout_nano)
+Err UvCondition::wait(UvLock & lock, int64_t timeout_nano)
 {
-    ::uv_cond_timedwait(cast_uv_cond(_handle), static_cast<uv_mutex_t*>(lock.getHandle()), timeout_nano);
+    return convertUvErrorToErr(::uv_cond_timedwait(cast_uv_cond(_handle),
+                                                   static_cast<uv_mutex_t*>(lock.getHandle()),
+                                                   timeout_nano));
 }
 
 void UvCondition::signal()

@@ -45,9 +45,7 @@ void __global_uv_thread_cb__(void * args)
         thread->_exception = std::current_exception();
     }
 
-    thread->_lock.lock();
-    thread->_state = Thread::State::S_DONE;
-    thread->_lock.unlock();
+    thread->changeDoneState();
 }
 
 Thread::Thread() TBAG_NOEXCEPT
@@ -160,18 +158,36 @@ bool Thread::joinable() const
 
 Err Thread::join(bool rethrow)
 {
-    _lock.lock();
-    auto const state = _state;
-    auto const joined = _once_joined;
-    _once_joined = true;
-    _lock.unlock();
+    return joinTimeout(INFINITY_TIMEOUT, rethrow);
+}
 
-    if (state == State::S_READY) {
-        return E_ILLSTATE;
-    }
-    if (joined) {
-        return E_ALREADY;
-    }
+Err Thread::joinTimeout(int64_t timeout_nano, bool rethrow)
+{
+    State state;
+
+    COMMENT("==[[ LOCK GUARD ]]==") {
+        UvGuard const G(_lock);
+        if (_once_joined) {
+            return E_ALREADY;
+        }
+        if (_state == State::S_READY) {
+            return E_ILLSTATE;
+        }
+
+        while (_state == State::S_CREATED || _state == State::S_RUNNING) {
+            if (timeout_nano == INFINITY_TIMEOUT) {
+                _condition.wait(_lock);
+            } else {
+                auto const code = _condition.wait(_lock, timeout_nano);
+                if (isFailure(code)) {
+                    return code;
+                }
+            }
+        }
+
+        assert(_state == State::S_DONE);
+        _once_joined = true;
+    } // ==[[ UNLOCK ]]== //
 
     // [WARNING]
     //  The thread resource is freed at this point.
@@ -191,13 +207,23 @@ Err Thread::waitForRunningOrDone(unsigned long timeout_ms, unsigned long tick_ms
     return waitForRunningOrDone(*this, std::chrono::milliseconds(timeout_ms), std::chrono::milliseconds(tick_ms));
 }
 
-Err Thread::kill(int signum) const
+void Thread::changeDoneState()
 {
+    _lock.lock();
+    _state = Thread::State::S_DONE;
+    _condition.signal();
+    _lock.unlock();
+}
+
+Err Thread::kill(int signum)
+{
+    changeDoneState();
     return libtbag::thread::killThread(_thread, signum);
 }
 
-Err Thread::cancel() const
+Err Thread::cancel()
 {
+    changeDoneState();
     return libtbag::thread::cancelThread(_thread);
 }
 

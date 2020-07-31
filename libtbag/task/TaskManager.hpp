@@ -284,6 +284,7 @@ public:
 
 public:
     Err join(TaskId id);
+    Err join(TaskId id, int64_t timeout_nano);
     Err erase(TaskId id);
     Err kill(TaskId id);
 };

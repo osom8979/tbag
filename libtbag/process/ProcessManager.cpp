@@ -21,16 +21,15 @@ namespace process {
 // ProcessManager::Proc implementation.
 // ------------------------------------
 
-ProcessManager::Proc::Proc(ProcessManager * parent) : _parent(parent)
+ProcessManager::Proc::Proc(ProcessManager * parent)
+        : _parent(parent)
 {
     // EMPTY.
 }
 
 ProcessManager::Proc::~Proc()
 {
-    if (_thread.joinable()) {
-        _thread.join();
-    }
+    // EMPTY.
 }
 
 void ProcessManager::Proc::onOutRead(char const * buffer, std::size_t size)
@@ -51,13 +50,14 @@ void ProcessManager::Proc::onExit(int64_t exit_status, int term_signal)
     _parent->onExit(getPid(), exit_status, term_signal);
 }
 
-void ProcessManager::Proc::runner()
+void ProcessManager::Proc::onRunner()
 {
     int const pid = getPid();
     if (pid == 0) {
         tDLogE("ProcessManager::Proc::runner() Unknown process id");
         return;
     }
+
     auto const code = _loop.run();
     if (isFailure(code)) {
         tDLogW("ProcessManager::Proc::runner() loop {} error (PID: {})", code, pid);
@@ -72,26 +72,16 @@ Err ProcessManager::Proc::exec(std::string const & file,
                                bool enable_stdout,
                                bool enable_stderr)
 {
-    Err const CODE = spawn(_loop, file, args, envs, cwd, input, enable_stdout, enable_stderr);
-    if (isFailure(CODE)) {
-        return CODE;
+    auto const code = spawn(_loop, file, args, envs, cwd, input, enable_stdout, enable_stderr);
+    if (isFailure(code)) {
+        return code;
     }
-    try {
-        _thread = std::thread(&ProcessManager::Proc::runner, this);
-    } catch (...) {
-        return E_UNKEXCP;
-    }
-    return E_SUCCESS;
+    return run();
 }
 
-bool ProcessManager::Proc::joinable() const
+Err ProcessManager::Proc::killProcess(int signum)
 {
-    return _thread.joinable();
-}
-
-void ProcessManager::Proc::join()
-{
-    _thread.join();
+    return StdProcess::kill(signum);
 }
 
 // -----------------------------
@@ -175,6 +165,22 @@ Err ProcessManager::join(int pid)
     }
     itr->second->join();
     return E_SUCCESS;
+}
+
+Err ProcessManager::joinTimeout(int pid, int64_t timeout_nano)
+{
+    Guard const G(_mutex);
+    auto itr = _procs.find(pid);
+    if (itr == _procs.end()) {
+        return E_NFOUND;
+    }
+    if (!itr->second) {
+        return E_EXPIRED;
+    }
+    if (!itr->second->joinable()) {
+        return E_ILLSTATE;
+    }
+    return itr->second->joinTimeout(timeout_nano);
 }
 
 void ProcessManager::joinAll()
@@ -277,7 +283,7 @@ Err ProcessManager::kill(int pid, int signum)
     if (!itr->second->isRunning()) {
         return E_ILLSTATE;
     }
-    return itr->second->kill(signum);
+    return itr->second->killProcess(signum);
 }
 
 void ProcessManager::killAll(int signum)
@@ -285,7 +291,7 @@ void ProcessManager::killAll(int signum)
     Guard const G(_mutex);
     for (auto & proc : _procs) {
         if (proc.second && proc.second->isRunning()) {
-            proc.second->kill(signum);
+            proc.second->killProcess(signum);
         }
     }
 }

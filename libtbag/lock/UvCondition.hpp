@@ -16,6 +16,7 @@
 #include <libtbag/config.h>
 #include <libtbag/predef.hpp>
 #include <libtbag/Noncopyable.hpp>
+#include <libtbag/Err.hpp>
 
 #include <cstdint>
 
@@ -73,7 +74,7 @@ public:
 
 public:
     void wait(UvLock & lock);
-    void wait(UvLock & lock, int64_t timeout_nano);
+    Err wait(UvLock & lock, int64_t timeout_nano);
 
 public:
     void signal();

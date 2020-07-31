@@ -19,6 +19,7 @@
 #include <libtbag/Err.hpp>
 #include <libtbag/uvpp/UvCommon.hpp>
 #include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
 
 #include <atomic>
 #include <exception>
@@ -43,9 +44,11 @@ public:
     using uthread = libtbag::uvpp::uthread;
     using UvLock = libtbag::lock::UvLock;
     using UvGuard = libtbag::lock::UvLockGuard<UvLock>;
+    using UvCondition = libtbag::lock::UvCondition;
 
 public:
-    TBAG_CONSTEXPR static std::size_t NO_ASSIGN_ID = 0;
+    TBAG_CONSTEXPR static std::size_t const NO_ASSIGN_ID = 0;
+    TBAG_CONSTEXPR static int64_t const INFINITY_TIMEOUT = -1;
 
 public:
     /**
@@ -69,6 +72,7 @@ public:
 
 private:
     UvLock mutable _lock;
+    UvCondition _condition;
 
     /**
      * @warning
@@ -150,6 +154,7 @@ public:
 
 public:
     Err join(bool rethrow = true);
+    Err joinTimeout(int64_t timeout_nano, bool rethrow = true);
 
 private:
     friend TBAG_API void __global_uv_thread_cb__(void * args);
@@ -171,9 +176,12 @@ public:
 public:
     Err waitForRunningOrDone(unsigned long timeout_ms, unsigned long tick_ms = 1);
 
+private:
+    void changeDoneState();
+
 public:
-    Err kill(int signum) const;
-    Err cancel() const;
+    Err kill(int signum);
+    Err cancel();
 };
 
 } // namespace thread

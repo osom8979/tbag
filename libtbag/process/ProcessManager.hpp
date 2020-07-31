@@ -21,6 +21,9 @@
 #include <libtbag/uvpp/Loop.hpp>
 #include <libtbag/process/StdProcess.hpp>
 #include <libtbag/signal/SignalHandler.hpp>
+#include <libtbag/lock/UvLock.hpp>
+#include <libtbag/lock/UvCondition.hpp>
+#include <libtbag/thread/Thread.hpp>
 #include <libtbag/util/Structures.hpp>
 
 #include <unordered_map>
@@ -46,6 +49,7 @@ class TBAG_API ProcessManager : private Noncopyable
 {
 public:
     using Loop = uvpp::Loop;
+    using Thread = libtbag::thread::Thread;
 
     /**
      * Proc class prototype.
@@ -53,13 +57,19 @@ public:
      * @author zer0
      * @date   2017-09-06
      */
-    class TBAG_API Proc : public StdProcess
+    class TBAG_API Proc : public StdProcess, public Thread
     {
+    private:
+        using UvLock = libtbag::lock::UvLock;
+        using UvCondition = libtbag::lock::UvCondition;
+
+    public:
+        TBAG_CONSTEXPR static int64_t const INFINITY_TIMEOUT = Thread::INFINITY_TIMEOUT;
+
     private:
         ProcessManager * _parent;
 
     private:
-        std::thread _thread;
         Loop _loop;
 
     public:
@@ -71,8 +81,8 @@ public:
         void onErrRead(char const * buffer, std::size_t size) override;
         void onExit(int64_t exit_status, int term_signal) override;
 
-    private:
-        void runner();
+    protected:
+        void onRunner() override;
 
     public:
         Err exec(std::string const & file,
@@ -84,8 +94,7 @@ public:
                  bool enable_stderr = true);
 
     public:
-        bool joinable() const;
-        void join();
+        Err killProcess(int signum);
     };
 
     friend class Proc;
@@ -137,6 +146,7 @@ public:
 public:
     void clear();
     Err join(int pid);
+    Err joinTimeout(int pid, int64_t timeout_nano);
     void joinAll();
 
 public:

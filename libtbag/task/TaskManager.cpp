@@ -388,6 +388,11 @@ ErrTaskId TaskManager::runProcess(ProcessParams const & params, void * opaque)
 
 Err TaskManager::join(TaskId id)
 {
+    return join(id, ProcessManager::Proc::INFINITY_TIMEOUT);
+}
+
+Err TaskManager::join(TaskId id, int64_t timeout_nano)
+{
     auto const err_task_info = getTaskInfo(id);
     if (!err_task_info) {
         return err_task_info.code;
@@ -408,8 +413,7 @@ Err TaskManager::join(TaskId id)
         if (!shared_process->joinable()) {
             return E_ILLSTATE;
         }
-        shared_process->join();
-        return E_SUCCESS;
+        return shared_process->joinTimeout(timeout_nano);
     } else {
         assert(task_info.type == TaskType::TT_THREAD);
         auto const thread_id = task_info.internal_id.thread;
@@ -425,7 +429,7 @@ Err TaskManager::join(TaskId id)
         if (!shared_thread->joinable()) {
             return E_ILLSTATE;
         }
-        return shared_thread->join(RETHROW_JOIN);
+        return shared_thread->joinTimeout(timeout_nano, RETHROW_JOIN);
     }
 }
 
