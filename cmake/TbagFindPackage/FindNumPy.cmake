@@ -9,11 +9,18 @@ if (NumPy_FOUND)
     return ()
 endif ()
 
-if (NOT PYTHONINTERP_FOUND)
+if (Python3_Interpreter_FOUND)
+    set (__python_executable ${Python3_EXECUTABLE})
+elseif (Python_Interpreter_FOUND)
+    set (__python_executable ${Python_EXECUTABLE})
+elseif (PYTHONINTERP_FOUND)
+    set (__python_executable ${PYTHON_EXECUTABLE})  ## Legacy
+else ()
+    set (__python_executable python)
     message (WARNING "FindNumpy: Not found Python interpreter.")
 endif ()
 
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import numpy as n; print(n.__version__); print(n.get_include());"
+execute_process(COMMAND "${__python_executable}" "-c" "import numpy as n; print(n.__version__); print(n.get_include());"
                 RESULT_VARIABLE __result
                 OUTPUT_VARIABLE __output
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
