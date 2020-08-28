@@ -110,6 +110,9 @@ Desktop.ini
 # Debug files
 *.dSYM/
 
+# Code completion
+.clangd/
+
 #############
 ### CMake ###
 CMakeCache.txt
