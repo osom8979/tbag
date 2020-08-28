@@ -54,6 +54,10 @@ Err convert(libtbag::net::Mime const & mime, Box const & src, Box & dest)
     using namespace libtbag::string;
     auto const subtype = lower(trim(mime.subtype));
 
+    if (!src.is_device_cpu() || src.empty()) {
+        return E_ILLARGS;
+    }
+
     if (mime.isImageType()) {
         float q;
         auto q_itr = mime.parameters.find("q");
