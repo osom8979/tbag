@@ -2,6 +2,9 @@
 ## HISTORY OF LIBTBAG PROJECT ##
 ################################
 
+VERSION=1.0.0
+- Major update.
+
 VERSION=0.9.0-0.1-0
 - Create libtbui project.
 
