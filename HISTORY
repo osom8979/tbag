@@ -2,6 +2,9 @@
 ## HISTORY OF LIBTBAG PROJECT ##
 ################################
 
+VERSION=1.1.0
+- Remove unused packages: glfw, raylib, imgui, imnodes, openblas
+
 VERSION=1.0.0
 - Major update.
 
