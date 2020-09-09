@@ -9,7 +9,7 @@ tbag_modules__update_c_family_subdir_objects (
         crypto database debug dom dummy filesystem flow functional game
         geometry gpu graph graphic http id io ipc iterator lexer lib locale
         lock lockfree log loop macro math media memory mq net network
-        parallel pattern pref preprocessor process proto random ray res
+        parallel pattern pref preprocessor process proto random res
         rstl scene science script security service signal string system
         task thread tiled time tmp tty type typography util uvpp uvxx)
 tbag_modules__update_subdir_object (Err.cpp libtbag.cpp)
@@ -35,7 +35,6 @@ tbag_modules__apply_ext_bzip2       ()
 tbag_modules__apply_ext_lzma        ()
 tbag_modules__apply_ext_archive     ()
 tbag_modules__apply_ext_nng         ()
-tbag_modules__apply_ext_glfw        ()
 tbag_modules__apply_ext_sqlite3     ()
 tbag_modules__apply_ext_date        ()
 tbag_modules__apply_ext_lmdb        ()
@@ -51,12 +50,12 @@ tbag_modules__apply_ext_lemon       ()
 
 ## Dependencies.
 tbag_modules__apply_dep_stb         ()
-tbag_modules__apply_dep_raylib      ()
-tbag_modules__apply_dep_imgui       ()
-tbag_modules__apply_dep_imnodes     ()
+#tbag_modules__apply_dep_raylib     ()
+#tbag_modules__apply_dep_imgui      ()
+#tbag_modules__apply_dep_imnodes    ()
 
-tbag_modules__check_opengl ()
-tbag_modules__apply_opengl ()
+#tbag_modules__check_opengl()
+#tbag_modules__apply_opengl()
 
 set (BOX_FBS_SRC  "${CMAKE_SOURCE_DIR}/libtbag/box/fbs/box.fbs")
 set (BOX_D2S_PATH "${CMAKE_SOURCE_DIR}/libtbag/box/fbs/box_d2s.h")

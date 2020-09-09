@@ -14,9 +14,9 @@
 #include <libtbag/string/StringUtils.hpp>
 #include <libtbag/string/Format.hpp>
 
-#include <libtbag/script/lua/RayLua.hpp>
-#include <libtbag/script/lua/RayGuiLua.hpp>
-#include <libtbag/script/lua/RayGuiNodesLua.hpp>
+//#include <libtbag/script/lua/RayLua.hpp>
+//#include <libtbag/script/lua/RayGuiLua.hpp>
+//#include <libtbag/script/lua/RayGuiNodesLua.hpp>
 #include <libtbag/script/lua/LogLua.hpp>
 #include <libtbag/script/lua/StringLua.hpp>
 #include <libtbag/script/lua/SystemLua.hpp>
@@ -167,15 +167,15 @@ void LuaMachine::initDefault()
     if (!libtbag::script::luaopen_tbag(L)) {
         tDLogW("LuaMachine::initDefault() Tbag bind failed.");
     }
-    if (!libtbag::script::lua::luaE_open_ray(L)) {
-        tDLogW("LuaMachine::initDefault() Ray bind failed.");
-    }
-    if (!libtbag::script::lua::luaE_open_raygui(L)) {
-        tDLogW("LuaMachine::initDefault() RayGui bind failed.");
-    }
-    if (!libtbag::script::lua::luaE_open_rayguinodes(L)) {
-        tDLogW("LuaMachine::initDefault() RayGuiNodes bind failed.");
-    }
+    //if (!libtbag::script::lua::luaE_open_ray(L)) {
+    //    tDLogW("LuaMachine::initDefault() Ray bind failed.");
+    //}
+    //if (!libtbag::script::lua::luaE_open_raygui(L)) {
+    //    tDLogW("LuaMachine::initDefault() RayGui bind failed.");
+    //}
+    //if (!libtbag::script::lua::luaE_open_rayguinodes(L)) {
+    //    tDLogW("LuaMachine::initDefault() RayGuiNodes bind failed.");
+    //}
     if (!libtbag::script::lua::luaE_open_log(L)) {
         tDLogW("LuaMachine::initDefault() Log bind failed.");
     }

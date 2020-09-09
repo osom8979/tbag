@@ -93,9 +93,9 @@ endif ()
 tbag_config__find_thread ()
 tbag_config__default_generate_c_header ()
 
-tbag_config__set_library_option (USE_OPENGL   OpenGL    OPENGL_FOUND)
-tbag_config__set_library_option (USE_OPENCL   OpenCL    OpenCL_FOUND)
-tbag_config__set_library_option (USE_CUDA     TbagCUDA  CUDA_FOUND)
+#tbag_config__set_library_option(USE_OPENGL   OpenGL    OPENGL_FOUND)
+#tbag_config__set_library_option(USE_OPENCL   OpenCL    OpenCL_FOUND)
+#tbag_config__set_library_option(USE_CUDA     TbagCUDA  CUDA_FOUND)
 tbag_config__set_library_option (USE_DOXYGEN  Doxygen   DOXYGEN_FOUND)
 
 #set (TbagPython_PYENV_NAME "opy-$ENV{USER}-3.6.1")
@@ -126,11 +126,6 @@ message (STATUS "Simdpp runnable archs: ${SIMDPP_RUNNABLE_ARCHS}")
 foreach (__arch_cursor ${SIMDPP_RUNNABLE_ARCHS})
     set (TBAG_SIMDPP_RUNNABLE_ARCH_${__arch_cursor} 1)
 endforeach ()
-
-## Library subproject.
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/raylib)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/imgui)
-add_subdirectory (${CMAKE_SOURCE_DIR}/dep/imnodes)
 
 ## CI Preset.
 if (RUN_TRAVIS)
