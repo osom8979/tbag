@@ -18,6 +18,7 @@
 #include <libtbag/log/sink/Sink.hpp>
 
 #include <functional>
+#include <string>
 
 // -------------------
 NAMESPACE_LIBTBAG_OPEN
