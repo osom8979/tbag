@@ -722,45 +722,6 @@ if (NOT blend2d_EXT_EXISTS)
 endif ()
 add_custom_target (blend2d DEPENDS ${blend2d_EXT_LIBRARIES})
 
-##############
-## OpenBLAS ##
-##############
-
-set (openblas_EXT_SOURCE_DIR   "${CMAKE_SOURCE_DIR}/external/openblas")
-set (openblas_EXT_INCLUDE_DIR  "${EXT_INSTALL_DIR}/include")
-set (openblas_EXT_HEADER       "${openblas_EXT_INCLUDE_DIR}/openblas/cblas.h")
-set (openblas_EXT_STATIC_LIB   "${EXT_INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}openblas${CMAKE_STATIC_LIBRARY_SUFFIX}")
-set (openblas_EXT_LIBRARIES    "${openblas_EXT_STATIC_LIB}")
-exists_files (openblas_EXT_EXISTS ${openblas_EXT_LIBRARIES} ${openblas_EXT_HEADER})
-
-if (NOT openblas_EXT_EXISTS)
-    message (STATUS "Add external/openblas")
-    ExternalProject_Add (openblas_ext
-            PREFIX "${EXT_PREFIX_DIR}"
-            #--Configure step-------------
-            SOURCE_DIR "${openblas_EXT_SOURCE_DIR}"
-            CMAKE_ARGS "-DCMAKE_MACOSX_RPATH=${CMAKE_MACOSX_RPATH}"
-                       "-DBUILD_SHARED_LIBS=OFF"
-                       "-DCMAKE_C_FLAGS=${EXT_C_FLAGS} -DDllMain=openblas_DllMain"
-                       "-DCMAKE_BUILD_TYPE=${EXT_BUILD_TYPE}"
-                       "-DCMAKE_INSTALL_PREFIX=${EXT_INSTALL_DIR}"
-                       "-DNOFORTRAN=ON"
-                       "-DBUILD_WITHOUT_LAPACK=ON"
-                       "-DBUILD_WITHOUT_CBLAS=OFF"
-                       "-DDYNAMIC_ARCH=OFF"
-                       "-DDYNAMIC_OLDER=OFF"
-                       "-DBUILD_RELAPACK=OFF"
-            #--Output logging-------------
-            LOG_DOWNLOAD  1
-            LOG_UPDATE    1
-            LOG_CONFIGURE 1
-            LOG_BUILD     0
-            LOG_TEST      1
-            LOG_INSTALL   1)
-    fake_output_library (openblas_ext_output openblas_ext ${openblas_EXT_LIBRARIES})
-endif ()
-add_custom_target (openblas DEPENDS ${openblas_EXT_LIBRARIES})
-
 ###########
 ## ICU4C ##
 ###########
