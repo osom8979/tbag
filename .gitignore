@@ -227,6 +227,8 @@ fabric.properties
 #############
 ### OPVIM ###
 .opvim
+.cache
+.clangd
 opvim.json
 ycm_extra_conf.log
 

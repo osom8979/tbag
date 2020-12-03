@@ -32,7 +32,7 @@ Tea-bag is Third party extension utility project.
 - CMake 3.13.4 (BSD 3-Clause license)
   - external/archive/build/Modules/CMakePushCheckState.cmake
 - gperftools 2.7 (BSD 3-Clause license)
-- nng 1.3.0 (MIT license)
+- nng 1.3.2 (MIT license)
 - glfw 3.3 (zlib license)
 - sqlite 3.28.0 (Public Domain)
 - date master-27d1e1e (MIT license)

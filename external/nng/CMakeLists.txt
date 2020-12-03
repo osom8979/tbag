@@ -80,7 +80,7 @@ endif ()
 set(NNG_ABI_SOVERSION 1)
 set(NNG_ABI_VERSION "${NNG_MAJOR_VERSION}.${NNG_MINOR_VERSION}.${NNG_PATCH_VERSION}${NNG_PRERELEASE}")
 set(NNG_PACKAGE_VERSION "${NNG_ABI_VERSION}")
-message("Configuring for NNG version ${NNG_ABI_VERSION}")
+message(STATUS "Configuring for NNG version ${NNG_ABI_VERSION}")
 
 # User-defined options.
 
@@ -154,13 +154,6 @@ CheckSanitizer()
 if (NOT NNG_SANITIZER STREQUAL "none")
     set(NNG_SANITIZER_FLAGS "-fsanitize=${NNG_SANITIZER}")
 endif ()
-
-include(CheckAtomicLib)
-CheckAtomicLib()
-if (NOT HAVE_C_ATOMICS_WITHOUT_LIB AND HAVE_C_ATOMICS_WITH_LIB)
-    list(APPEND NNG_LIBS "atomic")
-endif ()
-
 
 if (NNG_ENABLE_COVERAGE)
     # NB: This only works for GCC and Clang 3.0 and newer.  If your stuff
@@ -327,11 +320,22 @@ else ()
     nng_check_lib(nsl gethostbyname NNG_HAVE_LIBNSL)
     nng_check_lib(socket socket NNG_HAVE_LIBSOCKET)
 
+    # GCC needs libatomic on some architectures (e.g. ARM) because the
+    # underlying architecture may lack the necessary atomic primitives.
+    # One hopes that the libatomic implementation is superior to just using
+    # a pthread mutex.  The symbol chosen here was identified from GCC's
+    # libatomic map file.
+    #
+    # Arguably when using clang, compiler-rt might be better.
+    nng_check_lib(atomic __atomic_load_1 NNG_HAVE_LIBATOMIC)
+
     nng_check_sym(AF_UNIX sys/socket.h NNG_HAVE_UNIX_SOCKETS)
     nng_check_sym(backtrace_symbols_fd execinfo.h NNG_HAVE_BACKTRACE)
     nng_check_struct_member(msghdr msg_control sys/socket.h NNG_HAVE_MSG_CONTROL)
     nng_check_sym(eventfd sys/eventfd.h NNG_HAVE_EVENTFD)
-    nng_check_sym(kqueue sys/event.h NNG_HAVE_KQUEUE)
+    # While some systems (NetBSD) have kqueue, our use depends on EVFILT_USER
+    # This means that NetBSD and OpenBSD will be stuck with poll().
+    nng_check_sym(EVFILT_USER sys/event.h NNG_HAVE_KQUEUE)
     nng_check_sym(port_create port.h NNG_HAVE_PORT_CREATE)
     nng_check_sym(epoll_create sys/epoll.h NNG_HAVE_EPOLL)
     nng_check_sym(epoll_create1 sys/epoll.h NNG_HAVE_EPOLL_CREATE1)
@@ -339,6 +343,7 @@ else ()
     nng_check_sym(SO_PEERCRED sys/socket.h NNG_HAVE_SOPEERCRED)
     nng_check_struct_member(sockpeercred uid sys/socket.h NNG_HAVE_SOCKPEERCRED)
     nng_check_sym(LOCAL_PEERCRED sys/un.h NNG_HAVE_LOCALPEERCRED)
+    nng_check_sym(LOCAL_PEERPID sys/un.h NNG_HAVE_LOCALPEERPID)
     nng_check_sym(getpeerucred ucred.h NNG_HAVE_GETPEERUCRED)
     nng_check_sym(atomic_flag_test_and_set stdatomic.h NNG_HAVE_STDATOMIC)
 
@@ -474,7 +479,7 @@ if (NNG_ENABLE_TLS)
     set(NNG_SUPP_TLS ON)
 endif ()
 
-#add_subdirectory(docs/man)
+# add_subdirectory(docs/man)
 
 set(CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_VERSION ${NNG_PACKAGE_VERSION})

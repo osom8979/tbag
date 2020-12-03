@@ -1098,6 +1098,8 @@ tls_tcp_send_cb(void *arg)
 	count = nni_aio_count(aio);
 	NNI_ASSERT(count <= conn->tcp_send_len);
 	conn->tcp_send_len -= count;
+	conn->tcp_send_tail += count;
+	conn->tcp_send_tail %= NNG_TLS_MAX_SEND_SIZE;
 	tls_tcp_send_start(conn);
 
 	if (tls_do_handshake(conn)) {
@@ -1180,6 +1182,7 @@ tls_tcp_send_start(tls_conn *conn)
 
 	while (len > 0) {
 		size_t cnt;
+		NNI_ASSERT(nio < 2);
 		if (tail < head) {
 			cnt = head - tail;
 		} else {
@@ -1196,7 +1199,6 @@ tls_tcp_send_start(tls_conn *conn)
 		nio++;
 	}
 	conn->tcp_send_active = true;
-	conn->tcp_send_tail   = tail;
 	nni_aio_set_iov(&conn->tcp_send, nio, iov);
 	nng_stream_send(conn->tcp, &conn->tcp_send);
 }
@@ -1228,6 +1230,8 @@ nng_tls_engine_send(void *arg, const uint8_t *buf, size_t *szp)
 	// We are committed at this point to sending out len bytes.
 	// Update this now, so that we can use len to update.
 	*szp = len;
+	conn->tcp_send_len += len;
+	NNI_ASSERT(conn->tcp_send_len <= NNG_TLS_MAX_SEND_SIZE);
 
 	while (len > 0) {
 		if (head >= tail) {
@@ -1243,10 +1247,10 @@ nng_tls_engine_send(void *arg, const uint8_t *buf, size_t *szp)
 		buf += cnt;
 		head += cnt;
 		head %= NNG_TLS_MAX_SEND_SIZE;
-		conn->tcp_send_len += cnt;
-		conn->tcp_send_head = head;
 		len -= cnt;
 	}
+
+	conn->tcp_send_head = head;
 
 	tls_tcp_send_start(conn);
 	return (0);
